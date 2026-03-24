@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gracy Chen — 认知代理人报告</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="../blockchain_shared.css">
+  <style>
+    .anno { position:absolute; left:1rem; right:1rem; }
+    .anno.meta-note { padding:0.6rem 0.75rem; border-left:2px solid var(--accent); border-radius:0 6px 6px 0; background:rgba(248,168,72,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+    .anno.meta-note:hover { box-shadow:0 0 0 1px var(--accent); }
+    .anno.know-note { padding:0.6rem 0.75rem; border-left:2px solid var(--knowledge); border-radius:0 6px 6px 0; background:rgba(91,155,213,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+    .anno.know-note:hover { box-shadow:0 0 0 1px var(--knowledge); }
+    .anno .note-label { display:inline-block; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--bg-base); background:var(--accent); padding:0.1rem 0.4rem; border-radius:3px; margin-bottom:0.3rem; }
+    .anno .note-label.know { background:var(--knowledge); color:white; }
+    .anno .mn-head { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
+    .anno .mn-title { flex:1; font-weight:510; font-size:0.75rem; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .anno .mn-fold { font-size:0.55rem; color:var(--text-quaternary); transition:transform 0.2s; margin-left:auto; }
+    .anno.open .mn-fold { transform:rotate(180deg); }
+    .anno .mn-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+    .anno.open .mn-body { max-height:2000px; }
+    .anno .mn-body p { font-size:0.78rem; margin-bottom:0.3rem; color:var(--text-secondary); }
+    .anno.flash { animation:noteFlash 1.5s ease; }
+    @keyframes noteFlash { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--accent);} }
+    .anno.know-note.flash { animation:noteFlashBlue 1.5s ease; }
+    @keyframes noteFlashBlue { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--knowledge);} }
+    .anno.hover { outline:2px solid var(--accent); outline-offset:-1px; }
+    .anno.know-note.hover { outline-color:var(--knowledge); }
+    mark.hl-know { background:rgba(91,155,213,0.12); border-bottom:1.5px solid var(--knowledge); padding:0 2px; border-radius:2px; color:inherit; cursor:pointer; transition:background 0.15s; }
+    mark.hl-know:hover, mark.hl-know.hover { background:rgba(91,155,213,0.28); }
+    .nref { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; font-size:0.48rem; font-weight:700; cursor:pointer; margin-left:1px; vertical-align:super; transition:transform 0.15s; text-decoration:none; background:var(--knowledge); color:white; }
+    .nref:hover { transform:scale(1.25); box-shadow:0 0 6px rgba(91,155,213,0.4); }
+    .top-controls { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; padding:0.35rem 0.7rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); font-size:0.72rem; flex-wrap:wrap; }
+    .top-controls .tc-label { font-weight:590; color:var(--knowledge); }
+    .top-controls button { padding:0.15rem 0.45rem; border-radius:4px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-tertiary); cursor:pointer; font-size:0.68rem; font-family:inherit; transition:all 0.15s; }
+    .top-controls button:hover { border-color:var(--knowledge); color:var(--text-primary); }
+    .top-controls button.active { background:var(--knowledge-dim); color:var(--knowledge); border-color:rgba(91,155,213,0.3); }
+    .top-controls .tc-sep { color:var(--border-default); margin:0 0.15rem; }
+    .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+    .notes-sidebar-header { position:sticky; top:0; z-index:60; background:var(--bg-elevated); padding-bottom:0.5rem; border-bottom:1px solid var(--border-subtle); margin-bottom:0.75rem; }
+    .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+    .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+    .sidebar-overlay.open { display:block; }
+    .notes-toggle-btn { position:fixed; right:1rem; bottom:1.5rem; z-index:200; width:44px; height:44px; border-radius:50%; border:1px solid var(--border-default); background:var(--bg-surface); color:var(--text-secondary); cursor:pointer; font-size:1.1rem; display:none; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.4); font-family:inherit; }
+    .notes-close-btn { float:right; background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:1.1rem; padding:0; display:none; font-family:inherit; }
+    @media (max-width:1200px) { .notes-close-btn { display:block; } }
+    .notes-overlay-right { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:140; }
+    .notes-overlay-right.open { display:block; }
+    .verified { color:var(--tier-high); font-weight:590; }
+    .partial { color:var(--tier-medium); font-weight:590; }
+    .failed { color:var(--tier-low); font-weight:590; }
+    .pending { color:var(--text-tertiary); font-weight:510; }
+    .credibility-meter { display:flex; align-items:center; gap:0.75rem; margin:0.75rem 0; }
+    .meter-bar { flex:1; height:8px; background:var(--border-subtle); border-radius:4px; overflow:hidden; }
+    .meter-fill { height:100%; border-radius:4px; }
+    .meter-label { font-size:1.2rem; font-weight:680; min-width:3rem; }
+    .badge-row { display:flex; flex-wrap:wrap; gap:0.4rem; }
+    .role-badge { display:inline-block; padding:0.15rem 0.6rem; border-radius:4px; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:0.5rem; background:var(--accent-dim); color:var(--accent); }
+    .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+    .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+    @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+    @media (max-width:1200px) { .notes-sidebar { position:fixed; right:0; top:0; height:100vh; overflow-y:auto; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.4); z-index:150; } .notes-sidebar.ns-closed { transform:translateX(100%); box-shadow:none; } }
+    @media (min-width:1600px) { .main-content { max-width:1000px; } .notes-sidebar { width:360px; min-width:360px; } }
+    body.embedded .sidebar, body.embedded .notes-sidebar, body.embedded .hamburger-btn, body.embedded .notes-toggle-btn { display:none!important; }
+    body.embedded .main-content { max-width:100%; padding:1.5rem; }
+    body.reading-mode .notes-sidebar { display:none!important; }
+    body.reading-mode .main-content { max-width:720px; margin:0 auto; }
+  </style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="page-wrapper">
+
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Gracy Chen<br>Agent #13 &middot; B档 3/5</div>
+    <h4>Contents</h4>
+    <nav>
+      <ul>
+        <li><a href="#overview"><span class="toc-num">&sect;0</span> Profile Overview</a></li>
+        <li><a href="#action"><span class="toc-num">&sect;1</span> Action Evidence</a></li>
+        <li><a href="#judgment"><span class="toc-num">&sect;2</span> Core Judgment</a></li>
+        <li><a href="#predictions"><span class="toc-num">&sect;3</span> Prediction Track Record</a></li>
+        <li><a href="#trading"><span class="toc-num">&sect;4</span> Trading Implications</a></li>
+        <li><a href="#sources"><span class="toc-num">&sect;5</span> Source Curation</a></li>
+      </ul>
+    </nav>
+    <h4>Related</h4>
+    <nav><ul><li><a href="../blockchain_hub.html">Blockchain Hub</a></li></ul></nav>
+  </aside>
+
+  <main class="main-content">
+
+    <div class="top-controls">
+      <span class="tc-label" id="noteCountLabel"></span>
+      <span class="tc-sep">|</span>
+      <button id="knowToggleBtn" class="active" onclick="toggleKnowNotes()">Knowledge</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">Expand All</button>
+      <button onclick="collapseAllNotes()">Collapse All</button>
+    </div>
+
+    <header class="page-header" id="overview">
+      <div class="role-badge">B档 Agent #13 &middot; Node 4 交易所</div>
+      <h1>Gracy Chen</h1>
+      <p class="subtitle">CEO &middot; Bitget &mdash; B档 Agent #13 &middot; Node 4 交易所 &middot; 中国/新加坡 &middot; 2026-03-22</p>
+      <div class="badge-row">
+        <span class="badge badge-gold">Bitget</span>
+        <span class="badge badge-gold">120M Users</span>
+        <span class="badge badge-gold">Copy Trading</span>
+        <span class="badge badge-purple">Female CEO in Crypto</span>
+      </div>
+    </header>
+
+    <section id="overview-body">
+      <div class="section-header">
+        <h2><span class="section-num">&sect;0</span> Profile Overview <span class="zh">人物概述</span></h2>
+      </div>
+      <p>Gracy Chen是加密行业少有的女性CEO，领导Bitget从二线交易所成长为<mark class="hl-know" data-note="k1">全球Top 5衍生品交易所</mark>。120M注册用户，核心竞争力是跟单交易（Copy Trading）功能和激进的市场推广（Messi赞助）。Bitget代表了亚洲散户交易所的增长模式 &mdash; 社交化交易、衍生品为主、新兴市场扩张。</p>
+      <div class="credibility-meter">
+        <span style="font-size:0.82rem; color:var(--text-tertiary);">Credibility</span>
+        <div class="meter-bar">
+          <div class="meter-fill" style="width:60%; background:linear-gradient(90deg, var(--tier-medium), var(--accent));"></div>
+        </div>
+        <span class="meter-label" style="color:var(--tier-medium);">3/5</span>
+      </div>
+      <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+        执行力强，在竞争激烈的交易所赛道快速突围。社交化交易的先行者。<br>
+        <strong style="color:var(--tier-low);">偏差</strong>：交易所CEO天然看多交易量。Bitget的用户数据和交易量需要交叉验证。
+      </p>
+    </section>
+
+    <section id="action">
+      <div class="section-header">
+        <h2><span class="section-num">&sect;1</span> Action Evidence <span class="zh">行动证据</span></h2>
+      </div>
+      <div class="card">
+        <strong>1. 120M注册用户</strong>
+        <p class="card-desc">从2020年的小型交易所成长为120M用户的全球平台。增速在所有CEX中名列前茅。</p>
+        <span class="card-meta">2020&ndash;2026 &middot; 120M registered users</span>
+      </div>
+      <div class="card">
+        <strong>2. Copy Trading首创者</strong>
+        <p class="card-desc"><mark class="hl-know" data-note="k2">跟单交易功能</mark>让新手可以一键复制顶级交易员的策略。这是Bitget的核心差异化，eToro之后最成功的社交化交易实现。</p>
+        <span class="card-meta">2020&ndash;ongoing &middot; Core differentiator</span>
+      </div>
+      <div class="card">
+        <strong>3. Messi赞助</strong>
+        <p class="card-desc">签下梅西作为品牌大使 &mdash; 在亚洲和拉美市场的品牌影响力大幅提升。</p>
+        <span class="card-meta">2022 &middot; Global brand sponsorship</span>
+      </div>
+      <div class="card">
+        <strong>4. 衍生品为主的业务结构</strong>
+        <p class="card-desc">衍生品交易量远超现货。合约交易是Bitget的主要收入来源，也是亚洲散户的偏好。</p>
+        <span class="card-meta">Ongoing &middot; Derivatives-focused</span>
+      </div>
+      <div class="card">
+        <strong>5. 全球化扩张</strong>
+        <p class="card-desc">总部新加坡，团队分布全球。积极获取各地牌照。在土耳其、越南、拉美等新兴市场增长强劲。</p>
+        <span class="card-meta">2023&ndash;2026 &middot; Global expansion</span>
+      </div>
+    </section>
+
+    <section id="judgment">
+      <div class="section-header">
+        <h2><span class="section-num">&sect;2</span> Core Judgment <span class="zh">核心判断</span></h2>
+      </div>
+      <blockquote>Asian retail exchange model &mdash; growth through social trading.</blockquote>
+      <ul>
+        <li>亚洲散户是加密市场最大的用户群体 &mdash; 他们需要的不是合规，而是产品创新</li>
+        <li>社交化交易（跟单）是降低散户入门门槛的最有效方式</li>
+        <li>衍生品市场比现货大10x+ &mdash; 这才是真正的增长引擎</li>
+        <li>交易所格局未定 &mdash; Binance之后仍有巨大空间</li>
+      </ul>
+    </section>
+
+    <section id="predictions">
+      <div class="section-header">
+        <h2><span class="section-num">&sect;3</span> Prediction Track Record <span class="zh">预测记录</span></h2>
+      </div>
+      <figure>
+        <table>
+          <thead><tr><th>Prediction</th><th>Date</th><th>Status</th><th>Accuracy</th></tr></thead>
+          <tbody>
+            <tr><td>Copy Trading将成为交易所标配</td><td>2021</td><td><span class="verified">&#10003; 正确 (Bybit/OKX/Binance都跟进)</span></td><td>9/10</td></tr>
+            <tr><td>新兴市场是增长主力</td><td>2022</td><td><span class="verified">&#10003; 正确</span></td><td>8/10</td></tr>
+            <tr><td>Bitget将进入Top 3交易所</td><td>2023</td><td><span class="partial">部分验证 (Top 5但非Top 3)</span></td><td>6/10</td></tr>
+            <tr><td>监管不会显著影响亚洲散户市场</td><td>持续</td><td><span class="pending">待观察</span></td><td>&mdash;</td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </section>
+
+    <section id="trading">
+      <div class="section-header">
+        <h2><span class="section-num">&sect;4</span> Trading Implications <span class="zh">交易含义</span></h2>
+      </div>
+      <div class="alert alert-gold">
+        <strong>Bitget未上市 &mdash; 关注BGB代币和交易所赛道整体</strong>
+      </div>
+      <ul>
+        <li><strong>BGB</strong>（Bitget平台币）是间接参与Bitget增长的方式</li>
+        <li><strong>交易所赛道洗牌</strong>：Binance受监管压力，二线交易所（Bitget/Bybit）受益</li>
+        <li><strong>跟单交易数据</strong>是散户情绪的实时指标 &mdash; 多空比、热门交易员持仓值得跟踪</li>
+        <li><strong>风险</strong>：交易所赛道竞争激烈，监管不确定性高，用户忠诚度低</li>
+      </ul>
+    </section>
+
+    <section id="sources">
+      <div class="section-header">
+        <h2><span class="section-num">&sect;5</span> Source Curation <span class="zh">信源策展</span></h2>
+      </div>
+      <h3>Primary</h3>
+      <ul><li>Bitget official blog &amp; announcements</li><li>Gracy Chen Twitter/X &amp; interviews</li></ul>
+      <h3>Secondary</h3>
+      <ul><li>CoinGecko / CoinMarketCap exchange rankings</li><li>The Block exchange data</li></ul>
+      <h3>Chinese Sources</h3>
+      <ul><li>吴说区块链交易所报道</li><li>PANews交易所赛道分析</li><li>Odaily Bitget专题</li></ul>
+    </section>
+
+    <footer class="page-footer">
+      <p>Gracy Chen &middot; Cognitive Agent #13 &middot; Blockchain Research &middot; 2026-03-22</p>
+      <p><a href="../blockchain_hub.html">Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <aside class="notes-sidebar" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn" aria-label="Close notes">&#10005;</button>
+      <h4>&#129504; Meta + &#128218; Knowledge</h4>
+    </div>
+
+    <div class="anno meta-note open" data-section="overview" id="k1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Asian retail model</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>Bitget represents the "Asian exchange playbook": derivatives-first, social trading, aggressive marketing, emerging market focus. This model serves a different user base than Coinbase/Kraken (compliance-first, spot-focused, Western). Both models coexist because they serve fundamentally different users.</p>
+        <p><span class="zh">Bitget代表"亚洲交易所打法"：衍生品优先、社交化交易、激进营销、新兴市场聚焦。这种模式服务的用户群与Coinbase/Kraken（合规优先、现货为主、西方市场）完全不同。两种模式共存，因为它们服务的是根本不同的用户。</span></p>
+      </div>
+    </div>
+
+    <div class="anno know-note open" data-section="action" id="k2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">Knowledge</span>
+        <span class="mn-title">Copy trading innovation</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>Copy trading democratizes trading skill. Top traders on Bitget have 10K+ followers copying their every trade. This creates a flywheel: good traders attract copiers, copiers generate fees, fees attract more traders. The data from copy trading (what top traders are buying/selling) is itself a valuable market signal.</p>
+        <p><span class="zh">跟单交易将交易技能民主化。Bitget上的顶级交易员有1万+跟随者复制他们的每笔交易。这创造了飞轮效应：好交易员吸引跟单者，跟单者产生手续费，手续费吸引更多交易员。跟单交易数据（顶级交易员在买卖什么）本身就是有价值的市场信号。</span></p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes">&#128218;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<script>
+(function() {
+  const hamburger = document.getElementById('hamburgerBtn'); const sidebar = document.getElementById('sidebar'); const overlay = document.getElementById('sidebarOverlay');
+  hamburger.addEventListener('click', () => { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+  sidebar.querySelectorAll('a').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 900) { sidebar.classList.remove('open'); overlay.classList.remove('open'); } }); });
+  window.toggleNote = function(head) { head.parentElement.classList.toggle('open'); requestAnimationFrame(positionNotes); };
+  function positionNotes() {
+    const sidebarEl = document.getElementById('notesSidebar'); if (!sidebarEl) return;
+    const notes = [...sidebarEl.querySelectorAll('.anno')]; const scrollY = window.scrollY; const sidebarAbsTop = sidebarEl.getBoundingClientRect().top + scrollY;
+    const headerEl = sidebarEl.querySelector('.notes-sidebar-header'); const headerHeight = headerEl ? headerEl.offsetHeight + 12 : 40;
+    notes.sort((a, b) => { const secA = document.getElementById(a.dataset.section); const secB = document.getElementById(b.dataset.section); if (!secA || !secB) return 0; return secA.getBoundingClientRect().top - secB.getBoundingClientRect().top; });
+    let lastBottom = headerHeight;
+    notes.forEach(note => { if (note.style.display === 'none') return; const section = document.getElementById(note.dataset.section); if (!section) { note.style.display = 'none'; return; } const sectionAbsTop = section.getBoundingClientRect().top + scrollY; let targetY = sectionAbsTop - sidebarAbsTop; if (targetY < lastBottom + 8) targetY = lastBottom + 8; note.style.top = targetY + 'px'; lastBottom = targetY + note.offsetHeight; });
+    sidebarEl.style.minHeight = (lastBottom + 40) + 'px';
+  }
+  window.addEventListener('load', () => { positionNotes(); document.querySelectorAll('details').forEach(d => { d.addEventListener('toggle', () => setTimeout(positionNotes, 50)); }); });
+  window.addEventListener('resize', positionNotes);
+  let scrollTimer; window.addEventListener('scroll', () => { clearTimeout(scrollTimer); scrollTimer = setTimeout(positionNotes, 100); }, { passive: true });
+  document.querySelectorAll('.nref, mark.hl-know').forEach(el => { el.addEventListener('click', e => { e.preventDefault(); const noteId = el.dataset.note; const note = document.getElementById(noteId); if (!note) return; note.classList.add('open'); requestAnimationFrame(() => { positionNotes(); note.scrollIntoView({ behavior: 'smooth', block: 'center' }); note.classList.add('flash'); setTimeout(() => note.classList.remove('flash'), 1500); }); }); });
+  document.querySelectorAll('.anno').forEach(note => { note.addEventListener('mouseenter', () => { document.querySelectorAll('[data-note="' + note.id + '"]').forEach(el => el.classList.add('hover')); }); note.addEventListener('mouseleave', () => { document.querySelectorAll('[data-note="' + note.id + '"]').forEach(el => el.classList.remove('hover')); }); note.addEventListener('dblclick', () => { const section = document.getElementById(note.dataset.section); if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' }); }); });
+  document.querySelectorAll('[data-note]').forEach(el => { if (el.classList.contains('anno')) return; el.addEventListener('mouseenter', () => { const note = document.getElementById(el.dataset.note); if (note) note.classList.add('hover'); }); el.addEventListener('mouseleave', () => { const note = document.getElementById(el.dataset.note); if (note) note.classList.remove('hover'); }); });
+  const allAnnos = document.querySelectorAll('.anno'); const knowNotes = document.querySelectorAll('.anno.know-note'); const knowMarks = document.querySelectorAll('mark.hl-know'); const knowRefs = document.querySelectorAll('.nref'); const metaNotes = document.querySelectorAll('.anno.meta-note');
+  document.getElementById('noteCountLabel').textContent = metaNotes.length + ' \u5143\u601d\u8003 + ' + knowNotes.length + ' \u77e5\u8bc6\u6279\u6ce8';
+  window.toggleKnowNotes = function() { const btn = document.getElementById('knowToggleBtn'); const isActive = btn.classList.toggle('active'); btn.textContent = isActive ? 'Knowledge' : 'Hidden'; knowNotes.forEach(n => n.style.display = isActive ? '' : 'none'); knowMarks.forEach(m => { m.style.background = isActive ? '' : 'transparent'; m.style.borderBottom = isActive ? '' : 'none'; }); knowRefs.forEach(r => r.style.display = isActive ? '' : 'none'); requestAnimationFrame(positionNotes); };
+  window.expandAllNotes = function() { allAnnos.forEach(n => n.classList.add('open')); requestAnimationFrame(positionNotes); };
+  window.collapseAllNotes = function() { allAnnos.forEach(n => n.classList.remove('open')); requestAnimationFrame(positionNotes); };
+  var notesSidebarEl = document.getElementById('notesSidebar'); var notesToggleBtn = document.getElementById('notesToggleBtn'); var notesOverlayEl = document.getElementById('notesOverlay'); var notesCloseBtn = document.getElementById('notesCloseBtn');
+  function toggleNotesSidebar() { var willClose = !notesSidebarEl.classList.contains('ns-closed'); notesSidebarEl.classList.toggle('ns-closed', willClose); notesToggleBtn.style.display = willClose ? 'flex' : 'none'; notesOverlayEl.classList.toggle('open', !willClose); if (!willClose) requestAnimationFrame(positionNotes); }
+  if (notesToggleBtn) notesToggleBtn.addEventListener('click', toggleNotesSidebar);
+  if (notesOverlayEl) notesOverlayEl.addEventListener('click', toggleNotesSidebar);
+  if (notesCloseBtn) notesCloseBtn.addEventListener('click', toggleNotesSidebar);
+  window.addEventListener('resize', function() { if (window.innerWidth > 1200) { notesSidebarEl.classList.remove('ns-closed'); notesToggleBtn.style.display = 'none'; notesOverlayEl.classList.remove('open'); } });
+  const tocLinks = sidebar.querySelectorAll('nav ul li a[href^="#"]'); const sections = [...tocLinks].map(a => document.getElementById(a.getAttribute('href').slice(1))).filter(Boolean);
+  function updateActiveToc() { let current = ''; sections.forEach(sec => { if (sec.getBoundingClientRect().top <= 120) current = sec.id; }); tocLinks.forEach(a => { a.classList.toggle('active', a.getAttribute('href') === '#' + current); }); }
+  window.addEventListener('scroll', updateActiveToc, { passive: true }); updateActiveToc();
+  if (window.location.search.includes('embedded=1') || window !== window.top) document.body.classList.add('embedded');
+  if (window.location.search.includes('reading=1')) document.body.classList.add('reading-mode');
+})();
+</script>
+
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+
+</body>
+</html>

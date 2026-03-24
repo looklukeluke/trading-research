@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>卖方研报策展 + 缺口分析 — Sell-side Research Curation & Gap Analysis</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="semiconductor_shared.css">
+  <style>
+    /* === Page-specific: sell_side_research_curation === */
+    /* knowledge + tier-medium-high now in semiconductor_shared.css */
+
+    /* Main content */
+    .main-content { flex: 1; min-width: 0; max-width: 960px; padding: 2rem 2.5rem 4rem; }
+
+    /* Hub nav (sidebar sticky sub-nav) */
+    .hub-nav { position: sticky; top: 0; z-index: 110; background: var(--bg-elevated); border-bottom: 1px solid var(--border-subtle); padding: 0.5rem 0.75rem; margin-bottom: 0.75rem; }
+    .hub-nav a { font-size: 0.75rem; color: var(--accent); text-decoration: none; font-weight: 510; }
+    .hub-nav a:hover { text-decoration: underline; }
+
+    /* Back-links */
+    .back-links { margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border-subtle); }
+    .back-links h4 { font-size: 0.65rem; }
+    .back-links a { display: block; padding: 0.2rem 0.5rem; font-size: 0.72rem; color: var(--text-quaternary); text-decoration: none; border-radius: 4px; }
+    .back-links a:hover { color: var(--accent); background: var(--accent-hover); }
+
+    /* Hamburger (mobile) */
+    .hamburger-btn { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 200; background: var(--bg-surface); color: var(--text-primary); border: none; border-radius: 6px; width: 44px; height: 44px; font-size: 1.4rem; cursor: pointer; line-height: 1; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+    @media (max-width: 900px) {
+      .sidebar { position: fixed; left: -320px; top: 0; transition: left 0.3s ease; box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.open { display: block; }
+      .hamburger-btn { display: block; }
+      .main-content { padding: 2rem 1rem 4rem; }
+    }
+
+    /* Page header */
+    .page-header { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-default); }
+    .page-header .subtitle { margin-bottom: 1rem; font-size: 0.95rem; font-weight: 400; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+    /* Priority box */
+    .priority-box { border: 1px solid rgba(248, 168, 72, 0.3); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin-bottom: 2rem; background: var(--bg-surface); }
+    .priority-box h2 { color: var(--accent); margin-top: 0; font-size: 1.1rem; font-weight: 590; }
+
+    /* Tier color spans */
+    .tier-high { color: var(--tier-high); font-weight: 700; }
+    .tier-medium-high { color: var(--tier-medium-high); font-weight: 700; }
+    .tier-medium { color: var(--tier-medium); font-weight: 700; }
+    .tier-low { color: var(--tier-low); font-weight: 700; }
+
+    /* Figure wrapper */
+    figure { margin: 1.25rem 0; overflow-x: auto; }
+
+    /* Blockquote */
+    blockquote { border-left: 3px solid var(--accent); padding: 0.6rem 1.25rem; margin: 1rem 0; font-style: italic; background: var(--bg-surface); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-secondary); }
+
+    /* Details / Source cards */
+    details { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.8rem 1rem; margin: 0.8rem 0; background: var(--bg-elevated); }
+    details summary { cursor: pointer; font-weight: 510; font-size: 0.9rem; color: var(--text-primary); }
+    details[open] summary { margin-bottom: 0.6rem; color: var(--accent); }
+    .source-card { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); margin: 1rem 0; padding: 1.25rem 1.5rem; background: var(--bg-surface); }
+    .source-card h3 { margin-top: 0; font-size: 1rem; }
+    .source-card .source-meta { font-size: 0.78rem; color: var(--text-tertiary); margin-bottom: 0.5rem; }
+    .source-card .source-meta span { margin-right: 0.75rem; }
+    .source-card p { font-size: 0.88rem; }
+
+    /* External link arrow */
+    a[target="_blank"]::after { content: " \2197"; font-size: 0.7em; vertical-align: super; }
+
+    /* Text overrides */
+    p { color: var(--text-secondary); margin-bottom: 1rem; }
+    h4 { font-size: 0.95rem; margin-top: 1.2rem; }
+    ul, ol { color: var(--text-secondary); }
+    li { margin-bottom: 0.35rem; line-height: 1.6; }
+    strong { color: var(--text-primary); font-weight: 590; }
+    code { font-family: var(--font-mono); font-size: 0.85em; background: var(--bg-surface); padding: 0.15em 0.4em; border-radius: 4px; border: 1px solid var(--border-subtle); }
+    pre { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 1rem 1.25rem; overflow-x: auto; font-size: 0.82rem; line-height: 1.6; }
+    pre code { border: none; padding: 0; background: transparent; }
+
+    /* Severity badges */
+    .sev-critical { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 10px; font-size: 0.72rem; font-weight: 590; background: rgba(244,67,54,0.15); color: var(--tier-low); }
+    .sev-important { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 10px; font-size: 0.72rem; font-weight: 590; background: rgba(255,193,7,0.15); color: var(--tier-medium); }
+    .sev-nice { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 10px; font-size: 0.72rem; font-weight: 590; background: rgba(76,175,80,0.15); color: var(--tier-high); }
+
+    /* Comparison table */
+    .cmp-yes { color: var(--tier-high); font-weight: 590; }
+    .cmp-no { color: var(--tier-low); font-weight: 590; }
+
+    /* Knowledge highlights */
+    mark.hl-know { background: rgba(91,155,213,0.12); border-bottom: 1.5px solid var(--knowledge); padding: 0 2px; border-radius: 2px; color: inherit; cursor: pointer; transition: background 0.15s; }
+    mark.hl-know:hover { background: rgba(91,155,213,0.28); }
+    .nref { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 50%; font-size: 0.48rem; font-weight: 700; cursor: pointer; margin-left: 1px; vertical-align: super; transition: transform 0.15s; text-decoration: none; background: var(--knowledge); color: white; }
+    .nref:hover { transform: scale(1.25); box-shadow: 0 0 6px rgba(91,155,213,0.4); }
+
+    /* Notes sidebar: knowledge label variant */
+    .notes-sidebar .note-label.know { background: rgba(91,155,213,0.15); color: var(--knowledge); }
+
+    /* Top controls bar */
+    .top-controls { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; padding: 0.35rem 0.7rem; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 0.72rem; flex-wrap: wrap; }
+    .top-controls .tc-label { font-weight: 590; color: var(--knowledge); }
+    .top-controls button { padding: 0.15rem 0.45rem; border-radius: 4px; border: 1px solid var(--border-subtle); background: transparent; color: var(--text-tertiary); cursor: pointer; font-size: 0.68rem; font-family: inherit; transition: all 0.15s; }
+    .top-controls button:hover { border-color: var(--knowledge); color: var(--text-primary); }
+    .top-controls button.active { background: var(--knowledge-dim); color: var(--knowledge); border-color: rgba(91,155,213,0.3); }
+    .top-controls .tc-sep { color: var(--border-default); margin: 0 0.15rem; }
+  </style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ===================== LEFT SIDEBAR ===================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="hub-nav">
+      <a href="semiconductor_hub.html">&larr; Semiconductor Hub</a>
+    </div>
+    <h4>Table of Contents</h4>
+    <nav>
+      <ul>
+        <li><a href="#s1">01 评判标准</a></li>
+        <li><a href="#s2">02 Tier S — 必读</a></li>
+        <li><a href="#s3">03 Tier A — 高价值</a></li>
+        <li><a href="#s4">04 Tier B — 有价值补充</a></li>
+        <li><a href="#s5">05 Tier C — 背景参考</a></li>
+        <li><a href="#s6">06 缺口分析</a></li>
+        <li><a href="#s7">07 数据抓取方案</a></li>
+        <li><a href="#s8">08 与研究中枢对比</a></li>
+      </ul>
+    </nav>
+
+    <div class="back-links">
+      <h4>Back-links</h4>
+      <a href="semiconductor_hub.html">Semiconductor Hub</a>
+      <a href="cognitive_agents_2026-03-20/sources_01_jensen_huang_v4.html">Jensen Huang V4</a>
+      <a href="cognitive_agents_2026-03-20/">Cognitive Agents Report</a>
+    </div>
+  </aside>
+
+  <!-- ===================== MAIN CONTENT ===================== -->
+  <main class="main-content">
+
+    <!-- Header -->
+    <header class="page-header" id="header">
+      <h1>卖方研报策展 + 缺口分析<br><span style="font-size:0.6em;color:var(--text-tertiary);font-weight:400;">Sell-side Research Curation &amp; Gap Analysis</span></h1>
+      <p class="subtitle">评判标准 &middot; 17个来源 &middot; 缺口诊断 &middot; 数据抓取方案 &middot; 2026-03-21</p>
+      <div class="badge-row">
+        <span class="badge">17 Sources</span>
+        <span class="badge">4 Tiers</span>
+        <span class="badge">6 Gaps Identified</span>
+        <span class="badge">12 Tickers to Track</span>
+      </div>
+    </header>
+
+    <!-- ======================== S1 ======================== -->
+    <div class="section-header" id="s1">
+      <h2><span class="section-num">01</span>评判标准 <span class="zh">Evaluation Framework</span></h2>
+    </div>
+
+    <p>对每个信息源按以下5个维度加权评分，权重反映趋势交易者的优先级：预测是否可验证 > 信息是否独家 > 利益是否干净。</p>
+
+    <figure>
+      <table>
+        <thead>
+          <tr><th>维度</th><th>权重</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>预测准确率</strong></td><td>30%</td><td>历史预测是否被验证？有没有公开 track record？</td></tr>
+          <tr><td><strong>信息不对称</strong></td><td>25%</td><td>是否拥有行业内部供应链/客户数据？</td></tr>
+          <tr><td><strong>独立性</strong></td><td>20%</td><td>利益冲突？(卖方做市/承销 vs 独立付费)</td></tr>
+          <tr><td><strong>框架原创性</strong></td><td>15%</td><td>是否提出了被行业采纳的原创分析框架？</td></tr>
+          <tr><td><strong>影响力</strong></td><td>10%</td><td>实际影响资金流向？(机构客户数, 被引用频率)</td></tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <!-- ======================== S2 ======================== -->
+    <div class="section-header" id="s2">
+      <h2><span class="section-num">02</span><span class="tier-high">Tier S</span> — 必读 <span class="zh">3 sources</span></h2>
+    </div>
+
+    <div class="source-card">
+      <h3>1. SemiAnalysis <span style="color:var(--text-tertiary);font-weight:400;font-size:0.85em;">(Dylan Patel)</span></h3>
+      <div class="source-meta">
+        <span>独立付费</span>
+        <span>50K+ 订阅</span>
+        <span><a href="https://semianalysis.com/" target="_blank">semianalysis.com</a></span>
+      </div>
+      <p><strong>Key Insight:</strong> <mark class="hl-know" data-note="n1">InferenceMAX 基准测试</mark>、CUDA 侵蚀论、供应链数据独家。最早系统论证 CUDA 护城河被 Triton/PyTorch 编译器侵蚀。</p>
+      <blockquote>"NVIDIA's CUDA Monopoly Is Breaking" &mdash; 最早系统论证 CUDA 护城河被 Triton/PyTorch 侵蚀<span class="zh">代表作：系统拆解NVIDIA的软件护城河如何被开源编译器绕过</span></blockquote>
+      <p><strong>Track Record:</strong> DeepSeek 预测正确；HBM 供应链预判准确；2024年准确预测 B100 延迟。</p>
+    </div>
+
+    <div class="source-card">
+      <h3>2. Stratechery <span style="color:var(--text-tertiary);font-weight:400;font-size:0.85em;">(Ben Thompson)</span></h3>
+      <div class="source-meta">
+        <span>独立付费</span>
+        <span><a href="https://stratechery.com/2024/nvidia-waves-and-moats/" target="_blank">Nvidia Waves and Moats</a></span>
+      </div>
+      <p><strong>Key Insight:</strong> "CUDA 是操作系统级护城河 &rarr; 但正在被侵蚀。Google TPU 是最严重威胁。" 战略框架清晰度无人能及。</p>
+      <blockquote>"The question is not whether NVIDIA will lose its moat, but whether the moat matters when the entire ocean is rising."</blockquote>
+      <p><strong>Representative:</strong> <a href="https://stratechery.com/2025/google-nvidia-and-openai/" target="_blank">"Google, Nvidia, and OpenAI" (2025)</a> &mdash; 三角博弈框架</p>
+    </div>
+
+    <div class="source-card">
+      <h3>3. Fabricated Knowledge <span style="color:var(--text-tertiary);font-weight:400;font-size:0.85em;">(Doug O'Laughlin)</span></h3>
+      <div class="source-meta">
+        <span>独立付费</span>
+        <span>94K 订阅</span>
+        <span><a href="https://www.fabricatedknowledge.com/" target="_blank">fabricatedknowledge.com</a></span>
+      </div>
+      <p><strong>Key Insight:</strong> 投资者视角的半导体制造翻译。将复杂制造流程翻译为投资逻辑，2024年预判 NVIDIA-median divergence。</p>
+      <p>对 EUV 产能、先进封装良率等技术细节的投资含义解读，是连接工程师和基金经理的最佳桥梁。</p>
+    </div>
+
+    <!-- ======================== S3 ======================== -->
+    <div class="section-header" id="s3">
+      <h2><span class="section-num">03</span><span class="tier-medium-high">Tier A</span> — 高价值 <span class="zh">4 sources</span></h2>
+    </div>
+
+    <div class="source-card">
+      <h3>4. Morgan Stanley TMT <span style="color:var(--text-tertiary);font-weight:400;font-size:0.85em;">(Joseph Moore)</span></h3>
+      <div class="source-meta">
+        <span>卖方</span>
+        <span><a href="https://seekingalpha.com/news/4532616-nvidia-broadcom-astera-labs-among-morgan-stanleys-top-chip-stocks-for-2026" target="_blank">Top Chip Stocks 2026</a></span>
+      </div>
+      <p><strong>Key:</strong> "AI bubble dismissed" &mdash; NVDA / AVGO / ALAB top picks 2026。Vera Rubin 部署 H2 2026 &rarr; NVDA highest return in cloud computing。</p>
+    </div>
+
+    <div class="source-card">
+      <h3>5. Goldman Sachs <span style="color:var(--text-tertiary);font-weight:400;font-size:0.85em;">(Toshiya Hari / James Schneider)</span></h3>
+      <div class="source-meta">
+        <span>卖方</span>
+        <span><a href="https://www.thestreet.com/investing/stocks/goldman-sachs-stuns-with-taiwan-semiconductor-stock-price-target" target="_blank">TSM ADR $375 PT</a></span>
+      </div>
+      <p><strong>Key:</strong> NVDA $250 PT (FY27 $380B)；TSM ADR $375；AVGO $450。AVGO 是 "AI boom 的关键军火商"；TSM EPS 2027年 NT$100。</p>
+    </div>
+
+    <div class="source-card">
+      <h3>6. Bank of America <span style="color:var(--text-tertiary);font-weight:400;font-size:0.85em;">(Vivek Arya)</span></h3>
+      <div class="source-meta">
+        <span>卖方</span>
+        <span><a href="https://finance.yahoo.com/news/these-6-stocks-will-lead-the-1-trillion-chip-surge-in-2026-bofa-says-130008431.html" target="_blank">$1T Semiconductor Milestone</a></span>
+      </div>
+      <p><strong>Key:</strong> "$1T 半导体里程碑" 2026 预测。全球半导体销售 YoY +30%，6只领头股。最全面的行业 sizing 报告。</p>
+    </div>
+
+    <div class="source-card">
+      <h3>7. Evercore ISI <span style="color:var(--text-tertiary);font-weight:400;font-size:0.85em;">(Mark Lipacis)</span></h3>
+      <div class="source-meta">
+        <span>卖方</span>
+        <span><a href="https://www.businesswire.com/news/home/20241029316519/en/" target="_blank">Institutional Investor #1</a></span>
+      </div>
+      <p><strong>Key:</strong> 连续3年 <mark class="hl-know" data-note="n5">Institutional Investor #1 分析师</mark>。半导体资本设备专家，从需求端反推设备周期。</p>
+    </div>
+
+    <!-- ======================== S4 ======================== -->
+    <div class="section-header" id="s4">
+      <h2><span class="section-num">04</span><span class="tier-medium">Tier B</span> — 有价值补充 <span class="zh">6 sources</span></h2>
+    </div>
+
+    <div class="source-card">
+      <h3>8. TrendForce / DRAMeXchange</h3>
+      <div class="source-meta">
+        <span>数据源</span>
+        <span>DRAM/NAND/HBM 价格追踪</span>
+        <span><a href="https://www.trendforce.com/research/dram" target="_blank">trendforce.com</a></span>
+      </div>
+      <p>1Q26 DRAM <mark class="hl-know" data-note="n7">合约价</mark> +55-60% QoQ。半导体存储器定价的行业标准数据源。</p>
+    </div>
+
+    <div class="source-card">
+      <h3>9. TechInsights <span style="color:var(--text-tertiary);font-weight:400;font-size:0.85em;">(含 VLSIresearch)</span></h3>
+      <div class="source-meta">
+        <span>芯片拆解反向工程</span>
+        <span><a href="https://www.techinsights.com/" target="_blank">techinsights.com</a></span>
+      </div>
+      <p>2026 Top 5 Expectations，制造工艺分析。实际拆解芯片的一手物理数据，验证厂商宣称的节点参数。</p>
+    </div>
+
+    <div class="source-card">
+      <h3>10. Rosenblatt <span style="color:var(--text-tertiary);font-weight:400;font-size:0.85em;">(Kevin Cassidy)</span></h3>
+      <div class="source-meta">
+        <span>卖方</span>
+        <span>20年半导体设备经验</span>
+        <span><a href="https://www.rblt.com/equity-research" target="_blank">rblt.com</a></span>
+      </div>
+      <p>MU $300 PT。长期半导体设备领域积累，对存储周期判断有独到见解。</p>
+    </div>
+
+    <div class="source-card">
+      <h3>11. WSTS / SIA</h3>
+      <div class="source-meta">
+        <span>唯一一手行业出货数据</span>
+        <span><a href="https://www.semiconductors.org/data-resources/market-data/" target="_blank">semiconductors.org</a></span>
+      </div>
+      <p>2026 预测全球半导体 $975B (+25% YoY)。<mark class="hl-know" data-note="n6">WSTS 是唯一的一手行业统计来源</mark>，所有卖方模型都依赖此数据。</p>
+    </div>
+
+    <div class="source-card">
+      <h3>12. McKinsey Semiconductor Practice</h3>
+      <div class="source-meta">
+        <span>咨询</span>
+        <span><a href="https://www.mckinsey.com/industries/semiconductors/our-insights" target="_blank">mckinsey.com</a></span>
+      </div>
+      <p>长周期战略视角。对地缘政治重塑供应链、fab 选址经济学的分析有参考价值。</p>
+    </div>
+
+    <div class="source-card">
+      <h3>13. Deloitte TMT</h3>
+      <div class="source-meta">
+        <span>咨询</span>
+        <span><a href="https://www.deloitte.com/us/en/insights/industry/technology/technology-media-telecom-outlooks/semiconductor-industry-outlook.html" target="_blank">2026 Semiconductor Outlook</a></span>
+      </div>
+      <p>年度半导体展望报告。对终端市场 (auto, IoT, data center) 需求拆分有系统框架。</p>
+    </div>
+
+    <!-- ======================== S5 ======================== -->
+    <div class="section-header" id="s5">
+      <h2><span class="section-num">05</span><span class="tier-low">Tier C</span> — 背景参考 <span class="zh">4 sources</span></h2>
+    </div>
+
+    <div class="source-card">
+      <h3>14. JPMorgan Eye on the Market</h3>
+      <div class="source-meta">
+        <span>宏观视角</span>
+        <span><a href="https://am.jpmorgan.com/content/dam/jpm-am-aem/global/en/insights/eye-on-the-market/smothering-heights-amv.pdf" target="_blank">Smothering Heights (PDF)</a></span>
+      </div>
+      <p>AI CapEx 泡沫风险的宏观视角。Michael Cembalest 团队。偏向风险警示，适合做空观点的交叉验证。</p>
+    </div>
+
+    <div class="source-card">
+      <h3>15. S&amp;P Global Ratings</h3>
+      <div class="source-meta">
+        <span>信用评级</span>
+        <span><a href="https://www.spglobal.com/ratings/en/" target="_blank">spglobal.com</a></span>
+      </div>
+      <p>NVIDIA BBB+/Stable 信用评级。信用市场对 NVIDIA 资产负债表的独立验证，侧面反映财务健康度。</p>
+    </div>
+
+    <div class="source-card">
+      <h3>16. Mark LaPedus <span style="color:var(--text-tertiary);font-weight:400;font-size:0.85em;">(Substack)</span></h3>
+      <div class="source-meta">
+        <span>行业老兵</span>
+        <span>25年半导体设备报道</span>
+        <span><a href="https://marklapedus.substack.com/" target="_blank">Substack</a></span>
+      </div>
+      <p>半导体设备行业25年经验。对光刻、蚀刻、沉积等前端设备周期判断有不可替代的经验积累。</p>
+    </div>
+
+    <div class="source-card">
+      <h3>17. Chris Mims <span style="color:var(--text-tertiary);font-weight:400;font-size:0.85em;">(WSJ)</span></h3>
+      <div class="source-meta">
+        <span>大众媒体</span>
+      </div>
+      <p>大众媒体中最好的半导体报道。适合追踪叙事变化和公众认知偏差。当 WSJ 开始唱多/唱空时，可能已是反向信号。</p>
+    </div>
+
+    <!-- ======================== S6 ======================== -->
+    <div class="section-header" id="s6">
+      <h2><span class="section-num">06</span>缺口分析 <span class="zh">Gap Analysis</span></h2>
+    </div>
+
+    <div class="priority-box">
+      <h2>6个缺口 &mdash; 按优先级排列</h2>
+      <p style="font-size:0.85rem;color:var(--text-tertiary);">我们的研究中枢在定性策展上已达天花板，但定量数据几乎为零。以下缺口直接影响交易决策质量。</p>
+    </div>
+
+    <figure>
+      <table>
+        <thead>
+          <tr><th>缺口</th><th>严重度</th><th>说明</th><th>修复方案</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>季度财务数据</strong></td>
+            <td><span class="sev-critical">关键</span></td>
+            <td>无收入/毛利率/CapEx 趋势图</td>
+            <td><code>yfinance</code> 自动抓取 12 标的</td>
+          </tr>
+          <tr>
+            <td><strong>估值模型</strong></td>
+            <td><span class="sev-critical">关键</span></td>
+            <td>无 PE/PS/PEG/DCF</td>
+            <td><code>yfinance</code> + 手动补充</td>
+          </tr>
+          <tr>
+            <td><strong>供应链实时数据</strong></td>
+            <td><span class="sev-important">重要</span></td>
+            <td>TSMC 月度营收 / DRAM 价格 / ASML backlog</td>
+            <td><code>WebFetch</code> + TrendForce</td>
+          </tr>
+          <tr>
+            <td><strong>卖方共识追踪</strong></td>
+            <td><span class="sev-important">重要</span></td>
+            <td>Bloomberg consensus unavailable</td>
+            <td>手动收集 PT / Rating</td>
+          </tr>
+          <tr>
+            <td><strong>宏观叠加</strong></td>
+            <td><span class="sev-important">重要</span></td>
+            <td>利率/美元/出口管制时间线</td>
+            <td><code>yfinance</code> 宏观数据</td>
+          </tr>
+          <tr>
+            <td><strong>持仓/资金流</strong></td>
+            <td><span class="sev-nice">加分</span></td>
+            <td>13F / ETF flow / 期权</td>
+            <td>SEC EDGAR API</td>
+          </tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <!-- ======================== S7 ======================== -->
+    <div class="section-header" id="s7">
+      <h2><span class="section-num">07</span>数据抓取方案 <span class="zh">Data Collection Plan</span></h2>
+    </div>
+
+    <p>以 <code>yfinance</code> 为核心免费数据源，覆盖12只核心标的的季度财务 + 估值指标。供应链数据通过定期 WebFetch 补充。</p>
+
+    <h3>12 Tickers</h3>
+    <pre><code>TICKERS = [
+    "NVDA",   # NVIDIA — GPU / AI accelerator
+    "TSM",    # TSMC — foundry
+    "AVGO",   # Broadcom — networking / custom ASIC
+    "AMD",    # AMD — CPU / GPU
+    "ASML",   # ASML — EUV lithography
+    "MU",     # Micron — DRAM / HBM
+    "AMAT",   # Applied Materials — deposition / etch
+    "ARM",    # ARM Holdings — architecture licensing
+    "SNPS",   # Synopsys — EDA
+    "CDNS",   # Cadence — EDA
+    "MRVL",   # Marvell — custom silicon / networking
+    "INTC",   # Intel — IDM / foundry aspirant
+]</code></pre>
+
+    <h3>Metrics to Collect</h3>
+    <pre><code># === Phase 1: yfinance (free, immediate) ===
+quarterly_metrics = {
+    "Revenue":       "totalRevenue",
+    "Gross Margin":  "grossMargins",
+    "R&D":           "researchDevelopment",
+    "CapEx":         "capitalExpenditures",
+    "FCF":           "freeCashflow",
+}
+
+valuation_metrics = {
+    "PE (TTM)":      "trailingPE",
+    "PE (FWD)":      "forwardPE",
+    "PS (TTM)":      "priceToSalesTrailing12Months",
+    "PB":            "priceToBook",
+    "EV/EBITDA":     "enterpriseToEbitda",
+}
+
+# === Phase 2: WebFetch (scheduled) ===
+supply_chain = {
+    "TSMC Monthly Revenue":  "https://investor.tsmc.com/",
+    "TrendForce DRAM Price": "https://www.trendforce.com/",
+    "ASML Backlog":          "https://www.asml.com/en/investors",
+}
+
+# === Phase 3: SEC EDGAR (nice to have) ===
+institutional = {
+    "13F Filings":  "https://efts.sec.gov/LATEST/search-index?q=NVDA",
+    "ETF Flows":    "manual tracking via ETF.com",
+}</code></pre>
+
+    <!-- ======================== S8 ======================== -->
+    <div class="section-header" id="s8">
+      <h2><span class="section-num">08</span>与我们研究中枢的对比 <span class="zh">Comparison with Our Research Hub</span></h2>
+    </div>
+
+    <figure>
+      <table>
+        <thead>
+          <tr><th>维度</th><th>我们的研究中枢</th><th>卖方研报</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>认知画像</strong></td>
+            <td><span class="cmp-yes">&#10003; 16人&times;28轮 (无人有此)</span></td>
+            <td><span class="cmp-no">&#10007; 无</span></td>
+          </tr>
+          <tr>
+            <td><strong>交叉验证</strong></td>
+            <td><span class="cmp-yes">&#10003; 6 Claims 网络</span></td>
+            <td><span class="cmp-no">&#10007; 单标的分析</span></td>
+          </tr>
+          <tr>
+            <td><strong>信号传导链</strong></td>
+            <td><span class="cmp-yes">&#10003; BULL / BEAR / WATCH</span></td>
+            <td><span class="cmp-no">&#10007; 只有目标价</span></td>
+          </tr>
+          <tr>
+            <td><strong>季度财务</strong></td>
+            <td><span class="cmp-no">&#10007; 零</span></td>
+            <td><span class="cmp-yes">&#10003; 完整模型</span></td>
+          </tr>
+          <tr>
+            <td><strong>估值</strong></td>
+            <td><span class="cmp-no">&#10007; 零</span></td>
+            <td><span class="cmp-yes">&#10003; DCF + 相对估值</span></td>
+          </tr>
+          <tr>
+            <td><strong>供应链数据</strong></td>
+            <td><span class="cmp-no">&#10007; 零</span></td>
+            <td><span class="cmp-yes">&#10003; 独家数据</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <div class="priority-box">
+      <h2>结论</h2>
+      <p>定性天花板 + 定量为零 = 需要双重验证。</p>
+      <p style="font-size:0.88rem;">我们的认知画像和交叉验证网络是独一无二的定性资产，但缺少任何财务数据支撑。卖方拥有完整的定量模型，但缺乏我们的多源认知画像。两者互补而非替代。下一步：用 07 的数据方案填补 06 的缺口，实现定性 + 定量的双重验证。</p>
+    </div>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+      <p>卖方研报策展 + 缺口分析 &mdash; 2026-03-21<br>
+      Part of <a href="semiconductor_hub.html">Semiconductor Research Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ===================== RIGHT NOTES SIDEBAR ===================== -->
+  <aside class="notes-sidebar" id="notesSidebar">
+    <h4>Meta-cognitive 元思考</h4>
+
+    <div class="meta-note">
+      <div class="note-label strength">META</div>
+      <p><strong>为什么 SemiAnalysis 比 Morgan Stanley 更有价值</strong> — 核心在于信息不对称。Morgan Stanley 的分析师覆盖 20+ 只股票，每只分配的研究时间有限。Dylan Patel 只聚焦半导体 AI 供应链，能深入到 wafer 级别的供应数据。更关键的是：SemiAnalysis 没有承销关系，不会因为帮 NVIDIA 发债而被迫维持买入评级。</p>
+    </div>
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label strength">META</div>
+      <p><strong>卖方研报的结构性偏见</strong> — 卖方的商业模式决定了偏见方向：承销关系导致买入评级偏多，主要投行的买入/持有/卖出比例约为 50%/40%/10%。他们的价值在于：(1) 财务模型的颗粒度；(2) 管理层 access；(3) 行业 sizing。但方向性判断需要打折。</p>
+    </div>
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label strength">META</div>
+      <p><strong>独立研究的 Substack 模式可持续性</strong> — SemiAnalysis (50K) 和 Fabricated Knowledge (94K) 都走 Substack 付费模式。按 $20/月估算，年收入 $12M-$22M，足以维持独立研究。风险：订阅增长停滞可能转向咨询收入，独立性可能受损。</p>
+    </div>
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label know">KNOW</div>
+      <p><strong>什么是 InferenceMAX 基准测试</strong> — SemiAnalysis 开发的 AI 推理性能基准。与 MLPerf 不同，测试的是真实部署场景下的 tokens/second/dollar，直接关联云服务商的 ROI 计算，对 NVIDIA vs AMD vs 自研芯片的竞争力排名有重大影响。</p>
+    </div>
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label know">KNOW</div>
+      <p><strong>Institutional Investor 排名如何运作</strong> — 每年由买方投票评选各行业最佳卖方分析师。Mark Lipacis 连续3年 #1 意味着大型机构基金经理认为他的观点最有投资参考价值。但注意：这是 popularity contest，不等于预测准确率最高。</p>
+    </div>
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label know">KNOW</div>
+      <p><strong>WSTS 数据为什么是唯一一手来源</strong> — World Semiconductor Trade Statistics 直接从半导体公司收集出货数据。SIA 发布的月度数据就是 WSTS 汇总。所有卖方模型的 TAM 估算都锚定在 WSTS 数据上。没有第二个组织能获得同等覆盖的一手出货量。</p>
+    </div>
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label know">KNOW</div>
+      <p><strong>TrendForce 合约价 vs 现货价</strong> — 合约价是大客户按季度谈判的价格，占出货量 ~70%，反映真实供需。现货价波动大，领先合约价 2-4 周。当合约价 QoQ +55-60% 时，意味着 Micron/SK Hynix 的毛利率将大幅扩张。</p>
+    </div>
+
+  </aside>
+
+</div><!-- end page-wrapper -->
+
+<script>
+(function() {
+  // Left sidebar toggle (mobile)
+  const hamburger = document.getElementById('hamburgerBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+
+  hamburger.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+  });
+
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+  });
+
+  sidebar.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 900) {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+      }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

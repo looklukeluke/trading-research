@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>认知节点报告: 需求侧/超大规模 — Node 7</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="../cognitive_agents_2026-03-20/jensen_sources_shared.css">
+  <style>
+/* === KPI Cards === */
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+.kpi-card { background: var(--bg-surface); border-radius: var(--radius-md); padding: 1.25rem; border: 1px solid var(--border-subtle); }
+.kpi-label { font-size: 0.72rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.kpi-value { font-size: 1.5rem; font-weight: 680; font-feature-settings: 'tnum' 1; margin-bottom: 4px; }
+.kpi-change { font-size: 0.78rem; font-weight: 600; }
+.kpi-change.positive { color: #4caf50; }
+.kpi-change.negative { color: #f44336; }
+.kpi-subtitle { font-size: 0.72rem; color: var(--text-quaternary); margin-top: 4px; }
+
+/* === Risk Matrix & Extended Tables === */
+.risk-matrix td:nth-child(2), .risk-matrix td:nth-child(3) { text-align: center; }
+.risk-high { color: #f44336; font-weight: 700; }
+.risk-medium { color: #ffc107; font-weight: 700; }
+.risk-low { color: #4caf50; font-weight: 700; }
+
+/* === Callout Boxes === */
+.callout { background: var(--bg-surface); border-radius: var(--radius-sm); padding: 1rem 1.25rem; margin: 1rem 0; border-left: 3px solid var(--accent); }
+.callout-title { font-size: 0.8rem; font-weight: 590; color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+.callout-body { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; }
+.callout.risk { border-left-color: #f44336; }
+.callout.risk .callout-title { color: #f44336; }
+.callout.insight { border-left-color: var(--knowledge); }
+.callout.insight .callout-title { color: var(--knowledge); }
+
+/* === Phase Headers === */
+.phase-header { display: flex; align-items: center; gap: 0.75rem; margin: 2.5rem 0 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle); }
+.phase-num { font-size: 0.72rem; font-weight: 700; color: var(--bg-base); background: var(--accent); padding: 3px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+.phase-title { font-size: 1.15rem; font-weight: 590; color: var(--text-primary); }
+
+/* === Agent Cards === */
+.agent-header { display: flex; align-items: center; gap: 0.75rem; margin: 2rem 0 1rem; }
+.agent-role-badge { font-size: 0.68rem; font-weight: 510; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+.agent-role-badge.giant { background: rgba(248,168,72,0.15); color: var(--accent); }
+.agent-role-badge.investor { background: rgba(91,155,213,0.15); color: var(--knowledge); }
+.agent-role-badge.contrarian { background: rgba(244,67,54,0.15); color: #f44336; }
+
+/* === Triangulation Table Colors === */
+.consensus { color: #4caf50; font-weight: 600; }
+.disagreement { color: #f44336; font-weight: 600; }
+
+/* === Provenance Badges === */
+.prov-badge { font-size: 0.65rem; padding: 1px 6px; border-radius: 3px; font-weight: 600; }
+.prov-primary { background: rgba(76,175,80,0.12); color: #4caf50; }
+.prov-industry { background: rgba(91,155,213,0.12); color: var(--knowledge); }
+.prov-media { background: rgba(248,168,72,0.12); color: var(--accent); }
+.prov-analysis { background: rgba(171,71,188,0.12); color: #ab47bc; }
+
+/* === Chart Frames === */
+.chart-frame { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); margin: 1rem 0; overflow: hidden; }
+.chart-frame-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-subtle); }
+.chart-frame-title { font-size: 0.82rem; font-weight: 590; color: var(--text-secondary); letter-spacing: 0.02em; }
+.chart-frame-body { padding: 0; }
+.chart-frame-body .js-plotly-plot { width: 100% !important; }
+.chart-source { padding: 0.5rem 1rem; font-size: 0.7rem; color: var(--text-quaternary); border-top: 1px solid var(--border-subtle); }
+  
+/* === Embedded mode: inside Dashboard iframe === */
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+body.embedded .hamburger-btn { display: none !important; }
+body.embedded .sidebar-overlay { display: none !important; }
+
+/* === Reading mode: full-width === */
+.reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+.reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+.reading-mode .hamburger-btn { display: none !important; }
+.reading-mode .sidebar-overlay { display: none !important; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes sidebar">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <a class="back-link" href="../semiconductor_hub.html" style="display:block;padding:0.4rem 0.5rem;margin-bottom:1rem;font-size:0.8rem;color:var(--accent);text-decoration:none;border:1px solid var(--accent-dim);border-radius:var(--radius-sm);">&#8592; Semiconductor Hub</a>
+    <h4>目录导航 Contents</h4>
+    <nav><ul>
+      <li><a href="#metacognition" style="color:var(--accent);"><span class="toc-num">&#9733;</span>元思考<br><span class="zh-inline">Metacognition</span></a></li>
+      <li><a href="#phase0"><span class="toc-num">0</span>独立思考<br><span class="zh-inline">Independent Thinking</span></a></li>
+      <li><a href="#phase05"><span class="toc-num">0.5</span>策展搜索<br><span class="zh-inline">Curated Search</span></a></li>
+      <li><a href="#phase1"><span class="toc-num">1</span>认知代理人<br><span class="zh-inline">Cognitive Agents</span></a></li>
+      <li><a href="#musk"><span class="toc-num">1.1</span>Elon Musk<br><span class="zh-inline">CONTRARIAN &middot; xAI</span></a></li>
+      <li><a href="#altman"><span class="toc-num">1.2</span>Sam Altman<br><span class="zh-inline">GIANT &middot; OpenAI</span></a></li>
+      <li><a href="#nadella"><span class="toc-num">1.3</span>Satya Nadella<br><span class="zh-inline">GIANT &middot; Microsoft</span></a></li>
+      <li><a href="#phase2"><span class="toc-num">2</span>综合分析<br><span class="zh-inline">Synthesis</span></a></li>
+      <li><a href="#triangulation"><span class="toc-num">2.1</span>三角验证<br><span class="zh-inline">Triangulation</span></a></li>
+      <li><a href="#competitive"><span class="toc-num">2.2</span>竞争格局<br><span class="zh-inline">Competitive Landscape</span></a></li>
+      <li><a href="#supply-demand"><span class="toc-num">2.3</span>供需框架<br><span class="zh-inline">Supply-Demand Framework</span></a></li>
+      <li><a href="#risk-matrix"><span class="toc-num">2.4</span>风险矩阵<br><span class="zh-inline">Risk Matrix</span></a></li>
+      <li><a href="#node-judgment"><span class="toc-num">2.5</span>节点判断<br><span class="zh-inline">Node Judgment</span></a></li>
+      <li><a href="#trading"><span class="toc-num">2.6</span>交易视角<br><span class="zh-inline">Trading Perspective</span></a></li>
+      <li><a href="#综合判断"><span class="toc-num">2.7</span>综合判断<br><span class="zh-inline">Triangulated Verdict</span></a></li>
+      <li><a href="#验证日历"><span class="toc-num">2.8</span>验证日历<br><span class="zh-inline">Verification Calendar</span></a></li>
+      <li><a href="#信号传导"><span class="toc-num">2.9</span>信号传导链<br><span class="zh-inline">Signal Transmission</span></a></li>
+      <li><a href="#kpi-dashboard"><span class="toc-num">3</span>KPI仪表盘<br><span class="zh-inline">Dashboard</span></a></li>
+      <li><a href="#charts"><span class="toc-num">4</span>图表<br><span class="zh-inline">Charts</span></a></li>
+      <li><a href="#provenance"><span class="toc-num">5</span>溯源表<br><span class="zh-inline">Provenance Table</span></a></li>
+      <li><a href="#sources"><span class="toc-num">6</span>来源<br><span class="zh-inline">Sources</span></a></li>
+    </ul></nav>
+    <h4>供应链节点 Supply Chain Nodes</h4>
+    <nav><ul>
+      <li><a href="NODE_1_GPU_AI芯片设计_2026-03-19.html">Node 1: GPU/AI芯片设计<br><span class="zh-inline">GPU/AI Chip Design</span></a></li>
+      <li><a href="NODE_2_光刻设备_2026-03-19.html">Node 2: 光刻设备<br><span class="zh-inline">Lithography Equipment</span></a></li>
+      <li><a href="NODE_3_代工制造_2026-03-19.html">Node 3: 代工制造<br><span class="zh-inline">Foundry Manufacturing</span></a></li>
+      <li><a href="NODE_4_存储_HBM_2026-03-19.html">Node 4: 存储/HBM<br><span class="zh-inline">Memory / HBM</span></a></li>
+      <li><a href="NODE_5_定制芯片_ASIC_2026-03-19.html">Node 5: 定制芯片<br><span class="zh-inline">Custom Silicon / ASIC</span></a></li>
+      <li><a href="NODE_6_EDA_IP授权_2026-03-19.html">Node 6: EDA/IP授权<br><span class="zh-inline">EDA / IP Licensing</span></a></li>
+      <li><a href="NODE_7_需求侧_Demand_2026-03-21.html" class="active">Node 7: 需求侧/超大规模<br><span class="zh-inline">Demand / Hyperscaler</span></a></li>
+      <li><a href="NODE_8_AI_Lab_模型层_2026-03-21.html">Node 8: AI Lab/模型层<br><span class="zh-inline">AI Lab / Model Layer</span></a></li>
+    </ul></nav>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <header class="page-header">
+      <h1>认知节点报告: 需求侧/超大规模<span class="zh">Cognitive Node Report: Demand / Hyperscaler</span></h1>
+      <div class="subtitle">Node 7 of 8 &middot; Phase 0&rarr;2 + 3 Cognitive Agents &middot; 2026-03-21</div>
+      <div class="badge-row">
+        <span class="badge">MSFT $3.2T</span>
+        <span class="badge">OpenAI ~$300B</span>
+        <span class="badge">xAI $80B</span>
+        <span class="badge">3 Agents</span>
+        <span class="badge">30+ Sources</span>
+      </div>
+    </header>
+
+    <!-- METACOGNITIVE SUMMARY -->
+    <div class="priority-box" id="metacognition">
+      <h2 style="margin-top:0; font-size:1.1rem; font-weight:680; color:var(--accent);">&#9733; 元思考: 这份报告的核心发现<span class="zh" style="font-weight:400; font-size:0.85rem;"> Metacognitive Summary</span></h2>
+
+      <div style="margin:1rem 0; padding:1rem 1.25rem; background:var(--bg-overlay); border-radius:var(--radius-sm); border-left:3px solid var(--accent);">
+        <p style="font-size:0.92rem; font-weight:590; color:var(--text-primary); margin:0 0 0.75rem;">&#128270; 核心分析焦点</p>
+        <p style="color:var(--text-secondary); font-size:0.88rem; line-height:1.65; margin:0;">The demand node answers THE fundamental question: <strong>is the $1T AI infrastructure buildout real?</strong> 16 supply-side agents across Nodes 1-6 say "insatiable demand" but they are sellers. This node provides <strong>buyer verification</strong>.<br><br>
+        <strong>真正的分析焦点是：买家的资本承诺是否真实，以及2028年后是否可持续？</strong><br>
+        Altman的$100B LOI、Nadella的Azure CapEx记录、Musk的$25B GPU采购=真实资本承诺。但买家有动机表现承诺（股价、合作伙伴杠杆）。三人的CapEx公告可能夸大实际利用率意图。Altman的信号最关键（4/5），Nadella提供最稳定的验证窗口（4/5），Musk的时间线可靠性需要x2-3折扣（2/5）。</p>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin:1rem 0;">
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid #4caf50;">
+          <p style="font-size:0.72rem; font-weight:510; color:#4caf50; text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#10003; 三代理共识</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;">All 3 confirm AI CapEx acceleration. Altman's $100B LOI, Nadella's Azure CapEx records, Musk's $25B GPU purchase = real capital commitment. AI model training compute scaling 4-10x/year + inference scaling post-deployment = demand is structurally real, not speculative.<strong> Demand-side verification: confirmed for 2026-2027.</strong></p>
+        </div>
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid #f44336;">
+          <p style="font-size:0.72rem; font-weight:510; color:#f44336; text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#10007; 关键分歧与风险</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;">Self-chip timelines diverge. Altman's Broadcom chip delayed to Q3 2026. Musk's Terafab not operational. Nadella's Project Maia in early stages. But all are investing in alternatives to NVIDIA dependency. <strong>LOI-to-contract conversion rate only ~60% credible. Sustainability 2028+ uncertain.</strong></p>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin:1rem 0;">
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid var(--knowledge);">
+          <p style="font-size:0.72rem; font-weight:510; color:var(--knowledge); text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#128200; 交易指引</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;">Don't trade demand-side tickers directly (MSFT/GOOG not primary semiconductor plays). Use demand signals to <strong>validate supply-side positions</strong> (NVDA/AVGO/ARM/ASML). Monitor quarterly Azure AI CapEx (Nadella), OpenAI's Broadcom chip delivery (Altman), xAI Memphis cluster utilization (Musk). Any slowdown = earliest demand-cliff signal.</p>
+        </div>
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid var(--accent);">
+          <p style="font-size:0.72rem; font-weight:510; color:var(--accent); text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#9888; 认知陷阱预警</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;"><strong>买家承诺偏差</strong>: Buyers have incentive to appear committed (stock price, partner leverage). Their CapEx announcements may overstate actual utilization intent. <strong>叙事传染</strong>: "AI CapEx race" narrative creates self-reinforcing commitment &mdash; no CEO wants to be seen as "falling behind." <strong>LOI虚报</strong>: Letters of Intent are not binding contracts &mdash; $100B LOI ≠ $100B spend.</p>
+        </div>
+      </div>
+
+      <details style="margin-top:0.75rem;">
+        <summary style="font-size:0.82rem; font-weight:510; color:var(--text-tertiary); cursor:pointer;">&#128214; 三位代理人一句话摘要</summary>
+        <div style="padding:0.75rem 0; font-size:0.82rem; color:var(--text-secondary); line-height:1.65;">
+          <p><strong>Elon Musk (CONTRARIAN, 2/5)</strong>: "$25B+ GPU buyer + Terafab + Grok &mdash; the largest physical GPU buyer on Earth." &mdash; Action evidence is real but timeline reliability factor x2-3. Memphis 100k GPU cluster operational, but Terafab 1GW facility timeline unclear. Core value: Musk's spending is independently verifiable and he buys at a scale that moves NVIDIA's revenue needle.</p>
+          <p><strong>Sam Altman (GIANT, 4/5)</strong>: "$100B LOI + Broadcom self-chip + 30% discount negotiator &mdash; the demand-side bellwether." &mdash; If Altman cuts GPU purchases H2 2026 = earliest signal $1T narrative collapsing. Broadcom custom chip delayed to Q3 2026 signals self-chip harder than expected. Core value: OpenAI is the demand signal the entire supply chain watches.</p>
+          <p><strong>Satya Nadella (GIANT, 4/5)</strong>: "Azure #1 AI CapEx + Project Maia + 49% OpenAI &mdash; the most credible demand validator." &mdash; Azure AI CapEx decisions = 25%+ NVIDIA revenue. Copilot ROI = best proxy for AI application value. Core value: Nadella's quarterly CapEx is the most transparent and verifiable of all demand signals.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="top-controls">
+      <span class="tc-label">&#128218; 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <!-- PHASE 0: INDEPENDENT THINKING -->
+    <div class="section-header" id="phase0">
+      <h2>&sect;0 Phase 0: 独立思考<span class="zh">Independent Thinking (Before Search)</span></h2>
+    </div>
+
+    <div class="callout" style="border-left-color:#ffc107; margin-bottom:1.5rem;">
+      <div class="callout-title" style="color:#ffc107;">&#9888; 诚实标注 Honesty Disclosure</div>
+      <div class="callout-body">本Phase 0标题为"搜索前独立思考"，但实际撰写时已读完三位代理人的完整MD文件。这是<strong>事后重构</strong>，不是真正的搜索前独立思考。其价值在于：明确标记预判偏差方向（如Phase 0可能低估了自研芯片对NVIDIA的长期影响，高估了LOI的约束力），而非假装"猜对了"。</div>
+    </div>
+
+    <h3>1. 节点解决什么问题？</h3>
+    <p><strong>Who's actually buying all these GPUs, and will they keep buying?</strong> 需求侧节点回答半导体供应链的根本问题：$1T AI基础设施建设是真实的还是叙事泡沫？Nodes 1-6的16位代理人（设计者、制造者、设备商）都说"需求无限"&mdash;&mdash;但他们是卖家。本节点的三位代理人是<strong>买家</strong>：他们花真金白银购买GPU、建设数据中心、训练AI模型。买家的行动是需求端最不可伪造的信号。</p>
+
+    <h3>2. 供给约束？</h3>
+    <ul>
+      <li><strong><mark class="hl-know" data-note="k1">GPU allocation controlled by NVIDIA</mark><sup class="nref" data-note="k1">1</sup></strong>: Buyers compete for scarce supply &mdash; NVIDIA decides who gets how many H100/B200/GB300 chips</li>
+      <li><strong>数据中心电力约束</strong>: AI training clusters consume 50-150MW per facility; grid capacity is the new bottleneck</li>
+      <li><strong>Self-chip development as hedge</strong>: All three buyers are investing in NVIDIA alternatives (Broadcom custom, Project Maia, xAI Terafab)</li>
+      <li><strong>人才竞争</strong>: Top AI researchers and infra engineers are the scarcest resource &mdash; compensation war among hyperscalers</li>
+    </ul>
+
+    <h3>3. 需求驱动力？</h3>
+    <ul>
+      <li><strong><mark class="hl-know" data-note="k2">AI model training compute scaling</mark><sup class="nref" data-note="k2">2</sup> 4-10x/year</strong>: GPT-4 &rarr; GPT-5 &rarr; GPT-6 each requires order-of-magnitude more compute</li>
+      <li><strong>Inference scaling post-deployment</strong>: Once models are deployed, inference volume grows exponentially with user adoption</li>
+      <li><strong>Enterprise AI adoption</strong>: Copilot, ChatGPT Enterprise, Grok &mdash; each enterprise deployment = recurring GPU demand</li>
+      <li><strong><mark class="hl-know" data-note="k3">Competitive CapEx race</mark><sup class="nref" data-note="k3">3</sup></strong>: No CEO wants to be the one who "underinvested" in AI &mdash; FOMO drives spend</li>
+      <li><strong>National AI sovereignty</strong>: Government-backed AI initiatives (Stargate, etc.) add non-commercial demand layer</li>
+    </ul>
+
+    <h3>4. 当前供需状态？</h3>
+    <p>需求远超供给。NVIDIA B200/GB300 sold out through 2027. <mark class="hl-know" data-note="k4">Aggregate hyperscaler AI CapEx ~$250B FY2026E</mark><sup class="nref" data-note="k4">4</sup>, projected $350B+ FY2027E. But AI application revenue is only ~$50-80B &mdash; the gap between infrastructure spend and application monetization is the fundamental sustainability question. Current CapEx is justified by "build it and they will come" logic, not proven ROI at scale.</p>
+
+    <h3>5. Key unknowns?</h3>
+    <ul>
+      <li><strong>LOI-to-contract conversion rate</strong>: How much of the announced $100B+ LOIs will convert to actual spending?</li>
+      <li><strong>AI application ROI sustainability</strong>: Is Copilot/ChatGPT Enterprise actually generating sufficient value to justify $50B+ CapEx per hyperscaler?</li>
+      <li><strong>Self-chip impact on NVIDIA revenue 2027+</strong>: If Google TPU, AWS Trainium, Azure Maia, OpenAI-Broadcom all mature, NVIDIA loses how much share?</li>
+      <li><strong>Demand concentration risk</strong>: Top 4 customers = 40%+ NVIDIA revenue &mdash; any single pullback has outsized impact</li>
+    </ul>
+
+    <!-- PHASE 0.5: CURATED SEARCH -->
+    <div class="section-header" id="phase05">
+      <h2>&sect;1 Phase 0.5: 策展搜索<span class="zh">Curated Search</span></h2>
+    </div>
+
+    <h3>最佳分析源</h3>
+    <figure>
+      <table>
+        <thead>
+          <tr><th>Source 来源</th><th>Type 类型</th><th>Value 价值</th><th>Credibility 可信度</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Microsoft Azure IR</strong></td><td>Primary source</td><td>Quarterly AI CapEx filings, Azure AI revenue, Copilot metrics</td><td><span class="tier-high">Primary</span></td></tr>
+          <tr><td><strong>OpenAI investor updates</strong></td><td>Primary source</td><td>DevDay announcements, ARR data, Broadcom chip updates</td><td><span class="tier-high">Primary</span></td></tr>
+          <tr><td><strong>xAI Memphis cluster specs</strong></td><td>Primary source</td><td>GPU deployment data, Grok model progression, Terafab plans</td><td><span class="tier-medium-high">High</span></td></tr>
+          <tr><td><strong>SemiAnalysis</strong><br><small>Dylan Patel</small></td><td>Deep analysis</td><td>Hyperscaler CapEx tracking, GPU allocation analysis</td><td><span class="tier-medium-high">High</span></td></tr>
+          <tr><td><strong>Stratechery</strong><br><small>Ben Thompson</small></td><td>Deep analysis</td><td>Hyperscaler AI strategy, platform economics</td><td><span class="tier-medium-high">High</span></td></tr>
+          <tr><td><strong>Morgan Stanley / Goldman Sachs</strong></td><td>Sell-side</td><td>AI CapEx forecasting reports, hyperscaler models</td><td><span class="tier-medium">Medium</span></td></tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <h3>Key Curated Findings</h3>
+
+    <div class="callout">
+      <div class="callout-title">CURATED-1 &mdash; Microsoft Azure AI CapEx Quarterly Filings</div>
+      <div class="callout-body">Microsoft FY2026 CapEx on track for <strong>$80B+</strong>, majority allocated to AI infrastructure. Azure AI revenue growing 60%+ YoY. Copilot seats surpassing 5M paid enterprise users. Nadella: "We are seeing demand signals that exceed our ability to deploy capacity."<br><small class="zh-inline">Source: Microsoft IR, Q2 FY2026 Earnings, 2026-01</small></div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">CURATED-2 &mdash; OpenAI Investor Updates and DevDay Announcements</div>
+      <div class="callout-body">OpenAI ARR reportedly approaching <strong>$15B</strong> (annualized Q1 2026). $100B Letter of Intent for GPU procurement over 3 years. Broadcom custom chip (code-named "Bespoke") delayed from Q1 to <strong>Q3 2026</strong>. ChatGPT Enterprise growing 3x QoQ. OpenAI valuation ~$300B in latest tender offer.<br><small class="zh-inline">Source: The Information, Bloomberg, 2025-2026</small></div>
+    </div>
+
+    <div class="callout insight">
+      <div class="callout-title">CURATED-3 &mdash; xAI Memphis Data Center and Grok Progression</div>
+      <div class="callout-body">Memphis cluster: <strong>100,000 H100 GPUs</strong> operational (world's largest single-site cluster as of late 2025). Grok-3 trained on Memphis. Terafab 1GW facility announced but timeline undisclosed. Musk confirmed <strong>$25B+</strong> GPU purchases to date. xAI valuation $80B.<br><small class="zh-inline">Source: Reuters, xAI blog, 2025-2026</small></div>
+    </div>
+
+    <div class="callout insight">
+      <div class="callout-title">CURATED-4 &mdash; SemiAnalysis Hyperscaler CapEx Tracking</div>
+      <div class="callout-body">Top 4 hyperscalers (MSFT, GOOG, AMZN, META) aggregate AI CapEx: <strong>~$250B FY2026E</strong>. GPU allocation: NVIDIA controls 85%+ of AI accelerator market. Self-chip efforts (TPU, Trainium, Maia) represent ~15% of total AI compute deployed. CapEx-to-revenue ratio in AI: <strong>3-5x</strong> vs historical tech infrastructure 1-2x.<br><small class="zh-inline">Source: SemiAnalysis, 2026-02</small></div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">CURATED-5 &mdash; Stratechery: Hyperscaler AI Strategy</div>
+      <div class="callout-body">Ben Thompson: "The hyperscaler AI race is the largest infrastructure buildout since the transcontinental railroad. The question is not whether it will be built &mdash; it's whether the ROI will materialize before the capital is exhausted." Key insight: <strong>CapEx commitments are sunk cost once announced &mdash; pulling back publicly is career suicide for a CEO.</strong><br><small class="zh-inline">Source: Stratechery, 2026-01</small></div>
+    </div>
+
+    <div class="callout risk">
+      <div class="callout-title">CURATED-6 &mdash; Morgan Stanley / Goldman Sachs AI CapEx Forecasting</div>
+      <div class="callout-body">MS estimates aggregate AI CapEx could reach <strong>$400B by 2028</strong> but flags "ROI gap" as primary risk. GS model shows AI application revenue needs to reach $200B+ by 2028 to justify current build pace. Current trajectory: $50-80B AI app revenue vs $250B CapEx = <strong>3-5x gap</strong>. Historical precedent: fiber optic buildout 1998-2001 had similar CapEx/revenue ratio before collapse.<br><small class="zh-inline">Source: Morgan Stanley Research, Goldman Sachs TMT, 2026-01</small></div>
+    </div>
+
+    <!-- PHASE 1: COGNITIVE AGENTS -->
+    <div class="section-header" id="phase1">
+      <h2>&sect;2 Phase 1: 认知代理人<span class="zh">Cognitive Agents</span></h2>
+    </div>
+
+    <!-- Agent 1: Elon Musk -->
+    <div id="musk">
+      <div class="agent-header">
+        <span class="agent-role-badge contrarian">CONTRARIAN</span>
+        <h3>Elon Musk (#12) &mdash; CEO Tesla/xAI</h3>
+      </div>
+
+      <p><strong>选择理由</strong>: Musk is the largest physical GPU buyer on Earth. $25B+ spent on NVIDIA GPUs. Memphis 100k-GPU cluster is the world's largest single-site AI training facility. xAI's Grok competes directly with OpenAI's GPT. His spending is independently verifiable and moves NVIDIA's revenue needle. But timeline reliability factor requires x2-3 discount on all announced dates. <strong>可信度: 2/5</strong>.</p>
+
+      <h4>行动证据（重于言论）</h4>
+      <ol>
+        <li><strong>Memphis 100k H100 cluster (2025)</strong>: Built and operational. World's largest single-site AI training cluster. Grok-3 trained here. This is $5B+ in hardware alone.</li>
+        <li><strong>$25B+ cumulative GPU purchases</strong>: Independently verifiable through NVIDIA's revenue disclosures. xAI is one of NVIDIA's top 5 customers.</li>
+        <li><strong>Terafab 1GW facility announced</strong>: Would be the largest AI data center ever built. But timeline is vague and Musk's construction timelines historically 2-3x optimistic.</li>
+        <li><strong>Grok-3 competitive performance</strong>: Reached parity with GPT-4.5 on key benchmarks, validating the GPU investment ROI.</li>
+        <li><strong>xAI $80B valuation (2026)</strong>: Largest AI startup valuation outside OpenAI. Investors include Sequoia, a16z, Valor Equity.</li>
+      </ol>
+
+      <h4>核心判断</h4>
+      <blockquote>"We're going to need a LOT more compute. The demand for AI inference alone will exceed all current supply within 18 months."<span class="zh">我们需要更多算力。光是AI推理需求就将在18个月内超过所有当前供给</span></blockquote>
+      <ul>
+        <li>Musk's spending is the <strong>most verifiable</strong> demand signal &mdash; he buys physical GPUs at scale</li>
+        <li>Timeline reliability is the critical discount factor &mdash; <mark class="hl-know" data-note="k5">Terafab could be 2-3 years late</mark><sup class="nref" data-note="k5">5</sup></li>
+        <li>xAI's competitive positioning forces continued GPU spending regardless of efficiency gains</li>
+        <li>Political entanglements (government contracts, Tesla AI) create non-economic GPU demand motivations</li>
+      </ul>
+
+      <details>
+        <summary>财务与估值详情</summary>
+        <p><strong>xAI valuation</strong>: ~$80B (2026 funding round). Revenue undisclosed but Grok API + X platform integration generating undisclosed ARR.</p>
+        <p><strong>GPU spend</strong>: $25B+ cumulative. Primarily H100, transitioning to B200/GB300.</p>
+        <p><strong>Key risk</strong>: Musk's attention is split across Tesla, SpaceX, X, xAI, Neuralink, Boring Company. xAI execution quality depends on which entity has his focus at any given time.</p>
+      </details>
+      <p style="font-size:0.8rem; margin-top:0.75rem;"><a href="../cognitive_agents_2026-03-20/12_elon_musk.html" style="color:var(--accent);">&#8594; Full Agent Profile: Elon Musk (#12)</a></p>
+    </div>
+
+    <hr>
+
+    <!-- Agent 2: Sam Altman -->
+    <div id="altman">
+      <div class="agent-header">
+        <span class="agent-role-badge giant">GIANT</span>
+        <h3>Sam Altman (#17) &mdash; CEO OpenAI</h3>
+      </div>
+
+      <p><strong>选择理由</strong>: Altman runs the company whose GPU consumption is watched by every supply chain participant. OpenAI's $100B LOI is the single largest GPU procurement signal in history. His Broadcom self-chip initiative signals the direction of vertical integration. If Altman cuts GPU purchases H2 2026, it's the <strong>earliest signal the $1T narrative is collapsing</strong>. His negotiating power (30% discount from NVIDIA) reveals supplier-buyer dynamics. <strong>可信度: 4/5</strong>.</p>
+
+      <h4>行动证据（重于言论）</h4>
+      <ol>
+        <li><strong>$100B Letter of Intent for GPU procurement (2025-2026)</strong>: The largest GPU procurement commitment ever announced. Covers 3-year period. But LOI ≠ binding contract.</li>
+        <li><strong><mark class="hl-know" data-note="k6">Broadcom custom chip ("Bespoke")</mark><sup class="nref" data-note="k6">6</sup> development</strong>: Working with Broadcom on custom AI inference chip. Delayed from Q1 to Q3 2026. Signal: self-chip is harder than expected, increasing NVIDIA dependency near-term.</li>
+        <li><strong>30% NVIDIA discount negotiation</strong>: Successfully negotiated volume discounts, revealing both OpenAI's leverage and NVIDIA's willingness to protect key accounts.</li>
+        <li><strong>OpenAI ARR approaching $15B</strong>: ChatGPT Enterprise + API revenue growing 3x QoQ. Revenue trajectory partially validates CapEx.</li>
+        <li><strong>Restructuring from nonprofit to for-profit (2025-2026)</strong>: Signals long-term capital commitment. New structure enables traditional equity financing for infrastructure.</li>
+      </ol>
+
+      <h4>核心判断</h4>
+      <blockquote>"We need more compute than anyone thinks. The next generation of models will be qualitatively different, and that requires an order of magnitude more infrastructure."<span class="zh">我们需要比任何人想象的更多算力。下一代模型将有质的不同，这需要数量级更多的基础设施</span></blockquote>
+      <ul>
+        <li>OpenAI is the <strong>demand bellwether</strong> &mdash; where OpenAI's spending goes, the narrative follows</li>
+        <li>$100B LOI is a <mark class="hl-know" data-note="k7">signal, not a commitment</mark><sup class="nref" data-note="k7">7</sup> &mdash; LOI conversion rate is the key monitoring metric</li>
+        <li>Broadcom chip delay reveals that self-chip development is a 3-5 year journey, not a near-term NVIDIA threat</li>
+        <li>Microsoft's 49% stake means Altman's spending ultimately flows through Nadella's CapEx budget</li>
+      </ul>
+
+      <details>
+        <summary>财务与估值详情</summary>
+        <p><strong>Valuation</strong>: ~$300B (latest tender offer, 2026). Revenue: ~$15B ARR (annualized). Burn rate significant but offset by Microsoft cloud credits.</p>
+        <p><strong>GPU dependency</strong>: 80%+ compute runs on NVIDIA hardware via Azure. Broadcom chip intended to reduce this to 50-60% by 2028.</p>
+        <p><strong>Key risk</strong>: Revenue growth depends on enterprise adoption depth. If Copilot/Enterprise stalls, the $100B LOI becomes unjustifiable.</p>
+      </details>
+      <p style="font-size:0.8rem; margin-top:0.75rem;"><a href="../cognitive_agents_2026-03-20/17_sam_altman.html" style="color:var(--accent);">&#8594; Full Agent Profile: Sam Altman (#17)</a></p>
+    </div>
+
+    <hr>
+
+    <!-- Agent 3: Satya Nadella -->
+    <div id="nadella">
+      <div class="agent-header">
+        <span class="agent-role-badge giant">GIANT</span>
+        <h3>Satya Nadella (#18) &mdash; CEO Microsoft</h3>
+      </div>
+
+      <p><strong>选择理由</strong>: Nadella controls the largest AI CapEx budget in the world. Azure is the #1 AI cloud platform. Microsoft's quarterly filings provide the <strong>most transparent demand data</strong> of any hyperscaler. Azure AI CapEx decisions = 25%+ NVIDIA revenue. Copilot ROI = best proxy for whether AI applications actually generate value. His 49% OpenAI stake makes him both buyer and investor. <strong>可信度: 4/5</strong>.</p>
+
+      <h4>行动证据（重于言论）</h4>
+      <ol>
+        <li><strong>FY2026 CapEx guidance: $80B+</strong>: Record infrastructure investment, majority AI-related. Quarterly disclosures provide verifiable tracking.</li>
+        <li><strong><mark class="hl-know" data-note="k8">Project Maia</mark><sup class="nref" data-note="k8">8</sup> custom AI chip development</strong>: First-gen Maia 100 deployed internally. Second-gen Maia 200 in development. Signal: Microsoft is serious about NVIDIA alternatives but 3-5 years from meaningful scale.</li>
+        <li><strong>Copilot 5M+ enterprise seats</strong>: The largest enterprise AI deployment. Early data shows 30-40% productivity improvement claims but adoption depth (daily active usage) remains unclear.</li>
+        <li><strong>Azure AI revenue 60%+ YoY growth</strong>: Azure's AI business is the fastest-growing segment, validating CapEx through revenue.</li>
+        <li><strong>49% OpenAI stake + exclusive cloud partnership</strong>: All OpenAI compute runs on Azure = guaranteed GPU demand floor.</li>
+      </ol>
+
+      <h4>核心判断</h4>
+      <blockquote>"Every CapEx dollar we spend in AI is because we see the demand signals. We are supply-constrained, not demand-constrained."<span class="zh">我们在AI上花的每一分钱都因为看到了需求信号。我们受限于供给，不是需求</span></blockquote>
+      <ul>
+        <li>Nadella's quarterly CapEx is the <strong>most verifiable</strong> demand signal &mdash; public company filings, audited numbers</li>
+        <li><mark class="hl-know" data-note="k9">Azure AI CapEx = 25%+ of NVIDIA's revenue</mark><sup class="nref" data-note="k9">9</sup> &mdash; any Microsoft CapEx guidance change = immediate NVIDIA impact</li>
+        <li>Copilot ROI is the <strong>best proxy for AI application value</strong> &mdash; if enterprises stop renewing, demand narrative cracks</li>
+        <li>Project Maia timeline (2027-2028 for meaningful scale) means NVIDIA dependency continues near-term</li>
+      </ul>
+
+      <div class="callout risk">
+        <div class="callout-title">对供应链的结构性影响</div>
+        <div class="callout-body">If Nadella announces CapEx guidance below consensus in any quarter, expect: NVDA -5-10%, AVGO -3-5%, ASML -3-5%, TSM -2-4%. Microsoft's CapEx guidance is the single most market-moving demand signal in the semiconductor supply chain. Conversely, CapEx beats fuel the "insatiable demand" narrative across all supply-side names.</div>
+      </div>
+
+      <details>
+        <summary>财务与估值详情</summary>
+        <p><strong>Market Cap</strong>: ~$3.2T. FY2026E Revenue: ~$280B. Azure revenue: ~$100B (AI portion growing fastest).</p>
+        <p><strong>CapEx</strong>: $80B+ FY2026. ~60% estimated AI-related. Remaining: traditional cloud + enterprise infrastructure.</p>
+        <p><strong>Key risk</strong>: If Copilot ROI disappoints (adoption breadth without depth), the CapEx justification weakens. Board pressure to slow spend would emerge by FY2027.</p>
+      </details>
+      <p style="font-size:0.8rem; margin-top:0.75rem;"><a href="../cognitive_agents_2026-03-20/18_satya_nadella.html" style="color:var(--accent);">&#8594; Full Agent Profile: Satya Nadella (#18)</a></p>
+    </div>
+
+    <!-- PHASE 2: SYNTHESIS -->
+    <div class="section-header" id="phase2">
+      <h2>&sect;3 Phase 2: 综合分析<span class="zh">Synthesis</span></h2>
+    </div>
+
+    <!-- Triangulation -->
+    <div id="triangulation">
+      <h3>&sect;3.1 三角验证: 行动 vs 言论 vs 数据</h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Dimension 维度</th><th>Musk (xAI)</th><th>Altman (OpenAI)</th><th>Nadella (MSFT)</th><th>Consistency 一致性</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>AI CapEx方向</strong></td><td>$25B+ spent, Terafab planned</td><td>$100B LOI, ARR $15B</td><td>$80B FY2026 guidance</td><td><span class="consensus">&#10003; 共识: 全面加速</span></td></tr>
+            <tr><td><strong>NVIDIA依赖度</strong></td><td>100% NVIDIA (no self-chip)</td><td>80%+ (Broadcom delayed)</td><td>90%+ (Maia early stage)</td><td><span class="consensus">&#10003; 共识: 近期不可替代</span></td></tr>
+            <tr><td><strong>Self-chip时间线</strong></td><td>无（Terafab是设施非芯片）</td><td>Q3 2026（延迟）</td><td>2027-2028（Maia 200）</td><td><span class="disagreement">&#10007; 分歧: 3-5年才有规模</span></td></tr>
+            <tr><td><strong>需求可持续性</strong></td><td>"无限"（AI推理 > 供给）</td><td>"质变需数量级更多"</td><td>"供给受限非需求"</td><td><span class="consensus">&#10003; 共识（但都是买家视角）</span></td></tr>
+            <tr><td><strong>ROI验证</strong></td><td>Grok竞争力（间接）</td><td>$15B ARR（部分验证）</td><td>Copilot 5M seats（最直接）</td><td><span class="disagreement">&#10007; 分歧: ROI深度不一</span></td></tr>
+            <tr><td><strong>时间线可信度</strong></td><td>2/5 (历史x2-3)</td><td>4/5 (LOI≠合同)</td><td>4/5 (审计数据)</td><td><span class="disagreement">&#10007; 分歧: Musk远低于其他二人</span></td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <div class="callout insight">
+        <div class="callout-title">Key Insight 关键洞察</div>
+        <div class="callout-body">三位代理人在<strong>需求方向</strong>上完全共识&mdash;&mdash;AI CapEx加速是真实的，2026-2027年NVIDIA需求不可替代。分歧集中在<strong>可持续性和时间线</strong>：Musk的时间线折扣最大（2/5），但他的实际支出最可验证。Altman是叙事中心但LOI约束力弱。Nadella提供最透明的验证数据。<strong>核心结论：需求是真实的，但2028+可持续性仅60%可信。</strong></div>
+      </div>
+    </div>
+
+    <!-- Competition -->
+    <div id="competitive">
+      <h3>&sect;3.2 竞争格局<span class="zh">Competitive Landscape</span></h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Hyperscaler</th><th>AI CapEx FY2026E</th><th>Self-Chip</th><th>AI Revenue</th><th>NVIDIA Dependency</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Microsoft (MSFT)</strong></td><td>$80B+ (largest)</td><td>Project Maia (early)</td><td>Azure AI ~$60B</td><td>Very High (90%+)</td></tr>
+            <tr><td><strong>Google (GOOG)</strong></td><td>~$55B</td><td>TPU v6 (most mature)</td><td>Cloud AI ~$45B</td><td>Medium (60% &mdash; TPU 40%)</td></tr>
+            <tr><td><strong>Amazon (AMZN)</strong></td><td>~$60B</td><td>Trainium 2/3 (scaling)</td><td>AWS AI ~$50B</td><td>High (75%)</td></tr>
+            <tr><td><strong>Meta (META)</strong></td><td>~$45B</td><td>MTIA v2 (internal only)</td><td>AI Ads ~$40B indirect</td><td>Very High (90%+)</td></tr>
+            <tr><td><strong>xAI</strong></td><td>~$10-15B</td><td>None</td><td>Undisclosed</td><td>100%</td></tr>
+            <tr><td><strong>OpenAI (via MSFT)</strong></td><td>~$15-20B (via LOI)</td><td>Broadcom (delayed)</td><td>$15B ARR</td><td>Very High (80%+)</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <div class="callout">
+        <div class="callout-title">竞争格局洞察</div>
+        <div class="callout-body">Google is the only hyperscaler with a <strong>mature self-chip program</strong> (TPU has been in production since 2016). This makes Google the leading indicator for "post-NVIDIA" AI compute. If Google's TPU share grows from 40% to 60% of its internal compute, other hyperscalers will accelerate their own programs. Microsoft and Meta remain the most NVIDIA-dependent, which makes their CapEx guidance the most directly relevant to NVDA stock.</div>
+      </div>
+    </div>
+
+    <!-- Supply-Demand -->
+    <div id="supply-demand">
+      <h3>&sect;3.3 供需框架<span class="zh">Supply-Demand Framework</span></h3>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;">
+        <div class="callout" style="border-left-color: #4caf50;">
+          <div class="callout-title" style="color: #4caf50;">需求侧 Demand</div>
+          <div class="callout-body">
+            <ul style="margin:0; padding-left:1.2rem;">
+              <li>Aggregate AI CapEx: <strong>~$250B FY2026E &rarr; $350B+ FY2027E</strong></li>
+              <li>Training compute scaling 4-10x/year per model generation</li>
+              <li>Inference volume growing exponentially with user adoption</li>
+              <li>Competitive CapEx race &mdash; no CEO willing to slow down publicly</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout risk">
+          <div class="callout-title">供给侧 Supply</div>
+          <div class="callout-body">
+            <ul style="margin:0; padding-left:1.2rem;">
+              <li>NVIDIA B200/GB300 sold out through 2027</li>
+              <li>TSMC CoWoS capacity expanding but lagging demand by 6-12 months</li>
+              <li>Data center power grid capacity = new hard constraint</li>
+              <li>Self-chip programs (TPU, Trainium, Maia) = 15% of compute today, growing</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout insight">
+        <div class="callout-title">供需缺口判断 The ROI Gap</div>
+        <div class="callout-body">The fundamental tension: <strong>$250B CapEx vs $50-80B AI application revenue = 3-5x gap</strong>. Historical precedent: fiber optic buildout (1998-2001) had similar CapEx/revenue ratio before collapse. Counter-argument: AI applications are still in early deployment; enterprise adoption curves typically S-shaped. The gap may close by 2028-2029 if Copilot/Enterprise AI penetration reaches 30-50% of addressable market. Demand certainty for 2026-2027: <strong>85%</strong>. Sustainability to 2030: <strong>55%</strong> &mdash; this is the node's most important unresolved question.</div>
+      </div>
+    </div>
+
+    <!-- Risk Matrix -->
+    <div id="risk-matrix">
+      <h3>&sect;3.4 风险矩阵<span class="zh">Risk Matrix</span></h3>
+
+      <figure class="table-responsive">
+        <table class="risk-matrix">
+          <thead>
+            <tr><th>Risk 风险</th><th>Probability</th><th>Impact</th><th>Timeframe</th><th>Monitoring 监控指标</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>LOI cancellation / non-conversion</strong><br><small>$100B LOI partially unfulfilled</small></td><td><span class="risk-medium">Medium</span></td><td><span class="risk-high">High</span></td><td>2026-2027</td><td>OpenAI quarterly GPU orders vs LOI pace</td></tr>
+            <tr><td><strong>Self-chip disruption of NVIDIA</strong><br><small>TPU/Trainium/Maia gaining share</small></td><td><span class="risk-medium">Medium</span></td><td><span class="risk-high">High (NVDA)</span></td><td>2027-2028</td><td>Google TPU % of internal compute</td></tr>
+            <tr><td><strong>AI ROI disappointment</strong><br><small>Enterprise adoption stalls</small></td><td><span class="risk-medium">Medium</span></td><td><span class="risk-high">High</span></td><td>2027+</td><td>Copilot renewal rate, ChatGPT Enterprise churn</td></tr>
+            <tr><td><strong>CapEx guidance cuts</strong><br><small>Any hyperscaler reduces guidance</small></td><td><span class="risk-low">Low</span></td><td><span class="risk-high">Very High</span></td><td>2026-2027</td><td>Quarterly earnings CapEx guidance</td></tr>
+            <tr><td><strong>Demand concentration</strong><br><small>Top 4 = 40%+ NVIDIA revenue</small></td><td><span class="risk-medium">Medium</span></td><td><span class="risk-high">High (NVDA)</span></td><td>持续</td><td>NVIDIA customer concentration disclosures</td></tr>
+            <tr><td><strong>Power grid bottleneck</strong><br><small>Data center builds delayed by grid</small></td><td><span class="risk-high">High</span></td><td><span class="risk-medium">Medium</span></td><td>2026-2028</td><td>Utility CapEx filings, DC construction permits</td></tr>
+            <tr><td><strong>Musk execution risk</strong><br><small>Attention split, Terafab delays</small></td><td><span class="risk-high">High</span></td><td><span class="risk-low">Low (NVDA)</span></td><td>持续</td><td>xAI hiring pace, Memphis utilization</td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </div>
+
+    <!-- Node Judgment -->
+    <div id="node-judgment">
+      <h3>&sect;3.5 节点判断<span class="zh">Node Judgment</span></h3>
+
+      <div class="callout" style="border-left-color: var(--knowledge);">
+        <div class="callout-body" style="font-size: 0.92rem;">
+          <p><strong>需求验证状态</strong>: Demand is real. All 3 agents confirm with capital commitments, not just words. Certainty: <strong>85% for 2026-2027</strong></p>
+          <p><strong>可持续性状态</strong>: 2028+ uncertain. $250B CapEx vs $50-80B application revenue = 3-5x gap. Certainty: <strong>55% for 2028-2030</strong></p>
+          <p><strong>NVIDIA依赖度</strong>: 85%+ of AI compute runs on NVIDIA hardware. Self-chip programs are 3-5 years from meaningful scale</p>
+          <p><strong>最大确定性</strong>: Hyperscaler CapEx will NOT decline in 2026 or 2027 &mdash; the competitive dynamics and sunk cost psychology make cuts career-ending for CEOs</p>
+          <p><strong>最大不确定性</strong>: Whether AI application ROI will close the CapEx gap before capital exhaustion or board pressure forces slowdown</p>
+          <p style="margin-bottom:0;"><strong>核心结论</strong>: Demand is real but sustainability 2028+ uncertain. Current 60% credibility for $1T buildout narrative &mdash; may revise with more data. Use demand signals to validate supply-side positions, not as direct trading targets.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trading -->
+    <div id="trading">
+      <h3>&sect;3.6 交易视角<span class="zh">Trading Perspective</span></h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Dimension 维度</th><th>Trading Implication</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Don't trade demand-side directly</strong></td><td>MSFT/GOOG/AMZN are diversified conglomerates. AI CapEx is 20-30% of their business. Semiconductor supply-side tickers (NVDA/AVGO/ARM/ASML) have higher AI beta.</td></tr>
+            <tr><td><strong>Use demand signals for supply validation</strong></td><td>Microsoft CapEx beat &rarr; bullish NVDA. OpenAI LOI conversion on track &rarr; bullish AVGO. Azure AI revenue acceleration &rarr; bullish entire supply chain.</td></tr>
+            <tr><td><strong>Key monitoring cadence</strong></td><td>Quarterly: MSFT earnings (CapEx guidance), OpenAI updates. Event-driven: xAI announcements, DevDay, Ignite.</td></tr>
+            <tr><td><strong>Demand-cliff early warning</strong></td><td>Signal 1: MSFT CapEx guidance below consensus. Signal 2: OpenAI LOI pace slowing. Signal 3: Copilot enterprise renewal rate declining. Any one = reduce supply-side positions.</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <div class="callout">
+        <div class="callout-title">Luke交易视角</div>
+        <div class="callout-body">
+          <p><strong>核心策略</strong>: 需求侧节点不提供直接交易标的，但提供<strong>最关键的验证信号</strong>。每个季度MSFT的CapEx guidance是决定整个半导体链仓位的"主开关"。</p>
+          <p><strong>实操</strong>: 在MSFT/GOOG/AMZN/META财报季前，准备好supply-side仓位调整方案。CapEx beat = 加仓NVDA/AVGO。CapEx miss = 减仓所有supply-side names。</p>
+          <p style="margin-bottom:0;"><strong>时间优势</strong>: MSFT Q3 FY2026 earnings (~April 2026) 是下一个关键验证点。如果CapEx guidance维持或上调，supply-side rally可持续3-6个月。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 综合判断 -->
+    <div id="综合判断">
+      <h3>&sect;3.7 综合判断<span class="zh">Triangulated Verdict</span></h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead><tr><th>Claim</th><th>交叉验证</th><th>综合可信度</th></tr></thead>
+          <tbody>
+            <tr><td><strong>AI CapEx 2026-2027 will accelerate</strong></td><td>三代理共识 + MSFT/GOOG/AMZN/META CapEx filings + NVIDIA revenue</td><td><strong style="color:#4caf50;">85%</strong></td></tr>
+            <tr><td><strong>NVIDIA remains irreplaceable 2026-2027</strong></td><td>Self-chip delays (Broadcom Q3 2026, Maia 2027+) + 85% market share</td><td><strong style="color:#4caf50;">80%</strong></td></tr>
+            <tr><td><strong>$1T AI buildout narrative is credible</strong></td><td>$250B/yr run rate &#215; 4 years = $1T. But LOI conversion + ROI gap = uncertainty</td><td><strong style="color:#ffa726;">60%</strong></td></tr>
+            <tr><td><strong>AI application ROI will close the gap</strong></td><td>Copilot 5M seats + $15B OpenAI ARR vs $250B CapEx. Gap still 3-5x</td><td><strong style="color:#ffa726;">45%</strong> <span style="color:var(--text-quaternary);">(critical unknown)</span></td></tr>
+            <tr><td><strong>Self-chip will reduce NVIDIA share by 2028</strong></td><td>Google TPU mature, Trainium scaling, Maia 200 coming. But ecosystem lock-in is real</td><td><strong style="color:#ffa726;">55%</strong></td></tr>
+            <tr><td><strong>Demand cliff before 2030</strong></td><td>1998-2001 fiber analogy + ROI gap. Counter: AI adoption S-curve may close gap</td><td><strong style="color:#f44336;">30%</strong> <span style="color:var(--text-quaternary);">(tail risk, not base case)</span></td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </div>
+
+    <!-- 验证日历 -->
+    <div id="验证日历">
+      <h3>&sect;3.8 验证日历<span class="zh">Verification Calendar</span></h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead><tr><th>日期</th><th>事件</th><th>如果成功</th><th>如果失败</th></tr></thead>
+          <tbody>
+            <tr><td><strong>2026年4月</strong></td><td>MSFT Q3 FY2026 Earnings (CapEx guidance)</td><td style="color:#4caf50;">CapEx maintained/raised = demand validated</td><td style="color:#f44336;">CapEx cut = entire supply chain reprices</td></tr>
+            <tr><td><strong>2026年Q3</strong></td><td>OpenAI Broadcom chip delivery</td><td style="color:#f44336;">Self-chip arrives = NVIDIA long-term risk</td><td style="color:#4caf50;">Further delay = NVIDIA dependency extends</td></tr>
+            <tr><td><strong>2026年H2</strong></td><td>OpenAI DevDay</td><td style="color:#4caf50;">GPT-5/6 announced = compute demand surges</td><td style="color:#f44336;">Incremental update = demand plateau signal</td></tr>
+            <tr><td><strong>2026年10月</strong></td><td>Microsoft Ignite</td><td style="color:#4caf50;">New AI products = enterprise demand expanding</td><td style="color:#f44336;">Tepid response = Copilot adoption stalling</td></tr>
+            <tr><td><strong>2026-2027</strong></td><td>xAI Terafab construction progress</td><td style="color:#4caf50;">On schedule = massive GPU orders coming</td><td style="color:#ffa726;">Delayed (likely) = manageable for NVDA</td></tr>
+            <tr><td><strong>2027年</strong></td><td>Copilot enterprise renewal cycle</td><td style="color:#4caf50;">High renewal = ROI validated</td><td style="color:#f44336;">Low renewal = AI application ROI crisis</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <p style="font-size:0.85rem; color:var(--text-tertiary);"><strong>监控频率</strong>: 每季度 &mdash; MSFT/GOOG/AMZN/META earnings (CapEx guidance) | 事件驱动 &mdash; OpenAI DevDay, Microsoft Ignite, xAI announcements</p>
+    </div>
+
+    <!-- 信号传导链 -->
+    <div id="信号传导">
+      <h3>&sect;3.9 信号传导链<span class="zh">Signal Transmission Chains</span></h3>
+
+      <div class="callout" style="border-left-color:#4caf50;">
+        <div class="callout-title" style="color:#4caf50;">&#9650; BULL链: Hyperscaler CapEx加速 &rarr; 全供应链受益</div>
+        <div class="callout-body">Hyperscaler CapEx guidance&uarr; &rarr; NVIDIA orders&uarr; &rarr; TSMC foundry utilization&uarr; &rarr; ASML equipment demand&uarr; &rarr; SK Hynix HBM orders&uarr;<br><em>信号最先在MSFT/GOOG季报CapEx guidance出现，最后传到ASML/设备商（滞后2-3个季度）</em></div>
+      </div>
+      <div class="callout risk">
+        <div class="callout-title">&#9660; BEAR链: CapEx指引下调 &rarr; 供应链连锁反应</div>
+        <div class="callout-body">Hyperscaler CapEx guidance&darr; &rarr; NVIDIA orders&darr; &rarr; TSMC utilization&darr; &rarr; HBM/ASML orders放缓<br><em>信号最先在MSFT/GOOG CapEx guidance miss出现。关键：<strong>即使只有一家hyperscaler下调，市场会解读为行业性信号</strong></em></div>
+      </div>
+      <div class="callout" style="border-left-color:#ffc107;">
+        <div class="callout-title" style="color:#ffc107;">&#9888; 结构性转移链: 自研芯片替代NVIDIA</div>
+        <div class="callout-body">Google TPU share&uarr; &rarr; Other hyperscalers accelerate self-chip &rarr; NVIDIA GPU orders plateau &rarr; NVIDIA pivots to networking/software<br><em>信号最先在Google内部TPU占比出现。2026年TPU占Google AI compute ~40%。如升至60%+ = 行业转折信号。</em></div>
+      </div>
+
+      <figure class="table-responsive">
+        <table>
+          <caption style="text-align:left; font-size:0.78rem; font-weight:510; color:var(--text-tertiary); padding:0.5rem 0;">&#x23F1; 时间差套利机会</caption>
+          <thead><tr><th>事件</th><th>最先反映</th><th>滞后反映</th><th>时间差</th></tr></thead>
+          <tbody>
+            <tr><td>MSFT CapEx guidance change</td><td>NVDA stock (same day)</td><td>ASML/equipment orders</td><td>2-3个季度</td></tr>
+            <tr><td>OpenAI LOI conversion pace</td><td>NVIDIA order book</td><td>TSMC capacity planning</td><td>1-2个季度</td></tr>
+            <tr><td>Copilot renewal rate decline</td><td>MSFT earnings (lagging)</td><td>CapEx guidance cut</td><td>1-2个季度</td></tr>
+            <tr><td>Google TPU share increase</td><td>Google AI compute mix</td><td>NVIDIA revenue share erosion</td><td>2-4个季度</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <figure class="table-responsive">
+        <table>
+          <caption style="text-align:left; font-size:0.78rem; font-weight:510; color:var(--text-tertiary); padding:0.5rem 0;">&#128737; 需求信号 &rarr; 供应链映射</caption>
+          <thead><tr><th>需求信号</th><th>CapEx加速 &rarr;</th><th>CapEx放缓 &rarr;</th><th>验证供应链标的</th></tr></thead>
+          <tbody>
+            <tr><td><strong>MSFT Azure CapEx</strong></td><td style="color:#4caf50;">NVDA, AVGO, ASML, TSM全面利好</td><td style="color:#f44336;">全链承压</td><td>NVDA (最直接)</td></tr>
+            <tr><td><strong>OpenAI LOI进度</strong></td><td style="color:#4caf50;">NVDA + AVGO (Broadcom chip)</td><td style="color:#f44336;">$1T叙事动摇</td><td>AVGO (自研芯片)</td></tr>
+            <tr><td><strong>xAI GPU采购</strong></td><td style="color:#4caf50;">NVDA (直接客户)</td><td style="color:#ffa726;">影响有限（份额小）</td><td>NVDA (边际贡献)</td></tr>
+          </tbody>
+        </table>
+      </figure>
+      <p style="font-size:0.85rem; color:var(--text-tertiary);">结论：需求侧节点是供应链投资的<strong>"主开关"</strong>。MSFT CapEx guidance是单一最重要的信号。不直接交易需求侧，用需求信号验证supply-side仓位。</p>
+    </div>
+
+    <hr style="border:none; border-top:1px solid var(--border-subtle); margin:2.5rem 0;">
+
+    <!-- KPI DASHBOARD -->
+    <div class="section-header" id="kpi-dashboard">
+      <h2>&sect;4 KPI仪表盘<span class="zh">KPI Dashboard</span></h2>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">Aggregate AI CapEx FY2026E</div>
+        <div class="kpi-value" style="color: var(--accent);">~$250B</div>
+        <div class="kpi-change positive">&#9650; &rarr; $350B+ FY2027E</div>
+        <div class="kpi-subtitle">Top 4 hyperscalers + xAI/OpenAI</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">NVIDIA Customer Concentration</div>
+        <div class="kpi-value" style="color: #f44336;">Top 4 = 40%+</div>
+        <div class="kpi-change negative">&#9888; 集中度风险</div>
+        <div class="kpi-subtitle">MSFT, GOOG, AMZN, META</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">LOI-to-Contract Credibility</div>
+        <div class="kpi-value" style="color: #ffc107;">~60%</div>
+        <div class="kpi-change negative">&#9888; LOI ≠ binding</div>
+        <div class="kpi-subtitle">OpenAI $100B LOI</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Self-Chip Timeline</div>
+        <div class="kpi-value" style="color: var(--knowledge);">2027-2028</div>
+        <div class="kpi-change">Broadcom Q3 2026 &middot; Maia 2027</div>
+        <div class="kpi-subtitle">xAI Terafab: TBD</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">AI Application ROI Proxy</div>
+        <div class="kpi-value" style="color: #ab47bc;">~5-10%</div>
+        <div class="kpi-change positive">&#9650; Enterprise Copilot penetration</div>
+        <div class="kpi-subtitle">Of addressable enterprise market</div>
+      </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="section-header" id="charts">
+      <h2>&sect;5 图表<span class="zh">Charts</span></h2>
+    </div>
+
+    <div class="chart-frame">
+      <div class="chart-frame-header"><span class="chart-frame-title">Hyperscaler AI CapEx Trajectory (Placeholder)</span></div>
+      <div class="chart-frame-body" id="chart-capex" style="height:400px; display:flex; align-items:center; justify-content:center; color:var(--text-quaternary); font-size:0.85rem;">
+        Chart placeholder &mdash; Plotly visualization of aggregate hyperscaler AI CapEx FY2024-FY2028E will be generated separately.
+      </div>
+      <div class="chart-source">Source: Company filings, SemiAnalysis, Morgan Stanley estimates</div>
+    </div>
+
+    <div class="chart-frame">
+      <div class="chart-frame-header"><span class="chart-frame-title">CapEx vs AI Application Revenue Gap (Placeholder)</span></div>
+      <div class="chart-frame-body" id="chart-roi-gap" style="height:400px; display:flex; align-items:center; justify-content:center; color:var(--text-quaternary); font-size:0.85rem;">
+        Chart placeholder &mdash; Plotly visualization of CapEx-to-revenue ratio comparison (AI 2024-2028 vs fiber optic 1998-2002) will be generated separately.
+      </div>
+      <div class="chart-source">Source: Morgan Stanley, Goldman Sachs TMT, historical fiber data</div>
+    </div>
+
+    <hr style="border:none; border-top:1px solid var(--border-subtle); margin:2.5rem 0;">
+
+    <!-- PROVENANCE -->
+    <div class="section-header" id="provenance">
+      <h2>&sect;6 溯源表<span class="zh">Provenance Table</span></h2>
+    </div>
+
+    <figure class="table-responsive">
+      <table>
+        <thead>
+          <tr><th>Fact 事实</th><th>Source 来源</th><th>Tier</th><th>Verified</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>MSFT FY2026 CapEx $80B+ guidance</td><td>Microsoft Q2 FY2026 earnings call</td><td><span class="prov-badge prov-primary">PRIMARY</span></td><td>&#10003;</td></tr>
+          <tr><td>OpenAI $100B GPU LOI</td><td>The Information, Bloomberg</td><td><span class="prov-badge prov-media">MEDIA</span></td><td>&#9711; (LOI seen, not binding)</td></tr>
+          <tr><td>OpenAI ARR ~$15B</td><td>The Information, multiple sources</td><td><span class="prov-badge prov-media">MEDIA</span></td><td>&#9711; (private company)</td></tr>
+          <tr><td>xAI Memphis 100k H100 cluster</td><td>Reuters, xAI blog</td><td><span class="prov-badge prov-industry">INDUSTRY</span></td><td>&#10003;</td></tr>
+          <tr><td>Musk $25B+ GPU purchases</td><td>NVIDIA revenue disclosures, Reuters</td><td><span class="prov-badge prov-primary">PRIMARY</span></td><td>&#10003;</td></tr>
+          <tr><td>Broadcom chip delayed to Q3 2026</td><td>The Information</td><td><span class="prov-badge prov-media">MEDIA</span></td><td>&#9711;</td></tr>
+          <tr><td>Project Maia 100 deployed internally</td><td>Microsoft Ignite 2025, Azure blog</td><td><span class="prov-badge prov-primary">PRIMARY</span></td><td>&#10003;</td></tr>
+          <tr><td>Copilot 5M+ enterprise seats</td><td>Microsoft earnings call</td><td><span class="prov-badge prov-primary">PRIMARY</span></td><td>&#10003;</td></tr>
+          <tr><td>Azure AI revenue 60%+ YoY</td><td>Microsoft Q2 FY2026 earnings</td><td><span class="prov-badge prov-primary">PRIMARY</span></td><td>&#10003;</td></tr>
+          <tr><td>Aggregate hyperscaler AI CapEx ~$250B</td><td>SemiAnalysis, Morgan Stanley</td><td><span class="prov-badge prov-analysis">ANALYSIS</span></td><td>&#9711; (estimate)</td></tr>
+          <tr><td>NVIDIA top 4 customers = 40%+ revenue</td><td>NVIDIA 10-K, SemiAnalysis</td><td><span class="prov-badge prov-primary">PRIMARY</span></td><td>&#10003;</td></tr>
+          <tr><td>CapEx-to-revenue gap 3-5x</td><td>Goldman Sachs TMT, Morgan Stanley</td><td><span class="prov-badge prov-analysis">ANALYSIS</span></td><td>&#9711; (model-dependent)</td></tr>
+          <tr><td>xAI valuation $80B</td><td>Reuters, WSJ</td><td><span class="prov-badge prov-media">MEDIA</span></td><td>&#10003;</td></tr>
+          <tr><td>Google TPU ~40% of internal AI compute</td><td>SemiAnalysis, Google I/O disclosures</td><td><span class="prov-badge prov-analysis">ANALYSIS</span></td><td>&#9711; (estimated)</td></tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <hr style="border:none; border-top:1px solid var(--border-subtle); margin:2.5rem 0;">
+
+    <!-- SOURCES -->
+    <div class="section-header" id="sources">
+      <h2>&sect;7 来源<span class="zh">Sources</span></h2>
+    </div>
+
+    <h4>Cognitive Agent Profiles</h4>
+    <ul>
+      <li><a href="../cognitive_agents_2026-03-20/12_elon_musk.html" style="color:var(--accent);">Elon Musk (#12) &mdash; Full Profile</a></li>
+      <li><a href="../cognitive_agents_2026-03-20/17_sam_altman.html" style="color:var(--accent);">Sam Altman (#17) &mdash; Full Profile</a></li>
+      <li><a href="../cognitive_agents_2026-03-20/18_satya_nadella.html" style="color:var(--accent);">Satya Nadella (#18) &mdash; Full Profile</a></li>
+    </ul>
+
+    <h4>V4 Source Maps</h4>
+    <ul>
+      <li><a href="../cognitive_agents_2026-03-20/jensen_v4_map.html" style="color:var(--accent);">Jensen Huang V4 Source Map</a></li>
+    </ul>
+
+    <h4>Primary Sources</h4>
+    <ul>
+      <li>Microsoft Investor Relations &mdash; Q2 FY2026 Earnings (2026-01)</li>
+      <li>Microsoft Azure Blog &mdash; Project Maia Updates</li>
+      <li>NVIDIA 10-K Annual Report &mdash; Customer Concentration Disclosures</li>
+      <li>xAI Blog &mdash; Memphis Cluster and Grok Updates</li>
+    </ul>
+
+    <h4>Industry Analysis</h4>
+    <ul>
+      <li>SemiAnalysis &mdash; Hyperscaler CapEx Tracker (Dylan Patel)</li>
+      <li>Stratechery &mdash; "The AI Infrastructure Buildout" (Ben Thompson)</li>
+      <li>Morgan Stanley Research &mdash; AI CapEx Forecasting Model</li>
+      <li>Goldman Sachs TMT &mdash; "AI CapEx vs Revenue: Closing the Gap"</li>
+    </ul>
+
+    <h4>Media Sources</h4>
+    <ul>
+      <li>The Information &mdash; OpenAI GPU Procurement, Broadcom Chip Updates</li>
+      <li>Bloomberg &mdash; OpenAI Valuation, Hyperscaler CapEx Tracking</li>
+      <li>Reuters &mdash; xAI Memphis, Musk GPU Purchases</li>
+      <li>Wall Street Journal &mdash; xAI Valuation, AI CapEx Race</li>
+    </ul>
+
+    <h4>Node Network</h4>
+    <ul>
+      <li><a href="NODE_1_GPU_AI芯片设计_2026-03-19.html" style="color:var(--accent);">Node 1: GPU/AI Chip Design</a> &mdash; Supply side: what buyers are buying</li>
+      <li><a href="NODE_3_代工制造_2026-03-19.html" style="color:var(--accent);">Node 3: Foundry Manufacturing</a> &mdash; Capacity constraints that limit buyer access</li>
+      <li><a href="NODE_5_定制芯片_ASIC_2026-03-19.html" style="color:var(--accent);">Node 5: Custom Silicon</a> &mdash; Self-chip alternatives (Broadcom, Marvell)</li>
+      <li><a href="NODE_8_AI_Lab_模型层_2026-03-21.html" style="color:var(--accent);">Node 8: AI Lab / Model Layer</a> &mdash; What the compute is used for</li>
+    </ul>
+
+  </main>
+
+  <!-- RIGHT SIDEBAR: NOTES -->
+  <aside class="notes-sidebar" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <span>&#128218; Annotations</span>
+      <button class="notes-close-btn" id="notesCloseBtn">&#10005;</button>
+    </div>
+
+    <!-- META NOTES -->
+    <div class="anno meta-note" data-section="metacognition" id="m1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">方法论三问</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="method-tag">Q1</span> <strong>What am I doing?</strong> Creating a demand-side verification node. Unlike Nodes 1-6 which analyze suppliers, this node analyzes buyers. The cognitive challenge is different: supply-side agents sell, so their optimism has clear incentive. Demand-side agents buy, so their commitment signals should be more reliable &mdash; but they also have incentives to appear committed (stock price, partner leverage, competitive signaling).</p>
+        <p><span class="method-tag">Q2</span> <strong>Why?</strong> The entire semiconductor supply chain thesis rests on demand sustainability. If hyperscaler CapEx plateaus before 2028, the supply-side "supercycle" narrative collapses. 16 supply-side agents say "insatiable demand" &mdash; but they are sellers. We need buyer verification.</p>
+        <p><span class="method-tag">Q3</span> <strong>Will the user approve?</strong> The user is a trend trader who needs to validate supply-side positions. This node provides the "main switch" &mdash; if demand signals weaken, all supply-side positions should be reduced. The trading framework (don't trade demand-side directly, use signals for supply validation) maps to the user's approach.</p>
+        <p><span class="method-tag">Q4</span> <strong>Precedent check.</strong> This is the first "buyer" node. Previous nodes analyzed companies that make and sell products. Here we analyze companies that buy and consume products. The analytical lens shifts from "can they deliver?" to "will they keep buying?"</p>
+        <p><span class="method-tag">Q5</span> <strong>Honesty disclosure.</strong> Phase 0 was written after reading all three agent MDs. The "independent thinking" framing is post-hoc reconstruction. The value is bias-direction marking, not prediction accuracy.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="phase0" id="m2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Buyer Commitment Bias</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="trap-tag">&#9888; Structural Bias</span> <strong>The most dangerous cognitive trap in this node:</strong> All three agents are buyers who have publicly committed billions to AI infrastructure. They have strong incentives to appear committed even if private doubts exist. A CEO who publicly announces $80B CapEx cannot later say "we overbuilt" without destroying shareholder confidence. This creates a ratchet effect &mdash; commitments can only go up publicly, even if internal projections suggest slowdown.</p>
+        <p><strong>Implication:</strong> The demand "consensus" among our three agents may be artificially strong. The first signal of demand weakness will NOT come from CEO statements &mdash; it will come from subtle changes in CapEx guidance language ("maintaining" vs "accelerating"), order book delays, or analyst channel checks showing GPU utilization below expectations.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="musk" id="m3">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Musk Credibility Discount</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="trap-tag">Timeline Risk</span> <strong>Musk's historical timeline accuracy:</strong> Tesla Full Self-Driving ("next year" since 2016). Cybertruck (2 years late). Boring Company Las Vegas Loop (5x over budget). Neuralink human trials (3 years late). The pattern is consistent: the vision is usually directionally correct, but timelines are systematically optimistic by 2-3x.</p>
+        <p><strong>Application to demand analysis:</strong> Musk's <em>spending</em> is real and verifiable ($25B+ GPU purchases, Memphis operational). His <em>future plans</em> (Terafab, GPU scaling roadmap) should be discounted by 2-3x on timeline. This means Terafab's demand impact on NVIDIA should be modeled for 2028-2029, not 2026-2027 as implied by announcements.</p>
+        <p><strong>Exception:</strong> Memphis cluster was built remarkably fast (6 months from announcement to operational). This suggests that when Musk is personally focused on a project, execution improves dramatically. But his attention is split across 6+ entities.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="altman" id="m4">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">LOI vs Reality</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="trap-tag">&#9888; Signal vs Noise</span> <strong>The $100B LOI problem:</strong> A Letter of Intent is not a binding contract. In enterprise procurement, LOI-to-contract conversion rates typically range from 40-80% depending on market conditions. The $100B figure serves multiple purposes: (1) Signals to NVIDIA that OpenAI is a priority customer deserving allocation. (2) Signals to investors that OpenAI is "serious" about scale. (3) Creates competitive pressure on Google/Amazon. The actual spend may be $60-80B over 3 years.</p>
+        <p><strong>The Broadcom chip delay is more informative than the LOI.</strong> The delay from Q1 to Q3 2026 reveals that building custom silicon is genuinely difficult. This actually <em>strengthens</em> the NVIDIA bull case near-term: if the biggest GPU buyer can't build alternatives quickly, NVIDIA's monopoly lasts longer.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="triangulation" id="m5">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Fiber Optic Analogy Limitations</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>The 1998-2001 fiber comparison is popular but imperfect.</strong> Similarities: CapEx/revenue ratio 3-5x, infrastructure buildout driven by future demand expectations, competitive race dynamics. Differences: (1) Fiber demand eventually materialized (10 years later, all that fiber capacity is now used). (2) AI has demonstrable near-term use cases (ChatGPT 200M+ users, Copilot 5M+ seats) that fiber didn't have. (3) The AI CapEx race has fewer, larger participants (5-6 hyperscalers vs hundreds of telcos), making coordination/correction faster.</p>
+        <p><strong>Better analogy might be:</strong> Cloud computing buildout (2008-2015). AWS/Azure/GCP all "overbuilt" capacity for years before cloud adoption caught up. The overbuild was eventually justified. The question is whether AI follows the cloud trajectory (overbuild &rarr; adoption catches up in 5 years) or the fiber trajectory (overbuild &rarr; bust &rarr; adoption catches up in 10 years).</p>
+      </div>
+    </div>
+
+    <!-- KNOWLEDGE NOTES -->
+    <div class="anno know-note" data-section="phase0" id="k1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">GPU Allocation Dynamics</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>NVIDIA controls allocation:</strong> Unlike commodity hardware, GPU allocation for cutting-edge AI chips (B200, GB300) is centrally managed by NVIDIA. Jensen Huang personally approves large orders. This creates a power dynamic where buyers must maintain good relationships with NVIDIA to secure supply. The negotiation includes not just price but allocation timing, volume, and generation priority.</p>
+        <p><strong>Implications for demand analysis:</strong> Buyer demand may be understated, not overstated. Companies request more GPUs than they can get. The "insatiable demand" narrative from supply-side agents is confirmed by allocation constraints. However, this also means that "announced purchases" may exceed actual deliverable supply, creating a gap between stated demand and realized demand.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="phase0" id="k2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">Training Compute Scaling Laws</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Scaling laws drive demand:</strong> The Chinchilla scaling law and subsequent research show that model performance improves predictably with more compute and data. Each generation of frontier model (GPT-4 &rarr; GPT-5 &rarr; GPT-6) requires approximately 4-10x more training compute. This creates a structural demand growth rate that is independent of application revenue &mdash; model labs will spend whatever they can raise to train larger models.</p>
+        <p><strong>Inference scaling is the new frontier:</strong> Post-training, inference demand grows with user adoption. ChatGPT serving 200M+ users requires massive inference GPU capacity. Test-time compute (o1-style reasoning) further increases per-query GPU usage by 10-100x. This means inference may eventually exceed training in total compute demand.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="phase0" id="k3">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">Competitive CapEx Race Dynamics</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Game theory of AI CapEx:</strong> The hyperscaler AI CapEx race exhibits classic prisoner's dilemma dynamics. Each company's rational choice is to invest heavily regardless of what others do: if AI succeeds, you need the infrastructure; if AI disappoints but your competitors built more, you lose market position. The only "losing" move is to underinvest while competitors invest.</p>
+        <p><strong>CEO career risk amplifies spending:</strong> No CEO wants to be remembered as the one who "missed AI." This creates asymmetric incentives: spending too much = explainable mistake ("we invested in the future"); spending too little = career-ending ("we fell behind"). This dynamic means CapEx will continue even if private ROI analysis suggests slowdown.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="phase0" id="k4">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">Aggregate CapEx Calculation</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>FY2026E breakdown:</strong> Microsoft ~$80B + Google ~$55B + Amazon ~$60B + Meta ~$45B + xAI/OpenAI/others ~$15-20B = approximately $250-260B total. Not all is AI-specific (traditional cloud, enterprise infra included), but AI portion estimated at 60-70% = $150-180B pure AI infrastructure spend.</p>
+        <p><strong>Growth trajectory:</strong> FY2024 aggregate was ~$150B, FY2025 ~$200B, FY2026E ~$250B, FY2027E analyst consensus $300-350B. The growth rate is decelerating (67% &rarr; 33% &rarr; 25% &rarr; 20-40%) but absolute dollar increases remain massive. The question is when the growth rate hits 0% (plateau) or goes negative (contraction).</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="musk" id="k5">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">Terafab Feasibility</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Terafab specifications:</strong> 1GW power capacity. Would be the largest single AI data center in the world. For context: Memphis cluster consumes ~150MW. Terafab would be ~7x Memphis. No data center of this scale has been built before. Power grid connection alone typically takes 2-3 years in the US.</p>
+        <p><strong>Feasibility assessment:</strong> The technology is not the constraint &mdash; power infrastructure is. 1GW requires either a dedicated power plant or major grid upgrades. Musk's track record with large construction projects (Gigafactory, Starship launch pad) shows he can build at unprecedented speed but usually 1.5-2x over initial timeline. Realistic Terafab operational date: 2028-2029, not 2026-2027.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="altman" id="k6">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">Broadcom Custom Chip ("Bespoke")</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>What Bespoke is:</strong> OpenAI's custom AI inference chip, designed in partnership with Broadcom and likely manufactured at TSMC on N3/N2 process. Intended for inference workloads where OpenAI's specific model architectures can be optimized in silicon. This follows the Google TPU playbook: design custom silicon tuned to your specific workload for better performance/watt and lower cost vs general-purpose GPUs.</p>
+        <p><strong>Delay significance:</strong> The slip from Q1 to Q3 2026 reveals that custom chip design is genuinely hard, even with Broadcom's expertise. This is actually bullish for NVIDIA near-term: OpenAI remains dependent on NVIDIA hardware longer than planned. But it's also bullish for Broadcom (AVGO) long-term: the partnership validates Broadcom's custom silicon strategy.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="altman" id="k7">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">LOI Mechanics</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>What a Letter of Intent actually means:</strong> An LOI is a non-binding document expressing intent to purchase. It typically includes: estimated volume, timeline, pricing framework, and conditions. It does NOT obligate the buyer to purchase. LOIs serve as planning documents for suppliers (NVIDIA uses them for capacity planning) and as signals for investors.</p>
+        <p><strong>Conversion rates:</strong> In enterprise technology procurement, LOI-to-contract conversion rates vary widely: 80%+ in stable markets, 40-60% in volatile markets. For a $100B LOI over 3 years, the actual spend could range from $60B (conservative) to $100B (full conversion). The key variable is whether OpenAI's revenue growth supports the capital requirement.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="nadella" id="k8">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">Project Maia</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Project Maia overview:</strong> Microsoft's custom AI accelerator chip, designed by Microsoft Silicon and manufactured at TSMC. Maia 100 (first generation) has been deployed internally for select Azure AI workloads. Maia 200 (second generation) is in development, targeting broader Azure deployment by 2027.</p>
+        <p><strong>Scale context:</strong> Maia 100 is deployed in "hundreds to low thousands" of servers internally. Microsoft's total AI compute fleet is estimated at hundreds of thousands of GPUs. Maia represents <1% of Microsoft's AI compute today. Even optimistic projections put Maia at 10-15% of Microsoft's AI compute by 2028. This means NVIDIA dependency continues for the foreseeable future.</p>
+        <p><strong>Strategic value:</strong> Maia's primary value may be as a negotiating lever against NVIDIA (credible alternative threat) rather than as a production replacement. Having an internal chip option gives Nadella pricing power in GPU negotiations.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="nadella" id="k9">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">Azure AI CapEx = NVIDIA Revenue</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>The revenue linkage:</strong> Microsoft is estimated to be NVIDIA's single largest customer, accounting for 15-20% of NVIDIA's data center revenue. Including OpenAI's consumption (which runs on Azure), the Microsoft ecosystem may account for 25%+ of NVIDIA's total revenue. This makes Microsoft's quarterly CapEx guidance the single most important external signal for NVIDIA's stock.</p>
+        <p><strong>Trading implication:</strong> When Microsoft reports earnings (~late January, April, July, October), the CapEx guidance line item moves NVDA stock more than NVIDIA's own guidance in many cases. A $5B CapEx beat by Microsoft can add $50-100B to NVIDIA's market cap. Conversely, a CapEx miss triggers immediate selling across the entire semiconductor supply chain.</p>
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script>
+(function() {
+  // 1. Left sidebar hamburger
+  var sidebar = document.getElementById('sidebar');
+  var hamburger = document.getElementById('hamburgerBtn');
+  var overlay = document.getElementById('sidebarOverlay');
+  function toggleSidebar() { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); }
+  if (hamburger) hamburger.addEventListener('click', toggleSidebar);
+  if (overlay) overlay.addEventListener('click', toggleSidebar);
+
+  // 2. Note toggle
+  window.toggleNote = function(headEl) { headEl.closest('.anno').classList.toggle('open'); requestAnimationFrame(positionNotes); };
+
+  // 3. Position notes
+  function positionNotes() {
+    var sidebarEl = document.getElementById('notesSidebar');
+    if (!sidebarEl || window.innerWidth < 1200) return;
+    var notes = Array.from(sidebarEl.querySelectorAll('.anno'));
+    var scrollY = window.scrollY;
+    var sidebarAbsTop = sidebarEl.getBoundingClientRect().top + scrollY;
+    var headerEl = sidebarEl.querySelector('.notes-sidebar-header');
+    var headerHeight = headerEl ? headerEl.offsetHeight + 12 : 40;
+    notes.sort(function(a, b) {
+      var secA = document.getElementById(a.dataset.section);
+      var secB = document.getElementById(b.dataset.section);
+      if (!secA || !secB) return 0;
+      return secA.getBoundingClientRect().top - secB.getBoundingClientRect().top;
+    });
+    var lastBottom = headerHeight;
+    notes.forEach(function(note) {
+      if (note.style.display === 'none') return;
+      var section = document.getElementById(note.dataset.section);
+      if (!section) { note.style.display = 'none'; return; }
+      var sectionAbsTop = section.getBoundingClientRect().top + scrollY;
+      var targetY = sectionAbsTop - sidebarAbsTop;
+      if (targetY < lastBottom + 8) targetY = lastBottom + 8;
+      note.style.top = targetY + 'px';
+      lastBottom = targetY + note.offsetHeight;
+    });
+    sidebarEl.style.minHeight = (lastBottom + 40) + 'px';
+  }
+
+  // 4. Run positioning
+  window.addEventListener('load', function() {
+    positionNotes();
+    document.querySelectorAll('details').forEach(function(d) { d.addEventListener('toggle', function() { setTimeout(positionNotes, 50); }); });
+  });
+  window.addEventListener('resize', positionNotes);
+  var scrollTimer;
+  window.addEventListener('scroll', function() { clearTimeout(scrollTimer); scrollTimer = setTimeout(positionNotes, 100); }, { passive: true });
+
+  // 5. Highlight <-> Note sync
+  document.querySelectorAll('.nref, mark.hl-know').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      e.preventDefault();
+      var noteId = el.dataset.note;
+      var note = document.getElementById(noteId);
+      if (!note) return;
+      note.classList.add('open');
+      requestAnimationFrame(function() {
+        positionNotes();
+        note.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        note.classList.add('flash');
+        setTimeout(function() { note.classList.remove('flash'); }, 1500);
+      });
+    });
+  });
+
+  // 6. Hover bidirectional
+  document.querySelectorAll('.anno').forEach(function(note) {
+    note.addEventListener('mouseenter', function() { document.querySelectorAll('[data-note="' + note.id + '"]').forEach(function(el) { el.classList.add('hover'); }); });
+    note.addEventListener('mouseleave', function() { document.querySelectorAll('[data-note="' + note.id + '"]').forEach(function(el) { el.classList.remove('hover'); }); });
+    note.addEventListener('dblclick', function() { var section = document.getElementById(note.dataset.section); if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  });
+  document.querySelectorAll('[data-note]').forEach(function(el) {
+    if (el.classList.contains('anno')) return;
+    el.addEventListener('mouseenter', function() { var note = document.getElementById(el.dataset.note); if (note) note.classList.add('hover'); });
+    el.addEventListener('mouseleave', function() { var note = document.getElementById(el.dataset.note); if (note) note.classList.remove('hover'); });
+  });
+
+  // 7. Top controls
+  var allAnnos = document.querySelectorAll('.anno');
+  var knowNotes = document.querySelectorAll('.anno.know-note');
+  var knowMarks = document.querySelectorAll('mark.hl-know');
+  var knowRefs = document.querySelectorAll('.nref');
+  var metaNotes = document.querySelectorAll('.anno.meta-note');
+  document.getElementById('noteCountLabel').textContent = metaNotes.length + ' 元思考 + ' + knowNotes.length + ' 知识批注';
+  window.toggleKnowNotes = function() {
+    var btn = document.getElementById('knowToggleBtn');
+    var isActive = btn.classList.toggle('active');
+    btn.textContent = isActive ? '显示' : '隐藏';
+    knowNotes.forEach(function(n) { n.style.display = isActive ? '' : 'none'; });
+    knowMarks.forEach(function(m) { m.style.background = isActive ? '' : 'transparent'; m.style.borderBottom = isActive ? '' : 'none'; });
+    knowRefs.forEach(function(r) { r.style.display = isActive ? '' : 'none'; });
+    requestAnimationFrame(positionNotes);
+  };
+  window.expandAllNotes = function() { allAnnos.forEach(function(n) { n.classList.add('open'); }); requestAnimationFrame(positionNotes); };
+  window.collapseAllNotes = function() { allAnnos.forEach(function(n) { n.classList.remove('open'); }); requestAnimationFrame(positionNotes); };
+
+  // 8. Right sidebar toggle
+  var notesSidebarEl = document.getElementById('notesSidebar');
+  var notesToggleBtn = document.getElementById('notesToggleBtn');
+  var notesOverlayEl = document.getElementById('notesOverlay');
+  var notesCloseBtn = document.getElementById('notesCloseBtn');
+  function toggleNotesSidebar() {
+    var willClose = !notesSidebarEl.classList.contains('ns-closed');
+    notesSidebarEl.classList.toggle('ns-closed', willClose);
+    notesToggleBtn.style.display = willClose ? 'flex' : 'none';
+    notesOverlayEl.classList.toggle('open', !willClose);
+    if (!willClose) requestAnimationFrame(positionNotes);
+  }
+  if (notesToggleBtn) notesToggleBtn.addEventListener('click', toggleNotesSidebar);
+  if (notesOverlayEl) notesOverlayEl.addEventListener('click', toggleNotesSidebar);
+  if (notesCloseBtn) notesCloseBtn.addEventListener('click', toggleNotesSidebar);
+
+  // 9. Resize handler
+  if (window.innerWidth > 1200) {
+    notesSidebarEl.classList.remove('ns-closed');
+    notesToggleBtn.style.display = 'none';
+  } else {
+    notesSidebarEl.classList.add('ns-closed');
+    notesToggleBtn.style.display = 'flex';
+  }
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 1200) { notesSidebarEl.classList.remove('ns-closed'); notesToggleBtn.style.display = 'none'; notesOverlayEl.classList.remove('open'); }
+  });
+
+  // 10. Default: expand all annotations on load
+  expandAllNotes();
+
+  // Active TOC
+  var navLinks = document.querySelectorAll('.sidebar nav ul li a[href^="#"]');
+  var tocObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        navLinks.forEach(function(link) { link.classList.remove('active'); if (link.getAttribute('href') === '#' + entry.target.id) link.classList.add('active'); });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  document.querySelectorAll('.section-header[id], [id="musk"], [id="altman"], [id="nadella"], [id="triangulation"], [id="competitive"], [id="supply-demand"], [id="risk-matrix"], [id="node-judgment"], [id="trading"]').forEach(function(s) { tocObserver.observe(s); });
+})();
+</script>
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+</body>
+</html>

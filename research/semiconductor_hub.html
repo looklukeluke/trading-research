@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Semiconductor Research Hub 半导体研究中枢</title>
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="semiconductor_shared.css">
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- ===== Left Sidebar ===== -->
+  <div class="sidebar">
+    <a class="back-link" href="file:///Users/luwenkang/observatory/weekly/2026-W12-v3.html">← W12 Synthesis</a>
+
+    <h4>Semiconductor Hub</h4>
+    <div class="project-meta">
+      半导体研究中枢<br>
+      75+ reports · 30 agents · 9 nodes
+    </div>
+
+    <h4>Navigate</h4>
+    <nav>
+      <ul>
+        <li><a href="#panorama">01 Industry 行业全景</a></li>
+        <li><a href="#audit" style="color:var(--accent);">02 Audit 审计+数据</a></li>
+        <li><a href="#nodes">03 Supply Chain 供应链</a></li>
+        <li><a href="#agents">04 Cognitive Agents 代理人</a></li>
+        <li><a href="#reviews">05 Decision Reviews 复盘</a></li>
+        <li><a href="#sources">06 Sources 素材库</a></li>
+        <li><a href="#archive">07 Archive 归档</a></li>
+      </ul>
+    </nav>
+
+    <h4>Context 上下文</h4>
+    <nav>
+      <ul>
+        <li><a href="file:///Users/luwenkang/observatory/weekly/2026-W12-v3.html">W12 Weekly Synthesis</a></li>
+        <li><a href="file:///Users/luwenkang/observatory/weekly/projects/trading-dashboard.html">Trading Dashboard</a></li>
+        <li><a href="file:///Users/luwenkang/observatory/weekly/projects/cognitive-agents.html">Cognitive Agents Project</a></li>
+        <li><a href="file:///Users/luwenkang/observatory/weekly/projects/v3-reports.html">V3 Report Template</a></li>
+        <li><a href="file:///Users/luwenkang/observatory/weekly/semiconductor_signal_tracker.html" style="color:#4caf50;">📡 Signal Tracker 信号追踪</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- ===== Main Content ===== -->
+  <main>
+
+    <h1>Semiconductor Research Hub<span class="zh">半导体研究中枢 — 从行业全景到供应链节点到行业领袖</span></h1>
+    <div class="subtitle">Top-down L3 deep dive · SMH ETF → 8 supply chain nodes → 20 cognitive agents · 2026-03-19~21</div>
+    <div style="margin-top:0.75rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+      <a href="semiconductor_deep_research_v3.html" style="display:inline-block;padding:0.35rem 0.85rem;border-radius:6px;font-size:0.82rem;font-weight:510;background:rgba(248,168,72,0.12);color:#f8a848;border:1px solid rgba(248,168,72,0.25);text-decoration:none;">&#128209; 行业深度研究 V3-Final →</a>
+      <a href="semiconductor_industry_metacognition.html" style="display:inline-block;padding:0.35rem 0.85rem;border-radius:6px;font-size:0.82rem;font-weight:510;background:rgba(171,71,188,0.12);color:#ab47bc;border:1px solid rgba(171,71,188,0.25);text-decoration:none;">&#129504; 28轮行业元思考 →</a>
+      <a href="china_semi_data_curation.html" style="display:inline-block;padding:0.35rem 0.85rem;border-radius:6px;font-size:0.82rem;font-weight:510;background:rgba(244,67,54,0.12);color:#f44336;border:1px solid rgba(244,67,54,0.25);text-decoration:none;">&#127464;&#127475; 中国半导体数据策展 →</a>
+      <a href="western_semi_reverse_verification.html" style="display:inline-block;padding:0.35rem 0.85rem;border-radius:6px;font-size:0.82rem;font-weight:510;background:rgba(91,155,213,0.12);color:#5b9bd5;border:1px solid rgba(91,155,213,0.25);text-decoration:none;">&#128269; 西方叙事反向校验 →</a>
+    </div>
+
+    <!-- Stats Strip -->
+    <div class="stats-strip">
+      <div class="stat-item"><span class="stat-value">1</span> <span class="stat-label">V3 Final Report</span></div>
+      <div class="stat-item"><span class="stat-value">8</span> <span class="stat-label">Supply Chain Nodes</span></div>
+      <div class="stat-item"><span class="stat-value">30</span> <span class="stat-label">Cognitive Agents</span></div>
+      <div class="stat-item"><span class="stat-value">3</span> <span class="stat-label">Decision Reviews</span></div>
+      <div class="stat-item"><span class="stat-value">20</span> <span class="stat-label">Source Files</span></div>
+    </div>
+
+    <!-- Advisory -->
+    <div class="advisory-box">
+      <strong>Thinking Chain 思维链：</strong>"找到下一个黄金" → Top-down扫描 → L3行业研究 → 半导体SMH是第一个深度对象 → 6个供应链节点浮现关键品种：<strong>NVDA / AVGO / ARM / ASML</strong> → 回到仪表盘监控。<br>
+      <span class="zh">This hub is the L3 industry deep-dive that feeds asset candidates back into the Trading Dashboard.</span>
+    </div>
+
+    <div class="advisory-box" style="border-left-color: var(--tier-low); background: rgba(244,67,54,0.03); margin-top:0.75rem;">
+      <strong style="color:var(--tier-low);">&#9888; Structural Bias Update 结构性偏差更新</strong><br>
+      30个代理人：西方供给侧16 + 西方需求侧4 + <strong>中国供给侧3 + 中国需求侧5 + 中国存储2</strong>。中国覆盖已从0%提升至基础水平，但数据透明度仍远低于西方代理人（中国平均信息质量1-2/5 vs 西方3-5/5）。中国代理人的置信度应使用宽区间(±15%)。
+      <span class="zh">30 agents: 16 Western supply + 4 Western demand + 10 China (supply 3 + demand 5 + memory 2). China coverage now at baseline but data transparency remains far lower than Western agents.</span>
+    </div>
+
+    <!-- ═══════════ §1 行业全景 ═══════════ -->
+    <div class="section-header" id="panorama">
+      <h2><span class="section-num">01</span>Industry Panorama<span class="zh">行业全景 — SMH半导体ETF V3终版</span></h2>
+    </div>
+
+    <div class="card" style="border-left: 3px solid var(--accent);">
+      <a href="INDUSTRY_V3_FINAL_SMH_Semiconductor_2026-03-19.html" target="_blank" style="font-size:1rem;">
+        SMH Semiconductor — V3 Final Report (4.8MB)
+      </a>
+      <div class="card-desc">
+        完整行业分析：市场规模 → 竞争格局 → 供应链映射 → 波浪周期定位 → 交易信号。含Plotly交互图表。
+        <span class="zh-inline">Full industry analysis with interactive Plotly charts. The definitive semiconductor reference.</span>
+      </div>
+      <div class="card-meta">INDUSTRY_V3_FINAL_SMH_Semiconductor_2026-03-19.html · 4.8MB · Plotly + Jinja2</div>
+    </div>
+
+    <div class="card">
+      <a href="THINKING_semiconductor_first_principles_2026-03-19.html" target="_blank">
+        Semiconductor First Principles Thinking 半导体第一性原理
+      </a>
+      <div class="card-desc">为什么半导体是第一个深度研究对象？从$280K账户的黄金成功经验推导。</div>
+      <div class="card-meta">45KB · Thinking document</div>
+    </div>
+
+    <!-- ═══════════ §2 审计与数据 ═══════════ -->
+    <div class="section-header" id="audit">
+      <h2><span class="section-num">02</span>Audit & Data<span class="zh">完整性审计 + 财务数据 + 卖方对标</span></h2>
+    </div>
+
+    <div class="grid-2">
+      <div class="card" style="border-left: 3px solid var(--accent);">
+        <a href="sell_side_research_curation.html" target="_blank" style="font-size:0.95rem;">
+          📊 卖方研报策展 + 缺口分析
+        </a>
+        <div class="card-desc">
+          17个来源按S/A/B/C四层评级 · 5维评判标准 · 6个缺口诊断 · 与我们研究中枢的对比
+          <span class="zh-inline">SemiAnalysis · Stratechery · Fabricated Knowledge · Morgan Stanley · Goldman Sachs · BofA · Evercore ISI...</span>
+        </div>
+        <div class="card-meta">970行 · V4模板 · 含所有外部链接</div>
+      </div>
+      <div class="card" style="border-left: 3px solid #4caf50;">
+        <a href="semiconductor_financials.html" target="_blank" style="font-size:0.95rem;">
+          📈 财务数据仪表盘
+        </a>
+        <div class="card-desc">
+          12标的季度数据 · 收入趋势 · 毛利率对比 · CapEx加速 · PE vs 增速估值散点图
+          <span class="zh-inline">NVDA / TSM / AVGO / AMD / ASML / MU / AMAT / ARM / SNPS / CDNS / MRVL / INTC</span>
+        </div>
+        <div class="card-meta">Plotly交互图表 · yfinance实时数据 · 2026-03-21</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:1rem;">
+      <div class="card" style="border-left: 3px solid #4caf50; grid-column: 1 / -1;">
+        <a href="file:///Users/luwenkang/observatory/weekly/semiconductor_signal_tracker.html" target="_blank" style="font-size:0.95rem;">
+          📡 半导体产业信号追踪器 Signal Tracker
+        </a>
+        <div class="card-desc">
+          6个基线概率判断 · 月/季/年度追踪信号 · 2026-2028里程碑日历 · 信号分级框架 · 投资组合调仓规则
+          <span class="zh-inline">From cognitive accumulation to forward-looking tracking — what to watch, how to track, how to adjust</span>
+        </div>
+        <div class="card-meta">60KB · 1000行 · 9章 · 基于16代理人+6节点认知积累</div>
+      </div>
+    </div>
+
+    <!-- ═══════════ §3 供应链节点 ═══════════ -->
+    <div class="section-header" id="nodes">
+      <h2><span class="section-num">03</span>Supply Chain Nodes<span class="zh">供应链节点 (8) — 从设计到制造到需求侧</span></h2>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <a href="nodes/NODE_1_GPU_AI芯片设计_2026-03-19.html" target="_blank">NODE 1: GPU/AI芯片设计</a>
+        <div class="card-desc">V4三栏布局 · Phase 0→2 + 3认知代理人 · NVDA/AMD/AVGO</div>
+        <div class="card-meta">240KB · V4 Cognitive Node Report · <a href="nodes/NODE_1_GPU_AI_metacognition.html" target="_blank" style="color:var(--accent);">&#129504; 28轮元思考</a></div>
+      </div>
+      <div class="card">
+        <a href="nodes/NODE_2_光刻设备_2026-03-19.html" target="_blank">NODE 2: 光刻设备</a>
+        <div class="card-desc">V4三栏 · Phase 0→2 + 3代理人 · ASML/AMAT/LRCX</div>
+        <div class="card-meta">239KB · V4 Cognitive Node Report · <a href="nodes/NODE_2_lithography_metacognition.html" target="_blank" style="color:var(--accent);">&#129504; 28轮元思考</a></div>
+      </div>
+      <div class="card">
+        <a href="nodes/NODE_3_代工制造_2026-03-19.html" target="_blank">NODE 3: 代工制造</a>
+        <div class="card-desc">V4三栏 · Phase 0→2 + 3代理人 · TSM/INTC/GFS</div>
+        <div class="card-meta">229KB · V4 Cognitive Node Report · <a href="nodes/NODE_3_foundry_metacognition.html" target="_blank" style="color:var(--accent);">&#129504; 28轮元思考</a></div>
+      </div>
+      <div class="card">
+        <a href="nodes/NODE_4_存储_HBM_2026-03-19.html" target="_blank">NODE 4: 存储/HBM</a>
+        <div class="card-desc">V4三栏 · Phase 0→2 + 2代理人 · MU/SK Hynix</div>
+        <div class="card-meta">103KB · V4 Cognitive Node Report · <a href="nodes/NODE_4_HBM_metacognition.html" target="_blank" style="color:var(--accent);">&#129504; 28轮元思考</a></div>
+      </div>
+      <div class="card">
+        <a href="nodes/NODE_5_定制芯片_ASIC_2026-03-19.html" target="_blank">NODE 5: 定制芯片/ASIC</a>
+        <div class="card-desc">V4三栏 · Phase 0→2 + 3代理人 · AVGO/AAPL/TSLA</div>
+        <div class="card-meta">183KB · V4 Cognitive Node Report · <a href="nodes/NODE_5_custom_silicon_metacognition.html" target="_blank" style="color:var(--accent);">&#129504; 28轮元思考</a></div>
+      </div>
+      <div class="card">
+        <a href="nodes/NODE_6_EDA_IP授权_2026-03-19.html" target="_blank">NODE 6: EDA/IP授权</a>
+        <div class="card-desc">V4三栏 · Phase 0→2 + 2代理人 · SNPS/CDNS/ARM</div>
+        <div class="card-meta">218KB · V4 Cognitive Node Report · <a href="nodes/NODE_6_EDA_IP_metacognition.html" target="_blank" style="color:var(--accent);">&#129504; 28轮元思考</a></div>
+      </div>
+      <div class="card" style="border-left:2px solid var(--tier-high);">
+        <a href="nodes/NODE_7_需求侧_Demand_2026-03-21.html" target="_blank">NODE 7: 需求侧/超大规模 <span style="font-size:0.7rem;color:var(--tier-high);">NEW</span></a>
+        <div class="card-desc">V4三栏 · Phase 0→2 + 3代理人(Musk/Altman/Nadella) · $1T订单验证 · CapEx可持续性</div>
+        <div class="card-meta">V4 Cognitive Node Report · <a href="nodes/NODE_7_demand_metacognition.html" target="_blank" style="color:var(--accent);">&#129504; 元思考</a></div>
+      </div>
+      <div class="card" style="border-left:2px solid var(--tier-high);">
+        <a href="nodes/NODE_8_AI_Lab_模型层_2026-03-21.html" target="_blank">NODE 8: AI Lab/模型层 <span style="font-size:0.7rem;color:var(--tier-high);">NEW</span></a>
+        <div class="card-desc">V4三栏 · Phase 0→2 + 2代理人(Pichai/Hassabis) · CUDA可替代性 · TPU vs GPU</div>
+        <div class="card-meta">V4 Cognitive Node Report · <a href="nodes/NODE_8_ai_lab_metacognition.html" target="_blank" style="color:var(--accent);">&#129504; 元思考</a></div>
+      </div>
+      <div class="card" style="border-left:2px solid var(--tier-low);">
+        <a href="file:///Users/luwenkang/observatory/weekly/semiconductor_signal_tracker.html#china-semi" target="_blank">中国半导体综合 China Semi <span style="font-size:0.7rem;color:var(--tier-low);">10 agents in Nodes 1-7</span></a>
+        <div class="card-desc">🇨🇳 红色边框 = 中国代理人 · 嵌入各节点而非独立分区 · Signal Tracker §VII 追踪信号</div>
+        <div class="card-meta"><span style="font-size:0.65rem;color:var(--tier-low);">⚠ 数据透明度极低 · 置信区间±15%</span></div>
+      </div>
+    </div>
+
+    <!-- ═══════════ §3 认知代理人 ═══════════ -->
+    <div class="section-header" id="agents">
+      <h2><span class="section-num">04</span>Cognitive Agents<span class="zh">认知代理人 (30) — 按产业链节点分组</span></h2>
+    </div>
+
+    <!-- NODE 1: GPU/AI Design -->
+    <div class="node-group-label">NODE 1 — GPU/AI芯片设计 Design <span style="font-size:0.65rem;color:var(--tier-low);margin-left:0.5rem;">含中国对标</span></div>
+    <div class="grid-3">
+      <div class="agent-card">
+        <div class="agent-num">#01</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/01_jensen_huang.html" target="_blank">Jensen Huang 黄仁勋</a></div>
+        <div class="agent-role">CEO · NVIDIA</div>
+        <div class="agent-company">NVDA · GPU→AI pivot architect</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><span class="dot-label">5/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_01_jensen_huang_v4.html" target="_blank">素材策展地图 V4 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">统一入口</span></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/01_jensen_huang_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考过程 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">思考旅程</span></div>
+        <details class="agent-sources-detail">
+          <summary>4份专项素材 (已集成至V4)</summary>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_01_jensen_primary.html" target="_blank">一手来源 Primary → V4 §5</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_01_jensen_interviews.html" target="_blank">访谈集 Interviews → V4 §4</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_01_jensen_relationships.html" target="_blank">关系网络 Relationships → V4 §6</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_01_jensen_deep_analysis.html" target="_blank">深度分析 Deep Analysis → V4 §7-9</a>
+        </details>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">#02</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/02_lisa_su.html" target="_blank">Lisa Su 苏姿丰</a></div>
+        <div class="agent-role">CEO · AMD</div>
+        <div class="agent-company">AMD · turnaround + MI300X</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><span class="dot-label">4/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_02_lisa_su_v4.html" target="_blank">素材策展地图 V4 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">统一入口</span></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/02_lisa_su_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考过程 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">思考旅程</span></div>
+        <details class="agent-sources-detail">
+          <summary>4份专项素材</summary>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_02_lisa_su_primary.html" target="_blank">一手来源 Primary</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_02_lisa_su_interviews.html" target="_blank">采访与播客 Interviews</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_02_lisa_su_relationships.html" target="_blank">关系网络 Relationships</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_02_lisa_su_deep_analysis.html" target="_blank">深度分析 Deep Analysis</a>
+        </details>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">#16</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/16_rene_haas.html" target="_blank">Rene Haas</a></div>
+        <div class="agent-role">CEO · ARM Holdings</div>
+        <div class="agent-company">ARM · IP licensing → AI compute</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">3/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_16_haas_v4.html" target="_blank">素材策展地图 V4 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">统一入口</span></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/16_rene_haas_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考过程 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">思考旅程</span></div>
+        <details class="agent-sources-detail">
+          <summary>4份专项素材</summary>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_16_haas_primary.html" target="_blank">一手来源 Primary</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_16_haas_interviews.html" target="_blank">采访与播客 Interviews</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_16_haas_relationships.html" target="_blank">关系网络 Relationships</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_16_haas_deep_analysis.html" target="_blank">深度分析 Deep Analysis</a>
+        </details>
+      </div>
+      <div class="agent-card" style="border-color:rgba(244,67,54,0.3);background:rgba(244,67,54,0.02);">
+        <div class="agent-num" style="color:var(--tier-low);">#22 🇨🇳</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/22_xu_zhijun.html" target="_blank">徐直军 Eric Xu</a></div>
+        <div class="agent-role">Rotating Chairman · Huawei</div>
+        <div class="agent-company">华为 · Ascend 910C · CANN生态</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">1/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_22_xu_zhijun_v4.html" target="_blank">素材策展地图 V4 →</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/22_xu_zhijun_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考 →</a></div>
+      </div>
+    </div>
+
+    <!-- NODE 2: Lithography -->
+    <div class="node-group-label">NODE 2 — 光刻设备 Lithography</div>
+    <div class="grid-3">
+      <div class="agent-card">
+        <div class="agent-num">#04</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/04_christophe_fouquet.html" target="_blank">Christophe Fouquet</a></div>
+        <div class="agent-role">CEO · ASML</div>
+        <div class="agent-company">ASML · EUV monopoly</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><span class="dot-label">4/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_04_fouquet_v4.html" target="_blank">素材策展地图 V4 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">统一入口</span></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/04_christophe_fouquet_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考过程 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">思考旅程</span></div>
+        <details class="agent-sources-detail">
+          <summary>4份专项素材</summary>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_04_fouquet_primary.html" target="_blank">一手来源 Primary</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_04_fouquet_interviews.html" target="_blank">采访与播客 Interviews</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_04_fouquet_relationships.html" target="_blank">关系网络 Relationships</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_04_fouquet_deep_analysis.html" target="_blank">深度分析 Deep Analysis</a>
+        </details>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">#05</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/05_gary_dickerson.html" target="_blank">Gary Dickerson</a></div>
+        <div class="agent-role">CEO · Applied Materials</div>
+        <div class="agent-company">AMAT · deposition & etch</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">3/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_05_dickerson_v4.html" target="_blank">素材策展地图 V4 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">统一入口</span></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/05_gary_dickerson_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考过程 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">思考旅程</span></div>
+        <details class="agent-sources-detail">
+          <summary>4份专项素材</summary>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_05_dickerson_primary.html" target="_blank">一手来源 Primary</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_05_dickerson_interviews.html" target="_blank">采访与播客 Interviews</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_05_dickerson_relationships.html" target="_blank">关系网络 Relationships</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_05_dickerson_deep_analysis.html" target="_blank">深度分析 Deep Analysis</a>
+        </details>
+      </div>
+      <div class="agent-card" style="border-color:rgba(244,67,54,0.3);background:rgba(244,67,54,0.02);">
+        <div class="agent-num" style="color:var(--tier-low);">#23 🇨🇳</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/23_he_rongming.html" target="_blank">贺荣明 He Rongming</a></div>
+        <div class="agent-role">GM · SMEE</div>
+        <div class="agent-company">上微 · 28nm DUV · 代差15年+</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">1/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_23_he_rongming_v4.html" target="_blank">素材策展地图 V4 →</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/23_he_rongming_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考 →</a></div>
+      </div>
+    </div>
+
+    <!-- NODE 3: Foundry -->
+    <div class="node-group-label">NODE 3 — 代工制造 Foundry</div>
+    <div class="grid-3">
+      <div class="agent-card">
+        <div class="agent-num">#07</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/07_cc_wei.html" target="_blank">C.C. Wei 魏哲家</a></div>
+        <div class="agent-role">CEO · TSMC</div>
+        <div class="agent-company">TSM · 3nm/2nm leader</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><span class="dot-label">4/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_07_cc_wei_v4.html" target="_blank">素材策展地图 V4 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">统一入口</span></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/07_cc_wei_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考过程 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">思考旅程</span></div>
+        <details class="agent-sources-detail">
+          <summary>4份专项素材</summary>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_07_cc_wei_primary.html" target="_blank">一手来源 Primary</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_07_cc_wei_interviews.html" target="_blank">采访与播客 Interviews</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_07_cc_wei_relationships.html" target="_blank">关系网络 Relationships</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_07_cc_wei_deep_analysis.html" target="_blank">深度分析 Deep Analysis</a>
+        </details>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">#08</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/08_morris_chang.html" target="_blank">Morris Chang 张忠谋</a></div>
+        <div class="agent-role">Founder · TSMC</div>
+        <div class="agent-company">TSM · foundry model creator</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><span class="dot-label">5/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_08_morris_chang_v4.html" target="_blank">素材策展地图 V4 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">统一入口</span></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/08_morris_chang_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考过程 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">思考旅程</span></div>
+        <details class="agent-sources-detail">
+          <summary>4份专项素材</summary>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_08_morris_chang_primary.html" target="_blank">一手来源 Primary</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_08_morris_chang_interviews.html" target="_blank">采访与播客 Interviews</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_08_morris_chang_relationships.html" target="_blank">关系网络 Relationships</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_08_morris_chang_deep_analysis.html" target="_blank">深度分析 Deep Analysis</a>
+        </details>
+      </div>
+      <div class="agent-card" style="border-color:rgba(244,67,54,0.3);background:rgba(244,67,54,0.02);">
+        <div class="agent-num" style="color:var(--tier-low);">#21 🇨🇳</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/21_zhao_haijun.html" target="_blank">赵海军 Zhao Haijun</a></div>
+        <div class="agent-role">Co-CEO · SMIC</div>
+        <div class="agent-company">0981.HK · 7nm多重曝光 · 中国代工龙头</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">2/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_21_zhao_haijun_v4.html" target="_blank">素材策展地图 V4 →</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/21_zhao_haijun_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考 →</a></div>
+      </div>
+    </div>
+
+    <!-- NODE 4: Memory -->
+    <div class="node-group-label">NODE 4 — 存储/HBM Memory</div>
+    <div class="grid-3">
+      <div class="agent-card">
+        <div class="agent-num">#10</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/10_kwak_noh_jung.html" target="_blank">Kwak Noh-Jung 郭鲁正</a></div>
+        <div class="agent-role">CEO · SK Hynix</div>
+        <div class="agent-company">SK Hynix · HBM market leader</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">3/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_10_kwak_v4.html" target="_blank">素材策展地图 V4 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">统一入口</span></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/10_kwak_noh_jung_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考过程 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">思考旅程</span></div>
+        <details class="agent-sources-detail">
+          <summary>4份专项素材</summary>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_10_kwak_primary.html" target="_blank">一手来源 Primary</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_10_kwak_interviews.html" target="_blank">采访与播客 Interviews</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_10_kwak_relationships.html" target="_blank">关系网络 Relationships</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_10_kwak_deep_analysis.html" target="_blank">深度分析 Deep Analysis</a>
+        </details>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">#11</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/11_sanjay_mehrotra.html" target="_blank">Sanjay Mehrotra</a></div>
+        <div class="agent-role">CEO · Micron</div>
+        <div class="agent-company">MU · DRAM/NAND + HBM</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">3/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_11_mehrotra_v4.html" target="_blank">素材策展地图 V4 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">统一入口</span></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/11_sanjay_mehrotra_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考过程 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">思考旅程</span></div>
+        <details class="agent-sources-detail">
+          <summary>4份专项素材</summary>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_11_mehrotra_primary.html" target="_blank">一手来源 Primary</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_11_mehrotra_interviews.html" target="_blank">采访与播客 Interviews</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_11_mehrotra_relationships.html" target="_blank">关系网络 Relationships</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_11_mehrotra_deep_analysis.html" target="_blank">深度分析 Deep Analysis</a>
+        </details>
+      </div>
+      <div class="agent-card" style="border-color:rgba(244,67,54,0.3);background:rgba(244,67,54,0.02);">
+        <div class="agent-num" style="color:var(--tier-low);">#29 🇨🇳</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/29_chen_nanxiang.html" target="_blank">陈南翔 Chen Nanxiang</a></div>
+        <div class="agent-role">CEO · YMTC</div>
+        <div class="agent-company">长存 · 232L NAND · Xtacking</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">1/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_29_chen_nanxiang_v4.html" target="_blank">素材策展地图 V4 →</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/29_chen_nanxiang_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考 →</a></div>
+      </div>
+      <div class="agent-card" style="border-color:rgba(244,67,54,0.3);background:rgba(244,67,54,0.02);">
+        <div class="agent-num" style="color:var(--tier-low);">#30 🇨🇳</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/30_zhu_yiming.html" target="_blank">朱一明 Zhu Yiming</a></div>
+        <div class="agent-role">Founder · CXMT</div>
+        <div class="agent-company">长鑫 · DDR5 DRAM · 合肥模式</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">1/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_30_zhu_yiming_v4.html" target="_blank">素材策展地图 V4 →</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/30_zhu_yiming_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考 →</a></div>
+      </div>
+    </div>
+
+    <!-- NODE 5: Custom/ASIC -->
+    <div class="node-group-label">NODE 5 — 定制芯片/ASIC Custom Silicon</div>
+    <div class="grid-3">
+      <div class="agent-card">
+        <div class="agent-num">#03</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/03_hock_tan.html" target="_blank">Hock Tan 陈福阳</a></div>
+        <div class="agent-role">CEO · Broadcom</div>
+        <div class="agent-company">AVGO · M&A + custom AI chips</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><span class="dot-label">4/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_03_hock_tan_v4.html" target="_blank">素材策展地图 V4 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">统一入口</span></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/03_hock_tan_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考过程 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">思考旅程</span></div>
+        <details class="agent-sources-detail">
+          <summary>4份专项素材</summary>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_03_hock_tan_primary.html" target="_blank">一手来源 Primary</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_03_hock_tan_interviews.html" target="_blank">采访与播客 Interviews</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_03_hock_tan_relationships.html" target="_blank">关系网络 Relationships</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_03_hock_tan_deep_analysis.html" target="_blank">深度分析 Deep Analysis</a>
+        </details>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">#13</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/13_johny_srouji.html" target="_blank">Johny Srouji</a></div>
+        <div class="agent-role">SVP Hardware · Apple</div>
+        <div class="agent-company">AAPL · Apple Silicon architect</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">3/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_13_srouji_v4.html" target="_blank">素材策展地图 V4 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">统一入口</span></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/13_johny_srouji_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考过程 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">思考旅程</span></div>
+        <details class="agent-sources-detail">
+          <summary>4份专项素材</summary>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_13_srouji_primary.html" target="_blank">一手来源 Primary</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_13_srouji_interviews.html" target="_blank">采访与播客 Interviews</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_13_srouji_relationships.html" target="_blank">关系网络 Relationships</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_13_srouji_deep_analysis.html" target="_blank">深度分析 Deep Analysis</a>
+        </details>
+      </div>
+      <div class="agent-card" style="border-color:rgba(244,67,54,0.3);background:rgba(244,67,54,0.02);">
+        <div class="agent-num" style="color:var(--tier-low);">#27 🇨🇳</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/27_wang_haifeng.html" target="_blank">王海峰 Wang Haifeng</a></div>
+        <div class="agent-role">CTO · Baidu</div>
+        <div class="agent-company">BIDU · 昆仑芯自研 · 中国Google TPU</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">2/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_27_wang_haifeng_v4.html" target="_blank">素材策展地图 V4 →</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/27_wang_haifeng_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考 →</a></div>
+      </div>
+    </div>
+
+    <!-- NODE 6: EDA/IP + Cross-cutting -->
+    <div class="node-group-label">NODE 6 — EDA/IP + Cross-cutting 跨节点</div>
+    <div class="grid-3">
+      <div class="agent-card">
+        <div class="agent-num">#15</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/15_sassine_ghazi.html" target="_blank">Sassine Ghazi</a></div>
+        <div class="agent-role">CEO · Synopsys <span style="display:inline-block;padding:0.1rem 0.45rem;border-radius:10px;font-size:0.6rem;font-weight:590;background:rgba(91,155,213,0.12);color:#5b9bd5;margin-left:0.3rem;">EDA/TOOLS</span></div>
+        <div class="agent-company">SNPS · EDA→AI-driven design</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">3/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_15_ghazi_v4.html" target="_blank">素材策展地图 V4 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">统一入口</span></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/15_sassine_ghazi_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考过程 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">思考旅程</span></div>
+        <details class="agent-sources-detail">
+          <summary>4份专项素材</summary>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_15_ghazi_primary.html" target="_blank">一手来源 Primary</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_15_ghazi_interviews.html" target="_blank">采访与播客 Interviews</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_15_ghazi_relationships.html" target="_blank">关系网络 Relationships</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_15_ghazi_deep_analysis.html" target="_blank">深度分析 Deep Analysis</a>
+        </details>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">#09</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/09_lip_bu_tan.html" target="_blank">Lip-Bu Tan 陈立武</a></div>
+        <div class="agent-role">Executive Chairman · Cadence → Intel</div>
+        <div class="agent-company">CDNS → INTC · EDA + board vision</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><span class="dot-label">4/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_09_lip_bu_tan_v4.html" target="_blank">素材策展地图 V4 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">统一入口</span></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/09_lip_bu_tan_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考过程 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">思考旅程</span></div>
+        <details class="agent-sources-detail">
+          <summary>4份专项素材</summary>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_09_lip_bu_tan_primary.html" target="_blank">一手来源 Primary</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_09_lip_bu_tan_interviews.html" target="_blank">采访与播客 Interviews</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_09_lip_bu_tan_relationships.html" target="_blank">关系网络 Relationships</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_09_lip_bu_tan_deep_analysis.html" target="_blank">深度分析 Deep Analysis</a>
+        </details>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">#06</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/06_chris_miller.html" target="_blank">Chris Miller</a></div>
+        <div class="agent-role">Author · Chip War <span style="display:inline-block;padding:0.1rem 0.45rem;border-radius:10px;font-size:0.6rem;font-weight:590;background:rgba(171,71,188,0.12);color:#ab47bc;margin-left:0.3rem;">REFERENCE 参考源</span></div>
+        <div class="agent-company">Historian · geopolitics + supply chain</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><span class="dot-label">4/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_06_miller_v4.html" target="_blank">素材策展地图 V4 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">统一入口</span></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/06_chris_miller_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考过程 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">思考旅程</span></div>
+        <details class="agent-sources-detail">
+          <summary>4份专项素材</summary>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_06_miller_primary.html" target="_blank">一手来源 Primary</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_06_miller_interviews.html" target="_blank">采访与播客 Interviews</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_06_miller_relationships.html" target="_blank">关系网络 Relationships</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_06_miller_deep_analysis.html" target="_blank">深度分析 Deep Analysis</a>
+        </details>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">#14</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/14_jim_keller.html" target="_blank">Jim Keller</a></div>
+        <div class="agent-role">CTO · Tenstorrent</div>
+        <div class="agent-company">Serial chip architect · AMD/Apple/Tesla/Intel</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><span class="dot-label">4/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_14_keller_v4.html" target="_blank">素材策展地图 V4 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">统一入口</span></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/14_jim_keller_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考过程 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">思考旅程</span></div>
+        <details class="agent-sources-detail">
+          <summary>4份专项素材</summary>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_14_keller_primary.html" target="_blank">一手来源 Primary</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_14_keller_interviews.html" target="_blank">采访与播客 Interviews</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_14_keller_relationships.html" target="_blank">关系网络 Relationships</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_14_keller_deep_analysis.html" target="_blank">深度分析 Deep Analysis</a>
+        </details>
+      </div>
+    </div>
+
+    <!-- NODE 7: Demand / Hyperscaler (NEW) -->
+    <div class="node-group-label">NODE 7 — 需求侧/超大规模 Demand</div>
+    <div class="grid-3">
+      <div class="agent-card">
+        <div class="agent-num">#12</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/12_elon_musk.html" target="_blank">Elon Musk</a></div>
+        <div class="agent-role">CEO · Tesla/xAI</div>
+        <div class="agent-company">TSLA · $25B+ GPU buyer + Terafab</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot med"></div><div class="dot med"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">2/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_12_musk_v4.html" target="_blank">素材策展地图 V4 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">统一入口</span></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/12_elon_musk_metacognition.html" target="_blank" style="color:#5b9bd5;">元思考过程 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">思考旅程</span></div>
+        <details class="agent-sources-detail">
+          <summary>4份专项素材</summary>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_12_musk_primary.html" target="_blank">一手来源 Primary</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_12_musk_interviews.html" target="_blank">采访与播客 Interviews</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_12_musk_relationships.html" target="_blank">关系网络 Relationships</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_12_musk_deep_analysis.html" target="_blank">深度分析 Deep Analysis</a>
+        </details>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">#17</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/17_sam_altman.html" target="_blank">Sam Altman</a></div>
+        <div class="agent-role">CEO · OpenAI</div>
+        <div class="agent-company">$100B LOI + Broadcom自研 + 30%折扣</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><span class="dot-label">4/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_17_altman_v4.html" target="_blank">素材策展地图 V4 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">统一入口</span></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/17_sam_altman_metacognition.html" target="_blank" style="color:#5b9bd5;">元思考过程 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">思考旅程</span></div>
+        <details class="agent-sources-detail">
+          <summary>5份专项素材</summary>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_17_altman_primary.html" target="_blank">一手来源 Primary</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_17_altman_interviews.html" target="_blank">采访与播客 Interviews</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_17_altman_relationships.html" target="_blank">关系网络 Relationships</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_17_altman_deep_analysis.html" target="_blank">深度分析 Deep Analysis</a>
+        </details>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">#18</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/18_satya_nadella.html" target="_blank">Satya Nadella</a></div>
+        <div class="agent-role">CEO · Microsoft</div>
+        <div class="agent-company">Azure #1 AI CapEx + Project Maia + 49% OpenAI</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><span class="dot-label">4/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_18_nadella_v4.html" target="_blank">素材策展地图 V4 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">统一入口</span></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/18_satya_nadella_metacognition.html" target="_blank" style="color:#5b9bd5;">元思考过程 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">思考旅程</span></div>
+        <details class="agent-sources-detail">
+          <summary>5份专项素材</summary>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_18_nadella_primary.html" target="_blank">一手来源 Primary</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_18_nadella_interviews.html" target="_blank">采访与播客 Interviews</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_18_nadella_relationships.html" target="_blank">关系网络 Relationships</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_18_nadella_deep_analysis.html" target="_blank">深度分析 Deep Analysis</a>
+        </details>
+      </div>
+      <div class="agent-card" style="border-color:rgba(244,67,54,0.3);background:rgba(244,67,54,0.02);">
+        <div class="agent-num" style="color:var(--tier-low);">#24 🇨🇳</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/24_liang_wenfeng.html" target="_blank">梁文锋 Liang Wenfeng</a></div>
+        <div class="agent-role">Founder · DeepSeek</div>
+        <div class="agent-company">R1 Ascend训练 · 非NVIDIA可行性证人</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">2/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_24_liang_wenfeng_v4.html" target="_blank">素材策展地图 V4 →</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/24_liang_wenfeng_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考 →</a></div>
+      </div>
+      <div class="agent-card" style="border-color:rgba(244,67,54,0.3);background:rgba(244,67,54,0.02);">
+        <div class="agent-num" style="color:var(--tier-low);">#25 🇨🇳</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/25_bytedance_volcano.html" target="_blank">字节/火山引擎</a></div>
+        <div class="agent-role">AI Infra · ByteDance</div>
+        <div class="agent-company">中国最大AI推理需求方 · Ascend大客户</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">1/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_25_bytedance_v4.html" target="_blank">素材策展地图 V4 →</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/25_bytedance_volcano_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考 →</a></div>
+      </div>
+      <div class="agent-card" style="border-color:rgba(244,67,54,0.3);background:rgba(244,67,54,0.02);">
+        <div class="agent-num" style="color:var(--tier-low);">#26 🇨🇳</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/26_zhou_jingren.html" target="_blank">周靖人 Zhou Jingren</a></div>
+        <div class="agent-role">CTO · Alibaba Cloud</div>
+        <div class="agent-company">BABA · 含光芯片+通义千问+阿里云</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">2/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_26_zhou_jingren_v4.html" target="_blank">素材策展地图 V4 →</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/26_zhou_jingren_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考 →</a></div>
+      </div>
+      <div class="agent-card" style="border-color:rgba(244,67,54,0.3);background:rgba(244,67,54,0.02);">
+        <div class="agent-num" style="color:var(--tier-low);">#28 🇨🇳</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/28_tencent_hunyuan.html" target="_blank">腾讯云/混元</a></div>
+        <div class="agent-role">AI Infra · Tencent</div>
+        <div class="agent-company">0700.HK · 紫霄芯片+混元+腾讯云</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">1/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_28_tencent_v4.html" target="_blank">素材策展地图 V4 →</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/28_tencent_hunyuan_metacognition.html" target="_blank" style="color:#5b9bd5;">28轮元思考 →</a></div>
+      </div>
+    </div>
+
+    <!-- NODE 8: AI Lab / Model Layer (NEW) -->
+    <div class="node-group-label">NODE 8 — AI Lab/模型层 Model Layer</div>
+    <div class="grid-3">
+      <div class="agent-card">
+        <div class="agent-num">#19</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/19_sundar_pichai.html" target="_blank">Sundar Pichai</a></div>
+        <div class="agent-role">CEO · Google / Alphabet</div>
+        <div class="agent-company">TPU 10年积累 · CUDA最大威胁 · Meta TPU交易</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><span class="dot-label">4/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_19_pichai_v4.html" target="_blank">素材策展地图 V4 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">统一入口</span></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/19_sundar_pichai_metacognition.html" target="_blank" style="color:#5b9bd5;">元思考过程 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">思考旅程</span></div>
+        <details class="agent-sources-detail">
+          <summary>5份专项素材</summary>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_19_pichai_primary.html" target="_blank">一手来源 Primary</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_19_pichai_interviews.html" target="_blank">采访与播客 Interviews</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_19_pichai_relationships.html" target="_blank">关系网络 Relationships</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_19_pichai_deep_analysis.html" target="_blank">深度分析 Deep Analysis</a>
+        </details>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">#20</div>
+        <div class="agent-name"><a href="cognitive_agents_2026-03-20/20_demis_hassabis.html" target="_blank">Demis Hassabis</a></div>
+        <div class="agent-role">CEO · Google DeepMind</div>
+        <div class="agent-company">AlphaFold · AGI研究 · TPU架构决策者</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><span class="dot-label">4/5</span></div></div>
+        <div class="agent-sources"><a href="cognitive_agents_2026-03-20/sources_20_hassabis_v4.html" target="_blank">素材策展地图 V4 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">统一入口</span></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="cognitive_agents_2026-03-20/20_demis_hassabis_metacognition.html" target="_blank" style="color:#5b9bd5;">元思考过程 →</a> <span style="font-size:0.65rem;color:var(--text-quaternary);">思考旅程</span></div>
+        <details class="agent-sources-detail">
+          <summary>5份专项素材</summary>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_18_hassabis_primary.html" target="_blank">一手来源 Primary</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_18_hassabis_interviews.html" target="_blank">采访与播客 Interviews</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_18_hassabis_relationships.html" target="_blank">关系网络 Relationships</a>
+          <a class="source-link" href="cognitive_agents_2026-03-20/sources_18_hassabis_deep_analysis.html" target="_blank">深度分析 Deep Analysis</a>
+        </details>
+      </div>
+    </div>
+
+    <!-- Aggregate reports -->
+    <div style="margin-top:1.25rem;">
+      <div class="card">
+        <a href="cognitive_agents_2026-03-20/overview.html" target="_blank">Overview 概览</a>
+        <div class="card-desc">30位代理人全景对比</div>
+      </div>
+      <div class="card">
+        <a href="cognitive_agents_2026-03-20/briefing_doc.html" target="_blank">Briefing Document 简报</a>
+        <div class="card-desc">投资决策简报</div>
+      </div>
+      <div class="card">
+        <a href="cognitive_agents_2026-03-20/study_guide.html" target="_blank">Study Guide 学习指南</a>
+        <div class="card-desc">半导体行业学习路径</div>
+      </div>
+    </div>
+
+    <!-- ═══════════ §4 决策复盘 ═══════════ -->
+    <div class="section-header" id="reviews">
+      <h2><span class="section-num">05</span>Decision Reviews<span class="zh">决策复盘 (3) — AI辅助交易分析</span></h2>
+    </div>
+
+    <div class="card">
+      <a href="Gold_4Trades_Decision_Review_2026-03-20.html" target="_blank">Gold 4-Trades Decision Review</a>
+      <div class="card-desc">证明论点的黄金交易：+$121K · 方法论提炼 · 两个成功模板确认</div>
+      <div class="card-meta">2026-03-20</div>
+    </div>
+    <div class="card">
+      <a href="AI_REVIEW_TSLA_BTC_2026-03-20.html" target="_blank">TSLA / BTC 复盘 + 品种匹配分析</a>
+      <div class="card-desc">决策复盘 + 品种-交易者兼容性评分 · 周期不匹配案例</div>
+      <div class="card-meta">2026-03-20</div>
+    </div>
+    <div class="card">
+      <a href="ETH_AI_REVIEW_2026-03-20.html" target="_blank">ETH 3笔交易深度复盘</a>
+      <div class="card-desc">入场时机、仓位大小、FOMO回补失败解剖</div>
+      <div class="card-meta">2026-03-20</div>
+    </div>
+
+    <!-- ═══════════ §6 原始素材 ═══════════ -->
+    <div class="section-header" id="sources">
+      <h2><span class="section-num">06</span>Raw Sources<span class="zh">原始素材 .md（备查）</span></h2>
+    </div>
+
+    <p class="muted small">素材 V4 HTML 已集成到上方每个代理人名片的「素材地图→」链接中。以下仅为原始 Markdown 备查。</p>
+
+    <details class="collapsible">
+      <summary>20份原始素材 .md</summary>
+      <div class="detail-body">
+        <div class="card"><a href="cognitive_agents_2026-03-20/sources_01_jensen_huang.md" target="_blank">01 Jensen Huang</a> <span class="muted">11.9KB</span></div>
+        <div class="card"><a href="cognitive_agents_2026-03-20/sources_02_lisa_su.md" target="_blank">02 Lisa Su</a> <span class="muted">17.5KB</span></div>
+        <div class="card"><a href="cognitive_agents_2026-03-20/sources_03_hock_tan.md" target="_blank">03 Hock Tan</a> <span class="muted">24.6KB</span></div>
+        <div class="card"><a href="cognitive_agents_2026-03-20/sources_04_fouquet.md" target="_blank">04 Fouquet</a> <span class="muted">9.8KB</span></div>
+        <div class="card"><a href="cognitive_agents_2026-03-20/sources_05_dickerson.md" target="_blank">05 Dickerson</a> <span class="muted">9.1KB</span></div>
+        <div class="card"><a href="cognitive_agents_2026-03-20/sources_06_miller.md" target="_blank">06 Miller</a> <span class="muted">11.3KB</span></div>
+        <div class="card"><a href="cognitive_agents_2026-03-20/sources_07_cc_wei.md" target="_blank">07 C.C. Wei</a> <span class="muted">10.4KB</span></div>
+        <div class="card"><a href="cognitive_agents_2026-03-20/sources_08_morris_chang.md" target="_blank">08 Morris Chang</a> <span class="muted">17.8KB</span></div>
+        <div class="card"><a href="cognitive_agents_2026-03-20/sources_09_lip_bu_tan.md" target="_blank">09 Lip-Bu Tan</a> <span class="muted">20.2KB</span></div>
+        <div class="card"><a href="cognitive_agents_2026-03-20/sources_10_kwak.md" target="_blank">10 Kwak</a> <span class="muted">20.7KB</span></div>
+        <div class="card"><a href="cognitive_agents_2026-03-20/sources_11_mehrotra.md" target="_blank">11 Mehrotra</a> <span class="muted">23.8KB</span></div>
+        <div class="card"><a href="cognitive_agents_2026-03-20/sources_12_musk.md" target="_blank">12 Musk</a> <span class="muted">N/A</span></div>
+        <div class="card"><a href="cognitive_agents_2026-03-20/sources_13_srouji.md" target="_blank">13 Srouji</a> <span class="muted">17.2KB</span></div>
+        <div class="card"><a href="cognitive_agents_2026-03-20/sources_14_keller.md" target="_blank">14 Keller</a> <span class="muted">21.2KB</span></div>
+        <div class="card"><a href="cognitive_agents_2026-03-20/sources_15_ghazi.md" target="_blank">15 Ghazi</a> <span class="muted">18KB</span></div>
+        <div class="card"><a href="cognitive_agents_2026-03-20/sources_16_haas.md" target="_blank">16 Haas</a> <span class="muted">26KB</span></div>
+        <div class="card"><a href="cognitive_agents_2026-03-20/sources_17_altman.md" target="_blank">17 Altman</a> <span class="muted">5.6KB</span></div>
+        <div class="card"><a href="cognitive_agents_2026-03-20/sources_18_nadella.md" target="_blank">18 Nadella</a> <span class="muted">5.2KB</span></div>
+        <div class="card"><a href="cognitive_agents_2026-03-20/sources_19_pichai.md" target="_blank">19 Pichai</a> <span class="muted">7.0KB</span></div>
+        <div class="card"><a href="cognitive_agents_2026-03-20/sources_18_hassabis.md" target="_blank">20 Hassabis</a> <span class="muted">5.1KB</span></div>
+      </div>
+    </details>
+
+    <!-- ═══════════ §6 归档 ═══════════ -->
+    <div class="section-header" id="archive">
+      <h2><span class="section-num">07</span>Archive<span class="zh">归档 — 旧版 + Demo + 其他行业ETF</span></h2>
+    </div>
+
+    <details class="collapsible">
+      <summary>SMH 旧版本 (V1, V2, V3 draft)</summary>
+      <div class="detail-body">
+        <div class="card"><a href="INDUSTRY_SMH_Semiconductor_2026-03-18.html" target="_blank">V1: SMH 2026-03-18</a> <span class="muted">· 26KB · 初版</span></div>
+        <div class="card"><a href="INDUSTRY_V2_SMH_Semiconductor_2026-03-18.html" target="_blank">V2: SMH 2026-03-18</a> <span class="muted">· 925KB · 带图表</span></div>
+        <div class="card"><a href="INDUSTRY_V3_SMH_Semiconductor_2026-03-19.html" target="_blank">V3 Draft: SMH 2026-03-19</a> <span class="muted">· 398KB · 草稿</span></div>
+      </div>
+    </details>
+
+    <details class="collapsible">
+      <summary>Demo / Test 文件 (3)</summary>
+      <div class="detail-body">
+        <div class="card"><a href="V3_DEMO_semiconductor.html" target="_blank">V3 Demo: Semiconductor</a> <span class="muted">· 39KB</span></div>
+        <div class="card"><a href="V3_DEMO_plotly_charts.html" target="_blank">V3 Demo: Plotly Charts</a> <span class="muted">· 4.7MB</span></div>
+        <div class="card"><a href="V3_DEMO_treemap.html" target="_blank">V3 Demo: Treemap</a> <span class="muted">· 4.7MB</span></div>
+      </div>
+    </details>
+
+    <details class="collapsible">
+      <summary>其他行业 ETF V1 报告 (14)</summary>
+      <div class="detail-body">
+        <div class="card"><a href="INDUSTRY_BTCETH_Crypto_2026-03-18.html" target="_blank">BTC/ETH Crypto</a></div>
+        <div class="card"><a href="INDUSTRY_GDX_GoldMiners_2026-03-18.html" target="_blank">GDX Gold Miners</a></div>
+        <div class="card"><a href="INDUSTRY_TLT_Bonds_2026-03-18.html" target="_blank">TLT Bonds</a></div>
+        <div class="card"><a href="INDUSTRY_XLB_Materials_2026-03-18.html" target="_blank">XLB Materials</a></div>
+        <div class="card"><a href="INDUSTRY_XLC_CommServices_2026-03-18.html" target="_blank">XLC Comm Services</a></div>
+        <div class="card"><a href="INDUSTRY_XLE_Energy_2026-03-18.html" target="_blank">XLE Energy</a></div>
+        <div class="card"><a href="INDUSTRY_XLF_Financials_2026-03-18.html" target="_blank">XLF Financials</a></div>
+        <div class="card"><a href="INDUSTRY_XLI_Industrials_2026-03-18.html" target="_blank">XLI Industrials</a></div>
+        <div class="card"><a href="INDUSTRY_XLK_Technology_2026-03-18.html" target="_blank">XLK Technology</a></div>
+        <div class="card"><a href="INDUSTRY_XLP_ConsumerStaples_2026-03-18.html" target="_blank">XLP Consumer Staples</a></div>
+        <div class="card"><a href="INDUSTRY_XLRE_RealEstate_2026-03-18.html" target="_blank">XLRE Real Estate</a></div>
+        <div class="card"><a href="INDUSTRY_XLU_Utilities_2026-03-18.html" target="_blank">XLU Utilities</a></div>
+        <div class="card"><a href="INDUSTRY_XLV_Healthcare_2026-03-18.html" target="_blank">XLV Healthcare</a></div>
+        <div class="card"><a href="INDUSTRY_XLY_ConsumerDiscretionary_2026-03-18.html" target="_blank">XLY Consumer Discretionary</a></div>
+      </div>
+    </details>
+
+    <!-- Footer -->
+    <div class="page-footer">
+      <a href="file:///Users/luwenkang/observatory/weekly/2026-W12-v3.html">← Back to W12 Synthesis 返回周综合</a>
+      <div style="margin-top:0.5rem;">Semiconductor Research Hub · Part of Cognitive Observatory V3 · 2026-03-21</div>
+    </div>
+
+  </main>
+
+  <!-- ===== Right Sidebar: Meta-cognitive ===== -->
+  <aside class="notes-sidebar">
+    <h4>Meta-cognitive 元思考</h4>
+
+    <div class="meta-note">
+      <div class="note-label strength">Strength</div>
+      <p>唯一从行业→供应链→领袖→品种的完整Top-down L3深度研究。8个节点×20人的矩阵结构让关键品种自然浮现：NVDA/AVGO/ARM/ASML。含4个需求侧代理人验证买方视角。<span class="zh">The only complete L3 deep-dive from industry → supply chain → leaders → tickers. Now includes 4 demand-side agents.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label chain">Chain</div>
+      <p>Dashboard需要行业输入 → V3报告模板 → SMH是第一个深度对象 → 8个供应链节点映射(含需求侧+AI Lab) → 20个认知代理人 → 关键品种浮现 → 回到仪表盘监控。<span class="zh">Every step traces back to "find the next gold."</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label pattern">Depth Imbalance</div>
+      <p>Jensen有V4策展地图+4份专项素材(160KB+)，其他人平均1份(~30KB)。这不一定是问题——Jensen是NVDA的核心，深度合理。但如果AVGO/ARM是下一个候选，Hock Tan和Rene Haas需要同等深度。<span class="zh">Jensen: V4 curation map + 4 specialized sources vs others' 1 source. Not wrong — but if AVGO/ARM are next candidates, Hock Tan and Rene Haas need equal depth.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label risk">3 CSS Systems</div>
+      <p>Hub用Linear Docs，Industry/Nodes用V3 Semantic 5色系统，Agent Profiles用Pico CSS框架。视觉不统一。当前优先级低——内容质量>视觉统一。<span class="zh">Three different CSS systems across the hierarchy. Low priority — content quality matters more than visual uniformity.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label suggestion">Next Step</div>
+      <p>不要加更多行业。先验证NVDA/AVGO/ARM/ASML是否进入Candidate Workbench。这些是系统第一次从研究到候选的闭环测试。如果成功→验证整个Top-down管道。<span class="zh">Don't add more industries. Validate if these 4 tickers enter the Candidate Workbench. This is the pipeline's first real test.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label suggestion">Coverage Gap</div>
+      <p>需求侧已从0→4人(Altman/Nadella/Pichai/Hassabis)，但深度仍不对称。TIER B缺失：Jassy(AWS)、Zuckerberg(Meta/PyTorch)、Amodei(Anthropic)。供给侧缺失：Intel新CEO、Samsung半导体、GlobalFoundries。<span class="zh">Demand-side now 4 agents (from 0). TIER B gaps: Jassy, Zuckerberg, Amodei. Supply gaps: Intel new CEO, Samsung Semi, GlobalFoundries.</span></p>
+    </div>
+  </aside>
+
+</div>
+
+<!-- Sidebar active state -->
+<script>
+const sections = document.querySelectorAll('.section-header[id]');
+const navLinks = document.querySelectorAll('.sidebar nav ul li a[href^="#"]');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + entry.target.id) link.classList.add('active');
+      });
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+
+<script src="../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../lib/reading-mode.js"></script>
+</body>
+</html>

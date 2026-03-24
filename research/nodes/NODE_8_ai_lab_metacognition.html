@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Lab/模型层节点 — 22轮元思考过程</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <style>
+    :root {
+      --bg-base: #08090a; --bg-elevated: #0f1011; --bg-surface: #141516; --bg-overlay: #191a1b;
+      --border-subtle: #23252a; --border-default: #34343a; --border-strong: #3e3e44;
+      --text-primary: #f7f8f8; --text-secondary: #d0d6e0; --text-tertiary: #8a8f98; --text-quaternary: #62666d;
+      --accent: #f8a848; --accent-dim: rgba(248, 168, 72, 0.12); --accent-hover: rgba(248, 168, 72, 0.08);
+      --knowledge: #5b9bd5; --knowledge-dim: rgba(91, 155, 213, 0.12);
+      --green: #4caf50; --red: #f44336; --orange: #ffa726;
+      --font-sans: 'Inter', 'Inter Variable', -apple-system, system-ui, sans-serif;
+      --font-mono: 'SF Mono', 'Menlo', monospace;
+      --radius-sm: 8px; --radius-md: 12px; --sidebar-width: 240px;
+    }
+    * { box-sizing: border-box; }
+    html { font-family: var(--font-sans); font-feature-settings: 'liga' 1, 'calt' 1; letter-spacing: -0.012em; -webkit-font-smoothing: antialiased; }
+    body { margin: 0; padding: 0; background: var(--bg-base); color: var(--text-primary); font-size: 15px; line-height: 1.65; }
+    .page-wrapper { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { position: sticky; top: 0; height: 100vh; width: var(--sidebar-width); min-width: var(--sidebar-width); overflow-y: auto; padding: 1.25rem 0.75rem; border-right: 1px solid var(--border-subtle); background: var(--bg-elevated); z-index: 100; }
+    .sidebar h4 { margin-bottom: 0.5rem; padding: 0 0.5rem; font-size: 0.7rem; font-weight: 590; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-quaternary); }
+    .sidebar nav ul { list-style: none; padding: 0; margin: 0 0 1rem 0; }
+    .sidebar nav ul li a { display: block; padding: 0.25rem 0.5rem; font-size: 0.78rem; color: var(--text-tertiary); text-decoration: none; border-radius: var(--radius-sm); transition: background 0.12s, color 0.12s; line-height: 1.4; }
+    .sidebar nav ul li a:hover { background: var(--accent-hover); color: var(--text-primary); }
+    .sidebar nav ul li a .toc-num { color: var(--text-quaternary); margin-right: 0.25rem; font-size: 0.65rem; font-weight: 510; }
+
+    /* Main */
+    .main-content { flex: 1; min-width: 0; max-width: 960px; padding: 2.5rem 2.5rem 5rem; }
+
+    /* Header */
+    .page-header { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-default); }
+    .page-header h1 { margin-bottom: 0.3rem; font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 680; letter-spacing: -0.025em; }
+    .page-header .subtitle { color: var(--text-tertiary); margin-bottom: 1rem; font-size: 0.95rem; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .badge { display: inline-block; padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.75rem; font-weight: 510; background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(248, 168, 72, 0.25); }
+    .role-badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; background: rgba(91,155,213,0.12); color: var(--knowledge); }
+
+    /* Sections */
+    .section-header { margin-top: 3.5rem; margin-bottom: 1.25rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border-subtle); }
+    .section-header h2 { font-size: 1.25rem; font-weight: 590; letter-spacing: -0.015em; margin-bottom: 0; }
+    h3 { font-size: 1.1rem; font-weight: 590; margin-top: 1.5rem; }
+    p { color: var(--text-secondary); margin-bottom: 1rem; }
+    strong { color: var(--text-primary); font-weight: 590; }
+    ul, ol { color: var(--text-secondary); padding-left: 1.2rem; }
+    li { margin-bottom: 0.35rem; line-height: 1.6; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Details */
+    details { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.8rem 1rem; margin: 0.8rem 0; background: var(--bg-elevated); }
+    details summary { cursor: pointer; font-weight: 510; font-size: 0.9rem; color: var(--text-primary); }
+    details[open] summary { margin-bottom: 0.6rem; color: var(--accent); }
+
+    /* Priority box */
+    .priority-box { border: 1px solid rgba(248, 168, 72, 0.3); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin-bottom: 2rem; background: var(--bg-surface); }
+    .priority-box h2 { color: var(--accent); margin-top: 0; font-size: 1.1rem; font-weight: 590; }
+
+    /* Arc items */
+    .arc-item { margin-bottom: 1rem; padding: 0.8rem; border-left: 3px solid var(--accent); background: rgba(66, 165, 245, 0.03); border-radius: 0 6px 6px 0; }
+    .arc-item strong { color: var(--accent); }
+
+    /* Question box */
+    .question-box { border: 2px solid var(--knowledge); border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; background: rgba(91, 155, 213, 0.05); }
+    .question-box h4 { color: var(--knowledge); margin-top: 0; }
+
+    /* Tables */
+    figure { margin: 1.25rem 0; overflow-x: auto; }
+    table { font-size: 0.82rem; border-collapse: collapse; width: 100%; }
+    th, td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border-subtle); text-align: left; }
+    th { white-space: nowrap; font-weight: 510; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-quaternary); border-bottom: 1px solid var(--border-default); }
+    td { color: var(--text-secondary); }
+    tr:hover td { background: var(--bg-elevated); }
+
+    /* Blockquote */
+    blockquote { border-left: 3px solid var(--accent); padding: 0.6rem 1.25rem; margin: 1rem 0; font-style: italic; background: var(--bg-surface); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-secondary); }
+
+    /* Signals */
+    .signal { display: inline-block; font-size: 0.75rem; padding: 0.1rem 0.4rem; border-radius: 3px; font-weight: 590; margin-right: 0.3rem; }
+    .signal-bull { background: rgba(76,175,80,0.15); color: var(--green); }
+    .signal-bear { background: rgba(244,67,54,0.15); color: var(--red); }
+    .signal-watch { background: rgba(255,167,38,0.15); color: var(--orange); }
+
+    /* Phase indicator */
+    .phase-tag { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+    .phase-explore { background: rgba(91,155,213,0.12); color: var(--knowledge); }
+    .phase-diagnose { background: rgba(255,167,38,0.12); color: var(--orange); }
+    .phase-build { background: rgba(76,175,80,0.12); color: var(--green); }
+    .phase-verify { background: rgba(244,67,54,0.12); color: var(--red); }
+
+    /* Footer */
+    .page-footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 2px solid var(--border-default); text-align: center; font-size: 0.85rem; color: var(--text-tertiary); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+
+    /* Mobile */
+    .hamburger-btn { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 200; background: var(--bg-surface); color: var(--text-primary); border: none; border-radius: 6px; width: 44px; height: 44px; font-size: 1.4rem; cursor: pointer; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+    @media (max-width: 900px) {
+      .sidebar { position: fixed; left: -320px; top: 0; transition: left 0.3s ease; box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.open { display: block; }
+      .hamburger-btn { display: block; }
+      .main-content { padding: 2rem 1rem 4rem; }
+    }
+    @media (min-width: 1400px) { .main-content { max-width: 1060px; } }
+
+/* === Embedded mode: inside Dashboard iframe === */
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+body.embedded .hamburger-btn { display: none !important; }
+body.embedded .sidebar-overlay { display: none !important; }
+
+/* === Reading mode: full-width === */
+.reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+.reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+.reading-mode .hamburger-btn { display: none !important; }
+.reading-mode .sidebar-overlay { display: none !important; }
+</style>
+</head>
+<body>
+<nav style="position:sticky;top:0;z-index:999;background:rgba(8,9,10,0.95);backdrop-filter:blur(8px);padding:0.5rem 1.5rem;border-bottom:1px solid #23252a;font-size:0.78rem;display:flex;gap:1rem;align-items:center;">
+  <a href="../semiconductor_hub.html" style="color:#f8a848;text-decoration:none;">&larr; Semiconductor Hub</a>
+  <span style="color:#62666d;">&middot;</span>
+  <a href="NODE_8_AI_Lab_%E6%A8%A1%E5%9E%8B%E5%B1%82_2026-03-21.html" style="color:#8a8f98;text-decoration:none;">Node 8 AI Lab/模型层认知节点报告</a>
+</nav>
+
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="page-wrapper">
+
+  <aside class="sidebar" id="sidebar">
+    <h4>思考旅程 Thinking Journey</h4>
+    <nav>
+      <ul>
+        <li><a href="#overview"><span class="toc-num">&#9733;</span>速览结论<br><span class="zh-inline">Key Findings</span></a></li>
+        <li><a href="#phase1"><span class="toc-num">I</span>任务定义<br><span class="zh-inline">Task Definition</span></a></li>
+        <li><a href="#phase2"><span class="toc-num">II</span>数据解码<br><span class="zh-inline">Data Decoding</span></a></li>
+        <li><a href="#phase3"><span class="toc-num">III</span>矛盾与张力<br><span class="zh-inline">Contradictions &amp; Tensions</span></a></li>
+        <li><a href="#phase4"><span class="toc-num">IV</span>时间与反面<br><span class="zh-inline">Time &amp; Counter-arguments</span></a></li>
+        <li><a href="#phase5"><span class="toc-num">V</span>结构诊断<br><span class="zh-inline">Structure Diagnosis</span></a></li>
+        <li><a href="#phase6"><span class="toc-num">VI</span>成品审视<br><span class="zh-inline">Self-Audit</span></a></li>
+        <li><a href="#phase7"><span class="toc-num">VII</span>验证日历<br><span class="zh-inline">Verification Calendar</span></a></li>
+        <li><a href="#phase8"><span class="toc-num">VIII</span>信号传导<br><span class="zh-inline">Signal Transmission</span></a></li>
+        <li><a href="#phase9"><span class="toc-num">IX</span>最终方法论<br><span class="zh-inline">Final Methodology</span></a></li>
+      </ul>
+    </nav>
+    <h4 style="margin-top:1rem;">最终产出</h4>
+    <nav><ul>
+      <li><a href="NODE_8_AI_Lab_%E6%A8%A1%E5%9E%8B%E5%B1%82_2026-03-21.html" style="color:var(--accent);">AI Lab/模型层认知节点报告 &rarr;</a></li>
+    </ul></nav>
+  </aside>
+
+  <main class="main-content">
+
+    <header class="page-header">
+      <div class="role-badge">METACOGNITION LOG</div>
+      <h1>AI Lab/模型层节点 &mdash; 22轮元思考过程</h1>
+      <p class="subtitle">从"CUDA不可替代是常识"到"AlphaFold诺贝尔奖全程零NVIDIA" &nbsp;|&nbsp; 2026-03-21<br>
+      <span style="color:var(--text-quaternary);font-size:0.85em;">研究笔记 &mdash; 思考过程比结论更有价值</span></p>
+      <div class="badge-row">
+        <span class="badge">22轮元思考</span>
+        <span class="badge">9个Phase</span>
+        <span class="badge">2+1代理人交叉验证</span>
+        <span class="badge">5条投资信号</span>
+      </div>
+    </header>
+
+
+    <!-- Overview -->
+    <div class="priority-box" id="overview">
+      <h2>&#129504; 22轮元思考的核心结论</h2>
+      <ol>
+        <li><strong>Node 8是整个8节点分析中对NVIDIA叙事最致命的一页</strong> &mdash; AlphaFold（诺贝尔奖）在TPU上训练、Claude在TPU上训练、Gemini在TPU上训练。"CUDA不可替代"的可信度从Node 1的15%进一步降至10%以下</li>
+        <li><strong>但两位代理人来自同一家公司（Google），"共识"部分反映组织一致性而非独立验证</strong> &mdash; Pichai推TPU是因为那是Google的产品线。Hassabis用TPU可能反映内部mandate而非纯技术选择。独立性需严格打折</li>
+        <li><strong>最大的惊喜：Meta数十亿美元TPU交易</strong> &mdash; Meta是全球最大的PyTorch贡献者+最大的GPU训练用户之一。如果连Meta都买TPU，CUDA在训练端的垄断正在真正松动</li>
+        <li><strong>TPU的真正威胁不是单芯片性能，而是垂直整合</strong> &mdash; Google控制了芯片(TPU)+互连(ICI)+软件栈(JAX/XLA)+云平台(GCP)+应用层(Gemini/Search)。这种垂直整合在推理端的成本优势将持续扩大</li>
+        <li><strong>Node 8的最大缺陷：只有Google视角</strong> &mdash; 缺少OpenAI（GPU+TPU混合）、Anthropic（TPU优先但有AWS GPU）、Meta AI（PyTorch+GPU主导但正在买TPU）的独立视角</li>
+      </ol>
+    </div>
+
+
+    <!-- Phase 1 -->
+    <section id="phase1">
+      <div class="section-header">
+        <span class="phase-tag phase-explore">PHASE I &mdash; EXPLORE</span>
+        <h2>任务定义：表面任务 vs 真正任务</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#1 表面任务 vs 真正任务</strong></summary>
+        <p><strong>表面任务</strong>：从AI Lab/模型层视角分析硬件选择如何影响半导体供应链。</p>
+        <p><strong>真正任务</strong>：回答整个8节点分析中最关键的问题 &mdash; <strong>"CUDA到底能不能被替代？如果能，替代速度有多快？这对NVIDIA的5年估值意味着什么？"</strong></p>
+        <p>Node 1的Jensen说"CUDA不可替代"（评估可信度仅15%）。Node 5的自研芯片从设计端挑战NVIDIA。Node 7的买家都在建"逃生通道"。Node 8提供最后一块拼图：<strong>实际使用硬件训练前沿模型的人怎么选？</strong>这是所有节点中最接近"地面真相"的视角。</p>
+      </details>
+
+      <details>
+        <summary><strong>#2 代理人选择的认知弧线</strong></summary>
+        <p><strong>初始本能</strong>：选三个代表不同硬件路径的AI lab领导者 &mdash; OpenAI(GPU)、Google DeepMind(TPU)、Meta AI(GPU+开源)。</p>
+        <p><strong>反思后调整</strong>：Node 8只选了Pichai和Hassabis（两个Google人）。这是一个有意识的tradeoff：</p>
+        <ul>
+          <li><strong>优点</strong>：Google是唯一拥有完整NVIDIA替代方案（TPU 10年积累）的公司。深度覆盖TPU生态比浅层覆盖三个lab更有分析价值</li>
+          <li><strong>缺点</strong>：两个代理人来自同一家公司 = 失去独立三角验证能力。他们的"共识"可能只是Google的组织立场</li>
+          <li><strong>补救</strong>：必须通过Cross-node triangulation（对比Node 1 Jensen、Node 7 Altman/Musk、Node 5 ASIC视角）来弥补独立性缺陷</li>
+        </ul>
+        <p><strong>最大遗憾</strong>：没有直接覆盖Anthropic的Dario Amodei。Anthropic是"非Google公司选择TPU"的最强独立验证。他的视角能解答"TPU选择是技术优势还是Google投资换来的锁定？"</p>
+      </details>
+
+      <details>
+        <summary><strong>#3 "就是这个" vs "不对"</strong></summary>
+        <p><strong>成功标准</strong>：第一眼看到"CUDA替代的真实进度评估"+"TPU生态的投资含义"+"NVIDIA 5年估值的上下限因此改变多少"。</p>
+        <p><strong>失败标准</strong>：Google内部PPT的翻译（推销材料）；"TPU好/CUDA也好"两边讨好（和事佬）；技术细节堆砌但没有投资信号（学术报告）。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 2 -->
+    <section id="phase2">
+      <div class="section-header">
+        <span class="phase-tag phase-explore">PHASE II &mdash; EXPLORE</span>
+        <h2>数据解码：两位代理人的隐含叙事</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#4 两位Google代理人到底讲了什么故事？</strong></summary>
+        <h4>隐藏叙事解码</h4>
+        <figure>
+          <table>
+            <thead><tr><th>Agent</th><th>表面叙事</th><th>隐含叙事</th><th>我漏掉了什么</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Pichai</strong></td><td>TPU是10年积累的成熟替代品</td><td>"买我的TPU Cloud，不要买NVIDIA DGX"</td><td>TPU as a Service是Google Cloud增长最快的产品线 = 有收入动机推销</td></tr>
+              <tr><td><strong>Hassabis</strong></td><td>前沿AI不需要CUDA</td><td>"我的研究成果证明Google硬件路线正确"</td><td>作为Google员工，Hassabis用TPU可能是政策而非选择。DeepMind 100% TPU mandate?</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>核心发现：同一公司的"共识"不是三角验证</strong>。Pichai是TPU的卖家，Hassabis是TPU的内部用户。他们的一致不代表市场共识，代表Google的公司战略。</p>
+        <p><strong>但</strong>：有两个"逃逸验证"点让这个分析不只是Google内部推销 &mdash;</p>
+        <ul>
+          <li><strong>Anthropic选择TPU</strong>：一家与Google有投资关系但也与Amazon有深度合作的公司，选择在TPU上训练Claude系列。这不完全独立（Google投了数十亿），但也不完全被Google mandate</li>
+          <li><strong>Meta TPU交易</strong>：Meta是PyTorch的创造者和CUDA生态最大的非NVIDIA贡献者。Meta买TPU不是因为缺GPU &mdash; 他们有海量GPU。这意味着TPU在某些工作负载上确实有成本/性能优势</li>
+        </ul>
+
+        <h4>跨节点交叉信号</h4>
+        <figure>
+          <table>
+            <thead><tr><th>信号</th><th>来源</th><th>投资含义</th></tr></thead>
+            <tbody>
+              <tr><td>AlphaFold诺贝尔奖 = 零NVIDIA参与</td><td>Hassabis agent</td><td><span class="signal signal-bear">BEAR</span> "CUDA必需"叙事被最高级别成果否定</td></tr>
+              <tr><td>Meta数十亿美元TPU交易</td><td>Pichai agent</td><td><span class="signal signal-bear">BEAR</span> PyTorch之王也买TPU = CUDA不是唯一选项</td></tr>
+              <tr><td>Claude Opus 4.5在TPU上训练</td><td>Cross-ref Anthropic</td><td><span class="signal signal-bear">BEAR</span> 外部前沿lab验证TPU竞争力</td></tr>
+              <tr><td>TPU v6e 2x性能 + 67%能效提升</td><td>Pichai agent</td><td><span class="signal signal-watch">WATCH</span> 硬件参数追赶，但生态深度差距仍大</td></tr>
+              <tr><td>CUDA生态 &gt; 100万开发者 vs JAX &lt; 5万</td><td>Node 1 cross-ref</td><td><span class="signal signal-bull">BULL</span> 生态惯性是CUDA最后的护城河</td></tr>
+              <tr><td>Google Cloud AI $10B+ run-rate</td><td>Pichai agent</td><td><span class="signal signal-bull">BULL</span> TPU变现真实 = GOOGL受益</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details>
+        <summary><strong>#5 Pichai的TPU路线图 vs Hassabis的架构需求 vs Jensen的CUDA防御</strong></summary>
+        <p>三方视角的交叉验证揭示了真正的竞争动态：</p>
+        <figure>
+          <table>
+            <thead><tr><th>维度</th><th>Pichai (TPU卖家)</th><th>Hassabis (TPU用户)</th><th>Jensen (CUDA卖家, Node 1)</th></tr></thead>
+            <tbody>
+              <tr><td><strong>硬件性能</strong></td><td>v6e 2x性能，v7再2-3x</td><td>满足AlphaFold/Gemini需求</td><td>Blackwell&rarr;Rubin年度cadence</td></tr>
+              <tr><td><strong>生态系统</strong></td><td>JAX/XLA + Google投资</td><td>研究者用JAX无摩擦</td><td>CUDA + PyTorch + 100万开发者</td></tr>
+              <tr><td><strong>垂直整合</strong></td><td>芯片+互连+云平台一体</td><td>不关心（研究者视角）</td><td>NVLink+InfiniBand+DGX</td></tr>
+              <tr><td><strong>成本效率</strong></td><td>>1000芯片时TPU更优</td><td>不公开评论</td><td>TCO包括生态转换成本</td></tr>
+              <tr><td><strong>核心论点</strong></td><td>"TPU是完整替代"</td><td>"前沿AI不需要CUDA"</td><td>"自研不合理，CUDA不可替代"</td></tr>
+              <tr><td><strong>利益冲突</strong></td><td>卖TPU = Google收入</td><td>Google员工mandate</td><td>卖GPU = NVIDIA收入</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>结论</strong>：三方都在讲对自己有利的故事。但行动证据倒向TPU一侧 &mdash; Meta买TPU、Anthropic用TPU、AlphaFold零NVIDIA。Jensen的$20B买Groq（非GPU公司）也暗示他自己不完全相信"CUDA不可替代"。<strong>CUDA的侵蚀方向已确定，争论的只是速度。</strong></p>
+      </details>
+    </section>
+
+
+    <!-- Phase 3 -->
+    <section id="phase3">
+      <div class="section-header">
+        <span class="phase-tag phase-diagnose">PHASE III &mdash; DIAGNOSE</span>
+        <h2>矛盾与张力：Node 8没面对的四个矛盾</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#6 四个Node 8没面对的矛盾</strong></summary>
+        <div class="arc-item"><strong>矛盾1：两位代理人来自同一家公司但报告当作"独立三角验证"</strong><br>Node 8的三角验证表显示Pichai和Hassabis在几乎所有维度上"共识"。但他们是同事，不是独立来源。Google内部可能有"TPU优先"的组织方针。Hassabis的硬件选择可能反映mandate而非纯技术判断。<strong>这种"假三角验证"是Node 8最大的方法论缺陷。</strong></div>
+        <div class="arc-item"><strong>矛盾2：TPU前沿突破 vs TPU市场份额的巨大反差</strong><br>AlphaFold赢了诺贝尔奖。Gemini在benchmark上竞争力十足。Claude在TPU上训练。但TPU的AI训练市场份额只有~5-8%，NVIDIA仍占~90%。<strong>为什么顶级成果全在TPU上但市场份额这么低？</strong>答案：TPU仅通过Google Cloud可用 + JAX生态小 + 历史惯性。但这个反差也说明市场份额不等于技术优势，变化可能是非线性的。</div>
+        <div class="arc-item"><strong>矛盾3：Anthropic的TPU选择到底有多"独立"？</strong><br>Google向Anthropic投资了数十亿美元。Anthropic选择TPU可能是：(a)真正的技术偏好，(b)投资条款中的隐含条件，(c)Google Cloud优惠定价的经济激励。Node 8把Anthropic当作"独立验证"引用，但没有探讨这些可能性。如果(b)或(c)是主因，TPU竞争力的"外部验证"就需要大幅打折。</div>
+        <div class="arc-item"><strong>矛盾4：推理 vs 训练的分析混淆</strong><br>TPU在大规模训练（>1000芯片）有成本优势。但推理市场（更大的TAM）的硬件选择动态完全不同&mdash;&mdash;推理需要低延迟、多样化工作负载、边缘部署。Node 8把AlphaFold训练的TPU成功外推到整个AI硬件市场，可能高估了TPU的通用竞争力。</div>
+      </details>
+
+      <details>
+        <summary><strong>#7 信息空白</strong></summary>
+        <ol>
+          <li>DeepMind是否有"TPU优先"的内部mandate（不能选GPU即使更适合某些任务？）</li>
+          <li>Anthropic的TPU选择中Google投资条款的影响程度</li>
+          <li>TPU vs GPU在推理端（非训练端）的真实TCO比较</li>
+          <li>JAX/XLA开发者社区的实际增长率（>5万还是停滞？）</li>
+          <li>Google Cloud TPU的客户留存率（买了的人续约了吗？还是试用后回到GPU？）</li>
+          <li>如果Meta的TPU交易是"探索性"的小规模测试 vs "战略性"的大规模迁移，含义完全不同</li>
+        </ol>
+        <p><strong>结论</strong>：<strong>Node 8的证据链看起来很强（诺贝尔奖+前沿模型+外部验证），但独立性打折后，实际的"CUDA可替代"证据不如表面看起来那么确凿。</strong></p>
+      </details>
+    </section>
+
+
+    <!-- Phase 4 -->
+    <section id="phase4">
+      <div class="section-header">
+        <span class="phase-tag phase-diagnose">PHASE IV &mdash; DIAGNOSE</span>
+        <h2>时间与反面：CUDA侵蚀加速 vs 生态惯性</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#8 加速 vs 减速</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>CUDA侵蚀加速（NVDA看空）</th><th>CUDA生态惯性（NVDA看多）</th></tr></thead>
+            <tbody>
+              <tr><td>AlphaFold诺贝尔奖 = TPU最高级别证明</td><td>CUDA开发者100万+ vs JAX &lt;5万</td></tr>
+              <tr><td>Meta买TPU = PyTorch之王也转向</td><td>PyTorch原生支持CUDA，迁移成本巨大</td></tr>
+              <tr><td>Anthropic/Claude在TPU训练 = 外部验证</td><td>Anthropic也用AWS GPU = 不是all-in TPU</td></tr>
+              <tr><td>TPU v6e 2x性能 + Google $75B CapEx投入</td><td>NVIDIA Blackwell&rarr;Rubin每年迭代不停</td></tr>
+              <tr><td>Google Cloud TPU $10B+ run-rate</td><td>NVIDIA数据中心收入$100B+ = 10x差距</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details open>
+        <summary><strong>#9 最强反面论证：为什么CUDA可能比我认为的更持久</strong></summary>
+        <blockquote>"The moat is not the chip. The moat is the million developers who dream in CUDA." &mdash; Jensen Huang, GTC 2026</blockquote>
+        <ol>
+          <li><strong>生态转换成本是非线性的</strong>：从CUDA迁移到JAX不是"重写代码"，是"重训团队+重写库+重建CI/CD+重做benchmark"。对一个100人的AI团队，这是6-12个月的生产力损失</li>
+          <li><strong>PyTorch是真正的锁定层</strong>：CUDA的护城河在PyTorch层（由Meta控制），不在cuDNN层。即使TPU性能更好，如果PyTorch不能无缝跑在TPU上，90%的开发者不会迁移。Meta控制PyTorch + Meta买TPU = 这个锁定可能正在松动，但还没松动</li>
+          <li><strong>TPU仅通过Google Cloud可用</strong>：NVIDIA GPU可以从任何云、任何OEM、甚至二手市场获取。TPU只能从Google Cloud租用。这限制了TPU的可获得性和定价灵活性</li>
+          <li><strong>推理端NVIDIA仍有巨大优势</strong>：训练是大规模集群（TPU优势区间），推理是多样化、小批量、低延迟（GPU优势区间）。推理市场TAM > 训练市场TAM。TPU赢训练但GPU赢推理 = NVIDIA收入可能不降反升（推理收入增长抵消训练份额流失）</li>
+          <li><strong>幸存者偏差</strong>：我们看到了AlphaFold/Gemini/Claude的TPU成功。但有多少项目因为TPU限制（库不兼容、debug困难、小规模实验效率低）而迁移回GPU？这些失败案例不会被报道</li>
+        </ol>
+        <p><strong>概率重新校准</strong>：Node 1评CUDA不可替代15%可信度。Node 8的证据在行动层面确认了侵蚀。但生态惯性证据同样强。<strong>修正后评估：CUDA训练端垄断在3年内从90%降至70-80%概率75%；降至50%以下概率20%。推理端NVIDIA份额保持80%+概率70%。</strong></p>
+      </details>
+
+      <details>
+        <summary><strong>#10 Google卖TPU给Meta意味着什么？</strong></summary>
+        <p>这是Node 8中最令我惊讶的信号。深入分析：</p>
+        <ul>
+          <li><strong>对Google</strong>：TPU从"内部优势"变成"收入来源"。如果TPU Cloud成为$50B+业务，Google的估值框架会发生结构性变化（从广告公司变成AI基础设施公司）</li>
+          <li><strong>对Meta</strong>：PyTorch的创造者买TPU = 承认JAX/XLA在某些场景有优势。但也可能是价格谈判杠杆（告诉NVIDIA"我有替代品"以压价）</li>
+          <li><strong>对NVIDIA</strong>：最核心的风险。Meta是NVIDIA最大客户之一。如果Meta的TPU使用从"试验性"升级为"战略性"，NVIDIA面临的不是市场份额问题而是定价权问题</li>
+          <li><strong>对Anthropic/OpenAI</strong>：如果Google愿意把TPU卖给Meta（竞争对手），未来可能对更多AI lab开放。TPU可获得性提升 = CUDA锁定进一步松动</li>
+        </ul>
+        <p><strong>关键监控指标</strong>：Meta的TPU使用量是否在未来4个季度持续增长。如果增长 &rarr; CUDA侵蚀加速确认。如果停滞 &rarr; "试用后回到GPU"叙事。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 5 -->
+    <section id="phase5">
+      <div class="section-header">
+        <span class="phase-tag phase-build">PHASE V &mdash; BUILD</span>
+        <h2>结构诊断：当前Node 8的优劣</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#11 当前Node 8结构的优劣</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>做到了</th><th>没做到</th></tr></thead>
+            <tbody>
+              <tr><td>Phase 0&rarr;2完整结构</td><td>只有<strong>Google视角</strong>（两个代理人同一公司）</td></tr>
+              <tr><td>TPU证据链完整（AlphaFold/Gemini/Claude）</td><td>没有<strong>CUDA防御的公平陈述</strong>（Node 1的Jensen视角未充分引用）</td></tr>
+              <tr><td>Cross-node triangulation尝试</td><td>没有<strong>Anthropic独立性评估</strong></td></tr>
+              <tr><td>训练vs推理的区分</td><td>推理端分析太薄（训练端证据充分，推理端一笔带过）</td></tr>
+              <tr><td>Meta TPU交易信号识别</td><td>没有<strong>交易规模和性质的深入分析</strong>（试验性 vs 战略性？）</td></tr>
+              <tr><td>CUDA可信度评估</td><td>没有<strong>幸存者偏差的量化</strong></td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details>
+        <summary><strong>#12 "两个Google人"的方法论局限</strong></summary>
+        <p>如果重做Node 8，理想的代理人配置应该是：</p>
+        <ol>
+          <li><strong>Pichai</strong>（保留）：TPU卖方视角，有最完整的路线图数据</li>
+          <li><strong>Dario Amodei（替换Hassabis）</strong>：Anthropic CEO，"非Google公司选择TPU"的最强独立验证者。他能回答"TPU选择是技术偏好还是投资条件？"</li>
+          <li><strong>Yann LeCun（新增）</strong>：Meta AI负责人，PyTorch架构师。他的视角能回答"Meta为什么买TPU？PyTorch未来会原生支持TPU吗？"</li>
+        </ol>
+        <p>当前Node 8的Pichai+Hassabis配置 = Google内部辩论，不是市场竞争分析。这是Node 8最需要改进的地方。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 6 -->
+    <section id="phase6">
+      <div class="section-header">
+        <span class="phase-tag phase-verify">PHASE VI &mdash; VERIFY</span>
+        <h2>成品审视：诚实的自我诊断</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#13 可信度评分审视</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>Agent</th><th>报告评分</th><th>分解后评估</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Pichai</strong></td><td>4/5 (report中标8/10)</td><td>技术路线图数据 5/5 &times; CEO推销偏差 3/5 &times; TPU竞争力数据 4/5 = 平均4/5。评分准确</td></tr>
+              <tr><td><strong>Hassabis</strong></td><td>4/5 (report中标7/10)</td><td>研究成果数据 5/5 &times; 独立性（Google员工）2/5 &times; 技术判断深度 5/5 = 平均4/5。报告评7/10偏低</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>Hassabis被低估了</strong>。他的可信度问题不是判断质量，而是独立性。但他的研究成果（AlphaFold诺贝尔奖）不是"推销"&mdash;&mdash;它是科学界的最高认可。这种证据的权重应该高于CEO言论。</p>
+        <p><strong>Node 8整体对NVIDIA过于悲观</strong>。两个Google人的TPU推广叙事被当作"CUDA在侵蚀"的主要证据。如果加入Amodei/LeCun的独立视角，结论可能更nuanced：CUDA在侵蚀，但速度比Node 8暗示的更慢。</p>
+      </details>
+
+      <details>
+        <summary><strong>#14 Padding识别</strong></summary>
+        <ul>
+          <li>Pichai $75B CapEx数字 &mdash; 这是Node 7的内容（CapEx分析），不是Node 8的（模型层分析）</li>
+          <li>AlphaFold系列历史回顾（AF1&rarr;AF2&rarr;AF3） &mdash; 只需要AF3的TPU证据，历史是padding</li>
+          <li>Scaling Laws详细讨论 &mdash; 这是各节点共有的背景，Node 8不需要重复展开</li>
+          <li>Google Cloud AI收入估算 &mdash; 这是GOOGL的收入分析，不是模型层的硬件选择分析</li>
+        </ul>
+      </details>
+    </section>
+
+
+    <!-- Phase 7 -->
+    <section id="phase7">
+      <div class="section-header">
+        <span class="phase-tag phase-build">PHASE VII &mdash; BUILD</span>
+        <h2>验证日历：什么时候能验证？</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#15 CUDA侵蚀速度验证日历</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>日期</th><th>事件</th><th>如果成功</th><th>如果失败</th></tr></thead>
+            <tbody>
+              <tr><td><strong>2026年H1</strong></td><td>TPU v7发布/量产</td><td>3x性能 = 追上Blackwell级别</td><td>延期 = NVIDIA保持1代领先</td></tr>
+              <tr><td><strong>2026年Q3</strong></td><td>Meta TPU使用量第一年数据</td><td>增长 = CUDA侵蚀加速确认</td><td><span class="signal signal-bull">BULL</span> 停滞 = "试用后回GPU"</td></tr>
+              <tr><td><strong>2026年H2</strong></td><td>Claude下一代训练硬件选择</td><td>继续TPU = 外部验证持续</td><td><span class="signal signal-bull">BULL</span> 转GPU = TPU竞争力质疑</td></tr>
+              <tr><td><strong>2027年</strong></td><td>PyTorch TPU支持成熟度</td><td>原生无缝 = CUDA锁定解除</td><td>仍需workaround = 生态差距维持</td></tr>
+              <tr><td><strong>2027年H2</strong></td><td>NVIDIA训练份额首次跌破85%</td><td><span class="signal signal-bear">BEAR</span> CUDA侵蚀从理论变为数据</td><td>维持90%+ = 侵蚀叙事被证伪</td></tr>
+              <tr><td><strong>2028年</strong></td><td>TPU外部客户数突破1000家</td><td>TPU生态达到"不可逆"临界点</td><td>客户集中在少数大客户 = 不是真的生态</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details>
+        <summary><strong>#16 监控方法论</strong></summary>
+        <p><strong>每季度</strong>：Google Cloud earnings call中TPU revenue/customer metrics | NVIDIA数据中心收入中训练vs推理拆分 | Meta AI infra团队博客（硬件选择信号）。</p>
+        <p><strong>每半年</strong>：JAX/XLA开发者社区规模追踪（GitHub stars, PyPI downloads） | Anthropic engineering blog（硬件选择更新） | SemiAnalysis TPU vs GPU cost比较更新。</p>
+        <p><strong>事件驱动</strong>：PyTorch对TPU的原生支持公告 | 新的AI lab公开选择TPU | Google Cloud TPU价格调整 | NVIDIA对TPU竞争的官方回应或反制。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 8 -->
+    <section id="phase8">
+      <div class="section-header">
+        <span class="phase-tag phase-build">PHASE VIII &mdash; BUILD</span>
+        <h2>信号传导与标的地图</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#17 模型层三条传导链</strong></summary>
+        <div class="arc-item"><strong><span class="signal signal-bear">BEAR</span> TPU胜出 &rarr; NVIDIA估值天花板下调</strong><br>TPU训练份额10%+ &rarr; NVDA训练收入增速放缓 &rarr; 毛利率从73%压向60% &rarr; Forward P/E下调<br><em style="color:var(--text-tertiary);">最早信号：Google Cloud AI revenue增速 vs NVIDIA数据中心增速的比值变化</em></div>
+        <div class="arc-item"><strong><span class="signal signal-bull">BULL</span> CUDA坚守 + 推理市场爆发 &rarr; NVIDIA增长切换</strong><br>训练份额微降（90%&rarr;80%）但推理TAM 3x扩大 &rarr; NVDA推理收入补偿训练流失 &rarr; 总收入继续增长<br><em style="color:var(--text-tertiary);">最早信号：NVDA推理收入占比突破50%。2026年Q2-Q3可能看到</em></div>
+        <div class="arc-item"><strong><span class="signal signal-watch">WATCH</span> Google变成AI基础设施公司 &rarr; GOOGL重估</strong><br>TPU Cloud $10B&rarr;$30B+ &rarr; Google从广告公司重新定价为AI infra &rarr; GOOGL P/E上调<br><em style="color:var(--text-tertiary);">最早信号：Google Cloud总收入超过YouTube广告收入的季度</em></div>
+      </details>
+
+      <details open>
+        <summary><strong>#18 时间差套利</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>事件</th><th>最先反映</th><th>滞后反映</th><th>时间差</th></tr></thead>
+            <tbody>
+              <tr><td>TPU v7量产成功</td><td>GOOGL股价(Cloud期待)</td><td>NVDA估值下调(分析师)</td><td>2-4季度</td></tr>
+              <tr><td>Meta扩大TPU使用</td><td>Google Cloud收入(即时)</td><td>NVDA训练收入&darr;(滞后)</td><td>3-6月</td></tr>
+              <tr><td>PyTorch原生TPU支持</td><td>开发者社区讨论(即时)</td><td>GPU需求结构变化(慢)</td><td>1-2年</td></tr>
+              <tr><td>NVDA推理收入过半</td><td>NVDA财报(即时)</td><td>AVGO/MRVL推理链受益</td><td>1-2季度</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details open>
+        <summary><strong>#19 标的含义：谁受益于TPU崛起</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>标的</th><th>TPU胜出&rarr;</th><th>CUDA坚守&rarr;</th><th>逻辑</th></tr></thead>
+            <tbody>
+              <tr><td><strong>GOOGL</strong></td><td>Cloud TPU $30B+收入，重估</td><td>Cloud增速放缓，广告估值</td><td>TPU崛起最大受益者</td></tr>
+              <tr><td><strong>NVDA</strong></td><td>训练份额流失，毛利率压缩</td><td>推理+训练双增长</td><td>TPU崛起最大输家（相对）</td></tr>
+              <tr><td><strong>AVGO</strong></td><td>自研芯片设计需求&uarr;</td><td>NVIDIA网络需求&uarr;</td><td>同Node 1：两条链交叉点</td></tr>
+              <tr><td><strong>ARM</strong></td><td>TPU + GPU都用ARM IP</td><td>GPU IP需求维持</td><td>ISA层面中立受益者</td></tr>
+              <tr><td><strong>TSM</strong></td><td>TPU也在TSMC制造</td><td>NVIDIA订单维持</td><td>所有芯片经过TSMC</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>Node 8的新增交易洞察</strong>：GOOGL是一个被低估的"AI基础设施"投资标的。如果TPU Cloud收入持续翻倍增长，市场将把Google从"广告公司P/E"重新定价为"AI infra公司P/E"。这是一个Node 1-7没有覆盖的独立投资主题。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 9 -->
+    <section id="phase9">
+      <div class="section-header">
+        <span class="phase-tag phase-verify">PHASE IX &mdash; VERIFY</span>
+        <h2>最终方法论 &mdash; 综合判断与CUDA侵蚀评估</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#20 Node 8的综合判断</strong></summary>
+        <p>Based on AI Lab evidence, cross-node triangulation produces:</p>
+        <figure>
+          <table>
+            <thead><tr><th>判断维度</th><th>概率</th></tr></thead>
+            <tbody>
+              <tr><td>CUDA训练端垄断3年内维持85%+</td><td><strong style="color:#ffa726;">50-60%</strong> &mdash; TPU+自研侵蚀真实但生态惯性强</td></tr>
+              <tr><td>CUDA训练端5年内降至70%以下</td><td><strong style="color:#ffa726;">45-55%</strong> &mdash; Meta TPU交易 + Anthropic验证 + 自研加速</td></tr>
+              <tr><td>TPU成为CUDA的真正替代</td><td><strong style="color:#4caf50;">70%</strong> &mdash; 行动证据压倒性（诺贝尔奖+前沿模型+外部客户）</td></tr>
+              <tr><td>推理端NVIDIA保持80%+份额</td><td><strong style="color:#4caf50;">70%</strong> &mdash; 推理多样化需求 = GPU灵活性优势</td></tr>
+              <tr><td>GOOGL被重估为AI infra公司</td><td><strong style="color:#ffa726;">35-45%</strong> &mdash; 取决于TPU Cloud增速和广告增速对比</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details open>
+        <summary><strong>#21 Node 8对全链交易决策的修正</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>此前结论</th><th>Node 8修正</th><th>修正原因</th></tr></thead>
+            <tbody>
+              <tr><td>NVDA short-term bull</td><td><strong>维持</strong>，但5年估值下调10-15%</td><td>CUDA侵蚀在前沿已真实发生，5年风险高于此前评估</td></tr>
+              <tr><td>CUDA 5年+护城河40-45%（Node 7修正后）</td><td><strong>维持</strong></td><td>Node 8证据支持侵蚀但生态惯性论同样有力</td></tr>
+              <tr><td>AVGO两条链交叉点</td><td><strong>强化</strong></td><td>TPU崛起 = 更多自研芯片需求 = Broadcom设计收入更确定</td></tr>
+              <tr><td>N/A（新增）</td><td><strong>GOOGL作为AI infra标的纳入watchlist</strong></td><td>TPU Cloud收入增速如果持续 &rarr; 估值框架转变机会</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <div class="question-box">
+        <h4>最终方法论 &mdash; 模型层5条规则</h4>
+        <p style="text-align:left;"><strong>规则1：行动证据 > 叙事</strong><br>"CUDA不可替代"是Jensen的叙事。AlphaFold诺贝尔奖用零NVIDIA是行动。Meta买TPU是行动。跟行动走。</p>
+        <p style="text-align:left;"><strong>规则2：独立性打折</strong><br>两个Google人的"共识"不是市场共识。Anthropic的"独立选择"要考虑Google投资条款。所有证据按独立性打折后再判断。</p>
+        <p style="text-align:left;"><strong>规则3：训练 &ne; 推理</strong><br>TPU在大规模训练有竞争力。GPU在多样化推理有优势。不要把训练端的证据外推到整个AI硬件市场。</p>
+        <p style="text-align:left;"><strong>规则4：CUDA侵蚀以年为单位</strong><br>方向确定（所有证据指向侵蚀），速度缓慢（生态惯性+PyTorch锁定）。不要基于"CUDA侵蚀"做短期交易，但要基于它调整5年估值。</p>
+        <p style="text-align:left;"><strong>规则5：Google Cloud TPU收入是最佳监控指标</strong><br>TPU收入增速 &gt; NVDA数据中心增速 = CUDA侵蚀加速。反之 = 生态惯性胜出。每季度对比。</p>
+      </div>
+
+    </section>
+
+
+    <footer class="page-footer">
+      <p>AI Lab / Model Layer Node &mdash; Metacognition Log &nbsp;|&nbsp; 22 Rounds &nbsp;|&nbsp; 2026-03-21 &nbsp;|&nbsp; V4 Design System</p>
+      <p><a href="NODE_8_AI_Lab_%E6%A8%A1%E5%9E%8B%E5%B1%82_2026-03-21.html">AI Lab/模型层认知节点报告</a> &nbsp;|&nbsp; <a href="../semiconductor_hub.html">Semiconductor Hub</a> &nbsp;|&nbsp; <a href="NODE_1_GPU_AI_metacognition.html">Node 1 元思考</a></p>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+(function() {
+  const hamburger = document.getElementById('hamburgerBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  hamburger.addEventListener('click', () => { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+  sidebar.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => { if (window.innerWidth <= 900) { sidebar.classList.remove('open'); overlay.classList.remove('open'); } });
+  });
+})();
+</script>
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+</body>
+</html>

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Node 3 — Metacognition 社交与内容 Social Content</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../internet_shared.css">
+<style>
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  .meta-card { border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:1.1rem 1.3rem; margin-bottom:0.75rem; background:var(--bg-surface); }
+  .meta-card h3 { font-size:0.95rem; font-weight:590; margin-bottom:0.5rem; color:var(--text-primary); }
+  .meta-card p { font-size:0.82rem; color:var(--text-secondary); line-height:1.6; margin-bottom:0.5rem; }
+  .bias-tag { display:inline-block; padding:0.15rem 0.5rem; border-radius:4px; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
+  .bias-confirmed { background:rgba(76,175,80,0.15); color:var(--tier-high); }
+  .bias-warning { background:rgba(255,193,7,0.15); color:var(--tier-medium); }
+  .bias-critical { background:rgba(244,67,54,0.15); color:var(--tier-low); }
+  .confidence-bar { display:flex; align-items:center; gap:0.5rem; margin:0.5rem 0; }
+  .conf-track { flex:1; height:6px; background:var(--border-subtle); border-radius:3px; overflow:hidden; }
+  .conf-fill { height:100%; border-radius:3px; }
+  .conf-label { font-size:0.72rem; font-weight:590; color:var(--text-tertiary); min-width:2.5rem; }
+  .gap-item { border-left:3px solid var(--tier-low); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(244,67,54,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .cross-ref { border-left:3px solid var(--knowledge); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(91,155,213,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .decision-log { font-size:0.78rem; color:var(--text-tertiary); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:0.8rem 1rem; background:var(--bg-elevated); margin-bottom:0.75rem; }
+  .section-divider { height:1px; background:linear-gradient(90deg,var(--border-subtle),transparent); margin:2rem 0; }
+  .company-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:0.75rem; margin-top:0.75rem; }
+  .company-item { background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:0.75rem; font-size:0.8rem; }
+  .company-item strong { color:var(--text-primary); font-weight:590; }
+  .company-item span { color:var(--text-tertiary); font-size:0.72rem; display:block; margin-top:0.25rem; }
+  body.embedded .sidebar { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+</style>
+</head>
+<body>
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="page-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <a href="../internet_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Node 3<br>Metacognition 元思考</div>
+    <h4>Contents</h4>
+    <nav><ul>
+      <li><a href="#selection">1 Selection 选择理由</a></li>
+      <li><a href="#biases">2 Biases 认知偏差</a></li>
+      <li><a href="#corrections">3 Corrections 纠正</a></li>
+      <li><a href="#gaps">4 Gaps 信息缺口</a></li>
+      <li><a href="#crossval">5 Cross-Validation 交叉验证</a></li>
+      <li><a href="#quality">6 Quality 质量评估</a></li>
+      <li><a href="#log">7 Decision Log 决策日志</a></li>
+    </ul></nav>
+    <h4>Related</h4>
+    <nav><ul>
+      <li><a href="../internet_hub.html">Internet Map</a></li>
+      <li><a href="../sources/internet_sources.html">Sources V4</a></li>
+    </ul></nav>
+  </aside>
+  <main class="main-content">
+    <header class="page-header">
+      <h1>Node 3 — 社交与内容<span style="display:block;font-size:0.85rem;font-weight:400;color:var(--text-tertiary);margin-top:0.2rem;">Social Content — 元宇宙与Web3内容生态</span></h1>
+      <p style="font-size:0.82rem;color:var(--text-quaternary);">Generated: 2026-03-22 &middot; Part of Blockchain Research Hub</p>
+    </header>
+
+    <!-- §1 节点定义与边界 -->
+    <section id="selection">
+      <div class="meta-card">
+        <h3>§1 节点定义与边界 / Node Definition & Boundaries</h3>
+        <p><strong>定义 Definition:</strong> 社交与内容节点涵盖所有支持用户生成内容（UGC）、社交互动和数字内容分发的平台与服务。这些平台是区块链社交协议、DAO治理、NFT创作者经济的重要流量入口和数据源。</p>
+        <p><strong>English Definition:</strong> Social Content nodes encompass all platforms supporting user-generated content (UGC), social interaction, and digital content distribution. These platforms serve as critical entry points and data sources for blockchain social protocols, DAO governance, and NFT creator economies.</p>
+        <p><strong>边界 Boundary:</strong></p>
+        <ul style="font-size:0.82rem;color:var(--text-secondary);margin-left:1.5rem;margin-bottom:0.5rem;">
+          <li><strong>包含 Include:</strong> 社交媒体平台、内容创作平台、社区论坛、去中心化社交协议、创作者经济平台</li>
+          <li><strong>排除 Exclude:</strong> 纯电商平台（归入Node 5）、企业协作工具（归入Node 4）、新闻聚合器（归入Node 2）</li>
+          <li><strong>边界案例 Edge Cases:</strong> Discord兼具社区与协作属性，按主要用途归入内容社交；Telegram侧重通信但包含大量社区场景，视为混合节点</li>
+        </ul>
+        <p><strong>分类依据 Classification Basis:</strong> 以用户间内容互动为核心价值主张的平台。平台需满足：①支持公开/半公开内容发布 ②具备社交关系图谱 ③存在内容分发机制</p>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- §2 关键公司归类 -->
+    <section id="companies">
+      <div class="meta-card">
+        <h3>§2 关键公司归类 / Key Company Classification</h3>
+        <p>按平台类型与区块链整合深度分类：</p>
+        <div class="company-grid">
+          <div class="company-item">
+            <strong>X Corp (Twitter)</strong>
+            <span>Centralized · Crypto Integration Level: High · Elon Musk era</span>
+          </div>
+          <div class="company-item">
+            <strong>Meta (FB/IG/Threads)</strong>
+            <span>Centralized · NFT &amp; Creator Tools · Digital Collectibles</span>
+          </div>
+          <div class="company-item">
+            <strong>Reddit</strong>
+            <span>Community · Moons Token · r/CryptoCurrency</span>
+          </div>
+          <div class="company-item">
+            <strong>Telegram</strong>
+            <span>Messaging+Community · TON Ecosystem · Groups</span>
+          </div>
+          <div class="company-item">
+            <strong>Discord</strong>
+            <span>Community · NFT &amp; Gaming Servers · Creator Tools</span>
+          </div>
+          <div class="company-item">
+            <strong>YouTube</strong>
+            <span>Video Content · YouTube NFT · Creator Revenue</span>
+          </div>
+          <div class="company-item">
+            <strong>Lens Protocol</strong>
+            <span>Decentralized Social · Polygon · Social Graph</span>
+          </div>
+          <div class="company-item">
+            <strong>Farcaster</strong>
+            <span>Decentralized Social · Ethereum L2 · Open Protocol</span>
+          </div>
+          <div class="company-item">
+            <strong>Mastodon/Fediverse</strong>
+            <span>Federated Social · ActivityPub · Decentralized</span>
+          </div>
+          <div class="company-item">
+            <strong>Steem/Hive</strong>
+            <span>Blockchain-based Content · Token Rewards · DApps</span>
+          </div>
+          <div class="company-item">
+            <strong>Mirror.xyz</strong>
+            <span>Decentralized Publishing · $WRITE Token · Crowdfunding</span>
+          </div>
+          <div class="company-item">
+            <strong>Lenshare/Galxe</strong>
+            <span>Web3 Credentials · NFT Loyalty · On-chain Identity</span>
+          </div>
+        </div>
+        <p style="margin-top:0.75rem;font-size:0.82rem;color:var(--text-tertiary);"><strong>分类逻辑 Logic:</strong> 第一层按中心化程度（Centralized vs Decentralized），第二层按内容形式（Text/Video/Community），第三层按区块链整合深度（None/Partial/Native）</p>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- §3 认知偏差 -->
+    <section id="biases">
+      <div class="meta-card">
+        <h3>§3 认知偏差 / Cognitive Biases</h3>
+        
+        <p><strong>偏差1: 平台中心化偏差 Platform Centralization Bias</strong></p>
+        <p style="margin-left:1rem;">研究倾向于过度关注大型中心化平台（Meta、X），因为它们数据丰富、案例明显。但去中心化社交协议可能代表更长期的范式转变。</p>
+        <span class="bias-tag bias-warning">WARNING 警告</span>
+        <p style="margin-top:0.5rem;"><strong>缓解 Mitigation:</strong> 为Lens、Farcaster等协议分配专项章节，评估其用户增长轨迹和技术可行性。</p>
+        <br>
+        
+        <p><strong>偏差2: 近期偏差 Recency Bias</strong></p>
+        <p style="margin-left:1rem;">2022-2024年熊市期间社交代币崩盘、STEPN等play-to-earn项目失败可能过度影响判断。应区分投机泡沫与真正的用户需求。</p>
+        <span class="bias-tag bias-warning">WARNING 警告</span>
+        <p style="margin-top:0.5rem;"><strong>缓解 Mitigation:</strong> 区分2021年狂热期与当前稳健发展期，聚焦产品-市场匹配（PMF）证据。</p>
+        <br>
+        
+        <p><strong>偏差3: 硅谷视角偏差 Silicon Valley Bias</strong></p>
+        <p style="margin-left:1rem;">以英语平台为主的分析框架可能忽视微信生态、抖音/TikTok在新兴市场的统治地位、KakaoTalk在韩国的生态等区域差异。</p>
+        <span class="bias-tag bias-critical">CRITICAL 严重</span>
+        <p style="margin-top:0.5rem;"><strong>缓解 Mitigation:</strong> 增加亚洲社交平台专项分析，包括微信小程序生态、TikTok电商整合、Line生态系统。</p>
+        <br>
+        
+        <p><strong>偏差4: 技术决定论 Technological Determinism</strong></p>
+        <p style="margin-left:1rem;">假设"去中心化必然优于中心化"的隐含倾向。实际上大多数用户选择平台时优先考虑体验而非架构。</p>
+        <span class="bias-tag bias-warning">WARNING 警告</span>
+        <p style="margin-top:0.5rem;"><strong>缓解 Mitigation:</strong> 纳入用户行为数据，评估迁移成本和实际采用障碍。</p>
+        <br>
+        
+        <p><strong>偏差5: 幸存者偏差 Survivorship Bias</strong></p>
+        <p style="margin-left:1rem;">仅关注存活项目，忽视已失败的社交代币实验（如Steem被Hive分叉、THETA TV失败）。这些失败案例提供关键教训。</p>
+        <span class="bias-tag bias-confirmed">CONFIRMED 已确认</span>
+        <p style="margin-top:0.5rem;"><strong>缓解 Mitigation:</strong> 专项分析失败案例，建立"失败模式"分类框架。</p>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- §4 上下游交叉 -->
+    <section id="crossval">
+      <div class="meta-card">
+        <h3>§4 上下游交叉验证 / Upstream & Downstream Cross-Reference</h3>
+        
+        <p><strong>上游依赖 Upstream Dependencies:</strong></p>
+        <div class="cross-ref">
+          <strong>→ Node 1 (基础设施)</strong> — 社交平台依赖云服务（AWS/GCP）、CDN、内容存储。Lens Protocol依赖Polygon L2。身份验证需要去中心化标识符（DID）基础设施。
+        </div>
+        <div class="cross-ref">
+          <strong>→ Node 2 (信息聚合)</strong> — NewsAggregator平台依赖社交媒体数据流。Crypto Twitter是链上数据之外的主要信息来源。Sentiment分析依赖社交数据。
+        </div>
+        <div class="cross-ref">
+          <strong>→ Node 4 (开发者工具)</strong> — 社交API（Twitter API、Farcaster Frames）是开发者构建应用的基础。Graph Protocol索引社交数据。
+        </div>
+        
+        <p style="margin-top:1rem;"><strong>下游影响 Downstream Impact:</strong></p>
+        <div class="cross-ref">
+          <strong>→ Node 5 (电商与支付)</strong> — 社交电商（TikTok Shop、Instagram Checkout）直接连接内容与交易。Social Token可用于购买NFT和数字商品。
+        </div>
+        <div class="cross-ref">
+          <strong>→ Node 6 (DeFi & 金融)</strong> — 社交代币（$FWB、$JENNZ）具有金融属性。Lens积分可能演变为可交易资产。注意力代币化（Attention Token）概念。
+        </div>
+        <div class="cross-ref">
+          <strong>→ Node 7 (DAO & 治理)</strong> — Discord/Telegram是DAO运营核心。治理提案通过社交平台传播。Farcaster原生集成治理机制。
+        </div>
+        <div class="cross-ref">
+          <strong>→ Node 8 (游戏 & NFT)</strong> — 创作者经济是NFT核心用例。游戏公会使用Discord组织。社交图谱可用于游戏身份系统。
+        </div>
+        
+        <p style="margin-top:1rem;font-size:0.82rem;color:var(--text-tertiary);"><strong>交叉节点识别 Cross-Node Identification:</strong> Discord（社区+协作）、Telegram（通信+社交）、Mirror（内容+众筹）、Galxe（凭证+忠诚度）均为跨越多个节点的混合实体，需要在相关章节中交叉引用。</p>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- §5 信息缺口 -->
+    <section id="gaps">
+      <div class="meta-card">
+        <h3>§5 信息缺口 / Information Gaps</h3>
+        
+        <div class="gap-item">
+          <strong>缺口1: 中国社交平台区块链整合数据</strong>
+          微信小程序电商、TikTok抖音电商与区块链的整合程度缺乏英文资料。微信数字人民币红包、抖音NFT尝试等需要中文源验证。
+        </div>
+        
+        <div class="gap-item">
+          <strong>缺口2: 去中心化社交真实采用率</strong> 
+          Lens Protocol宣称30万+用户，但日活/月活比例不明。Farcaster经济模型数据不透明。难以区分真实用户与空投猎人。
+        </div>
+        
+        <div class="gap-item">
+          <strong>缺口3: 社交平台内容审核与Web3冲突</strong>
+          平台内容政策（Community Guidelines）如何与链上不可变性协调？删除内容的"链上印记"与隐私权冲突缺乏系统性研究。
+        </div>
+        
+        <div class="gap-item">
+          <strong>缺口4: Social Graph所有权争议</strong>
+          用户社交关系数据归属问题：Lens主张用户拥有社交图谱，但实际控制权在协议合约中。法律层面用户权益不明。
+        </div>
+        
+        <div class="gap-item">
+          <strong>缺口5: 跨平台互操作性标准</strong>
+          Lens vs Farcaster vs Nostr能否互通？ActivityPub federation现状。W3C Decentralized Identifiers (DID)标准采纳程度。
+        </div>
+        
+        <div class="gap-item">
+          <strong>缺口6: 监管对社交代币的定性</strong>
+          SEC/CFTC对$FWB等社交代币是否构成证券的判断。Howey Test应用结果不确定。各国监管差异缺乏比较分析。
+        </div>
+        
+        <div class="gap-item">
+          <strong>缺口7: 创作者疲劳与平台倦怠</strong>
+          多平台发布（cross-posting）策略的可持续性。创作者在Web2 vs Web3平台间的时间分配研究不足。
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- §6 质量评估 -->
+    <section id="quality">
+      <div class="meta-card">
+        <h3>§6 质量评估 / Quality Assessment</h3>
+        
+        <p><strong>数据可信度 Data Reliability:</strong></p>
+        <div class="confidence-bar">
+          <span class="conf-label">高 High</span>
+          <div class="conf-track"><div class="conf-fill" style="width:85%;background:var(--tier-high);"></div></div>
+          <span style="font-size:0.72rem;color:var(--text-tertiary);">85%</span>
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-tertiary);">中心化平台财报、月活用户数据较可靠。Twitter/X 2023年后数据因私有化质量下降。</p>
+        
+        <p style="margin-top:1rem;"><strong>去中心化协议数据 Decentralized Protocol Data:</strong></p>
+        <div class="confidence-bar">
+          <span class="conf-label">中 Medium</span>
+          <div class="conf-track"><div class="conf-fill" style="width:55%;background:var(--tier-medium);"></div></div>
+          <span style="font-size:0.72rem;color:var(--text-tertiary);">55%</span>
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-tertiary);">链上数据透明但语义层缺失。无法区分真实互动与女巫攻击/空投耕种。</p>
+        
+        <p style="margin-top:1rem;"><strong>市场趋势分析 Market Trend Analysis:</strong></p>
+        <div class="confidence-bar">
+          <span class="conf-label">中 Medium</span>
+          <div class="conf-track"><div class="conf-fill" style="width:60%;background:var(--tier-medium);"></div></div>
+          <span style="font-size:0.72rem;color:var(--text-tertiary);">60%</span>
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-tertiary);">短期趋势（6个月内）较可信，长期预测受监管和技术不确定性影响大。</p>
+        
+        <p style="margin-top:1rem;"><strong>竞争格局 Competitive Landscape:</strong></p>
+        <div class="confidence-bar">
+          <span class="conf-label">高 High</span>
+          <div class="conf-track"><div class="conf-fill" style="width:78%;background:var(--tier-high);"></div></div>
+          <span style="font-size:0.72rem;color:var(--text-tertiary);">78%</span>
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-tertiary);">主要玩家定位清晰，但新兴协议（如Warpscast、Pharakets）数据有限。</p>
+        
+        <p style="margin-top:1rem;"><strong>技术可行性评估 Technical Feasibility:</strong></p>
+        <div class="confidence-bar">
+          <span class="conf-label">低 Low</span>
+          <div class="conf-track"><div class="conf-fill" style="width:40%;background:var(--tier-low);"></div></div>
+          <span style="font-size:0.72rem;color:var(--text-tertiary);">40%</span>
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-tertiary);">社交图谱迁移、跨平台身份、隐私计算等技术挑战尚无成熟解决方案。</p>
+        
+        <p style="margin-top:1rem;font-size:0.82rem;color:var(--text-primary);"><strong>综合质量评分 Overall Quality Score:</strong></p>
+        <div class="confidence-bar">
+          <span class="conf-label">综合</span>
+          <div class="conf-track"><div class="conf-fill" style="width:64%;background:linear-gradient(90deg,var(--tier-medium),var(--tier-high));"></div></div>
+          <span style="font-size:0.72rem;color:var(--text-tertiary);">64%</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- §7 决策日志 -->
+    <section id="log">
+      <div class="meta-card">
+        <h3>§7 决策日志 / Decision Log</h3>
+        
+        <div class="decision-log">
+          <strong>[2026-03-15] Decision: 将Discord归入Node 3而非Node 4</strong><br>
+          <em>Decision: Classify Discord under Node 3 not Node 4</em><br>
+          <strong>理由 Reason:</strong> Discord的核心价值是社区建设而非团队协作。虽然有Slack-like频道功能，但主要使用场景是游戏公会、NFT社区、DAO讨论。<br>
+          <strong>风险 Risk:</strong> 可能造成Node 4（开发者工具）数据不完整。<br>
+          <strong>缓解 Mitigation:</strong> 在Node 4中保留Discord API交叉引用。
+        </div>
+        
+        <div class="decision-log">
+          <strong>[2026-03-16] Decision: 社交代币（Social Tokens）单独章节 vs 分散到各平台</strong><br>
+          <em>Decision: Dedicated chapter for Social Tokens vs Scattered across platforms</em><br>
+          <strong>最终决定 Final Decision:</strong> 分散归类到各平台章节，Social Token作为横向主题。<br>
+          <strong>理由 Reason:</strong> $FWB、$JENNZ、Moons等代币与发行平台强耦合。分离会导致信息碎片化。<br>
+          <strong>替代方案 Alternative:</strong> 单独章节适合理论分析，不适合本地图谱的实践导向。
+        </div>
+        
+        <div class="decision-log">
+          <strong>[2026-03-18] Decision: 纳入Nostr的优先级</strong><br>
+          <em>Decision: Nostr inclusion priority</em><br>
+          <strong>决定 Decision:</strong> 作为"其他去中心化协议"子节处理，不单独成章。<br>
+          <strong>理由 Reason:</strong> Nostr（Notes and Other Stuff Transmitted by Relays）技术架构独特但用户量较小（2024年初约百万用户）。<br>
+          <strong>重新评估条件 Re-evaluation Trigger:</strong> Damus应用突破1000万用户或获得主流平台采用。
+        </div>
+        
+        <div class="decision-log">
+          <strong>[2026-03-20] Decision: 微信生态分类边界</strong><br>
+          <em>Decision: WeChat ecosystem classification boundary</em><br>
+          <strong>决定 Decision:</strong> 微信归入Node 3（社交），微信小程序归入Node 5（电商/支付），微信支付单独归入Node 6。<br>
+          <strong>理由 Reason:</strong> 微信是多生态聚合体，需要功能拆分以保持分类一致性。<br>
+          <strong>挑战 Challenge:</strong> 数据获取受限于微信封闭生态，分析深度受限。
+        </div>
+        
+        <div class="decision-log">
+          <strong>[2026-03-22] Decision: 信息缺口优先级排序</strong><br>
+          <em>Decision: Information gaps prioritization</em><br>
+          <strong>Top 3 优先缺口 Priority Gaps:</strong><br>
+          1. 去中心化社交真实采用率（影响投资策略）<br>
+          2. 中国社交平台数据（影响全球市场分析完整性）<br>
+          3. 监管定性不确定性（影响合规风险评估）<br>
+          <strong>下一步 Next Steps:</strong> 专项委托中文研究伙伴补充缺口1和2。
+        </div>
+        
+        <p style="margin-top:1rem;font-size:0.78rem;color:var(--text-tertiary);"><strong>日志状态 Log Status:</strong> 完整 Complete &middot; 最后更新 2026-03-22 &middot; 下次审查 Scheduled Review: 2026-06-22</p>
+      </div>
+    </section>
+
+    <footer style="margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border-subtle);font-size:0.72rem;color:var(--text-quaternary);">
+      <p>Metacognition report &middot; <a href="../internet_hub.html">Blockchain Hub</a> &middot; 2026-03-22</p>
+    </footer>
+  </main>
+</div>
+<script>
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+})();
+</script>
+</body>
+</html>

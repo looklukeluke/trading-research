@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blockchain Research Hub 区块链研究中枢</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="blockchain_shared.css">
+<style>
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded main { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+.reading-mode .sidebar { display: none !important; }
+.reading-mode .notes-sidebar { display: none !important; }
+.reading-mode main { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+</style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- ===== Left Sidebar ===== -->
+  <div class="sidebar">
+    <a class="back-link" href="../../observatory/weekly/2026-W12-v3.html">&larr; W12 Synthesis</a>
+
+    <h4>Blockchain Hub</h4>
+    <div class="project-meta">
+      区块链研究中枢<br>
+      8 nodes &middot; 22 agents &middot; BTC+稳定币+RWA
+    </div>
+
+    <h4>Navigate</h4>
+    <nav>
+      <ul>
+        <li><a href="#panorama">01 Industry 行业全景</a></li>
+        <li><a href="#audit" style="color:var(--accent);">02 Audit 审计+数据</a></li>
+        <li><a href="#nodes">03 Value Chain 价值链</a></li>
+        <li><a href="#agents">04 Cognitive Agents 代理人</a></li>
+        <li><a href="#reviews">05 Decision Reviews 复盘</a></li>
+        <li><a href="#sources">06 Sources 素材库</a></li>
+        <li><a href="#archive">07 Archive 归档</a></li>
+      </ul>
+    </nav>
+
+    <h4>Context 上下文</h4>
+    <nav>
+      <ul>
+        <li><a href="../../observatory/weekly/2026-W12-v3.html">W12 Weekly Synthesis</a></li>
+        <li><a href="../../observatory/weekly/projects/trading-dashboard.html">Trading Dashboard</a></li>
+        <li><a href="semiconductor_hub.html">Semiconductor Hub 半导体</a></li>
+        <li><a href="../../observatory/weekly/blockchain_signal_tracker.html" style="color:var(--green);">&#128225; Signal Tracker 信号追踪</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- ===== Main Content ===== -->
+  <main>
+
+    <h1>Blockchain Research Hub<span class="zh">区块链研究中枢 &mdash; 从BTC到稳定币到资产上链</span></h1>
+    <div class="subtitle">Top-down L3 deep dive &middot; BTC/ETH/稳定币/RWA &rarr; 8 value chain nodes &rarr; 22 cognitive agents &middot; 2026-03-21</div>
+    <div style="margin-top:0.75rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+      <a href="INDUSTRY_V3_FINAL_BTCETH_Blockchain_2026-03-21.html" style="display:inline-block;padding:0.35rem 0.85rem;border-radius:6px;font-size:0.82rem;font-weight:510;background:var(--accent-dim);color:var(--accent);border:1px solid rgba(248,168,72,0.25);text-decoration:none;">&#128209; 行业深度研究 V3-Final &rarr;</a>
+      <a href="blockchain_industry_metacognition.html" style="display:inline-block;padding:0.35rem 0.85rem;border-radius:6px;font-size:0.82rem;font-weight:510;background:var(--purple-dim);color:#ab47bc;border:1px solid rgba(171,71,188,0.25);text-decoration:none;">&#129504; 28轮行业元思考 &rarr;</a>
+      <a href="blockchain_asia_data_curation.html" style="display:inline-block;padding:0.35rem 0.85rem;border-radius:6px;font-size:0.82rem;font-weight:510;background:var(--red-dim);color:var(--red);border:1px solid rgba(244,67,54,0.25);text-decoration:none;">&#127463;&#127479; 亚洲/新兴市场数据策展 &rarr;</a>
+      <a href="blockchain_western_narrative_verification.html" style="display:inline-block;padding:0.35rem 0.85rem;border-radius:6px;font-size:0.82rem;font-weight:510;background:var(--knowledge-dim);color:var(--knowledge);border:1px solid rgba(91,155,213,0.25);text-decoration:none;">&#128269; 西方叙事反向校验 &rarr;</a>
+    </div>
+
+    <!-- Stats Strip -->
+    <div class="stats-strip">
+      <div class="stat-item"><span class="stat-value">1</span> <span class="stat-label">V3 Final Report</span></div>
+      <div class="stat-item"><span class="stat-value">8</span> <span class="stat-label">Value Chain Nodes</span></div>
+      <div class="stat-item"><span class="stat-value">22</span> <span class="stat-label">Cognitive Agents</span></div>
+      <div class="stat-item"><span class="stat-value">3</span> <span class="stat-label">Decision Reviews</span></div>
+      <div class="stat-item"><span class="stat-value">0</span> <span class="stat-label">Source Files</span></div>
+    </div>
+
+    <!-- Advisory -->
+    <div class="advisory-box">
+      <strong>Thinking Chain 思维链：</strong>"找到下一个黄金" &rarr; Top-down扫描 &rarr; 半导体SMH完成L3深度研究 &rarr; <strong>BTC/区块链是第二个深度对象</strong> &rarr; 8个价值链节点（挖矿&rarr;L1&rarr;中间件&rarr;交易所&rarr;稳定币&rarr;RWA&rarr;DeFi&rarr;监管）&rarr; 22个认知代理人 &rarr; 关键品种浮现 &rarr; 回到仪表盘监控。<br>
+      <span class="zh">This hub is the L3 industry deep-dive for blockchain, the second industry after semiconductor (SMH).</span>
+    </div>
+
+    <div class="advisory-box" style="border-left-color: var(--tier-low); background: rgba(244,67,54,0.03); margin-top:0.75rem;">
+      <strong style="color:var(--tier-low);">&#9888; Structural Bias Update 结构性偏差更新</strong><br>
+      22个代理人：美国/西方12 + 华人/亚洲6 + 欧洲2 + 独立分析师2。<strong>关键发现</strong>：矿机硬件95%中国制造（Bitmain 35-45%市占）&rarr; 类似ASML的卡脖子点；TRON 3.3亿账户是发展中市场隐形巨人，英文来源严重低估；巴西90%加密活动是稳定币美元储蓄（不是投机）；尼日利亚$921亿交易量超多数亚洲市场。
+      <span class="zh">22 agents: 12 US/West + 6 Asia/Chinese + 2 Europe + 2 Independent. Key insight: Mining hardware 95% China-made — chokepoint like ASML. TRON 330M accounts — invisible giant in developing markets.</span>
+    </div>
+
+    <!-- ═══════════ §1 行业全景 ═══════════ -->
+    <div class="section-header" id="panorama">
+      <h2><span class="section-num">01</span>Industry Panorama<span class="zh">行业全景 &mdash; BTC/区块链 V3终版</span></h2>
+    </div>
+
+    <div class="card" style="border-left: 3px solid var(--accent);">
+      <a href="INDUSTRY_V3_FINAL_BTCETH_Blockchain_2026-03-21.html" target="_blank" style="font-size:1rem;">
+        BTC/Blockchain &mdash; V3 Final Report
+      </a>
+      <div class="card-desc">
+        完整行业分析：市场规模($3.2T) &rarr; 竞争格局 &rarr; 价值链映射 &rarr; 周期定位(减半周期) &rarr; 交易信号。含Plotly交互图表。
+        <span class="zh-inline">Full industry analysis with interactive Plotly charts. BTC halving cycle + DeFi + stablecoin + RWA landscape.</span>
+      </div>
+      <div class="card-meta">INDUSTRY_V3_FINAL_BTCETH_Blockchain_2026-03-21.html &middot; Plotly + Jinja2</div>
+    </div>
+
+    <div class="card">
+      <a href="THINKING_blockchain_first_principles_2026-03-21.html" target="_blank">
+        Blockchain First Principles Thinking 区块链第一性原理
+      </a>
+      <div class="card-desc">为什么BTC/区块链是第二个深度研究对象？从黄金成功经验&rarr;半导体验证&rarr;加密资产的周期特性推导。</div>
+      <div class="card-meta">Thinking document &middot; 待创建</div>
+    </div>
+
+    <!-- ═══════════ §2 审计与数据 ═══════════ -->
+    <div class="section-header" id="audit">
+      <h2><span class="section-num">02</span>Audit &amp; Data<span class="zh">完整性审计 + 链上数据 + 信息源对标</span></h2>
+    </div>
+
+    <div class="grid-2">
+      <div class="card" style="border-left: 3px solid var(--accent);">
+        <a href="blockchain_research_curation.html" target="_blank" style="font-size:0.95rem;">
+          &#128202; 信息源策展 + 缺口分析
+        </a>
+        <div class="card-desc">
+          链上分析(Glassnode/Dune) &middot; 宏观策略(Lyn Alden/Nic Carter) &middot; 行业媒体(The Block/CoinDesk) &middot; 中文来源(PANews/吴说区块链)
+          <span class="zh-inline">On-chain analytics + macro strategy + industry media + Chinese sources curation</span>
+        </div>
+        <div class="card-meta">待创建 &middot; V4模板</div>
+      </div>
+      <div class="card" style="border-left: 3px solid #4caf50;">
+        <a href="blockchain_financials.html" target="_blank" style="font-size:0.95rem;">
+          &#128200; 链上数据仪表盘
+        </a>
+        <div class="card-desc">
+          BTC/ETH/SOL链上指标 &middot; TVL趋势 &middot; 稳定币流通量 &middot; 交易所净流入 &middot; 矿工收入
+          <span class="zh-inline">On-chain metrics: TVL, stablecoin supply, exchange flows, miner revenue</span>
+        </div>
+        <div class="card-meta">待创建 &middot; Plotly交互图表</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:1rem;">
+      <div class="card" style="border-left: 3px solid #4caf50; grid-column: 1 / -1;">
+        <a href="../../observatory/weekly/blockchain_signal_tracker.html" target="_blank" style="font-size:0.95rem;">
+          &#128225; 区块链产业信号追踪器 Signal Tracker
+        </a>
+        <div class="card-desc">
+          减半周期追踪 &middot; ETF资金流 &middot; 稳定币供应量 &middot; DeFi TVL &middot; 监管事件日历 &middot; 矿工投降指标
+          <span class="zh-inline">Halving cycle + ETF flows + stablecoin supply + DeFi TVL + regulatory calendar + miner capitulation signals</span>
+        </div>
+        <div class="card-meta">待创建 &middot; 基于22代理人+8节点认知积累</div>
+      </div>
+    </div>
+
+    <!-- ═══════════ §3 价值链节点 ═══════════ -->
+    <div class="section-header" id="nodes">
+      <h2><span class="section-num">03</span>Value Chain Nodes<span class="zh">价值链节点 (8) &mdash; 从挖矿到监管</span></h2>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <a href="nodes/NODE_1_挖矿与能源_2026-03-22.html" target="_blank">NODE 1: 挖矿与能源</a>
+        <div class="card-desc">MARA/RIOT/CORZ + Bitmain(35-45%)/MicroBT(25%)/Canaan(15%) &middot; 矿机95%中国制造</div>
+        <div class="card-meta">50KB &middot; V4 Cognitive Node Report &middot; <a href="nodes/NODE_1_mining_metacognition.html" target="_blank" style="color:var(--accent);">&#129504; 元思考</a></div>
+      </div>
+      <div class="card">
+        <a href="nodes/NODE_2_L1协议_2026-03-22.html" target="_blank">NODE 2: L1协议</a>
+        <div class="card-desc">BTC/ETH/SOL/AVAX + TRON(3.3亿账户)/Conflux(合规链)/Sui/Aptos</div>
+        <div class="card-meta">50KB &middot; V4 Cognitive Node Report &middot; <a href="nodes/NODE_2_L1_metacognition.html" target="_blank" style="color:var(--accent);">&#129504; 元思考</a></div>
+      </div>
+      <div class="card">
+        <a href="nodes/NODE_3_中间件与预言机_2026-03-22.html" target="_blank">NODE 3: 中间件与预言机</a>
+        <div class="card-desc">Chainlink/LayerZero/The Graph + Band(泰国)/Pyth(亚洲数据)</div>
+        <div class="card-meta">V4 Cognitive Node Report &middot; <a href="nodes/NODE_3_middleware_metacognition.html" target="_blank" style="color:var(--accent);">&#129504; 元思考</a></div>
+      </div>
+      <div class="card">
+        <a href="nodes/NODE_4_交易所与托管_2026-03-22.html" target="_blank">NODE 4: 交易所与托管</a>
+        <div class="card-desc">Coinbase/Uniswap/BlackRock ETF + Upbit(韩$8.44亿/日)/OKX/Bybit/Bitget(120M用户)/HashKey(港)</div>
+        <div class="card-meta">V4 Cognitive Node Report &middot; <a href="nodes/NODE_4_exchange_metacognition.html" target="_blank" style="color:var(--accent);">&#129504; 元思考</a></div>
+      </div>
+      <div class="card">
+        <a href="nodes/NODE_5_稳定币与支付_2026-03-22.html" target="_blank">NODE 5: 稳定币与支付</a>
+        <div class="card-desc">USDT(64%)/USDC/PYUSD/DAI + e-CNY(35亿笔/$2.4T)/JPYC/韩元稳定币(8行筹备)</div>
+        <div class="card-meta">V4 Cognitive Node Report &middot; <a href="nodes/NODE_5_stablecoin_metacognition.html" target="_blank" style="color:var(--accent);">&#129504; 元思考</a></div>
+      </div>
+      <div class="card">
+        <a href="nodes/NODE_6_RWA代币化_2026-03-22.html" target="_blank">NODE 6: RWA代币化</a>
+        <div class="card-desc">Ondo/Securitize/BUIDL + SIX(瑞士)/DekaBank/新加坡Guardian/香港Ensemble</div>
+        <div class="card-meta">V4 Cognitive Node Report &middot; <a href="nodes/NODE_6_RWA_metacognition.html" target="_blank" style="color:var(--accent);">&#129504; 元思考</a></div>
+      </div>
+      <div class="card">
+        <a href="nodes/NODE_7_DeFi应用层_2026-03-22.html" target="_blank">NODE 7: DeFi应用层</a>
+        <div class="card-desc">Aave/Uniswap/Lido + PancakeSwap(亚洲最大)/DODO(中国PMM)/TRON DeFi</div>
+        <div class="card-meta">V4 Cognitive Node Report &middot; <a href="nodes/NODE_7_DeFi_metacognition.html" target="_blank" style="color:var(--accent);">&#129504; 元思考</a></div>
+      </div>
+      <div class="card" style="border-left:2px solid var(--tier-low);">
+        <a href="nodes/NODE_8_监管与政策_2026-03-22.html" target="_blank">NODE 8: 监管与政策 <span style="font-size:0.7rem;color:var(--tier-low);">地缘维度</span></a>
+        <div class="card-desc">SEC/CFTC(美) + EU MiCA + 日本FSA + 新加坡MAS + 香港SFC(12牌照) + 韩国FSC + 迪拜VARA + 中国(全面禁令)</div>
+        <div class="card-meta">V4 Cognitive Node Report &middot; <a href="nodes/NODE_8_regulation_metacognition.html" target="_blank" style="color:var(--accent);">&#129504; 元思考</a></div>
+      </div>
+    </div>
+
+    <!-- ═══════════ §4 认知代理人 ═══════════ -->
+    <div class="section-header" id="agents">
+      <h2><span class="section-num">04</span>Cognitive Agents<span class="zh">认知代理人 (22) &mdash; 按价值链节点分组</span></h2>
+    </div>
+
+    <!-- NODE 1: 挖矿与能源 -->
+    <div class="node-group-label">NODE 1 &mdash; 挖矿与能源 Mining &amp; Energy</div>
+    <div class="grid-3">
+      <div class="agent-card">
+        <div class="agent-num">#11 A档</div>
+        <div class="agent-name"><a href="blockchain_agents/11_fred_thiel.html" target="_blank">Fred Thiel</a></div>
+        <div class="agent-role">CEO &middot; Marathon Digital</div>
+        <div class="agent-company">MARA &middot; 最大上市矿企</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">3/5</span></div></div>
+        <div class="agent-sources"><a href="blockchain_agents/sources_11_thiel_v4.html" target="_blank">素材策展地图 V4 &rarr;</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="blockchain_agents/11_fred_thiel_metacognition.html" target="_blank" style="color:var(--knowledge);">元思考过程 &rarr;</a></div>
+      </div>
+      <div class="agent-card" style="border-color:rgba(244,67,54,0.3);background:rgba(244,67,54,0.02);">
+        <div class="agent-num" style="color:var(--tier-low);">#17 B档 &#127464;&#127475;</div>
+        <div class="agent-name"><a href="blockchain_agents/17_jihan_wu.html" target="_blank">吴忌寒 Jihan Wu</a></div>
+        <div class="agent-role">Co-founder &middot; Bitmain</div>
+        <div class="agent-company">比特大陆 &middot; 矿机行业缔造者 &middot; 35-45%市占</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">2/5</span></div></div>
+        <div class="agent-sources"><a href="blockchain_agents/sources_17_jihan_wu_v4.html" target="_blank">素材策展地图 V4 &rarr;</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="blockchain_agents/17_jihan_wu_metacognition.html" target="_blank" style="color:var(--knowledge);">元思考过程 &rarr;</a></div>
+      </div>
+    </div>
+
+    <!-- NODE 2: L1协议 -->
+    <div class="node-group-label">NODE 2 &mdash; L1协议 Layer 1 Protocols</div>
+    <div class="grid-3">
+      <div class="agent-card">
+        <div class="agent-num">#03 A档</div>
+        <div class="agent-name"><a href="blockchain_agents/03_vitalik_buterin.html" target="_blank">Vitalik Buterin</a></div>
+        <div class="agent-role">Co-founder &middot; Ethereum</div>
+        <div class="agent-company">ETH &middot; 公共知识分子 &middot; Layer 2 scaling</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><span class="dot-label">5/5</span></div></div>
+        <div class="agent-sources"><a href="blockchain_agents/sources_03_vitalik_v4.html" target="_blank">素材策展地图 V4 &rarr;</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="blockchain_agents/03_vitalik_buterin_metacognition.html" target="_blank" style="color:var(--knowledge);">元思考过程 &rarr;</a></div>
+      </div>
+      <div class="agent-card" style="border-color:rgba(244,67,54,0.3);background:rgba(244,67,54,0.02);">
+        <div class="agent-num" style="color:var(--tier-low);">#14 B档 &#127464;&#127475;</div>
+        <div class="agent-name"><a href="blockchain_agents/14_justin_sun.html" target="_blank">孙宇晨 Justin Sun</a></div>
+        <div class="agent-role">Founder &middot; TRON</div>
+        <div class="agent-company">TRX &middot; 3.3亿账户 &middot; 发展中市场巨人</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">3/5</span></div></div>
+        <div class="agent-sources"><a href="blockchain_agents/sources_14_justin_sun_v4.html" target="_blank">素材策展地图 V4 &rarr;</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="blockchain_agents/14_justin_sun_metacognition.html" target="_blank" style="color:var(--knowledge);">元思考过程 &rarr;</a></div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">#19 C档</div>
+        <div class="agent-name"><a href="blockchain_agents/19_satoshi_nakamoto.html" target="_blank">中本聪 Satoshi Nakamoto</a></div>
+        <div class="agent-role">Creator &middot; Bitcoin</div>
+        <div class="agent-company">BTC &middot; 仅历史档案 &middot; 身份未知</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><span class="dot-label">5/5</span></div></div>
+        <div class="agent-sources"><a href="blockchain_agents/sources_19_satoshi_v4.html" target="_blank">素材策展地图 V4 &rarr;</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="blockchain_agents/19_satoshi_metacognition.html" target="_blank" style="color:var(--knowledge);">元思考过程 &rarr;</a></div>
+      </div>
+    </div>
+
+    <!-- NODE 3: 中间件与预言机 -->
+    <div class="node-group-label">NODE 3 &mdash; 中间件与预言机 Middleware &amp; Oracles</div>
+    <div class="grid-3">
+      <div class="agent-card">
+        <div class="agent-num">#10 B档</div>
+        <div class="agent-name"><a href="blockchain_agents/10_sergey_nazarov.html" target="_blank">Sergey Nazarov</a></div>
+        <div class="agent-role">Co-founder &middot; Chainlink</div>
+        <div class="agent-company">LINK &middot; 70%+ DeFi预言机份额</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><span class="dot-label">4/5</span></div></div>
+        <div class="agent-sources"><a href="blockchain_agents/sources_10_nazarov_v4.html" target="_blank">素材策展地图 V4 &rarr;</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="blockchain_agents/10_sergey_nazarov_metacognition.html" target="_blank" style="color:var(--knowledge);">元思考过程 &rarr;</a></div>
+      </div>
+    </div>
+
+    <!-- NODE 4: 交易所与托管 -->
+    <div class="node-group-label">NODE 4 &mdash; 交易所与托管 Exchanges &amp; Custody</div>
+    <div class="grid-3">
+      <div class="agent-card">
+        <div class="agent-num">#01 A档</div>
+        <div class="agent-name"><a href="blockchain_agents/01_michael_saylor.html" target="_blank">Michael Saylor</a></div>
+        <div class="agent-role">Executive Chairman &middot; Strategy (MicroStrategy)</div>
+        <div class="agent-company">MSTR &middot; 628K+ BTC &middot; 最大企业持有者</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><span class="dot-label">5/5</span></div></div>
+        <div class="agent-sources"><a href="blockchain_agents/sources_01_saylor_v4.html" target="_blank">素材策展地图 V4 &rarr;</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="blockchain_agents/01_michael_saylor_metacognition.html" target="_blank" style="color:var(--knowledge);">元思考过程 &rarr;</a></div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">#02 A档</div>
+        <div class="agent-name"><a href="blockchain_agents/02_brian_armstrong.html" target="_blank">Brian Armstrong</a></div>
+        <div class="agent-role">CEO &middot; Coinbase</div>
+        <div class="agent-company">COIN &middot; 最大美国交易所 &middot; 合规先驱</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><span class="dot-label">5/5</span></div></div>
+        <div class="agent-sources"><a href="blockchain_agents/sources_02_armstrong_v4.html" target="_blank">素材策展地图 V4 &rarr;</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="blockchain_agents/02_brian_armstrong_metacognition.html" target="_blank" style="color:var(--knowledge);">元思考过程 &rarr;</a></div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">#04 A档</div>
+        <div class="agent-name"><a href="blockchain_agents/04_larry_fink.html" target="_blank">Larry Fink</a></div>
+        <div class="agent-role">CEO &middot; BlackRock</div>
+        <div class="agent-company">BLK &middot; $11.5T AUM &middot; 771K BTC via iShares</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><span class="dot-label">5/5</span></div></div>
+        <div class="agent-sources"><a href="blockchain_agents/sources_04_larry_fink_v4.html" target="_blank">素材策展地图 V4 &rarr;</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="blockchain_agents/04_larry_fink_metacognition.html" target="_blank" style="color:var(--knowledge);">元思考过程 &rarr;</a></div>
+      </div>
+      <div class="agent-card" style="border-color:rgba(244,67,54,0.3);background:rgba(244,67,54,0.02);">
+        <div class="agent-num" style="color:var(--tier-low);">#08 B档 &#127464;&#127475;</div>
+        <div class="agent-name"><a href="blockchain_agents/08_cz.html" target="_blank">CZ 赵长鹏</a></div>
+        <div class="agent-role">Founder &middot; Binance</div>
+        <div class="agent-company">BNB &middot; 全球最大交易所 &middot; 华人/新加坡</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><span class="dot-label">4/5</span></div></div>
+        <div class="agent-sources"><a href="blockchain_agents/sources_08_cz_v4.html" target="_blank">素材策展地图 V4 &rarr;</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="blockchain_agents/08_cz_metacognition.html" target="_blank" style="color:var(--knowledge);">元思考过程 &rarr;</a></div>
+      </div>
+      <div class="agent-card" style="border-color:rgba(244,67,54,0.3);background:rgba(244,67,54,0.02);">
+        <div class="agent-num" style="color:var(--tier-low);">#13 B档 &#127464;&#127475;</div>
+        <div class="agent-name"><a href="blockchain_agents/13_gracy_chen.html" target="_blank">Gracy Chen</a></div>
+        <div class="agent-role">CEO &middot; Bitget</div>
+        <div class="agent-company">Bitget &middot; 120M用户 &middot; 女性领导者</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">3/5</span></div></div>
+        <div class="agent-sources"><a href="blockchain_agents/sources_13_gracy_chen_v4.html" target="_blank">素材策展地图 V4 &rarr;</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="blockchain_agents/13_gracy_chen_metacognition.html" target="_blank" style="color:var(--knowledge);">元思考过程 &rarr;</a></div>
+      </div>
+      <div class="agent-card" style="border-color:rgba(244,67,54,0.3);background:rgba(244,67,54,0.02);">
+        <div class="agent-num" style="color:var(--tier-low);">#20 C档 &#127472;&#127479;</div>
+        <div class="agent-name"><a href="blockchain_agents/20_song_chi_hyung.html" target="_blank">宋治亨 Song Chi-Hyung</a></div>
+        <div class="agent-role">Founder &middot; Dunamu/Upbit</div>
+        <div class="agent-company">Upbit &middot; 韩国80%市场 &middot; 日均$8.44亿</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">2/5</span></div></div>
+        <div class="agent-sources"><a href="blockchain_agents/sources_20_song_v4.html" target="_blank">素材策展地图 V4 &rarr;</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="blockchain_agents/20_song_metacognition.html" target="_blank" style="color:var(--knowledge);">元思考过程 &rarr;</a></div>
+      </div>
+    </div>
+
+    <!-- NODE 5: 稳定币与支付 -->
+    <div class="node-group-label">NODE 5 &mdash; 稳定币与支付 Stablecoins &amp; Payments</div>
+    <div class="grid-3">
+      <div class="agent-card">
+        <div class="agent-num">#05 A档</div>
+        <div class="agent-name"><a href="blockchain_agents/05_jeremy_allaire.html" target="_blank">Jeremy Allaire</a></div>
+        <div class="agent-role">CEO &middot; Circle</div>
+        <div class="agent-company">USDC &middot; 已IPO &middot; 合规稳定币</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><span class="dot-label">4/5</span></div></div>
+        <div class="agent-sources"><a href="blockchain_agents/sources_05_allaire_v4.html" target="_blank">素材策展地图 V4 &rarr;</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="blockchain_agents/05_jeremy_allaire_metacognition.html" target="_blank" style="color:var(--knowledge);">元思考过程 &rarr;</a></div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">#09 B档</div>
+        <div class="agent-name"><a href="blockchain_agents/09_paolo_ardoino.html" target="_blank">Paolo Ardoino</a></div>
+        <div class="agent-role">CEO &middot; Tether</div>
+        <div class="agent-company">USDT &middot; 64%稳定币份额 &middot; $10B利润</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><span class="dot-label">4/5</span></div></div>
+        <div class="agent-sources"><a href="blockchain_agents/sources_09_ardoino_v4.html" target="_blank">素材策展地图 V4 &rarr;</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="blockchain_agents/09_paolo_ardoino_metacognition.html" target="_blank" style="color:var(--knowledge);">元思考过程 &rarr;</a></div>
+      </div>
+      <div class="agent-card" style="border-color:rgba(244,67,54,0.3);background:rgba(244,67,54,0.02);">
+        <div class="agent-num" style="color:var(--tier-low);">#21 C档 &#127464;&#127475;</div>
+        <div class="agent-name"><a href="blockchain_agents/21_zhou_xiaochuan.html" target="_blank">周小川/穆长春</a></div>
+        <div class="agent-role">数字人民币架构师 &middot; PBoC</div>
+        <div class="agent-company">e-CNY &middot; 35亿笔交易 &middot; $2.4T流通</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">2/5</span></div></div>
+        <div class="agent-sources"><a href="blockchain_agents/sources_21_ecny_v4.html" target="_blank">素材策展地图 V4 &rarr;</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="blockchain_agents/21_ecny_metacognition.html" target="_blank" style="color:var(--knowledge);">元思考过程 &rarr;</a></div>
+      </div>
+    </div>
+
+    <!-- NODE 6: RWA代币化 -->
+    <div class="node-group-label">NODE 6 &mdash; RWA代币化 Real World Assets</div>
+    <div class="grid-3">
+      <div class="agent-card">
+        <div class="agent-num">#12 B档</div>
+        <div class="agent-name"><a href="blockchain_agents/12_nathan_allman.html" target="_blank">Nathan Allman</a></div>
+        <div class="agent-role">CEO &middot; Ondo Finance</div>
+        <div class="agent-company">ONDO &middot; 60%代币化股权份额</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">3/5</span></div></div>
+        <div class="agent-sources"><a href="blockchain_agents/sources_12_allman_v4.html" target="_blank">素材策展地图 V4 &rarr;</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="blockchain_agents/12_nathan_allman_metacognition.html" target="_blank" style="color:var(--knowledge);">元思考过程 &rarr;</a></div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">#18 C档</div>
+        <div class="agent-name"><a href="blockchain_agents/18_carlos_domingo.html" target="_blank">Carlos Domingo</a></div>
+        <div class="agent-role">CEO &middot; Securitize</div>
+        <div class="agent-company">Securitize &middot; $4.6B代币化AUM</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">3/5</span></div></div>
+        <div class="agent-sources"><a href="blockchain_agents/sources_18_domingo_v4.html" target="_blank">素材策展地图 V4 &rarr;</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="blockchain_agents/18_carlos_domingo_metacognition.html" target="_blank" style="color:var(--knowledge);">元思考过程 &rarr;</a></div>
+      </div>
+    </div>
+
+    <!-- NODE 7: DeFi应用层 — 无专属代理人，通过NODE 2+4+5代理人覆盖 -->
+
+    <!-- NODE 8: 监管与政策 -->
+    <div class="node-group-label">NODE 8 &mdash; 监管与政策 Regulation &amp; Policy</div>
+    <div class="grid-3">
+      <div class="agent-card">
+        <div class="agent-num">#06 A档</div>
+        <div class="agent-name"><a href="blockchain_agents/06_hester_peirce.html" target="_blank">Hester Peirce</a></div>
+        <div class="agent-role">Commissioner &middot; SEC</div>
+        <div class="agent-company">SEC &middot; "加密妈妈" &middot; 规则制定者</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><span class="dot-label">4/5</span></div></div>
+        <div class="agent-sources"><a href="blockchain_agents/sources_06_peirce_v4.html" target="_blank">素材策展地图 V4 &rarr;</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="blockchain_agents/06_hester_peirce_metacognition.html" target="_blank" style="color:var(--knowledge);">元思考过程 &rarr;</a></div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">#15 B档</div>
+        <div class="agent-name"><a href="blockchain_agents/15_caitlin_long.html" target="_blank">Caitlin Long</a></div>
+        <div class="agent-role">CEO &middot; Custodia Bank</div>
+        <div class="agent-company">加密银行准入先驱 &middot; 怀俄明州特许</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">3/5</span></div></div>
+        <div class="agent-sources"><a href="blockchain_agents/sources_15_long_v4.html" target="_blank">素材策展地图 V4 &rarr;</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="blockchain_agents/15_caitlin_long_metacognition.html" target="_blank" style="color:var(--knowledge);">元思考过程 &rarr;</a></div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">#16 B档</div>
+        <div class="agent-name"><a href="blockchain_agents/16_david_sacks.html" target="_blank">David Sacks</a></div>
+        <div class="agent-role">White House AI/Crypto Czar</div>
+        <div class="agent-company">白宫加密/AI顾问 &middot; CLARITY法案</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot"></div><span class="dot-label">4/5</span></div></div>
+        <div class="agent-sources"><a href="blockchain_agents/sources_16_sacks_v4.html" target="_blank">素材策展地图 V4 &rarr;</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="blockchain_agents/16_david_sacks_metacognition.html" target="_blank" style="color:var(--knowledge);">元思考过程 &rarr;</a></div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">#22 C档</div>
+        <div class="agent-name"><a href="blockchain_agents/22_mica_representative.html" target="_blank">未定（欧洲MiCA代表）</a></div>
+        <div class="agent-role">MiCA Implementation &middot; EU</div>
+        <div class="agent-company">欧盟 &middot; 全球最完整加密监管框架</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><span class="dot-label">1/5</span></div></div>
+        <div class="agent-sources"><a href="blockchain_agents/sources_22_mica_v4.html" target="_blank">素材策展地图 V4 &rarr;</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="blockchain_agents/22_mica_metacognition.html" target="_blank" style="color:var(--knowledge);">元思考过程 &rarr;</a></div>
+      </div>
+    </div>
+
+    <!-- 跨节点 Cross-cutting -->
+    <div class="node-group-label">跨节点 Cross-cutting &mdash; 独立分析师 Independent Analysts</div>
+    <div class="grid-3">
+      <div class="agent-card">
+        <div class="agent-num">#07 A档</div>
+        <div class="agent-name"><a href="blockchain_agents/07_lyn_alden.html" target="_blank">Lyn Alden</a></div>
+        <div class="agent-role">Independent Analyst <span style="display:inline-block;padding:0.1rem 0.45rem;border-radius:10px;font-size:0.6rem;font-weight:590;background:var(--purple-dim);color:#ab47bc;margin-left:0.3rem;">REFERENCE 参考源</span></div>
+        <div class="agent-company">宏观-BTC周期论 &middot; 独立研究</div>
+        <div style="margin-top:0.35rem;"><div class="dot-grid"><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><div class="dot high"></div><span class="dot-label">5/5</span></div></div>
+        <div class="agent-sources"><a href="blockchain_agents/sources_07_lyn_alden_v4.html" target="_blank">素材策展地图 V4 &rarr;</a></div>
+        <div class="agent-sources" style="margin-top:0.25rem;"><a href="blockchain_agents/07_lyn_alden_metacognition.html" target="_blank" style="color:var(--knowledge);">元思考过程 &rarr;</a></div>
+      </div>
+    </div>
+
+    <!-- ═══════════ §5 交易复盘 ═══════════ -->
+    <div class="section-header" id="reviews">
+      <h2><span class="section-num">05</span>Decision Reviews<span class="zh">决策复盘 (3) &mdash; AI辅助交易分析</span></h2>
+    </div>
+
+    <div class="card">
+      <a href="ETH_AI_REVIEW_2026-03-20.html" target="_blank">ETH 3笔交易深度复盘</a>
+      <div class="card-desc">入场时机、仓位大小、FOMO回补失败解剖</div>
+      <div class="card-meta">2026-03-20 &middot; 来自半导体Hub（跨行业复盘）</div>
+    </div>
+    <div class="card">
+      <a href="AI_REVIEW_TSLA_BTC_2026-03-20.html" target="_blank">TSLA / BTC 复盘 + 品种匹配分析</a>
+      <div class="card-desc">决策复盘 + 品种-交易者兼容性评分 &middot; 周期不匹配案例</div>
+      <div class="card-meta">2026-03-20</div>
+    </div>
+    <div class="card">
+      <a href="Gold_4Trades_Decision_Review_2026-03-20.html" target="_blank">Gold 4-Trades Decision Review</a>
+      <div class="card-desc">证明论点的黄金交易：+$121K &middot; 方法论基准 &middot; BTC应学习黄金的纪律</div>
+      <div class="card-meta">2026-03-20 &middot; 方法论参考</div>
+    </div>
+
+    <!-- ═══════════ §6 素材库 ═══════════ -->
+    <div class="section-header" id="sources">
+      <h2><span class="section-num">06</span>Sources<span class="zh">素材库</span></h2>
+    </div>
+
+    <p class="muted small">代理人研究完成后，素材将集成到每个代理人名片的「素材地图&rarr;」链接中。</p>
+
+    <details class="collapsible">
+      <summary>关键数据来源（待策展）</summary>
+      <div class="detail-body">
+        <div class="card"><a>Glassnode / CryptoQuant</a> <span class="muted">链上分析</span></div>
+        <div class="card"><a>Dune Analytics</a> <span class="muted">链上仪表盘</span></div>
+        <div class="card"><a>DefiLlama</a> <span class="muted">DeFi TVL追踪</span></div>
+        <div class="card"><a>The Block Research</a> <span class="muted">行业数据+研报</span></div>
+        <div class="card"><a>Messari</a> <span class="muted">资产研究</span></div>
+        <div class="card"><a>PANews / 吴说区块链</a> <span class="muted">中文一手来源</span></div>
+        <div class="card"><a>巨潮资讯 / 东方财富</a> <span class="muted">中国上市矿企财报</span></div>
+      </div>
+    </details>
+
+    <!-- ═══════════ §7 归档 ═══════════ -->
+    <div class="section-header" id="archive">
+      <h2><span class="section-num">07</span>Archive<span class="zh">归档 &mdash; 旧版 + 相关行业</span></h2>
+    </div>
+
+    <details class="collapsible">
+      <summary>BTC/ETH 旧版报告</summary>
+      <div class="detail-body">
+        <div class="card"><a href="INDUSTRY_BTCETH_Crypto_2026-03-18.html" target="_blank">V1: BTC/ETH Crypto 2026-03-18</a> <span class="muted">&middot; 初版</span></div>
+      </div>
+    </details>
+
+    <!-- Footer -->
+    <div class="page-footer">
+      <a href="../../observatory/weekly/2026-W12-v3.html">&larr; Back to W12 Synthesis 返回周综合</a>
+      <div style="margin-top:0.5rem;">Blockchain Research Hub &middot; Part of Cognitive Observatory V3 &middot; 2026-03-21</div>
+    </div>
+
+  </main>
+
+  <!-- ===== Right Sidebar: Meta-cognitive ===== -->
+  <aside class="notes-sidebar">
+    <h4>Meta-cognitive 元思考</h4>
+
+    <div class="meta-note">
+      <div class="note-label strength">Strength</div>
+      <p>第二个完整的Top-down L3行业研究。8个价值链节点覆盖从底层（挖矿/协议）到上层（DeFi/RWA/监管）的完整链条。22个代理人包含美国+亚洲+欧洲视角，修正了英文偏见。<span class="zh">Second complete L3 deep-dive. 8 nodes from mining to regulation. 22 agents with US+Asia+Europe perspectives, correcting English-language bias.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label chain">Chain</div>
+      <p>半导体验证Top-down管道 &rarr; BTC/区块链是第二个测试 &rarr; 减半周期+ETF资金流提供可量化的交易信号 &rarr; 稳定币+RWA是真正的机构采用驱动力 &rarr; 关键品种：BTC/ETH/SOL/COIN/MSTR/MARA。<span class="zh">Semiconductor validated the pipeline → Blockchain is the second test → Halving cycle + ETF flows provide quantifiable signals.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label pattern">Key Insight</div>
+      <p>矿机硬件95%中国制造 = 类似ASML的卡脖子点。如果中国限制矿机出口，全网算力将受重大影响。这个风险在西方分析中几乎不被提及。<span class="zh">Mining hardware 95% China-made = ASML-like chokepoint. If China restricts exports, global hashrate takes a major hit. Almost never mentioned in Western analysis.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label risk">Data Transparency</div>
+      <p>中国全面禁令下的灰色活动难以量化。Tether储备审计争议持续。TRON在发展中市场的真实使用量可能远超报告数字。亚洲代理人数据质量普遍低于美国（2-3/5 vs 4-5/5）。<span class="zh">China's grey activity hard to quantify. Tether reserve audit controversy ongoing. TRON's real usage may far exceed reported figures.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label suggestion">Next Step</div>
+      <p>Hub框架已就位。下一步：逐个创建NODE报告（从NODE 1挖矿与能源开始），每个节点走Phase 0&rarr;2完整流程+28轮元思考。不要跳步。<span class="zh">Hub framework ready. Next: create NODE reports one by one (start with NODE 1 Mining), each node goes through Phase 0→2 + metacognition. Don't skip steps.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label suggestion">Coverage Gap</div>
+      <p>NODE 7 DeFi无专属代理人 &mdash; 需要Stani Kulechov(Aave)或Hayden Adams(Uniswap)。#22 MiCA代表待确定。缺失：矿池运营者(F2Pool/AntPool)、亚洲DeFi(PancakeSwap创始人)。<span class="zh">NODE 7 DeFi has no dedicated agent — needs Kulechov(Aave) or Adams(Uniswap). #22 MiCA rep TBD. Missing: mining pool operators, Asian DeFi founders.</span></p>
+    </div>
+  </aside>
+
+</div>
+
+<!-- Sidebar active state -->
+<script>
+const sections = document.querySelectorAll('.section-header[id]');
+const navLinks = document.querySelectorAll('.sidebar nav ul li a[href^="#"]');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + entry.target.id) link.classList.add('active');
+      });
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+
+<script src="../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../lib/reading-mode.js"></script>
+</body>
+</html>

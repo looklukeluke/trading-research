@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>监管与政策 — Metacognition 元思考过程</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  .meta-card { border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:1.1rem 1.3rem; margin-bottom:0.75rem; background:var(--bg-surface); }
+  .meta-card h3 { font-size:0.95rem; font-weight:590; margin-bottom:0.5rem; color:var(--text-primary); }
+  .meta-card p { font-size:0.82rem; color:var(--text-secondary); line-height:1.6; margin-bottom:0.5rem; }
+  .bias-tag { display:inline-block; padding:0.15rem 0.5rem; border-radius:4px; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
+  .bias-confirmed { background:rgba(76,175,80,0.15); color:var(--tier-high); }
+  .bias-warning { background:rgba(255,193,7,0.15); color:var(--tier-medium); }
+  .bias-critical { background:rgba(244,67,54,0.15); color:var(--tier-low); }
+  .confidence-bar { display:flex; align-items:center; gap:0.5rem; margin:0.5rem 0; }
+  .conf-track { flex:1; height:6px; background:var(--border-subtle); border-radius:3px; overflow:hidden; }
+  .conf-fill { height:100%; border-radius:3px; }
+  .conf-label { font-size:0.72rem; font-weight:590; color:var(--text-tertiary); min-width:2.5rem; }
+  .gap-item { border-left:3px solid var(--tier-low); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(244,67,54,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .cross-ref { border-left:3px solid var(--knowledge); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(91,155,213,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .decision-log { font-size:0.78rem; color:var(--text-tertiary); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:0.8rem 1rem; background:var(--bg-elevated); margin-bottom:0.75rem; }
+  body.embedded .sidebar { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+  .section-header { display:flex; align-items:center; gap:0.75rem; margin:2.5rem 0 1rem; padding-bottom:0.75rem; border-bottom:1px solid var(--border-subtle); }
+  .section-num { font-size:0.72rem; font-weight:700; color:var(--bg-base); background:var(--accent); padding:3px 10px; border-radius:4px; text-transform:uppercase; letter-spacing:0.06em; }
+  .section-title { font-size:1.15rem; font-weight:590; color:var(--text-primary); }
+  .zh-inline { font-size:0.85em; color:var(--text-tertiary); font-weight:400; }
+</style>
+</head>
+<body>
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="page-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">监管与政策<br>Metacognition 元思考</div>
+    <h4>Contents</h4>
+    <nav><ul>
+      <li><a href="#definition">&sect;1 定义与边界</a></li>
+      <li><a href="#companies">&sect;2 公司归类逻辑</a></li>
+      <li><a href="#biases">&sect;3 认知偏差</a></li>
+      <li><a href="#crossval">&sect;4 交叉影响</a></li>
+      <li><a href="#gaps">&sect;5 信息缺口</a></li>
+      <li><a href="#quality">&sect;6 质量评估</a></li>
+      <li><a href="#log">&sect;7 决策日志</a></li>
+    </ul></nav>
+    <h4>Related</h4>
+    <nav><ul>
+      <li><a href="NODE_8_监管与政策_2026-03-22.html">监管与政策 Profile</a></li>
+      <li><a href="blockchain_sources_V4.html">Sources V4</a></li>
+    </ul></nav>
+  </aside>
+  <main class="main-content">
+    <header class="page-header">
+      <h1>监管与政策 — Metacognition<span style="display:block;font-size:0.85rem;font-weight:400;color:var(--text-tertiary);margin-top:0.2rem;">元思考过程 — 研究中的认知审计</span></h1>
+      <p style="font-size:0.82rem;color:var(--text-quaternary);">Node 8 &middot; 2026-03-22 &middot; Part of Blockchain Research Hub</p>
+    </header>
+
+    <!-- §1 节点定义与边界 -->
+    <div class="section-header" id="definition">
+      <span class="section-num">§1</span>
+      <h2 class="section-title">节点定义与边界 <span class="zh-inline">Node Definition & Boundaries</span></h2>
+    </div>
+
+    <div class="meta-card">
+      <h3>为什么将"监管与政策"作为独立节点？</h3>
+      <p>监管与政策不是区块链价值链上的一个"业务层"，而是贯穿所有环节的<strong>横向基础设施</strong>。它决定了：</p>
+      <ul style="font-size:0.82rem; color:var(--text-secondary); margin:0.5rem 0; padding-left:1.2rem;">
+        <li>哪些业务可以合法运营（许可制度）</li>
+        <li>哪些产品可以向公众销售（证券法适用性）</li>
+        <li>机构资金是否可以入场（ETF/托管审批）</li>
+        <li>跨境资本流动的边界（AML/KYC要求）</li>
+      </ul>
+      <p>因此，Node 8 是所有其他节点的<strong>"背景变量"</strong>——它的状态决定其他节点的生存空间和增长速度。</p>
+    </div>
+
+    <div class="meta-card">
+      <h3>子行业边界划分</h3>
+      <p><strong>本节点覆盖：</strong></p>
+      <ul style="font-size:0.82rem; color:var(--text-secondary); margin:0.5rem 0; padding-left:1.2rem;">
+        <li>证券监管（SEC/CFTC/FSA等机构对加密资产的定性）</li>
+        <li>反洗钱合规（AML/KYC/旅行规则）</li>
+        <li>稳定币监管（储备要求、发行许可）</li>
+        <li>交易所牌照制度（国家级许可框架）</li>
+        <li>跨境监管协调（FATF、G20、IOSCO）</li>
+        <li>CBDC与加密共存政策</li>
+        <li>挖矿能源政策（环保披露、禁令）</li>
+      </ul>
+      <p><strong>本节点<em>不</em>覆盖：</strong></p>
+      <ul style="font-size:0.82rem; color:var(--text-secondary); margin:0.5rem 0; padding-left:1.2rem;">
+        <li>具体的技术协议设计（→ Node 2 L1协议）</li>
+        <li>商业运营细节（→ Node 4 交易所、Node 7 DeFi）</li>
+        <li>税务处理细节（→ 独立专题）</li>
+      </ul>
+    </div>
+
+    <div class="meta-card">
+      <h3>时间边界：为什么聚焦2025-2026？</h3>
+      <p>2025-2026年是全球加密监管的<strong>分水岭窗口</strong>：</p>
+      <ul style="font-size:0.82rem; color:var(--text-secondary); margin:0.5rem 0; padding-left:1.2rem;">
+        <li>美国：从"执法监管"转向立法（GENIUS Act/CLARITY Act）</li>
+        <li>EU：MiCA全面生效后的实际执行阶段</li>
+        <li>香港：12张牌照发放后的市场验证期</li>
+        <li>中国：禁令维持但e-CNY推进加速</li>
+      </ul>
+      <p>这个窗口期的政策选择将决定未来5-10年的行业格局，因此具有特殊的研究价值。</p>
+    </div>
+
+    <!-- §2 关键公司归类逻辑 -->
+    <div class="section-header" id="companies">
+      <span class="section-num">§2</span>
+      <h2 class="section-title">关键公司归类逻辑 <span class="zh-inline">Key Company Classification</span></h2>
+    </div>
+
+    <div class="meta-card">
+      <h3>监管节点中的"玩家"分类</h3>
+      <p>监管与政策节点中的主体分为两类：<strong>规则制定者</strong>和<strong>规则接受者</strong>。</p>
+    </div>
+
+    <div class="meta-card">
+      <h3>规则制定者（Regulators）</h3>
+      <ul style="font-size:0.82rem; color:var(--text-secondary); margin:0.5rem 0; padding-left:1.2rem;">
+        <li><strong>SEC（美国）</strong>：证券属性认定、ETF审批、执法行动</li>
+        <li><strong>CFTC（美国）</strong>：商品属性认定、衍生品监管</li>
+        <li><strong>ESMA/EBA（EU）</strong>：MiCA执行、单一护照机制</li>
+        <li><strong>SFC（香港）</strong>：牌照审批、合规监督</li>
+        <li><strong>MAS（新加坡）</strong>：沙盒机制、支付服务法案</li>
+        <li><strong>VARA（迪拜）</strong>：虚拟资产专项监管</li>
+        <li><strong>FSA（日本）</strong>：加密资产交易服务提供者注册</li>
+      </ul>
+    </div>
+
+    <div class="meta-card">
+      <h3>规则接受者（Regulated Entities）</h3>
+      <ul style="font-size:0.82rem; color:var(--text-secondary); margin:0.5rem 0; padding-left:1.2rem;">
+        <li><strong>合规交易所</strong>：Coinbase、Kraken、Galaxy Digital、HashKey、OSL</li>
+        <li><strong>稳定币发行方</strong>：Circle（USDC）、Tether（USDT）、Paxos（USDP）</li>
+        <li><strong>托管机构</strong>：Fireblocks、BitGo、Coinbase Custody、Fidelity Digital</li>
+        <li><strong>合规项目方</strong>：Ripple（XRP）、Polymatic（Polkadot）、a]6z（待SEC认定）</li>
+      </ul>
+    </div>
+
+    <div class="meta-card">
+      <h3>为什么不包含"监管科技"公司？</h3>
+      <p>Chainalysis、Elliptic、TRM Labs等区块链分析公司处于灰色地带——它们既是监管合规工具的提供者，又是监管机构的合作方。它们可以归入：</p>
+      <ul style="font-size:0.82rem; color:var(--text-secondary); margin:0.5rem 0; padding-left:1.2rem;">
+        <li>本节点（作为监管生态的一部分）</li>
+        <li>Node 3 中间件（作为基础设施服务）</li>
+      </ul>
+      <p><strong>决策：本报告将其归入Node 3中间件</strong>，因为它们提供的是技术/数据服务，而非直接参与政策制定。</p>
+    </div>
+
+    <!-- §3 认知偏差 -->
+    <div class="section-header" id="biases">
+      <span class="section-num">§3</span>
+      <h2 class="section-title">认知偏差 <span class="zh-inline">Cognitive Biases</span></h2>
+    </div>
+
+    <div class="meta-card">
+      <h3>偏差1: 英文来源偏差 <span class="bias-tag bias-critical">CRITICAL</span></h3>
+      <p><strong>定义</strong>：英文是加密行业的主要工作语言，导致研究和分析严重依赖英文来源，忽视其他语言的监管动态。</p>
+      <p><strong>本报告中的表现</strong>：</p>
+      <ul style="font-size:0.82rem; color:var(--text-secondary); margin:0.5rem 0; padding-left:1.2rem;">
+        <li>SEC/CFTC/MiCA信息丰富（英文来源充足）</li>
+        <li>日本FSA信息有限（日文资料获取困难）</li>
+        <li>韩国立法动态几乎缺失（韩文资料不足）</li>
+        <li>中国监管细节依赖二手翻译（信息衰减）</li>
+      </ul>
+      <p><strong>纠正措施</strong>：增加了香港SFC、南华早报、PANews、吴说区块链等中文来源；标记了数据质量差异。</p>
+    </div>
+
+    <div class="meta-card">
+      <h3>偏差2: 市值中心偏差 <span class="bias-tag bias-warning">WARNING</span></h3>
+      <p><strong>定义</strong>：研究聚焦于高市值资产和大型司法管辖区，忽视小市值资产和边缘市场的监管动态。</p>
+      <p><strong>本报告中的表现</strong>：</p>
+      <ul style="font-size:0.82rem; color:var(--text-secondary); margin:0.5rem 0; padding-left:1.2rem;">
+        <li>BTC/ETH/山寨币监管详尽，但meme币/隐私币监管几乎未覆盖</li>
+        <li>美国/EU/香港政策详尽，但拉美/非洲监管框架粗糙</li>
+        <li>DeFi协议监管待定，但NFT/GameFi监管缺口更大</li>
+      </ul>
+      <p><strong>纠正措施</strong>：在风险矩阵中标注了"监管碎片化持续"为高概率风险；建议关注边缘案例。</p>
+    </div>
+
+    <div class="meta-card">
+      <h3>偏差3: 幸存者偏差 <span class="bias-tag bias-critical">CRITICAL</span></h3>
+      <p><strong>定义</strong>：只分析合规成功或存活的项目，忽视被监管淘汰的项目，导致对监管影响的系统性高估。</p>
+      <p><strong>本报告中的表现</strong>：</p>
+      <ul style="font-size:0.82rem; color:var(--text-secondary); margin:0.5rem 0; padding-left:1.2rem;">
+        <li>强调Coinbase/Binance合规成功，但未充分分析被迫关闭的小交易所</li>
+        <li>强调ETF获批，但未分析被拒项目（如多个山寨币ETF）</li>
+        <li>暗示"监管明确化=利好"，但未充分分析合规成本对小型项目的杀伤力</li>
+      </ul>
+      <p><strong>纠正措施</strong>：在MiCA分析中强调"可能推动创新外迁"；在风险矩阵中标注"合规成本"为被低估的变量。</p>
+    </div>
+
+    <div class="meta-card">
+      <h3>偏差4: 近因偏差 <span class="bias-tag bias-warning">WARNING</span></h3>
+      <p><strong>定义</strong>：过度重视近期事件，忽视长期结构性趋势。</p>
+      <p><strong>本报告中的表现</strong>：</p>
+      <ul style="font-size:0.82rem; color:var(--text-secondary); margin:0.5rem 0; padding-left:1.2rem;">
+        <li>过度强调2025年美国立法（GENIUS/CLARITY Act），可能低估2028年选举周期逆转风险</li>
+        <li>强调美国监管态度转变，但忽视历史上多次"转变-逆转"循环</li>
+      </ul>
+      <p><strong>纠正措施</strong>：在风险矩阵中明确标注"SEC反转"风险；强调监管友好化的条件性。</p>
+    </div>
+
+    <div class="meta-card">
+      <h3>偏差5: 权威偏差 <span class="bias-tag bias-warning">WARNING</span></h3>
+      <p><strong>定义</strong>：过度依赖官方声明和高层表态，忽视实际执行与政策宣示之间的差距。</p>
+      <p><strong>本报告中的表现</strong>：</p>
+      <ul style="font-size:0.82rem; color:var(--text-secondary); margin:0.5rem 0; padding-left:1.2rem;">
+        <li>SEC新主席声明可信度高，但执法行动实际变化需时间验证</li>
+        <li>GENIUS Act文本清晰，但国会通过概率受政治博弈影响</li>
+        <li>MiCA法规完备，但实际执法力度尚未验证</li>
+      </ul>
+      <p><strong>纠正措施</strong>：在来源溯源中区分"官方声明"与"执行证据"；使用"行动>言论"原则评估代理人。</p>
+    </div>
+
+    <!-- §4 与上下游的交叉影响 -->
+    <div class="section-header" id="crossval">
+      <span class="section-num">§4</span>
+      <h2 class="section-title">与上下游的交叉影响 <span class="zh-inline">Cross-Node Impact</span></h2>
+    </div>
+
+    <div class="meta-card">
+      <h3>监管节点在价值链中的独特位置</h3>
+      <p>监管不是价值链上的一环，而是<strong>覆盖所有环节的横向变量</strong>。它的影响是双向的：既约束其他节点，又被其他节点的技术创新反向塑造。</p>
+    </div>
+
+    <div class="cross-ref">
+      <p><strong>&uarr; 上游影响：其他节点如何影响监管</strong></p>
+      <ul style="font-size:0.82rem; color:var(--text-secondary); margin:0.5rem 0; padding-left:1.2rem;">
+        <li><strong>Node 1 挖矿</strong>&rarr; 能源政策、环保法规 → 推动PoW禁令或碳足迹披露要求</li>
+        <li><strong>Node 2 L1协议</strong>&rarr; 技术创新（DePIN、AI+Block） → 推动监管框架更新</li>
+        <li><strong>Node 4 交易所</strong>&rarr; 托管/AML实践 → 成为监管标准的参考案例</li>
+        <li><strong>Node 5 稳定币</strong>&rarr; USDC/USDT规模 → 推动稳定币专项立法</li>
+        <li><strong>Node 6 RWA</strong>&rarr; 代币化证券规模 → 推动代币分类明确化</li>
+        <li><strong>Node 7 DeFi</strong>&rarr; 完全去中心化协议 → 推动"可调节框架"讨论</li>
+      </ul>
+    </div>
+
+    <div class="cross-ref">
+      <p><strong>&darr; 下游影响：监管如何影响其他节点</strong></p>
+      <ul style="font-size:0.82rem; color:var(--text-secondary); margin:0.5rem 0; padding-left:1.2rem;">
+        <li><strong>&rarr; Node 1 挖矿</strong>：环保法规影响运营成本；中国禁令导致算力外迁</li>
+        <li><strong>&rarr; Node 2 L1协议</strong>：证券属性认定影响代币发行和融资</li>
+        <li><strong>&rarr; Node 3 中间件</strong>：AML/KYC要求推动合规科技需求</li>
+        <li><strong>&rarr; Node 4 交易所</strong>：牌照制度决定市场准入门槛</li>
+        <li><strong>&rarr; Node 5 稳定币</strong>：GENIUS Act决定$200B+市场的合法性</li>
+        <li><strong>&rarr; Node 6 RWA</strong>：代币分类决定代币化证券的法律地位</li>
+        <li><strong>&rarr; Node 7 DeFi</strong>：DeFi合规框架决定协议能否服务零售/机构用户</li>
+      </ul>
+    </div>
+
+    <div class="meta-card">
+      <h3>关键反馈循环</h3>
+      <p><strong>循环1：ETF获批 → 机构入场 → 监管合法性确认 → 更多ETF获批</strong></p>
+      <p style="font-size:0.82rem; color:var(--text-secondary);">BTC/ETH ETF获批是监管节点对其他节点影响的最典型案例。ETF的存在需要SEC认定加密资产的"可托管性"和"价格发现机制"，这反过来确认了加密资产作为可投资资产类别的合法性。</p>
+      <p><strong>循环2：DeFi创新 → 监管空白 → 新法规制定 → DeFi被迫合规/迁移</strong></p>
+      <p style="font-size:0.82rem; color:var(--text-secondary);">Uniswap、Aave等DeFi协议的存在挑战了传统证券法的适用范围，推动监管机构制定专门框架。MiCA V2预计将覆盖DeFi。</p>
+    </div>
+
+    <!-- §5 信息缺口 -->
+    <div class="section-header" id="gaps">
+      <span class="section-num">§5</span>
+      <h2 class="section-title">信息缺口 <span class="zh-inline">Information Gaps</span></h2>
+    </div>
+
+    <div class="gap-item">
+      <p><strong>Gap 1: 中国禁令执行力度</strong></p>
+      <p style="margin-bottom:0;">中国2021年全面禁令后，OTC交易和DEX的实际规模难以量化。官方无公开数据，估算差异巨大（有人认为地下市场仍活跃，有人认为几乎消失）。需要：实地调查或内部消息源。</p>
+    </div>
+
+    <div class="gap-item">
+      <p><strong>Gap 2: MiCA实际执法力度</strong></p>
+      <p style="margin-bottom:0;">MiCA 2024年6月全面生效，但执法案例极少。ESMA的实际执法优先级和执行节奏尚未明确。需要：跟踪ESMA执法行动、EU成员国合规率数据。</p>
+    </div>
+
+    <div class="gap-item">
+      <p><strong>Gap 3: DeFi合规技术方案</strong></p>
+      <p style="margin-bottom:0;">完全去中心化协议如何在KYC/AML框架下运作仍是未解难题。现有的"预言机+合规层"方案可行性未经大规模验证。需要：跟踪Aztec、Espresso Systems等隐私/合规协议的实际部署。</p>
+    </div>
+
+    <div class="gap-item">
+      <p><strong>Gap 4: GENIUS Act最终版本</strong></p>
+      <p style="margin-bottom:0;">GENIUS Act仍在国会推进中，最终版本可能与草案有重大差异。稳定币储备要求（30%/100%/混合）尚未确定。需要：持续跟踪国会立法进程、两党谈判细节。</p>
+    </div>
+
+    <div class="gap-item">
+      <p><strong>Gap 5: 监管科技市场规模</strong></p>
+      <p style="margin-bottom:0;">区块链分析（Chainalysis、Elliptic）和合规科技市场规模无权威统计。各公司未公开详细收入数据，估算可靠性低。需要：行业报告交叉验证（如Messari、Delphi Digital）。</p>
+    </div>
+
+    <div class="gap-item">
+      <p><strong>Gap 6: 亚洲监管竞争数据</strong></p>
+      <p style="margin-bottom:0;">香港、新加坡、迪拜、日本、韩国的加密监管竞争缺乏量化指标。"吸引力"主要通过公司注册地变更来间接衡量，但数据滞后且不透明。需要：各司法管辖区加密公司注册/迁出数据。</p>
+    </div>
+
+    <div class="gap-item">
+      <p><strong>Gap 7: SEC vs CFTC管辖权演变</strong></p>
+      <p style="margin-bottom:0;">CLARITY Act试图终结SEC vs CFTC管辖混乱，但两机构的权力博弈历史深远，立法能否真正解决问题存疑。历史上多次类似尝试失败。需要：跟踪两机构在实际案件中的执法分工。</p>
+    </div>
+
+    <!-- §6 质量评估 -->
+    <div class="section-header" id="quality">
+      <span class="section-num">§6</span>
+      <h2 class="section-title">质量评估 <span class="zh-inline">Quality Assessment</span></h2>
+    </div>
+
+    <div class="meta-card">
+      <h3>研究质量维度</h3>
+      <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:1rem;">各维度的confidence评分基于：来源质量、多样性、时效性、覆盖范围的综合评估。</p>
+      
+      <div style="margin-bottom:1rem;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:0.35rem;">
+          <span style="font-size:0.82rem; font-weight:590; color:var(--text-primary);">英文来源质量 <span style="font-size:0.75rem; color:var(--text-tertiary); font-weight:400;">English Source Quality</span></span>
+          <span style="font-size:0.78rem; font-weight:600; color:var(--tier-high);">9/10</span>
+        </div>
+        <div class="confidence-bar">
+          <div class="conf-track"><div class="conf-fill" style="width:90%; background:var(--tier-high);"></div></div>
+          <span class="conf-label">High</span>
+        </div>
+        <p style="font-size:0.75rem; color:var(--text-tertiary); margin:0;">SEC/CFTC/MiCA等官方来源丰富；CoinDesk/The Block等媒体可信度高。</p>
+      </div>
+
+      <div style="margin-bottom:1rem;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:0.35rem;">
+          <span style="font-size:0.82rem; font-weight:590; color:var(--text-primary);">中文来源质量 <span style="font-size:0.75rem; color:var(--text-tertiary); font-weight:400;">Chinese Source Quality</span></span>
+          <span style="font-size:0.78rem; font-weight:600; color:var(--tier-medium);">6/10</span>
+        </div>
+        <div class="confidence-bar">
+          <div class="conf-track"><div class="conf-fill" style="width:60%; background:var(--tier-medium);"></div></div>
+          <span class="conf-label">Medium</span>
+        </div>
+        <p style="font-size:0.75rem; color:var(--text-tertiary); margin:0;">香港SFC/PANews/南华早报可信；但深度分析有限；中国内部消息源缺乏。</p>
+      </div>
+
+      <div style="margin-bottom:1rem;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:0.35rem;">
+          <span style="font-size:0.82rem; font-weight:590; color:var(--text-primary);">日韩来源覆盖 <span style="font-size:0.75rem; color:var(--text-tertiary); font-weight:400;">Japan/Korea Coverage</span></span>
+          <span style="font-size:0.78rem; font-weight:600; color:var(--tier-low);">3/10</span>
+        </div>
+        <div class="confidence-bar">
+          <div class="conf-track"><div class="conf-fill" style="width:30%; background:var(--tier-low);"></div></div>
+          <span class="conf-label">Low</span>
+        </div>
+        <p style="font-size:0.75rem; color:var(--text-tertiary); margin:0;">FSA/MAS官网英文版信息有限；日文/韩文资料获取困难。</p>
+      </div>
+
+      <div style="margin-bottom:1rem;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:0.35rem;">
+          <span style="font-size:0.82rem; font-weight:590; color:var(--text-primary);">代理人可信度 <span style="font-size:0.75rem; color:var(--text-tertiary); font-weight:400;">Agent Credibility</span></span>
+          <span style="font-size:0.78rem; font-weight:600; color:var(--tier-medium);">6/10</span>
+        </div>
+        <div class="confidence-bar">
+          <div class="conf-track"><div class="conf-fill" style="width:60%; background:var(--tier-medium);"></div></div>
+          <span class="conf-label">Medium</span>
+        </div>
+        <p style="font-size:0.75rem; color:var(--text-tertiary); margin:0;">Peirce/Sacks可信度高但立场明确；Long有利益立场；MiCA代表待定。</p>
+      </div>
+
+      <div style="margin-bottom:1rem;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:0.35rem;">
+          <span style="font-size:0.82rem; font-weight:590; color:var(--text-primary);">数据时效性 <span style="font-size:0.75rem; color:var(--text-tertiary); font-weight:400;">Data Recency</span></span>
+          <span style="font-size:0.78rem; font-weight:600; color:var(--tier-high);">8/10</span>
+        </div>
+        <div class="confidence-bar">
+          <div class="conf-track"><div class="conf-fill" style="width:80%; background:var(--tier-high);"></div></div>
+          <span class="conf-label">High</span>
+        </div>
+        <p style="font-size:0.75rem; color:var(--text-tertiary); margin:0;">核心数据基于2024-2026年最新进展；部分历史数据需交叉验证。</p>
+      </div>
+
+      <div style="margin-bottom:0;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:0.35rem;">
+          <span style="font-size:0.82rem; font-weight:590; color:var(--text-primary);">交叉验证充分度 <span style="font-size:0.75rem; color:var(--text-tertiary); font-weight:400;">Triangulation Depth</span></span>
+          <span style="font-size:0.78rem; font-weight:600; color:var(--tier-medium);">7/10</span>
+        </div>
+        <div class="confidence-bar">
+          <div class="conf-track"><div class="conf-fill" style="width:70%; background:var(--tier-medium);"></div></div>
+          <span class="conf-label">Medium</span>
+        </div>
+        <p style="font-size:0.75rem; color:var(--text-tertiary); margin:0;">官方来源+行业媒体+代理人视角三方验证；但DeFi/亚洲覆盖不足。</p>
+      </div>
+    </div>
+
+    <!-- §7 决策日志 -->
+    <div class="section-header" id="log">
+      <span class="section-num">§7</span>
+      <h2 class="section-title">决策日志 <span class="zh-inline">Decision Log</span></h2>
+    </div>
+
+    <div class="decision-log">
+      <p><strong>Decision 1: 为什么选择"监管与政策"作为独立节点？</strong></p>
+      <p>最初考虑将监管分散到各节点（交易所监管→Node 4，稳定币监管→Node 5）。但最终决定独立成节点，理由：监管是横跨所有节点的横向变量，独立节点可以更系统地分析监管对整个价值链的影响。这也符合"监管是行业最大背景变量"的判断。</p>
+      <p style="margin-bottom:0;"><em>Alternative considered: 分散到各节点 &rarr; Rejected: 无法系统分析跨节点影响</em></p>
+    </div>
+
+    <div class="decision-log">
+      <p><strong>Decision 2: 为什么不包含"监管科技"公司（Chainalysis等）？</strong></p>
+      <p>监管科技公司处于灰色地带——它们既是合规工具的提供者，又是监管机构的合作方。它们的商业模式直接依赖监管需求，理论上可以归入本节点。但最终决定将其归入Node 3中间件，理由：它们提供的是技术/数据服务，而非直接参与政策制定。</p>
+      <p style="margin-bottom:0;"><em>Alternative considered: 归入本节点 &rarr; Rejected: 偏离监管政策核心</em></p>
+    </div>
+
+    <div class="decision-log">
+      <p><strong>Decision 3: 为什么选择这4位认知代理人？</strong></p>
+      <p>选择逻辑：覆盖不同视角——监管机构内部（Peirce）、被监管方视角（Long）、政府决策层（Sacks）、国际框架（MiCA待定代表）。原本考虑加入"批评者"代理人（如加密权利组织Coin Center代表），但最终认为已通过偏差分析覆盖反对声音。</p>
+      <p style="margin-bottom:0;"><em>Alternative considered: 加入批评者代理人 &rarr; Deferred: 在偏差部分覆盖</em></p>
+    </div>
+
+    <div class="decision-log">
+      <p><strong>Decision 4: 为什么聚焦"全球监管模式竞争"而非单一司法管辖区？</strong></p>
+      <p>如果聚焦美国SEC或EU MiCA，可以更深入。但最终选择"三种模式竞争"作为核心框架，理由：这是影响整个行业格局的宏观叙事，单独分析任一司法管辖区都会失去全局视角。这也与"Node 8是所有其他节点的背景变量"的定位一致。</p>
+      <p style="margin-bottom:0;"><em>Alternative considered: 单一辖区深度分析 &rarr; Rejected: 失去宏观叙事</em></p>
+    </div>
+
+    <div class="decision-log">
+      <p><strong>Decision 5: 为什么将"中国禁令"作为重点而非边缘？</strong></p>
+      <p>加密研究社区普遍将中国排除在"监管讨论"之外（因为禁令简单明了）。但本报告认为：a）中国区块链技术仍在发展（BSN/e-CNY），b）中国地下市场无法忽略，c）香港是中国监管政策的"试验场"。因此将中国悖论作为独立主题。</p>
+      <p style="margin-bottom:0;"><em>Alternative considered: 边缘化中国（禁令=无监管讨论）&rarr; Rejected: 忽视$2T+行业的中国维度</em></p>
+    </div>
+
+    <footer style="margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border-subtle);font-size:0.72rem;color:var(--text-quaternary);">
+      <p>Metacognition report &middot; <a href="../blockchain_hub.html">Blockchain Hub</a> &middot; Node 8: 监管与政策 &middot; 2026-03-22</p>
+    </footer>
+  </main>
+</div>
+<script>
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+})();
+</script>
+</body>
+</html>

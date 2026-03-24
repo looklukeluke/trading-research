@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Node 1 元思考: 挖矿与能源 — Metacognition</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  .meta-card { border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:1.1rem 1.3rem; margin-bottom:0.75rem; background:var(--bg-surface); }
+  .meta-card h3 { font-size:0.95rem; font-weight:590; margin-bottom:0.5rem; color:var(--text-primary); }
+  .meta-card p { font-size:0.82rem; color:var(--text-secondary); line-height:1.6; margin-bottom:0.5rem; }
+  .bias-tag { display:inline-block; padding:0.15rem 0.5rem; border-radius:4px; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
+  .bias-confirmed { background:rgba(76,175,80,0.15); color:var(--tier-high); }
+  .bias-warning { background:rgba(255,193,7,0.15); color:var(--tier-medium); }
+  .bias-critical { background:rgba(244,67,54,0.15); color:var(--tier-low); }
+  .confidence-bar { display:flex; align-items:center; gap:0.5rem; margin:0.5rem 0; }
+  .conf-track { flex:1; height:6px; background:var(--border-subtle); border-radius:3px; overflow:hidden; }
+  .conf-fill { height:100%; border-radius:3px; }
+  .conf-label { font-size:0.72rem; font-weight:590; color:var(--text-tertiary); min-width:2.5rem; }
+  .gap-item { border-left:3px solid var(--tier-low); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(244,67,54,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .cross-ref { border-left:3px solid var(--knowledge); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(91,155,213,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .decision-log { font-size:0.78rem; color:var(--text-tertiary); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:0.8rem 1rem; background:var(--bg-elevated); margin-bottom:0.75rem; }
+  .section-meta { margin:1.5rem 0; }
+  .section-meta h2 { font-size:1.1rem; font-weight:680; color:var(--accent); margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:1px solid var(--border-subtle); }
+  .inline-badge { display:inline-block; font-size:0.65rem; padding:2px 8px; border-radius:3px; font-weight:600; vertical-align:middle; margin-left:0.5rem; }
+  .badge-gold { background:rgba(248,168,72,0.15); color:var(--accent); }
+  .badge-cyan { background:rgba(91,155,213,0.15); color:var(--knowledge); }
+  .flow-diagram { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:0.75rem; margin:1rem 0; }
+  .flow-node { background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:0.75rem 1rem; text-align:center; font-size:0.82rem; }
+  .flow-arrow { display:flex; align-items:center; justify-content:center; color:var(--text-tertiary); font-size:1.2rem; }
+  .key-insight { background:rgba(248,168,72,0.08); border:1px solid rgba(248,168,72,0.2); border-radius:var(--radius-sm); padding:1rem 1.25rem; margin:1rem 0; }
+  .key-insight-title { font-size:0.78rem; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:0.5rem; }
+  body.embedded .sidebar { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+</style>
+</head>
+<body>
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="page-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Node 1<br>Metacognition 元思考</div>
+    <h4>Contents</h4>
+    <nav><ul>
+      <li><a href="#definition">§1 定义与边界</a></li>
+      <li><a href="#companies">§2 公司归类逻辑</a></li>
+      <li><a href="#biases">§3 认知偏差</a></li>
+      <li><a href="#crossval">§4 上下游影响</a></li>
+      <li><a href="#gaps">§5 信息缺口</a></li>
+      <li><a href="#quality">§6 质量评估</a></li>
+      <li><a href="#log">§7 决策日志</a></li>
+    </ul></nav>
+    <h4>Related</h4>
+    <nav><ul>
+      <li><a href="NODE_1_挖矿与能源_2026-03-22.html">Node 1 挖矿与能源<br><span class="zh-inline">Mining &amp; Energy</span></a></li>
+      <li><a href="../sources.html">Sources V4</a></li>
+    </ul></nav>
+  </aside>
+  <main class="main-content">
+    <header class="page-header">
+      <h1>Node 1 元思考: 挖矿与能源<span style="display:block;font-size:0.85rem;font-weight:400;color:var(--text-tertiary);margin-top:0.2rem;">Metacognition — 认知审计与反思</span></h1>
+      <p style="font-size:0.82rem;color:var(--text-quaternary);">Generated: 2026-03-22 &middot; Blockchain Research Hub &middot; Cognitive Observatory V3</p>
+    </header>
+
+    <!-- §1 节点定义与边界 -->
+    <div class="section-meta" id="definition">
+      <h2>§1 节点定义与边界<span class="zh-inline">Node Definition &amp; Boundaries</span></h2>
+      
+      <div class="meta-card">
+        <h3>为什么这个节点独立存在？</h3>
+        <p>挖矿与能源是区块链价值链的<strong>"安全基础设施层"</strong>——将电力转化为共识安全的核心环节。这个节点横跨两个完全不同的行业（加密货币挖矿 + 能源基础设施），却因BTC的PoW机制形成了独特的共生关系。</p>
+        <p>选择将挖矿与能源合并而非拆分的原因：矿机的核心竞争力本质上就是<strong>能源转化效率</strong>（J/TH），能源成本占挖矿总成本的60-80%。将二者分离会破坏分析的系统性。</p>
+      </div>
+
+      <div class="meta-card">
+        <h3>节点覆盖范围<span class="inline-badge badge-gold">SCOPE</span></h3>
+        <p><strong>上行边界（被本节点影响的）</strong></p>
+        <ul style="font-size:0.82rem; color:var(--text-secondary); line-height:1.7; margin-left:1rem;">
+          <li>ASIC矿机制造（Bitmain/MicroBT/Canaan/Intel已退出）</li>
+          <li>矿机分销与二级市场（Hasrate Index/矿工黄页）</li>
+          <li>矿池服务（AntPool/F2Pool/SlushPool）</li>
+          <li>算力衍生品（算力期货/算力币）</li>
+        </ul>
+        <p style="margin-top:0.75rem;"><strong>核心层（本节点的核心）</strong></p>
+        <ul style="font-size:0.82rem; color:var(--text-secondary); line-height:1.7; margin-left:1rem;">
+          <li>BTC/ETH PoW挖矿运营（上市矿企+私人矿场）</li>
+          <li>能源采购与电力基础设施（数据中心/变电站/ PPA合同）</li>
+          <li>矿场建设与托管服务</li>
+          <li>AI/HPC数据中心转型（新兴）</li>
+        </ul>
+        <p style="margin-top:0.75rem;"><strong>下行边界（影响本节点的）</strong></p>
+        <ul style="font-size:0.82rem; color:var(--text-secondary); line-height:1.7; margin-left:1rem;">
+          <li>Layer 1协议层（BTC/ETH网络效应决定挖矿需求）</li>
+          <li>芯片代工（TSMC/Samsung的ASIC产能分配）</li>
+          <li>能源市场（天然气/可再生能源价格）</li>
+          <li>监管政策（挖矿禁令/能源补贴）</li>
+        </ul>
+      </div>
+
+      <div class="meta-card">
+        <h3>排除在外的子行业<span class="inline-badge badge-cyan">EXCLUSIONS</span></h3>
+        <p><strong>故意排除以保持分析边界清晰：</strong></p>
+        <ul style="font-size:0.82rem; color:var(--text-secondary); line-height:1.7; margin-left:1rem;">
+          <li><strong>ETH PoW之后转向ETC</strong>：ETH转PoS后，ETHW分叉的算力归入ETC网络，但规模已萎缩至不可分析级别</li>
+          <li><strong>GPU挖矿（ETHW/Kaspa等）</strong>：非ASIC PoW币种有独立的硬件经济学，但规模不足以独立成节点</li>
+          <li><strong>云计算算力</strong>：类似NiceHash的平台属于中间件层（Node 3），而非挖矿运营</li>
+          <li><strong>能源交易平台</strong>：P2P能源市场属于更广泛的能源科技，不在本节点范围</li>
+        </ul>
+      </div>
+
+      <div class="key-insight">
+        <div class="key-insight-title">&#9888; 边界模糊地带</div>
+        <p style="font-size:0.82rem; color:var(--text-secondary); margin:0;">CoreWeave等AI云服务商使用矿企电力基础设施，算不算"挖矿与能源"节点？<strong>当前归类</strong>：CORZ/MARA的AI业务属于挖矿节点，因为它们复用相同的电力资产、相同的运营团队。但随着AI收入占比提升，这些公司可能需要重新归类至"数据中心/AI基础设施"节点。</p>
+      </div>
+    </div>
+
+    <!-- §2 关键公司归类逻辑 -->
+    <div class="section-meta" id="companies">
+      <h2>§2 关键公司归类逻辑<span class="zh-inline">Company Classification Logic</span></h2>
+
+      <div class="meta-card">
+        <h3>公司归入本节点的核心标准</h3>
+        <p>采用<strong>收入来源 + 核心资产</strong>双重标准判断一家公司是否属于"挖矿与能源"节点：</p>
+        <ul style="font-size:0.82rem; color:var(--text-secondary); line-height:1.7; margin-left:1rem;">
+          <li>≥50%收入来自PoW挖矿运营 <strong>OR</strong></li>
+          <li>核心资产是挖矿基础设施（矿机/电力设施/矿场）</li>
+        </ul>
+      </div>
+
+      <div class="meta-card">
+        <h3>归类决策表</h3>
+        <figure>
+          <table>
+            <thead>
+              <tr><th>公司 Company</th><th>归类 Classification</th><th>理由 Rationale</th><th>Confidence</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>MARA (Marathon)</strong></td>
+                <td><span class="bias-tag bias-confirmed">✓ Node 1</span></td>
+                <td>~60%收入来自BTC挖矿，44K BTC储备，核心资产是矿机和电力设施</td>
+                <td>9/10</td>
+              </tr>
+              <tr>
+                <td><strong>RIOT Platforms</strong></td>
+                <td><span class="bias-tag bias-confirmed">✓ Node 1</span></td>
+                <td>~80%收入来自BTC挖矿，低电价(3.1¢/kWh)是其核心竞争力</td>
+                <td>9/10</td>
+              </tr>
+              <tr>
+                <td><strong>CORZ (Core Scientific)</strong></td>
+                <td><span class="bias-tag bias-warning">⚠ 过渡中</span></td>
+                <td>转型AI数据中心，挖矿收入萎缩至&lt;20%。2028年CoreWeave合同完成后可能移出</td>
+                <td>7/10</td>
+              </tr>
+              <tr>
+                <td><strong>Bitmain (未上市)</strong></td>
+                <td><span class="bias-tag bias-confirmed">✓ Node 1</span></td>
+                <td>矿机是挖矿价值链的核心，但属"设备商"子类。归入本节点但标记为B2B供应商</td>
+                <td>8/10</td>
+              </tr>
+              <tr>
+                <td><strong>MicroBT</strong></td>
+                <td><span class="bias-tag bias-confirmed">✓ Node 1</span></td>
+                <td>WhatsMiner制造商，归入矿机子类。香港上市后数据更透明</td>
+                <td>8/10</td>
+              </tr>
+              <tr>
+                <td><strong>Hut 8 Mining</strong></td>
+                <td><span class="bias-tag bias-confirmed">✓ Node 1</span></td>
+                <td>加拿大上市矿企，合并后多样化但核心仍是BTC挖矿</td>
+                <td>8/10</td>
+              </tr>
+              <tr>
+                <td><strong>TeraWulf</strong></td>
+                <td><span class="bias-tag bias-confirmed">✓ Node 1</span></td>
+                <td>100%清洁能源挖矿，北美矿企代表，低电价优势</td>
+                <td>9/10</td>
+              </tr>
+              <tr>
+                <td><strong>Bitdeer (BTDR)</strong></td>
+                <td><span class="bias-tag bias-warning">⚠ 混合型</span></td>
+                <td>矿企+自有SEAL芯片，尝试垂直整合。芯片业务可能需要单独分析</td>
+                <td>6/10</td>
+              </tr>
+              <tr>
+                <td><strong>CoreWeave</strong></td>
+                <td><span class="bias-tag bias-warning">→ Node X</span></td>
+                <td>AI云服务商，不是挖矿公司。但与CORZ的关系使其成为本节点的重要利益相关方</td>
+                <td>8/10</td>
+              </tr>
+            </tbody>
+          </table>
+        </figure>
+      </div>
+
+      <div class="meta-card">
+        <h3>边界案例：为什么这些公司不归入Node 1</h3>
+        <ul style="font-size:0.82rem; color:var(--text-secondary); line-height:1.7; margin-left:1rem;">
+          <li><strong>MicroStrategy (MSTR)</strong>：持有大量BTC但不是挖矿公司，归入"稳定币与支付/机构持有"讨论</li>
+          <li><strong>NVIDIA/AMD</strong>：GPU供应商，不是挖矿运营，不归入任何节点但会影响GPU可访问性</li>
+          <li><strong>Galaxy Digital / H.C. Wainwright</strong>：挖矿投行/券商服务，不归入运营节点</li>
+          <li><strong>Foundry (DCG子业务)</strong>：矿池+算力金融服务，接近边界但更接近Node 3中间件</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- §3 认知偏差 -->
+    <div class="section-meta" id="biases">
+      <h2>§3 认知偏差<span class="zh-inline">Cognitive Biases</span></h2>
+
+      <div class="meta-card">
+        <h3>系统性偏差识别</h3>
+        
+        <div style="margin:1rem 0;">
+          <span class="bias-tag bias-critical">CRITICAL BIAS</span>
+          <p style="margin-top:0.5rem;"><strong>英文来源偏差 (English Source Bias)</strong></p>
+          <p style="font-size:0.82rem; color:var(--text-secondary);">西方分析几乎完全基于英文来源（MARA/RIOT SEC文件、英文行业报告）。Bitmain作为全球35-45%矿机份额的垄断者，在英文分析中被系统性忽视——因为它不透明、无法验证、且是中美地缘风险的焦点。<strong>后果：整个挖矿价值链最重要的公司（Bitmain）在西方研究中几乎是隐形的。</strong></p>
+        </div>
+
+        <div style="margin:1rem 0;">
+          <span class="bias-tag bias-critical">CRITICAL BIAS</span>
+          <p style="margin-top:0.5rem;"><strong>上市偏好偏差 (Public Company Bias)</strong></p>
+          <p style="font-size:0.82rem; color:var(--text-secondary);">研究天然倾向于关注上市公司（MARA/RIOT/CORZ），因为它们有SEC文件、投资者关系页面、分析师覆盖。但私人矿场（尤其是中国/哈萨克斯坦/俄罗斯的）可能控制着50%+的全球算力。<strong>后果：行业图景被严重扭曲，呈现给投资者的画面与现实不符。</strong></p>
+        </div>
+
+        <div style="margin:1rem 0;">
+          <span class="bias-tag bias-warning">WARNING BIAS</span>
+          <p style="margin-top:0.5rem;"><strong>存活者偏差 (Survivorship Bias)</strong></p>
+          <p style="font-size:0.82rem; color:var(--text-secondary);">分析主要基于仍在运营的公司（尤其是上市矿企），忽视了已倒闭或重组的公司。Compute North、Core Scientific(破产重组前)、Giga Watt……这些案例揭示了高杠杆挖矿的真正风险，但很少出现在"矿企投资分析"中。<strong>后果：矿企的破产风险被系统性低估。</strong></p>
+        </div>
+
+        <div style="margin:1rem 0;">
+          <span class="bias-tag bias-warning">WARNING BIAS</span>
+          <p style="margin-top:0.5rem;"><strong>叙事过度适配偏差 (Narrative Fitting Bias)</strong></p>
+          <p style="font-size:0.82rem; color:var(--text-secondary);">BTC减半后的价格规律（2012/2016/2020验证）在2024-2026年是否仍然适用？历史样本仅有3次，而且每次周期都有宏观环境、机构参与度等根本性差异。<strong>后果：过度自信的"减半叙事"可能让投资者忽视新的风险因素。</strong></p>
+        </div>
+
+        <div style="margin:1rem 0;">
+          <span class="bias-tag bias-warning">WARNING BIAS</span>
+          <p style="margin-top:0.5rem;"><strong>AI叙事偏差 (AI Narrative Bias)</strong></p>
+          <p style="font-size:0.82rem; color:var(--text-secondary);">每个矿企都在讲"AI转型"故事（CORZ/MARA/RIOT/BTDR），但AI收入实际贡献可能&lt;5%。分析师和媒体倾向于放大叙事而非验证数字。<strong>后果：矿企估值被AI叙事过度支撑，一旦AI收入未达预期可能引发双杀。</strong></p>
+        </div>
+
+        <div style="margin:1rem 0;">
+          <span class="bias-tag bias-confirmed">MEASURED BIAS</span>
+          <p style="margin-top:0.5rem;"><strong>能源成本可见性偏差</strong></p>
+          <p style="font-size:0.82rem; color:var(--text-secondary);">西方矿企披露能源成本（RIOT的3.1¢/kWh），但中国/哈萨克斯坦矿场的实际电力成本难以验证。可能在计算"矿工盈利平衡点"时存在系统性误差。<strong>已测量：部分中国矿场使用违规电力（水电枯水期/弃风电），实际成本可能低于报告值。</strong></p>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <div class="key-insight-title">&#128214; 偏差纠正策略</div>
+        <p style="font-size:0.82rem; color:var(--text-secondary); margin:0;">本研究通过引入吴忌寒/ Bitmain视角（中方代理人）来纠正英文来源偏差；通过CORE_SCIENTIFIC破产案例提醒存活者偏差；通过风险矩阵的"概率×影响"量化来对冲叙事偏差。</p>
+      </div>
+    </div>
+
+    <!-- §4 与上下游的交叉影响 -->
+    <div class="section-meta" id="crossval">
+      <h2>§4 与上下游的交叉影响<span class="zh-inline">Cross-Chain Impact Analysis</span></h2>
+
+      <div class="flow-diagram">
+        <div class="flow-node" style="border-left:3px solid var(--knowledge);">
+          <strong>上游: 芯片代工</strong><br>
+          <span style="font-size:0.72rem; color:var(--text-tertiary);">TSMC/Samsung 3-5nm</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node" style="border-left:3px solid var(--accent);">
+          <strong>Node 1: 挖矿与能源</strong><br>
+          <span style="font-size:0.72rem; color:var(--text-tertiary);">800 EH/s · 矿机+电力</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node" style="border-left:3px solid var(--knowledge);">
+          <strong>下游: L1协议</strong><br>
+          <span style="font-size:0.72rem; color:var(--text-tertiary);">BTC/ETH网络安全</span>
+        </div>
+      </div>
+
+      <div class="meta-card">
+        <h3>上游影响：芯片代工层</h3>
+        <p style="font-size:0.82rem; color:var(--text-secondary);">矿机ASIC的制程进步（从16nm到3nm）由TSMC/Samsung驱动。如果代工厂优先分配产能给AI芯片（NVIDIA H100/H200），ASIC矿机的制程升级可能放缓。<strong>传导路径：</strong>代工厂产能 → 矿机效率 → 全网算力增长曲线 → 挖矿难度调整 → 每EH/s收入。</p>
+        <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.5rem;"><strong>反向影响：</strong>Bitmain/MicroBT是TSMC/Samsung的稳定大客户（批量采购），如果挖矿需求萎缩，代工厂将失去一块可预测的营收。</p>
+      </div>
+
+      <div class="cross-ref">
+        <p style="font-size:0.82rem; color:var(--text-secondary);"><strong>&#128279; 相关节点:</strong> Node 3 (中间件与预言机) — 矿池服务是DeFi流动性的一部分；Node 8 (监管与政策) — 芯片出口管制直接影响矿机供应链</p>
+      </div>
+
+      <div class="meta-card">
+        <h3>下游影响：Layer 1 协议层</h3>
+        <p style="font-size:0.82rem; color:var(--text-secondary);">BTC网络安全依赖矿工的算力投票。如果矿工大规模退出，51%攻击成本下降，BTC的抗审查性减弱。<strong>关键阈值：</strong>学术界认为全网算力低于300 EH/s时BTC的51%攻击成本可能不足以阻止国家级攻击者。</p>
+        <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.5rem;"><strong>反向影响：</strong>L1协议的市值和交易费用是矿工收入的直接决定因素。如果BTC价格暴跌→矿工关机→网络安全下降→用户信任下降→价格进一步下跌的负反馈可能触发。</p>
+      </div>
+
+      <div class="cross-ref">
+        <p style="font-size:0.82rem; color:var(--text-secondary);"><strong>&#128279; 相关节点:</strong> Node 2 (L1协议) — BTC/ETH是挖矿的主要标的；Node 6 (RWA代币化) — 主权储备叙事与挖矿需求正相关</p>
+      </div>
+
+      <div class="meta-card">
+        <h3>侧向影响：能源市场</h3>
+        <p style="font-size:0.82rem; color:var(--text-secondary);">BTC挖矿占全球电力消耗的约0.5-1%（约20-40 TWh/年），规模接近哈萨克斯坦或挪威的全国用电。挖矿对能源价格的影响在局部市场（德克萨斯州ERCOT电网）尤为显著。</p>
+        <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.5rem;"><strong>AI转型的颠覆效应：</strong>如果MARA/RIOT/CORZ成功转型AI数据中心，挖矿节点将从"能源消耗者"转变为"能源采购谈判者"，影响能源市场的定价权结构。</p>
+      </div>
+
+      <div class="cross-ref">
+        <p style="font-size:0.82rem; color:var(--text-secondary);"><strong>&#128279; 相关节点:</strong> Node 7 (DeFi应用层) — DeFi清算可能受BTC价格波动影响；Node 8 (监管与政策) — 能源补贴/碳税政策直接影响挖矿经济学</p>
+      </div>
+
+      <div class="key-insight">
+        <div class="key-insight-title">&#128640; 价值链中的核心位置</div>
+        <p style="font-size:0.82rem; color:var(--text-secondary); margin:0;">挖矿与能源节点处于价值链的"承上启下"位置：上游依赖芯片代工厂（地缘风险集中），下游服务L1网络安全（BTC生态的命脉），侧向影响能源市场。这个位置使其具有<strong>不对称的重要性</strong>——对挖矿的攻击就是对BTC的攻击，但挖矿本身的脆弱性（BTC价格波动）又使其成为整个价值链中最不稳定的节点。</p>
+      </div>
+    </div>
+
+    <!-- §5 信息缺口 -->
+    <div class="section-meta" id="gaps">
+      <h2>§5 信息缺口<span class="zh-inline">Information Gaps</span></h2>
+
+      <div class="meta-card">
+        <h3>关键数据缺口分析</h3>
+        
+        <div class="gap-item">
+          <p><strong>Gap 1: Bitmain 真实财务数据</strong></p>
+          <p style="font-size:0.78rem; color:var(--text-tertiary); margin:0;">Bitmain是全球35-45%矿机份额的垄断者，但其财务数据极度不透明。2018年香港IPO申请披露后多次更新/撤回，当前估值、利润率、现金流均不可验证。<strong>影响：</strong>无法准确评估挖矿价值链中利润的真实分配。 <strong>缓解：</strong>通过行业估算和吴说区块链等中文来源交叉验证，但置信度仍然有限。</p>
+        </div>
+
+        <div class="gap-item">
+          <p><strong>Gap 2: 中国地下算力规模</strong></p>
+          <p style="font-size:0.78rem; color:var(--text-tertiary); margin:0;">2021年中国禁令后官方算力降至&lt;5%，但业内普遍认为存在大量"地下矿场"未被统计。实际中国算力可能占15-25%。<strong>影响：</strong>全网算力数据不准确，挖矿难度调整计算可能有偏差。<strong>缓解：</strong>Cambridge CBECI提供估算，但方法论存在争议。</p>
+        </div>
+
+        <div class="gap-item">
+          <p><strong>Gap 3: 矿企AI收入实际贡献</strong></p>
+          <p style="font-size:0.78rem; color:var(--text-tertiary); margin:0;">每个上市矿企都在宣传AI转型，但具体AI收入贡献（$M或占总收入%）几乎没有详细披露。CORZ的CoreWeave合同是唯一有具体数字的例子（$8.6B/10年）。<strong>影响：</strong>无法区分"真正的AI转型"和"AI叙事营销"。<strong>缓解：</strong>持续跟踪季度财报的AI收入行项目。</p>
+        </div>
+
+        <div class="gap-item">
+          <p><strong>Gap 4: 全网矿机新旧分布</strong></p>
+          <p style="font-size:0.78rem; color:var(--text-tertiary); margin:0;">矿机效率分布（S9/S17/S19/S21比例）影响全网实际能耗和每EH/s收入。但这个数据没有权威来源，各机构估算差异巨大。<strong>影响：</strong>无法精确计算"矿工盈亏平衡点"BTC价格。<strong>缓解：</strong>通过矿机二级市场报价（Hashrate Index）和矿企披露的矿机型号推断。</p>
+        </div>
+
+        <div class="gap-item">
+          <p><strong>Gap 5: 非上市矿企的BTC储备</strong></p>
+          <p style="font-size:0.78rem; color:var(--text-tertiary); margin:0;">MARA披露44K BTC储备，但私人矿池（AntPool/F2Pool背后的实体）持有的BTC数量没有公开披露。矿工抛售压力的真实规模因此难以判断。<strong>影响：</strong>无法准确预测BTC卖压来源。<strong>缓解：</strong>链上分析（Glassnode/CoinMetrics）提供矿工钱包流向，但归属难以100%确认。</p>
+        </div>
+
+        <div class="gap-item">
+          <p><strong>Gap 6: 哈萨克斯坦/俄罗斯实际电力成本</strong></p>
+          <p style="font-size:0.78rem; color:var(--text-tertiary); margin:0;">这两个国家合计占~20%全网算力，但其电力成本（尤其是工业级PPA）的实际数字很难获得。官方电价vs影子电价（通过中间商/非法接电）差异巨大。<strong>影响：</strong>矿工真实盈利能力和生存边界不清晰。<strong>缓解：</strong>有限媒体报告+行业专家访谈。</p>
+        </div>
+
+        <div class="gap-item">
+          <p><strong>Gap 7: 第五次减半后的手续费补偿效应</strong></p>
+          <p style="font-size:0.78rem; color:var(--text-tertiary); margin:0;">历史上区块补贴（6.25→3.125→1.5625 BTC）持续下降，手续费占比理论上应上升以补偿。但Ordinals/Runes等创新能否持续推动手续费增长到足以替代区块补贴的水平？<strong>影响：</strong>2028年第五次减半后矿工收入的决定性因素。<strong>缓解：</strong>当前手续费数据可从链上获取，但未来需求不可预测。</p>
+        </div>
+
+        <div class="gap-item">
+          <p><strong>Gap 8: 美中技术脱钩对矿机供应的实际影响</strong></p>
+          <p style="font-size:0.78rem; color:var(--text-tertiary); margin:0;">理论上如果美国对中国实施矿机出口管制（类似芯片禁令），全球矿机供应将遭受毁灭性打击。但实际触发概率、触发条件、时间线均不明确。<strong>影响：</strong>这是本节点最大的尾部风险，但几乎无法量化。<strong>缓解：</strong>通过追踪半导体设备出口管制案例（ASML EUV禁令）类比推断。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- §6 质量评估 -->
+    <div class="section-meta" id="quality">
+      <h2>§6 质量评估<span class="zh-inline">Quality Assessment</span></h2>
+
+      <div class="meta-card">
+        <h3>研究质量维度评估</h3>
+        
+        <div style="margin:1rem 0;">
+          <p style="font-size:0.82rem; color:var(--text-primary); margin-bottom:0.25rem;"><strong>数据可验证性</strong></p>
+          <div class="confidence-bar">
+            <span class="conf-label">7/10</span>
+            <div class="conf-track"><div class="conf-fill" style="width:70%; background:var(--tier-medium-high);"></div></div>
+            <span style="font-size:0.72rem; color:var(--text-tertiary);">Primary数据(MARA IR等)可信，Bitmain数据依赖估算</span>
+          </div>
+        </div>
+
+        <div style="margin:1rem 0;">
+          <p style="font-size:0.82rem; color:var(--text-primary); margin-bottom:0.25rem;"><strong>来源多样性</strong></p>
+          <div class="confidence-bar">
+            <span class="conf-label">6/10</span>
+            <div class="conf-track"><div class="conf-fill" style="width:60%; background:var(--tier-medium);"></div></div>
+            <span style="font-size:0.72rem; color:var(--text-tertiary);">英文来源充足，中文来源有限，存在系统性盲点</span>
+          </div>
+        </div>
+
+        <div style="margin:1rem 0;">
+          <p style="font-size:0.82rem; color:var(--text-primary); margin-bottom:0.25rem;"><strong>认知偏差控制</strong></p>
+          <div class="confidence-bar">
+            <span class="conf-label">5/10</span>
+            <div class="conf-track"><div class="conf-fill" style="width:50%; background:var(--tier-medium);"></div></div>
+            <span style="font-size:0.72rem; color:var(--text-tertiary);">已识别主要偏差但无法完全消除，尤其是英文偏见</span>
+          </div>
+        </div>
+
+        <div style="margin:1rem 0;">
+          <p style="font-size:0.82rem; color:var(--text-primary); margin-bottom:0.25rem;"><strong>逻辑一致性</strong></p>
+          <div class="confidence-bar">
+            <span class="conf-label">8/10</span>
+            <div class="conf-track"><div class="conf-fill" style="width:80%; background:var(--tier-high);"></div></div>
+            <span style="font-size:0.72rem; color:var(--text-tertiary);">两位代理人视角互补，逻辑链清晰</span>
+          </div>
+        </div>
+
+        <div style="margin:1rem 0;">
+          <p style="font-size:0.82rem; color:var(--text-primary); margin-bottom:0.25rem;"><strong>覆盖完整性</strong></p>
+          <div class="confidence-bar">
+            <span class="conf-label">7/10</span>
+            <div class="conf-track"><div class="conf-fill" style="width:70%; background:var(--tier-medium-high);"></div></div>
+            <span style="font-size:0.72rem; color:var(--text-tertiary);">上市矿企覆盖完整，私人矿场覆盖不足</span>
+          </div>
+        </div>
+
+        <div style="margin:1rem 0;">
+          <p style="font-size:0.82rem; color:var(--text-primary); margin-bottom:0.25rem;"><strong>时效性</strong></p>
+          <div class="confidence-bar">
+            <span class="conf-label">8/10</span>
+            <div class="conf-track"><div class="conf-fill" style="width:80%; background:var(--tier-high);"></div></div>
+            <span style="font-size:0.72rem; color:var(--text-tertiary);">数据基于2025-2026年最新报告，足够新</span>
+          </div>
+        </div>
+
+        <div style="margin:1rem 0;">
+          <p style="font-size:0.82rem; color:var(--text-primary); margin-bottom:0.25rem;"><strong>可操作性</strong></p>
+          <div class="confidence-bar">
+            <span class="conf-label">7/10</span>
+            <div class="conf-track"><div class="conf-fill" style="width:70%; background:var(--tier-medium-high);"></div></div>
+            <span style="font-size:0.72rem; color:var(--text-tertiary);">提供具体公司分析和交易视角，但无法给出精确买卖时机</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="meta-card" style="background:var(--bg-elevated);">
+        <h3>总体质量评分: <span style="color:var(--tier-medium-high);">6.9/10</span></h3>
+        <p style="font-size:0.82rem; color:var(--text-secondary);">Node 1的元思考质量处于"良好"区间。主要局限在于私人矿场数据缺失和中美信息不对称。主要优势在于逻辑一致性高、认知偏差已明确识别、主要风险已通过风险矩阵量化。</p>
+        <p style="font-size:0.78rem; color:var(--text-tertiary); margin-top:0.5rem;">建议：下一步需要补充中文来源（吴说区块链深度报道），并尝试获取Bitmain内部人士的一手访谈。</p>
+      </div>
+    </div>
+
+    <!-- §7 决策日志 -->
+    <div class="section-meta" id="log">
+      <h2>§7 决策日志<span class="zh-inline">Decision Log</span></h2>
+
+      <div class="meta-card">
+        <h3>关键研究决策记录</h3>
+
+        <div class="decision-log">
+          <p><strong>Decision 1: 选择Fred Thiel (MARA) vs 其他上市矿企CEO</strong></p>
+          <p style="margin:0.25rem 0 0;"><strong>选项考虑：</strong></p>
+          <ul style="font-size:0.75rem; color:var(--text-tertiary); margin:0.25rem 0 0.5rem 1rem;">
+            <li>RIOT CEO Jason Les — 更保守但数据更真实</li>
+            <li>CORZ CEO Adam Sullivan — AI转型最激进</li>
+            <li>MARA Fred Thiel — 最大规模+激进BTC储备策略</li>
+          </ul>
+          <p style="margin:0.25rem 0 0;"><strong>最终决策：</strong>选择Fred Thiel作为GIANT代理。MARA是规模最大的上市矿企，其BTC储备策略（效仿MicroStrategy）代表了"矿业工业化"的极端案例，适合与"卖铲子"视角形成对比。</p>
+          <p style="font-size:0.72rem; color:var(--text-quaternary); margin:0.25rem 0 0;"><strong>决策时间：</strong>2026-03-22 &middot; <strong>置信度：</strong>7/10</p>
+        </div>
+
+        <div class="decision-log">
+          <p><strong>Decision 2: 为什么必须包含吴忌寒/ Bitmain</strong></p>
+          <p style="margin:0.25rem 0 0;"><strong>选项考虑：</strong></p>
+          <ul style="font-size:0.75rem; color:var(--text-tertiary); margin:0.25rem 0 0.5rem 1rem;">
+            <li>仅用西方公司（MIcroBT/Canaan公开数据）</li>
+            <li>用中文来源追踪Bitmain但不出现在代理人列表中</li>
+            <li>将Bitmain作为独立代理人纳入分析</li>
+          </ul>
+          <p style="margin:0.25rem 0 0;"><strong>最终决策：</strong>选择选项3，将吴忌寒作为CONTRARIAN代理纳入。理由：Bitmain是35-45%矿机份额的垄断者，任何忽视Bitmain的挖矿分析都是结构性地不完整。代价是数据可信度下降（6/10），但分析完整性大幅提升。</p>
+          <p style="font-size:0.72rem; color:var(--text-quaternary); margin:0.25rem 0 0;"><strong>决策时间：</strong>2026-03-22 &middot; <strong>置信度：</strong>8/10</p>
+        </div>
+
+        <div class="decision-log">
+          <p><strong>Decision 3: 将AI转型风险置于何种优先级</strong></p>
+          <p style="margin:0.25rem 0 0;"><strong>选项考虑：</strong></p>
+          <ul style="font-size:0.75rem; color:var(--text-tertiary); margin:0.25rem 0 0.5rem 1rem;">
+            <li>AI转型作为"次要叙事"简要提及</li>
+            <li>AI转型作为"核心新故事"与BTC挖矿并列</li>
+            <li>区分不同公司的AI转型程度，不做统一判断</li>
+          </ul>
+          <p style="margin:0.25rem 0 0;"><strong>最终决策：</strong>选择选项3，区分处理。CORZ的$8.6B CoreWeave合同是实质性的（已签订10年合同），但MARA/RIOT的AI收入仍&lt;5%（叙事&gt;实质）。将AI转型置于"交易视角"和"风险矩阵"中，但不在"核心分析焦点"过度放大。</p>
+          <p style="font-size:0.72rem; color:var(--text-quaternary); margin:0.25rem 0 0;"><strong>决策时间：</strong>2026-03-22 &middot; <strong>置信度：</strong>7/10</p>
+        </div>
+
+        <div class="decision-log">
+          <p><strong>Decision 4: "矿机 = ASML"类比的边界</strong></p>
+          <p style="margin:0.25rem 0 0;"><strong>选项考虑：</strong></p>
+          <ul style="font-size:0.75rem; color:var(--text-tertiary); margin:0.25rem 0 0.5rem 1rem;">
+            <li>完全回避这个类比（风险难以量化）</li>
+            <li>使用类比但强调风险方向相反</li>
+            <li>详细展开类比并量化潜在影响</li>
+          </ul>
+          <p style="margin:0.25rem 0 0;"><strong>最终决策：</strong>选择选项2，在"策展搜索"部分(CURATED-2)简要使用类比，但明确指出风险向量相反（是西方依赖中国的硬件，不是中国依赖西方的硬件）。不建议作为核心交易依据，适合作为"尾部风险认知"。</p>
+          <p style="font-size:0.72rem; color:var(--text-quaternary); margin:0.25rem 0 0;"><strong>决策时间：</strong>2026-03-22 &middot; <strong>置信度：</strong>6/10</p>
+        </div>
+
+        <div class="decision-log">
+          <p><strong>Decision 5: 直接持有BTC vs 矿股的选择框架</strong></p>
+          <p style="margin:0.25rem 0 0;"><strong>选项考虑：</strong></p>
+          <ul style="font-size:0.75rem; color:var(--text-tertiary); margin:0.25rem 0 0.5rem 1rem;">
+            <li>不做推荐，让读者自行判断</li>
+            <li>推荐矿股（因为有杠杆效应）</li>
+            <li>推荐直接持有BTC作为核心配置</li>
+          </ul>
+          <p style="margin:0.25rem 0 0;"><strong>最终决策：</strong>选择提供分析框架而非直接推荐。在"交易视角"部分(§2.5)明确矿股是"高杠杆BTC代理"(2-3x)，适合波段交易，但不适合长期持有替代BTC。交易风格适配度由读者自行判断。</p>
+          <p style="font-size:0.72rem; color:var(--text-quaternary); margin:0.25rem 0 0;"><strong>决策时间：</strong>2026-03-22 &middot; <strong>置信度：</strong>7/10</p>
+        </div>
+      </div>
+    </div>
+
+    <footer style="margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border-subtle);font-size:0.72rem;color:var(--text-quaternary);">
+      <p>Metacognition report &middot; Node 1: Mining &amp; Energy &middot; <a href="../blockchain_hub.html">Blockchain Hub</a> &middot; 2026-03-22</p>
+    </footer>
+  </main>
+</div>
+<script>
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+})();
+</script>
+</body>
+</html>

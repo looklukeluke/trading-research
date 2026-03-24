@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>周小川/穆长春 — Digital Yuan Architects — Cognitive Agent Profile</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="../blockchain_shared.css">
+  <style>
+    /* === C-tier Agent Profile Overrides === */
+    .page-wrapper { display: flex; min-height: 100vh; }
+    .main-content { flex: 1; min-width: 0; max-width: 900px; padding: 2.5rem 2.5rem 5rem; }
+    .page-header { margin-bottom: 2rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border-default); }
+    .page-header h1 { margin-bottom: 0.3rem; }
+    .page-header .subtitle { color: var(--text-tertiary); margin-bottom: 0.75rem; font-size: 0.88rem; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.5rem; font-size: 0.82rem; color: var(--text-tertiary); }
+    .meta-row span { padding: 0.15rem 0.5rem; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 4px; font-size: 0.75rem; }
+    blockquote { border-left: 3px solid var(--accent); padding: 0.6rem 1.25rem; margin: 1rem 0; font-style: italic; background: var(--bg-surface); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-secondary); }
+    blockquote .zh { font-style: normal; margin-top: 0.4em; padding-top: 0.4em; border-top: 1px dashed var(--border-subtle); }
+    .credibility-meter { display: flex; align-items: center; gap: 0.75rem; margin: 0.75rem 0; }
+    .meter-bar { flex: 1; height: 8px; background: var(--border-subtle); border-radius: 4px; overflow: hidden; }
+    .meter-fill { height: 100%; border-radius: 4px; }
+    .meter-label { font-size: 1.2rem; font-weight: 680; min-width: 3rem; }
+    .top-nav { position: sticky; top: 0; z-index: 999; background: rgba(8,9,10,0.95); backdrop-filter: blur(8px); padding: 0.5rem 1.5rem; border-bottom: 1px solid var(--border-subtle); font-size: 0.78rem; display: flex; gap: 1rem; align-items: center; }
+    .top-nav a { text-decoration: none; }
+    .hamburger-btn { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 200; background: var(--bg-surface); color: var(--text-primary); border: none; border-radius: 6px; width: 44px; height: 44px; font-size: 1.4rem; cursor: pointer; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+    @media (max-width: 900px) {
+      .sidebar { position: fixed; left: -280px; top: 0; transition: left 0.3s ease; box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.open { display: block; }
+      .hamburger-btn { display: block; }
+      .main-content { padding: 2rem 1rem 4rem; }
+    }
+    @media (max-width: 1200px) { .notes-sidebar { display: none; } }
+    p { color: var(--text-secondary); margin-bottom: 1rem; }
+    ul, ol { color: var(--text-secondary); padding-left: 1.2rem; }
+    li { margin-bottom: 0.35rem; line-height: 1.6; }
+    strong { color: var(--text-primary); font-weight: 590; }
+    /* Embedded + Reading mode */
+    body.embedded .sidebar { display: none !important; }
+    body.embedded .notes-sidebar { display: none !important; }
+    body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+    body.embedded .hamburger-btn { display: none !important; }
+    .reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+    .reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+    .reading-mode .hamburger-btn { display: none !important; }
+  </style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <a href="../blockchain_hub.html" style="color:var(--accent);">&larr; Blockchain Hub</a>
+  <span style="color:var(--text-quaternary);">&middot;</span>
+  <span style="color:var(--text-tertiary);">Agent #21 &middot; C-tier</span>
+</nav>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="page-wrapper">
+
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <h4>Profile</h4>
+    <nav>
+      <ul>
+        <li><a href="#summary">Overview</a></li>
+        <li><a href="#key-facts">Key Facts</a></li>
+        <li><a href="#actions">Action Evidence</a></li>
+        <li><a href="#judgment">Judgment</a></li>
+        <li><a href="#credibility">Credibility</a></li>
+      </ul>
+    </nav>
+    <div class="project-meta">
+      Node: N5 + N8<br>
+      Tier: C档 2/5<br>
+      Region: China<br>
+      Updated: 2026-03-22
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <div class="page-header">
+      <h1>周小川 / 穆长春</h1>
+      <div class="subtitle">Digital Yuan Architects — PBoC / Digital Currency Research Institute</div>
+      <div class="badge-row">
+        <span class="badge badge-gold">N5 Stablecoin + N8 Regulation</span>
+        <span class="badge badge-gray">C-tier 2/5</span>
+        <span class="badge badge-red">China (State-controlled)</span>
+      </div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="section-header" id="summary">
+      <h2><span class="section-num">01</span> Overview<span class="zh">概要</span></h2>
+    </div>
+
+    <div class="advisory-box">
+      <strong>C-tier rationale:</strong> Official Chinese government data — independently difficult to verify. Represents the "state-controlled digital currency" path, fundamentally opposed to decentralized crypto. Tracked as a geopolitical counterweight, not as a crypto ally.
+    </div>
+
+    <p>Zhou Xiaochuan (former PBoC governor, 2002-2018) initiated the digital yuan research program. Mu Changchun (current head of PBoC Digital Currency Research Institute) leads the implementation. Together they architect <strong>e-CNY</strong> — the world's most advanced CBDC with <strong>3.5 billion transactions</strong> and <strong>$2.4 trillion in circulation</strong> across 27 pilot cities. e-CNY includes smart contract capabilities and the cross-border mBridge experiment.</p>
+
+    <!-- KEY FACTS -->
+    <div class="section-header" id="key-facts">
+      <h2><span class="section-num">02</span> Key Facts<span class="zh">关键事实</span></h2>
+    </div>
+
+    <div class="stats-strip">
+      <div class="stat-item"><span class="stat-value">3.5B</span><span class="stat-label">Transactions</span></div>
+      <div class="stat-item"><span class="stat-value">$2.4T</span><span class="stat-label">Circulation (cumulative)</span></div>
+      <div class="stat-item"><span class="stat-value">27</span><span class="stat-label">Pilot cities</span></div>
+      <div class="stat-item"><span class="stat-value">mBridge</span><span class="stat-label">Cross-border CBDC</span></div>
+    </div>
+
+    <ul>
+      <li><strong>Two-tier architecture:</strong> PBoC issues to commercial banks, banks distribute to users. Designed to complement (not replace) existing banking system.</li>
+      <li><strong>Smart contracts:</strong> e-CNY supports programmable payments — conditional transfers, automatic tax collection, subsidy distribution. This is state programmable money.</li>
+      <li><strong>mBridge:</strong> Multi-CBDC cross-border experiment with Hong Kong, Thailand, UAE. Potential SWIFT alternative for participating nations.</li>
+      <li><strong>"Ban crypto, build CBDC":</strong> China banned all crypto trading/mining (2021) while simultaneously accelerating e-CNY. The strategy is clear — eliminate decentralized alternatives to maintain state monetary control.</li>
+    </ul>
+
+    <!-- ACTION EVIDENCE -->
+    <div class="section-header" id="actions">
+      <h2><span class="section-num">01</span> Action Evidence<span class="zh">行动证据</span></h2>
+    </div>
+
+    <div class="card">
+      <a>e-CNY Pilot Program</a>
+      <div class="card-desc">Largest CBDC deployment globally. 27 cities, 3.5B transactions. Distribution via red packet campaigns, salary payments, and public transit integration. Adoption driven by government mandate rather than organic demand — a key distinction from decentralized crypto adoption.</div>
+      <div class="card-meta">2020-present &middot; State deployment</div>
+    </div>
+
+    <div class="card">
+      <a>mBridge Cross-Border CBDC</a>
+      <div class="card-desc">Joint project with BIS Innovation Hub, Hong Kong, Thailand, UAE central banks. Aims to create a SWIFT alternative for CBDC-to-CBDC settlements. Geopolitical significance: potentially enables sanctioned-nation trade settlement bypassing USD-dominated systems.</div>
+      <div class="card-meta">2022-present &middot; Cross-border settlement</div>
+    </div>
+
+    <div class="card">
+      <a>Comprehensive Crypto Ban</a>
+      <div class="card-desc">China banned crypto exchanges (2017), ICOs (2017), mining (2021), and all transactions (2021). This is the action evidence for the strategic choice: eliminate decentralized competitors to maximize e-CNY adoption and state monetary control.</div>
+      <div class="card-meta">2017-2021 &middot; Regulatory action</div>
+    </div>
+
+    <!-- JUDGMENT -->
+    <div class="section-header" id="judgment">
+      <h2><span class="section-num">04</span> Judgment<span class="zh">判断</span></h2>
+    </div>
+
+    <blockquote>
+      "Ban crypto, but build CBDC." The state-controlled digital currency path — fundamentally opposed to decentralized stablecoins.
+      <span class="zh">"禁止加密货币，但建设CBDC。" 国家控制的数字货币路线——与去中心化稳定币根本对立。</span>
+    </blockquote>
+
+    <p>e-CNY and USDT serve <strong>completely different needs</strong>. e-CNY is state-controlled programmable money — it enables surveillance, conditional spending, and monetary policy enforcement. USDT/USDC are permissionless — they enable capital flight, sanctions evasion, and financial freedom. The two systems are not competitors; they are philosophical opposites serving different user bases.</p>
+
+    <!-- CREDIBILITY -->
+    <div class="section-header" id="credibility">
+      <h2><span class="section-num">05</span> Data Credibility<span class="zh">数据可信度</span></h2>
+    </div>
+
+    <div class="credibility-meter">
+      <span class="meter-label" style="color: var(--tier-low);">2/5</span>
+      <div class="meter-bar"><div class="meter-fill" style="width:40%; background: var(--tier-low);"></div></div>
+    </div>
+
+    <p><strong>Low.</strong> All statistics from official PBoC and government sources. Transaction counts and circulation figures cannot be independently verified. The "3.5 billion transactions" figure likely includes government-mandated distributions (red packets, subsidies) which inflate organic adoption metrics. Western media coverage relies on Chinese government press releases.</p>
+
+    <div class="page-footer">
+      <p>Blockchain Cognitive Agent Profile &middot; C-tier &middot; Generated 2026-03-22<br>
+      <a href="../blockchain_hub.html">Back to Blockchain Hub</a></p>
+    </div>
+  </main>
+
+  <aside class="notes-sidebar">
+    <h4>Meta-cognitive Notes</h4>
+
+    <div class="meta-note">
+      <div class="note-label risk">Contrast</div>
+      <p><strong>e-CNY vs USDT: Completely Different Needs</strong></p>
+      <p>e-CNY is state-controlled programmable money: surveillance, conditional spending, monetary policy enforcement. USDT/USDC are permissionless: capital flight, sanctions evasion, financial freedom. They are not competitors — they are philosophical opposites.</p>
+      <p class="zh">e-CNY是国家控制的可编程货币：监控、条件支付、货币政策执行。USDT/USDC是无许可的：资本外逃、制裁规避、金融自由。它们不是竞争对手——它们是哲学上的对立面。</p>
+      <p style="margin-top:0.5rem; font-size:0.75rem; color:var(--text-quaternary);">Irony: Chinese citizens who most need permissionless money (to move capital out) are the ones whose government is building the most controlled digital currency.</p>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const sidebar = document.getElementById('sidebar');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+  if (hamburgerBtn) {
+    hamburgerBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      sidebarOverlay.classList.toggle('open');
+    });
+  }
+  if (sidebarOverlay) {
+    sidebarOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('open');
+    });
+  }
+  const sections = document.querySelectorAll('.section-header');
+  const navLinks = document.querySelectorAll('.sidebar nav a');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        const id = entry.target.id;
+        const link = document.querySelector(`.sidebar nav a[href="#${id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -60% 0px' });
+  sections.forEach(s => observer.observe(s));
+});
+</script>
+
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+
+</body>
+</html>

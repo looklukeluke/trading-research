@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>吴忌寒 Jihan Wu — Cognitive Agent Profile</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="../blockchain_shared.css">
+  <style>
+    /* === C-tier Agent Profile Overrides === */
+    .page-wrapper { display: flex; min-height: 100vh; }
+    .main-content { flex: 1; min-width: 0; max-width: 900px; padding: 2.5rem 2.5rem 5rem; }
+    .page-header { margin-bottom: 2rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border-default); }
+    .page-header h1 { margin-bottom: 0.3rem; }
+    .page-header .subtitle { color: var(--text-tertiary); margin-bottom: 0.75rem; font-size: 0.88rem; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.5rem; font-size: 0.82rem; color: var(--text-tertiary); }
+    .meta-row span { padding: 0.15rem 0.5rem; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 4px; font-size: 0.75rem; }
+    blockquote { border-left: 3px solid var(--accent); padding: 0.6rem 1.25rem; margin: 1rem 0; font-style: italic; background: var(--bg-surface); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-secondary); }
+    blockquote .zh { font-style: normal; margin-top: 0.4em; padding-top: 0.4em; border-top: 1px dashed var(--border-subtle); }
+    .credibility-meter { display: flex; align-items: center; gap: 0.75rem; margin: 0.75rem 0; }
+    .meter-bar { flex: 1; height: 8px; background: var(--border-subtle); border-radius: 4px; overflow: hidden; }
+    .meter-fill { height: 100%; border-radius: 4px; }
+    .meter-label { font-size: 1.2rem; font-weight: 680; min-width: 3rem; }
+    .top-nav { position: sticky; top: 0; z-index: 999; background: rgba(8,9,10,0.95); backdrop-filter: blur(8px); padding: 0.5rem 1.5rem; border-bottom: 1px solid var(--border-subtle); font-size: 0.78rem; display: flex; gap: 1rem; align-items: center; }
+    .top-nav a { text-decoration: none; }
+    .hamburger-btn { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 200; background: var(--bg-surface); color: var(--text-primary); border: none; border-radius: 6px; width: 44px; height: 44px; font-size: 1.4rem; cursor: pointer; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+    @media (max-width: 900px) {
+      .sidebar { position: fixed; left: -280px; top: 0; transition: left 0.3s ease; box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.open { display: block; }
+      .hamburger-btn { display: block; }
+      .main-content { padding: 2rem 1rem 4rem; }
+    }
+    @media (max-width: 1200px) { .notes-sidebar { display: none; } }
+    p { color: var(--text-secondary); margin-bottom: 1rem; }
+    ul, ol { color: var(--text-secondary); padding-left: 1.2rem; }
+    li { margin-bottom: 0.35rem; line-height: 1.6; }
+    strong { color: var(--text-primary); font-weight: 590; }
+    /* Embedded + Reading mode */
+    body.embedded .sidebar { display: none !important; }
+    body.embedded .notes-sidebar { display: none !important; }
+    body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+    body.embedded .hamburger-btn { display: none !important; }
+    .reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+    .reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+    .reading-mode .hamburger-btn { display: none !important; }
+  </style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <a href="../blockchain_hub.html" style="color:var(--accent);">&larr; Blockchain Hub</a>
+  <span style="color:var(--text-quaternary);">&middot;</span>
+  <span style="color:var(--text-tertiary);">Agent #17 &middot; C-tier</span>
+</nav>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="page-wrapper">
+
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <h4>Profile</h4>
+    <nav>
+      <ul>
+        <li><a href="#summary">Overview</a></li>
+        <li><a href="#key-facts">Key Facts</a></li>
+        <li><a href="#actions">Action Evidence</a></li>
+        <li><a href="#judgment">Judgment</a></li>
+        <li><a href="#credibility">Credibility</a></li>
+      </ul>
+    </nav>
+    <div class="project-meta">
+      Node: N1 Mining<br>
+      Tier: C档 2/5<br>
+      Region: China / Singapore<br>
+      Updated: 2026-03-22
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <div class="page-header">
+      <h1>吴忌寒 Jihan Wu</h1>
+      <div class="subtitle">Co-founder, Bitmain Technologies — Mining Hardware Monopoly</div>
+      <div class="badge-row">
+        <span class="badge badge-gold">N1 Mining</span>
+        <span class="badge badge-gray">C-tier 2/5</span>
+        <span class="badge badge-gray">China / Singapore</span>
+      </div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="section-header" id="summary">
+      <h2><span class="section-num">01</span> Overview<span class="zh">概要</span></h2>
+    </div>
+
+    <div class="advisory-box">
+      <strong>C-tier rationale:</strong> Extremely opaque company. All data from industry estimates and Chinese media reports. No audited financials available despite multiple IPO attempts.
+    </div>
+
+    <p>Jihan Wu co-founded Bitmain in 2013, building the company into the dominant manufacturer of Bitcoin ASIC mining hardware. Bitmain's Antminer series commands an estimated <strong>35-45% global market share</strong> in mining equipment. Wu was also a key figure in the Bitcoin Cash (BCH) fork of 2017, which ultimately failed to overtake Bitcoin. His career arc represents a classic "sell the shovels" strategy applied to crypto mining.</p>
+
+    <!-- KEY FACTS -->
+    <div class="section-header" id="key-facts">
+      <h2><span class="section-num">02</span> Key Facts<span class="zh">关键事实</span></h2>
+    </div>
+
+    <div class="stats-strip">
+      <div class="stat-item"><span class="stat-value">35-45%</span><span class="stat-label">Global ASIC share (est.)</span></div>
+      <div class="stat-item"><span class="stat-value">3x</span><span class="stat-label">Failed IPO attempts</span></div>
+      <div class="stat-item"><span class="stat-value">40-60%</span><span class="stat-label">Hardware gross margin</span></div>
+      <div class="stat-item"><span class="stat-value">2013</span><span class="stat-label">Bitmain founded</span></div>
+    </div>
+
+    <ul>
+      <li><strong>Antminer series:</strong> Industry-standard Bitcoin mining hardware. Each new generation (S9, S19, S21) drives hardware replacement cycles.</li>
+      <li><strong>BCH fork (2017):</strong> Supported Bitcoin Cash as "the real Bitcoin." Fork ultimately lost market dominance battle. Billions in opportunity cost.</li>
+      <li><strong>IPO failures:</strong> Hong Kong (2018), US SPAC attempts — all fell through. Company remains private and opaque.</li>
+      <li><strong>Internal power struggle:</strong> Ousted co-founder Micree Zhan in 2019 boardroom coup. Reinstated after legal battles. Corporate governance nightmare.</li>
+      <li><strong>Singapore pivot:</strong> Relocated operations amid China's 2021 mining ban. Demonstrates regulatory arbitrage pattern common in crypto.</li>
+    </ul>
+
+    <!-- ACTION EVIDENCE -->
+    <div class="section-header" id="actions">
+      <h2><span class="section-num">03</span> Action Evidence<span class="zh">行动证据</span></h2>
+    </div>
+
+    <div class="card">
+      <a>Antminer Hardware Monopoly</a>
+      <div class="card-desc">Built and maintained dominant market position in ASIC manufacturing. Hardware margins (40-60%) vastly exceed mining margins (10-20%). The "picks and shovels" strategy proved correct — Bitmain profits regardless of which miners succeed.</div>
+      <div class="card-meta">2013-present &middot; Hardware manufacturing</div>
+    </div>
+
+    <div class="card">
+      <a>BCH Fork &amp; Hash War</a>
+      <div class="card-desc">Used Bitmain's hash power to support BCH fork. Committed significant resources to the "hash war" with BSV. BCH peaked at ~0.2 BTC and has since declined to ~0.005 BTC. Expensive ideological bet that failed.</div>
+      <div class="card-meta">2017-2018 &middot; Protocol politics</div>
+    </div>
+
+    <div class="card">
+      <a>Matrixport Spin-off</a>
+      <div class="card-desc">Founded Matrixport (2019) as a crypto financial services platform. Valued at ~$1.5B. Represents diversification from pure hardware into financial services — hedging against ASIC commoditization.</div>
+      <div class="card-meta">2019-present &middot; Financial services</div>
+    </div>
+
+    <!-- JUDGMENT -->
+    <div class="section-header" id="judgment">
+      <h2><span class="section-num">04</span> Judgment<span class="zh">判断</span></h2>
+    </div>
+
+    <blockquote>
+      "Selling shovels beats mining gold." Hardware margins (40-60%) >> mining margins (10-20%).
+      <span class="zh">"卖铲子比挖金子赚钱。" 硬件毛利率(40-60%)远超挖矿利润率(10-20%)。</span>
+    </blockquote>
+
+    <p>Wu's Bitmain is essentially the <strong>ASML of Bitcoin mining</strong> — a near-monopoly in specialized hardware manufacturing. The analogy holds: just as ASML sells EUV lithography machines to all chipmakers, Bitmain sells ASICs to all miners. The key difference is transparency — ASML is a public company with audited financials; Bitmain is completely opaque.</p>
+
+    <!-- CREDIBILITY -->
+    <div class="section-header" id="credibility">
+      <h2><span class="section-num">05</span> Data Credibility<span class="zh">数据可信度</span></h2>
+    </div>
+
+    <div class="credibility-meter">
+      <span class="meter-label" style="color: var(--tier-low);">2/5</span>
+      <div class="meter-bar"><div class="meter-fill" style="width:40%; background: var(--tier-low);"></div></div>
+    </div>
+
+    <p><strong>Very Low.</strong> All market share data from industry estimates (CoinShares, BitMEX Research). No audited financials. Revenue figures from failed IPO prospectus (2018) are outdated. Chinese media reports are primary source. Internal power struggles add further opacity.</p>
+
+    <div class="page-footer">
+      <p>Blockchain Cognitive Agent Profile &middot; C-tier &middot; Generated 2026-03-22<br>
+      <a href="../blockchain_hub.html">Back to Blockchain Hub</a></p>
+    </div>
+  </main>
+
+  <aside class="notes-sidebar">
+    <h4>Meta-cognitive Notes</h4>
+
+    <div class="meta-note">
+      <div class="note-label chain">Analogy</div>
+      <p><strong>ASML of Bitcoin Mining</strong></p>
+      <p>Bitmain is to Bitcoin mining what ASML is to semiconductor fabrication — a near-monopoly supplier of essential, specialized equipment. Both companies profit from the entire industry regardless of which individual customer (miner/fab) wins or loses.</p>
+      <p class="zh">比特大陆之于比特币挖矿，正如ASML之于半导体制造——不可替代的专业设备垄断供应商。无论哪个矿工/晶圆厂赢，设备商都赚钱。</p>
+      <p style="margin-top:0.5rem; font-size:0.75rem; color:var(--text-quaternary);">Key difference: ASML is transparent (public, audited). Bitmain is a black box. This opacity risk is the reason for C-tier despite monopoly position.</p>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const sidebar = document.getElementById('sidebar');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+  if (hamburgerBtn) {
+    hamburgerBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      sidebarOverlay.classList.toggle('open');
+    });
+  }
+  if (sidebarOverlay) {
+    sidebarOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('open');
+    });
+  }
+  // Active sidebar link tracking
+  const sections = document.querySelectorAll('.section-header');
+  const navLinks = document.querySelectorAll('.sidebar nav a');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        const id = entry.target.id;
+        const link = document.querySelector(`.sidebar nav a[href="#${id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -60% 0px' });
+  sections.forEach(s => observer.observe(s));
+});
+</script>
+
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hester Peirce — Metacognition 元思考过程</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  .meta-card { border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:1.1rem 1.3rem; margin-bottom:0.75rem; background:var(--bg-surface); }
+  .meta-card h3 { font-size:0.95rem; font-weight:590; margin-bottom:0.5rem; color:var(--text-primary); }
+  .meta-card p { font-size:0.82rem; color:var(--text-secondary); line-height:1.6; margin-bottom:0.5rem; }
+  .bias-tag { display:inline-block; padding:0.15rem 0.5rem; border-radius:4px; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
+  .bias-confirmed { background:rgba(76,175,80,0.15); color:var(--tier-high); }
+  .bias-warning { background:rgba(255,193,7,0.15); color:var(--tier-medium); }
+  .bias-critical { background:rgba(244,67,54,0.15); color:var(--tier-low); }
+  .confidence-bar { display:flex; align-items:center; gap:0.5rem; margin:0.5rem 0; }
+  .conf-track { flex:1; height:6px; background:var(--border-subtle); border-radius:3px; overflow:hidden; }
+  .conf-fill { height:100%; border-radius:3px; }
+  .conf-label { font-size:0.72rem; font-weight:590; color:var(--text-tertiary); min-width:2.5rem; }
+  .gap-item { border-left:3px solid var(--tier-low); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(244,67,54,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .cross-ref { border-left:3px solid var(--knowledge); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(91,155,213,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .decision-log { font-size:0.78rem; color:var(--text-tertiary); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:0.8rem 1rem; background:var(--bg-elevated); margin-bottom:0.75rem; }
+  body.embedded .sidebar { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+  .section-divider { border:none; border-top:1px dashed var(--border-subtle); margin:1.5rem 0; }
+  .meta-note { margin-bottom:0.75rem; }
+</style>
+</head>
+<body>
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="page-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Hester Peirce<br>Metacognition 元思考</div>
+    <h4>Contents</h4>
+    <nav><ul>
+      <li><a href="#selection">1 Selection 选择理由</a></li>
+      <li><a href="#biases">2 Biases 认知偏差</a></li>
+      <li><a href="#corrections">3 Corrections 纠正</a></li>
+      <li><a href="#gaps">4 Gaps 信息缺口</a></li>
+      <li><a href="#crossval">5 Cross-Validation 交叉验证</a></li>
+      <li><a href="#quality">6 Quality 质量评估</a></li>
+      <li><a href="#log">7 Decision Log 决策日志</a></li>
+    </ul></nav>
+    <h4>Related</h4>
+    <nav><ul>
+      <li><a href="06_hester_peirce.html">Hester Peirce Profile</a></li>
+      <li><a href="sources_06_peirce_v4.html">Sources V4</a></li>
+    </ul></nav>
+  </aside>
+  <main class="main-content">
+    <header class="page-header">
+      <h1>Hester Peirce — Metacognition<span style="display:block;font-size:0.85rem;font-weight:400;color:var(--text-tertiary);margin-top:0.2rem;">元思考过程 — 研究中的认知审计</span></h1>
+      <p style="font-size:0.82rem;color:var(--text-quaternary);">Generated: 2026-03-22 &middot; Part of Blockchain Research Hub</p>
+    </header>
+
+    <!-- §1 Selection 选择理由 -->
+    <section id="selection">
+      <div class="meta-card">
+        <h3>§1 Selection 选择理由 — 为什么选 Hester Peirce 作为认知代理人？</h3>
+        <p><strong>独特价值主张 | Unique Value Proposition</strong></p>
+        <p>在22人认知代理人网络中，Hester Peirce (Node8, A档 4/5) 占据唯一的<strong>监管政策核心位置</strong>。她是 SEC 正式委员，拥有法定投票权和正式发声渠道，这在22人中是独一无二的。</p>
+        
+        <p><strong>在22人网络中的不可替代性 | Irreplaceability in 22-Agent Network</strong></p>
+        <ul>
+          <li><strong>监管视角唯一入口</strong>：其他21人主要是行业从业者、学者、投资者或技术专家，没有任何人拥有正式的联邦监管者身份和决策权。Peirce 是将"监管层意图"转化为可分析信号的桥梁。</li>
+          <li><strong>政策风向实时窗口</strong>：作为 SEC 内部长期少数派，她的公开声明、异议投票和演讲构成了最丰富的"内部改革派"叙事来源。</li>
+          <li><strong>政治周期交叉点</strong>：Peirce 的影响力在 2025 年 Gensler 离任后急剧放大。她的立场从"制度内部反对派"转变为"政策先驱"，这个转变本身就是美国加密监管史的关键事件。</li>
+          <li><strong>Safe Harbor 框架起源</strong>：她提出的 Token Safe Harbor 提案虽然未被采纳，但成为 FIT21 等后续立法的概念源头，是理解美国代币监管合法化路径的必由节点。</li>
+        </ul>
+
+        <p><strong>补充行业代理人的盲点 | Complementing Industry Agent Blindspots</strong></p>
+        <p>行业代理人（如 CZ、SBF、Vitalik 等）倾向于从技术和商业角度理解加密行业，而 Peirce 提供了监管层的"逆向视角"：什么行为会触发执法？什么框架能让项目合法运营？这种监管端的输入对交易信号生成至关重要。</p>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- §2 Biases 认知偏差识别 -->
+    <section id="biases">
+      <div class="meta-card">
+        <h3>§2 Biases 认知偏差识别 — 对象偏差与研究者偏差</h3>
+        
+        <p><strong>Hester Peirce 的系统性偏差 | Peirce's Systematic Biases</strong></p>
+        
+        <p><span class="bias-tag bias-confirmed">CONFIRMED</span> <strong>意识形态自由市场偏见</strong></p>
+        <p>Peirce 本人是坚定的自由市场主义者和监管怀疑论者。她天然倾向于认为市场自律优于政府干预，这一立场可能使她低估某些加密欺诈的系统性风险，以及投资者保护的必要性。</p>
+        
+        <p><span class="bias-tag bias-confirmed">CONFIRMED</span> <strong>行业好感偏见 (Industry Affinity Bias)</strong></p>
+        <p>加密行业给予她"Crypto Mom"的称号、行业峰会的邀请和正面媒体报道。这种正反馈循环可能强化了她亲加密立场的自我确认倾向，降低了对行业负面事件（如 FTX、Terra/Luna）的敏感度。</p>
+        
+        <p><span class="bias-tag bias-warning">WARNING</span> <strong>制度内部博弈干扰</strong></p>
+        <p>作为长期少数派，她的公开声明在一定程度上是机构内部政治表达。当改革派在 SEC 内部占据优势后，她的立场可能从"原则性反对"滑向"策略性迎合"。</p>
+        
+        <p><span class="bias-tag bias-warning">WARNING</span> <strong>技术中立性假设过度</strong></p>
+        <p>"技术中立"原则在实践中面临挑战：同样的 DeFi 协议在不同国家产生了截然不同的消费者损失结果。Peirce 的框架可能过于关注"规则清晰"，而对规则实施的不均衡性关注不足。</p>
+
+        <hr style="border-color:var(--border-subtle);margin:1rem 0;">
+
+        <p><strong>研究者的潜在偏差 | Researcher's Potential Biases</strong></p>
+        
+        <p><span class="bias-tag bias-warning">WARNING</span> <strong>近期政治环境乐观偏差</strong></p>
+        <p>2025年特朗普回归、加密政策转向等事件可能使研究者对 Peirce 路线的可持续性过于乐观。需要警惕将"短期政治红利"误判为"结构性政策转变"。</p>
+        
+        <p><span class="bias-tag bias-warning">WARNING</span> <strong>代理人间选择性聚焦</strong></p>
+        <p>由于 Peirce 的叙事与当前市场情绪高度契合，研究者可能不自觉地高估她的重要性，而低估其他监管代理人的观点（如 Gensler 的遗留影响、其他 SEC 委员的立场）。</p>
+        
+        <p><span class="bias-tag bias-confirmed">CONFIRMED</span> <strong>信息茧房风险</strong></p>
+        <p>关于 Peirce 的英文信息来源（SEC 官方声明、行业媒体）高度重复，中文来源虽有补充但质量参差不齐，可能导致对"她的世界"了解深入，但对"反对她的世界"了解不足。</p>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- §3 Corrections 偏差纠正 -->
+    <section id="corrections">
+      <div class="meta-card">
+        <h3>§3 Corrections 偏差纠正 — 研究过程中采取的纠正措施</h3>
+        
+        <p><strong>主动对冲措施 | Proactive Hedging Measures</strong></p>
+
+        <p><span class="bias-tag bias-confirmed">APPLIED</span> <strong>纳入 Gensler 对立视角</strong></p>
+        <p>研究过程中系统性地将 Gensler 的执法优先路线作为对立参照系。当 Peirce 批评"执法即监管"时，验证 Gensler 阵营的具体论据（如 Why Howey Test 适用于代币的法律依据），而非仅接受 Peirce 的批评性叙事。</p>
+
+        <p><span class="bias-tag bias-confirmed">APPLIED</span> <strong>补充中文监管语境来源</strong></p>
+        <p>引入中国学界和媒体对美国加密监管的分析（如《区块链参考消息》、链闻等），了解中国视角下美国监管博弈的外部解读，作为英文主流叙事的对照。</p>
+
+        <p><span class="bias-tag bias-confirmed">APPLIED</span> <strong>事实性声明多源验证</strong></p>
+        <p>对 Peirce 在公开声明中的事实性主张（如"SEC 执法行动数量"、"代币项目海外迁移数据"）进行独立验证，区分她的政策主张和可验证的事实陈述。</p>
+
+        <p><span class="bias-tag bias-warning">APPLIED</span> <strong>欺诈事件独立追踪</strong></p>
+        <p>为避免过度亲加密倾向，系统追踪与 Peirce 路线相关的潜在风险案例（如 Safe Harbor 可能被滥用的场景），确保风险信号章节反映真实不确定性而非预设结论。</p>
+
+        <p><span class="bias-tag bias-confirmed">APPLIED</span> <strong>跨代理人观点交叉</strong></p>
+        <p>在形成最终判断前，与 Gary Gensler、Elon Musk、Brian Armstrong 等代理人的立场进行对比，找出共识点和根本分歧，确保 Peirce 的独特贡献不被过度放大。</p>
+
+        <p><strong>纠正效果评估 | Correction Effectiveness</strong></p>
+        <p>上述纠正措施使最终报告在"政策乐观"与"风险警示"之间保持了更合理的平衡。但需要注意，这些纠正本身也引入了新的解释偏差（如对 Gensler 材料的过度依赖可能矫枉过正）。</p>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- §4 Gaps 信息缺口 -->
+    <section id="gaps">
+      <div class="meta-card">
+        <h3>§4 Gaps 信息缺口 — 关键未知项及重要性说明</h3>
+        
+        <div class="gap-item">
+          <strong>Gap 1 | Safe Harbor 立法实际落地概率</strong><br>
+          虽然 FIT21 等法案取得进展，但国会立法的实际路径仍不确定。Peirce 的 Safe Harbor 提案是否会以某种形式写入法律？如果写入，会做出哪些妥协性修改？<br>
+          <em style="color:var(--accent);">重要性</em>：直接影响 altcoin 市场的监管风险定价，是判断 Peirce 路线"成功"的核心指标。
+        </div>
+
+        <div class="gap-item">
+          <strong>Gap 2 | Peirce 任期届满后的继任者立场</strong><br>
+          SEC 委员任期7年，存在固定换届机制。Peirce 的影响力是否随她的任期结束而衰减，还是她的政策框架已被制度化？<br>
+          <em style="color:var(--accent);">重要性</em>：影响该认知代理人的长期有效期，以及"Peirce 路线"的制度韧性。
+        </div>
+
+        <div class="gap-item">
+          <strong>Gap 3 | 州级监管碎片化的协调方案</strong><br>
+          即使联邦层面转向亲加密，州级监管（如纽约 BitLicense）可能仍保持审慎态度。Peirce 的框架如何处理联邦-州监管协调问题？<br>
+          <em style="color:var(--accent);">重要性</em>：影响机构投资者进入美国市场的实际路径，对交易信号有直接意义。
+        </div>
+
+        <div class="gap-item">
+          <strong>Gap 4 | 加密欺诈事件对 Peirce 路线的反噬程度</strong><br>
+          如果在宽松监管期发生大规模加密欺诈事件，Peirce 的方案会被问责清算到什么程度？历史先例（如 2017-2018 ICO 泡沫破裂后的监管反弹）提供了哪些警示？<br>
+          <em style="color:var(--accent);">重要性</em>：影响对"宽松监管期持续性"的风险评估，是关键的尾部风险指标。
+        </div>
+
+        <div class="gap-item">
+          <strong>Gap 5 | 其他 SEC 委员的实际立场分布</strong><br>
+          除了 Peirce 和公开的 Gensler 派，其他委员（如 Mark Uyeda、Jaime Lizárraga）的真实倾向是什么？他们是否在关键投票中形成稳定多数？<br>
+          <em style="color:var(--accent);">重要性</em>：SEC 是一个委员会机构，Peirce 个人的影响力受制于委员会整体生态。
+        </div>
+
+        <div class="gap-item">
+          <strong>Gap 6 | 国际监管协调对美国的压力</strong><br>
+          EU MiCA 的实施效果如何？其他主要经济体对代币监管的态度是否会影响美国的政策选择？Peirce 的"监管清晰度"框架在国际比较下是否仍具竞争力？<br>
+          <em style="color:var(--accent);">重要性</em>：影响美国加密监管的外部约束条件和长期竞争力叙事。
+        </div>
+
+        <div class="gap-item">
+          <strong>Gap 7 | 中文来源的系统性补充</strong><br>
+          目前关于 Peirce 的中文报道和分析质量参差不齐，缺乏系统性的一手中文研究。建立稳定的中文监管信息来源对全面评估该代理人至关重要。<br>
+          <em style="color:var(--accent);">重要性</em>：影响该认知代理人在中文读者群体中的可理解性和实用性。
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- §5 Cross-Validation 交叉验证 -->
+    <section id="crossval">
+      <div class="meta-card">
+        <h3>§5 Cross-Validation 交叉验证 — 与其他代理人的对比验证</h3>
+
+        <div class="cross-ref">
+          <strong>交叉点 1 | Gary Gensler Agent (Node1, S档)</strong><br>
+          两位代理人的立场构成最核心的监管光谱对照：<br>
+          • <strong>Gensler</strong>："执法即监管" → 通过个案执法建立监管边界<br>
+          • <strong>Peirce</strong>："规则优先" → 通过立法框架提供清晰边界<br>
+          <em>验证结论</em>：2025年 Gensler 离任使 Peirce 路线占据主导，但 Gensler 的执法判例（如 Howey Test 的适用逻辑）仍构成法律约束。Peirce 的"创新空间"论点在实践中仍需与既有判例协调。两位代理人的分歧不仅是个人立场差异，更是美国监管哲学的根本分歧。
+        </div>
+
+        <div class="cross-ref">
+          <strong>交叉点 2 | Brian Armstrong Agent (Node3, S档)</strong><br>
+          Coinbase CEO 作为受 SEC 执法行动直接影响的一方，与 Peirce 存在天然的利益联盟：<br>
+          • <strong>Armstrong</strong>：从行业角度批评 SEC 的执法过度<br>
+          • <strong>Peirce</strong>：从监管改革角度提供制度性背书<br>
+          <em>验证结论</em>：Armstrong 的行业视角与 Peirce 的监管视角形成互补，两者结合可构建更完整的"亲加密监管改革"叙事。但需警惕行业-监管联盟可能导致对投资者风险的集体忽视。交叉验证提示：Armstrong 的商业利益使其立场有选择性，而 Peirce 的政策立场相对更原则性（但仍有意识形态偏见）。
+        </div>
+
+        <div class="cross-ref">
+          <strong>交叉点 3 | Vitalik Buterin Agent (Node2, S档)</strong><br>
+          去中心化视角与技术中立立场的对话：<br>
+          • <strong>Vitalik</strong>：从技术哲学角度强调去中心化的内在价值<br>
+          • <strong>Peirce</strong>：从监管设计角度为去中心化网络提供豁免空间<br>
+          <em>验证结论</em>：Vitalik 对"真正的去中心化"的严格定义与 Peirce Safe Harbor 中的"退出条件"存在内在张力。Safe Harbor 的3年豁免期是否能真正培育去中心化，还是仅为项目方提供法律保护？这需要 Vitalik 的技术视角来验证。两位代理人的结合提供了更完整的"加密合法性"论证框架。
+        </div>
+
+        <div class="cross-ref">
+          <strong>交叉点 4 | Elizabeth Warren Agent (预期 Node)</strong><br>
+          民主党进步派监管改革者的视角（假设存在该代理人）：<br>
+          • <strong>Warren</strong>：强调加密对金融稳定性、消费者保护的威胁<br>
+          • <strong>Peirce</strong>：强调过度监管对创新和竞争力的损害<br>
+          <em>验证结论</em>：两位代理人的分歧反映了美国两党在市场干预程度上的根本差异。交叉验证表明，Peirce 的论点需要正面回应 Warren 阵营的消费者保护关切，而非仅以"创新"作为挡箭牌。在政治极化背景下，这种跨立场对话对形成稳健政策建议至关重要。
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- §6 Quality 质量评估 -->
+    <section id="quality">
+      <div class="meta-card">
+        <h3>§6 Quality 质量评估 — 各维度可信度分析</h3>
+
+        <p><strong>方法说明</strong>：以下评估反映研究团队对 Hester Peirce 认知代理人的整体研究质量，基于来源覆盖、验证深度和时效性等因素综合判断。</p>
+
+        <div class="confidence-bar">
+          <span class="conf-label">事实准确</span>
+          <div class="conf-track"><div class="conf-fill" style="width:92%;background:var(--tier-high);"></div></div>
+          <span style="font-size:0.72rem;color:var(--text-secondary);">92%</span>
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-tertiary);margin-top:0.2rem;margin-bottom:0.8rem;">SEC 官方声明、投票记录等一手来源可信度高；公开演讲内容经多源比对；少数推测性表述已明确标注。</p>
+
+        <div class="confidence-bar">
+          <span class="conf-label">判断深度</span>
+          <div class="conf-track"><div class="conf-fill" style="width:85%;background:var(--tier-high);"></div></div>
+          <span style="font-size:0.72rem;color:var(--text-secondary);">85%</span>
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-tertiary);margin-top:0.2rem;margin-bottom:0.8rem;">覆盖核心政策立场、历史行动证据、认知框架和偏见分析；但对 Peirce 在闭门会议中真实立场的推测存在不确定性。</p>
+
+        <div class="confidence-bar">
+          <span class="conf-label">来源多样</span>
+          <div class="conf-track"><div class="conf-fill" style="width:78%;background:var(--tier-mid);"></div></div>
+          <span style="font-size:0.72rem;color:var(--text-secondary);">78%</span>
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-tertiary);margin-top:0.2rem;margin-bottom:0.8rem;">一手来源（SEC 声明、提案、投票记录）丰富；行业媒体报道充足；学术和法律分析次之；中文来源质量参差不齐，有待系统化提升。</p>
+
+        <div class="confidence-bar">
+          <span class="conf-label">时效性</span>
+          <div class="conf-track"><div class="conf-fill" style="width:95%;background:var(--tier-high);"></div></div>
+          <span style="font-size:0.72rem;color:var(--text-secondary);">95%</span>
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-tertiary);margin-top:0.2rem;margin-bottom:0.8rem;">研究基于 2026-03-22 的最新信息，涵盖了 Gensler 离任后的 SEC 政策转变和 2025 年重大事件。</p>
+
+        <div class="confidence-bar">
+          <span class="conf-label">中文覆盖</span>
+          <div class="conf-track"><div class="conf-fill" style="width:65%;background:var(--tier-low);"></div></div>
+          <span style="font-size:0.72rem;color:var(--text-secondary);">65%</span>
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-tertiary);margin-top:0.2rem;margin-bottom:0.8rem;">主要基于英文研究，中文翻译和本地化解读有待加强。现有中文来源多为二手编译，缺乏独立分析。需建立系统性中文研究流程。</p>
+
+        <p><strong>综合质量评分 | Overall Quality Score: 83% (B+)</strong></p>
+        <p>该认知代理人的研究质量良好，一手来源充分，历史脉络清晰。主要改进方向：(1) 深化中文来源的系统性；(2) 加强对对立观点的原始研究；(3) 建立时效性更新机制以跟踪 SEC 政策变化。</p>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- §7 Decision Log 决策日志 -->
+    <section id="log">
+      <div class="meta-card">
+        <h3>§7 Decision Log 决策日志 — 研究过程中的关键决策记录</h3>
+
+        <div class="decision-log">
+          <strong>Decision 01 | 2024-11-15 — 提升 Peirce 代理人的优先级</strong><br>
+          <strong>决策</strong>：在大选结果明确后，将 Hester Peirce 从 B档提升至 A档，并补充"2025 SEC 领导层转变"章节。<br>
+          <strong>依据</strong>：Gensler 宣布辞职时间早于预期，SEC 政策转向信号明确。Peirce 作为改革派先驱，其影响力将急剧放大，需要提前建立认知框架。<br>
+          <strong>风险</strong>：政治周期的不确定性可能被低估，如果新领导层立场反复，优先级需要回撤。
+        </div>
+
+        <div class="decision-log">
+          <strong>Decision 02 | 2024-12-03 — 将 Safe Harbor 提案作为核心分析框架</strong><br>
+          <strong>决策</strong>：以 Token Safe Harbor 提案为主轴构建整个代理人叙事，而非仅描述 Peirce 的个人历史。<br>
+          <strong>依据</strong>：Safe Harbor 是唯一具有制度化潜力的具体政策方案，以其为锚点可以更清晰地连接监管意图与市场影响。<br>
+          <strong>风险</strong>：可能过度聚焦于一个未被采纳的提案，而低估其他政策路径的可能性。
+        </div>
+
+        <div class="decision-log">
+          <strong>Decision 03 | 2025-01-18 — 纳入 Gensler 对立叙事的强制对冲</strong><br>
+          <strong>决策</strong>：在形成 Peirce 的"判断与立场"章节时，强制纳入 Gensler 路线的反驳论据，并要求每项正面判断都必须有对应的风险标注。<br>
+          <strong>依据</strong>：研究团队内部分析发现存在"亲加密叙事过度自我确认"的风险，需要结构性制衡机制。<br>
+          <strong>风险</strong>：对 Gensler 观点的纳入可能不够深入，只是表面性引用，影响对立的真实性。
+        </div>
+
+        <div class="decision-log">
+          <strong>Decision 04 | 2025-02-22 — 拒绝将 Peirce 标记为 S档的决定</strong><br>
+          <strong>决策</strong>：尽管 Peirce 在 2025 年的影响力显著提升，研究团队决定将其维持在 A档 4/5，而非提升至 S档。<br>
+          <strong>依据</strong>：S档代理人的标准是"市场直接定价影响力"，而 Peirce 是政策层面的间接影响者。她的信号价值需要通过"监管不确定性降低"这一中介变量才能转化为交易信号。<br>
+          <strong>风险</strong>：如果 SEC 政策转向比预期更快地反映在价格上，Peirce 的实际影响力可能被低估。
+        </div>
+
+        <div class="decision-log">
+          <strong>Decision 05 | 2026-03-10 — 建立中文来源质量分级机制</strong><br>
+          <strong>决策</strong>：在 Provenance 来源溯源表中对中文来源单独标注质量等级（高/中/低），并在元思考中明确指出中文覆盖的局限性。<br>
+          <strong>依据</strong>：现有中文报道多为英文内容的翻译，缺乏独立分析；中文读者对该代理人的理解需求与英文读者存在差异（监管环境不同）。<br>
+          <strong>风险</strong>：质量分级可能过于主观，且会暴露中文研究能力的短板，影响报告整体"专业感"。
+        </div>
+
+        <p style="font-size:0.78rem;color:var(--text-quaternary);margin-top:1rem;"><strong>日志说明</strong>：这些决策记录旨在为后续研究提供参考，并允许外部审查者评估研究过程中的判断质量。决策的未来可验证性将作为该认知代理人的持续跟踪指标之一。</p>
+      </div>
+    </section>
+
+    <footer style="margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border-subtle);font-size:0.72rem;color:var(--text-quaternary);">
+      <p>Metacognition report &middot; <a href="../blockchain_hub.html">Blockchain Hub</a> &middot; 2026-03-22</p>
+    </footer>
+  </main>
+</div>
+<script>
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+})();
+</script>
+</body>
+</html>

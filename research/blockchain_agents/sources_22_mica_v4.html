@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MiCA Representative — 素材策展地图 V4</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  /* Page-specific V4 extensions (~75 lines) */
+  .priority-box { border:1px solid rgba(248,168,72,0.3); border-left:3px solid var(--accent); border-radius:var(--radius-sm); padding:1.25rem 1.5rem; margin-bottom:2rem; background:var(--bg-surface); }
+  .priority-box h2 { color:var(--accent); margin-top:0; font-size:1.1rem; font-weight:590; }
+  .priority-box ol { margin-bottom:0; padding-left:1.2rem; }
+  .priority-box li { margin-bottom:0.6rem; line-height:1.5; }
+  .time-badge { display:inline-block; padding:0.1rem 0.5rem; border-radius:10px; font-size:0.7rem; font-weight:590; margin-right:0.3rem; background:var(--accent); color:var(--bg-base); }
+  .anno { position:absolute; left:1rem; right:1rem; }
+  .anno.meta-note { padding:0.6rem 0.75rem; border-left:2px solid var(--accent); border-radius:0 6px 6px 0; background:rgba(248,168,72,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.meta-note:hover { box-shadow:0 0 0 1px var(--accent); }
+  .anno.know-note { padding:0.6rem 0.75rem; border-left:2px solid var(--knowledge); border-radius:0 6px 6px 0; background:rgba(91,155,213,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.know-note:hover { box-shadow:0 0 0 1px var(--knowledge); }
+  .anno .note-label { display:inline-block; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--bg-base); background:var(--accent); padding:0.1rem 0.4rem; border-radius:3px; margin-bottom:0.3rem; }
+  .anno .note-label.know { background:var(--knowledge); color:white; }
+  .anno .mn-head { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
+  .anno .mn-title { flex:1; font-weight:510; font-size:0.75rem; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .anno .mn-fold { font-size:0.55rem; color:var(--text-quaternary); transition:transform 0.2s; margin-left:auto; }
+  .anno.open .mn-fold { transform:rotate(180deg); }
+  .anno .mn-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+  .anno.open .mn-body { max-height:2000px; }
+  .anno .mn-body p { font-size:0.78rem; margin-bottom:0.3rem; color:var(--text-secondary); }
+  .anno.flash { animation:noteFlash 1.5s ease; }
+  @keyframes noteFlash { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--accent);} }
+  .anno.know-note.flash { animation:noteFlashBlue 1.5s ease; }
+  @keyframes noteFlashBlue { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--knowledge);} }
+  mark.hl-know { background:rgba(91,155,213,0.12); border-bottom:1.5px solid var(--knowledge); padding:0 2px; border-radius:2px; color:inherit; cursor:pointer; transition:background 0.15s; }
+  mark.hl-know:hover { background:rgba(91,155,213,0.28); }
+  .nref { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; font-size:0.48rem; font-weight:700; cursor:pointer; margin-left:1px; vertical-align:super; transition:transform 0.15s; text-decoration:none; background:var(--knowledge); color:white; }
+  .nref:hover { transform:scale(1.25); box-shadow:0 0 6px rgba(91,155,213,0.4); }
+  .top-controls { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; padding:0.35rem 0.7rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); font-size:0.72rem; flex-wrap:wrap; }
+  .top-controls .tc-label { font-weight:590; color:var(--knowledge); }
+  .top-controls button { padding:0.15rem 0.45rem; border-radius:4px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-tertiary); cursor:pointer; font-size:0.68rem; font-family:inherit; transition:all 0.15s; }
+  .top-controls button:hover { border-color:var(--knowledge); color:var(--text-primary); }
+  .top-controls button.active { background:var(--knowledge-dim); color:var(--knowledge); border-color:rgba(91,155,213,0.3); }
+  .top-controls .tc-sep { color:var(--border-default); margin:0 0.15rem; }
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .notes-sidebar { position:relative; width:320px; min-width:320px; padding:1.25rem 1rem; border-left:1px solid var(--border-subtle); background:var(--bg-elevated); }
+  .notes-sidebar-header { position:sticky; top:0; z-index:60; background:var(--bg-elevated); padding-bottom:0.5rem; border-bottom:1px solid var(--border-subtle); margin-bottom:0.75rem; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  .notes-toggle-btn { position:fixed; right:1rem; bottom:1.5rem; z-index:200; width:44px; height:44px; border-radius:50%; border:1px solid var(--border-default); background:var(--bg-surface); color:var(--text-secondary); cursor:pointer; font-size:1.1rem; display:none; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.4); }
+  .notes-close-btn { float:right; background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:1.1rem; padding:0; display:none; }
+  @media (max-width:1200px) { .notes-close-btn { display:block; } .notes-sidebar { position:fixed; right:0; top:0; height:100vh; overflow-y:auto; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.4); z-index:150; } .notes-sidebar.ns-closed { transform:translateX(100%); box-shadow:none; } .notes-toggle-btn { display:flex; } }
+  .notes-overlay-right { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:140; }
+  .notes-overlay-right.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  @media (min-width:1600px) { .main-content { max-width:1000px; } .notes-sidebar { width:360px; min-width:360px; } }
+  .rel-card { border:1px solid var(--border-subtle); border-radius:var(--radius-md); background:var(--bg-elevated); margin-bottom:0.75rem; }
+  .rel-card summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  .rel-card[open] summary { color:var(--accent); }
+  .rel-card .rel-body { padding:0 1rem 1rem; font-size:0.82rem; color:var(--text-secondary); line-height:1.6; }
+  .arc-item { border-left:3px solid var(--accent); padding:0.6rem 1rem; margin-bottom:0.75rem; background:rgba(66,165,245,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+  .arc-item strong { color:var(--text-primary); }
+  .question-box { border:2px solid var(--knowledge); background:rgba(91,155,213,0.05); border-radius:var(--radius-md); padding:1.5rem; text-align:center; margin:2rem 0; }
+  .question-box blockquote { border:none; margin:0; padding:0; }
+  .question-box p { font-size:1rem; font-weight:510; color:var(--text-primary); }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; margin-bottom:1rem; }
+  th { text-transform:uppercase; font-size:0.72rem; font-weight:510; color:var(--text-quaternary); letter-spacing:0.04em; text-align:left; padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-default); }
+  td { padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-subtle); vertical-align:top; color:var(--text-secondary); }
+  tr:hover td { background:var(--bg-elevated); }
+  .url-col { max-width:200px; word-break:break-all; }
+  .zh { display:block; font-size:0.85em; color:var(--text-tertiary); margin-top:0.15em; }
+  .zh-inline { font-size:0.85em; color:var(--text-tertiary); }
+  details { border:1px solid var(--border-subtle); background:var(--bg-elevated); border-radius:var(--radius-sm); padding:0; margin-bottom:0.75rem; }
+  details summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  details[open] summary { color:var(--accent); }
+  details > div, details > p { padding:0 1rem 1rem; font-size:0.82rem; line-height:1.6; color:var(--text-secondary); }
+  body.embedded .sidebar, body.embedded .notes-sidebar, body.embedded .hamburger-btn, body.embedded .notes-toggle-btn { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ========== LEFT SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">MiCA Representative<br>素材策展地图 V4</div>
+
+    <h4>Contents</h4>
+    <nav>
+      <ul>
+        <li><a href="#priority"><span class="toc-num">&#9733;</span>如果只有2小时</a></li>
+        <li><a href="#analysts"><span class="toc-num">1</span>最佳分析师</a></li>
+        <li><a href="#longform"><span class="toc-num">2</span>必读长文/书籍</a></li>
+        <li><a href="#podcasts"><span class="toc-num">3</span>播客与视频</a></li>
+        <li><a href="#primary"><span class="toc-num">4</span>一手资料</a></li>
+        <li><a href="#relationships"><span class="toc-num">5</span>关键关系网</a></li>
+        <li><a href="#narratives"><span class="toc-num">6</span>叙事弧</a></li>
+        <li><a href="#gaps"><span class="toc-num">7</span>信息空白</a></li>
+        <li><a href="#quality"><span class="toc-num">8</span>质量评估</a></li>
+      </ul>
+    </nav>
+
+    <h4>Related</h4>
+    <nav>
+      <ul>
+        <li><a href="22_mica_representative.html">MiCA Representative Profile</a></li>
+        <li><a href="22_mica_metacognition.html">Metacognition</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+
+    <div class="top-controls">
+      <span class="tc-label">&#128218; 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <header class="page-header">
+      <h1>MiCA Representative — 素材策展地图 V4</h1>
+      <p class="subtitle">Research Date: 2026-03-22 &nbsp;|&nbsp; 10 Categories &middot; 30+ Sources &middot; 4 Priority Levels<br>
+      <span class="zh-inline">欧洲加密资产市场监管全面解读 | Brussels Effect理论框架</span></p>
+      <div class="badge-row">
+        <span class="badge">&#127757; EU Regulation</span>
+        <span class="badge">&#128220; Compliance</span>
+        <span class="badge">&#128200; Stablecoins</span>
+        <span class="badge">&#128268; Primary Sources</span>
+      </div>
+    </header>
+
+    <!-- ★ Priority Box -->
+    <div class="priority-box" id="priority">
+      <h2>&#9200; 如果只有2小时 — 推荐阅读路径</h2>
+      <ol>
+        <li><span class="time-badge">30min</span><strong>EUR-Lex MiCA原文</strong> — 至少阅读Recitals(序言)与关键条款(Arts. 3-6, 39-41)，理解立法意图<span class="nref" data-note="note-01">1</span></li>
+        <li><span class="time-badge">20min</span><strong>The Block MiCA Tracker</strong> — 快速掌握实施时间线与当前进度<span class="nref" data-note="note-02">2</span></li>
+        <li><span class="time-badge">30min</span><strong>ESMA Final Report</strong> — 技术标准核心内容，重点关注稳定币储备要求<span class="nref" data-note="note-03">3</span></li>
+        <li><span class="time-badge">20min</span><strong>"Brussels Effect"</strong> — 理解MiCA全球影响力的理论框架<span class="nref" data-note="note-04">4</span></li>
+        <li><span class="time-badge">20min</span><strong>吴说关键报道</strong> — 中文实操影响：交易所下架USDT等案例<span class="nref" data-note="note-05">5</span></li>
+      </ol>
+    </div>
+
+    <!-- §1 最佳分析师 -->
+    <section id="analysts">
+      <div class="section-header">
+        <h2>1. 最佳分析师与独立研究<span class="zh">Best Analysts &amp; Independent Research</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>ESMA</strong></td>
+            <td>监管机构研究</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>MiCA技术标准制定者，发布最终报告和指导<span class="nref" data-note="note-06">6</span></td>
+          </tr>
+          <tr>
+            <td><strong>EBA</strong></td>
+            <td>监管机构研究</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>稳定币审慎标准制定，Art. 39-41技术规范</td>
+          </tr>
+          <tr>
+            <td><strong>The Block MiCA Tracker</strong></td>
+            <td>行业媒体追踪</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>最全面的MiCA实施追踪，含时间线和影响分析</td>
+          </tr>
+          <tr>
+            <td><strong>CoinDesk EU Regulation</strong></td>
+            <td>新闻分析</td>
+            <td>⭐⭐⭐⭐</td>
+            <td>实时政策解读，含执法案例和专家评论</td>
+          </tr>
+          <tr>
+            <td><strong>吴说区块链</strong></td>
+            <td>中文行业研究</td>
+            <td>⭐⭐⭐⭐</td>
+            <td>中文世界最及时的欧盟监管解读，含交易所下架USDT实操影响</td>
+          </tr>
+          <tr>
+            <td><strong>PANews</strong></td>
+            <td>中文加密媒体</td>
+            <td>⭐⭐⭐⭐</td>
+            <td>深度解读文章，侧重对华出海企业的合规指导</td>
+          </tr>
+          <tr>
+            <td><strong>Chainalysis</strong></td>
+            <td>数据分析</td>
+            <td>⭐⭐⭐⭐</td>
+            <td>链上数据视角分析MiCA对市场结构的影响</td>
+          </tr>
+          <tr>
+            <td><strong>Kaiko Research</strong></td>
+            <td>市场数据分析</td>
+            <td>⭐⭐⭐⭐</td>
+            <td>稳定币市场份额变化的量化研究，USDT/USDC欧洲数据</td>
+          </tr>
+          <tr>
+            <td><strong>Circle政策团队</strong></td>
+            <td>行业参与者研究</td>
+            <td>⭐⭐⭐⭐</td>
+            <td>USDC发行方的政策立场和合规经验</td>
+          </tr>
+          <tr>
+            <td><strong>Fireblocks合规团队</strong></td>
+            <td>企业合规研究</td>
+            <td>⭐⭐⭐</td>
+            <td>机构级合规方案提供商的一线观察</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §2 必读长文/书籍 -->
+    <section id="longform">
+      <div class="section-header">
+        <h2>2. 必读长文与书籍<span class="zh">Must-Read Long-Form &amp; Books</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>MiCA Regulation Full Text</strong></td>
+            <td>法规原文</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>189页完整法规，所有分析的源头，建议读Recitals和关键条款<span class="nref" data-note="note-07">7</span></td>
+          </tr>
+          <tr>
+            <td><strong>ESMA Final Report on MiCA</strong></td>
+            <td>监管技术规范</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>600+页技术标准，执行层面的"圣经"</td>
+          </tr>
+          <tr>
+            <td><strong>"Brussels Effect"</strong></td>
+            <td>学术专著</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>理解MiCA全球影响力的理论框架，哥大Anu Bradford教授著</td>
+          </tr>
+          <tr>
+            <td><strong>EU Crypto-Assets Policy: MiCA to DORA</strong></td>
+            <td>政策白皮书</td>
+            <td>⭐⭐⭐⭐</td>
+            <td>欧盟加密政策全景，含MiCA与银行监管(DORA)的衔接</td>
+          </tr>
+          <tr>
+            <td><strong>Stablecoins: Risks, Regulation, Supervision</strong></td>
+            <td>BIS工作论文</td>
+            <td>⭐⭐⭐⭐</td>
+            <td>国际清算银行对稳定币风险的系统性分析</td>
+          </tr>
+          <tr>
+            <td><strong>The Law of Digital Assets</strong></td>
+            <td>法律教科书</td>
+            <td>⭐⭐⭐⭐</td>
+            <td>数字资产法的系统性教材，MiCA章节为必读</td>
+          </tr>
+          <tr>
+            <td><strong>Token Economy</strong></td>
+            <td>行业专著</td>
+            <td>⭐⭐⭐⭐</td>
+            <td>Web3治理经典，2023年后版本含MiCA分析</td>
+          </tr>
+          <tr>
+            <td><strong>欧盟加密资产监管制度研究</strong></td>
+            <td>中文学术论文</td>
+            <td>⭐⭐⭐⭐</td>
+            <td>中国学者对MiCA的比较法研究，侧重对我国的启示</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §3 播客与视频 -->
+    <section id="podcasts">
+      <div class="section-header">
+        <h2>3. 播客与视频<span class="zh">Podcasts &amp; Video</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Unchained: MiCA Deep Dives</strong></td>
+            <td>英文播客</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>Laura Shin的权威访谈，多次专访ESMA官员和行业领袖<span class="nref" data-note="note-08">8</span></td>
+          </tr>
+          <tr>
+            <td><strong>Bankless: EU Crypto Regulation</strong></td>
+            <td>英文播客</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>行业视角的MiCA影响分析，含交易策略讨论</td>
+          </tr>
+          <tr>
+            <td><strong>The Block Live: MiCA Special</strong></td>
+            <td>视频访谈</td>
+            <td>⭐⭐⭐⭐</td>
+            <td>政策专家圆桌，实时解读ESMA最新指引</td>
+          </tr>
+          <tr>
+            <td><strong>a16z crypto research talks</strong></td>
+            <td>研究视频</td>
+            <td>⭐⭐⭐⭐</td>
+            <td>顶级风投的监管策略分析，含MiCA合规建议</td>
+          </tr>
+          <tr>
+            <td><strong>吴说区块链 YouTube/B站</strong></td>
+            <td>中文视频</td>
+            <td>⭐⭐⭐⭐</td>
+            <td>中文视频解读，含图表和时间线梳理</td>
+          </tr>
+          <tr>
+            <td><strong>链捕手 ChainCatcher 直播</strong></td>
+            <td>中文播客/直播</td>
+            <td>⭐⭐⭐⭐</td>
+            <td>中文行业KOL的MiCA专题讨论，侧重实操影响</td>
+          </tr>
+          <tr>
+            <td><strong>EU Policy Podcast: Digital Finance</strong></td>
+            <td>官方播客</td>
+            <td>⭐⭐⭐⭐</td>
+            <td>欧盟官员直接发声，理解政策意图的一手渠道</td>
+          </tr>
+          <tr>
+            <td><strong>Circle Converge 政策专场</strong></td>
+            <td>会议视频</td>
+            <td>⭐⭐⭐⭐</td>
+            <td>USDC发行方的政策沟通，含合规经验分享</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §4 一手资料 -->
+    <section id="primary">
+      <div class="section-header">
+        <h2>4. 一手资料<span class="zh">Primary Sources</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>EUR-Lex MiCA Official Journal</strong></td>
+            <td>法规原文</td>
+            <td class="url-col"><a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32023R1114" target="_blank">CELEX:32023R1114</a></td>
+            <td>唯一权威版本，所有引用的最终依据<span class="nref" data-note="note-09">9</span></td>
+          </tr>
+          <tr>
+            <td><strong>ESMA Consultation Papers</strong></td>
+            <td>监管征询</td>
+            <td class="url-col"><a href="https://www.esma.europa.eu/consultations" target="_blank">esma.europa.eu/consultations</a></td>
+            <td>规则制定前的公开征询，含行业反馈和ESMA回应</td>
+          </tr>
+          <tr>
+            <td><strong>EBA Consultation on MiCA</strong></td>
+            <td>监管征询</td>
+            <td class="url-col"><a href="https://www.eba.europa.eu/regulation-and-policy/crypto-assets" target="_blank">eba.europa.eu</a></td>
+            <td>稳定币技术标准征询文件</td>
+          </tr>
+          <tr>
+            <td><strong>European Parliament Legislative Observatory</strong></td>
+            <td>立法追踪</td>
+            <td class="url-col"><a href="https://oeil.secure.europarl.europa.eu/oeil/popups/ficheprocedure.do?reference=2020/0265(COD)" target="_blank">2020/0265(COD)</a></td>
+            <td>MiCA立法全过程档案，含各轮修正案和投票记录</td>
+          </tr>
+          <tr>
+            <td><strong>EU Member States NCAs</strong></td>
+            <td>国家执行机构</td>
+            <td class="url-col">德国BaFin, 法国AMF等</td>
+            <td>具体执行层面的国家差异，如BaFin的加密牌照指引</td>
+          </tr>
+          <tr>
+            <td><strong>European Court (CJEU) Cases</strong></td>
+            <td>司法解释</td>
+            <td class="url-col"><a href="https://curia.europa.eu/" target="_blank">curia.europa.eu</a></td>
+            <td>未来MiCA相关诉讼的司法解释来源</td>
+          </tr>
+          <tr>
+            <td><strong>Exchange Announcements</strong></td>
+            <td>企业合规公告</td>
+            <td class="url-col">Binance EU, Coinbase, Kraken</td>
+            <td>实际执行层面的第一手反应，如下架USDT的公告<span class="nref" data-note="note-10">10</span></td>
+          </tr>
+          <tr>
+            <td><strong>Tether/Bitfinex Official</strong></td>
+            <td>企业立场</td>
+            <td class="url-col"><a href="https://tether.to/en/news/" target="_blank">tether.to</a></td>
+            <td>被监管方的应对策略和合规努力</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §5 关键关系网 -->
+    <section id="relationships">
+      <div class="section-header">
+        <h2>5. 关键关系网<span class="zh">Key Relationships</span></h2>
+      </div>
+
+      <details class="rel-card" open>
+        <summary>&#9878; 立法层级 Legislative Hierarchy</summary>
+        <div class="rel-body">
+          <p>欧盟委员会(提案) ←→ 欧洲议会 ←→ 欧盟理事会 = MiCA法规</p>
+          <p>↓</p>
+          <p><strong>ESMA + EBA</strong> (技术标准制定)</p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>&#128736; 执行层级 Implementation Hierarchy</summary>
+        <div class="rel-body">
+          <p>各国NCA (德国BaFin/法国AMF/荷兰DNB等) ←→ 交易所/CASP</p>
+          <p>↓</p>
+          <p><strong>合规服务商</strong> (Fireblocks, Circle, ComplyAdvantage)</p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>&#128200; 市场影响层级 Market Impact</summary>
+        <div class="rel-body">
+          <p><strong>USDC (Circle)</strong> ✅已合规 ←→ <strong>USDT (Tether)</strong> ❌未合规</p>
+          <p>欧洲交易所 (Bitstamp, Kraken EU) ←→ 离岸交易所 (Binance)</p>
+          <p>↓</p>
+          <p><mark class="hl-know" data-note="note-11">全球标准溢出 (Brussels Effect)</mark> → 香港/新加坡/迪拜监管</p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>&#128240; 关键关系对</summary>
+        <div class="rel-body">
+          <table>
+            <tr><td><strong>ESMA ↔ 行业</strong></td><td>监管-被监管</td><td>征询-反馈循环，ESMA最终报告吸收行业大量意见</td></tr>
+            <tr><td><strong>Circle ↔ EBA</strong></td><td>合规合作</td><td>Circle主动申请EMI牌照，成为"好学生"样板</td></tr>
+            <tr><td><strong>Tether ↔ 欧盟</strong></td><td>对抗-回避</td><td>Tether未申请许可，依赖法律灰色地带运营</td></tr>
+            <tr><td><strong>欧盟 ↔ 美国</strong></td><td>监管竞争</td><td><mark class="hl-know" data-note="note-12">MiCA vs 美国"执法监管"模式</mark>，争夺全球标准制定权</td></tr>
+          </table>
+        </div>
+      </details>
+
+    </section>
+
+    <!-- §6 叙事弧 -->
+    <section id="narratives">
+      <div class="section-header">
+        <h2>6. 关键叙事弧<span class="zh">Key Narrative Arcs</span></h2>
+      </div>
+
+      <div class="arc-item">
+        <strong>&#127757; Brussels Effect — 欧盟如何成为全球加密监管标准制定者</strong>
+        <p>MiCA不仅是欧盟内部法规，更通过"布鲁塞尔效应"——欧盟单一市场的规模优势迫使全球加密企业主动遵守——成为事实上的全球标准。Anu Bradford的<mark class="hl-know" data-note="note-13">"The Brussels Effect"</mark>理论解释了为何即使是非欧盟企业也需关注MiCA合规。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>&#128176; 稳定币战争 — USDC vs USDT的欧洲生死局</strong>
+        <p>MiCA第17-40条对<mark class="hl-know" data-note="note-14">稳定币发行者设定了严格的储备、审计和披露要求</mark>。Circle积极合规寻求成为"监管冠军"，而Tether则采取观望策略。这场博弈将重塑欧洲乃至全球稳定币市场格局。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>&#128268; 从执法监管到规则监管 — 美欧监管哲学分歧</strong>
+        <p>美国SEC采取"执法优先"策略（先起诉后立法），而欧盟通过MiCA建立<mark class="hl-know" data-note="note-15">清晰的规则手册</mark>。这一叙事对比将成为加密行业选择注册地的关键考量。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>&#128273; 牌照竞赛 — 加密企业欧洲布局加速</strong>
+        <p>MiCA设定的30个月过渡期即将结束，加密企业正在欧洲各国NCA争相申请牌照。德国BaFin以严格著称但流程清晰，法国AMF则相对灵活。爱沙宛曾是小型交易所的"牌照超市"，但已收紧政策。</p>
+      </div>
+
+    </section>
+
+    <!-- §7 信息空白 -->
+    <section id="gaps">
+      <div class="section-header">
+        <h2>7. 信息空白 — What Doesn't Exist<span class="zh">Information Gaps</span></h2>
+      </div>
+
+      <div class="question-box">
+        <blockquote>
+          <p>&#9989; 关键未解问题：MiCA 2.0将如何处理DeFi、NFT和质押服务？</p>
+        </blockquote>
+      </div>
+
+      <details open>
+        <summary>&#9888; MiCA 2.0具体内容</summary>
+        <div>
+          <p><strong>现状：</strong>仅知2024年启动审查，DeFi/NFT/质押细节未定</p>
+          <p><strong>影响：</strong>长期合规规划困难，项目方难以提前布局</p>
+          <p><strong>填补可能性：</strong>2025-2026年逐步释放，需持续跟踪ESMA征询</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>&#9888; DeFi协议的具体合规路径</summary>
+        <div>
+          <p><strong>现状：</strong>当前MiCA对"去中心化"定义模糊</p>
+          <p><strong>影响：</strong>Uniswap等协议欧洲运营风险不明</p>
+          <p><strong>填补可能性：</strong>需等待ESMA进一步指引或判例</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>&#9888; 非欧盟企业的执法力度</summary>
+        <div>
+          <p><strong>现状：</strong>Tether未获许可但仍在欧洲流通</p>
+          <p><strong>影响：</strong>法规权威性受质疑</p>
+          <p><strong>填补可能性：</strong>2025年全面执行期观察</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>&#9888; 中文一手资料的系统性缺失</summary>
+        <div>
+          <p><strong>现状：</strong>无中文官方译本，依赖二手解读</p>
+          <p><strong>影响：</strong>华语企业合规信息不对称</p>
+          <p><strong>填补可能性：</strong>低，需依赖专业服务机构</p>
+        </div>
+      </details>
+
+    </section>
+
+    <!-- §8 质量评估 -->
+    <section id="quality">
+      <div class="section-header">
+        <h2>8. 素材质量评估<span class="zh">Source Quality Assessment</span></h2>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>类别</th>
+            <th>质量评级</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>官方一手资料</strong></td>
+            <td style="color:#4caf50;">&#9733;&#9733;&#9733;&#9733;&#9733;</td>
+            <td>EUR-Lex原文、ESMA/EBA报告——所有分析的最终依据</td>
+          </tr>
+          <tr>
+            <td><strong>监管机构研究</strong></td>
+            <td style="color:#4caf50;">&#9733;&#9733;&#9733;&#9733;&#9733;</td>
+            <td>ESMA、EBA——技术标准制定者，权威性最高</td>
+          </tr>
+          <tr>
+            <td><strong>学术专著</strong></td>
+            <td style="color:#8bc34a;">&#9733;&#9733;&#9733;&#9733;</td>
+            <td>Brussels Effect、BIS论文——理论框架扎实</td>
+          </tr>
+          <tr>
+            <td><strong>行业数据分析</strong></td>
+            <td style="color:#8bc34a;">&#9733;&#9733;&#9733;&#9733;</td>
+            <td>Chainalysis、Kaiko——量化视角补充监管盲区</td>
+          </tr>
+          <tr>
+            <td><strong>行业媒体</strong></td>
+            <td style="color:#ffc107;">&#9733;&#9733;&#9733;</td>
+            <td>The Block、CoinDesk——时效性强但需交叉验证</td>
+          </tr>
+          <tr>
+            <td><strong>中文渠道</strong></td>
+            <td style="color:#ffc107;">&#9733;&#9733;&#9733;</td>
+            <td>吴说、PANews——实操价值高但存在二手信息延迟</td>
+          </tr>
+          <tr>
+            <td><strong>企业公告</strong></td>
+            <td style="color:#ff9800;">&#9733;&#9733;</td>
+            <td>交易所、Tether公告——立场鲜明，需独立判断</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="question-box">
+        <blockquote>
+          <p>&#128172; 研究建议：建立"官方→学术→行业→企业"的信息优先级金字塔，确保分析建立在坚实的一手资料基础上。</p>
+        </blockquote>
+      </div>
+
+    </section>
+
+    <footer style="margin-top:3rem; padding-top:1rem; border-top:1px solid var(--border-subtle); font-size:0.72rem; color:var(--text-quaternary);">
+      <p>Generated: 2026-03-22 &middot; V4 Template &middot; <a href="../blockchain_hub.html">Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ========== RIGHT SIDEBAR (Notes) ========== -->
+  <aside class="notes-sidebar ns-closed" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&times;</button>
+      <h4 style="font-size:0.7rem; font-weight:590; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-quaternary); margin:0;">&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+
+    <!-- Annotation 01 -->
+    <div class="anno meta-note" id="note-01" data-section="priority">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">优先级策略：时间盒阅读法</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>将2小时分割为5个时间盒，每个时间盒专注单一信息源。这是处理高复杂度监管文献的高效策略。</p>
+        <p>关键原则：先建立框架(Recitals)，再深入细节(具体条款)。</p>
+      </div>
+    </div>
+
+    <!-- Annotation 02 -->
+    <div class="anno know-note" id="note-02" data-section="priority">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">The Block MiCA Tracker工具价值</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>该追踪器整合了：</p>
+        <p>• ESMA/EBA关键节点时间线</p>
+        <p>• 各成员国NCA实施进度</p>
+        <p>• 交易所合规状态地图</p>
+        <p>• 实时政策新闻关联</p>
+      </div>
+    </div>
+
+    <!-- Annotation 03 -->
+    <div class="anno meta-note" id="note-03" data-section="priority">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">ESMA Final Report阅读策略</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>600+页文件需要策略性阅读：</p>
+        <p>1. 先读Executive Summary</p>
+        <p>2. 重点关注Arts. 39-41(稳定币)</p>
+        <p>3. 附录中的技术规范模板</p>
+        <p>4. 行业反馈摘要部分</p>
+      </div>
+    </div>
+
+    <!-- Annotation 04 -->
+    <div class="anno know-note" id="note-04" data-section="priority">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">Brussels Effect核心机制</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Anu Bradford提出：欧盟通过五种机制实现全球影响：</p>
+        <p>1. 市场准入杠杆</p>
+        <p>2. 消费者保护标准</p>
+        <p>3. 供应链合规要求</p>
+        <p>4. 跨国企业总部决策</p>
+        <p>5. 国际标准溢出效应</p>
+      </div>
+    </div>
+
+    <!-- Annotation 05 -->
+    <div class="anno know-note" id="note-05" data-section="priority">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">中文实操影响案例</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>吴说追踪的关键实操案例：</p>
+        <p>• 交易所下架USDT时间线</p>
+        <p>• CEX欧洲牌照申请进度</p>
+        <p>• 华人项目方合规成本估算</p>
+        <p>• 监管套利空间分析</p>
+      </div>
+    </div>
+
+    <!-- Annotation 06 -->
+    <div class="anno meta-note" id="note-06" data-section="analysts">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">监管机构研究优先级</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>ESMA vs EBA职责分工：</p>
+        <p><strong>ESMA</strong>：市场行为、CASP许可、投资者保护</p>
+        <p><strong>EBA</strong>：审慎监管、资本要求、稳定币储备</p>
+        <p>针对不同问题选择正确机构。</p>
+      </div>
+    </div>
+
+    <!-- Annotation 07 -->
+    <div class="anno know-note" id="note-07" data-section="longform">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">MiCA法规结构速查</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>MiCA Regulation (32023R1114) 结构：</p>
+        <p>• Recitals (1-88)：立法意图</p>
+        <p>• Arts. 1-4：范围与定义</p>
+        <p>• Arts. 5-15：MAT-Token发行</p>
+        <p>• Arts. 16-40：CASPs许可</p>
+        <p>• Arts. 39-41：EMT稳定币(重点)</p>
+      </div>
+    </div>
+
+    <!-- Annotation 08 -->
+    <div class="anno meta-note" id="note-08" data-section="podcasts">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">播客学习效率优化</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Unchained vs Bankless风格差异：</p>
+        <p><strong>Unchained</strong>：深度访谈，1-2小时，适合碎片时间</p>
+        <p><strong>Bankless</strong>：行业快评，30-60分钟，适合通勤</p>
+        <p>建议：用Bankless保持信息敏感度，用Unchained深入特定主题。</p>
+      </div>
+    </div>
+
+    <!-- Annotation 09 -->
+    <div class="anno know-note" id="note-09" data-section="primary">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">EUR-Lex使用技巧</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>EUR-Lex高级功能：</p>
+        <p>• 切换语言版本（官方22种）</p>
+        <p>• 历史版本对比工具</p>
+        <p>• 相关法案交叉引用</p>
+        <p>• 订阅更新通知</p>
+        <p>• PDF/EPUB下载</p>
+      </div>
+    </div>
+
+    <!-- Annotation 10 -->
+    <div class="anno meta-note" id="note-10" data-section="primary">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">交易所公告的信息价值</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>企业公告分析框架：</p>
+        <p>1. <strong>表面信息</strong>：官方声明文字</p>
+        <p>2. <strong>时间信号</strong>：发布时间与监管节点的关联</p>
+        <p>3. <strong>沉默分析</strong>：未提及的内容同样重要</p>
+        <p>4. <strong>后续行动</strong>：声明后的实际操作</p>
+      </div>
+    </div>
+
+    <!-- Annotation 11 -->
+    <div class="anno know-note" id="note-11" data-section="relationships">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">Brussels Effect在加密领域实例</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>香港SFC跟进：2023年虚拟资产框架</p>
+        <p>新加坡MAS调整：支付服务法修订</p>
+        <p>迪拜VARA：自由区加密框架</p>
+        <p>英国FCA：虽脱欧仍参考MiCA方向</p>
+      </div>
+    </div>
+
+    <!-- Annotation 12 -->
+    <div class="anno know-note" id="note-12" data-section="relationships">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">美欧监管哲学对比</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>美国SEC "Regulation by Enforcement"</strong>：</p>
+        <p>• 先起诉，后立法</p>
+        <p>• 案例法积累路径</p>
+        <p>• 监管不确定性高</p>
+        <p><strong>欧盟 MiCA "Clear Rulebook"</strong>：</p>
+        <p>• 先立法，后执行</p>
+        <p>• 规则手册明确</p>
+        <p>• 合规成本可预期</p>
+      </div>
+    </div>
+
+    <!-- Annotation 13 -->
+    <div class="anno know-note" id="note-13" data-section="narratives">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">Brussels Effect理论要点</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>核心论点：欧盟法规通过市场力量而非谈判实现全球适用。</p>
+        <p>关键条件：</p>
+        <p>• 市场规模足够大（欧盟=全球16%GDP）</p>
+        <p>• 产品标准难以分离（合规成本高）</p>
+        <p>• 消费者偏好欧盟标准</p>
+        <p>• 无可替代的竞争对手</p>
+      </div>
+    </div>
+
+    <!-- Annotation 14 -->
+    <div class="anno know-note" id="note-14" data-section="narratives">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">EMT稳定币关键合规要求</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>MiCA Art. 39-41核心要求：</p>
+        <p>• 100%储备资产持有</p>
+        <p>• 低波动性加密资产储备</p>
+        <p>• 信用机构托管要求</p>
+        <p>• 月度储备报告披露</p>
+        <p>• 赎回归还权保障</p>
+        <p>• 投资限制（不得用于投资）</p>
+      </div>
+    </div>
+
+    <!-- Annotation 15 -->
+    <div class="anno meta-note" id="note-15" data-section="narratives">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">信息源优先级决策框架</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>建立三层信息过滤：</p>
+        <p><strong>P0 法规原文</strong>：EUR-Lex > ESMA > EBA</p>
+        <p><strong>P1 权威分析</strong>：学术 > 行业研究 > 媒体</p>
+        <p><strong>P2 补充视角</strong>：企业公告 > 社交媒体 > 二手解读</p>
+        <p>每个结论必须可追溯到P0或P1来源。</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+// === Sidebar toggle (mobile) ===
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+
+// === Notes sidebar toggle ===
+(function(){
+  var btn=document.getElementById("notesToggleBtn"),ns=document.getElementById("notesSidebar"),ov=document.getElementById("notesOverlay"),cb=document.getElementById("notesCloseBtn");
+  if(!btn||!ns)return;
+  function toggle(){ns.classList.toggle("ns-closed");ov.classList.toggle("open");}
+  btn.onclick=toggle;
+  if(ov)ov.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(cb)cb.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(window.innerWidth>1200)ns.classList.remove("ns-closed");
+  window.addEventListener("resize",function(){if(window.innerWidth>1200)ns.classList.remove("ns-closed");});
+})();
+
+// === Toggle note ===
+function toggleNote(head){
+  var anno=head.closest(".anno");
+  if(anno){anno.classList.toggle("open");positionNotes();}
+}
+
+// === Position notes ===
+function positionNotes(){
+  var ns=document.getElementById("notesSidebar");if(!ns)return;
+  var annos=ns.querySelectorAll(".anno");
+  var lastBottom=80;
+  annos.forEach(function(a){
+    if(a.style.display==="none")return;
+    var sec=a.getAttribute("data-section");
+    var target=sec?document.getElementById(sec):null;
+    var top=target?target.getBoundingClientRect().top+window.scrollY-ns.getBoundingClientRect().top:lastBottom;
+    if(top<lastBottom)top=lastBottom;
+    a.style.top=top+"px";
+    lastBottom=top+a.offsetHeight+8;
+  });
+}
+
+// === Knowledge toggle ===
+function toggleKnowNotes(){
+  var btn=document.getElementById("knowToggleBtn");
+  var knowNotes=document.querySelectorAll(".anno.know-note");
+  var marks=document.querySelectorAll("mark.hl-know");
+  var nrefs=document.querySelectorAll(".nref");
+  var visible=btn.classList.contains("active");
+  knowNotes.forEach(function(n){n.style.display=visible?"none":"";});
+  marks.forEach(function(m){m.style.background=visible?"transparent":"";m.style.borderBottom=visible?"none":"";});
+  nrefs.forEach(function(r){r.style.display=visible?"none":"";});
+  btn.classList.toggle("active");
+  btn.textContent=visible?"显示":"隐藏";
+  positionNotes();
+}
+
+// === Expand / Collapse all ===
+function expandAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.add("open");});positionNotes();}
+function collapseAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.remove("open");});positionNotes();}
+
+// === Note count ===
+(function(){
+  var label=document.getElementById("noteCountLabel");if(!label)return;
+  var meta=document.querySelectorAll(".anno.meta-note").length;
+  var know=document.querySelectorAll(".anno.know-note").length;
+  label.textContent=meta+" META + "+know+" Knowledge";
+})();
+
+// === Highlight → Note sync ===
+document.addEventListener("click",function(e){
+  var mark=e.target.closest("mark.hl-know")||e.target.closest(".nref");
+  if(!mark)return;
+  var noteId=mark.getAttribute("data-note");if(!noteId)return;
+  var anno=document.getElementById(noteId);if(!anno)return;
+  anno.classList.add("open");
+  anno.scrollIntoView({behavior:"smooth",block:"center"});
+  anno.classList.add("flash");
+  setTimeout(function(){anno.classList.remove("flash");},1500);
+  positionNotes();
+});
+
+// === Embedded mode ===
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+  document.addEventListener("click",function(e){
+    var a=e.target.closest("a");if(!a||!a.href)return;
+    try{var url=new URL(a.href,location.href)}catch(err){return}
+    if(url.pathname.startsWith("/trade-pipeline/")||url.pathname.startsWith("/observatory/")){
+      e.preventDefault();
+      window.top.postMessage({type:"dashboard-nav",action:"openResearch",url:url.pathname,title:a.textContent.trim().substring(0,60)},"*");
+    }
+  });
+})();
+
+// Initial positioning
+window.addEventListener("load",function(){positionNotes();});
+window.addEventListener("scroll",function(){positionNotes();});
+</script>
+</body>
+</html>

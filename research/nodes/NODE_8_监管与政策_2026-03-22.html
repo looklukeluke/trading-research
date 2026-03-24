@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>认知节点报告: 监管与政策 — Node 8</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="../blockchain_shared.css">
+  <style>
+/* === Node-specific extensions (keep under 80 lines) === */
+/* KPI Cards */
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+.kpi-card { background: var(--bg-surface); border-radius: var(--radius-md); padding: 1.25rem; border: 1px solid var(--border-subtle); }
+.kpi-label { font-size: 0.72rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.kpi-value { font-size: 1.5rem; font-weight: 680; font-feature-settings: 'tnum' 1; margin-bottom: 4px; }
+.kpi-change { font-size: 0.78rem; font-weight: 600; }
+.kpi-change.positive { color: #4caf50; }
+.kpi-subtitle { font-size: 0.72rem; color: var(--text-quaternary); margin-top: 4px; }
+/* Risk Matrix */
+.risk-matrix td:nth-child(2), .risk-matrix td:nth-child(3) { text-align: center; }
+.risk-high { color: #f44336; font-weight: 700; }
+.risk-medium { color: #ffc107; font-weight: 700; }
+.risk-low { color: #4caf50; font-weight: 700; }
+/* Callout Boxes */
+.callout { background: var(--bg-surface); border-radius: var(--radius-sm); padding: 1rem 1.25rem; margin: 1rem 0; border-left: 3px solid var(--accent); }
+.callout-title { font-size: 0.8rem; font-weight: 590; color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+.callout-body { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; }
+.callout.risk { border-left-color: #f44336; }
+.callout.risk .callout-title { color: #f44336; }
+.callout.insight { border-left-color: var(--knowledge); }
+.callout.insight .callout-title { color: var(--knowledge); }
+/* Phase Headers */
+.phase-header { display: flex; align-items: center; gap: 0.75rem; margin: 2.5rem 0 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle); }
+.phase-num { font-size: 0.72rem; font-weight: 700; color: var(--bg-base); background: var(--accent); padding: 3px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+.phase-title { font-size: 1.15rem; font-weight: 590; color: var(--text-primary); }
+/* Agent Cards */
+.agent-header { display: flex; align-items: center; gap: 0.75rem; margin: 2rem 0 1rem; }
+.agent-role-badge { font-size: 0.68rem; font-weight: 510; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+.agent-role-badge.giant { background: rgba(248,168,72,0.15); color: var(--accent); }
+.agent-role-badge.investor { background: rgba(91,155,213,0.15); color: var(--knowledge); }
+.agent-role-badge.contrarian { background: rgba(244,67,54,0.15); color: #f44336; }
+/* Triangulation */
+.consensus { color: #4caf50; font-weight: 600; }
+.disagreement { color: #f44336; font-weight: 600; }
+/* Provenance */
+.prov-badge { font-size: 0.65rem; padding: 1px 6px; border-radius: 3px; font-weight: 600; }
+.prov-primary { background: rgba(76,175,80,0.12); color: #4caf50; }
+.prov-industry { background: rgba(91,155,213,0.12); color: var(--knowledge); }
+.prov-media { background: rgba(248,168,72,0.12); color: var(--accent); }
+.prov-analysis { background: rgba(171,71,188,0.12); color: #ab47bc; }
+/* Chart Frames */
+.chart-frame { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); margin: 1rem 0; overflow: hidden; }
+.chart-frame-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-subtle); }
+.chart-frame-title { font-size: 0.82rem; font-weight: 590; color: var(--text-secondary); letter-spacing: 0.02em; }
+.chart-frame-body { padding: 0; }
+.chart-source { padding: 0.5rem 1rem; font-size: 0.7rem; color: var(--text-quaternary); border-top: 1px solid var(--border-subtle); }
+/* Embedded + Reading mode */
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+body.embedded .hamburger-btn { display: none !important; }
+body.embedded .sidebar-overlay { display: none !important; }
+.reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+.reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+.reading-mode .hamburger-btn { display: none !important; }
+.reading-mode .sidebar-overlay { display: none !important; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes sidebar">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ═══════════ LEFT SIDEBAR ═══════════ -->
+  <aside class="sidebar" id="sidebar">
+    <a class="back-link" href="../blockchain_hub.html" style="display:block;padding:0.4rem 0.5rem;margin-bottom:1rem;font-size:0.8rem;color:var(--accent);text-decoration:none;border:1px solid var(--accent-dim);border-radius:var(--radius-sm);">&#8592; Blockchain Hub</a>
+    <h4>目录导航 Contents</h4>
+    <nav><ul>
+      <li><a href="#metacognition" style="color:var(--accent);"><span class="toc-num">&#9733;</span>元思考<br><span class="zh-inline">Metacognition</span></a></li>
+      <li><a href="#phase0"><span class="toc-num">0</span>独立思考<br><span class="zh-inline">Independent Thinking</span></a></li>
+      <li><a href="#phase05"><span class="toc-num">0.5</span>策展搜索<br><span class="zh-inline">Curated Search</span></a></li>
+      <li><a href="#phase1"><span class="toc-num">1</span>认知代理人<br><span class="zh-inline">Cognitive Agents</span></a></li>
+      <li><a href="#hester-peirce"><span class="toc-num">1.1</span>Hester Peirce<br><span class="zh-inline">GIANT &middot; SEC</span></a></li>
+      <li><a href="#caitlin-long"><span class="toc-num">1.2</span>Caitlin Long<br><span class="zh-inline">INVESTOR &middot; Custodia Bank</span></a></li>
+      <li><a href="#david-sacks"><span class="toc-num">1.3</span>David Sacks<br><span class="zh-inline">GIANT &middot; White House</span></a></li>
+      <li><a href="#mica-representative"><span class="toc-num">1.4</span>未定 MiCA代表<br><span class="zh-inline">INVESTOR &middot; EU</span></a></li>
+      <li><a href="#phase2"><span class="toc-num">2</span>综合分析<br><span class="zh-inline">Synthesis</span></a></li>
+      <li><a href="#triangulation"><span class="toc-num">2.1</span>三角验证<br><span class="zh-inline">Triangulation</span></a></li>
+      <li><a href="#competitive"><span class="toc-num">2.2</span>竞争格局<br><span class="zh-inline">Competitive Landscape</span></a></li>
+      <li><a href="#risk-matrix"><span class="toc-num">2.3</span>风险矩阵<br><span class="zh-inline">Risk Matrix</span></a></li>
+      <li><a href="#node-judgment"><span class="toc-num">2.4</span>节点判断<br><span class="zh-inline">Node Judgment</span></a></li>
+      <li><a href="#trading"><span class="toc-num">2.5</span>交易视角<br><span class="zh-inline">Trading Perspective</span></a></li>
+      <li><a href="#kpi-dashboard"><span class="toc-num">3</span>KPI仪表盘<br><span class="zh-inline">Dashboard</span></a></li>
+      <li><a href="#provenance"><span class="toc-num">4</span>溯源表<br><span class="zh-inline">Provenance Table</span></a></li>
+    </ul></nav>
+    <h4>&#129504; 元思考 Metacognition</h4>
+    <nav><ul>
+      <li><a href="NODE_8_regulation_metacognition.html" style="color:var(--accent);">元思考过程<br><span class="zh-inline">Thinking Log &rarr;</span></a></li>
+    </ul></nav>
+    <h4>价值链节点 Value Chain Nodes</h4>
+    <nav><ul>
+      <li><a href="NODE_1_挖矿与能源_2026-03-22.html">Node 1: 挖矿与能源<br><span class="zh-inline">Mining &amp; Energy</span></a></li>
+      <li><a href="NODE_2_L1协议_2026-03-22.html">Node 2: L1协议<br><span class="zh-inline">Layer 1 Protocols</span></a></li>
+      <li><a href="NODE_3_中间件与预言机_2026-03-22.html">Node 3: 中间件<br><span class="zh-inline">Middleware &amp; Oracles</span></a></li>
+      <li><a href="NODE_4_交易所与托管_2026-03-22.html">Node 4: 交易所<br><span class="zh-inline">Exchanges &amp; Custody</span></a></li>
+      <li><a href="NODE_5_稳定币与支付_2026-03-22.html">Node 5: 稳定币<br><span class="zh-inline">Stablecoins &amp; Payments</span></a></li>
+      <li><a href="NODE_6_RWA代币化_2026-03-22.html">Node 6: RWA<br><span class="zh-inline">Real World Assets</span></a></li>
+      <li><a href="NODE_7_DeFi应用层_2026-03-22.html">Node 7: DeFi<br><span class="zh-inline">DeFi Applications</span></a></li>
+      <li><a href="NODE_8_监管与政策_2026-03-22.html" class="active">Node 8: 监管<br><span class="zh-inline">Regulation &amp; Policy</span></a></li>
+    </ul></nav>
+  </aside>
+
+  <!-- ═══════════ MAIN CONTENT ═══════════ -->
+  <main class="main-content">
+
+    <header class="page-header">
+      <h1>认知节点报告: 监管与政策<span class="zh">Cognitive Node Report: Regulation &amp; Policy</span></h1>
+      <div class="subtitle">Node 8 of 8 &middot; Phase 0&rarr;2 + 4 Cognitive Agents &middot; 2026-03-22</div>
+      <div class="badge-row">
+        <span class="badge badge-gold">SEC</span>
+        <span class="badge badge-gold">MiCA</span>
+        <span class="badge badge-cyan">香港SFC 12牌照</span>
+        <span class="badge badge-red">中国全面禁令</span>
+        <span class="badge badge-gray">4 Agents</span>
+      </div>
+    </header>
+
+    <!-- ═══════════ METACOGNITIVE SUMMARY ═══════════ -->
+    <div class="priority-box" id="metacognition">
+      <h2 style="margin-top:0; font-size:1.1rem; font-weight:680; color:var(--accent);">&#9733; 元思考: 这份报告的核心发现<span class="zh" style="font-weight:400; font-size:0.85rem;"> Metacognitive Summary</span></h2>
+
+      <div style="margin:1rem 0; padding:1rem 1.25rem; background:var(--bg-overlay); border-radius:var(--radius-sm); border-left:3px solid var(--accent);">
+        <p style="font-size:0.92rem; font-weight:590; color:var(--text-primary); margin:0 0 0.75rem;">&#128270; 核心分析焦点</p>
+        <p style="color:var(--text-secondary); font-size:0.88rem; line-height:1.65; margin:0;">监管是区块链行业的"最后一英里"&mdash;&mdash;技术已成熟，市场需求已验证（ETF/稳定币/RWA），但监管不确定性仍是机构采用的最大障碍。2025-2026年是全球加密监管的分水岭：美国从"执法监管"转向立法（GENIUS Act/CLARITY Act），欧盟MiCA生效成全球首个完整框架，香港发放12张牌照，中国维持全面禁令。<br><br>
+        <strong>真正的分析焦点是：全球正在形成三种竞争性监管模式。</strong>（1）美国模式——行业立法（GENIUS/CLARITY Act），（2）EU模式——统一框架（MiCA），（3）亚洲模式——灵活沙盒（香港/新加坡/迪拜）。哪种成为全球标准将决定行业格局和资本流向。<strong>监管不是技术问题，是地缘博弈。</strong></p>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin:1rem 0;">
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid #4caf50;">
+          <p style="font-size:0.72rem; font-weight:510; color:#4caf50; text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#10003; 三角验证共识</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;">监管终将到来且不可避免。合规的项目将受益。明确的规则优于不确定性。<strong>所有代理人都同意：监管明确化是行业成熟的标志，不是威胁。</strong></p>
+        </div>
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid #f44336;">
+          <p style="font-size:0.72rem; font-weight:510; color:#f44336; text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#10007; 三角验证分歧</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;">SEC是敌人还是盟友（已转变）？MiCA是否过度监管？中国禁令是暂时还是永久？<strong>监管目标分歧：创新 vs 消费者保护 vs 国家竞争力。</strong></p>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin:1rem 0;">
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid var(--knowledge);">
+          <p style="font-size:0.72rem; font-weight:510; color:var(--knowledge); text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#128200; 交易指引</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;">监管节点不直接产生交易信号，但它是所有其他节点的"背景变量"。关键事件：<strong>GENIUS Act投票</strong>、<strong>MiCA执行细则</strong>、<strong>SEC新主席政策声明</strong>。每个事件都可能引发5-10%的市场波动。监管明确=机构入场=看涨。</p>
+        </div>
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid var(--accent);">
+          <p style="font-size:0.72rem; font-weight:510; color:var(--accent); text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#9888; 认知陷阱预警</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;"><strong>英文偏见</strong>: 西方分析过度聚焦SEC/MiCA，忽视亚洲监管动态（香港12牌照、日本FSA、韩国立法）。<strong>线性思维</strong>: 假设监管"越来越友好"&mdash;&mdash;但政权更替可能逆转。<strong>幸存者偏差</strong>: 只看合规成功案例，忽视被监管淘汰的项目。</p>
+        </div>
+      </div>
+
+      <details style="margin-top:0.75rem;">
+        <summary style="font-size:0.82rem; font-weight:510; color:var(--text-tertiary); cursor:pointer;">&#128214; 四位代理人一句话摘要</summary>
+        <div style="padding:0.75rem 0; font-size:0.82rem; color:var(--text-secondary); line-height:1.65;">
+          <p><strong>Hester Peirce (GIANT, 4/5)</strong>: "Regulation should enable innovation, not kill it through enforcement." &mdash; SEC Commissioner "Crypto Mom"，代表美国监管态度关键转向。</p>
+          <p><strong>Caitlin Long (INVESTOR, 3/5)</strong>: "The biggest barrier to crypto adoption is banking access, not technology." &mdash; Custodia Bank CEO，揭露Operation Chokepoint 2.0。</p>
+          <p><strong>David Sacks (GIANT, 4/5)</strong>: "America must lead in crypto or lose to China/Singapore." &mdash; 白宫加密/AI沙皇，地缘竞争框架下的监管。</p>
+          <p><strong>未定 MiCA代表 (INVESTOR, 1/5)</strong>: 框架分析为主。MiCA是全球首个完整加密监管框架，但可能过度监管导致创新外迁。数据质量1/5，代表待定。</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- ═══════════ PHASE 0: 独立思考 ═══════════ -->
+    <div class="section-header" id="phase0">
+      <h2>&sect;0 Phase 0: 独立思考<span class="zh">Independent Thinking (Before Search)</span></h2>
+    </div>
+
+    <h3>1. 节点解决什么问题？</h3>
+    <p>监管解决<strong>"信任和投资者保护"</strong>问题。没有监管框架，机构投资者无法合规进入，银行无法提供加密服务，主流采用受阻。监管是区块链从"极客实验"变成"金融基础设施"的<strong>最后一道门槛</strong>&mdash;&mdash;就像证券法对股票市场的角色。</p>
+
+    <h3>2. 为什么监管是"背景变量"？</h3>
+    <ul>
+      <li><strong>对ETF/机构</strong>：SEC批准BTC/ETH ETF是标志性时刻&mdash;&mdash;没有监管框架，ETF不可能存在</li>
+      <li><strong>对稳定币</strong>：GENIUS Act定义稳定币发行规则，决定$200B+市场的合法性</li>
+      <li><strong>对RWA</strong>：代币化证券需要证券法明确界定&mdash;&mdash;CLARITY Act试图解决</li>
+      <li><strong>对DeFi</strong>：去中心化协议如何合规？这是全球监管的最大未解难题</li>
+    </ul>
+
+    <h3>3. 当前全球监管状态？</h3>
+    <p>2025-2026年是全球加密监管的<strong>分水岭</strong>。美国从Gensler时代"一切皆证券"的执法监管转向"合理立法"。EU MiCA成为首个完整框架。香港/新加坡/迪拜竞争亚洲枢纽地位。中国维持全面禁令但大力发展数字人民币和区块链技术。<strong>监管碎片化是当前最大特征。</strong></p>
+
+    <h3>4. 未来2-3年变化方向？</h3>
+    <ul>
+      <li><strong>美国立法</strong>：GENIUS Act（稳定币）+ CLARITY Act（代币分类）2025年推进中</li>
+      <li><strong>MiCA执行</strong>：2024年6月全面生效，实际执行和合规成本成为关键变量</li>
+      <li><strong>监管竞争</strong>：各司法管辖区竞争吸引加密公司和资本</li>
+      <li><strong>DeFi监管</strong>：全球尚无成熟方案，可能成为下一个监管焦点</li>
+      <li><strong>CBDC与加密共存</strong>：各国央行数字货币如何与去中心化加密货币共存</li>
+    </ul>
+
+    <!-- ═══════════ PHASE 0.5: 策展搜索 ═══════════ -->
+    <div class="section-header" id="phase05">
+      <h2>&sect;1 Phase 0.5: 策展搜索<span class="zh">Curated Search</span></h2>
+    </div>
+
+    <h3>Key Curated Findings</h3>
+
+    <div class="callout">
+      <div class="callout-title">CURATED-1 &mdash; 美国SEC态度180度转变</div>
+      <div class="callout-body">从Gensler时代"一切皆证券"到新主席"合理监管"。BTC/ETH ETF获批是标志性时刻&mdash;&mdash;SEC首次承认加密资产可以通过传统金融产品合规进入市场。SEC新领导层多次释放亲加密信号，执法行动数量显著下降。<br><small class="zh-inline">Source: SEC官网, CoinDesk, The Block, 2024-2026</small></div>
+    </div>
+
+    <div class="callout insight">
+      <div class="callout-title">CURATED-2 &mdash; GENIUS Act + CLARITY Act</div>
+      <div class="callout-body"><strong>GENIUS Act</strong>（稳定币）：定义稳定币发行方资质、储备要求、联邦/州双轨监管。2025年两党推进中。<strong>CLARITY Act</strong>（代币分类）：明确哪些代币是证券、哪些是商品，终结SEC vs CFTC管辖权之争。这两部法案可能定义全球加密监管标准。<br><small class="zh-inline">Source: 美国国会记录, CoinDesk Policy, 2025</small></div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">CURATED-3 &mdash; EU MiCA全面生效</div>
+      <div class="callout-body">2024年6月全面生效&mdash;&mdash;全球首个完整加密监管框架。要求：稳定币发行方持EU银行牌照+100%储备，交易所需MiCA牌照，环保信息披露。<strong>Tether可能无法合规=被迫退出欧洲市场。</strong>MiCA的"单一护照"机制允许一国获批全EU运营。<br><small class="zh-inline">Source: European Commission, ESMA, 2024-2025</small></div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">CURATED-4 &mdash; 香港SFC 12张牌照</div>
+      <div class="callout-body">香港SFC已发放12张虚拟资产交易平台牌照（HashKey, OSL等），成为亚洲最开放的加密监管辖区。但规模较小&mdash;&mdash;日交易量远低于Binance/Coinbase。香港试图在中国全面禁令与全球开放之间走"第三条路"。<br><small class="zh-inline">Source: 香港SFC官网, 南华早报, PANews, 2024-2025</small></div>
+    </div>
+
+    <div class="callout risk">
+      <div class="callout-title">CURATED-5 &mdash; 中国全面禁令的悖论</div>
+      <div class="callout-body">中国维持全面禁令（2021年9月起）&mdash;&mdash;禁止交易、挖矿、ICO。<strong>但例外是关键</strong>：数字人民币（e-CNY）大规模试点，区块链服务网络（BSN）国家级基础设施，区块链专利数全球第一。<strong>"禁加密，不禁链"</strong>是中国政策的核心逻辑。地下OTC交易仍活跃。<br><small class="zh-inline">Source: 中国人民银行, 巨潮资讯, PANews, 吴说区块链, 2021-2026</small></div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">CURATED-6 &mdash; 监管友好型竞争</div>
+      <div class="callout-body"><strong>迪拜VARA</strong>：全球首个专门的虚拟资产监管机构，低税+快速审批吸引Binance/Bybit设立总部。<strong>新加坡MAS</strong>：2022年后从宽松转向审慎，但仍保持沙盒创新机制。<strong>日本FSA</strong>：最早的加密监管先驱（2017），但55%税率限制发展。监管竞争正在全球化。<br><small class="zh-inline">Source: VARA, MAS, FSA, The Block, 2023-2025</small></div>
+    </div>
+
+    <!-- ═══════════ PHASE 1: 认知代理人 ═══════════ -->
+    <div class="section-header" id="phase1">
+      <h2>&sect;2 Phase 1: 认知代理人<span class="zh">Cognitive Agents</span></h2>
+    </div>
+
+    <!-- ─── Agent 1: Hester Peirce ─── -->
+    <div id="hester-peirce">
+      <div class="agent-header">
+        <span class="agent-role-badge giant">GIANT</span>
+        <h3>Hester Peirce &mdash; SEC Commissioner "Crypto Mom"</h3>
+      </div>
+
+      <p><strong>选择理由</strong>: SEC Commissioner，加密行业最有影响力的亲加密监管者。在Gensler时代持续反对过度执法，提出Token Safe Harbor提案。2025年SEC新领导下影响力扩大。<strong>可信度: 4/5</strong>（公开记录详尽，SEC内部人士视角独特，但立场明确亲加密，需平衡看待）。</p>
+
+      <h4>行动证据（重于言论）</h4>
+      <ol>
+        <li><strong>多次公开反对SEC执法行动</strong>：在Ripple、Coinbase等案件中发表异议声明，提供法律和政策依据反对"执法即监管"路线。</li>
+        <li><strong>Token Safe Harbor提案</strong>：提出为新代币项目提供3年免注册期的Safe Harbor方案，允许去中心化充分发展后再判定是否为证券。</li>
+        <li><strong>推动SEC内部改革</strong>：在SEC加密资产工作组中推动明确指南替代个案执法。</li>
+        <li><strong>2025年影响力扩大</strong>：SEC新领导班子上任后，Peirce的理念从"少数派意见"变为主流方向。</li>
+      </ol>
+
+      <h4>核心判断</h4>
+      <blockquote>"Regulation should enable innovation, not kill it through enforcement."<span class="zh">监管应该赋能创新，而不是通过执法扼杀它。</span></blockquote>
+      <ul>
+        <li>SEC过去的"先执法、后立规"模式<strong>摧毁了美国加密创新</strong>&mdash;&mdash;项目外逃到新加坡/迪拜</li>
+        <li>明确的规则框架（Safe Harbor）优于模糊的执法威胁</li>
+        <li>代表美国监管态度的<strong>关键转向</strong>&mdash;&mdash;从敌对到合作</li>
+      </ul>
+    </div>
+
+    <hr>
+
+    <!-- ─── Agent 2: Caitlin Long ─── -->
+    <div id="caitlin-long">
+      <div class="agent-header">
+        <span class="agent-role-badge investor">INVESTOR</span>
+        <h3>Caitlin Long &mdash; Custodia Bank CEO</h3>
+      </div>
+
+      <p><strong>选择理由</strong>: 加密银行准入先驱。华尔街20年资深人士转身创建加密原生银行，亲身经历了传统银行体系对加密行业的系统性歧视。她的斗争揭露了Operation Chokepoint 2.0。<strong>可信度: 3/5</strong>（亲身经历提供独特视角，但作为被拒方有明确利益立场）。</p>
+
+      <h4>行动证据</h4>
+      <ol>
+        <li><strong>推动怀俄明州SPDI银行法</strong>：亲自游说州议会，创建全新的"特殊目的存款机构"银行牌照类别，专为加密资产设计。</li>
+        <li><strong>申请Fed master account（被拒）</strong>：Custodia Bank申请联储主账户被拒&mdash;&mdash;揭露了联储系统性反加密偏见。该案成为Operation Chokepoint 2.0的标志性事件。</li>
+        <li><strong>建立加密原生银行</strong>：Custodia Bank实现100%准备金率（非部分准备金），为加密公司提供合规银行服务。</li>
+        <li><strong>公开批评传统银行对加密的歧视</strong>：记录并公开了多家银行关闭加密公司账户的系统性模式。</li>
+      </ol>
+
+      <h4>核心判断</h4>
+      <blockquote>"The biggest barrier to crypto adoption is banking access, not technology."<span class="zh">加密采用的最大障碍是银行准入，不是技术。</span></blockquote>
+      <ul>
+        <li>Operation Chokepoint 2.0是<strong>政府通过银行系统间接打压加密行业</strong>的协调行动</li>
+        <li>新政府上台后这一障碍正在消除&mdash;&mdash;银行将开始提供加密服务</li>
+        <li>银行准入是机构采用的<strong>前提条件</strong>&mdash;&mdash;没有银行账户，企业无法合规运营</li>
+      </ul>
+    </div>
+
+    <hr>
+
+    <!-- ─── Agent 3: David Sacks ─── -->
+    <div id="david-sacks">
+      <div class="agent-header">
+        <span class="agent-role-badge giant">GIANT</span>
+        <h3>David Sacks &mdash; White House AI/Crypto Czar</h3>
+      </div>
+
+      <p><strong>选择理由</strong>: 白宫AI/Crypto政策顾问。PayPal Mafia成员，Craft Ventures创始人。被任命为美国政府首位加密/AI"沙皇"，代表特朗普政府"亲加密"立场。将加密监管置于<strong>地缘竞争</strong>框架下。<strong>可信度: 4/5</strong>（政治任命有明确政策方向，但执行取决于国会配合）。</p>
+
+      <h4>行动证据</h4>
+      <ol>
+        <li><strong>被任命为白宫加密/AI政策顾问</strong>：美国历史上首次设立该职位&mdash;&mdash;本身就是政策信号。</li>
+        <li><strong>推动CLARITY Act</strong>：协调白宫与国会推进代币分类立法，试图终结SEC vs CFTC管辖混乱。</li>
+        <li><strong>组织加密政策白宫峰会</strong>：邀请行业领袖、监管机构、国会议员对话&mdash;&mdash;从对抗转向合作。</li>
+        <li><strong>代表"亲加密"政策立场</strong>：公开声明美国必须在加密领域保持领导地位，否则将输给中国/新加坡/迪拜。</li>
+      </ol>
+
+      <h4>核心判断</h4>
+      <blockquote>"America must lead in crypto or lose to China/Singapore."<span class="zh">美国必须在加密领域领先，否则将输给中国/新加坡。</span></blockquote>
+      <ul>
+        <li>将加密监管置于<strong>国家竞争力</strong>框架&mdash;&mdash;不是"要不要监管"而是"怎么监管才不输"</li>
+        <li>PayPal Mafia背景使他理解支付创新&mdash;&mdash;稳定币是下一代支付基础设施</li>
+        <li>执行力取决于国会是否配合&mdash;&mdash;<strong>白宫支持≠立法通过</strong></li>
+      </ul>
+    </div>
+
+    <hr>
+
+    <!-- ─── Agent 4: MiCA代表 ─── -->
+    <div id="mica-representative">
+      <div class="agent-header">
+        <span class="agent-role-badge investor">INVESTOR</span>
+        <h3>未定 MiCA代表 &mdash; EU MiCA Implementation</h3>
+      </div>
+
+      <p><strong>选择理由</strong>: EU MiCA是全球首个完整加密监管框架，代表"统一规则"路线。具体代表人选待确定（ESMA/EBA官员或MiCA起草者）。本Agent以框架分析为主。<strong>可信度: 1/5</strong>（代表待定，数据基于公开框架文件，缺乏内部人士视角）。</p>
+
+      <h4>MiCA关键条款</h4>
+      <ol>
+        <li><strong>稳定币发行方需EU银行牌照+100%储备</strong>：e-money token (EMT) 和 asset-referenced token (ART) 分类监管。Tether（USDT）可能无法满足合规要求。</li>
+        <li><strong>交易所需MiCA牌照</strong>：Crypto Asset Service Provider (CASP) 统一牌照，"单一护照"机制允许一国获批全EU运营。</li>
+        <li><strong>环保信息披露</strong>：要求加密项目披露能源消耗和碳足迹&mdash;&mdash;对PoW挖矿施加额外压力。</li>
+        <li><strong>DeFi暂时豁免</strong>：MiCA V1未覆盖完全去中心化的协议，但MiCA V2预计将纳入。</li>
+      </ol>
+
+      <h4>核心判断</h4>
+      <ul>
+        <li>MiCA是<strong>"双刃剑"</strong>&mdash;&mdash;清晰规则吸引机构，但合规成本可能推动创新外迁</li>
+        <li>Tether如果被迫退出欧洲，将加速<strong>USDC/EURC的市场份额</strong>增长</li>
+        <li>MiCA可能成为<strong>全球标准模板</strong>&mdash;&mdash;"Brussels Effect"在加密领域的延伸</li>
+        <li><strong>数据质量: 1/5</strong> &mdash; 代表待定，框架分析为主，缺乏内部人士判断</li>
+      </ul>
+    </div>
+
+    <!-- ═══════════ PHASE 2: 综合分析 ═══════════ -->
+    <div class="section-header" id="phase2">
+      <h2>&sect;3 Phase 2: 综合分析<span class="zh">Synthesis</span></h2>
+    </div>
+
+    <!-- §3.1 Triangulation -->
+    <div id="triangulation">
+      <h3>&sect;3.1 三角验证: 行动 vs 言论 vs 数据</h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Dimension 维度</th><th>Peirce (SEC)</th><th>Long (Banking)</th><th>Sacks (White House)</th><th>MiCA (EU)</th><th>Consistency</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>监管目标</strong></td><td>创新+保护平衡</td><td>银行准入</td><td>国家竞争力</td><td>消费者保护</td><td><span class="disagreement">&#10007; 不同优先级</span></td></tr>
+            <tr><td><strong>执行路径</strong></td><td>SEC改革</td><td>银行法改革</td><td>国会立法</td><td>统一框架</td><td><span class="disagreement">&#10007; 不同机制</span></td></tr>
+            <tr><td><strong>对DeFi态度</strong></td><td>宽容</td><td>需要银行接口</td><td>待定</td><td>可能过度监管</td><td><span class="disagreement">&#10007; 分歧</span></td></tr>
+            <tr><td><strong>全球影响力</strong></td><td>美国标准辐射</td><td>美国银行体系</td><td>美国主导</td><td>EU标准辐射</td><td><span class="consensus">&#10003; 都想设定全球标准</span></td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <div class="callout insight">
+        <div class="callout-title">Key Insight 关键洞察</div>
+        <div class="callout-body">全球正在形成三种监管模式&mdash;&mdash;（1）美国模式：行业立法（GENIUS/CLARITY Act），（2）EU模式：统一框架（MiCA），（3）亚洲模式：灵活沙盒（香港/新加坡/迪拜）。<strong>四位代理人在"监管必须明确化"上形成共识，但对"怎么监管"有根本分歧。</strong>这反映了监管不仅是技术问题，更是价值观和治理哲学的选择。哪种模式成为全球标准将决定资本流向和行业格局。</div>
+      </div>
+    </div>
+
+    <!-- §3.2 Competition -->
+    <div id="competitive">
+      <h3>&sect;3.2 竞争格局: 全球监管辖区<span class="zh">Regulatory Jurisdiction Landscape</span></h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Jurisdiction 辖区</th><th>Approach 路径</th><th>Key Framework</th><th>Strength 优势</th><th>Weakness 劣势</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>美国</strong></td><td>从执法转向立法</td><td>GENIUS/CLARITY Act</td><td>最大市场</td><td>分裂的监管机构</td></tr>
+            <tr><td><strong>EU</strong></td><td>统一框架</td><td>MiCA</td><td>清晰规则</td><td>可能过度监管</td></tr>
+            <tr><td><strong>香港</strong></td><td>持牌准入</td><td>SFC 12牌照</td><td>亚洲金融中心</td><td>规模小</td></tr>
+            <tr><td><strong>新加坡</strong></td><td>沙盒模式</td><td>MAS Framework</td><td>灵活创新</td><td>2022后收紧</td></tr>
+            <tr><td><strong>迪拜</strong></td><td>吸引转移</td><td>VARA</td><td>低税+快速审批</td><td>执行力待验</td></tr>
+            <tr><td><strong>中国</strong></td><td>全面禁令</td><td>&mdash;</td><td>清晰(虽然禁止)</td><td>放弃行业领导</td></tr>
+            <tr><td><strong>日本</strong></td><td>早期立法</td><td>FSA框架</td><td>最早监管</td><td>税率高(55%)</td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </div>
+
+    <!-- §3.3 Risk Matrix -->
+    <div id="risk-matrix">
+      <h3>&sect;3.3 风险矩阵<span class="zh">Risk Matrix</span></h3>
+
+      <figure class="table-responsive">
+        <table class="risk-matrix">
+          <thead>
+            <tr><th>Risk 风险</th><th>Probability</th><th>Impact</th><th>Timeframe</th><th>Monitoring 监控指标</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>美国立法失败/推迟</strong><br><small>GENIUS/CLARITY Act未通过</small></td><td><span class="risk-medium">Medium</span></td><td><span class="risk-high">High</span></td><td>2025-2026</td><td>国会投票进程、两党支持度</td></tr>
+            <tr><td><strong>MiCA过度监管导致创新外迁</strong></td><td><span class="risk-medium">Medium</span></td><td><span class="risk-medium">Medium</span></td><td>2025-2027</td><td>EU加密公司注册/迁出数</td></tr>
+            <tr><td><strong>中国立场变化</strong><br><small>解禁加密交易</small></td><td><span class="risk-low">Low</span></td><td><span class="risk-high">High</span></td><td>不确定</td><td>中国人民银行政策、e-CNY进展</td></tr>
+            <tr><td><strong>全球监管碎片化持续</strong></td><td><span class="risk-high">High</span></td><td><span class="risk-medium">Medium</span></td><td>持续</td><td>各国法规一致性、FATF指南采纳率</td></tr>
+            <tr><td><strong>SEC反转（新政府/换届）</strong></td><td><span class="risk-low">Low</span></td><td><span class="risk-high">High</span></td><td>2028+</td><td>美国选举周期、SEC人事</td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </div>
+
+    <!-- §3.4 Node Judgment -->
+    <div id="node-judgment">
+      <h3>&sect;3.4 节点判断<span class="zh">Node Judgment</span></h3>
+
+      <div class="callout" style="border-left-color: var(--knowledge);">
+        <div class="callout-body" style="font-size: 0.92rem;">
+          <p><strong>核心判断</strong>: 2025-2026是监管分水岭。美国态度转变是最重要的催化剂。</p>
+          <p><strong>对交易者</strong>: 监管明确=机构入场=看涨。监管不确定=机构观望=震荡。GENIUS Act通过=稳定币行业爆发。</p>
+          <p><strong>最大确定性</strong>: 监管终将到来&mdash;&mdash;行业已大到不可忽视（$2T+市值、数亿用户）。</p>
+          <p><strong>最大不确定性</strong>: 哪种监管模式成为全球标准？美国立法能否通过？MiCA执行效果如何？</p>
+          <p><strong>隐藏风险</strong>: 监管"明确化"不等于"友好"&mdash;&mdash;MiCA的清晰规则也可能杀死创新。</p>
+          <p style="margin-bottom:0;"><strong>地缘维度</strong>: 监管竞争本质上是主权竞争&mdash;&mdash;谁的规则成为全球标准，谁就控制了$2T+加密经济的规则制定权。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- §3.5 Trading -->
+    <div id="trading">
+      <h3>&sect;3.5 交易视角<span class="zh">Trading Perspective</span></h3>
+
+      <div class="callout">
+        <div class="callout-title">监管事件驱动交易</div>
+        <div class="callout-body">
+          <p>监管节点不直接产生交易信号，但它是所有其他节点的<strong>"背景变量"</strong>。关键事件及预期影响：</p>
+          <p><strong>GENIUS Act投票</strong>: 通过=稳定币板块(Circle/Tether)暴涨，USDC发行方Circle可能IPO。失败=短期回调5-10%。</p>
+          <p><strong>CLARITY Act进展</strong>: 明确代币分类=ALT币合规化，利好交易所（Coinbase）和合规项目。</p>
+          <p><strong>MiCA执行细则</strong>: 如果Tether被迫退出欧洲=USDC/EURC市场份额暴增，Circle利好。</p>
+          <p style="margin-bottom:0;"><strong>SEC新主席政策声明</strong>: 每次政策发言都可能引发5-10%市场波动。关注ETF审批、执法撤回、Safe Harbor进展。</p>
+        </div>
+      </div>
+    </div>
+
+    <hr style="border:none; border-top:1px solid var(--border-subtle); margin:2.5rem 0;">
+
+    <!-- ═══════════ KPI DASHBOARD ═══════════ -->
+    <div class="section-header" id="kpi-dashboard">
+      <h2>&sect;4 KPI仪表盘<span class="zh">KPI Dashboard</span></h2>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">SEC执法行动数</div>
+        <div class="kpi-value">&#8595; 下降</div>
+        <div class="kpi-change positive">-40% YoY (est.)</div>
+        <div class="kpi-subtitle">新领导层转向合作</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">加密牌照发放数</div>
+        <div class="kpi-value">&#8593; 上升</div>
+        <div class="kpi-change positive">+60% YoY</div>
+        <div class="kpi-subtitle">香港12张 + MiCA CASP</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">MiCA合规实体数</div>
+        <div class="kpi-value">~50+</div>
+        <div class="kpi-change positive">从0开始</div>
+        <div class="kpi-subtitle">2024年6月全面生效后</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">稳定币立法进度</div>
+        <div class="kpi-value">GENIUS Act</div>
+        <div class="kpi-change" style="color:#ffc107;">委员会阶段</div>
+        <div class="kpi-subtitle">2025年两党推进中</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">加密禁令国家数</div>
+        <div class="kpi-value">&#8595; 下降</div>
+        <div class="kpi-change positive">趋势减少</div>
+        <div class="kpi-subtitle">多国从禁令转向监管</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">机构加密产品获批</div>
+        <div class="kpi-value">BTC+ETH ETF</div>
+        <div class="kpi-change positive">里程碑</div>
+        <div class="kpi-subtitle">SOL/其他ETF待审</div>
+      </div>
+    </div>
+
+    <!-- ═══════════ PROVENANCE TABLE ═══════════ -->
+    <div class="section-header" id="provenance">
+      <h2>&sect;5 来源溯源<span class="zh">Provenance Table</span></h2>
+    </div>
+
+    <figure class="table-responsive">
+      <table>
+        <thead>
+          <tr><th>Claim 判断</th><th>Source 来源</th><th>Type</th><th>Confidence</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>SEC态度180度转变</td><td>SEC官网声明 + CoinDesk, 2024-2025</td><td><span class="prov-badge prov-primary">PRIMARY</span></td><td>9/10</td></tr>
+          <tr><td>GENIUS Act + CLARITY Act推进中</td><td>美国国会记录, Congress.gov</td><td><span class="prov-badge prov-primary">PRIMARY</span></td><td>8/10</td></tr>
+          <tr><td>MiCA 2024年6月全面生效</td><td>European Commission, ESMA</td><td><span class="prov-badge prov-primary">PRIMARY</span></td><td>10/10</td></tr>
+          <tr><td>香港SFC 12张牌照</td><td>香港SFC官网, 南华早报</td><td><span class="prov-badge prov-primary">PRIMARY</span></td><td>9/10</td></tr>
+          <tr><td>中国全面禁令+e-CNY例外</td><td>中国人民银行, 巨潮资讯, PANews</td><td><span class="prov-badge prov-industry">INDUSTRY</span></td><td>8/10</td></tr>
+          <tr><td>Operation Chokepoint 2.0</td><td>Custodia Bank诉讼文件 + Nic Carter分析</td><td><span class="prov-badge prov-analysis">ANALYSIS</span></td><td>7/10</td></tr>
+          <tr><td>迪拜VARA/新加坡MAS框架</td><td>VARA官网, MAS官网</td><td><span class="prov-badge prov-primary">PRIMARY</span></td><td>8/10</td></tr>
+          <tr><td>Tether可能无法MiCA合规</td><td>行业分析 + MiCA条款解读</td><td><span class="prov-badge prov-analysis">ANALYSIS</span></td><td>6/10</td></tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <!-- Footer -->
+    <footer style="margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--border-subtle); font-size:0.72rem; color:var(--text-quaternary); text-align:center;">
+      <p>Blockchain Node 8: Regulation &amp; Policy &middot; Part of Cognitive Observatory V3 &middot; 2026-03-22</p>
+      <p><a href="NODE_8_regulation_metacognition.html">&#129504; 元思考过程</a> &nbsp;|&nbsp; <a href="../blockchain_hub.html">&larr; Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ═══════════ RIGHT NOTES SIDEBAR ═══════════ -->
+  <aside class="notes-sidebar" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&#10005;</button>
+      <h4>&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+
+    <!-- ── META NOTES ── -->
+
+    <div class="anno meta-note" data-section="phase0" id="m1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">2025-2026是分水岭</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>US regulatory attitude shifted 180&deg; in 18 months.</strong> From "everything is a security" to "let's write proper laws." This is the single biggest catalyst for institutional adoption. The BTC/ETH ETF approvals were the proof point — SEC effectively admitted that crypto assets can exist within regulated financial products. The question is no longer "will regulation come?" but "what form will it take?"</p>
+        <p><strong>Implication:</strong> For trend traders, regulatory clarity is a structural tailwind. Every major regulatory milestone (ETF approval, GENIUS Act progress, MiCA implementation) creates a step-function increase in institutional participation.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="caitlin-long" id="m2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Operation Chokepoint 2.0已结束</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Caitlin Long's fight exposed systematic banking discrimination against crypto.</strong> Multiple banks (Silvergate, Signature, Silicon Valley Bank) were shut down or pressured to exit crypto relationships. The term "Operation Chokepoint 2.0" — coined by Nic Carter and validated by Long's experience — describes coordinated government pressure on banks to deny services to legal crypto businesses.</p>
+        <p><strong>With the new administration, this barrier is lifting.</strong> Banks will start offering crypto services — not because they love crypto, but because their competitors will. This is a structural unlock for the entire industry: banking access enables payroll, treasury, lending, and all the mundane operations that businesses need to function.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="mica-representative" id="m3">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">MiCA的双刃剑</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Clear rules attract institutions but may push innovation to less regulated jurisdictions.</strong> Tether already moved its registration to El Salvador partly because of MiCA compliance costs. The irony: MiCA was designed to make Europe a crypto hub, but its stablecoin requirements may push the largest stablecoin (USDT, $130B+) out of Europe entirely.</p>
+        <p><strong>The "Brussels Effect" cuts both ways:</strong> If MiCA becomes the global template (as GDPR did for privacy), it could impose EU-style compliance costs worldwide. This benefits large, well-capitalized firms (Coinbase, Circle) and disadvantages startups and DeFi protocols. Regulatory capture risk is real.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="triangulation" id="m4">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">中国悖论</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Banned crypto but leads in blockchain patents, runs the world's largest CBDC experiment, and manufactures 95% of mining hardware.</strong> "Ban crypto, not blockchain" is the policy. China's approach is internally consistent: control the monetary system (e-CNY) while capturing the technology layer (BSN, blockchain patents, mining hardware exports).</p>
+        <p><strong>The question is whether the ban is permanent.</strong> Arguments for permanence: capital control is a core CCP priority, e-CNY is the preferred solution, crypto enables capital flight. Arguments against: Hong Kong's 12 licenses suggest a "testing ground" approach, China doesn't want to permanently cede a $2T+ industry, and the ban hasn't stopped underground OTC trading anyway.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="trading" id="m5">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">监管是滞后指标</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Regulation follows adoption, not the other way around.</strong> ETF approval came after $1T+ market cap. MiCA came after EU crypto activity was already massive. By the time regulation is "clear," the market has already moved. This creates a paradox for traders: waiting for regulatory clarity means missing the move, but acting before clarity means accepting regulatory risk.</p>
+        <p><strong>The resolution:</strong> Trade the trend, not the regulation. Use regulatory events as confirmation signals (not entry signals). When GENIUS Act passes, it confirms a trend that's already underway — don't wait for it to enter, but use it to add conviction to existing positions.</p>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+(function() {
+  // 1. Sidebar toggle
+  var hamburger = document.getElementById('hamburgerBtn');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('sidebarOverlay');
+  hamburger.addEventListener('click', function() { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', function() { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+  sidebar.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() { if (window.innerWidth <= 900) { sidebar.classList.remove('open'); overlay.classList.remove('open'); } });
+  });
+
+  // 2. Note toggle
+  window.toggleNote = function(head) { head.parentElement.classList.toggle('open'); };
+
+  // 3. Right sidebar toggle
+  var notesSidebarEl = document.getElementById('notesSidebar');
+  var notesToggleBtn = document.getElementById('notesToggleBtn');
+  var notesOverlayEl = document.getElementById('notesOverlay');
+  var notesCloseBtn = document.getElementById('notesCloseBtn');
+  function toggleNotesSidebar() {
+    var willClose = !notesSidebarEl.classList.contains('ns-closed');
+    notesSidebarEl.classList.toggle('ns-closed', willClose);
+    notesToggleBtn.style.display = willClose ? 'flex' : 'none';
+    notesOverlayEl.classList.toggle('open', !willClose);
+  }
+  if (notesToggleBtn) notesToggleBtn.addEventListener('click', toggleNotesSidebar);
+  if (notesOverlayEl) notesOverlayEl.addEventListener('click', toggleNotesSidebar);
+  if (notesCloseBtn) notesCloseBtn.addEventListener('click', toggleNotesSidebar);
+
+  // 4. Resize handler
+  if (window.innerWidth > 1200) {
+    notesSidebarEl.classList.remove('ns-closed');
+    notesToggleBtn.style.display = 'none';
+  } else {
+    notesSidebarEl.classList.add('ns-closed');
+    notesToggleBtn.style.display = 'flex';
+  }
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 1200) { notesSidebarEl.classList.remove('ns-closed'); notesToggleBtn.style.display = 'none'; notesOverlayEl.classList.remove('open'); }
+  });
+
+  // 5. Expand all notes on load
+  document.querySelectorAll('.anno').forEach(function(n) { n.classList.add('open'); });
+
+  // 6. Active TOC
+  var navLinks = document.querySelectorAll('.sidebar nav ul li a[href^="#"]');
+  var tocObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        navLinks.forEach(function(link) { link.classList.remove('active'); if (link.getAttribute('href') === '#' + entry.target.id) link.classList.add('active'); });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  document.querySelectorAll('.section-header[id], [id="hester-peirce"], [id="caitlin-long"], [id="david-sacks"], [id="mica-representative"], [id="triangulation"], [id="competitive"], [id="risk-matrix"], [id="node-judgment"], [id="trading"]').forEach(function(s) { tocObserver.observe(s); });
+})();
+</script>
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+</body>
+</html>

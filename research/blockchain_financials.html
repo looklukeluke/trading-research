@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>On-chain Data Dashboard 链上数据仪表盘</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="blockchain_shared.css">
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<style>
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded main { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+.reading-mode .sidebar { display: none !important; }
+.reading-mode .notes-sidebar { display: none !important; }
+.reading-mode main { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+
+.chart-container {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.chart-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.chart-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background: var(--bg-secondary);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+}
+
+.data-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.data-indicator.live {
+    background: rgba(76, 175, 80, 0.15);
+    color: var(--green);
+}
+
+.data-indicator.placeholder {
+    background: rgba(244, 67, 54, 0.15);
+    color: var(--red);
+}
+
+.data-indicator.updating {
+    background: rgba(248, 168, 72, 0.15);
+    color: var(--accent);
+}
+
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+    margin: 1rem 0;
+}
+
+.metric-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.metric-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: 'Inter', monospace;
+}
+
+.metric-value.btc { color: #f7931a; }
+.metric-value.eth { color: #627eea; }
+.metric-value.sol { color: #00ffa3; }
+.metric-value.usdt { color: #26a17b; }
+.metric-value.usdc { color: #2775ca; }
+
+.metric-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+.metric-change {
+    font-size: 0.7rem;
+    margin-top: 0.25rem;
+    font-weight: 500;
+}
+
+.metric-change.positive { color: var(--green); }
+.metric-change.negative { color: var(--red); }
+
+.table-wrapper {
+    overflow-x: auto;
+    margin: 1rem 0;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.data-table th,
+.data-table td {
+    padding: 0.65rem 0.85rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+.data-table th {
+    background: var(--bg-secondary);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.data-table tr:hover {
+    background: var(--hover-bg);
+}
+
+.data-table td.numeric {
+    font-family: 'Inter', monospace;
+    text-align: right;
+}
+
+.comparison-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+@media (max-width: 900px) {
+    .comparison-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.gauge-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.gauge-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+}
+
+.gauge-bar {
+    height: 8px;
+    background: var(--bg-secondary);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.gauge-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.gauge-fill.bullish { background: linear-gradient(90deg, var(--green), #81c784); }
+.gauge-fill.neutral { background: linear-gradient(90deg, var(--accent), #ffc107); }
+.gauge-fill.bearish { background: linear-gradient(90deg, var(--red), #ef5350); }
+
+.last-updated {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+</style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- ===== Left Sidebar ===== -->
+  <div class="sidebar">
+    <a class="back-link" href="blockchain_hub.html">&larr; Blockchain Hub</a>
+
+    <h4>On-chain Dashboard</h4>
+    <div class="project-meta">
+      链上数据仪表盘<br>
+      BTC/ETH/SOL + DeFi + Stablecoin
+    </div>
+
+    <h4>Navigate</h4>
+    <nav>
+      <ul>
+        <li><a href="#overview">Overview 总览</a></li>
+        <li><a href="#btc">BTC 链上指标</a></li>
+        <li><a href="#eth">ETH 链上指标</a></li>
+        <li><a href="#sol">SOL 链上指标</a></li>
+        <li><a href="#defi">DeFi TVL</a></li>
+        <li><a href="#stablecoins">Stablecoins 稳定币</a></li>
+        <li><a href="#flows">Exchange Flows 交易所流向</a></li>
+        <li><a href="#miner">Miner Revenue 矿工收入</a></li>
+        <li><a href="#risk">Risk Gauges 风险仪表</a></li>
+      </ul>
+    </nav>
+
+    <h4>Data Sources</h4>
+    <nav>
+      <ul>
+        <li><a href="blockchain_research_curation.html">&#128202; 信息源策展</a></li>
+        <li><a href="blockchain_signal_tracker.html">&#128225; Signal Tracker</a></li>
+        <li><a href="INDUSTRY_V3_FINAL_BTCETH_Blockchain_2026-03-21.html">V3 Final Report</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- ===== Main Content ===== -->
+  <main>
+
+    <h1>On-chain Data Dashboard<span class="zh">链上数据仪表盘 &mdash; BTC/ETH/SOL/DeFi/稳定币</span></h1>
+    <div class="subtitle">Real-time chain metrics &middot; Live data feeds &middot; 2026-03-21</div>
+
+    <!-- Advisory Box -->
+    <div class="advisory-box" style="border-left-color: var(--accent); background: rgba(248,168,72,0.05);">
+      <strong style="color:var(--accent);">&#9888; Data Status 数据状态</strong><br>
+      当前页面使用<strong>占位数据</strong>进行演示。图表已配置Plotly.js，连接以下数据源后可实时更新：
+      <span class="zh-inline">This page uses placeholder data for demonstration. Charts are Plotly.js configured and ready for live data from:</span>
+      <div style="margin-top:0.5rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <span class="data-indicator placeholder">&#9679; Glassnode API</span>
+        <span class="data-indicator placeholder">&#9679; Dune Analytics</span>
+        <span class="data-indicator placeholder">&#9679; DeFiLlama</span>
+        <span class="data-indicator placeholder">&#9679; CoinGecko</span>
+      </div>
+    </div>
+
+    <!-- ═══════════ §Overview ═══════════ -->
+    <div class="section-header" id="overview">
+      <h2><span class="section-num">00</span>Key Metrics Overview<span class="zh">关键指标总览</span></h2>
+    </div>
+
+    <div class="metric-grid">
+      <div class="metric-card">
+        <div class="metric-value btc">$87,420</div>
+        <div class="metric-label">BTC Price 比特币价格</div>
+        <div class="metric-change positive">&#9650; +2.34% (7d)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value eth">$3,847</div>
+        <div class="metric-label">ETH Price 以太坊价格</div>
+        <div class="metric-change positive">&#9650; +4.12% (7d)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value sol">$142.6</div>
+        <div class="metric-label">SOL Price Solana价格</div>
+        <div class="metric-change negative">&#9660; -1.87% (7d)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">$142.8B</div>
+        <div class="metric-label">BTC Dominance BTC主导</div>
+        <div class="metric-change negative">&#9660; -0.8% (30d)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">$196.4B</div>
+        <div class="metric-label">Total DeFi TVL</div>
+        <div class="metric-change positive">&#9650; +8.3% (30d)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value usdt">$161.2B</div>
+        <div class="metric-label">USDT Supply USDT供应</div>
+        <div class="metric-change positive">&#9650; +5.1% (YTD)</div>
+      </div>
+    </div>
+
+    <div class="card" style="border-left: 3px solid var(--accent);">
+      <div style="font-size:0.95rem;font-weight:600;margin-bottom:0.5rem;">&#128202; Market Cap Comparison 市值对比</div>
+      <div class="chart-container" style="margin:0;padding:0.5rem;">
+        <div id="market-cap-chart" style="height:350px;"></div>
+      </div>
+      <div class="card-meta">占位数据 | Placeholder data &middot; Replace with CoinGecko API</div>
+    </div>
+
+    <!-- ═══════════ §BTC ═══════════ -->
+    <div class="section-header" id="btc">
+      <h2><span class="section-num">01</span>BTC On-chain Metrics<span class="zh">比特币链上指标</span></h2>
+    </div>
+
+    <div class="card" style="border-left: 3px solid #f7931a;">
+      <div class="chart-header">
+        <span class="chart-title">&#128200; BTC Price vs MVRV Ratio 比特币价格 vs MVRV比率</span>
+        <span class="data-indicator placeholder">&#9679; Placeholder 占位</span>
+      </div>
+      <div id="btc-mvrv-chart" style="height:400px;"></div>
+      <div class="card-meta">MVRV = Market Value / Realized Value &middot; 高MVRV (>3.5) = 顶部风险 &middot; 占位数据</div>
+    </div>
+
+    <div class="grid-2" style="margin-top:1rem;">
+      <div class="card">
+        <div class="chart-header">
+          <span class="chart-title">&#128176; BTC Hashrate 算力</span>
+          <span class="data-indicator placeholder">占位</span>
+        </div>
+        <div id="btc-hashrate-chart" style="height:280px;"></div>
+        <div class="card-meta">EH/s (Exahashes per second) &middot; 当前: ~750 EH/s</div>
+      </div>
+      <div class="card">
+        <div class="chart-header">
+          <span class="chart-title">&#128273; BTC Exchange Flows 交易所流向</span>
+          <span class="data-indicator placeholder">占位</span>
+        </div>
+        <div id="btc-exchange-flows-chart" style="height:280px;"></div>
+        <div class="card-meta">Net flows 30-day MA &middot; 净流入 = 抛压 &middot; 占位数据</div>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Metric 指标</th>
+            <th class="numeric">Current 当前</th>
+            <th class="numeric">7d Change</th>
+            <th class="numeric">30d Change</th>
+            <th>Signal 信号</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Active Addresses 活跃地址</td>
+            <td class="numeric">1,024,521</td>
+            <td class="numeric" style="color:var(--green);">+3.2%</td>
+            <td class="numeric" style="color:var(--green);">+12.4%</td>
+            <td><span class="signal-badge bullish">&#9650; Bullish</span></td>
+          </tr>
+          <tr>
+            <td>Transaction Count 交易数</td>
+            <td class="numeric">325,847/day</td>
+            <td class="numeric" style="color:var(--green);">+5.1%</td>
+            <td class="numeric" style="color:var(--green);">+18.7%</td>
+            <td><span class="signal-badge bullish">&#9650; Bullish</span></td>
+          </tr>
+          <tr>
+            <td>Exchange Balance 交易所余额</td>
+            <td class="numeric">1.847M BTC</td>
+            <td class="numeric" style="color:var(--red);">-1.2%</td>
+            <td class="numeric" style="color:var(--green);">-4.8%</td>
+            <td><span class="signal-badge bullish">&#9650; Accumulation</span></td>
+          </tr>
+          <tr>
+            <td>Mean Coin dormancy 平均币龄</td>
+            <td class="numeric">142 days</td>
+            <td class="numeric">+0.7%</td>
+            <td class="numeric" style="color:var(--green);">-8.2%</td>
+            <td><span class="signal-badge neutral">&#8211; Neutral</span></td>
+          </tr>
+          <tr>
+            <td>NUPL (Net Unrealized P/L)</td>
+            <td class="numeric">0.72</td>
+            <td class="numeric">+0.04</td>
+            <td class="numeric">+0.12</td>
+            <td><span class="signal-badge risk">&#9888; Euphoria</span></td>
+          </tr>
+          <tr>
+            <td>RHODL Ratio</td>
+            <td class="numeric">0.184</td>
+            <td class="numeric" style="color:var(--red);">+0.08</td>
+            <td class="numeric" style="color:var(--red);">+0.15</td>
+            <td><span class="signal-badge risk">&#9888; Elevated</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ═══════════ §ETH ═══════════ -->
+    <div class="section-header" id="eth">
+      <h2><span class="section-num">02</span>ETH On-chain Metrics<span class="zh">以太坊链上指标</span></h2>
+    </div>
+
+    <div class="metric-grid">
+      <div class="metric-card">
+        <div class="metric-value">32.4M</div>
+        <div class="metric-label">ETH Staked 质押量</div>
+        <div class="metric-change positive">&#9650; +2.1% (30d)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">4.2%</div>
+        <div class="metric-label">Staking Yield 质押收益</div>
+        <div class="metric-change negative">&#9660; -0.3% (30d)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">14.2M</div>
+        <div class="metric-label">Daily Transactions 日交易</div>
+        <div class="metric-change positive">&#9650; +22.4% (30d)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">$847M</div>
+        <div class="metric-label">Daily Fees 日费用</div>
+        <div class="metric-change negative">&#9660; -8.1% (30d)</div>
+      </div>
+    </div>
+
+    <div class="card" style="border-left: 3px solid #627eea;">
+      <div class="chart-header">
+        <span class="chart-title">&#128200; ETH Price vs Gas Price 以太坊价格 vs Gas价格</span>
+        <span class="data-indicator placeholder">占位</span>
+      </div>
+      <div id="eth-gas-chart" style="height:400px;"></div>
+      <div class="card-meta">Gwei over time &middot; Gas价格与网络活跃度正相关 &middot; 占位数据</div>
+    </div>
+
+    <div class="card" style="border-left: 3px solid #627eea; margin-top:1rem;">
+      <div class="chart-header">
+        <span class="chart-title">&#128200; ETH 2.0 Staking Growth 质押增长</span>
+        <span class="data-indicator placeholder">占位</span>
+      </div>
+      <div id="eth-staking-chart" style="height:300px;"></div>
+      <div class="card-meta">质押ETH总量 &middot; Post-Merge趋势 &middot; 占位数据</div>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Layer 2</th>
+            <th class="numeric">TVL</th>
+            <th class="numeric">Tx/day</th>
+            <th class="numeric">Avg Cost</th>
+            <th>Trend</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Arbitrum One</td>
+            <td class="numeric">$14.2B</td>
+            <td class="numeric">1.2M</td>
+            <td class="numeric">$0.12</td>
+            <td><span class="signal-badge bullish">&#9650;</span></td>
+          </tr>
+          <tr>
+            <td>Optimism</td>
+            <td class="numeric">$8.7B</td>
+            <td class="numeric">0.8M</td>
+            <td class="numeric">$0.18</td>
+            <td><span class="signal-badge bullish">&#9650;</span></td>
+          </tr>
+          <tr>
+            <td>Base (Coinbase)</td>
+            <td class="numeric">$6.4B</td>
+            <td class="numeric">1.5M</td>
+            <td class="numeric">$0.08</td>
+            <td><span class="signal-badge bullish">&#9650;</span></td>
+          </tr>
+          <tr>
+            <td>zkSync Era</td>
+            <td class="numeric">$2.1B</td>
+            <td class="numeric">0.4M</td>
+            <td class="numeric">$0.15</td>
+            <td><span class="signal-badge bullish">&#9650;</span></td>
+          </tr>
+          <tr>
+            <td>Linea</td>
+            <td class="numeric">$1.8B</td>
+            <td class="numeric">0.3M</td>
+            <td class="numeric">$0.22</td>
+            <td><span class="signal-badge neutral">&#8211;</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ═══════════ §SOL ═══════════ -->
+    <div class="section-header" id="sol">
+      <h2><span class="section-num">03</span>SOL On-chain Metrics<span class="zh">Solana链上指标</span></h2>
+    </div>
+
+    <div class="metric-grid">
+      <div class="metric-card">
+        <div class="metric-value sol">42.8M</div>
+        <div class="metric-label">Daily Transactions 日交易</div>
+        <div class="metric-change positive">&#9650; +45% (30d)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value sol">$0.00025</div>
+        <div class="metric-label">Avg Transaction Fee 平均费用</div>
+        <div class="metric-change positive">&#9660; -12% (30d)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value sol">3,247</div>
+        <div class="metric-label">TPS Avg 平均TPS</div>
+        <div class="metric-change">~ Baseline</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value sol">65K+</div>
+        <div class="metric-label">Peak TPS 峰值TPS</div>
+        <div class="metric-change positive">&#9650; New high</div>
+      </div>
+    </div>
+
+    <div class="card" style="border-left: 3px solid #00ffa3;">
+      <div class="chart-header">
+        <span class="chart-title">&#128200; SOL vs ETH Price Comparison 相对表现</span>
+        <span class="data-indicator placeholder">占位</span>
+      </div>
+      <div id="sol-comparison-chart" style="height:350px;"></div>
+      <div class="card-meta">Normalized to 100 at start &middot; SOL/ETH比率 &middot; 占位数据</div>
+    </div>
+
+    <div class="card" style="border-left: 3px solid #00ffa3; margin-top:1rem;">
+      <div class="chart-header">
+        <span class="chart-title">&#128202; SOL DeFi Activity SOL DeFi活动</span>
+        <span class="data-indicator placeholder">占位</span>
+      </div>
+      <div id="sol-defi-chart" style="height:280px;"></div>
+      <div class="card-meta">Raydium + Jupiter + Marinade TVL &middot; 占位数据</div>
+    </div>
+
+    <!-- ═══════════ §DeFi TVL ═══════════ -->
+    <div class="section-header" id="defi">
+      <h2><span class="section-num">04</span>DeFi TVL Trends<span class="zh">DeFi总锁仓量趋势</span></h2>
+    </div>
+
+    <div class="card" style="border-left: 3px solid var(--green);">
+      <div class="chart-header">
+        <span class="chart-title">&#128200; Total DeFi TVL by Chain 各链TVL分布</span>
+        <span class="data-indicator placeholder">占位</span>
+      </div>
+      <div id="defi-tvl-chart" style="height:450px;"></div>
+      <div class="card-meta">Data from DeFiLlama &middot; 占位数据需替换</div>
+    </div>
+
+    <div class="grid-2" style="margin-top:1rem;">
+      <div class="card">
+        <div class="chart-header">
+          <span class="chart-title">Top 10 Protocols TVL</span>
+          <span class="data-indicator placeholder">占位</span>
+        </div>
+        <div id="defi-protocols-chart" style="height:320px;"></div>
+      </div>
+      <div class="card">
+        <div class="chart-header">
+          <span class="chart-title">TVL Trend 30d 趋势</span>
+          <span class="data-indicator placeholder">占位</span>
+        </div>
+        <div id="defi-trend-chart" style="height:320px;"></div>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Protocol 协议</th>
+            <th>Chain</th>
+            <th class="numeric">TVL</th>
+            <th class="numeric">24h Volume</th>
+            <th class="numeric">7d Change</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Lido Finance</td>
+            <td>Multi-chain</td>
+            <td class="numeric">$32.4B</td>
+            <td class="numeric">$847M</td>
+            <td class="numeric" style="color:var(--green);">+4.2%</td>
+          </tr>
+          <tr>
+            <td>Aave</td>
+            <td>Multi-chain</td>
+            <td class="numeric">$24.8B</td>
+            <td class="numeric">$1.2B</td>
+            <td class="numeric" style="color:var(--green);">+6.1%</td>
+          </tr>
+          <tr>
+            <td>Uniswap</td>
+            <td>ETH/Arb/OP</td>
+            <td class="numeric">$18.7B</td>
+            <td class="numeric">$3.4B</td>
+            <td class="numeric" style="color:var(--green);">+8.7%</td>
+          </tr>
+          <tr>
+            <td>MakerDAO</td>
+            <td>ETH</td>
+            <td class="numeric">$8.4B</td>
+            <td class="numeric">$142M</td>
+            <td class="numeric" style="color:var(--green);">+2.1%</td>
+          </tr>
+          <tr>
+            <td>Curve</td>
+            <td>ETH</td>
+            <td class="numeric">$7.2B</td>
+            <td class="numeric">$412M</td>
+            <td class="numeric" style="color:var(--red);">-1.4%</td>
+          </tr>
+          <tr>
+            <td>PancakeSwap</td>
+            <td>BSC</td>
+            <td class="numeric">$4.8B</td>
+            <td class="numeric">$284M</td>
+            <td class="numeric" style="color:var(--green);">+12.3%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ═══════════ §Stablecoins ═══════════ -->
+    <div class="section-header" id="stablecoins">
+      <h2><span class="section-num">05</span>Stablecoin Supply<span class="zh">稳定币供应量</span></h2>
+    </div>
+
+    <div class="metric-grid">
+      <div class="metric-card">
+        <div class="metric-value usdt">$161.2B</div>
+        <div class="metric-label">USDT Total Supply</div>
+        <div class="metric-change positive">&#9650; +$7.8B (30d)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value usdc">$42.4B</div>
+        <div class="metric-label">USDC Total Supply</div>
+        <div class="metric-change negative">&#9660; -$2.1B (30d)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">$9.8B</div>
+        <div class="metric-label">FDUSD Supply</div>
+        <div class="metric-change positive">&#9650; +18.4% (30d)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">$215.7B</div>
+        <div class="metric-label">Total Stablecoin MCap</div>
+        <div class="metric-change positive">&#9650; +$5.9B (30d)</div>
+      </div>
+    </div>
+
+    <div class="card" style="border-left: 3px solid #26a17b;">
+      <div class="chart-header">
+        <span class="chart-title">&#128200; Stablecoin Supply Over Time 稳定币供应量趋势</span>
+        <span class="data-indicator placeholder">占位</span>
+      </div>
+      <div id="stablecoin-supply-chart" style="height:400px;"></div>
+      <div class="card-meta">USDT + USDC + FDUSD + DAI &middot; 占位数据</div>
+    </div>
+
+    <div class="grid-2" style="margin-top:1rem;">
+      <div class="card">
+        <div class="chart-header">
+          <span class="chart-title">Stablecoin Market Share 市场份额</span>
+          <span class="data-indicator placeholder">占位</span>
+        </div>
+        <div id="stablecoin-pie-chart" style="height:300px;"></div>
+      </div>
+      <div class="card">
+        <div class="chart-header">
+          <span class="chart-title">Net Mint/Burn 30d 净铸造/销毁</span>
+          <span class="data-indicator placeholder">占位</span>
+        </div>
+        <div id="stablecoin-flows-chart" style="height:300px;"></div>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Stablecoin</th>
+            <th>Issuer</th>
+            <th class="numeric">Market Cap</th>
+            <th class="numeric">30d Δ</th>
+            <th>Key Market</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>USDT</td>
+            <td>Tether</td>
+            <td class="numeric">$161.2B</td>
+            <td class="numeric" style="color:var(--green);">+$7.8B</td>
+            <td>TRON/ETH/Omni</td>
+          </tr>
+          <tr>
+            <td>USDC</td>
+            <td>Circle</td>
+            <td class="numeric">$42.4B</td>
+            <td class="numeric" style="color:var(--red);">-$2.1B</td>
+            <td>ETH/Solana</td>
+          </tr>
+          <tr>
+            <td>FDUSD</td>
+            <td>FD100</td>
+            <td class="numeric">$9.8B</td>
+            <td class="numeric" style="color:var(--green);">+$1.5B</td>
+            <td>BNB Chain</td>
+          </tr>
+          <tr>
+            <td>DAI</td>
+            <td>MakerDAO</td>
+            <td class="numeric">$5.2B</td>
+            <td class="numeric">+$0.3B</td>
+            <td>ETH Mainnet</td>
+          </tr>
+          <tr>
+            <td>PYUSD</td>
+            <td>PayPal</td>
+            <td class="numeric">$2.1B</td>
+            <td class="numeric" style="color:var(--green);">+$0.8B</td>
+            <td>Solana/Ethereum</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ═══════════ §Exchange Flows ═══════════ -->
+    <div class="section-header" id="flows">
+      <h2><span class="section-num">06</span>Exchange Flows<span class="zh">交易所净流入/流出</span></h2>
+    </div>
+
+    <div class="card" style="border-left: 3px solid var(--purple);">
+      <div class="chart-header">
+        <span class="chart-title">&#128200; BTC/ETH Exchange Net Flow 交易所净流向</span>
+        <span class="data-indicator placeholder">占位</span>
+      </div>
+      <div id="exchange-flows-chart" style="height:400px;"></div>
+      <div class="card-meta">Positive = Net inflow to exchanges (selling pressure) | Negative = Accumulation &middot; 占位数据</div>
+    </div>
+
+    <div class="grid-2" style="margin-top:1rem;">
+      <div class="card">
+        <div class="chart-header">
+          <span class="chart-title">Exchange Balance by Exchange</span>
+          <span class="data-indicator placeholder">占位</span>
+        </div>
+        <div id="exchange-balance-chart" style="height:280px;"></div>
+      </div>
+      <div class="card">
+        <div class="chart-header">
+          <span class="chart-title">CEX vs DEX Volume</span>
+          <span class="data-indicator placeholder">占位</span>
+        </div>
+        <div id="cex-dex-chart" style="height:280px;"></div>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Exchange</th>
+            <th class="numeric">BTC Balance</th>
+            <th class="numeric">ETH Balance</th>
+            <th class="numeric">30d Net Flow</th>
+            <th>Signal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Binance</td>
+            <td class="numeric">624K BTC</td>
+            <td class="numeric">4.2M ETH</td>
+            <td class="numeric" style="color:var(--red);">-18.4K BTC</td>
+            <td><span class="signal-badge bullish">Accumulating</span></td>
+          </tr>
+          <tr>
+            <td>Coinbase</td>
+            <td class="numeric">487K BTC</td>
+            <td class="numeric">2.8M ETH</td>
+            <td class="numeric" style="color:var(--green);">+12.1K BTC</td>
+            <td><span class="signal-badge risk">Distribution</span></td>
+          </tr>
+          <tr>
+            <td>OKX</td>
+            <td class="numeric">312K BTC</td>
+            <td class="numeric">1.9M ETH</td>
+            <td class="numeric" style="color:var(--red);">-8.7K BTC</td>
+            <td><span class="signal-badge bullish">Accumulating</span></td>
+          </tr>
+          <tr>
+            <td>Kraken</td>
+            <td class="numeric">124K BTC</td>
+            <td class="numeric">0.8M ETH</td>
+            <td class="numeric" style="color:var(--red);">-2.4K BTC</td>
+            <td><span class="signal-badge neutral">Neutral</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ═══════════ §Miner Revenue ═══════════ -->
+    <div class="section-header" id="miner">
+      <h2><span class="section-num">07</span>Miner Revenue<span class="zh">矿工收入分析</span></h2>
+    </div>
+
+    <div class="metric-grid">
+      <div class="metric-card">
+        <div class="metric-value">$47.2M</div>
+        <div class="metric-label">Daily Revenue 日收入</div>
+        <div class="metric-change positive">&#9650; +8.4% (30d)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">54.2%</div>
+        <div class="metric-label">Fees % 手续费占比</div>
+        <div class="metric-change positive">&#9650; Post-halving shift</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">$52.4K</div>
+        <div class="metric-label">Production Cost 生产成本</div>
+        <div class="metric-change negative">&#9660; -3.1%</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">67.4%</div>
+        <div class="metric-label">Miner Margin 利润率</div>
+        <div class="metric-change positive">&#9650; Healthy</div>
+      </div>
+    </div>
+
+    <div class="card" style="border-left: 3px solid var(--orange);">
+      <div class="chart-header">
+        <span class="chart-title">&#128200; BTC Miner Revenue Breakdown 矿工收入构成</span>
+        <span class="data-indicator placeholder">占位</span>
+      </div>
+      <div id="miner-revenue-chart" style="height:400px;"></div>
+      <div class="card-meta">Subsidy (block reward) vs Fees &middot; Post-halving fee increase &middot; 占位数据</div>
+    </div>
+
+    <div class="grid-2" style="margin-top:1rem;">
+      <div class="card">
+        <div class="chart-header">
+          <span class="chart-title">Hashrate Difficulty 难度/算力</span>
+          <span class="data-indicator placeholder">占位</span>
+        </div>
+        <div id="miner-difficulty-chart" style="height:280px;"></div>
+      </div>
+      <div class="card">
+        <div class="chart-header">
+          <span class="chart-title">Public Miner BTC Holdings</span>
+          <span class="data-indicator placeholder">占位</span>
+        </div>
+        <div id="miner-holdings-chart" style="height:280px;"></div>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Miner</th>
+            <th class="numeric">BTC Holdings</th>
+            <th class="numeric">Hashrate</th>
+            <th class="numeric">Revenue/Day</th>
+            <th>Trend</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>MARA Holdings</td>
+            <td class="numeric">44.5K BTC</td>
+            <td class="numeric">28.4 EH/s</td>
+            <td class="numeric">$8.4M</td>
+            <td><span class="signal-badge bullish">HODLing</span></td>
+          </tr>
+          <tr>
+            <td>Riot Platforms</td>
+            <td class="numeric">16.2K BTC</td>
+            <td class="numeric">21.8 EH/s</td>
+            <td class="numeric">$6.2M</td>
+            <td><span class="signal-badge bullish">HODLing</span></td>
+          </tr>
+          <tr>
+            <td>CleanSpark</td>
+            <td class="numeric">9.8K BTC</td>
+            <td class="numeric">18.4 EH/s</td>
+            <td class="numeric">$5.1M</td>
+            <td><span class="signal-badge bullish">Accumulating</span></td>
+          </tr>
+          <tr>
+            <td>Core Scientific</td>
+            <td class="numeric">12.4K BTC</td>
+            <td class="numeric">24.2 EH/s</td>
+            <td class="numeric">$7.1M</td>
+            <td><span class="signal-badge neutral">Stable</span></td>
+          </tr>
+          <tr>
+            <td>Terawulf</td>
+            <td class="numeric">4.2K BTC</td>
+            <td class="numeric">8.4 EH/s</td>
+            <td class="numeric">$2.4M</td>
+            <td><span class="signal-badge bullish">Accumulating</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ═══════════ §Risk Gauges ═══════════ -->
+    <div class="section-header" id="risk">
+      <h2><span class="section-num">08</span>Market Risk Gauges<span class="zh">市场风险仪表</span></h2>
+    </div>
+
+    <div class="card" style="border-left: 3px solid var(--purple);">
+      <div class="chart-header">
+        <span class="chart-title">&#128202; BTC Cycle Position & Risk Metrics 周期位置与风险指标</span>
+        <span class="data-indicator placeholder">占位</span>
+      </div>
+      
+      <div class="comparison-grid">
+        <div class="gauge-container">
+          <div class="gauge-label">
+            <span>MVRV Ratio</span>
+            <span style="font-weight:600;">3.42</span>
+          </div>
+          <div class="gauge-bar">
+            <div class="gauge-fill bearish" style="width:85%;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.65rem;color:var(--text-muted);">
+            <span>1.0 (Fair)</span>
+            <span>7.0+ (Extreme)</span>
+          </div>
+        </div>
+        
+        <div class="gauge-container">
+          <div class="gauge-label">
+            <span>Pi Cycle Top</span>
+            <span style="font-weight:600;">Not triggered</span>
+          </div>
+          <div class="gauge-bar">
+            <div class="gauge-fill neutral" style="width:42%;"></div>
+          </div>
+          <div style="font-size:0.65rem;color:var(--accent);">Distance: 18.4% below trigger</div>
+        </div>
+        
+        <div class="gauge-container">
+          <div class="gauge-label">
+            <span>Fear & Greed Index</span>
+            <span style="font-weight:600;color:var(--green);">72 Greed</span>
+          </div>
+          <div class="gauge-bar">
+            <div class="gauge-fill bullish" style="width:72%;"></div>
+          </div>
+        </div>
+        
+        <div class="gauge-container">
+          <div class="gauge-label">
+            <span>ETF Flow Signal</span>
+            <span style="font-weight:600;color:var(--green);">Strong Inflow</span>
+          </div>
+          <div class="gauge-bar">
+            <div class="gauge-fill bullish" style="width:78%;"></div>
+          </div>
+          <div style="font-size:0.65rem;color:var(--green);">+$842M net (7d)</div>
+        </div>
+        
+        <div class="gauge-container">
+          <div class="gauge-label">
+            <span>Stablecoin Ratio</span>
+            <span style="font-weight:600;">8.2%</span>
+          </div>
+          <div class="gauge-bar">
+            <div class="gauge-fill neutral" style="width:45%;"></div>
+          </div>
+          <div style="font-size:0.65rem;color:var(--text-muted);">High = Bearish signal</div>
+        </div>
+        
+        <div class="gauge-container">
+          <div class="gauge-label">
+            <span>Funding Rate</span>
+            <span style="font-weight:600;color:var(--accent);">Elevated</span>
+          </div>
+          <div class="gauge-bar">
+            <div class="gauge-fill bearish" style="width:68%;"></div>
+          </div>
+          <div style="font-size:0.65rem;color:var(--red);">0.012% avg (annualized ~10.5%)</div>
+        </div>
+      </div>
+      
+      <div style="margin-top:1.5rem;padding:1rem;background:var(--bg-secondary);border-radius:8px;">
+        <div style="font-size:0.85rem;font-weight:600;margin-bottom:0.5rem;">Overall Cycle Assessment 周期评估</div>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;font-size:0.8rem;">
+          <span><strong>Phase:</strong> Mid-bull (减半后12-18个月)</span>
+          <span><strong>Risk Level:</strong> <span style="color:var(--accent);">Elevated-Overt</span></span>
+          <span><strong>Confidence:</strong> 72%</span>
+        </div>
+        <div style="margin-top:0.75rem;font-size:0.75rem;color:var(--text-muted);">
+          Based on MVRV, ETF flows, funding rates, and halving cycle historical patterns. 
+          <span class="zh-inline">基于MVRV、ETF流向、资金费率及减半周期历史模式。</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="last-updated">
+      Page rendered: 2026-03-21 14:32 UTC &middot; All chart data is placeholder | 占位数据<br>
+      <span style="color:var(--accent);">&#9888; Connect to Glassnode/Dune/CoinGecko API for live data</span>
+    </div>
+
+    <!-- Footer -->
+    <div class="page-footer">
+      <a href="blockchain_hub.html">&larr; Back to Blockchain Hub</a>
+      <div style="margin-top:0.5rem;">On-chain Data Dashboard &middot; Blockchain Research Hub &middot; 2026-03-21</div>
+    </div>
+
+  </main>
+
+</div>
+
+<script>
+// ========================================
+// Placeholder Data Configuration
+// ========================================
+
+const PLACEHOLDER_NOTICE = '⚠️ Placeholder data - Replace with live API';
+
+// Chart color scheme
+const COLORS = {
+    btc: '#f7931a',
+    eth: '#627eea',
+    sol: '#00ffa3',
+    accent: '#f8a848',
+    green: '#4caf50',
+    red: '#f44336',
+    purple: '#ab47bc',
+    blue: '#5c6bc0',
+    text: '#e0e0e0',
+    bg: '#1a1a2e',
+    grid: 'rgba(255,255,255,0.08)'
+};
+
+// Common Plotly layout
+const baseLayout = {
+    paper_bgcolor: 'transparent',
+    plot_bgcolor: 'transparent',
+    font: { family: 'Inter, sans-serif', color: COLORS.text },
+    margin: { t: 20, r: 20, b: 40, l: 50 },
+    showlegend: true,
+    legend: { orientation: 'h', y: -0.2 },
+    xaxis: {
+        gridcolor: COLORS.grid,
+        linecolor: COLORS.grid,
+        zerolinecolor: COLORS.grid
+    },
+    yaxis: {
+        gridcolor: COLORS.grid,
+        linecolor: COLORS.grid,
+        zerolinecolor: COLORS.grid
+    }
+};
+
+// ========================================
+// Chart 1: Market Cap Comparison
+// ========================================
+const marketCapData = {
+    labels: ['BTC', 'ETH', 'BNB', 'SOL', 'XRP', 'ADA', 'DOGE', 'AVAX', 'Others'],
+    values: [1724, 462, 87, 68, 54, 18, 16, 12, 247],
+    colors: [COLORS.btc, COLORS.eth, '#F3BA2F', COLORS.sol, '#23292F', '#0033ad', '#C2A633', COLORS.red, '#666']
+};
+
+Plotly.newPlot('market-cap-chart', [{
+    values: marketCapData.values,
+    labels: marketCapData.labels,
+    type: 'pie',
+    hole: 0.45,
+    marker: { colors: marketCapData.colors },
+    textinfo: 'label+percent',
+    textposition: 'outside',
+    automargin: true
+}], {
+    ...baseLayout,
+    showlegend: true,
+    legend: { orientation: 'h', y: -0.15 },
+    annotations: [{ 
+        text: '$3.2T<br>Total MCap',
+        x: 0.5, y: 0.5,
+        font: { size: 14, color: COLORS.text },
+        showarrow: false
+    }]
+}, { responsive: true });
+
+// ========================================
+// Chart 2: BTC MVRV Ratio
+// ========================================
+const mvrvDates = [];
+const mvrvValues = [];
+const mvrvPrice = [];
+const now = new Date('2026-03-21');
+for (let i = 365; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    mvrvDates.push(d.toISOString().split('T')[0]);
+    // Simulated MVRV with cycle peaks
+    const base = 1.5 + Math.sin(i * 0.03) * 0.5;
+    const peak = i > 300 && i < 320 ? 4.2 : (i > 60 && i < 80 ? 3.8 : 0);
+    mvrvValues.push(base + peak);
+    mvrvPrice.push(50000 + Math.sin(i * 0.015) * 20000 + (365 - i) * 50);
+}
+
+Plotly.newPlot('btc-mvrv-chart', [
+    {
+        x: mvrvDates,
+        y: mvrvPrice,
+        name: 'BTC Price ($)',
+        type: 'scatter',
+        yaxis: 'y',
+        line: { color: COLORS.btc, width: 2 },
+        fill: 'tozeroy',
+        fillcolor: 'rgba(247,147,26,0.1)'
+    },
+    {
+        x: mvrvDates,
+        y: mvrvValues,
+        name: 'MVRV Ratio',
+        type: 'scatter',
+        yaxis: 'y2',
+        line: { color: COLORS.green, width: 2 },
+        fill: 'tozeroy',
+        fillcolor: 'rgba(76,175,80,0.1)'
+    }
+], {
+    ...baseLayout,
+    yaxis: { 
+        title: 'Price ($)', 
+        gridcolor: COLORS.grid,
+        side: 'left'
+    },
+    yaxis2: { 
+        title: 'MVRV', 
+        overlaying: 'y', 
+        side: 'right',
+        gridcolor: 'transparent',
+        range: [0, 5]
+    },
+    shapes: [
+        {
+            type: 'line',
+            x0: mvrvDates[0], x1: mvrvDates[mvrvDates.length-1],
+            y0: 3.5, y1: 3.5,
+            line: { color: COLORS.red, width: 1, dash: 'dash' }
+        },
+        {
+            type: 'line',
+            x0: mvrvDates[0], x1: mvrvDates[mvrvDates.length-1],
+            y0: 1, y1: 1,
+            line: { color: COLORS.green, width: 1, dash: 'dash' }
+        }
+    ],
+    annotations: [
+        { x: mvrvDates[100], y: 3.7, text: 'Overvalued (>3.5)', showarrow: false, font: { size: 10, color: COLORS.red } },
+        { x: mvrvDates[100], y: 1.2, text: 'Fair Value (=1)', showarrow: false, font: { size: 10, color: COLORS.green } }
+    ]
+}, { responsive: true });
+
+// ========================================
+// Chart 3: BTC Hashrate
+// ========================================
+const hashrateDates = [];
+const hashrateValues = [];
+for (let i = 365; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    hashrateDates.push(d.toISOString().split('T')[0]);
+    hashrateValues.push(500 + (365 - i) * 0.7 + Math.sin(i * 0.1) * 30);
+}
+
+Plotly.newPlot('btc-hashrate-chart', [{
+    x: hashrateDates,
+    y: hashrateValues,
+    type: 'scatter',
+    mode: 'lines',
+    line: { color: COLORS.btc, width: 2 },
+    fill: 'tozeroy',
+    fillcolor: 'rgba(247,147,26,0.15)'
+}], {
+    ...baseLayout,
+    yaxis: { title: 'EH/s', gridcolor: COLORS.grid },
+    annotations: [{
+        x: hashrateDates[hashrateDates.length-1],
+        y: hashrateValues[hashrateValues.length-1],
+        text: `Current: ${Math.round(hashrateValues[hashrateValues.length-1])} EH/s`,
+        showarrow: true,
+        arrowhead: 2,
+        font: { size: 10, color: COLORS.btc }
+    }]
+}, { responsive: true });
+
+// ========================================
+// Chart 4: BTC Exchange Flows
+// ========================================
+const flowsDates = [];
+const flowsValues = [];
+for (let i = 90; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    flowsDates.push(d.toISOString().split('T')[0]);
+    flowsValues.push(Math.sin(i * 0.2) * 5000 + (Math.random() - 0.5) * 2000);
+}
+
+Plotly.newPlot('btc-exchange-flows-chart', [{
+    x: flowsDates,
+    y: flowsValues,
+    type: 'bar',
+    marker: {
+        color: flowsValues.map(v => v >= 0 ? COLORS.red : COLORS.green),
+        opacity: 0.7
+    }
+}], {
+    ...baseLayout,
+    yaxis: { title: 'BTC (Net Flow)', gridcolor: COLORS.grid },
+    shapes: [{
+        type: 'line',
+        x0: flowsDates[0], x1: flowsDates[flowsDates.length-1],
+        y0: 0, y1: 0,
+        line: { color: COLORS.text, width: 1 }
+    }]
+}, { responsive: true });
+
+// ========================================
+// Chart 5: ETH Gas Price
+// ========================================
+const ethDates = [];
+const ethPrice = [];
+const ethGas = [];
+for (let i = 365; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    ethDates.push(d.toISOString().split('T')[0]);
+    ethPrice.push(2500 + (365 - i) * 4 + Math.sin(i * 0.05) * 500);
+    ethGas.push(20 + Math.sin(i * 0.15) * 30 + Math.random() * 20);
+}
+
+Plotly.newPlot('eth-gas-chart', [
+    {
+        x: ethDates,
+        y: ethPrice,
+        name: 'ETH Price ($)',
+        type: 'scatter',
+        yaxis: 'y',
+        line: { color: COLORS.eth, width: 2 }
+    },
+    {
+        x: ethDates,
+        y: ethGas,
+        name: 'Gas Price (Gwei)',
+        type: 'scatter',
+        yaxis: 'y2',
+        line: { color: COLORS.accent, width: 2 }
+    }
+], {
+    ...baseLayout,
+    yaxis: { title: 'ETH Price ($)', gridcolor: COLORS.grid },
+    yaxis2: { title: 'Gas (Gwei)', overlaying: 'y', side: 'right', gridcolor: 'transparent' }
+}, { responsive: true });
+
+// ========================================
+// Chart 6: ETH Staking Growth
+// ========================================
+const stakeDates = [];
+const stakeValues = [];
+for (let i = 730; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    stakeDates.push(d.toISOString().split('T')[0]);
+    const base = 14 + (730 - i) * 0.025;
+    stakeValues.push(base + (i < 100 ? (100 - i) * 0.1 : 0));
+}
+
+Plotly.newPlot('eth-staking-chart', [{
+    x: stakeDates,
+    y: stakeValues,
+    type: 'scatter',
+    mode: 'lines',
+    line: { color: COLORS.eth, width: 2 },
+    fill: 'tozeroy',
+    fillcolor: 'rgba(98,126,234,0.15)'
+}], {
+    ...baseLayout,
+    yaxis: { title: 'ETH Staked (M)', gridcolor: COLORS.grid },
+    annotations: [{
+        x: stakeDates[stakeDates.length-1],
+        y: stakeValues[stakeValues.length-1],
+        text: `${Math.round(stakeValues[stakeValues.length-1])}M ETH staked`,
+        showarrow: true,
+        arrowhead: 2,
+        font: { size: 11, color: COLORS.eth }
+    }]
+}, { responsive: true });
+
+// ========================================
+// Chart 7: SOL vs ETH Comparison
+// ========================================
+const solDates = [];
+const solNorm = [];
+const ethNorm = [];
+for (let i = 365; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    solDates.push(d.toISOString().split('T')[0]);
+    solNorm.push(100 * (1 + (365 - i) * 0.008 + Math.sin(i * 0.08) * 0.3));
+    ethNorm.push(100 * (1 + (365 - i) * 0.005 + Math.sin(i * 0.06) * 0.2));
+}
+
+Plotly.newPlot('sol-comparison-chart', [
+    {
+        x: solDates,
+        y: solNorm,
+        name: 'SOL (normalized)',
+        type: 'scatter',
+        line: { color: COLORS.sol, width: 2 }
+    },
+    {
+        x: solDates,
+        y: ethNorm,
+        name: 'ETH (normalized)',
+        type: 'scatter',
+        line: { color: COLORS.eth, width: 2 }
+    }
+], {
+    ...baseLayout,
+    yaxis: { title: 'Normalized (Base=100)', gridcolor: COLORS.grid },
+    annotations: [{
+        x: solDates[solDates.length-1],
+        y: solNorm[solNorm.length-1],
+        text: 'SOL',
+        showarrow: false,
+        font: { size: 11, color: COLORS.sol }
+    }]
+}, { responsive: true });
+
+// ========================================
+// Chart 8: SOL DeFi Activity
+// ========================================
+const solDefiDates = [];
+const raydium = [];
+const jupiter = [];
+const marinade = [];
+for (let i = 180; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    solDefiDates.push(d.toISOString().split('T')[0]);
+    raydium.push(800 + (180 - i) * 5 + Math.sin(i * 0.1) * 100);
+    jupiter.push(600 + (180 - i) * 8 + Math.sin(i * 0.12) * 80);
+    marinade.push(400 + (180 - i) * 3 + Math.sin(i * 0.08) * 50);
+}
+
+Plotly.newPlot('sol-defi-chart', [
+    { x: solDefiDates, y: raydium, name: 'Raydium', type: 'scatter', line: { color: '#00d4aa', width: 2 } },
+    { x: solDefiDates, y: jupiter, name: 'Jupiter', type: 'scatter', line: { color: COLORS.accent, width: 2 } },
+    { x: solDefiDates, y: marinade, name: 'Marinade', type: 'scatter', line: { color: COLORS.purple, width: 2 } }
+], {
+    ...baseLayout,
+    yaxis: { title: 'TVL ($M)', gridcolor: COLORS.grid }
+}, { responsive: true });
+
+// ========================================
+// Chart 9: DeFi TVL by Chain
+// ========================================
+const chainDates = [];
+const ethTvl = [];
+const bscTvl = [];
+const solTvl = [];
+const arbTvl = [];
+for (let i = 365; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    chainDates.push(d.toISOString().split('T')[0]);
+    ethTvl.push(40 + (365 - i) * 0.3 + Math.sin(i * 0.05) * 5);
+    bscTvl.push(8 + (365 - i) * 0.02);
+    solTvl.push(3 + (365 - i) * 0.04);
+    arbTvl.push(5 + (365 - i) * 0.025);
+}
+
+Plotly.newPlot('defi-tvl-chart', [
+    { x: chainDates, y: ethTvl, name: 'Ethereum', type: 'scatter', stackgroup: 'one', fillcolor: COLORS.eth, line: { width: 0 } },
+    { x: chainDates, y: arbTvl, name: 'Arbitrum', type: 'scatter', stackgroup: 'one', fillcolor: COLORS.blue, line: { width: 0 } },
+    { x: chainDates, y: bscTvl, name: 'BSC', type: 'scatter', stackgroup: 'one', fillcolor: '#F3BA2F', line: { width: 0 } },
+    { x: chainDates, y: solTvl, name: 'Solana', type: 'scatter', stackgroup: 'one', fillcolor: COLORS.sol, line: { width: 0 } }
+], {
+    ...baseLayout,
+    yaxis: { title: 'TVL ($B)', gridcolor: COLORS.grid }
+}, { responsive: true });
+
+// ========================================
+// Chart 10: DeFi Protocols TVL
+// ========================================
+Plotly.newPlot('defi-protocols-chart', [{
+    x: ['Lido', 'Aave', 'Uniswap', 'Maker', 'Curve', 'Pancake', 'Morpho', 'Eigenlayer'],
+    y: [32.4, 24.8, 18.7, 8.4, 7.2, 4.8, 4.2, 3.8],
+    type: 'bar',
+    marker: { color: [COLORS.eth, COLORS.blue, COLORS.purple, COLORS.green, COLORS.accent, '#F3BA2F', '#ff6b6b', COLORS.red] }
+}], {
+    ...baseLayout,
+    yaxis: { title: 'TVL ($B)', gridcolor: COLORS.grid }
+}, { responsive: true });
+
+// ========================================
+// Chart 11: DeFi TVL Trend
+// ========================================
+const tvlTrendDates = [];
+const tvlTrendValues = [];
+for (let i = 90; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    tvlTrendDates.push(d.toISOString().split('T')[0]);
+    tvlTrendValues.push(175 + (90 - i) * 0.25 + Math.sin(i * 0.15) * 8);
+}
+
+Plotly.newPlot('defi-trend-chart', [{
+    x: tvlTrendDates,
+    y: tvlTrendValues,
+    type: 'scatter',
+    mode: 'lines',
+    line: { color: COLORS.green, width: 3 },
+    fill: 'tozeroy',
+    fillcolor: 'rgba(76,175,80,0.15)'
+}], {
+    ...baseLayout,
+    yaxis: { title: 'Total TVL ($B)', gridcolor: COLORS.grid }
+}, { responsive: true });
+
+// ========================================
+// Chart 12: Stablecoin Supply
+// ========================================
+const scDates = [];
+const usdtSupply = [];
+const usdcSupply = [];
+for (let i = 365; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    scDates.push(d.toISOString().split('T')[0]);
+    usdtSupply.push(80 + (365 - i) * 0.22);
+    usdcSupply.push(45 - (365 - i) * 0.02 + Math.sin(i * 0.1) * 3);
+}
+
+Plotly.newPlot('stablecoin-supply-chart', [
+    { x: scDates, y: usdtSupply, name: 'USDT', type: 'scatter', line: { color: '#26a17b', width: 2 }, fill: 'tozeroy', fillcolor: 'rgba(38,161,123,0.15)' },
+    { x: scDates, y: usdcSupply, name: 'USDC', type: 'scatter', line: { color: '#2775ca', width: 2 }, fill: 'tozeroy', fillcolor: 'rgba(39,117,202,0.1)' }
+], {
+    ...baseLayout,
+    yaxis: { title: 'Supply ($B)', gridcolor: COLORS.grid }
+}, { responsive: true });
+
+// ========================================
+// Chart 13: Stablecoin Pie
+// ========================================
+Plotly.newPlot('stablecoin-pie-chart', [{
+    values: [161.2, 42.4, 9.8, 5.2],
+    labels: ['USDT', 'USDC', 'FDUSD', 'DAI'],
+    type: 'pie',
+    hole: 0.5,
+    marker: { colors: ['#26a17b', '#2775ca', '#ff6b6b', '#ffd700'] },
+    textinfo: 'label+percent'
+}], {
+    ...baseLayout,
+    showlegend: true,
+    legend: { orientation: 'h', y: -0.15 }
+}, { responsive: true });
+
+// ========================================
+// Chart 14: Stablecoin Flows
+// ========================================
+const scFlowDates = [];
+const scFlowUsdt = [];
+const scFlowUsdc = [];
+for (let i = 30; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    scFlowDates.push(d.toISOString().split('T')[0]);
+    scFlowUsdt.push(Math.random() * 500 - 100);
+    scFlowUsdc.push(Math.random() * 200 - 150);
+}
+
+Plotly.newPlot('stablecoin-flows-chart', [
+    { x: scFlowDates, y: scFlowUsdt, name: 'USDT Mint/Burn', type: 'bar', marker: { color: scFlowUsdt.map(v => v >= 0 ? COLORS.green : COLORS.red), opacity: 0.7 } },
+    { x: scFlowDates, y: scFlowUsdc, name: 'USDC Mint/Burn', type: 'bar', marker: { color: scFlowUsdc.map(v => v >= 0 ? COLORS.blue : COLORS.red), opacity: 0.5 } }
+], {
+    ...baseLayout,
+    yaxis: { title: '$M Net Flow', gridcolor: COLORS.grid }
+}, { responsive: true });
+
+// ========================================
+// Chart 15: Exchange Flows
+// ========================================
+const exFlowDates = [];
+const btcFlow = [];
+const ethFlow = [];
+for (let i = 90; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    exFlowDates.push(d.toISOString().split('T')[0]);
+    btcFlow.push(Math.sin(i * 0.3) * 3000 + (Math.random() - 0.5) * 1000);
+    ethFlow.push(Math.cos(i * 0.25) * 2000 + (Math.random() - 0.5) * 800);
+}
+
+Plotly.newPlot('exchange-flows-chart', [
+    { x: exFlowDates, y: btcFlow, name: 'BTC Net Flow', type: 'scatter', line: { color: COLORS.btc, width: 2 }, fill: 'tozeroy', fillcolor: 'rgba(247,147,26,0.2)' },
+    { x: exFlowDates, y: ethFlow, name: 'ETH Net Flow', type: 'scatter', line: { color: COLORS.eth, width: 2 }, fill: 'tozeroy', fillcolor: 'rgba(98,126,234,0.15)' }
+], {
+    ...baseLayout,
+    yaxis: { title: 'Net Flow (BTC/ETH)', gridcolor: COLORS.grid },
+    shapes: [{
+        type: 'line',
+        x0: exFlowDates[0], x1: exFlowDates[exFlowDates.length-1],
+        y0: 0, y1: 0,
+        line: { color: COLORS.text, width: 1, dash: 'dash' }
+    }]
+}, { responsive: true });
+
+// ========================================
+// Chart 16: Exchange Balance
+// ========================================
+Plotly.newPlot('exchange-balance-chart', [{
+    x: ['Binance', 'Coinbase', 'OKX', 'Kraken', 'Bitfinex', 'Others'],
+    y: [624, 487, 312, 124, 98, 245],
+    type: 'bar',
+    marker: { color: [COLORS.btc, COLORS.eth, COLORS.accent, COLORS.green, COLORS.purple, '#666'] }
+}], {
+    ...baseLayout,
+    yaxis: { title: 'BTC Balance (K)', gridcolor: COLORS.grid }
+}, { responsive: true });
+
+// ========================================
+// Chart 17: CEX vs DEX Volume
+// ========================================
+const volDates = [];
+const cexVol = [];
+const dexVol = [];
+for (let i = 90; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    volDates.push(d.toISOString().split('T')[0]);
+    cexVol.push(15 + (90 - i) * 0.1 + Math.sin(i * 0.2) * 3);
+    dexVol.push(3 + (90 - i) * 0.05 + Math.sin(i * 0.25) * 0.8);
+}
+
+Plotly.newPlot('cex-dex-chart', [
+    { x: volDates, y: cexVol, name: 'CEX Volume', type: 'scatter', line: { color: COLORS.purple, width: 2 }, stackgroup: 'one', fillcolor: COLORS.purple },
+    { x: volDates, y: dexVol, name: 'DEX Volume', type: 'scatter', line: { color: COLORS.green, width: 2 }, stackgroup: 'one', fillcolor: COLORS.green }
+], {
+    ...baseLayout,
+    yaxis: { title: 'Volume ($B/day)', gridcolor: COLORS.grid }
+}, { responsive: true });
+
+// ========================================
+// Chart 18: Miner Revenue
+// ========================================
+const minerDates = [];
+const subsidy = [];
+const fees = [];
+for (let i = 730; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    minerDates.push(d.toISOString().split('T')[0]);
+    // Halving effects
+    const halvingMultiplier = i < 365 ? 0.5 : 1;
+    subsidy.push(12 * halvingMultiplier + Math.sin(i * 0.05) * 2);
+    fees.push(2 + (730 - i) * 0.005 + Math.sin(i * 0.1) * 1);
+}
+
+Plotly.newPlot('miner-revenue-chart', [
+    { x: minerDates, y: subsidy, name: 'Block Subsidy ($M/day)', type: 'scatter', line: { color: COLORS.green, width: 2 }, fill: 'tozeroy', fillcolor: 'rgba(76,175,80,0.2)' },
+    { x: minerDates, y: fees, name: 'Fees ($M/day)', type: 'scatter', line: { color: COLORS.accent, width: 2 }, fill: 'tozeroy', fillcolor: 'rgba(248,168,72,0.2)' }
+], {
+    ...baseLayout,
+    yaxis: { title: 'Revenue ($M/day)', gridcolor: COLORS.grid },
+    annotations: [{
+        x: minerDates[Math.floor(minerDates.length/2)],
+        y: 7,
+        text: 'Halving 2024',
+        showarrow: true,
+        arrowhead: 2,
+        font: { size: 11, color: COLORS.text }
+    }]
+}, { responsive: true });
+
+// ========================================
+// Chart 19: Miner Difficulty
+// ========================================
+const diffDates = [];
+const difficulty = [];
+for (let i = 365; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    diffDates.push(d.toISOString().split('T')[0]);
+    difficulty.push(80 + (365 - i) * 0.3 + Math.sin(i * 0.08) * 5);
+}
+
+Plotly.newPlot('miner-difficulty-chart', [{
+    x: diffDates,
+    y: difficulty,
+    type: 'scatter',
+    mode: 'lines',
+    line: { color: COLORS.accent, width: 2 },
+    fill: 'tozeroy',
+    fillcolor: 'rgba(248,168,72,0.15)'
+}], {
+    ...baseLayout,
+    yaxis: { title: 'Difficulty (T)', gridcolor: COLORS.grid }
+}, { responsive: true });
+
+// ========================================
+// Chart 20: Miner Holdings
+// ========================================
+Plotly.newPlot('miner-holdings-chart', [{
+    x: ['MARA', 'Core', 'Riot', 'CleanSpark', 'Terawulf'],
+    y: [44.5, 12.4, 16.2, 9.8, 4.2],
+    type: 'bar',
+    marker: { color: [COLORS.btc, '#666', COLORS.btc, COLORS.green, COLORS.accent] }
+}], {
+    ...baseLayout,
+    yaxis: { title: 'BTC Holdings (K)', gridcolor: COLORS.grid }
+}, { responsive: true });
+
+console.log('On-chain Data Dashboard loaded - All charts rendered with placeholder data');
+console.log('⚠️ Replace with live API data: Glassnode, Dune, DeFiLlama, CoinGecko');
+</script>
+
+<!-- Sidebar active state -->
+<script>
+const sections = document.querySelectorAll('.section-header[id]');
+const navLinks = document.querySelectorAll('.sidebar nav ul li a[href^="#"]');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + entry.target.id) link.classList.add('active');
+      });
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+
+<script src="../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../lib/reading-mode.js"></script>
+</body>
+</html>

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caitlin Long — Metacognition 元思考过程</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  .meta-card { border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:1.1rem 1.3rem; margin-bottom:0.75rem; background:var(--bg-surface); }
+  .meta-card h3 { font-size:0.95rem; font-weight:590; margin-bottom:0.5rem; color:var(--text-primary); }
+  .meta-card p { font-size:0.82rem; color:var(--text-secondary); line-height:1.6; margin-bottom:0.5rem; }
+  .bias-tag { display:inline-block; padding:0.15rem 0.5rem; border-radius:4px; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
+  .bias-confirmed { background:rgba(76,175,80,0.15); color:var(--tier-high); }
+  .bias-warning { background:rgba(255,193,7,0.15); color:var(--tier-medium); }
+  .bias-critical { background:rgba(244,67,54,0.15); color:var(--tier-low); }
+  .confidence-bar { display:flex; align-items:center; gap:0.5rem; margin:0.5rem 0; }
+  .conf-track { flex:1; height:6px; background:var(--border-subtle); border-radius:3px; overflow:hidden; }
+  .conf-fill { height:100%; border-radius:3px; }
+  .conf-label { font-size:0.72rem; font-weight:590; color:var(--text-tertiary); min-width:2.5rem; }
+  .gap-item { border-left:3px solid var(--tier-low); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(244,67,54,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .cross-ref { border-left:3px solid var(--knowledge); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(91,155,213,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .decision-log { font-size:0.78rem; color:var(--text-tertiary); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:0.8rem 1rem; background:var(--bg-elevated); margin-bottom:0.75rem; }
+  .section-divider { border:none; border-top:1px solid var(--border-subtle); margin:1.5rem 0; }
+  .metric-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:0.75rem; margin:1rem 0; }
+  .metric-item { background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:0.8rem 1rem; }
+  .metric-item .metric-label { font-size:0.72rem; color:var(--text-tertiary); margin-bottom:0.25rem; }
+  .metric-item .metric-value { font-size:0.95rem; font-weight:590; color:var(--text-primary); }
+  body.embedded .sidebar { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+</style>
+</head>
+<body>
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="page-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Caitlin Long<br>Metacognition 元思考</div>
+    <h4>Contents</h4>
+    <nav><ul>
+      <li><a href="#selection">1 Selection 选择理由</a></li>
+      <li><a href="#biases">2 Biases 认知偏差</a></li>
+      <li><a href="#corrections">3 Corrections 纠正</a></li>
+      <li><a href="#gaps">4 Gaps 信息缺口</a></li>
+      <li><a href="#crossval">5 Cross-Validation 交叉验证</a></li>
+      <li><a href="#quality">6 Quality 质量评估</a></li>
+      <li><a href="#log">7 Decision Log 决策日志</a></li>
+    </ul></nav>
+    <h4>Related</h4>
+    <nav><ul>
+      <li><a href="15_caitlin_long.html">Caitlin Long Profile</a></li>
+      <li><a href="sources_15_long_v4.html">Sources V4</a></li>
+    </ul></nav>
+  </aside>
+  <main class="main-content">
+    <header class="page-header">
+      <h1>Caitlin Long — Metacognition<span style="display:block;font-size:0.85rem;font-weight:400;color:var(--text-tertiary);margin-top:0.2rem;">元思考过程 — 研究中的认知审计</span></h1>
+      <p style="font-size:0.82rem;color:var(--text-quaternary);">Generated: 2026-03-22 &middot; Agent #15 &middot; Node N8 监管 &middot; Part of Blockchain Research Hub</p>
+    </header>
+
+    <!-- §1: Selection Reason -->
+    <section id="selection">
+      <div class="meta-card">
+        <h3>§1 选择理由 — Selection Reason</h3>
+        <p><strong>EN:</strong> Caitlin Long represents a critical but often overlooked dimension of the crypto regulatory landscape: the battle for banking access. Her role as Custodia Bank CEO and Wyoming SPDI architect makes her the leading indicator for traditional finance's openness to crypto.</p>
+        <p><strong>ZH:</strong> Caitlin Long代表了加密监管领域中一个关键但常被忽视的维度：银行准入之战。她作为Custodia Bank CEO和Wyoming SPDI架构师的角色，使她成为传统金融对加密开放度的领先指标。</p>
+        <hr class="section-divider">
+        <h4>Selection Criteria / 选择标准</h4>
+        <ul style="font-size:0.82rem;color:var(--text-secondary);margin-left:1rem;">
+          <li><strong>Position uniqueness:</strong> Only major crypto bank CEO with direct Fed litigation experience</li>
+          <li><strong>Information asymmetry:</strong> First-hand access to regulatory decision-making process</li>
+          <li><strong>Signal value:</strong> Custodia's Fed account status = litmus test for US crypto banking</li>
+          <li><strong>Node alignment:</strong> N8 (Regulatory/Policy) — directly maps to this agent's domain</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- §2: Cognitive Biases -->
+    <section id="biases">
+      <div class="meta-card">
+        <h3>§2 认知偏差 — Cognitive Biases</h3>
+        <p style="margin-bottom:1rem;"><strong>EN:</strong> Identifying systematic cognitive biases in this research to ensure balanced assessment.</p>
+        <p style="margin-bottom:1rem;"><strong>ZH:</strong> 识别本研究中的系统性认知偏差，以确保评估的平衡性。</p>
+
+        <div style="margin-bottom:1rem;">
+          <span class="bias-tag bias-warning">Anchoring Bias 锚定偏差</span>
+          <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.3rem;">Risk: Over-weighting US regulatory framework as the primary lens. Long's SPDI focus may blind us to DeFi-native solutions that bypass banking entirely. Correction needed: explicitly model non-banking pathways.</p>
+        </div>
+
+        <div style="margin-bottom:1rem;">
+          <span class="bias-tag bias-warning">Confirmation Bias 确认偏差</span>
+          <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.3rem;">Risk: Selecting information that supports "banking = main barrier" thesis while discounting evidence of technology, UX, or regulatory uncertainty as equally important barriers. Correction: weigh all barrier categories equally in analysis.</p>
+        </div>
+
+        <div style="margin-bottom:1rem;">
+          <span class="bias-tag bias-critical">Status Quo Bias 现状偏见</span>
+          <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.3rem;">Risk: Assuming traditional banking infrastructure is inherently necessary for crypto adoption, rather than questioning whether this assumption reflects path dependency rather than technical necessity. Correction: analyze which crypto use cases genuinely require TradFi rails.</p>
+        </div>
+
+        <div style="margin-bottom:1rem;">
+          <span class="bias-tag bias-warning">Survivorship Bias 幸存者偏差</span>
+          <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.3rem;">Risk: Custodia Bank is profiled because it survived (partially). Many crypto banks failed (Silvergate, Signature). Their failures may reveal different insights than Long's experience. Correction: include failed bank analysis in cross-validation.</p>
+        </div>
+
+        <div style="margin-bottom:0;">
+          <span class="bias-tag bias-confirmed">Optimism Bias 乐观偏差</span>
+          <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.3rem;">Risk: Current pro-crypto political environment (2025-26) may lead to overconfidence in sustained regulatory opening. Chokepoint 2.0 could return under different administration. Status: Monitored, currently LOW probability but acknowledged risk.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- §3: Corrections -->
+    <section id="corrections">
+      <div class="meta-card">
+        <h3>§3 纠正 — Corrections</h3>
+        <p style="margin-bottom:1rem;"><strong>EN:</strong> Applied corrections to initial assessments based on identified biases.</p>
+        <p style="margin-bottom:1rem;"><strong>ZH:</strong> 根据已识别的偏差对初步评估进行纠正。</p>
+
+        <div style="margin-bottom:1rem;padding:0.8rem;background:rgba(76,175,80,0.05);border-radius:var(--radius-sm);border-left:3px solid var(--tier-high);">
+          <h4 style="font-size:0.85rem;margin:0 0 0.3rem 0;color:var(--tier-high);">Correction 1: Technology Barriers Are Equal Partners</h4>
+          <p style="font-size:0.82rem;color:var(--text-secondary);margin:0;">Initial assessment over-weighted banking as THE barrier. Correction: Technology scalability (ETH 2.0, L2 adoption), UX complexity, and regulatory uncertainty are equally important. Banking access is necessary but not sufficient condition for crypto adoption.</p>
+        </div>
+
+        <div style="margin-bottom:1rem;padding:0.8rem;background:rgba(76,175,80,0.05);border-radius:var(--radius-sm);border-left:3px solid var(--tier-high);">
+          <h4 style="font-size:0.85rem;margin:0 0 0.3rem 0;color:var(--tier-high);">Correction 2: DeFi as Banking Alternative</h4>
+          <p style="font-size:0.82rem;color:var(--text-secondary);margin:0;">Original framing assumed crypto needs TradFi banking. Correction: DeFi protocols offer alternative rails for many use cases. Long's focus on TradFi integration may underweight the decentralized pathway. Both trajectories matter.</p>
+        </div>
+
+        <div style="margin-bottom:1rem;padding:0.8rem;background:rgba(76,175,80,0.05);border-radius:var(--radius-sm);border-left:3px solid var(--tier-high);">
+          <h4 style="font-size:0.85rem;margin:0 0 0.3rem 0;color:var(--tier-high);">Correction 3: International Regulatory Perspectives</h4>
+          <p style="font-size:0.82rem;color:var(--text-secondary);margin:0;">US-centric analysis may miss innovative approaches elsewhere. Correction: HK, EU, and Singapore regulatory experiments offer alternative models. Long's US framework is not universal truth.</p>
+        </div>
+
+        <div style="margin-bottom:0;padding:0.8rem;background:rgba(76,175,80,0.05);border-radius:var(--radius-sm);border-left:3px solid var(--tier-high);">
+          <h4 style="font-size:0.85rem;margin:0 0 0.3rem 0;color:var(--tier-high);">Correction 4: Include Failed Bank Analysis</h4>
+          <p style="font-size:0.82rem;color:var(--text-secondary);margin:0;">Survivorship bias correction: explicitly include Silvergate and Signature Bank failures in analysis. Their collapse reveals structural vulnerabilities in crypto-friendly banking model that Long's success story does not capture.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- §4: Information Gaps -->
+    <section id="gaps">
+      <div class="meta-card">
+        <h3>§4 信息缺口 — Information Gaps</h3>
+        <p style="margin-bottom:1rem;"><strong>EN:</strong> Critical knowledge gaps identified during research requiring future investigation.</p>
+        <p style="margin-bottom:1rem;"><strong>ZH:</strong> 研究过程中发现的关键知识缺口，需要未来进一步调查。</p>
+
+        <div class="gap-item">
+          <strong>Gap 1: Fed Decision Internal Documentation</strong><br>
+          EN: Detailed internal Fed communications regarding Custodia's master account denial remain undisclosed. Public statements vs. actual decision drivers unknown.<br>
+          ZH: Custodia主账户拒绝相关的美联储内部通讯仍未公开。公开声明与实际决策驱动因素不明。
+        </div>
+
+        <div class="gap-item">
+          <strong>Gap 2: Custodia Bank Financials</strong><br>
+          EN: As a private entity, Custodia's revenue, client base size, and profitability data are limited. Assessment of commercial viability relies on proxies.<br>
+          ZH: 作为私营实体，Custodia的收入、客户规模和盈利数据有限。商业可行性评估依赖代理指标。
+        </div>
+
+        <div class="gap-item">
+          <strong>Gap 3: Long's Personal Crypto Holdings</strong><br>
+          EN: No public disclosure of personal crypto portfolio. Potential conflict of interest between public advocacy and personal positions unknown.<br>
+          ZH: 公开资料中未见个人加密持仓披露。公众倡导与个人头寸之间的潜在利益冲突不明。
+        </div>
+
+        <div class="gap-item">
+          <strong>Gap 4: Other SPDI Applicants' Status</strong><br>
+          EN: How many other institutions applied for Wyoming SPDI? How many were approved vs. rejected? This data would contextualize whether Custodia is exception or pattern.<br>
+          ZH: 有多少其他机构申请了Wyoming SPDI？批准与拒绝的比例如何？这些数据可以说明Custodia是例外还是模式。
+        </div>
+
+        <div class="gap-item">
+          <strong>Gap 5: International SPDI Equivalents</strong><br>
+          EN: Detailed comparison with EU MiCA banking provisions, HK stablecoin licensing, Singapore payment licensing — specific provisions vs. US SPDI unknown.<br>
+          ZH: 与欧盟MiCA银行条款、香港稳定币牌照、新加坡支付牌照的详细比较 — 具体条款与US SPDI的对比不明。
+        </div>
+
+        <div class="gap-item">
+          <strong>Gap 6: Chokepoint 2.0 Coordinated Action Proof</strong><br>
+          EN: Evidence of coordinated inter-agency action vs. parallel independent decisions remains circumstantial. FOIA documents provide partial picture only.<br>
+          ZH: 机构间协调行动与独立并行决策的证据仍属于间接性质。FOIA文件仅提供部分图景。
+        </div>
+
+        <div class="gap-item">
+          <strong>Gap 7: Long's Historical Position Evolution</strong><br>
+          EN: How did Long's views evolve from Morgan Stanley/Credit Suisse career to crypto advocacy? Understanding this trajectory would inform reliability of current positions.<br>
+          ZH: Long从摩根士丹利/瑞信职业生涯到加密倡导的观点演变过程如何？理解这一轨迹有助于评估当前立场的可靠性。
+        </div>
+      </div>
+    </section>
+
+    <!-- §5: Cross-Validation -->
+    <section id="crossval">
+      <div class="meta-card">
+        <h3>§5 交叉验证 — Cross-Validation</h3>
+        <p style="margin-bottom:1rem;"><strong>EN:</strong> Validating key claims through independent sources and contrasting viewpoints.</p>
+        <p style="margin-bottom:1rem;"><strong>ZH:</strong> 通过独立来源和对立观点验证关键主张。</p>
+
+        <div class="cross-ref">
+          <strong>Cross-Ref 1: Hester Peirce (SEC Commissioner)</strong><br>
+          EN: Peirce's "token safe harbor" proposal and public criticism of SEC enforcement approach aligns with Long's regulatory reform advocacy. Both emphasize process over prohibition. <strong>Validation: SUPPORTED</strong> — convergent independent viewpoints.<br>
+          ZH: Peirce的"代币安全港"提案和对SEC执法方式的公开批评与Long的监管改革倡导一致。两者都强调过程而非禁止。<strong>验证：支持</strong> — 独立的收敛观点。
+        </div>
+
+        <div class="cross-ref">
+          <strong>Cross-Ref 2: Gary Gensler (Former SEC Chair) — Contrasting</strong><br>
+          EN: Gensler's "everything is a security" approach directly opposes Long's regulated banking pathway. His 2021-2024 tenure represents the anti-thesis to Long's thesis. <strong>Validation: CONTRAST CONFIRMS</strong> the regulatory battle lines Long represents.<br>
+          ZH: Gensler的"一切皆是证券"立场与Long的受监管银行路径直接对立。他的2021-2024任期代表了Long论点的反题。<strong>验证：对比证实</strong>了Long所代表的监管战线。
+        </div>
+
+        <div class="cross-ref">
+          <strong>Cross-Ref 3: Silvergate Bank Collapse (2023)</strong><br>
+          EN: Silvergate's voluntary liquidation after FTX contagion validates Long's "banking access = critical infrastructure" thesis from negative angle. Their failure to manage crypto risk proves both necessity and difficulty of crypto banking. <strong>Validation: STRONGLY SUPPORTED</strong>.<br>
+          ZH: Silvergate在FTX传染后的自愿清算从负面角度验证了Long的"银行准入=关键基础设施"论点。其管理加密风险的失败同时证明了加密银行的必要性和难度。<strong>验证：强力支持</strong>。
+        </div>
+
+        <div class="cross-ref">
+          <strong>Cross-Ref 4: Wyoming SPDI Legislative Record</strong><br>
+          EN: Independent legislative history confirms Long's advocacy role. Multiple bills she championed passed with bipartisan support, indicating substantive contribution beyond just public relations. <strong>Validation: CONFIRMED</strong>.<br>
+          ZH: 独立的立法记录证实了Long的倡导角色。她支持的多项法案获得两党支持，表明其贡献超越公共关系。<strong>验证：确认</strong>。
+        </div>
+
+        <div class="cross-ref">
+          <strong>Cross-Ref 5: Trump Administration Crypto Policy Shift (2025)</strong><br>
+          EN: Executive orders and regulatory guidance in 2025-26 aligned with Long's advocacy trajectory (FiVEACTS repeal, SAB 121 reconsideration). <strong>Validation: POLICY CONVERGENCE</strong> — her predicted direction materialized.<br>
+          ZH: 2025-26年的行政命令和监管指导与Long的倡导轨迹一致（FiVEACTS废除，SAB 121重新考虑）。<strong>验证：政策趋同</strong> — 她预测的方向成为现实。
+        </div>
+      </div>
+    </section>
+
+    <!-- §6: Quality Assessment -->
+    <section id="quality">
+      <div class="meta-card">
+        <h3>§6 质量评估 — Quality Assessment</h3>
+        <p style="margin-bottom:1rem;"><strong>EN:</strong> Confidence levels for key claims and data quality evaluation.</p>
+        <p style="margin-bottom:1rem;"><strong>ZH:</strong> 关键主张和数据质量评估的置信水平。</p>
+
+        <div class="confidence-bar">
+          <span class="conf-label">Banking = Primary Barrier</span>
+          <div class="conf-track" style="background:var(--border-subtle);">
+            <div class="conf-fill" style="width:75%;background:var(--tier-medium);"></div>
+          </div>
+          <span style="font-size:0.72rem;color:var(--tier-medium);">75%</span>
+        </div>
+        <p style="font-size:0.75rem;color:var(--text-tertiary);margin-bottom:0.8rem;">EN: Significant evidence supports this but DeFi alternatives and other barriers warrant equal weight.<br>ZH: 重要证据支持此观点，但DeFi替代方案和其他障碍需要同等权重。</p>
+
+        <div class="confidence-bar">
+          <span class="conf-label">Fed Decision Was Political</span>
+          <div class="conf-track" style="background:var(--border-subtle);">
+            <div class="conf-fill" style="width:65%;background:var(--tier-medium);"></div>
+          </div>
+          <span style="font-size:0.72rem;color:var(--tier-medium);">65%</span>
+        </div>
+        <p style="font-size:0.75rem;color:var(--text-tertiary);margin-bottom:0.8rem;">EN: Circumstantial evidence strong but smoking-gun documentation unavailable.<br>ZH: 间接证据充分但关键文件尚不可得。</p>
+
+        <div class="confidence-bar">
+          <span class="conf-label">Long's Advocacy Effectiveness</span>
+          <div class="conf-track" style="background:var(--border-subtle);">
+            <div class="conf-fill" style="width:80%;background:var(--tier-high);"></div>
+          </div>
+          <span style="font-size:0.72rem;color:var(--tier-high);">80%</span>
+        </div>
+        <p style="font-size:0.75rem;color:var(--text-tertiary);margin-bottom:0.8rem;">EN: Legislative record and policy convergence validate substantive contribution.<br>ZH: 立法记录和政策趋同证实了实质性贡献。</p>
+
+        <div class="confidence-bar">
+          <span class="conf-label">Chokepoint 2.0 Ended</span>
+          <div class="conf-track" style="background:var(--border-subtle);">
+            <div class="conf-fill" style="width:70%;background:var(--tier-medium);"></div>
+          </div>
+          <span style="font-size:0.72rem;color:var(--tier-medium);">70%</span>
+        </div>
+        <p style="font-size:0.75rem;color:var(--text-tertiary);margin-bottom:0.8rem;">EN: Policy-level ending confirmed but structural inertia in banking culture persists.<br>ZH: 政策层面结束已确认，但银行业文化中的结构性惯性持续存在。</p>
+
+        <div class="confidence-bar">
+          <span class="conf-label">Custodia Commercial Viability</span>
+          <div class="conf-track" style="background:var(--border-subtle);">
+            <div class="conf-fill" style="width:45%;background:var(--tier-low);"></div>
+          </div>
+          <span style="font-size:0.72rem;color:var(--tier-low);">45%</span>
+        </div>
+        <p style="font-size:0.75rem;color:var(--text-tertiary);margin-bottom:0;">EN: Limited data. Private company financials unknown. Fed account status critical variable.<br>ZH: 数据有限。私营公司财务不明。Fed账户状态是关键变量。</p>
+
+        <hr class="section-divider">
+
+        <div class="metric-grid">
+          <div class="metric-item">
+            <div class="metric-label">Overall Confidence</div>
+            <div class="metric-value" style="color:var(--tier-medium);">67%</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">Source Reliability</div>
+            <div class="metric-value" style="color:var(--tier-high);">High</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">Bias Risk</div>
+            <div class="metric-value" style="color:var(--tier-medium);">Moderate</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">Completeness</div>
+            <div class="metric-value" style="color:var(--tier-medium);">78%</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- §7: Decision Log -->
+    <section id="log">
+      <div class="meta-card">
+        <h3>§7 决策日志 — Decision Log</h3>
+        <p style="margin-bottom:1rem;"><strong>EN:</strong> Key decisions made during research and their rationale.</p>
+        <p style="margin-bottom:1rem;"><strong>ZH:</strong> 研究过程中做出的关键决策及其理由。</p>
+
+        <div class="decision-log">
+          <strong>Decision 1: Why Caitlin Long as Agent #15</strong><br>
+          <strong>Date:</strong> 2026-03-22<br>
+          <strong>Reasoning:</strong> Long occupies unique position at crypto-TradFi interface. Her direct experience with Fed litigation provides institutional knowledge unavailable from external analysts. N8 (Regulatory) node requires on-the-ground regulatory actor.<br>
+          <strong>Alternative considered:</strong> Hester Peirce (too passive), Brian Brooks (less focused on banking), circle, Kraken CEOs — rejected due to narrower scope or less direct regulatory battle experience.<br>
+          <strong>Confidence:</strong> High (9/10)
+        </div>
+
+        <div class="decision-log">
+          <strong>Decision 2: Tier B (3/5) Rating — Not Directly Investable</strong><br>
+          <strong>Date:</strong> 2026-03-22<br>
+          <strong>Reasoning:</strong> Custodia Bank is private, unlisted entity. Cannot provide direct equity exposure. However, her regulatory work creates second-order effects on investable assets (BTC, ETH, crypto miners, exchanges with banking access).<br>
+          <strong>Alternative considered:</strong> Tier C (pure information) — rejected because her actions have clear market impact pathways.<br>
+          <strong>Confidence:</strong> Medium (7/10)
+        </div>
+
+        <div class="decision-log">
+          <strong>Decision 3: Emphasis on Fed Master Account as Key Metric</strong><br>
+          <strong>Date:</strong> 2026-03-22<br>
+          <strong>Reasoning:</strong> Fed master account access is binary, observable outcome that summarizes entire banking-access-for-crypto debate. If/when Custodia receives it, signals structural shift in US crypto banking.<br>
+          <strong>Alternative considered:</strong> Track all SPDI banks — rejected due to data availability and complexity. Single flagship metric more actionable.<br>
+          <strong>Confidence:</strong> Medium-High (8/10)
+        </div>
+
+        <div class="decision-log">
+          <strong>Decision 4: Include Chokepoint 2.0 in Core Assessment</strong><br>
+          <strong>Date:</strong> 2026-03-22<br>
+          <strong>Reasoning:</strong> Operation Chokepoint 2.0 is defining regulatory battle of 2022-2024 cycle. Long is primary witness/archivist of this event. Understanding her requires understanding the systemic context she fought against.<br>
+          <strong>Alternative considered:</strong> Focus purely on SPDI legislation — rejected as too narrow. Regulatory battles define actor effectiveness.<br>
+          <strong>Confidence:</strong> High (9/10)
+        </div>
+
+        <div class="decision-log">
+          <strong>Decision 5: Cross-Validate with Silvergate/Signature Failures</strong><br>
+          <strong>Date:</strong> 2026-03-22<br>
+          <strong>Reasoning:</strong> Survivorship bias correction. Long's success story incomplete without understanding parallel failures. Crypto banking thesis validated by both successes and failures.<br>
+          <strong>Alternative considered:</strong> Only analyze successful cases — rejected as analytically incomplete.<br>
+          <strong>Confidence:</strong> High (9/10)
+        </div>
+      </div>
+    </section>
+
+    <footer style="margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border-subtle);font-size:0.72rem;color:var(--text-quaternary);">
+      <p>Metacognition report &middot; <a href="../blockchain_hub.html">Blockchain Hub</a> &middot; Agent #15 Caitlin Long &middot; 2026-03-22</p>
+    </footer>
+  </main>
+</div>
+<script>
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+})();
+</script>
+</body>
+</html>

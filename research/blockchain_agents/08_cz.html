@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CZ 赵长鹏 — Cognitive Agent Profile</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="../blockchain_shared.css">
+  <style>
+/* === Page-specific extensions (under 80 lines) === */
+.priority-box { border: 1px solid rgba(248,168,72,0.3); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin-bottom: 2rem; background: var(--bg-surface); }
+.priority-box h2 { color: var(--accent); margin-top: 0; font-size: 1.1rem; font-weight: 590; }
+.priority-box ol { margin-bottom: 0; padding-left: 1.2rem; }
+.priority-box li { margin-bottom: 0.6rem; line-height: 1.55; }
+.anno { border-radius: 0 6px 6px 0; padding: 0.6rem 0.75rem; margin-bottom: 0.75rem; font-size: 0.82rem; line-height: 1.55; overflow: hidden; }
+.anno.meta-note { border-left: 2px solid var(--accent); background: rgba(248,168,72,0.04); }
+.anno.know-note { border-left: 2px solid var(--knowledge); background: rgba(91,155,213,0.04); }
+.anno .mn-head { display: flex; align-items: center; gap: 0.4rem; cursor: pointer; user-select: none; }
+.anno .mn-body { max-height: 0; overflow: hidden; transition: max-height 0.25s ease; }
+.anno.open .mn-body { max-height: 600px; }
+.anno .mn-fold { margin-left: auto; font-size: 0.7rem; color: var(--text-quaternary); transition: transform 0.2s; }
+.anno.open .mn-fold { transform: rotate(180deg); }
+.note-label { display: inline-block; font-size: 0.55rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.08rem 0.35rem; border-radius: 3px; }
+.note-label:not(.know) { background: var(--accent); color: var(--bg-base); }
+.note-label.know { background: var(--knowledge); color: white; }
+.mn-title { font-weight: 510; font-size: 0.78rem; color: var(--text-primary); }
+.mn-body p { font-size: 0.82rem; color: var(--text-secondary); margin: 0.4rem 0; }
+.mn-body p:first-child { margin-top: 0.5rem; }
+.hamburger-btn { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 200; background: var(--bg-surface); color: var(--text-primary); border: none; border-radius: 6px; width: 44px; height: 44px; font-size: 1.4rem; cursor: pointer; }
+.sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+.notes-toggle-btn { display: none; position: fixed; top: 1rem; right: 1rem; z-index: 200; background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-default); border-radius: 6px; width: 44px; height: 44px; font-size: 1.2rem; cursor: pointer; align-items: center; justify-content: center; }
+.notes-overlay-right { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 149; }
+.notes-overlay-right.open { display: block; }
+.notes-sidebar.ns-closed { transform: translateX(100%); }
+.notes-sidebar .notes-sidebar-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+.notes-sidebar .notes-close-btn { background: none; border: 1px solid var(--border-subtle); color: var(--text-tertiary); border-radius: 4px; width: 24px; height: 24px; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+@media (max-width: 900px) {
+  .sidebar { position: fixed; left: -320px; top: 0; transition: left 0.3s ease; box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+  .sidebar.open { left: 0; }
+  .sidebar-overlay.open { display: block; }
+  .hamburger-btn { display: block; }
+  main.main-content { padding: 2rem 1rem 4rem; }
+}
+@media (max-width: 1200px) {
+  .notes-sidebar { position: fixed !important; right: 0; top: 0; z-index: 150; transition: transform 0.3s ease; box-shadow: -4px 0 20px rgba(0,0,0,0.3); }
+  .notes-toggle-btn { display: flex; }
+}
+body.embedded .sidebar, body.embedded .notes-sidebar { display: none !important; }
+body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+body.embedded .hamburger-btn, body.embedded .sidebar-overlay { display: none !important; }
+.reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+.reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+.reading-mode .hamburger-btn, .reading-mode .sidebar-overlay { display: none !important; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes sidebar">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ═══════════ LEFT SIDEBAR ═══════════ -->
+  <aside class="sidebar" id="sidebar">
+    <a class="back-link" href="../blockchain_hub.html" style="display:block;padding:0.4rem 0.5rem;margin-bottom:1rem;font-size:0.8rem;color:var(--accent);text-decoration:none;border:1px solid var(--accent-dim);border-radius:var(--radius-sm);">&#8592; Blockchain Hub</a>
+    <h4>CZ 赵长鹏</h4>
+    <div class="project-meta">
+      Founder, Binance &middot; BNB<br>
+      N4 交易所 &middot; B档 4/5 &middot; 华人/新加坡
+    </div>
+    <h4>目录导航 Contents</h4>
+    <nav><ul>
+      <li><a href="#overview"><span class="toc-num">&#9733;</span>概览 Overview</a></li>
+      <li><a href="#actions"><span class="toc-num">1</span>关键行动 Key Actions</a></li>
+      <li><a href="#judgment"><span class="toc-num">2</span>判断 Judgment</a></li>
+      <li><a href="#trading"><span class="toc-num">3</span>交易视角 Trading</a></li>
+      <li><a href="#context"><span class="toc-num">4</span>背景 Context</a></li>
+    </ul></nav>
+    <h4>Blockchain Agents</h4>
+    <nav><ul>
+      <li><a href="08_cz.html" class="active">08 CZ 赵长鹏</a></li>
+      <li><a href="09_paolo_ardoino.html">09 Paolo Ardoino</a></li>
+      <li><a href="10_sergey_nazarov.html">10 Sergey Nazarov</a></li>
+      <li><a href="11_fred_thiel.html">11 Fred Thiel</a></li>
+      <li><a href="12_nathan_allman.html">12 Nathan Allman</a></li>
+      <li><a href="13_gracy_chen.html">13 Gracy Chen</a></li>
+    </ul></nav>
+  </aside>
+
+  <!-- ═══════════ MAIN CONTENT ═══════════ -->
+  <main class="main-content">
+
+    <header class="page-header">
+      <h1>CZ 赵长鹏 <span class="zh">Changpeng Zhao</span></h1>
+      <div class="subtitle">Founder, Binance &middot; Node N4 交易所 &middot; Tier B档 4/5 &middot; 华人/新加坡</div>
+      <div class="badge-row">
+        <span class="badge badge-gold">Binance #1 Exchange</span>
+        <span class="badge badge-red">DOJ $4.3B Fine</span>
+        <span class="badge badge-cyan">BNB Chain</span>
+        <span class="badge badge-purple">Post-Prison Transition</span>
+      </div>
+    </header>
+
+    <!-- ═══════════ OVERVIEW ═══════════ -->
+    <div class="priority-box" id="overview">
+      <h2>&#9733; 核心概览 <span class="zh" style="font-weight:400; font-size:0.85rem;">Core Overview</span></h2>
+      <p style="color:var(--text-secondary); font-size:0.88rem; line-height:1.65;">Built the world's largest cryptocurrency exchange from zero to #1 in just 6 months (2017). Pioneered the "borderless, move-fast" exchange model with regulatory arbitrage across jurisdictions. Pleaded guilty to DOJ charges in 2023, resulting in a $4.3B fine and prison time. Post-prison, CZ has transitioned to education and investment roles while Binance continues to dominate global crypto trading. The BNB Chain (formerly BSC) ecosystem represents a parallel platform play.</p>
+      <p class="zh" style="font-size:0.82rem;">从零到全球第一大加密货币交易所仅用6个月（2017年）。开创了"无国界、快速行动"的交易所模式，跨司法管辖区进行监管套利。2023年对美国司法部认罪，罚款43亿美元并入狱。出狱后转型为教育和投资角色，同时币安继续主导全球加密交易。BNB Chain生态系统代表了平行的平台战略。</p>
+    </div>
+
+    <!-- ═══════════ KEY ACTIONS ═══════════ -->
+    <section id="actions">
+      <div class="section-header">
+        <h2><span class="section-num">01</span> 关键行动 <span class="zh">Key Actions</span></h2>
+      </div>
+
+      <div class="card">
+        <a>Binance from 0 to #1 in 6 Months (2017)</a>
+        <div class="card-desc">Launched Binance in July 2017, became the world's largest exchange by January 2018. Leveraged ICO timing, aggressive listing strategy, and zero-fee promotions. Operated from multiple jurisdictions to avoid regulatory friction.</div>
+        <div class="card-desc zh">2017年7月推出币安，2018年1月成为全球最大交易所。利用ICO时机、激进的上币策略和零手续费推广。在多个司法管辖区运营以避免监管摩擦。</div>
+      </div>
+
+      <div class="card">
+        <a>BNB Token Utility Model</a>
+        <div class="card-desc">Created BNB as exchange utility token with fee discounts, then expanded to gas token for BNB Chain. Quarterly burns create deflationary pressure. BNB became the first exchange token to sustain top-5 market cap relevance.</div>
+        <div class="card-desc zh">创建BNB作为交易所实用代币并提供手续费折扣，后扩展为BNB Chain的Gas代币。季度销毁机制制造通缩压力。BNB成为首个持续保持市值前5的交易所代币。</div>
+      </div>
+
+      <div class="card">
+        <a>DOJ Plea Deal (November 2023)</a>
+        <div class="card-desc">Pleaded guilty to money laundering and sanctions violations. $4.3B fine &mdash; largest in DOJ crypto enforcement history. CZ stepped down as CEO, replaced by Richard Teng. Served prison sentence. The plea deal was strategic: avoided exchange shutdown and preserved Binance operations.</div>
+        <div class="card-desc zh">对洗钱和违反制裁指控认罪。43亿美元罚款——DOJ加密执法史上最大金额。CZ辞去CEO职务，由Richard Teng接任。服刑。认罪协议是战略性的：避免了交易所关闭，保住了币安运营。</div>
+      </div>
+
+      <div class="card">
+        <a>BNB Chain / BSC Ecosystem</a>
+        <div class="card-desc">Launched Binance Smart Chain (2020) as EVM-compatible L1 with lower fees than Ethereum. Attracted massive DeFi activity during the "DeFi Summer" of 2021. Rebranded to BNB Chain. Despite centralization criticism (21 validators), it remains the most-used chain by transaction count in some periods.</div>
+        <div class="card-desc zh">2020年推出币安智能链（BSC），作为与以太坊兼容但费用更低的L1。在2021年"DeFi之夏"吸引了大量DeFi活动。更名为BNB Chain。尽管面临中心化批评（21个验证者），按交易量计算在某些时期仍是使用最多的链。</div>
+      </div>
+
+      <div class="card">
+        <a>Regulatory Arbitrage Model</a>
+        <div class="card-desc">Operated without a fixed headquarters, moving between Malta, Singapore, UAE, and other jurisdictions. Created Binance.US as a separate entity for American users while maintaining the main platform offshore. This model was ultimately challenged by DOJ but demonstrated the viability of a "jurisdiction-shopping" approach in early crypto.</div>
+        <div class="card-desc zh">无固定总部运营，在马耳他、新加坡、阿联酋等地流动。为美国用户创建了独立的Binance.US实体，同时保持主平台在海外。该模式最终被DOJ挑战，但证明了早期加密货币中"选择管辖区"策略的可行性。</div>
+      </div>
+    </section>
+
+    <!-- ═══════════ JUDGMENT ═══════════ -->
+    <section id="judgment">
+      <div class="section-header">
+        <h2><span class="section-num">02</span> 判断 <span class="zh">Judgment</span></h2>
+      </div>
+
+      <blockquote>
+        <p>"CZ represents the 'borderless, move-fast' exchange model vs Coinbase's compliance-first model. Both models have proven viable &mdash; but in different regulatory regimes."</p>
+        <p class="zh">CZ代表了"无国界、快速行动"的交易所模式，对比Coinbase的合规优先模式。两种模式都已证明可行——但在不同的监管体制下。</p>
+      </blockquote>
+
+      <p>The $4.3B DOJ fine was existential-level, yet Binance survived and continues to dominate global volume. This is itself a signal: <strong>the exchange's network effects and liquidity moat are strong enough to absorb regulatory shocks that would destroy smaller competitors.</strong> Post-DOJ compliance may actually strengthen Binance long-term by removing the regulatory overhang and allowing institutional participation.</p>
+      <p class="zh">43亿美元的DOJ罚款是生存级别的打击，但币安存活下来并继续主导全球交易量。这本身就是一个信号：交易所的网络效应和流动性护城河足够强大，能够吸收会摧毁较小竞争对手的监管冲击。认罪后的合规实际上可能通过消除监管悬念并允许机构参与来长期加强币安。</p>
+
+      <p>CZ's personal transition from operator to educator/investor mirrors a common pattern in crypto founders who face regulatory consequences &mdash; but few have done it from a position of such strength. Binance remains operational and dominant, unlike FTX.</p>
+    </section>
+
+    <!-- ═══════════ TRADING ═══════════ -->
+    <section id="trading">
+      <div class="section-header">
+        <h2><span class="section-num">03</span> 交易视角 <span class="zh">Trading Perspective</span></h2>
+      </div>
+
+      <div class="alert alert-gold">
+        <strong>BNB is indirect Binance exposure.</strong> BNB token captures value from Binance exchange fees (through burns) and BNB Chain usage. Post-DOJ compliance may strengthen Binance long-term, making BNB a potential beneficiary.
+      </div>
+
+      <h3>Key Trading Considerations</h3>
+      <ul>
+        <li><strong>BNB as Binance proxy:</strong> BNB quarterly burns are tied to exchange revenue. Higher Binance volume = more BNB burned = deflationary pressure.</li>
+        <li><strong>Regulatory tail risk:</strong> While DOJ settlement resolved the largest overhang, Binance still faces regulatory scrutiny in multiple jurisdictions. Each new regulatory action creates short-term volatility.</li>
+        <li><strong>Correlation with BTC:</strong> BNB tends to outperform in bull markets (higher beta) and underperform in bear markets. It's a leveraged bet on crypto exchange activity.</li>
+        <li><strong>Competitive moat:</strong> Binance's liquidity advantage creates a self-reinforcing cycle. Traders go where liquidity is deepest, and liquidity concentrates where traders are.</li>
+      </ul>
+
+      <div class="stats-strip">
+        <div class="stat-item"><span class="stat-value">BNB</span><span class="stat-label">Primary Token</span></div>
+        <div class="stat-item"><span class="stat-value">#1</span><span class="stat-label">Exchange by Volume</span></div>
+        <div class="stat-item"><span class="stat-value">$4.3B</span><span class="stat-label">DOJ Fine (2023)</span></div>
+        <div class="stat-item"><span class="stat-value">B档 4/5</span><span class="stat-label">Confidence</span></div>
+      </div>
+    </section>
+
+    <!-- ═══════════ CONTEXT ═══════════ -->
+    <section id="context">
+      <div class="section-header">
+        <h2><span class="section-num">04</span> 背景与关系 <span class="zh">Context &amp; Relationships</span></h2>
+      </div>
+
+      <details class="collapsible">
+        <summary>CZ vs Brian Armstrong (Coinbase) &mdash; Two Exchange Models</summary>
+        <div class="detail-body">
+          <p>CZ and Armstrong represent the two poles of crypto exchange strategy. <strong>Coinbase</strong> chose US-first, compliance-heavy, publicly listed (NASDAQ: COIN). <strong>Binance</strong> chose global-first, move-fast, regulatory arbitrage. Both survived and thrived, but in different market segments. Coinbase dominates US institutional flow; Binance dominates global retail and derivatives.</p>
+          <p class="zh">CZ和Armstrong代表了加密交易所战略的两极。Coinbase选择美国优先、重合规、上市（NASDAQ: COIN）。币安选择全球优先、快速行动、监管套利。两者都存活并繁荣，但在不同的市场细分领域。Coinbase主导美国机构资金流；币安主导全球零售和衍生品。</p>
+        </div>
+      </details>
+
+      <details class="collapsible">
+        <summary>Post-Prison CZ &mdash; Education &amp; Investment Phase</summary>
+        <div class="detail-body">
+          <p>After serving his sentence, CZ has focused on Giggle Academy (free education platform), personal investments in AI and blockchain projects, and advisory roles. He no longer runs Binance day-to-day but retains significant equity ownership. This transition is reminiscent of Jack Ma post-Ant Group crackdown &mdash; a powerful founder forced into the background by regulatory pressure.</p>
+          <p class="zh">服刑后，CZ专注于Giggle Academy（免费教育平台）、AI和区块链项目的个人投资以及顾问角色。他不再日常管理币安，但保留重大股权。这种转型类似于马云在蚂蚁集团整顿后的情况——一位被监管压力迫使退居幕后的强大创始人。</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- Footer -->
+    <footer style="margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--border-subtle); font-size:0.72rem; color:var(--text-quaternary); text-align:center;">
+      <p>Cognitive Agent #08: CZ 赵长鹏 &middot; Blockchain Research System &middot; 2026-03-22</p>
+      <p><a href="../blockchain_hub.html">&larr; Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ═══════════ RIGHT NOTES SIDEBAR ═══════════ -->
+  <aside class="notes-sidebar" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&#10005;</button>
+      <h4>&#129504; 元思考 Meta-Notes</h4>
+    </div>
+
+    <div class="anno meta-note" data-section="judgment" id="m1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">监管套利的极限</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Regulatory arbitrage has a ceiling.</strong> CZ proved you can build a global exchange by jurisdiction-shopping, but the DOJ prosecution showed that US enforcement can reach across borders. The $4.3B fine was the price of a decade of regulatory arbitrage.</p>
+        <p><strong>The lesson for crypto:</strong> You can run from regulators temporarily, but if you get big enough, the US will find you. The question is whether the profits earned during the arbitrage period exceed the eventual penalty. For Binance, the answer was yes &mdash; the exchange survived and dominates. For smaller players, the math would be fatal.</p>
+        <p class="zh">监管套利有天花板。CZ证明了可以通过"选管辖区"建立全球交易所，但DOJ起诉表明美国执法能跨境触达。43亿美元罚款是十年监管套利的代价。教训：暂时可以逃避监管，但如果做大到一定程度，美国会找到你。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="trading" id="m2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Binance韧性：$4.3B罚款后的存续</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Binance's survival after a $4.3B fine is the strongest possible evidence of its moat.</strong> FTX collapsed from far less regulatory pressure. The fact that Binance paid the largest fine in crypto history and continued operating at scale tells you everything about its network effects.</p>
+        <p><strong>Contrast with FTX:</strong> FTX collapsed because it was fraudulent (commingled customer funds). Binance was fined for compliance failures (AML/KYC), not fraud. This is a critical distinction. Compliance failures are fixable; fraud is not.</p>
+        <p><strong>For BNB holders:</strong> The DOJ settlement actually reduced risk by creating a known, quantified regulatory cost rather than an unknown, unlimited one. BNB's post-settlement performance supports this thesis.</p>
+        <p class="zh">币安在43亿美元罚款后的存续是其护城河最有力的证据。FTX在远小于此的监管压力下就崩溃了。币安支付了加密史上最大罚款却继续大规模运营，说明了一切。关键区别：FTX因欺诈（挪用客户资金）而崩溃，币安因合规失误（反洗钱/KYC）被罚——合规失误可修复，欺诈不可。</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+(function() {
+  // 1. Sidebar toggle
+  var hamburger = document.getElementById('hamburgerBtn');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('sidebarOverlay');
+  hamburger.addEventListener('click', function() { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', function() { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+  sidebar.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() { if (window.innerWidth <= 900) { sidebar.classList.remove('open'); overlay.classList.remove('open'); } });
+  });
+
+  // 2. Note toggle
+  window.toggleNote = function(head) { head.parentElement.classList.toggle('open'); };
+
+  // 3. Right sidebar toggle
+  var notesSidebarEl = document.getElementById('notesSidebar');
+  var notesToggleBtn = document.getElementById('notesToggleBtn');
+  var notesOverlayEl = document.getElementById('notesOverlay');
+  var notesCloseBtn = document.getElementById('notesCloseBtn');
+  function toggleNotesSidebar() {
+    var willClose = !notesSidebarEl.classList.contains('ns-closed');
+    notesSidebarEl.classList.toggle('ns-closed', willClose);
+    notesToggleBtn.style.display = willClose ? 'flex' : 'none';
+    notesOverlayEl.classList.toggle('open', !willClose);
+  }
+  if (notesToggleBtn) notesToggleBtn.addEventListener('click', toggleNotesSidebar);
+  if (notesOverlayEl) notesOverlayEl.addEventListener('click', toggleNotesSidebar);
+  if (notesCloseBtn) notesCloseBtn.addEventListener('click', toggleNotesSidebar);
+
+  // 4. Resize handler
+  if (window.innerWidth > 1200) { notesSidebarEl.classList.remove('ns-closed'); notesToggleBtn.style.display = 'none'; }
+  else { notesSidebarEl.classList.add('ns-closed'); notesToggleBtn.style.display = 'flex'; }
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 1200) { notesSidebarEl.classList.remove('ns-closed'); notesToggleBtn.style.display = 'none'; notesOverlayEl.classList.remove('open'); }
+  });
+
+  // 5. Expand all notes on load
+  document.querySelectorAll('.anno').forEach(function(n) { n.classList.add('open'); });
+
+  // 6. Active TOC
+  var navLinks = document.querySelectorAll('.sidebar nav ul li a[href^="#"]');
+  var tocObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        navLinks.forEach(function(link) { link.classList.remove('active'); if (link.getAttribute('href') === '#' + entry.target.id) link.classList.add('active'); });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  document.querySelectorAll('[id="overview"], [id="actions"], [id="judgment"], [id="trading"], [id="context"]').forEach(function(s) { tocObserver.observe(s); });
+})();
+</script>
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+</body>
+</html>

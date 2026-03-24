@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sergey Nazarov — 认知代理人报告</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="../blockchain_shared.css">
+  <style>
+    .priority-box { border:1px solid rgba(248,168,72,0.3); border-left:3px solid var(--accent); border-radius:var(--radius-sm); padding:1.25rem 1.5rem; margin-bottom:2rem; background:var(--bg-surface); }
+    .priority-box h2 { color:var(--accent); margin-top:0; font-size:1.1rem; font-weight:590; }
+    .anno { position:absolute; left:1rem; right:1rem; }
+    .anno.meta-note { padding:0.6rem 0.75rem; border-left:2px solid var(--accent); border-radius:0 6px 6px 0; background:rgba(248,168,72,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+    .anno.meta-note:hover { box-shadow:0 0 0 1px var(--accent); }
+    .anno.know-note { padding:0.6rem 0.75rem; border-left:2px solid var(--knowledge); border-radius:0 6px 6px 0; background:rgba(91,155,213,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+    .anno.know-note:hover { box-shadow:0 0 0 1px var(--knowledge); }
+    .anno .note-label { display:inline-block; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--bg-base); background:var(--accent); padding:0.1rem 0.4rem; border-radius:3px; margin-bottom:0.3rem; }
+    .anno .note-label.know { background:var(--knowledge); color:white; }
+    .anno .mn-head { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
+    .anno .mn-title { flex:1; font-weight:510; font-size:0.75rem; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .anno .mn-fold { font-size:0.55rem; color:var(--text-quaternary); transition:transform 0.2s; margin-left:auto; }
+    .anno.open .mn-fold { transform:rotate(180deg); }
+    .anno .mn-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+    .anno.open .mn-body { max-height:2000px; }
+    .anno .mn-body p { font-size:0.78rem; margin-bottom:0.3rem; color:var(--text-secondary); }
+    .anno.flash { animation:noteFlash 1.5s ease; }
+    @keyframes noteFlash { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--accent);} }
+    .anno.know-note.flash { animation:noteFlashBlue 1.5s ease; }
+    @keyframes noteFlashBlue { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--knowledge);} }
+    .anno.hover { outline:2px solid var(--accent); outline-offset:-1px; }
+    .anno.know-note.hover { outline-color:var(--knowledge); }
+    mark.hl-know { background:rgba(91,155,213,0.12); border-bottom:1.5px solid var(--knowledge); padding:0 2px; border-radius:2px; color:inherit; cursor:pointer; transition:background 0.15s; }
+    mark.hl-know:hover, mark.hl-know.hover { background:rgba(91,155,213,0.28); }
+    .nref { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; font-size:0.48rem; font-weight:700; cursor:pointer; margin-left:1px; vertical-align:super; transition:transform 0.15s; text-decoration:none; background:var(--knowledge); color:white; }
+    .nref:hover { transform:scale(1.25); box-shadow:0 0 6px rgba(91,155,213,0.4); }
+    .top-controls { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; padding:0.35rem 0.7rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); font-size:0.72rem; flex-wrap:wrap; }
+    .top-controls .tc-label { font-weight:590; color:var(--knowledge); }
+    .top-controls button { padding:0.15rem 0.45rem; border-radius:4px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-tertiary); cursor:pointer; font-size:0.68rem; font-family:inherit; transition:all 0.15s; }
+    .top-controls button:hover { border-color:var(--knowledge); color:var(--text-primary); }
+    .top-controls button.active { background:var(--knowledge-dim); color:var(--knowledge); border-color:rgba(91,155,213,0.3); }
+    .top-controls .tc-sep { color:var(--border-default); margin:0 0.15rem; }
+    .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+    .notes-sidebar-header { position:sticky; top:0; z-index:60; background:var(--bg-elevated); padding-bottom:0.5rem; border-bottom:1px solid var(--border-subtle); margin-bottom:0.75rem; }
+    .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+    .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+    .sidebar-overlay.open { display:block; }
+    .notes-toggle-btn { position:fixed; right:1rem; bottom:1.5rem; z-index:200; width:44px; height:44px; border-radius:50%; border:1px solid var(--border-default); background:var(--bg-surface); color:var(--text-secondary); cursor:pointer; font-size:1.1rem; display:none; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.4); font-family:inherit; }
+    .notes-toggle-btn:hover { border-color:var(--accent); color:var(--accent); }
+    .notes-close-btn { float:right; background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:1.1rem; padding:0; display:none; font-family:inherit; }
+    .notes-close-btn:hover { color:var(--text-primary); }
+    @media (max-width:1200px) { .notes-close-btn { display:block; } }
+    .notes-overlay-right { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:140; }
+    .notes-overlay-right.open { display:block; }
+    .verified { color:var(--tier-high); font-weight:590; }
+    .partial { color:var(--tier-medium); font-weight:590; }
+    .failed { color:var(--tier-low); font-weight:590; }
+    .pending { color:var(--text-tertiary); font-weight:510; }
+    .credibility-meter { display:flex; align-items:center; gap:0.75rem; margin:0.75rem 0; }
+    .meter-bar { flex:1; height:8px; background:var(--border-subtle); border-radius:4px; overflow:hidden; }
+    .meter-fill { height:100%; border-radius:4px; }
+    .meter-label { font-size:1.2rem; font-weight:680; min-width:3rem; }
+    .badge-row { display:flex; flex-wrap:wrap; gap:0.4rem; }
+    .role-badge { display:inline-block; padding:0.15rem 0.6rem; border-radius:4px; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:0.5rem; background:var(--accent-dim); color:var(--accent); }
+    .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+    .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+    @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+    @media (max-width:1200px) { .notes-sidebar { position:fixed; right:0; top:0; height:100vh; overflow-y:auto; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.4); z-index:150; } .notes-sidebar.ns-closed { transform:translateX(100%); box-shadow:none; } }
+    @media (min-width:1600px) { .main-content { max-width:1000px; } .notes-sidebar { width:360px; min-width:360px; } }
+    body.embedded .sidebar, body.embedded .notes-sidebar, body.embedded .hamburger-btn, body.embedded .notes-toggle-btn { display:none!important; }
+    body.embedded .main-content { max-width:100%; padding:1.5rem; }
+    body.reading-mode .notes-sidebar { display:none!important; }
+    body.reading-mode .main-content { max-width:720px; margin:0 auto; }
+  </style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="page-wrapper">
+
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Sergey Nazarov<br>Agent #10 &middot; B档 4/5</div>
+    <h4>Contents</h4>
+    <nav>
+      <ul>
+        <li><a href="#overview"><span class="toc-num">&sect;0</span> Profile Overview</a></li>
+        <li><a href="#action"><span class="toc-num">&sect;1</span> Action Evidence</a></li>
+        <li><a href="#judgment"><span class="toc-num">&sect;2</span> Core Judgment</a></li>
+        <li><a href="#predictions"><span class="toc-num">&sect;3</span> Prediction Track Record</a></li>
+        <li><a href="#trading"><span class="toc-num">&sect;4</span> Trading Implications</a></li>
+        <li><a href="#sources"><span class="toc-num">&sect;5</span> Source Curation</a></li>
+      </ul>
+    </nav>
+    <h4>Related</h4>
+    <nav><ul><li><a href="../blockchain_hub.html">Blockchain Hub</a></li></ul></nav>
+  </aside>
+
+  <main class="main-content">
+
+    <div class="top-controls">
+      <span class="tc-label" id="noteCountLabel"></span>
+      <span class="tc-sep">|</span>
+      <button id="knowToggleBtn" class="active" onclick="toggleKnowNotes()">Knowledge</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">Expand All</button>
+      <button onclick="collapseAllNotes()">Collapse All</button>
+    </div>
+
+    <header class="page-header" id="overview">
+      <div class="role-badge">B档 Agent #10 &middot; Node 3 中间件</div>
+      <h1>Sergey Nazarov</h1>
+      <p class="subtitle">Co-founder &middot; Chainlink (LINK) &mdash; B档 Agent #10 &middot; Node 3 中间件 &middot; 2026-03-22</p>
+      <div class="badge-row">
+        <span class="badge badge-gold">LINK</span>
+        <span class="badge badge-gold">70%+ Oracle Share</span>
+        <span class="badge badge-gold">1000+ Integrations</span>
+        <span class="badge badge-purple">Oracle King</span>
+      </div>
+    </header>
+
+    <section id="overview-body">
+      <div class="section-header">
+        <h2><span class="section-num">&sect;0</span> Profile Overview <span class="zh">人物概述</span></h2>
+      </div>
+      <p>Sergey Nazarov是区块链预言机赛道的绝对霸主。Chainlink占据<mark class="hl-know" data-note="k1">70%+的DeFi预言机市场份额</mark>，1000+协议集成，是连接链上世界与链下数据的关键基础设施。CCIP（跨链互操作协议）的推出和SWIFT合作进一步巩固了Chainlink作为"区块链TCP/IP"的定位。</p>
+      <div class="credibility-meter">
+        <span style="font-size:0.82rem; color:var(--text-tertiary);">Credibility</span>
+        <div class="meter-bar">
+          <div class="meter-fill" style="width:80%; background:linear-gradient(90deg, var(--tier-medium-high), var(--accent));"></div>
+        </div>
+        <span class="meter-label" style="color:var(--tier-medium-high);">4/5</span>
+      </div>
+      <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+        在预言机赛道建立了无人匹敌的护城河。技术判断力强，合作伙伴质量高。<br>
+        <strong style="color:var(--tier-low);">偏差</strong>：团队持续抛售LINK代币引发社区不满。<mark class="hl-know" data-note="k2">LINK价值捕获机制</mark>一直是争议焦点。
+      </p>
+    </section>
+
+    <section id="action">
+      <div class="section-header">
+        <h2><span class="section-num">&sect;1</span> Action Evidence <span class="zh">行动证据</span></h2>
+      </div>
+      <div class="card">
+        <strong>1. 70%+ DeFi Oracle市场份额</strong>
+        <p class="card-desc">Aave、Compound、Synthetix等头部DeFi协议均依赖Chainlink价格喂价。预言机赛道的事实标准。</p>
+        <span class="card-meta">Ongoing &middot; 70%+ market dominance</span>
+      </div>
+      <div class="card">
+        <strong>2. CCIP跨链互操作协议</strong>
+        <p class="card-desc">Cross-Chain Interoperability Protocol &mdash; Chainlink从预言机扩展到跨链消息传递和代币桥接，直接对标LayerZero。</p>
+        <span class="card-meta">2023&ndash;2026 &middot; Cross-chain infrastructure</span>
+      </div>
+      <div class="card">
+        <strong>3. SWIFT合作</strong>
+        <p class="card-desc">与SWIFT的概念验证合作 &mdash; 传统金融通过Chainlink连接区块链网络。这是TradFi认可的最强信号。</p>
+        <span class="card-meta">2023 &middot; SWIFT PoC partnership</span>
+      </div>
+      <div class="card">
+        <strong>4. 1000+协议集成</strong>
+        <p class="card-desc">跨链、跨生态系统的广泛集成。网络效应极强 &mdash; 越多协议使用，越难被替代。</p>
+        <span class="card-meta">Cumulative &middot; 1000+ integrations</span>
+      </div>
+      <div class="card">
+        <strong>5. Staking v0.2 &amp; Economics 2.0</strong>
+        <p class="card-desc">推出LINK质押机制，尝试解决代币价值捕获问题。BUILD计划让协议用代币换取Chainlink服务。</p>
+        <span class="card-meta">2023&ndash;2025 &middot; Token economics evolution</span>
+      </div>
+    </section>
+
+    <section id="judgment">
+      <div class="section-header">
+        <h2><span class="section-num">&sect;2</span> Core Judgment <span class="zh">核心判断</span></h2>
+      </div>
+      <blockquote>"Chainlink is TCP/IP of blockchain connectivity."</blockquote>
+      <ul>
+        <li>区块链需要可靠的链下数据 &rarr; 预言机是不可或缺的中间件</li>
+        <li>跨链互操作性将是下一个万亿美元基础设施层</li>
+        <li>SWIFT合作证明TradFi会通过Chainlink接入区块链，而非自建</li>
+        <li>网络效应 + 安全记录 = 竞争壁垒几乎不可逾越</li>
+      </ul>
+    </section>
+
+    <section id="predictions">
+      <div class="section-header">
+        <h2><span class="section-num">&sect;3</span> Prediction Track Record <span class="zh">预测记录</span></h2>
+      </div>
+      <figure>
+        <table>
+          <thead><tr><th>Prediction</th><th>Date</th><th>Status</th><th>Accuracy</th></tr></thead>
+          <tbody>
+            <tr><td>预言机将成为DeFi关键基础设施</td><td>2019</td><td><span class="verified">&#10003; 正确</span></td><td>10/10</td></tr>
+            <tr><td>跨链互操作将成为核心需求</td><td>2021</td><td><span class="verified">&#10003; 正确 (CCIP + bridges成为热点)</span></td><td>8/10</td></tr>
+            <tr><td>TradFi将通过Chainlink接入crypto</td><td>2022</td><td><span class="partial">部分验证 (SWIFT PoC但未大规模部署)</span></td><td>6/10</td></tr>
+            <tr><td>LINK将捕获协议收入价值</td><td>持续</td><td><span class="failed">&#10007; 尚未实现 (收入与代币价格脱钩)</span></td><td>3/10</td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </section>
+
+    <section id="trading">
+      <div class="section-header">
+        <h2><span class="section-num">&sect;4</span> Trading Implications <span class="zh">交易含义</span></h2>
+      </div>
+      <div class="alert alert-gold">
+        <strong>LINK = 最强中间件beta，但价值捕获是核心风险</strong>
+      </div>
+      <ul>
+        <li><strong>LINK是DeFi行情的放大器</strong> &mdash; DeFi TVL上升时LINK表现强于大盘</li>
+        <li><strong>SWIFT/TradFi催化剂</strong>：任何传统金融合作公告都是短期催化</li>
+        <li><strong>团队抛售</strong>是持续的卖压来源 &mdash; 需要监控链上大额转账</li>
+        <li><strong>竞争对手</strong>：Pyth（Solana生态）、API3、Band &mdash; 但份额差距悬殊</li>
+      </ul>
+    </section>
+
+    <section id="sources">
+      <div class="section-header">
+        <h2><span class="section-num">&sect;5</span> Source Curation <span class="zh">信源策展</span></h2>
+      </div>
+      <h3>Primary</h3>
+      <ul><li>Chainlink blog &amp; documentation</li><li>Sergey Nazarov conference talks (SmartCon, Consensus)</li><li>CCIP technical papers</li></ul>
+      <h3>Secondary</h3>
+      <ul><li>Messari oracle market reports</li><li>DeFi Llama oracle tracking</li></ul>
+      <h3>Chinese Sources</h3>
+      <ul><li>链闻 Chainlink深度分析</li><li>PANews预言机赛道报告</li></ul>
+    </section>
+
+    <footer class="page-footer">
+      <p>Sergey Nazarov &middot; Cognitive Agent #10 &middot; Blockchain Research &middot; 2026-03-22</p>
+      <p><a href="../blockchain_hub.html">Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <aside class="notes-sidebar" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn" aria-label="Close notes">&#10005;</button>
+      <h4>&#129504; Meta + &#128218; Knowledge</h4>
+    </div>
+
+    <div class="anno meta-note open" data-section="overview" id="k1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Oracle monopoly</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>Chainlink's 70%+ oracle share creates a single point of dependency for DeFi. If Chainlink's price feeds fail, hundreds of protocols simultaneously face liquidation crises. This is both a moat and a systemic risk.</p>
+        <p><span class="zh">Chainlink 70%+的预言机份额造成DeFi的单点依赖。如果Chainlink喂价失败，数百个协议同时面临清算危机。这既是护城河，也是系统性风险。</span></p>
+      </div>
+    </div>
+
+    <div class="anno know-note open" data-section="judgment" id="k2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">Knowledge</span>
+        <span class="mn-title">LINK value capture disconnect</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>Chainlink generates real revenue but LINK token captures almost none of it. Protocol usage grows while LINK underperforms. This is the classic "fat protocol vs thin token" problem. Until staking economics mature, LINK is a narrative trade, not a fundamentals trade.</p>
+        <p><span class="zh">Chainlink产生真实收入但LINK代币几乎无法捕获。协议使用量增长但LINK表现不佳。这是经典的"胖协议vs瘦代币"问题。在质押经济成熟之前，LINK是叙事交易而非基本面交易。</span></p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes">&#128218;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<script>
+(function() {
+  const hamburger = document.getElementById('hamburgerBtn'); const sidebar = document.getElementById('sidebar'); const overlay = document.getElementById('sidebarOverlay');
+  hamburger.addEventListener('click', () => { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+  sidebar.querySelectorAll('a').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 900) { sidebar.classList.remove('open'); overlay.classList.remove('open'); } }); });
+  window.toggleNote = function(head) { head.parentElement.classList.toggle('open'); requestAnimationFrame(positionNotes); };
+  function positionNotes() {
+    const sidebarEl = document.getElementById('notesSidebar'); if (!sidebarEl) return;
+    const notes = [...sidebarEl.querySelectorAll('.anno')]; const scrollY = window.scrollY; const sidebarAbsTop = sidebarEl.getBoundingClientRect().top + scrollY;
+    const headerEl = sidebarEl.querySelector('.notes-sidebar-header'); const headerHeight = headerEl ? headerEl.offsetHeight + 12 : 40;
+    notes.sort((a, b) => { const secA = document.getElementById(a.dataset.section); const secB = document.getElementById(b.dataset.section); if (!secA || !secB) return 0; return secA.getBoundingClientRect().top - secB.getBoundingClientRect().top; });
+    let lastBottom = headerHeight;
+    notes.forEach(note => { if (note.style.display === 'none') return; const section = document.getElementById(note.dataset.section); if (!section) { note.style.display = 'none'; return; } const sectionAbsTop = section.getBoundingClientRect().top + scrollY; let targetY = sectionAbsTop - sidebarAbsTop; if (targetY < lastBottom + 8) targetY = lastBottom + 8; note.style.top = targetY + 'px'; lastBottom = targetY + note.offsetHeight; });
+    sidebarEl.style.minHeight = (lastBottom + 40) + 'px';
+  }
+  window.addEventListener('load', () => { positionNotes(); document.querySelectorAll('details').forEach(d => { d.addEventListener('toggle', () => setTimeout(positionNotes, 50)); }); });
+  window.addEventListener('resize', positionNotes);
+  let scrollTimer; window.addEventListener('scroll', () => { clearTimeout(scrollTimer); scrollTimer = setTimeout(positionNotes, 100); }, { passive: true });
+  document.querySelectorAll('.nref, mark.hl-know').forEach(el => { el.addEventListener('click', e => { e.preventDefault(); const noteId = el.dataset.note; const note = document.getElementById(noteId); if (!note) return; note.classList.add('open'); requestAnimationFrame(() => { positionNotes(); note.scrollIntoView({ behavior: 'smooth', block: 'center' }); note.classList.add('flash'); setTimeout(() => note.classList.remove('flash'), 1500); }); }); });
+  document.querySelectorAll('.anno').forEach(note => { note.addEventListener('mouseenter', () => { document.querySelectorAll('[data-note="' + note.id + '"]').forEach(el => el.classList.add('hover')); }); note.addEventListener('mouseleave', () => { document.querySelectorAll('[data-note="' + note.id + '"]').forEach(el => el.classList.remove('hover')); }); note.addEventListener('dblclick', () => { const section = document.getElementById(note.dataset.section); if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' }); }); });
+  document.querySelectorAll('[data-note]').forEach(el => { if (el.classList.contains('anno')) return; el.addEventListener('mouseenter', () => { const note = document.getElementById(el.dataset.note); if (note) note.classList.add('hover'); }); el.addEventListener('mouseleave', () => { const note = document.getElementById(el.dataset.note); if (note) note.classList.remove('hover'); }); });
+  const allAnnos = document.querySelectorAll('.anno'); const knowNotes = document.querySelectorAll('.anno.know-note'); const knowMarks = document.querySelectorAll('mark.hl-know'); const knowRefs = document.querySelectorAll('.nref'); const metaNotes = document.querySelectorAll('.anno.meta-note');
+  document.getElementById('noteCountLabel').textContent = metaNotes.length + ' \u5143\u601d\u8003 + ' + knowNotes.length + ' \u77e5\u8bc6\u6279\u6ce8';
+  window.toggleKnowNotes = function() { const btn = document.getElementById('knowToggleBtn'); const isActive = btn.classList.toggle('active'); btn.textContent = isActive ? 'Knowledge' : 'Hidden'; knowNotes.forEach(n => n.style.display = isActive ? '' : 'none'); knowMarks.forEach(m => { m.style.background = isActive ? '' : 'transparent'; m.style.borderBottom = isActive ? '' : 'none'; }); knowRefs.forEach(r => r.style.display = isActive ? '' : 'none'); requestAnimationFrame(positionNotes); };
+  window.expandAllNotes = function() { allAnnos.forEach(n => n.classList.add('open')); requestAnimationFrame(positionNotes); };
+  window.collapseAllNotes = function() { allAnnos.forEach(n => n.classList.remove('open')); requestAnimationFrame(positionNotes); };
+  var notesSidebarEl = document.getElementById('notesSidebar'); var notesToggleBtn = document.getElementById('notesToggleBtn'); var notesOverlayEl = document.getElementById('notesOverlay'); var notesCloseBtn = document.getElementById('notesCloseBtn');
+  function toggleNotesSidebar() { var willClose = !notesSidebarEl.classList.contains('ns-closed'); notesSidebarEl.classList.toggle('ns-closed', willClose); notesToggleBtn.style.display = willClose ? 'flex' : 'none'; notesOverlayEl.classList.toggle('open', !willClose); if (!willClose) requestAnimationFrame(positionNotes); }
+  if (notesToggleBtn) notesToggleBtn.addEventListener('click', toggleNotesSidebar);
+  if (notesOverlayEl) notesOverlayEl.addEventListener('click', toggleNotesSidebar);
+  if (notesCloseBtn) notesCloseBtn.addEventListener('click', toggleNotesSidebar);
+  window.addEventListener('resize', function() { if (window.innerWidth > 1200) { notesSidebarEl.classList.remove('ns-closed'); notesToggleBtn.style.display = 'none'; notesOverlayEl.classList.remove('open'); } });
+  const tocLinks = sidebar.querySelectorAll('nav ul li a[href^="#"]'); const sections = [...tocLinks].map(a => document.getElementById(a.getAttribute('href').slice(1))).filter(Boolean);
+  function updateActiveToc() { let current = ''; sections.forEach(sec => { if (sec.getBoundingClientRect().top <= 120) current = sec.id; }); tocLinks.forEach(a => { a.classList.toggle('active', a.getAttribute('href') === '#' + current); }); }
+  window.addEventListener('scroll', updateActiveToc, { passive: true }); updateActiveToc();
+  if (window.location.search.includes('embedded=1') || window !== window.top) document.body.classList.add('embedded');
+  if (window.location.search.includes('reading=1')) document.body.classList.add('reading-mode');
+})();
+</script>
+
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+
+</body>
+</html>

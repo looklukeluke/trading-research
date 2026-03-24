@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NODE 4: Cloud Infrastructure 云计算与基础设施 &mdash; Internet Research Hub</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../internet_shared.css">
+<style>
+/* ===== Node-Specific Styles ===== */
+:root {
+  --node-accent: #10b981;
+  --node-accent-dim: rgba(16, 185, 129, 0.15);
+  --node-purple: #8b5cf6;
+  --node-purple-dim: rgba(139, 92, 246, 0.15);
+  --node-cyan: #06b6d4;
+  --node-cyan-dim: rgba(6, 182, 212, 0.15);
+}
+
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded main { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+.reading-mode .sidebar { display: none !important; }
+.reading-mode .notes-sidebar { display: none !important; }
+.reading-mode main { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+
+/* Node-specific overrides */
+.main-title .node-tag {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  background: var(--node-accent-dim);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: var(--node-accent);
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+
+.section-header h2 {
+  border-left-color: var(--node-accent) !important;
+}
+
+.card.node-card {
+  border-left: 3px solid var(--node-accent);
+}
+
+.card.node-highlight {
+  border-left: 3px solid var(--node-purple);
+  background: var(--node-purple-dim);
+}
+
+.advisory-box.node-advisory {
+  border-left-color: var(--node-cyan);
+  background: var(--node-cyan-dim);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.85rem;
+}
+
+.data-table th {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--node-accent);
+  padding: 0.65rem 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid rgba(16, 185, 129, 0.3);
+}
+
+.data-table td {
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  vertical-align: top;
+}
+
+.data-table tr:hover td {
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.data-table .num {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  font-family: 'Inter', monospace;
+}
+
+.data-table .rank {
+  font-weight: 700;
+  color: var(--node-accent);
+}
+
+.moat-stars {
+  color: var(--accent);
+  letter-spacing: 2px;
+}
+
+.trend-card {
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin: 1rem 0;
+}
+
+.trend-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.trend-icon {
+  font-size: 1.5rem;
+}
+
+.trend-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--node-purple);
+}
+
+.signal-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.signal-bullet {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.risk-item {
+  padding: 0.75rem 1rem;
+  background: rgba(244, 67, 54, 0.05);
+  border-left: 3px solid var(--red);
+  margin: 0.5rem 0;
+  border-radius: 0 4px 4px 0;
+}
+
+.risk-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--red);
+  margin-bottom: 0.35rem;
+}
+
+.node-relation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.relation-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.relation-card .node-ref {
+  font-weight: 600;
+  color: var(--node-accent);
+  margin-bottom: 0.25rem;
+}
+
+.relation-card .relation-type {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.stats-strip .stat-item .stat-value {
+  color: var(--node-accent);
+}
+
+.market-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.market-stat {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.market-stat .value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--node-accent);
+  font-family: 'Inter', monospace;
+}
+
+.market-stat .label {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 0.25rem;
+}
+
+.market-stat .sub {
+  font-size: 0.7rem;
+  color: var(--green);
+  margin-top: 0.15rem;
+}
+
+.china-badge {
+  display: inline-block;
+  padding: 0.15rem 0.4rem;
+  background: rgba(244, 67, 54, 0.15);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  border-radius: 4px;
+  font-size: 0.65rem;
+  color: var(--red);
+  margin-left: 0.3rem;
+  vertical-align: middle;
+}
+
+.quote-box {
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-left: 3px solid var(--node-purple);
+  border-radius: 0 8px 8px 0;
+  padding: 1rem 1.25rem;
+  margin: 1rem 0;
+  font-style: italic;
+}
+
+.quote-source {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-style: normal;
+  margin-top: 0.5rem;
+}
+</style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- ===== Left Sidebar ===== -->
+  <div class="sidebar">
+    <a class="back-link" href="../internet_hub.html">&larr; Internet Hub</a>
+
+    <h4>Internet Hub</h4>
+    <div class="project-meta">
+      互联网研究中枢<br>
+      Internet Value Chain &middot; Cloud &middot; AI &middot; Edge
+    </div>
+
+    <h4>Navigate</h4>
+    <nav>
+      <ul>
+        <li><a href="#panorama">01 Industry 行业全景</a></li>
+        <li><a href="#market-size">02 Market Size 市场规模</a></li>
+        <li><a href="#competition">03 Competition 竞争格局</a></li>
+        <li><a href="#trends">04 Trends 关键趋势</a></li>
+        <li><a href="#china">05 China 中国特色</a></li>
+        <li><a href="#signals">06 Signals 投资信号</a></li>
+        <li><a href="#risks">07 Risks 风险分析</a></li>
+        <li><a href="#relations">08 Relations 节点关系</a></li>
+      </ul>
+    </nav>
+
+    <h4>Value Chain Nodes</h4>
+    <nav>
+      <ul>
+        <li><a href="NODE_1_宽带与接入_2026-03-22.html">NODE 1: Broadband 宽带接入</a></li>
+        <li><a href="NODE_2_数据中心_2026-03-22.html">NODE 2: Data Center 数据中心</a></li>
+        <li><a href="NODE_3_网络与安全_2026-03-22.html">NODE 3: Network 安全</a></li>
+        <li><a href="#panorama" style="color:var(--node-accent);">NODE 4: Cloud 云计算</a></li>
+        <li><a href="NODE_5_操作系统与平台_2026-03-22.html">NODE 5: OS &amp; Platform</a></li>
+        <li><a href="NODE_6_应用与服务_2026-03-22.html">NODE 6: Applications</a></li>
+        <li><a href="NODE_7_内容与媒体_2026-03-22.html">NODE 7: Content 媒体</a></li>
+        <li><a href="NODE_8_电商与支付_2026-03-22.html">NODE 8: E-commerce</a></li>
+      </ul>
+    </nav>
+
+    <h4>Context 上下文</h4>
+    <nav>
+      <ul>
+        <li><a href="../internet_hub.html">Internet Hub 主页</a></li>
+        <li><a href="../internet_industry_metacognition.html">&#129504; 元思考过程</a></li>
+        <li><a href="../internet_asia_data_curation.html">&#127463;&#127479; 亚洲数据策展</a></li>
+        <li><a href="../blockchain_hub.html" style="color:var(--accent);">Blockchain Hub 区块链</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- ===== Main Content ===== -->
+  <main>
+
+    <h1 class="main-title">
+      NODE 4: Cloud Infrastructure
+      <span class="node-tag">V4 Node Report</span>
+      <span class="zh">云计算与基础设施 &mdash; 从IaaS到AI原生云</span>
+    </h1>
+    <div class="subtitle">
+      Internet Value Chain Node 4 &middot; AWS/Azure/GCP/阿里云/华为云 &rarr; $800B+ Global Market &middot; 2026-03-22
+    </div>
+
+    <!-- Stats Strip -->
+    <div class="stats-strip">
+      <div class="stat-item"><span class="stat-value">$800B+</span> <span class="stat-label">Global Cloud Market</span></div>
+      <div class="stat-item"><span class="stat-value">20-22%</span> <span class="stat-label">YoY Growth</span></div>
+      <div class="stat-item"><span class="stat-value">$200B+</span> <span class="stat-label">2024 CapEx</span></div>
+      <div class="stat-item"><span class="stat-value">5</span> <span class="stat-label">Key Trends</span></div>
+      <div class="stat-item"><span class="stat-value">6</span> <span class="stat-label">Major Players</span></div>
+    </div>
+
+    <!-- Advisory -->
+    <div class="advisory-box node-advisory">
+      <strong>Thinking Chain 思维链：</strong>"找到下一个黄金" &rarr; Top-down扫描 &rarr; 半导体完成L3深度研究 &rarr; BTC/区块链第二个深度对象 &rarr; <strong>云计算与基础设施是互联网价值链第三层（核心中枢）</strong> &rarr; 从芯片到应用到数据的战略高地 &rarr; AI工作负载重塑竞争格局。
+      <br><span class="zh">Cloud infrastructure is the central nervous system of the internet value chain — the layer where compute, storage, and AI capabilities are delivered at scale.</span>
+    </div>
+
+    <div class="advisory-box" style="border-left-color: var(--purple); background: rgba(139, 92, 246, 0.05); margin-top:0.75rem;">
+      <strong style="color:var(--purple);">&#128161; Node Positioning 节点定位</strong><br>
+      云计算处于互联网价值链的核心位置：上游依赖数据中心（NODE 2）和网络/安全（NODE 3），下游支撑操作系统与平台（NODE 5）、应用与服务（NODE 6）。AI时代，Cloud从"水煤电"进化为"智能中枢"。
+      <span class="zh">Cloud sits at the center of the internet value chain, upstream from data centers and networks, downstream from platforms and applications. In the AI era, cloud has evolved from "utilities" to "intelligence hub".</span>
+    </div>
+
+    <!-- ═══════════ §1 行业全景 ═══════════ -->
+    <div class="section-header" id="panorama">
+      <h2><span class="section-num">01</span>Industry Panorama<span class="zh">行业全景 &mdash; 云计算：从基础设施到AI原生</span></h2>
+    </div>
+
+    <div class="card node-card">
+      <div style="font-size:0.95rem; font-weight:600; margin-bottom:0.5rem;">What is Cloud Infrastructure?</div>
+      <div class="card-desc">
+        <strong>云计算基础设施</strong>是提供计算、存储、网络等基础资源的服务层，包括：
+        <br>• <strong>IaaS</strong>（基础设施即服务）：虚拟机、存储、数据库等
+        <br>• <strong>PaaS</strong>（平台即服务）：开发平台、容器服务、大数据处理
+        <br>• <strong>MaaS</strong>（模型即服务）：AI模型托管与推理服务（新兴）
+        <br><br>
+        <strong>战略价值</strong>：云计算是数字经济的"水煤电"，也是AI时代算力交付的核心载体。全球Top 4云厂商2024年CapEx超$200B，AI基础设施成为最大增长引擎。
+        <span class="zh-inline">Cloud infrastructure delivers compute, storage, and networking as a service. It has evolved from IaaS/PaaS to include MaaS (Model-as-a-Service), becoming the primary delivery mechanism for AI capabilities.</span>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:1rem;">
+      <div class="card node-card">
+        <div style="font-weight:600;">Value Chain Position 价值链位置</div>
+        <div class="card-desc">
+          <div style="margin:0.5rem 0;padding-left:1rem;border-left:2px solid var(--node-accent);">
+            <strong>NODE 2: 数据中心</strong> → 提供物理基础设施
+          </div>
+          <div style="margin:0.5rem 0;padding-left:1rem;border-left:2px solid var(--node-accent);">
+            <strong>NODE 3: 网络与安全</strong> → 提供连接与防护
+          </div>
+          <div style="margin:0.5rem 0;padding-left:1rem;border-left:3px solid var(--node-accent);font-weight:700;color:var(--node-accent);">
+            <strong>NODE 4: 云计算（当前节点）</strong> → 算力交付中枢
+          </div>
+          <div style="margin:0.5rem 0;padding-left:1rem;border-left:2px solid var(--muted);">
+            <strong>NODE 5: 操作系统与平台</strong> → 基于云构建
+          </div>
+          <div style="margin:0.5rem 0;padding-left:1rem;border-left:2px solid var(--muted);">
+            <strong>NODE 6-8: 应用、内容、电商</strong> → 运行于云上
+          </div>
+        </div>
+      </div>
+      <div class="card node-highlight">
+        <div style="font-weight:600;">Why Cloud Matters?</div>
+        <div class="card-desc">
+          <strong>1. 规模效应</strong>：全球$800B+市场，规模效应构筑成本壁垒
+          <br><strong>2. AI驱动</strong>：生成式AI带来算力需求爆发，AI相关基础设施贡献40%+增量
+          <br><strong>3. 生态锁定</strong>：200+服务矩阵形成高迁移成本护城河
+          <br><strong>4. 垂直整合</strong>：芯片→服务器→云全栈自研趋势加速
+          <br><strong>5. 主权需求</strong>：数据本地化法规催生主权云市场
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ §2 市场规模 ═══════════ -->
+    <div class="section-header" id="market-size">
+      <h2><span class="section-num">02</span>Market Size<span class="zh">市场规模 &mdash; $800B+全球云市场</span></h2>
+    </div>
+
+    <!-- Global Market Summary -->
+    <div class="market-summary">
+      <div class="market-stat">
+        <div class="value">$800B+</div>
+        <div class="label">Global Public Cloud 2024</div>
+        <div class="sub">Synergy/Canalys</div>
+      </div>
+      <div class="market-stat">
+        <div class="value">$950B</div>
+        <div class="label">2025 Forecast</div>
+        <div class="sub">+18-20% YoY</div>
+      </div>
+      <div class="market-stat">
+        <div class="value">$290B</div>
+        <div class="label">IaaS + PaaS Core</div>
+        <div class="sub">Exclude SaaS</div>
+      </div>
+      <div class="market-stat">
+        <div class="value">40%+</div>
+        <div class="label">AI Contribution</div>
+        <div class="sub">Of incremental growth</div>
+      </div>
+    </div>
+
+    <!-- Global Market Table -->
+    <div class="card node-card">
+      <div style="font-weight:600; margin-bottom:0.75rem;">&#127757; Global Market Overview 全球市场概览</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Metric 指标</th>
+            <th>2024 Data 2024年数据</th>
+            <th>2025 Forecast 2025预测</th>
+            <th>Source 来源</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Global Public Cloud</strong></td>
+            <td class="num">~$800-850B</td>
+            <td class="num">~$950-1,000B</td>
+            <td>Synergy Research, Canalys</td>
+          </tr>
+          <tr>
+            <td><strong>IaaS + PaaS Core</strong></td>
+            <td class="num">~$290B</td>
+            <td class="num">~$350B</td>
+            <td>Infrastructure layer excl. SaaS</td>
+          </tr>
+          <tr>
+            <td><strong>YoY Growth</strong></td>
+            <td class="num">20-22%</td>
+            <td class="num">18-20%</td>
+            <td>Above IT industry avg.</td>
+          </tr>
+          <tr>
+            <td><strong>AI Workload Share</strong></td>
+            <td class="num">15-20%</td>
+            <td class="num">25-30%</td>
+            <td>GenAI drives significant growth</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- China Market -->
+    <div class="card node-card" style="margin-top:1rem;">
+      <div style="font-weight:600; margin-bottom:0.75rem;">
+        &#127463;&#127479; China Market Overview 中国市场概览
+        <span class="china-badge">CHINA 特色</span>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Metric 指标</th>
+            <th>2024 Data 2024年数据</th>
+            <th>2025 Forecast 2025预测</th>
+            <th>Source 来源</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>China Public Cloud</strong></td>
+            <td class="num">~¥450-480B (~$65B)</td>
+            <td class="num">~¥550-600B (~$80B)</td>
+            <td>IDC 2024 H1, 36Kr</td>
+          </tr>
+          <tr>
+            <td><strong>YoY Growth</strong></td>
+            <td class="num">12-15%</td>
+            <td class="num">15-18%</td>
+            <td>Below global, AI demand rising</td>
+          </tr>
+          <tr>
+            <td><strong>Private/Hybrid Cloud</strong></td>
+            <td class="num">~¥400B</td>
+            <td class="num">~¥480B</td>
+            <td>Gov/enterprise preference</td>
+          </tr>
+          <tr>
+            <td><strong>AI Compute Market</strong></td>
+            <td class="num">~¥80B</td>
+            <td class="num">~¥150B</td>
+            <td>智算中心、GPU cloud surge</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="quote-box" style="margin-top:1rem;">
+        据36Kr 2024年12月报道，中国智算中心规划投资已超万亿元，但实际利用率分化严重，部分中心GPU闲置率超50%。
+        <div class="quote-source">— 36Kr 2024-12</div>
+      </div>
+    </div>
+
+    <!-- Regional Dynamics -->
+    <div class="card node-card" style="margin-top:1rem;">
+      <div style="font-weight:600; margin-bottom:0.75rem;">&#127760; Regional Dynamics 区域分化</div>
+      <div class="grid-3">
+        <div>
+          <strong style="color:var(--blue);">亚太（除中国）</strong>
+          <div class="card-desc" style="margin-top:0.35rem;">
+            AWS主导地位<br>
+            GCP增速领先（AI/数据服务）<br>
+            阿里云、华为云积极布局
+          </div>
+        </div>
+        <div>
+          <strong style="color:var(--purple);">欧洲 Europe</strong>
+          <div class="card-desc" style="margin-top:0.35rem;">
+            监管趋严（GDPR/DMA）<br>
+            本土厂商获政策保护<br>
+            SAP、OVHcloud受益
+          </div>
+        </div>
+        <div>
+          <strong style="color:var(--gold);">中东/东南亚</strong>
+          <div class="card-desc" style="margin-top:0.35rem;">
+            主权云需求上升<br>
+            阿里云积极布局<br>
+            数据本地化要求
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ §3 竞争格局 ═══════════ -->
+    <div class="section-header" id="competition">
+      <h2><span class="section-num">03</span>Competitive Landscape<span class="zh">竞争格局 &mdash; 全球Top 5 + 中国三强</span></h2>
+    </div>
+
+    <!-- Global Top 5 -->
+    <div class="card node-card">
+      <div style="font-weight:600; margin-bottom:0.75rem;">
+        &#127942; Global IaaS + PaaS Market Share 2024 Q3 全球IaaS+PaaS市场份额
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th class="num">Rank</th>
+            <th>Vendor 厂商</th>
+            <th class="num">Share 市占率</th>
+            <th>Moat Source 护城河</th>
+            <th>Key Dynamics 关键动态</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rank">#1</td>
+            <td><strong>AWS</strong></td>
+            <td class="num">31-32%</td>
+            <td>先发优势、200+服务、企业生态</td>
+            <td>AI年化收入$10B；Trainium2自研芯片</td>
+          </tr>
+          <tr>
+            <td class="rank">#2</td>
+            <td><strong>Microsoft Azure</strong></td>
+            <td class="num">23-24%</td>
+            <td>企业客户基础、OpenAI独家合作</td>
+            <td>AI贡献12ppt增速；Copilot生态绑定</td>
+          </tr>
+          <tr>
+            <td class="rank">#3</td>
+            <td><strong>Google Cloud (GCP)</strong></td>
+            <td class="num">11-12%</td>
+            <td>AI/数据原生优势、TPU、BigQuery</td>
+            <td>2024首次全年盈利；Gemini领先</td>
+          </tr>
+          <tr>
+            <td class="rank">#4</td>
+            <td><strong>阿里云 Alibaba Cloud</strong></td>
+            <td class="num">4-5% (全球) / ~35% (中国)</td>
+            <td>亚太覆盖、电商/金融场景know-how</td>
+            <td>分拆上市暂停；"公共云优先"战略</td>
+          </tr>
+          <tr>
+            <td class="rank">#5</td>
+            <td><strong>Oracle Cloud (OCI)</strong></td>
+            <td class="num">2-3%</td>
+            <td>数据库客户迁移、高性能计算</td>
+            <td>2024增速超50%；AI合约大单</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Moat Analysis -->
+    <div class="card node-highlight" style="margin-top:1rem;">
+      <div style="font-weight:600; margin-bottom:0.75rem;">
+        &#128737; Moat Analysis 护城河深度分析
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Moat Type 护城河类型</th>
+            <th>Key Players 代表厂商</th>
+            <th>Sustainability 可持续性</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Network Effects / Ecosystem Lock-in</strong></td>
+            <td>AWS, Azure</td>
+            <td class="moat-stars">⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong>Data / AI Flywheel</strong></td>
+            <td>GCP, 阿里云</td>
+            <td class="moat-stars">⭐⭐⭐⭐☆</td>
+          </tr>
+          <tr>
+            <td><strong>Channel / Enterprise Relationships</strong></td>
+            <td>Azure, 华为云</td>
+            <td class="moat-stars">⭐⭐⭐⭐☆</td>
+          </tr>
+          <tr>
+            <td><strong>Cost / Scale Effects</strong></td>
+            <td>AWS, 阿里云</td>
+            <td class="moat-stars">⭐⭐⭐☆☆</td>
+          </tr>
+          <tr>
+            <td><strong>Vertical Domain Know-how</strong></td>
+            <td>华为云(政务)、腾讯云(游戏)</td>
+            <td class="moat-stars">⭐⭐⭐⭐☆</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="card-desc" style="margin-top:0.75rem; color:var(--muted);">
+        <strong>Note 注意：</strong>容器化趋势正在降低迁移成本，AWS/Azure的锁定优势面临挑战。但AI原生应用仍倾向于深度集成特定云厂商的模型服务。
+      </div>
+    </div>
+
+    <!-- China Top 3 -->
+    <div class="card node-card" style="margin-top:1rem;">
+      <div style="font-weight:600; margin-bottom:0.75rem;">
+        &#127463;&#127479; China Cloud Market 中国云市场格局
+        <span class="china-badge">CHINA 特色</span>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Vendor 厂商</th>
+            <th class="num">China IaaS Share</th>
+            <th>Core Strengths 核心优势</th>
+            <th>Challenges 挑战</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>阿里云 Alibaba Cloud</strong></td>
+            <td class="num">~34%</td>
+            <td>技术品牌、电商/金融云经验、国际化</td>
+            <td>增长放缓（2024财年增速仅3%）；组织动荡</td>
+          </tr>
+          <tr>
+            <td><strong>华为云 Huawei Cloud</strong></td>
+            <td class="num">~19%</td>
+            <td>政企关系、全栈能力（芯片-服务器-云）</td>
+            <td>消费端缺失，互联网渗透有限</td>
+          </tr>
+          <tr>
+            <td><strong>腾讯云 Tencent Cloud</strong></td>
+            <td class="num">~16%</td>
+            <td>游戏/音视频/社交场景、微信生态</td>
+            <td>战略收缩，聚焦自研业务上云</td>
+          </tr>
+          <tr>
+            <td><strong>天翼云/移动云</strong></td>
+            <td class="num">~15%</td>
+            <td>运营商网络资源、国资背景、边缘节点</td>
+            <td>技术能力、产品化程度待提升</td>
+          </tr>
+          <tr>
+            <td><strong>百度智能云</strong></td>
+            <td class="num">~9%</td>
+            <td>AI能力（文心一言）、自动驾驶云</td>
+            <td>通用云基础设施薄弱</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="quote-box" style="margin-top:1rem;">
+        据LatePost 2024年报道，阿里云2024年进行史上最大组织调整，从"按行业划分"回归"按产品划分"，公共云事业部与混合云事业部合并，反映"公共云优先"战略决心。
+        <div class="quote-source">— LatePost 2024</div>
+      </div>
+    </div>
+
+    <!-- ═══════════ §4 关键趋势 ═══════════ -->
+    <div class="section-header" id="trends">
+      <h2><span class="section-num">04</span>Key Trends<span class="zh">关键趋势 (2024-2025) &mdash; AI基础设施成为主战场</span></h2>
+    </div>
+
+    <!-- Trend 1: AI Infrastructure -->
+    <div class="trend-card">
+      <div class="trend-header">
+        <span class="trend-icon">&#129489;&#8205;&#128187;</span>
+        <span class="trend-title">Trend 1: AI Infrastructure as the New Battlefield AI基础设施成为主战场</span>
+      </div>
+      <div class="card-desc">
+        <strong>核心演变：</strong>从通用CPU → GPU/TPU/自研AI芯片异构计算；从IaaS → MaaS（模型即服务）
+        <br><br>
+        <table class="data-table" style="margin:0;">
+          <thead>
+            <tr>
+              <th>Dimension 维度</th>
+              <th>Evolution 演变</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Compute Form 算力形态</strong></td>
+              <td>通用CPU → GPU/TPU/自研AI芯片异构计算</td>
+            </tr>
+            <tr>
+              <td><strong>Service Model 服务模式</strong></td>
+              <td>IaaS（裸金属GPU）→ MaaS（模型即服务）</td>
+            </tr>
+            <tr>
+              <td><strong>Competition Focus 竞争焦点</strong></td>
+              <td>算力规模 → 模型性能+推理成本+企业落地</td>
+            </tr>
+            <tr>
+              <td><strong>Capital Expenditure 资本开支</strong></td>
+              <td>全球Top 4 CapEx 2024年超$200B，同比+40%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="quote-box" style="margin-top:0.75rem; border-left-color: var(--node-accent);">
+        "未来云计算的竞争，本质上是AI基础设施的效率竞争，包括训练效率、推理成本和模型服务化能力。"
+        <div class="quote-source">— 周靖人，阿里云CTO，极客公园 2024-11</div>
+      </div>
+    </div>
+
+    <!-- Trend 2: Vertical Integration -->
+    <div class="trend-card">
+      <div class="trend-header">
+        <span class="trend-icon">&#129309;</span>
+        <span class="trend-title">Trend 2: Vertical Integration 垂直整合加速 — Chip-to-Cloud</span>
+      </div>
+      <table class="data-table" style="margin:0;">
+        <thead>
+          <tr>
+            <th>Layer 层级</th>
+            <th>Global 全球动态</th>
+            <th>China 中国动态 <span class="china-badge">CHINA</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>芯片 Chip</strong></td>
+            <td>AWS Graviton/Trainium、GCP TPU、Azure Maia</td>
+            <td>阿里倚天710、华为昇腾、百度昆仑</td>
+          </tr>
+          <tr>
+            <td><strong>服务器 Server</strong></td>
+            <td>ODM直采，减少品牌服务器商</td>
+            <td>白牌服务器+自研DPU趋势</td>
+          </tr>
+          <tr>
+            <td><strong>基础设施 Infra</strong></td>
+            <td>液冷、高密度机柜、核能/可再生能源</td>
+            <td>智算中心大规模建设，能耗审批趋严</td>
+          </tr>
+          <tr>
+            <td><strong>软件 Software</strong></td>
+            <td>自研数据库、中间件替代开源</td>
+            <td>国产替代（数据库、操作系统）</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="advisory-box node-advisory" style="margin-top:0.75rem; padding:0.75rem;">
+        <strong>影响：</strong>自研芯片可降低20-40%算力成本，但需巨大销量摊薄研发，头部效应加剧。
+      </div>
+    </div>
+
+    <!-- Trend 3: Sovereign Cloud -->
+    <div class="trend-card">
+      <div class="trend-header">
+        <span class="trend-icon">&#127760;</span>
+        <span class="trend-title">Trend 3: Sovereign Cloud 主权云与数据本地化</span>
+      </div>
+      <div class="grid-2">
+        <div>
+          <strong style="color:var(--purple);">驱动因素 Drivers</strong>
+          <div class="card-desc" style="margin-top:0.5rem;">
+            • <strong>监管要求：</strong>GDPR（欧盟）、数据安全法（中国）、各国数据本地化
+            <br>• <strong>地缘政治：</strong>中美科技脱钩，"可信云"认证成准入门槛
+            <br>• <strong>商业模式：</strong>专属云、本地扩展、合作伙伴主权云
+          </div>
+        </div>
+        <div>
+          <strong style="color:var(--blue);">案例 Cases</strong>
+          <div class="card-desc" style="margin-top:0.5rem;">
+            • Microsoft 2024年推出"European Cloud"方案，数据完全本地化
+            <br>• 阿里云在东南亚、中东建设本地数据中心，规避跨境风险
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trend 4: FinOps -->
+    <div class="trend-card">
+      <div class="trend-header">
+        <span class="trend-icon">&#128176;</span>
+        <span class="trend-title">Trend 4: FinOps & Cost Optimization FinOps与成本优化常态化</span>
+      </div>
+      <div class="card-desc">
+        <strong>背景：</strong>经济下行期，企业云支出ROI受审，"云成本优化"成CIO首要任务
+        <br><br>
+        <strong>表现：</strong>
+        <br>• 预留实例/Spot实例使用率上升
+        <br>• 多云策略规避锁定
+        <br>• SaaS替代自建
+        <br><br>
+        <strong>厂商应对：</strong>
+        <br>• AWS Savings Plans、GCP Committed Use Discounts
+        <br>• 中国厂商价格战（2024年阿里云、腾讯云核心产品降价15-50%）
+      </div>
+      <div class="quote-box" style="margin-top:0.75rem; border-left-color: var(--gold);">
+        中国云厂商价格战从IaaS蔓延至PaaS，但企业客户更关注"上云后的成本可预测性"，FinOps工具和服务成为新增长点。
+        <div class="quote-source">— 36Kr 2024</div>
+      </div>
+    </div>
+
+    <!-- Trend 5: Edge Cloud -->
+    <div class="trend-card">
+      <div class="trend-header">
+        <span class="trend-icon">&#9881;</span>
+        <span class="trend-title">Trend 5: Edge Cloud 边缘云与5G/AIoT融合</span>
+      </div>
+      <table class="data-table" style="margin:0;">
+        <thead>
+          <tr>
+            <th>场景 Scenario</th>
+            <th>需求特征 Requirements</th>
+            <th>关键玩家 Key Players</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>智能制造</strong></td>
+            <td>低延迟（<10ms）、数据不出厂</td>
+            <td>华为云、AWS Outposts、Azure Stack Edge</td>
+          </tr>
+          <tr>
+            <td><strong>自动驾驶</strong></td>
+            <td>海量数据回传、实时决策</td>
+            <td>阿里云、腾讯云、百度智能云</td>
+          </tr>
+          <tr>
+            <td><strong>视频/直播</strong></td>
+            <td>带宽成本优化、CDN协同</td>
+            <td>阿里云CDN、腾讯云、AWS CloudFront</td>
+          </tr>
+          <tr>
+            <td><strong>IoT/AIoT</strong></td>
+            <td>海量连接、边缘AI推理</td>
+            <td>华为云、阿里云IoT、AWS IoT Greengrass</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ═══════════ §5 中国特色 ═══════════ -->
+    <div class="section-header" id="china">
+      <h2><span class="section-num">05</span>China Characteristics<span class="zh">中国特色 &mdash; 监管、竞争与机遇</span></h2>
+    </div>
+
+    <div class="advisory-box" style="border-left-color: var(--red); background: rgba(244, 67, 54, 0.05);">
+      <strong style="color:var(--red);">&#9888; Structural Bias Note 结构性偏差说明</strong><br>
+      中国云市场有其独特性：政府监管、国有资本、国产替代、智算中心热潮。本节修正英文来源对中国市场的低估。
+    </div>
+
+    <div class="grid-2" style="margin-top:1rem;">
+      <div class="card node-card">
+        <div style="font-weight:600; margin-bottom:0.5rem;">
+          &#128274; 监管环境 Regulatory Environment
+          <span class="china-badge">CHINA</span>
+        </div>
+        <div class="card-desc">
+          <strong>数据安全三法：</strong>
+          <br>• 《数据安全法》（2021）
+          <br>• 《个人信息保护法》（2021）
+          <br>• 《网络安全法》（2017）
+          <br><br>
+          <strong>合规要求：</strong>
+          <br>• 重要数据须境内存储
+          <br>• 关键信息基础设施运营者须本地采购
+          <br>• "可信云"认证成为政企采购门槛
+          <br><br>
+          <strong>影响：</strong>外资云厂商（AWS/Azure/GCP）通过合作模式（光环新网、西云数据）运营，中国厂商获得政策保护。
+        </div>
+      </div>
+
+      <div class="card node-card">
+        <div style="font-weight:600; margin-bottom:0.5rem;">
+          &#128640; 国产替代 Domestic Substitution
+          <span class="china-badge">CHINA</span>
+        </div>
+        <div class="card-desc">
+          <strong>芯片层：</strong>
+          <br>• 华为昇腾（910B/310）—— 对标英伟达A100/H100
+          <br>• 阿里倚天710 —— Arm架构服务器芯片
+          <br>• 百度昆仑芯 —— AI推理芯片
+          <br><br>
+          <strong>软件层：</strong>
+          <br>• 国产数据库（达梦、人大金仓、OceanBase）
+          <br>• 国产操作系统（麒麟、统信UOS）
+          <br>• 国产中间件（东方通、宝兰德）
+          <br><br>
+          <strong>挑战：</strong>生态迁移成本高、性能差距犹存、高端场景依赖进口芯片
+        </div>
+      </div>
+    </div>
+
+    <div class="card node-card" style="margin-top:1rem;">
+      <div style="font-weight:600; margin-bottom:0.5rem;">
+        &#9881; 智算中心热潮 AI Compute Center Boom
+        <span class="china-badge">CHINA</span>
+      </div>
+      <div class="card-desc">
+        <strong>规模：</strong>据36Kr 2024年12月报道，中国智算中心规划投资已超万亿元
+        <br><br>
+        <strong>问题：</strong>
+        <br>• GPU闲置率分化严重（部分中心超50%）
+        <br>• 算力布局与实际需求错配
+        <br>• 能耗审批趋严（双碳目标约束）
+        <br><br>
+        <strong>趋势：</strong>
+        <br>• 从"堆算力"到"提效率"转变
+        <br>• 液冷技术、高密度机柜需求上升
+        <br>• 绿色能源（西部清洁能源+数据中心）耦合
+      </div>
+    </div>
+
+    <div class="card node-highlight" style="margin-top:1rem;">
+      <div style="font-weight:600; margin-bottom:0.5rem;">
+        &#128101; 运营商云崛起 Telecom Cloud Rise
+        <span class="china-badge">CHINA</span>
+      </div>
+      <div class="card-desc">
+        <strong>天翼云（中国电信）：</strong>
+        <br>• 2024年收入目标超¥1,000亿
+        <br>• "国家队"背景，政企客户天然信任
+        <br>• 覆盖全国的边缘节点优势
+        <br><br>
+        <strong>移动云（中国移动）：</strong>
+        <br>• 依托10亿+移动用户生态
+        <br>• 基础设施投资持续加大
+        <br>• 云网融合战略
+        <br><br>
+        <strong>联通云：</strong>
+        <br>• 聚焦数字化转型服务
+        <br>• 混改引入民营资本
+      </div>
+    </div>
+
+    <!-- ═══════════ §6 投资信号 ═══════════ -->
+    <div class="section-header" id="signals">
+      <h2><span class="section-num">06</span>Investment Signals<span class="zh">投资信号 &mdash; 品种、节点与策略</span></h2>
+    </div>
+
+    <div class="advisory-box node-advisory">
+      <strong>&#128225; 关键投资信号 Key Investment Signals</strong><br>
+      基于22认知代理人研究 + 云计算价值链8节点分析，以下是关键投资方向：
+    </div>
+
+    <div class="card node-card" style="margin-top:1rem;">
+      <div style="font-weight:600; margin-bottom:0.75rem;">
+        &#128200; 直接投资标的 Direct Investment Targets
+      </div>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Category 类别</th>
+            <th>Symbol 标的</th>
+            <th>Thesis 逻辑</th>
+            <th>Signal 信号</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>US Hyperscaler</strong></td>
+            <td><strong>MSFT</strong></td>
+            <td>Azure+OpenAI协同，Copilot生态绑定企业客户</td>
+            <td style="color:var(--green);">强</td>
+          </tr>
+          <tr>
+            <td><strong>US Hyperscaler</strong></td>
+            <td><strong>GOOGL</strong></td>
+            <td>GCP AI原生优势，2024首次盈利，TPU自研</td>
+            <td style="color:var(--green);">强</td>
+          </tr>
+          <tr>
+            <td><strong>China Cloud</strong></td>
+            <td><strong>9988.HK (阿里云)</strong></td>
+            <td>中国最大云厂商，AI转型，公共云优先战略</td>
+            <td style="color:var(--gold);">中</td>
+          </tr>
+          <tr>
+            <td><strong>China AI Chip</strong></td>
+            <td><strong>Huawei (私有)</strong></td>
+            <td>昇腾芯片替代英伟达，政策受益</td>
+            <td style="color:var(--gold);">中</td>
+          </tr>
+          <tr>
+            <td><strong>AI Infrastructure</strong></td>
+            <td><strong>AI托管服务商</strong></td>
+            <td>MaaS需求爆发，模型服务化趋势</td>
+            <td style="color:var(--green);">强</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card node-highlight" style="margin-top:1rem;">
+      <div style="font-weight:600; margin-bottom:0.75rem;">
+        &#128161; 投资主题 Investment Themes
+      </div>
+
+      <div class="signal-item">
+        <span class="signal-bullet">&#9654;</span>
+        <div>
+          <strong>AI Infrastructure CapEx潮：</strong>全球Top 4云厂商2024年CapEx超$200B，同比+40%。GPU服务器、液冷、存储需求爆发。直接受益：英伟达、AMD、Marvell，以及数据中心REITs（EQIX、DLR）。
+        </div>
+      </div>
+
+      <div class="signal-item">
+        <span class="signal-bullet">&#9654;</span>
+        <div>
+          <strong>MaaS（模型即服务）崛起：</strong>AI模型托管与推理服务成为新增长点。Azure OpenAI Service年收入超$10B。垂直MaaS（金融、医疗、制造）机会涌现。
+        </div>
+      </div>
+
+      <div class="signal-item">
+        <span class="signal-bullet">&#9654;</span>
+        <div>
+          <strong>中国AI云算力：</strong>智算中心投资超万亿元，AI云算力市场2025年预计达¥150B。华为昇腾生态、阿里云PAI、百度智能云受益。
+        </div>
+      </div>
+
+      <div class="signal-item">
+        <span class="signal-bullet">&#9654;</span>
+        <div>
+          <strong>主权云与合规：</strong>数据本地化法规催生主权云市场。欧盟、中东、东南亚需求上升。已有布局的云厂商（微软、阿里云）获得先发优势。
+        </div>
+      </div>
+
+      <div class="signal-item">
+        <span class="signal-bullet">&#9654;</span>
+        <div>
+          <strong>FinOps工具与服务：</strong>云成本优化成为CIO首要任务。FinOps SaaS工具、云成本管理服务需求上升。
+        </div>
+      </div>
+    </div>
+
+    <div class="card node-card" style="margin-top:1rem;">
+      <div style="font-weight:600; margin-bottom:0.75rem;">
+        &#9889; Cloud vs. Blockchain Convergence 云与区块链融合
+      </div>
+      <div class="card-desc">
+        <strong>交叉点：</strong>
+        <br>• <strong>去中心化云计算：</strong>Filecoin、Akash、Render Network提供替代云服务
+        <br>• <strong>区块链基础设施：</strong>AWS/Azure/GCP托管区块链节点，中心化云提供可靠性
+        <br>• <strong>Web3开发平台：</strong>Alchemy、Infura（Mumbai/Cloudflare）提供RPC服务
+        <br><br>
+        <strong>机会：</strong>
+        <br>• 中心化云厂商的Web3服务收入占比提升
+        <br>• 混合架构（中心化+去中心化）成为企业选择
+        <br>• 区块链Hub中的交易所、DeFi节点依赖中心化云
+      </div>
+    </div>
+
+    <!-- ═══════════ §7 风险分析 ═══════════ -->
+    <div class="section-header" id="risks">
+      <h2><span class="section-num">07</span>Risk Analysis<span class="zh">风险分析 &mdash; 竞争、监管与技术</span></h2>
+    </div>
+
+    <div class="risk-item">
+      <div class="risk-header">
+        <span>&#9888;</span>
+        <span>竞争加剧与价格战</span>
+        <span style="margin-left:auto;font-size:0.75rem;color:var(--muted);">Competition & Price War</span>
+      </div>
+      <div class="card-desc" style="font-size:0.85rem;">
+        中国云厂商价格战从IaaS蔓延至PaaS，2024年核心产品降价15-50%。利润率承压，中小厂商面临生存危机。全球市场AWS/Azure/GCP三足鼎立，新进入者（Oracle、Tesla云）激进定价加剧竞争。
+      </div>
+    </div>
+
+    <div class="risk-item">
+      <div class="risk-header">
+        <span>&#9888;</span>
+        <span>AI CapEx回报不确定</span>
+        <span style="margin-left:auto;font-size:0.75rem;color:var(--muted);">AI CapEx Uncertainty</span>
+      </div>
+      <div class="card-desc" style="font-size:0.85rem;">
+        全球云厂商$200B+ CapEx主要流向AI基础设施，但AI商业化路径尚不明朗。中国智算中心部分GPU闲置率超50%。若AI投资回报低于预期，可能引发估值调整。
+      </div>
+    </div>
+
+    <div class="risk-item">
+      <div class="risk-header">
+        <span>&#9888;</span>
+        <span>地缘政治与芯片管制</span>
+        <span style="margin-left:auto;font-size:0.75rem;color:var(--muted);">Geopolitics & Chip Controls</span>
+      </div>
+      <div class="card-desc" style="font-size:0.85rem;">
+        美国对华芯片出口管制持续收紧，影响中国云厂商获取高端GPU。中国厂商加速昇腾等国产芯片替代，但性能差距犹存。地缘紧张可能进一步分割全球云市场。
+      </div>
+    </div>
+
+    <div class="risk-item">
+      <div class="risk-header">
+        <span>&#9888;</span>
+        <span>监管不确定性</span>
+        <span style="margin-left:auto;font-size:0.75rem;color:var(--muted);">Regulatory Uncertainty</span>
+      </div>
+      <div class="card-desc" style="font-size:0.85rem;">
+        各國数据本地化法规趋严，增加运营成本和市场进入壁垒。欧盟DMA对云服务商施加互操作性要求。中国《数据安全法》合规成本上升。
+      </div>
+    </div>
+
+    <div class="risk-item">
+      <div class="risk-header">
+        <span>&#9888;</span>
+        <span>能源与能耗约束</span>
+        <span style="margin-left:auto;font-size:0.75rem;color:var(--muted);">Energy & Carbon Constraints</span>
+      </div>
+      <div class="card-desc" style="font-size:0.85rem;">
+        AI算力需求爆发推高数据中心能耗，与双碳目标形成张力。中国对数据中心能耗审批趋严，西部清洁能源+数据中心耦合成为趋势。液冷、浸没冷却技术投资增加。
+      </div>
+    </div>
+
+    <div class="risk-item">
+      <div class="risk-header">
+        <span>&#9888;</span>
+        <span>技术替代风险</span>
+        <span style="margin-left:auto;font-size:0.75rem;color:var(--muted);">Technology Disruption Risk</span>
+      </div>
+      <div class="card-desc" style="font-size:0.85rem;">
+        量子计算、神经形态芯片等新技术可能颠覆现有云计算架构。去中心化云计算（Filecoin、Akash）若技术成熟，可能分流中心化云市场份额。
+      </div>
+    </div>
+
+    <!-- ═══════════ §8 节点关系 ═══════════ -->
+    <div class="section-header" id="relations">
+      <h2><span class="section-num">08</span>Node Relations<span class="zh">节点关系 &mdash; 云计算在价值链中的位置</span></h2>
+    </div>
+
+    <div class="card node-card">
+      <div style="font-weight:600; margin-bottom:0.75rem;">
+        &#128279; 价值链上下游关系 Value Chain Upstream & Downstream
+      </div>
+      <div class="node-relation-grid">
+        <div class="relation-card">
+          <div class="node-ref">NODE 2: 数据中心</div>
+          <div class="relation-type">上游依赖 ↑</div>
+          <div class="card-desc" style="font-size:0.75rem;margin-top:0.35rem;">
+            提供物理基础设施<br>
+            机柜、供电、制冷
+          </div>
+        </div>
+        <div class="relation-card">
+          <div class="node-ref">NODE 3: 网络与安全</div>
+          <div class="relation-type">上游依赖 ↑</div>
+          <div class="card-desc" style="font-size:0.75rem;margin-top:0.35rem;">
+            提供连接与防护<br>
+            CDN、DDoS防护
+          </div>
+        </div>
+        <div class="relation-card" style="border-color:var(--node-accent);background:var(--node-accent-dim);">
+          <div class="node-ref" style="color:var(--node-accent);">NODE 4: 云计算</div>
+          <div class="relation-type">当前节点 ★</div>
+          <div class="card-desc" style="font-size:0.75rem;margin-top:0.35rem;">
+            算力交付中枢<br>
+            IaaS / PaaS / MaaS
+          </div>
+        </div>
+        <div class="relation-card">
+          <div class="node-ref">NODE 5: OS & Platform</div>
+          <div class="relation-type">下游支撑 ↓</div>
+          <div class="card-desc" style="font-size:0.75rem;margin-top:0.35rem;">
+            基于云构建<br>
+            操作系统、开发平台
+          </div>
+        </div>
+        <div class="relation-card">
+          <div class="node-ref">NODE 6: Applications</div>
+          <div class="relation-type">下游支撑 ↓</div>
+          <div class="card-desc" style="font-size:0.75rem;margin-top:0.35rem;">
+            运行于云上<br>
+            SaaS、企业应用
+          </div>
+        </div>
+        <div class="relation-card">
+          <div class="node-ref">NODE 7: Content</div>
+          <div class="relation-type">下游支撑 ↓</div>
+          <div class="card-desc" style="font-size:0.75rem;margin-top:0.35rem;">
+            视频/游戏/直播<br>
+            内容分发依赖云
+          </div>
+        </div>
+        <div class="relation-card">
+          <div class="node-ref">NODE 8: E-commerce</div>
+          <div class="relation-type">下游支撑 ↓</div>
+          <div class="card-desc" style="font-size:0.75rem;margin-top:0.35rem;">
+            电商平台依赖云<br>
+            支付、物流系统
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card node-highlight" style="margin-top:1rem;">
+      <div style="font-weight:600; margin-bottom:0.75rem;">
+        &#128260; 跨节点协同 Cross-Node Synergies
+      </div>
+      <div class="card-desc">
+        <strong>云计算 ↔ 数据中心（NODE 2）：</strong>
+        <br>• 定制服务器（AWS Graviton、阿里倚天710）反向定义数据中心需求
+        <br>• 液冷、高密度机柜推动数据中心技术升级
+        <br><br>
+        <strong>云计算 ↔ 网络安全（NODE 3）：</strong>
+        <br>• 云原生安全（CNAPP）整合网络安全功能
+        <br>• SASE（安全访问服务边缘）成为混合云标配
+        <br><br>
+        <strong>云计算 ↔ 半导体：</strong>
+        <br>• 云计算是GPU/TPU最大采购方（类似Blockchain Hub矿机依赖芯片）
+        <br>• 自研芯片趋势与半导体行业形成垂直整合
+        <br><br>
+        <strong>云计算 ↔ 区块链：</strong>
+        <br>• 云厂商托管区块链节点（AWS Managed Blockchain）
+        <br>• Web3开发平台（Alchemy、Infura）介于中心化云与去中心化之间
+        <br>• 边缘计算与分布式节点形成技术协同
+      </div>
+    </div>
+
+    <div class="card node-card" style="margin-top:1rem;">
+      <div style="font-weight:600; margin-bottom:0.75rem;">
+        &#128202; 数据流向 Data Flow
+      </div>
+      <div class="card-desc" style="text-align:center; font-family:monospace; font-size:0.85rem; line-height:1.8;">
+        用户端/IoT → <span style="color:var(--blue);">NODE 3 网络</span> → 
+        <span style="color:var(--purple);">NODE 2 数据中心</span> → 
+        <span style="color:var(--node-accent);font-weight:700;">NODE 4 云计算</span> → 
+        <span style="color:var(--orange);">NODE 5 平台</span> → 
+        <span style="color:var(--gold);">NODE 6-8 应用</span>
+        <br><br>
+        <span style="color:var(--muted);">反向：应用请求 → 平台调度 → 云资源分配 → 数据中心执行 → 网络传输 → 用户</span>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="page-footer">
+      <a href="../internet_hub.html">&larr; Back to Internet Hub 返回中枢</a>
+      <div style="margin-top:0.5rem;">
+        NODE 4: Cloud Infrastructure &middot; Internet Research Hub V4 &middot; 2026-03-22
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ===== Right Sidebar: Meta-cognitive ===== -->
+  <aside class="notes-sidebar">
+    <h4>Meta-cognitive 元思考</h4>
+
+    <div class="meta-note">
+      <div class="note-label strength">Strength</div>
+      <p>云计算是互联网价值链的核心节点，连接上游（数据中心、网络）和下游（平台、应用）。$800B+市场规模、20%+增速、AI驱动的新增长曲线，使云计算成为数字经济的战略高地。
+      <span class="zh">Cloud is the central node connecting upstream (data center, network) and downstream (platform, applications). $800B+ market with 20%+ growth and AI-driven expansion.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label chain">Chain</div>
+      <p>半导体完成L3深度研究 → BTC/区块链第二个深度对象 → <strong>云计算是第三个深度候选</strong>。与半导体类似，云计算的核心竞争力在于：规模效应（→成本）、垂直整合（→护城河）、生态锁定（→粘性）。
+      <span class="zh">Similar to semiconductors: cloud's core competitiveness lies in scale effects, vertical integration, and ecosystem lock-in.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label pattern">Key Insight</div>
+      <p>AI正在重塑云计算格局：从"IaaS提供算力"到"MaaS提供智能"。这是从"水煤电"到"智能中枢"的质变。全球Top 4云厂商2024 CapEx超$200B，AI基础设施贡献40%+增量。
+      <span class="zh">AI is reshaping cloud: from "IaaS for compute" to "MaaS for intelligence". Global Top 4 CapEx $200B+ in 2024, AI infra contributing 40%+ of incremental growth.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label risk">China Correction</div>
+      <p>英文来源严重低估中国市场独特性：政府监管、国有资本、国产替代、智算中心热潮。阿里云组织调整、华为政企优势、运营商云崛起都需要中文来源修正。
+      <span class="zh">English sources severely understate China's unique market: government regulation, state capital, domestic substitution, AI compute center boom.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label suggestion">Next Step</div>
+      <p>NODE 4框架已就位。下一步：创建NODE 4认知代理人（AWS/Azure/GCP/阿里云/华为云/腾讯云各代表），走Phase 0→2完整流程。同时推进NODE 5（操作系统与平台）。
+      <span class="zh">Node 4 framework ready. Next: create cognitive agents (AWS/Azure/GCP/Alibaba Cloud/Huawei Cloud/Tencent Cloud representatives), follow Phase 0→2. Also advance NODE 5.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label suggestion">Coverage Gap</div>
+      <p>缺失的代理人：Oracle Cloud（5号玩家）、运营商云代表（天翼云CEO）、边缘计算专家（阿里云边缘节点团队）。建议补充。
+      <span class="zh">Missing agents: Oracle Cloud (player #5), Telecom cloud reps, Edge computing experts. Recommend supplementation.</span></p>
+    </div>
+  </aside>
+
+</div>
+
+<!-- Sidebar active state -->
+<script>
+const sections = document.querySelectorAll('.section-header[id]');
+const navLinks = document.querySelectorAll('.sidebar nav ul li a[href^="#"]');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + entry.target.id) link.classList.add('active');
+      });
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+
+<script src="../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../lib/reading-mode.js"></script>
+</body>
+</html>

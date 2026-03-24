@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>半导体超级周期 — 第一性原理分析</title>
+  <link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+    /* ============================================================
+   Design Tokens — V3 Industry Report Template
+   Semantic color system + typography + spacing
+   ============================================================ */
+
+:root {
+  /* === Semantic Colors (5-color system) === */
+  --c-positive: #4caf50;    /* Green: bullish, growth, confirmed */
+  --c-negative: #f44336;    /* Red: bearish, risk, warning */
+  --c-info: #58a6ff;        /* Blue: neutral info, links */
+  --c-warning: #f8a848;     /* Orange: caution, watch */
+  --c-highlight: #ffc107;   /* Gold: emphasis, titles */
+
+  /* Muted variants (for backgrounds, borders) */
+  --c-positive-bg: rgba(38, 166, 154, 0.12);
+  --c-negative-bg: rgba(239, 83, 80, 0.12);
+  --c-info-bg: rgba(66, 165, 245, 0.12);
+  --c-warning-bg: rgba(255, 183, 77, 0.12);
+
+  /* === Background Layers (dark → light) === */
+  --bg-0: #08090a;          /* deepest: page background */
+  --bg-1: #0f1011;          /* primary: content area */
+  --bg-2: #141516;          /* elevated: cards, tables */
+  --bg-3: #191a1b;          /* highest: callouts, code */
+
+  /* === Text Colors === */
+  --text-primary: #e8e8e8;
+  --text-secondary: #a0a0a0;
+  --text-muted: #666666;
+  --text-on-dark: #ffffff;
+
+  /* === Border === */
+  --border-subtle: #2a2a3e;
+  --border-default: #333355;
+  --border-strong: #4a4a6a;
+
+  /* === Typography === */
+  --font-body: 'Inter','Inter Variable',-apple-system,'SF Pro Display',system-ui,sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+  --font-chinese: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+
+  --fs-xs: 11px;
+  --fs-sm: 13px;
+  --fs-base: 15px;
+  --fs-lg: 18px;
+  --fs-xl: 22px;
+  --fs-2xl: 28px;
+  --fs-3xl: 36px;
+
+  --fw-normal: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  --lh-tight: 1.3;
+  --lh-normal: 1.6;
+  --lh-relaxed: 1.8;
+
+  /* === Spacing === */
+  --sp-xs: 4px;
+  --sp-sm: 8px;
+  --sp-md: 16px;
+  --sp-lg: 24px;
+  --sp-xl: 32px;
+  --sp-2xl: 48px;
+
+  /* === Border Radius === */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* === Shadows === */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-elevated: 0 4px 16px rgba(0, 0, 0, 0.4);
+
+  /* === Responsive Breakpoints (used in @media) === */
+  /* mobile: < 640px | tablet: 640-1024px | desktop: > 1024px */
+}
+
+/* === Global Resets === */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-0);
+  color: var(--text-primary);
+  font-family: var(--font-body), var(--font-chinese);
+  font-size: var(--fs-base);
+  line-height: var(--lh-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* === Tabular Numbers for ALL financial data === */
+td, th, .financial, .kpi-value, .kpi-change, .table-number {
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* === Selection === */
+::selection {
+  background: var(--c-info);
+  color: var(--text-on-dark);
+}
+
+/* === Scrollbar (webkit) === */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-0); }
+::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+    /* ============================================================
+   Component Styles — V3 Industry Report
+   KPI Cards | Callout Boxes | Chart Frames | Tables | Signals
+   ============================================================ */
+
+/* === KPI CARD === */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--sp-md);
+  margin: var(--sp-xl) 0;
+}
+
+.kpi-card {
+  background: var(--bg-2);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-lg);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.2s;
+}
+.kpi-card:hover {
+  border-color: var(--border-strong);
+}
+.kpi-label {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--sp-xs);
+}
+.kpi-value {
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-bold);
+  font-family: var(--font-mono);
+  line-height: var(--lh-tight);
+  margin-bottom: var(--sp-sm);
+}
+.kpi-change {
+  font-size: var(--fs-sm);
+  font-family: var(--font-mono);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-xs);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+.kpi-change.positive { color: var(--c-positive); background: var(--c-positive-bg); }
+.kpi-change.negative { color: var(--c-negative); background: var(--c-negative-bg); }
+.kpi-change.neutral  { color: var(--c-warning);  background: var(--c-warning-bg); }
+.kpi-subtitle {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  margin-top: var(--sp-xs);
+}
+
+/* Border accent colors */
+.kpi-card.positive { border-left: 3px solid var(--c-positive); }
+.kpi-card.negative { border-left: 3px solid var(--c-negative); }
+.kpi-card.warning  { border-left: 3px solid var(--c-warning); }
+.kpi-card.info     { border-left: 3px solid var(--c-info); }
+.kpi-card.highlight{ border-left: 3px solid var(--c-highlight); }
+
+/* === CALLOUT BOX === */
+.callout {
+  border-radius: var(--radius-md);
+  padding: var(--sp-lg);
+  margin: var(--sp-xl) 0;
+  border-left: 4px solid;
+  position: relative;
+}
+.callout-title {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-semibold);
+  margin-bottom: var(--sp-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+}
+.callout-content {
+  font-size: var(--fs-base);
+  line-height: var(--lh-relaxed);
+}
+.callout.insight {
+  background: var(--c-info-bg);
+  border-color: var(--c-info);
+}
+.callout.insight .callout-title { color: var(--c-info); }
+
+.callout.risk {
+  background: var(--c-negative-bg);
+  border-color: var(--c-negative);
+}
+.callout.risk .callout-title { color: var(--c-negative); }
+
+.callout.method {
+  background: rgba(160, 160, 160, 0.08);
+  border-color: var(--text-muted);
+}
+.callout.method .callout-title { color: var(--text-secondary); }
+
+.callout.success {
+  background: var(--c-positive-bg);
+  border-color: var(--c-positive);
+}
+.callout.success .callout-title { color: var(--c-positive); }
+
+/* === CHART FRAME === */
+.chart-frame {
+  background: var(--bg-2);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin: var(--sp-xl) 0;
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
+}
+.chart-frame-header {
+  padding: var(--sp-md) var(--sp-lg);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.chart-frame-title {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-semibold);
+  color: var(--c-highlight);
+}
+.chart-frame-body {
+  padding: 0;
+  /* Plotly charts fill this */
+}
+.chart-frame-body .js-plotly-plot {
+  width: 100% !important;
+}
+.chart-frame-body img {
+  width: 100%;
+  display: block;
+}
+.chart-annotation {
+  padding: var(--sp-md) var(--sp-lg);
+  background: var(--bg-3);
+  border-top: 1px solid var(--border-subtle);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  line-height: var(--lh-relaxed);
+}
+.chart-annotation strong { color: var(--c-info); }
+.chart-source {
+  padding: var(--sp-sm) var(--sp-lg);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* === DATA TABLE === */
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: var(--sp-lg) 0;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+}
+.data-table caption {
+  padding: var(--sp-md);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semibold);
+  color: var(--c-highlight);
+  text-align: left;
+  background: var(--bg-3);
+}
+.data-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.data-table th {
+  background: var(--bg-3);
+  color: var(--c-highlight);
+  font-weight: var(--fw-semibold);
+  padding: var(--sp-sm) var(--sp-md);
+  text-align: left;
+  border-bottom: 2px solid var(--border-default);
+  white-space: nowrap;
+}
+.data-table td {
+  padding: var(--sp-sm) var(--sp-md);
+  border-bottom: 1px solid var(--border-subtle);
+  font-family: var(--font-mono);
+}
+.data-table tbody tr {
+  transition: background 0.15s;
+}
+.data-table tbody tr:nth-child(even) {
+  background: rgba(22, 33, 62, 0.5);
+}
+.data-table tbody tr:hover {
+  background: rgba(66, 165, 245, 0.08);
+}
+/* Text columns use body font */
+.data-table td.text-col {
+  font-family: var(--font-body);
+}
+.table-source {
+  padding: var(--sp-sm) var(--sp-md);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  background: var(--bg-2);
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* === TRAFFIC LIGHT / SIGNAL === */
+.signal {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  font-size: var(--fs-sm);
+}
+.signal-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.signal-dot.red    { background: var(--c-negative); box-shadow: 0 0 6px var(--c-negative); }
+.signal-dot.yellow { background: var(--c-warning);  box-shadow: 0 0 6px var(--c-warning); }
+.signal-dot.green  { background: var(--c-positive); box-shadow: 0 0 6px var(--c-positive); }
+.signal-dot.black  { background: var(--text-muted); }
+
+/* === SOURCE TAG === */
+.source-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-xs);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  padding: 2px 0;
+}
+.source-tag a { color: var(--c-info); text-decoration: none; }
+.source-tag a:hover { text-decoration: underline; }
+
+/* === PROVENANCE BADGE === */
+.provenance {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: var(--fw-medium);
+  padding: 1px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+.provenance.search    { background: var(--c-info-bg);     color: var(--c-info); }
+.provenance.phase0    { background: var(--c-positive-bg); color: var(--c-positive); }
+.provenance.memory    { background: rgba(171, 71, 188, 0.15); color: #ab47bc; }
+.provenance.agent     { background: var(--c-warning-bg);  color: var(--c-warning); }
+.provenance.synthesis { background: rgba(255, 235, 59, 0.12); color: var(--c-highlight); }
+.provenance.curated   { background: rgba(38, 166, 154, 0.15); color: var(--c-positive); }
+
+/* === SECTION DIVIDER === */
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  margin: var(--sp-2xl) 0;
+}
+
+/* ============================================================
+   WAVE POSITION CARD — Historical Elliott Wave Location
+   Left: up-waves | Right: down-waves | Speed comparison
+   ============================================================ */
+.wave-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  margin: var(--sp-xl) 0;
+  overflow: hidden;
+}
+.wave-card-header {
+  background: var(--bg-3);
+  padding: var(--sp-lg);
+  border-bottom: 2px solid var(--c-highlight);
+}
+.wave-card-title {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+  color: var(--c-highlight);
+  margin-bottom: var(--sp-sm);
+}
+.wave-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-lg);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.wave-card-meta strong {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+/* Wave Level */
+.wave-level {
+  padding: var(--sp-lg);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.wave-level:last-of-type { border-bottom: none; }
+
+.wave-level-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-md);
+  margin-bottom: var(--sp-md);
+  flex-wrap: wrap;
+}
+.wave-level-name {
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semibold);
+  color: var(--c-info);
+}
+.wave-level-period {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  padding: 2px 8px;
+  background: var(--bg-3);
+  border-radius: var(--radius-sm);
+}
+.wave-level-parent {
+  font-size: var(--fs-xs);
+  color: var(--c-warning);
+  font-style: italic;
+}
+
+/* Two-column layout */
+.wave-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-md);
+}
+@media (max-width: 640px) {
+  .wave-columns { grid-template-columns: 1fr; }
+}
+
+.wave-col-header {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--sp-sm);
+  padding-bottom: var(--sp-xs);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.wave-col-up .wave-col-header { color: var(--c-positive); }
+.wave-col-down .wave-col-header { color: var(--c-negative); }
+
+/* Wave Item */
+.wave-item {
+  background: var(--bg-1);
+  border-radius: var(--radius-md);
+  padding: var(--sp-sm) var(--sp-md);
+  margin-bottom: var(--sp-sm);
+  border-left: 3px solid transparent;
+  transition: all 0.15s;
+}
+.wave-col-up .wave-item { border-left-color: var(--c-positive); }
+.wave-col-down .wave-item { border-left-color: var(--c-negative); }
+
+.wave-item.wave-current {
+  background: rgba(255, 235, 59, 0.06);
+  border-left-color: var(--c-highlight);
+  box-shadow: inset 0 0 0 1px rgba(255, 235, 59, 0.2);
+}
+
+.wave-item-label {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+}
+.wave-here-badge {
+  font-size: 9px;
+  background: var(--c-highlight);
+  color: #000;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+}
+
+.wave-item-range {
+  font-size: var(--fs-sm);
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  margin-top: 2px;
+}
+.wave-item-time {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+.wave-item-stats {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  margin-top: var(--sp-xs);
+  flex-wrap: wrap;
+}
+.wave-pct {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  font-family: var(--font-mono);
+}
+.wave-pct.positive { color: var(--c-positive); }
+.wave-pct.negative { color: var(--c-negative); }
+
+.wave-speed {
+  font-size: var(--fs-xs);
+  color: var(--text-secondary);
+  background: var(--bg-3);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+}
+
+.wave-item-note {
+  font-size: var(--fs-xs);
+  color: var(--c-warning);
+  font-style: italic;
+  margin-top: 2px;
+}
+
+/* Speed Comparison Bar */
+.wave-speed-compare {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  margin-top: var(--sp-md);
+  padding: var(--sp-sm) var(--sp-md);
+  background: var(--bg-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-xs);
+  flex-wrap: wrap;
+}
+.wave-speed-label {
+  color: var(--text-muted);
+  font-weight: var(--fw-medium);
+}
+.wave-speed-up { color: var(--c-positive); font-family: var(--font-mono); }
+.wave-speed-down { color: var(--c-negative); font-family: var(--font-mono); }
+.wave-speed-vs { color: var(--text-muted); }
+
+/* Footer */
+.wave-card-footer {
+  padding: var(--sp-sm) var(--sp-lg);
+  background: var(--bg-3);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-subtle);
+}
+
+    /* ============================================================
+   Layout — V3 Industry Report
+   Page structure | Sticky nav | Responsive | Print
+   ============================================================ */
+
+/* === PAGE CONTAINER === */
+.report-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--sp-lg);
+}
+
+/* === STICKY NAVIGATION === */
+.report-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg-0);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: var(--sp-sm) 0;
+  margin: 0 calc(-1 * var(--sp-lg));
+  padding-left: var(--sp-lg);
+  padding-right: var(--sp-lg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.nav-links {
+  display: flex;
+  gap: var(--sp-xs);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.nav-links::-webkit-scrollbar { display: none; }
+
+.nav-link {
+  display: inline-block;
+  padding: var(--sp-xs) var(--sp-sm);
+  font-size: var(--fs-xs);
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.nav-link:hover {
+  background: var(--bg-2);
+  color: var(--text-primary);
+}
+.nav-link.active {
+  background: var(--c-info-bg);
+  color: var(--c-info);
+  font-weight: var(--fw-medium);
+}
+
+/* === REPORT HEADER === */
+.report-header {
+  margin-bottom: var(--sp-2xl);
+  padding-bottom: var(--sp-xl);
+  border-bottom: 2px solid var(--border-default);
+}
+.report-title {
+  font-size: var(--fs-3xl);
+  font-weight: var(--fw-bold);
+  color: var(--c-highlight);
+  margin: 0 0 var(--sp-sm) 0;
+  line-height: var(--lh-tight);
+}
+.report-subtitle {
+  font-size: var(--fs-lg);
+  color: var(--text-secondary);
+  margin: 0 0 var(--sp-md) 0;
+}
+.report-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-md);
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+.report-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-xs);
+}
+
+/* === SECTION === */
+.report-section {
+  margin-bottom: var(--sp-2xl);
+  scroll-margin-top: 60px; /* offset for sticky nav */
+}
+.section-title {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-bold);
+  color: var(--c-positive);
+  margin: 0 0 var(--sp-lg) 0;
+  padding-bottom: var(--sp-sm);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.section-title .section-num {
+  color: var(--text-muted);
+  font-weight: var(--fw-normal);
+  margin-right: var(--sp-sm);
+}
+
+/* === PROSE (body text) === */
+.prose {
+  font-size: var(--fs-base);
+  line-height: var(--lh-relaxed);
+  color: var(--text-primary);
+}
+.prose p { margin: 0 0 var(--sp-md) 0; }
+.prose strong { color: var(--c-highlight); }
+.prose ul, .prose ol {
+  margin: var(--sp-md) 0;
+  padding-left: var(--sp-xl);
+}
+.prose li { margin-bottom: var(--sp-sm); }
+.prose a { color: var(--c-info); text-decoration: none; }
+.prose a:hover { text-decoration: underline; }
+
+/* === FOOTER === */
+.report-footer {
+  margin-top: var(--sp-2xl);
+  padding-top: var(--sp-xl);
+  border-top: 1px solid var(--border-subtle);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 640px) {
+  .report-wrapper {
+    padding: var(--sp-md);
+  }
+  .kpi-row {
+    grid-template-columns: 1fr;
+  }
+  .kpi-value {
+    font-size: var(--fs-xl);
+  }
+  .report-title {
+    font-size: var(--fs-xl);
+  }
+  .section-title {
+    font-size: var(--fs-lg);
+  }
+  .data-table {
+    font-size: var(--fs-xs);
+  }
+  .data-table th, .data-table td {
+    padding: var(--sp-xs) var(--sp-sm);
+  }
+  .callout {
+    padding: var(--sp-md);
+  }
+  .chart-annotation {
+    padding: var(--sp-sm) var(--sp-md);
+  }
+  .report-meta {
+    flex-direction: column;
+    gap: var(--sp-xs);
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .kpi-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* === PRINT === */
+@media print {
+  body { background: white; color: #1a1a1a; }
+  .report-nav { display: none; }
+  .report-wrapper { max-width: none; padding: 0; }
+  .kpi-card { border: 1px solid #ddd; box-shadow: none; background: #f9f9f9; }
+  .callout { break-inside: avoid; }
+  .chart-frame { break-inside: avoid; }
+  .data-table { font-size: 10px; }
+  a { color: #333; }
+  .section-title { color: #1a1a1a; }
+}
+
+  </style>
+</head>
+<body>
+<nav style="position:sticky;top:0;z-index:999;background:rgba(8,9,10,0.95);backdrop-filter:blur(8px);padding:0.5rem 1.5rem;border-bottom:1px solid #23252a;font-family:Inter,-apple-system,system-ui,sans-serif;font-size:0.78rem;display:flex;gap:1rem;align-items:center;"><a href="semiconductor_hub.html" style="color:#f8a848;text-decoration:none;">← Semiconductor Hub 半导体中枢</a><span style="color:#62666d;">·</span><a href="file:///Users/luwenkang/observatory/weekly/2026-W12-v3.html" style="color:#8a8f98;text-decoration:none;">W12 Synthesis</a></nav>
+
+  <nav class="report-nav">
+    <div class="nav-links">
+      <a href="#section-0" class="nav-link">§0 元问题</a>
+      <a href="#section-1" class="nav-link">§1 第一性原理</a>
+      <a href="#section-2" class="nav-link">§2 非共识</a>
+      <a href="#section-3" class="nav-link">§3 历史类比</a>
+      <a href="#section-4" class="nav-link">§4 二阶效应</a>
+      <a href="#section-5" class="nav-link">§5 交叉验证</a>
+      <a href="#section-6" class="nav-link">§6 决策框架</a>
+    </div>
+  </nav>
+
+  <div class="report-wrapper">
+    <header class="report-header">
+      <h1 class="report-title">半导体超级周期 — 第一性原理分析</h1>
+      <p class="report-subtitle">First Principles Thinking · 非共识洞察 · 交易者视角</p>
+      <div class="report-meta">
+        <span><strong>Date:</strong> 2026-03-19</span>
+        <span><strong>Author:</strong> Cognitive Engine V3 Deep Think</span>
+        <span><strong>Type:</strong> 第一性原理分析</span>
+      </div>
+    </header>
+
+    
+
+<section class="report-section" id="section-0">
+<h2 class="section-title"><span class="section-num">§0</span>元问题：我们到底在分析什么？</h2>
+<div class="prose">
+
+<div class="callout callout--method">
+<div class="callout-title">思考起点</div>
+<div class="callout-body">
+<p>在看任何数据之前，先问三个元问题：</p>
+<ol>
+<li><strong>这个周期的本质是什么？</strong> — 是技术革命、还是资本泡沫、还是两者叠加？</li>
+<li><strong>市场在定价什么故事？</strong> — 当前估值隐含的增长假设是什么？</li>
+<li><strong>什么条件下这个故事会破裂？</strong> — 不是"可能破裂"，而是"在什么精确条件下"？</li>
+</ol>
+</div>
+</div>
+
+<h3>思考过程记录</h3>
+
+<p><strong>Q: 这轮半导体周期的本质到底是什么？</strong></p>
+
+<p>表面答案：AI需求驱动的超级周期。但这个答案太浅，因为每一轮科技周期都会被当时的人称为"超级周期"。</p>
+
+<p><strong>更深一层：</strong>这轮的独特之处不在于"AI"这个标签，而在于<strong>计算范式的转变</strong>。过去60年的计算遵循冯·诺依曼架构（CPU串行处理），AI推动的是向<strong>大规模并行计算</strong>的迁移。这不是一个应用层的变化，是基础设施层的变化。</p>
+
+<p><strong>类比思考：</strong></p>
+<ul>
+<li>1990s互联网：从拨号→宽带，基础设施投资10年才见顶</li>
+<li>2000s移动互联网：从PC→手机，基础设施投资8年才见顶</li>
+<li>2020s AI：从CPU→GPU/ASIC，我们在第3年</li>
+</ul>
+
+<p><strong>第一性原理推论：</strong>如果这真的是计算范式转变（而非应用层泡沫），那基础设施投资周期应该持续5-10年，而非2-3年。<strong>我们在第3年，可能刚过中点。</strong></p>
+
+<p>但这里有一个关键假设需要验证：<strong>AI算力需求是否真的是无限的？</strong></p>
+
+</div>
+</section>
+
+<section class="report-section" id="section-1">
+<h2 class="section-title"><span class="section-num">§1</span>第一性原理分解</h2>
+<div class="prose">
+
+<h3>1.1 算力需求的第一性原理</h3>
+
+<div class="callout callout--insight">
+<div class="callout-title">关键洞察：Scaling Laws vs Efficiency</div>
+<div class="callout-body">
+<p>AI算力需求 = f(模型规模) × f(用户数) ÷ f(推理效率)</p>
+<p>多数分析师只看前两项（越来越大的模型 × 越来越多的用户 = 无限需求）。<strong>但第三项——推理效率——被严重低估。</strong></p>
+</div>
+</div>
+
+<p><strong>分解：</strong></p>
+
+<p><strong>因子1: 模型规模。</strong> GPT-4到GPT-5，参数量从~1.8T到可能10T+。训练算力需求确实在指数增长。但Scaling Law的回报正在递减——每10x算力投入，性能提升越来越小。这意味着<strong>训练侧的算力需求增速会在某个点减速</strong>（可能2027-2028）。</p>
+
+<p><strong>因子2: 用户数/推理量。</strong> 从ChatGPT到Agent、到嵌入每个应用。推理量可能是训练量的100-1000倍。这是真正的长期需求驱动力。但推理对算力的需求模式完全不同：<strong>推理侧更看性价比，不是绝对性能。</strong>这就是ASIC吃GPU增量蛋糕的结构性原因。</p>
+
+<p><strong>因子3: 效率提升。</strong> 2024-2025年的效率提升已经惊人：
+<ul>
+<li>量化技术（FP16→INT8→INT4）：推理算力需求降低4-8倍</li>
+<li>稀疏化（MoE架构）：实际计算量降低3-5倍</li>
+<li>蒸馏（大模型→小模型）：同等任务算力降低10-50倍</li>
+<li>推理优化（KV-cache, Speculative decoding）：2-3倍加速</li>
+</ul>
+</p>
+
+<p><strong>净效果：</strong>效率提升<strong>部分</strong>抵消了需求增长。但关键词是"部分"——因为需求增长是指数级的，而效率提升是线性的。<strong>在需求指数增长的早期，效率提升不重要；在后期，效率提升会成为增速杀手。</strong></p>
+
+<div class="callout callout--risk">
+<div class="callout-title">思考检查点</div>
+<div class="callout-body">
+<p>如果我的推论正确，那意味着：</p>
+<ul>
+<li><strong>2024-2026:</strong> 需求指数增长 >> 效率提升 → 算力短缺（我们在这里）</li>
+<li><strong>2027-2028:</strong> 需求增速放缓 + 效率提升积累 → 供需再平衡</li>
+<li><strong>2029+:</strong> 推理侧成为主导 → 算力需求稳定增长，但不再是指数级</li>
+</ul>
+<p><strong>交易含义：</strong>这轮半导体超级周期的峰值可能在2027年前后，而非"永远涨"。</p>
+</div>
+</div>
+
+<h3>1.2 利润分配的第一性原理</h3>
+
+<p><strong>问题：AI创造的价值，谁拿走了大头？</strong></p>
+
+<p>产业链利润分配遵循"微笑曲线"：</p>
+<ul>
+<li><strong>上游（设计+IP）：</strong> NVDA毛利率75%，ARM royalty模式，SNPS/CDNS 70%+订阅续约率 — <strong>拿走利润大头</strong></li>
+<li><strong>中游（制造）：</strong> TSMC毛利率63%，ASML 53% — <strong>靠垄断拿走超额利润</strong></li>
+<li><strong>下游（应用）：</strong> 大多数AI应用公司亏损 — <strong>几乎不赚钱</strong></li>
+</ul>
+
+<p><strong>第一性原理推论：</strong>当下游（AI应用）持续亏损时，上游（芯片）的超额利润来源只有一个——<strong>Hyperscaler的资本支出。</strong>而Hyperscaler的capex来自两个来源：</p>
+<ol>
+<li>自有现金流（稳定）</li>
+<li>债务融资（$1,080亿累计负债，不稳定）</li>
+</ol>
+
+<div class="callout callout--risk">
+<div class="callout-title">核心风险的第一性原理表述</div>
+<div class="callout-body">
+<p><strong>半导体利润 = Hyperscaler Capex = f(AI应用ROI)</strong></p>
+<p>如果AI应用的ROI在2026-2027年无法验证（即用户不愿为AI付费），则：</p>
+<p>AI应用亏损 → Hyperscaler削减capex → 芯片需求断崖 → 全链条利润崩塌</p>
+<p>这是一个<strong>自指系统</strong>：芯片公司的利润来自还没有被证明能赚钱的AI应用。只要音乐在播放，大家继续跳舞；一旦有人问"ROI在哪？"，音乐可能停止。</p>
+</div>
+</div>
+
+<h3>1.3 垄断的第一性原理</h3>
+
+<p><strong>为什么半导体利润率这么高？一个词：垄断。</strong></p>
+
+<p>六个节点中，有四个是事实上的垄断/寡头：</p>
+<ul>
+<li>ASML: EUV 90%+ → <strong>独家垄断</strong>（物理定律级壁垒：极紫外光源+超精密光学+复杂系统集成）</li>
+<li>TSMC: 先进制程70% → <strong>准垄断</strong>（20年工艺积累+客户迁移成本极高）</li>
+<li>NVDA: GPU+CUDA 86% → <strong>生态垄断</strong>（CUDA的20年开发者生态+数十亿沉没成本）</li>
+<li>HBM三寡头: SK/Samsung/Micron = 100% → <strong>寡头垄断</strong>（资本壁垒+技术壁垒+认证壁垒）</li>
+</ul>
+
+<p><strong>第一性原理推论：</strong>垄断的持久性取决于<strong>壁垒的性质</strong>：</p>
+<ul>
+<li><strong>物理定律级壁垒</strong>（ASML）→ 几乎不可能被颠覆，除非出现全新的光刻技术（5-10年视野内不可能）</li>
+<li><strong>工艺积累壁垒</strong>（TSMC）→ 可以被追赶但需要5-7年+数百亿美元（Samsung/Intel在尝试）</li>
+<li><strong>生态壁垒</strong>（NVDA CUDA）→ <strong>最容易被侵蚀</strong>，因为软件生态可以被新范式绕过（ASIC不需要CUDA）</li>
+<li><strong>资本壁垒</strong>（HBM）→ 中等持久，新进入者（中国）可以通过国家资本突破</li>
+</ul>
+
+<p><strong>交易含义：</strong>按壁垒持久性排序的投资优先级应该是 ASML > TSMC > HBM > NVDA，但市场定价恰恰相反（NVDA市值最高）。<strong>这可能意味着NVDA是最大的估值错配风险。</strong></p>
+
+</div>
+</section>
+
+<section class="report-section" id="section-2">
+<h2 class="section-title"><span class="section-num">§2</span>非共识洞察：市场可能错在哪？</h2>
+<div class="prose">
+
+<div class="callout callout--insight">
+<div class="callout-title">方法论</div>
+<div class="callout-body">
+<p>非共识 ≠ 反共识。不是为了反对而反对，而是寻找<strong>市场定价中隐含的假设，然后检验这些假设</strong>。</p>
+</div>
+</div>
+
+<h3>非共识洞察 #1: NVDA的CUDA护城河可能被高估</h3>
+
+<p><strong>市场共识：</strong>"CUDA是20年积累的不可逾越的壁垒"</p>
+
+<p><strong>第一性原理挑战：</strong></p>
+<ul>
+<li>CUDA是<strong>训练侧</strong>的壁垒，但AI正在从"训练为主"转向"推理为主"</li>
+<li>推理侧不需要CUDA的灵活性——<strong>固定模型、固定计算图、最优化到极致</strong></li>
+<li>这正是ASIC的优势所在：Google TPU、Amazon Trainium就是为推理优化的</li>
+<li>2026年ASIC出货+44.6% vs GPU仅+16.1%——市场已经在用脚投票</li>
+</ul>
+
+<p><strong>推论：</strong>NVDA的份额从90%→75%不是"小幅下滑"，而是<strong>结构性转变的开始</strong>。训练侧NVDA仍然垄断（Scaling Law需要灵活性），但推理侧（占未来算力需求80%+）正在被ASIC蚕食。NVDA的长期TAM可能比市场预期小30-40%。</p>
+
+<p><strong>但反过来想：</strong>NVDA也在推出推理优化产品（Blackwell的推理性能4x提升），且Rubin架构2026 Q3专门强化推理。NVDA不会坐以待毙。所以这不是"NVDA完蛋了"，而是<strong>"NVDA的增速天花板比市场预期低"</strong>。</p>
+
+<h3>非共识洞察 #2: CoWoS瓶颈可能比芯片设计更值得关注</h3>
+
+<p><strong>市场共识：</strong>半导体的价值在设计（NVDA/AVGO）和制造（TSMC）</p>
+
+<p><strong>第一性原理挑战：</strong></p>
+<ul>
+<li>当前AI算力的实际瓶颈不是芯片设计能力，而是<strong>先进封装产能</strong></li>
+<li>CoWoS产能决定了GPU/ASIC的实际出货量——NVDA的Blackwell芯片设计完了，但能卖多少取决于TSMC的CoWoS产能</li>
+<li>TSMC CoWoS从3.5万片/月→13万片/月是3.7倍扩产，但需求可能是10倍</li>
+<li>封装设备和材料供应商（日本的Disco、Ibiden、Shinko Electric等）可能是被低估的受益者</li>
+</ul>
+
+<p><strong>推论：</strong>投资半导体不应该只看"谁设计了最好的芯片"，还要看"谁控制了瓶颈"。<strong>封装环节可能是这轮周期中被最低估的环节。</strong></p>
+
+<h3>非共识洞察 #3: 存储周期的"猪周期"风险被低估</h3>
+
+<p><strong>市场共识：</strong>"HBM需求结构性增长，供不应求持续到2027"</p>
+
+<p><strong>第一性原理挑战：</strong></p>
+<ul>
+<li>存储行业有60年的周期历史，<strong>从未出现过"永远供不应求"</strong></li>
+<li>三大厂（SK Hynix +维持、Samsung +50%、Micron +扩产）正在同时大幅扩产</li>
+<li>"HBM售罄到2026底"与2018年初的"DRAM供不应求"叙事<strong>高度相似</strong></li>
+<li>2018年DRAM周期见顶后：价格腰斩、SK Hynix股价-60%、Micron从$64→$28</li>
+</ul>
+
+<p><strong>但反过来想：</strong>HBM≠传统DRAM。HBM的技术壁垒更高（3D堆叠+TSV+CoWoS集成），新进入者更少，客户更集中（主要就是NVDA和AVGO）。所以这轮周期的振幅可能比传统DRAM周期小，但<strong>方向一定会重复</strong>——问题只是时间（2027还是2028见顶）。</p>
+
+<h3>非共识洞察 #4: 中国不是风险，是变量</h3>
+
+<p><strong>市场共识：</strong>"中国出口管制是利空"</p>
+
+<p><strong>第一性原理挑战：</strong></p>
+<ul>
+<li>出口管制的<strong>短期效果</strong>：减少了收入（NVDA中国-40%、ASML中国-22pp）→ 利空</li>
+<li>出口管制的<strong>中期效果</strong>：逼迫客户提前囤货、加速非中国地区扩产 → <strong>可能是净利好</strong></li>
+<li>出口管制的<strong>长期效果</strong>：催生中国本土半导体产业链 → 远期竞争者，但现在还不是</li>
+</ul>
+
+<p><strong>推论：</strong>中国变量的净效果取决于时间框架。对于6-18个月的交易，中国因素可能是<strong>中性到微正</strong>（囤货需求+非中国扩产）。真正的风险不在中国，在于<strong>Hyperscaler的capex决策</strong>。</p>
+
+</div>
+</section>
+
+<section class="report-section" id="section-3">
+<h2 class="section-title"><span class="section-num">§3</span>历史类比：这轮最像哪次？</h2>
+<div class="prose">
+
+<h3>候选类比</h3>
+
+<table class="data-table">
+<thead><tr><th>周期</th><th>驱动力</th><th>基础设施投资期</th><th>峰值到谷底</th><th>领头羊</th><th>结局</th></tr></thead>
+<tbody>
+<tr><td><strong>1995-2000 互联网</strong></td><td>www</td><td>5年（光纤+ISP）</td><td>Nasdaq -78%</td><td>Cisco</td><td>泡沫破裂，但互联网是真的</td></tr>
+<tr><td><strong>2003-2007 房地产</strong></td><td>金融创新</td><td>4年（CDO+MBS）</td><td>金融股-80%</td><td>Bear Stearns</td><td>系统性危机</td></tr>
+<tr><td><strong>2009-2021 移动+云</strong></td><td>iPhone+AWS</td><td>12年（渐进式）</td><td>从未真正崩盘</td><td>Apple/Amazon</td><td>成为新常态</td></tr>
+<tr><td><strong>2016-2018 加密货币</strong></td><td>区块链</td><td>2年（矿机+交易所）</td><td>BTC -83%</td><td>Bitmain</td><td>泡沫破裂，但技术存活</td></tr>
+<tr><td style="color: var(--c-highlight);"><strong>2023-? AI</strong></td><td>LLM+Agent</td><td>3年+（进行中）</td><td>?</td><td>NVDA</td><td>?</td></tr>
+</tbody>
+</table>
+
+<h3>最佳类比判断</h3>
+
+<div class="callout callout--insight">
+<div class="callout-title">判断：最像1995-2000互联网，但有关键差异</div>
+<div class="callout-body">
+
+<p><strong>相似之处：</strong></p>
+<ul>
+<li>真实的技术革命 + 资本泡沫叠加</li>
+<li>"卖铲子的先赚钱"（Cisco路由器 ≈ NVDA GPU）</li>
+<li>终端应用还没找到商业模式（1998年的电商 ≈ 2026年的AI Agent）</li>
+<li>基础设施过度投资（光纤过剩 ≈ 算力可能过剩）</li>
+</ul>
+
+<p><strong>关键差异：</strong></p>
+<ul>
+<li>互联网时代没有垄断（Cisco份额<50%），AI时代有极端垄断（NVDA 86%）→ 崩盘时更集中</li>
+<li>互联网时代企业用自有资金投资，AI时代用债务融资（$1,080亿）→ 杠杆风险更大</li>
+<li>互联网时代估值更疯狂（PE 100-200x），AI时代相对理性（NVDA 30x forward）→ 泡沫程度可能更温和</li>
+<li>互联网的应用验证用了5年（Google 2004才盈利），AI的应用验证可能更快（Copilot/ChatGPT已有收入）</li>
+</ul>
+
+<p><strong>推论：</strong>这轮周期的<strong>上行空间可能不如1995-2000</strong>（因为估值已经比较理性），但<strong>下行风险也可能更温和</strong>（因为垄断者有真实利润支撑）。最可能的情景不是"Nasdaq -78%"式崩盘，而是<strong>"增速放缓+估值压缩"的软着陆——类似2022年科技股回调30-40%</strong>。</p>
+
+</div>
+</div>
+
+<h3>Cisco类比的警示</h3>
+
+<p>1999年的Cisco = 今天的NVDA？</p>
+<ul>
+<li>Cisco 2000年市值$5,550亿（当时第一），NVDA 2026年市值$4.5万亿</li>
+<li>Cisco的路由器是"必需品"但不是"独占品"——竞争者（Juniper、华为）最终侵蚀了份额</li>
+<li>NVDA的GPU目前是"独占品"，但ASIC+AMD正在侵蚀推理侧</li>
+<li>Cisco从高点跌了89%，至今（2026年）仍未回到2000年高点</li>
+</ul>
+
+<p><strong>但NVDA ≠ Cisco的关键原因：</strong>Cisco卖硬件（一次性），NVDA卖的是"CUDA生态+硬件+软件栈"（持续性）。NVDA的商业模式粘性更强。</p>
+
+<p><strong>结论：</strong>NVDA不会重演Cisco的-89%，但可能重演<strong>"增长天花板到来后的估值重估"</strong>——从30x forward PE压缩到15-20x，意味着<strong>股价可能从高点回调30-50%</strong>。</p>
+
+</div>
+</section>
+
+<section class="report-section" id="section-4">
+<h2 class="section-title"><span class="section-num">§4</span>二阶效应：如果X发生，然后呢？</h2>
+<div class="prose">
+
+<h3>4.1 如果AI应用ROI被证实</h3>
+<p><strong>一阶：</strong>Hyperscaler继续加码capex → 芯片需求持续</p>
+<p><strong>二阶：</strong>AI应用公司开始盈利 → 企业IT预算从传统软件转向AI → <strong>传统软件公司（非AI）被挤压</strong></p>
+<p><strong>三阶：</strong>AI成为效率工具 → 劳动力替代加速 → <strong>宏观经济结构性变化（通缩压力+就业问题）</strong></p>
+<p><strong>交易含义：</strong>做多半导体的同时，考虑做空传统IT服务公司（Accenture、Infosys等）作为对冲。</p>
+
+<h3>4.2 如果AI应用ROI被证伪</h3>
+<p><strong>一阶：</strong>Hyperscaler削减capex → NVDA/TSMC收入下降</p>
+<p><strong>二阶：</strong>芯片库存积压 → 价格战 → <strong>HBM/DRAM暴跌（2018重演）</strong></p>
+<p><strong>三阶：</strong>半导体公司削减研发 → 下一代技术（2nm、HBM4）延期 → <strong>为下一轮周期底部播下种子</strong></p>
+<p><strong>交易含义：</strong>如果2026 Q3-Q4看到capex指引下调，<strong>立即减仓HBM/存储标的</strong>（周期性最强），保留ASML/SNPS（垄断性最强）。</p>
+
+<h3>4.3 如果地缘政治升级</h3>
+<p><strong>一阶：</strong>台海紧张 → TSMC估值折价</p>
+<p><strong>二阶：</strong>全球芯片供应链断裂 → <strong>非TSMC代工厂（Samsung/Intel/GFS）反而受益</strong></p>
+<p><strong>三阶：</strong>各国加速本土半导体建设 → ASML设备需求<strong>可能不降反升</strong>（更多工厂=更多设备需求）</p>
+<p><strong>交易含义：</strong>ASML可能是地缘政治风险的天然对冲——无论谁建厂，都需要ASML的设备。</p>
+
+<h3>4.4 如果效率提升超预期</h3>
+<p><strong>一阶：</strong>同等任务需要更少算力 → 芯片需求放缓</p>
+<p><strong>二阶：</strong>但<strong>Jevons悖论</strong>——效率提升导致成本下降，成本下降导致使用量增加，净效果可能是<strong>需求不降反升</strong></p>
+<p><strong>三阶：</strong>AI从高端应用扩散到边缘设备 → 终端AI芯片需求爆发（不是数据中心GPU）</p>
+<p><strong>交易含义：</strong>如果效率提升加速，关注<strong>边缘AI芯片</strong>（Qualcomm、MediaTek）而非数据中心GPU。</p>
+
+</div>
+</section>
+
+<section class="report-section" id="section-5">
+<h2 class="section-title"><span class="section-num">§5</span>交叉验证：六节点告诉我们什么？</h2>
+<div class="prose">
+
+<h3>5.1 节点间的一致性检验</h3>
+
+<table class="data-table">
+<thead><tr><th>检验项</th><th>节点</th><th>信号</th><th>一致？</th></tr></thead>
+<tbody>
+<tr><td>需求是否真实？</td><td>全部6个</td><td>✅ 全部确认强劲需求</td><td style="color: var(--c-positive);">✅ 一致</td></tr>
+<tr><td>供给是否紧张？</td><td>代工(CoWoS)/存储(HBM)/光刻(EUV)</td><td>✅ Sold out / 积压</td><td style="color: var(--c-positive);">✅ 一致</td></tr>
+<tr><td>利润率是否可持续？</td><td>GPU 75% / TSMC 63% / HBM 58%</td><td>⚠️ 历史级高位</td><td style="color: var(--c-warning);">⚠️ 警示</td></tr>
+<tr><td>估值是否合理？</td><td>ARM 169x / CDNS 72x / SNPS 48x</td><td>❌ Forward PE更合理但TTM极高</td><td style="color: var(--c-negative);">❌ 分歧</td></tr>
+<tr><td>竞争格局是否稳定？</td><td>GPU(ASIC侵蚀) / 存储(三方扩产)</td><td>⚠️ 正在变化</td><td style="color: var(--c-warning);">⚠️ 动态</td></tr>
+</tbody>
+</table>
+
+<h3>5.2 最关键的领先指标</h3>
+
+<div class="callout callout--method">
+<div class="callout-title">如果只能看一个指标</div>
+<div class="callout-body">
+<p><strong>Hyperscaler季度Capex指引的同比增速变化。</strong></p>
+<p>不是看绝对值（仍然很高），而是看<strong>增速的二阶导</strong>：</p>
+<ul>
+<li>增速加速（+36% → +40%）→ 周期仍在扩张，持有</li>
+<li>增速维持（+36% → +35%）→ 可能接近峰值，收紧止损</li>
+<li>增速减速（+36% → +20%）→ 周期拐点，减仓</li>
+</ul>
+<p><strong>时间窗口：</strong>2026年4-5月（Q1财报季）和7-8月（Q2财报季）是关键观察期。</p>
+</div>
+</div>
+
+<h3>5.3 矛盾信号</h3>
+
+<p><strong>矛盾1：</strong>所有节点确认"需求强劲"，但Man Group/JPMorgan/BofA都在警告泡沫。<br>
+<strong>解读：</strong>短期现实（需求确实强劲）和中期风险（估值隐含的增长假设过于乐观）不矛盾。两者可以同时为真。</p>
+
+<p><strong>矛盾2：</strong>NVDA份额在下降，但收入在加速增长。<br>
+<strong>解读：</strong>蛋糕在快速膨胀，所以份额下降的同时绝对值仍在增长。但<strong>当蛋糕增速放缓时</strong>，份额下降就会转化为收入下降。这是一个延时炸弹。</p>
+
+<p><strong>矛盾3：</strong>存储"供不应求"，但三大厂在大幅扩产。<br>
+<strong>解读：</strong>经典周期行为——高利润吸引产能扩张，扩张导致过剩，过剩导致价格崩塌。问题只是时间。</p>
+
+</div>
+</section>
+
+<section class="report-section" id="section-6">
+<h2 class="section-title"><span class="section-num">§6</span>决策框架：怎么用这些思考来交易？</h2>
+<div class="prose">
+
+<h3>6.1 情景矩阵</h3>
+
+<table class="data-table">
+<thead><tr><th>情景</th><th>概率</th><th>SMH 12M</th><th>最佳标的</th><th>行动</th></tr></thead>
+<tbody>
+<tr><td><strong>A: AI超级周期延续</strong><br>Capex+30%+, 应用ROI验证</td><td>40%</td><td>+20-30%</td><td>TSM, AVGO, MU</td><td>回调买入，持有</td></tr>
+<tr><td><strong>B: 增速放缓软着陆</strong><br>Capex+10-15%, 估值压缩</td><td>35%</td><td>-10~+5%</td><td>ASML, SNPS</td><td>只持有垄断者</td></tr>
+<tr><td><strong>C: Capex断崖</strong><br>某家Hyperscaler砍30%+</td><td>15%</td><td>-30-40%</td><td>现金/债券</td><td>止损，等底部</td></tr>
+<tr><td><strong>D: 地缘政治黑天鹅</strong><br>台海/制裁升级</td><td>10%</td><td>-40-60%</td><td>ASML(对冲)</td><td>全面避险</td></tr>
+</tbody>
+</table>
+
+<h3>6.2 按壁垒持久性排序的投资优先级</h3>
+
+<table class="data-table">
+<thead><tr><th>优先级</th><th>标的</th><th>壁垒类型</th><th>壁垒持久性</th><th>当前估值</th><th>操作</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><strong>ASML</strong></td><td>物理定律级垄断</td><td>10年+</td><td>合理（backlog支撑）</td><td>回调即买</td></tr>
+<tr><td>2</td><td><strong>SNPS</strong></td><td>设计工具双寡头+Ansys</td><td>7-10年</td><td>Forward PE 29x合理</td><td>性价比最优</td></tr>
+<tr><td>3</td><td><strong>TSM</strong></td><td>工艺积累准垄断</td><td>5-7年</td><td>偏高但有定价权</td><td>等回调</td></tr>
+<tr><td>4</td><td><strong>AVGO</strong></td><td>ASIC设计+客户关系</td><td>3-5年</td><td>有上行空间</td><td>VCP形态入场</td></tr>
+<tr><td>5</td><td><strong>MU</strong></td><td>资本+认证壁垒</td><td>周期性</td><td>高位</td><td>慎重，注意周期</td></tr>
+<tr><td>6</td><td><strong>NVDA</strong></td><td>CUDA生态（被侵蚀中）</td><td>2-4年窗口期</td><td>充分定价</td><td>持有者续持，不新建仓</td></tr>
+</tbody>
+</table>
+
+<h3>6.3 行动清单</h3>
+
+<div class="callout callout--method">
+<div class="callout-title">对Luke的具体建议</div>
+<div class="callout-body">
+<p><strong>现在做：</strong></p>
+<ol>
+<li>将ASML和SNPS加入监控名单，设置均线回调提醒</li>
+<li>持有的半导体仓位收紧止损（SMH日线EMA50下方止损）</li>
+<li>标记2026年4月Q1财报季为"关键验证窗口"</li>
+</ol>
+
+<p><strong>等待做（触发条件）：</strong></p>
+<ol>
+<li>SMH日线RSI回落到40-50 + 成交量萎缩 → 建仓ASML/SNPS</li>
+<li>AVGO出现VCP形态（波动率收缩+均线汇聚）→ 建仓AVGO</li>
+<li>任何Hyperscaler Q1 capex指引下调 → 减仓MU/周期标的</li>
+</ol>
+
+<p><strong>不做：</strong></p>
+<ol>
+<li>不追高NVDA/TSM（估值已充分，等回调）</li>
+<li>不做空半导体（趋势仍在，做空 = 逆势）</li>
+<li>不建仓Intel/GFS（追赶者估值便宜但趋势不佳）</li>
+</ol>
+</div>
+</div>
+
+<h3>6.4 这份分析可能错在哪？</h3>
+
+<div class="callout callout--risk">
+<div class="callout-title">自我审计</div>
+<div class="callout-body">
+<ol>
+<li><strong>AI范式转变的持续时间可能被低估。</strong>如果AI真的像电力一样成为通用基础设施，那"5-10年投资期"可能是20年。在这种情况下，当前估值反而是"便宜"的。</li>
+<li><strong>效率提升的Jevons悖论可能主导。</strong>如果效率提升导致AI使用量爆发，需求曲线可能不是减速而是加速。</li>
+<li><strong>NVDA的生态壁垒可能比我判断的更持久。</strong>PyTorch/CUDA的开发者锁定可能不亚于Windows生态——即使有更好的替代品，惯性也足够强。</li>
+<li><strong>中国本土芯片的时间表可能更快。</strong>华为Ascend 920+在某些基准测试上已接近NVDA H100 80%的性能。国家意志+无限资本可能压缩追赶时间。</li>
+</ol>
+</div>
+</div>
+
+</div>
+</section>
+
+
+    <footer class="report-footer">
+      <p>Generated by Trade Pipeline Cognitive Engine V3</p>
+      <p>2026-03-19 | 6-node Cognitive Engine + Phase 0 + Triangulation</p>
+    </footer>
+  </div>
+</body>
+</html>

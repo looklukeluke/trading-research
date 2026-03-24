@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NODE 3: 社交与内容 Social & Content — Internet Research Hub</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../internet_shared.css">
+<style>
+/* Node-specific overrides */
+.node-hero {
+  background: linear-gradient(135deg, rgba(156, 39, 176, 0.15) 0%, rgba(233, 30, 99, 0.1) 100%);
+  border: 1px solid rgba(156, 39, 176, 0.3);
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 2rem;
+}
+
+.node-hero .node-badge {
+  display: inline-block;
+  background: var(--purple-dim);
+  color: #9c27b0;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.node-hero h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.75rem;
+}
+
+.node-hero .subtitle {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.trend-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.trend-card .trend-title {
+  color: var(--purple);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.trend-card .trend-title::before {
+  content: "▸";
+  color: var(--accent);
+}
+
+.signal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.signal-box {
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+}
+
+.signal-box.expansion {
+  background: rgba(76, 175, 80, 0.08);
+  border: 1px solid rgba(76, 175, 80, 0.25);
+}
+
+.signal-box.contraction {
+  background: rgba(244, 67, 54, 0.08);
+  border: 1px solid rgba(244, 67, 54, 0.25);
+}
+
+.signal-box h4 {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+}
+
+.signal-box.expansion h4 { color: var(--green); }
+.signal-box.contraction h4 { color: var(--red); }
+
+.risk-matrix {
+  font-family: monospace;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.ecosystem-map {
+  font-family: monospace;
+  background: linear-gradient(180deg, rgba(33, 150, 243, 0.05) 0%, rgba(156, 39, 176, 0.05) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+}
+
+@media (max-width: 768px) {
+  .signal-grid { grid-template-columns: 1fr; }
+  .node-hero { padding: 1rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- ===== Left Sidebar ===== -->
+  <div class="sidebar">
+    <a class="back-link" href="../internet_hub.html">&larr; Internet Hub</a>
+
+    <h4>Internet Research Hub</h4>
+    <div class="project-meta">
+      互联网研究中枢<br>
+      7 nodes &middot; 互联网+AI+云计算
+    </div>
+
+    <h4>Value Chain Nodes</h4>
+    <nav>
+      <ul>
+        <li><a href="NODE_1_semiconductors.html">01 Semiconductors 半导体</a></li>
+        <li><a href="NODE_2_cloud_ai.html">02 Cloud & AI 云计算与AI</a></li>
+        <li><a href="NODE_3_social_content.html" style="color:var(--purple);">03 Social & Content 社交与内容</a></li>
+        <li><a href="NODE_4_e-commerce.html">04 E-commerce 电子商务</a></li>
+        <li><a href="NODE_5_fintech.html">05 FinTech 金融科技</a></li>
+        <li><a href="NODE_6_enterprise_saas.html">06 Enterprise SaaS 企业服务</a></li>
+        <li><a href="NODE_7_gaming_entertainment.html">07 Gaming & Entertainment 游戏娱乐</a></li>
+      </ul>
+    </nav>
+
+    <h4>Context 上下文</h4>
+    <nav>
+      <ul>
+        <li><a href="../internet_hub.html">Internet Hub Overview</a></li>
+        <li><a href="../blockchain_hub.html" style="color:var(--accent);">Blockchain Hub 区块链</a></li>
+        <li><a href="../semiconductor_hub.html">Semiconductor Hub 半导体</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- ===== Main Content ===== -->
+  <main>
+
+    <!-- Node Hero -->
+    <div class="node-hero">
+      <div class="node-badge">NODE 3 — Value Chain</div>
+      <h1>Social & Content <span class="zh">社交与内容</span></h1>
+      <div class="subtitle">51.7亿全球用户 &middot; $740B数字广告市场 &middot; 算法推荐驱动增长 &middot; 2026-03-22</div>
+    </div>
+
+    <!-- Advisory Box -->
+    <div class="advisory-box">
+      <strong>Thinking Chain 思维链：</strong>社交与内容是互联网的"注意力中枢" — 连接上游基础设施与下游商业变现的核心节点。微信(私域)+抖音(公域)代表两种截然不同的流量逻辑，形成中国独特的"双寡头+超级App"格局。全球市场Meta+TikTok+YouTube三分天下。
+      <span class="zh">Social & content is the "attention hub" of the internet — connecting upstream infrastructure to downstream monetization. WeChat (private) + Douyin (public) represent two distinct traffic logics, forming China's unique "duopoly + Super App" structure.</span>
+    </div>
+
+    <div class="advisory-box" style="border-left-color: var(--purple); background: rgba(156, 39, 176, 0.05); margin-top:0.75rem;">
+      <strong style="color:var(--purple);">&#9888; Key Insight 关键洞察</strong><br>
+      <strong>中美流量逻辑的本质差异：</strong>中国=算法分发(公域流量)，美国=关系链分发(私域流量)。这导致商业化路径根本不同——抖音从内容到电商一站式完成，Meta需要外链跳转。该差异直接影响广告投放ROI和创作者变现模式。
+      <span class="zh">China = algorithm-driven (public traffic), US = relationship-driven (private traffic). This fundamental difference shapes monetization paths: Douyin completes content-to-commerce in one platform, Meta requires external links.</span>
+    </div>
+
+    <!-- ═══════════ §1 行业概述 ═══════════ -->
+    <div class="section-header" id="overview">
+      <h2><span class="section-num">01</span>Industry Overview<span class="zh">行业概述 &mdash; 注意力经济的基础设施</span></h2>
+    </div>
+
+    <div class="card" style="border-left: 3px solid var(--purple);">
+      <strong>行业定位 Industry Positioning</strong>
+      <div class="card-desc">
+        <p>社交与内容平台是数字经济中<strong>注意力货币化</strong>的核心载体。用户时间(DAU/使用时长)是核心资源，广告和电商是主要变现渠道。与其他节点的本质区别：<em>内容平台是需求发现和情绪激发的场所，而非商品供给的直接场所</em>。</p>
+        
+        <p><strong>与Blockchain Hub的关键联系：</strong>社交平台是加密叙事传播的主要载体(Twitter/X、Discord、Telegram)；内容创作者正在成为Web3与现实世界的连接点；稳定币为创作者经济提供跨境支付基础设施。</p>
+        
+        <span class="zh-inline">Social & content platforms are the core carriers of "attention monetization" in the digital economy. User time (DAU/usage duration) is the core resource, with advertising and e-commerce as primary monetization channels. Key connection to Blockchain Hub: social platforms are the primary carriers of crypto narratives; content creators are becoming bridges between Web3 and the real world.</span>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top: 1rem;">
+      <div class="card">
+        <strong>核心价值主张 Core Value Proposition</strong>
+        <ul style="margin: 0.5rem 0 0 1.25rem; line-height: 1.7;">
+          <li><strong>用户侧</strong>: 连接、表达、娱乐、信息获取</li>
+          <li><strong>广告主侧</strong>: 精准触达、需求创造、品牌建设</li>
+          <li><strong>创作者侧</strong>: 变现工具、粉丝积累、IP孵化</li>
+          <li><strong>商户侧</strong>: 流量获取、用户运营、即时转化</li>
+        </ul>
+      </div>
+      <div class="card">
+        <strong>商业化模式 Monetization Models</strong>
+        <ul style="margin: 0.5rem 0 0 1.25rem; line-height: 1.7;">
+          <li><strong>广告</strong>: 信息流、开屏、搜索 ($740B市场)</li>
+          <li><strong>电商</strong>: 直播带货、种草导流 (中国$3.5万亿)</li>
+          <li><strong>订阅</strong>: 会员制、付费内容 (Netflix模式)</li>
+          <li><strong>增值服务</strong>: 虚拟礼物、打赏、功能订阅</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ═══════════ §2 市场规模 ═══════════ -->
+    <div class="section-header" id="market-size">
+      <h2><span class="section-num">02</span>Market Size<span class="zh">市场规模 &mdash; 全球与中国双视角</span></h2>
+    </div>
+
+    <!-- Global Stats -->
+    <h3 style="color:var(--text);margin:1.5rem 0 0.75rem;font-size:1.1rem;">全球市场 Global Market (2024-2025)</h3>
+    
+    <div class="stats-strip">
+      <div class="stat-item"><span class="stat-value">51.7亿</span> <span class="stat-label">全球社交用户</span></div>
+      <div class="stat-item"><span class="stat-value">$740B</span> <span class="stat-label">数字广告支出</span></div>
+      <div class="stat-item"><span class="stat-value">$230B</span> <span class="stat-label">社交广告份额</span></div>
+      <div class="stat-item"><span class="stat-value">2h 23m</span> <span class="stat-label">日均使用时长</span></div>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>指标 Metric</th><th>数据 Value</th><th>来源 Source</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>全球社交媒体用户 Global Social Users</td><td><strong>51.7亿</strong> (64%渗透率)</td><td>DataReportal 2024</td></tr>
+        <tr><td>全球数字广告支出 Global Digital Ad Spend</td><td><strong>$740B</strong> (+13.8% YoY)</td><td>eMarketer 2024</td></tr>
+        <tr><td>社交平台广告占比 Social Ad Share</td><td><strong>~$230B</strong> (31%)</td><td>Industry Estimate</td></tr>
+        <tr><td>短视频市场规模 Short Video Market</td><td><strong>$300B+</strong></td><td>含广告+电商+直播</td></tr>
+        <tr><td>用户日均时长 Daily Usage</td><td><strong>2h 23min</strong></td><td>社交+短视频合计</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="color:var(--text);margin:1.5rem 0 0.75rem;font-size:1.1rem;">区域分布 Regional Distribution</h3>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>区域 Region</th><th>用户量 Users</th><th>特征 Characteristics</th><th>ARPU潜力</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>亚太 APAC</td><td>26.8亿 (52%)</td><td>移动优先，短视频主导</td><td>$$$ (增长中)</td></tr>
+        <tr><td>中东非洲 MEA</td><td>6.2亿</td><td>年轻人口，渗透率提升</td><td>$$ (潜力大)</td></tr>
+        <tr><td>拉美 LATAM</td><td>4.9亿</td><td>WhatsApp/TikTok增长快</td><td>$$</td></tr>
+        <tr><td>欧洲 Europe</td><td>4.5亿</td><td>GDPR严格，增长放缓</td><td>$$$</td></tr>
+        <tr><td>北美 North America</td><td>3.1亿</td><td>ARPU最高</td><td>$$$$</td></tr>
+      </tbody>
+    </table>
+
+    <!-- China Stats -->
+    <h3 style="color:var(--purple);margin:2rem 0 0.75rem;font-size:1.1rem;">中国市场 China Market (2024-2025)</h3>
+    
+    <div class="stats-strip" style="border-color: var(--purple);">
+      <div class="stat-item" style="color:var(--purple);"><span class="stat-value">11亿</span> <span class="stat-label">网民规模</span></div>
+      <div class="stat-item" style="color:var(--purple);"><span class="stat-value">10.5亿</span> <span class="stat-label">短视频用户</span></div>
+      <div class="stat-item" style="color:var(--purple);"><span class="stat-value">¥1.2万亿</span> <span class="stat-label">数字广告 ($165B)</span></div>
+      <div class="stat-item" style="color:var(--purple);"><span class="stat-value">¥3.5万亿</span> <span class="stat-label">抖音电商GMV</span></div>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>指标 Metric</th><th>数据 Value</th><th>备注 Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>网民规模 Internet Users</td><td><strong>11亿</strong> (2024.6)</td><td>CNNIC第54次报告</td></tr>
+        <tr><td>短视频用户 Short Video Users</td><td><strong>10.5亿</strong> (95.5%使用率)</td><td>QuestMobile 2024</td></tr>
+        <tr><td>即时通信 IM Users</td><td><strong>10.4亿</strong></td><td>微信+QQ主导</td></tr>
+        <tr><td>直播用户 Live Streaming</td><td><strong>8.0亿</strong></td><td>电商直播占主导</td></tr>
+        <tr><td>数字广告 Digital Advertising</td><td><strong>¥1.2万亿</strong></td><td>~$165B USD</td></tr>
+      </tbody>
+    </table>
+
+    <h4 style="color:var(--text);margin:1.25rem 0 0.5rem;">中国用户时长分布 Time Distribution (日均 Minutes)</h4>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>品类 Category</th><th>时长 Minutes</th><th>代表平台 Platforms</th><th>趋势 Trend</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>短视频 Short Video</td><td><strong>156</strong></td><td>抖音+快手</td><td class="positive">↑ 持续增长</td></tr>
+        <tr><td>即时通讯 Instant Messaging</td><td><strong>97</strong></td><td>微信</td><td class="neutral">→ 基本稳定</td></tr>
+        <tr><td>综合资讯 News/Aggregation</td><td><strong>67</strong></td><td>公众号/视频号</td><td class="neutral">→ 缓慢下滑</td></tr>
+        <tr><td>在线视频 Online Video</td><td><strong>58</strong></td><td>长视频平台</td><td class="negative">↓ 持续下降</td></tr>
+      </tbody>
+    </table>
+
+    <p class="small muted" style="margin-top:0.75rem;">来源: QuestMobile《2024中国移动互联网半年大报告》| Source: QuestMobile 2024H1 Report</p>
+
+    <!-- ═══════════ §3 竞争格局 ═══════════ -->
+    <div class="section-header" id="competitive">
+      <h2><span class="section-num">03</span>Competitive Landscape<span class="zh">竞争格局 &mdash; 全球与中国双寡头</span></h2>
+    </div>
+
+    <h3 style="color:var(--text);margin:1.5rem 0 0.75rem;font-size:1.1rem;">全球前5大玩家 Global Top 5 (2024)</h3>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>排名</th><th>平台 Platform</th><th>MAU</th><th>核心护城河 Moat</th><th>2024广告收入</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><strong>Meta</strong> (FB+IG+WA)</td>
+          <td><strong>30.3亿</strong></td>
+          <td>网络效应+算法+元宇宙布局</td>
+          <td><strong>$164B</strong></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><strong>TikTok</strong> (抖音国际)</td>
+          <td><strong>15.8亿</strong></td>
+          <td>算法推荐+创作者生态+电商闭环</td>
+          <td><strong>~$30B</strong></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><strong>YouTube</strong> (Google)</td>
+          <td><strong>25.6亿</strong></td>
+          <td>搜索整合+长视频+P2P分成</td>
+          <td><strong>$31.5B</strong></td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td><strong>Snapchat</strong></td>
+          <td><strong>8.5亿</strong></td>
+          <td>年轻用户+AR相机+私密社交</td>
+          <td><strong>$4.6B</strong></td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td><strong>X/Twitter</strong></td>
+          <td><strong>6.1亿</strong></td>
+          <td>实时信息+名人效应</td>
+          <td><strong>~$2.5B</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="advisory-box" style="margin-top:1rem; border-left-color: var(--knowledge); background: rgba(91, 155, 213, 0.05);">
+      <strong style="color:var(--knowledge);">Meta护城河深度解析:</strong><br>
+      • <strong>网络效应密度</strong>: FB 20年关系链沉淀，迁移成本极高<br>
+      • <strong>数据飞轮</strong>: 30亿用户×多产品矩阵训练算法<br>
+      • <strong>资本壁垒</strong>: 年CAPEX $350-400亿 (AI+元宇宙)<br>
+      <span class="zh-inline">Meta Moat: 20 years of FB relationship chains = high migration cost. Data flywheel: 3B users × multi-product matrix trains algorithms. Capital barrier: $350-400B annual CAPEX for AI + metaverse.</span>
+    </div>
+
+    <h3 style="color:var(--purple);margin:2rem 0 0.75rem;font-size:1.1rem;">中国前5大玩家 China Top 5 (2024)</h3>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>排名</th><th>平台 Platform</th><th>DAU/MAU</th><th>核心模式 Model</th><th>2024收入估算</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><strong>微信</strong> WeChat</td>
+          <td>DAU <strong>8.5亿</strong></td>
+          <td>超级App+社交关系链+支付</td>
+          <td><strong>¥6,000亿+</strong></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><strong>抖音</strong> Douyin</td>
+          <td>DAU <strong>7.5亿</strong></td>
+          <td>算法推荐+直播电商+本地生活</td>
+          <td><strong>¥5,000亿+</strong></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><strong>快手</strong> Kuaishou</td>
+          <td>DAU <strong>3.9亿</strong></td>
+          <td>信任电商+下沉市场+短剧</td>
+          <td><strong>¥1,200亿</strong></td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td><strong>B站</strong> Bilibili</td>
+          <td>DAU <strong>1.1亿</strong></td>
+          <td>年轻社区+PUGV+游戏联运</td>
+          <td><strong>¥250亿</strong></td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td><strong>小红书</strong> RED</td>
+          <td>DAU <strong>1.2亿</strong></td>
+          <td>种草社区+生活方式电商</td>
+          <td><strong>¥400亿+</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4 style="color:var(--text);margin:1.25rem 0 0.5rem;">双寡头格局深度分析 WeChat vs Douyin</h4>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>维度 Dimension</th><th>微信生态 WeChat</th><th>抖音生态 Douyin</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>流量逻辑</strong></td><td>关系链分发 (私域 Private)</td><td>算法分发 (公域 Public)</td></tr>
+        <tr><td><strong>用户心智</strong></td><td>"用"工具 → "看"内容</td><td>"刷"娱乐 → "买"商品</td></tr>
+        <tr><td><strong>商业化路径</strong></td><td>广告+游戏+金融+企业服务</td><td>广告+电商+本地生活</td></tr>
+        <tr><td><strong>创作者变现</strong></td><td>公众号+视频号+小程序</td><td>直播打赏+带货+星图广告</td></tr>
+        <tr><td><strong>2024关键战役</strong></td><td>视频号商业化加速</td><td>货架电商+抖音超市</td></tr>
+      </tbody>
+    </table>
+
+    <p class="small muted" style="margin-top:0.75rem;">来源: 36Kr《2024微信视频号商业化的关键一役》, 晚点LatePost《抖音电商的货架革命》</p>
+
+    <!-- ═══════════ §4 关键趋势 ═══════════ -->
+    <div class="section-header" id="trends">
+      <h2><span class="section-num">04</span>Key Trends<span class="zh">关键趋势 (2024-2025) &mdash; 五大结构性变化</span></h2>
+    </div>
+
+    <div class="trend-card">
+      <div class="trend-title">趋势 1: AI原生内容生产 AI-Native Content Creation</div>
+      <table class="data-table" style="margin: 0;">
+        <thead>
+          <tr><th>维度</th><th>进展</th><th>影响</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>技术</td><td>Sora/可灵/即梦等视频生成模型</td><td>内容生产成本↓90%</td></tr>
+          <tr><td>应用</td><td>TikTok Symphony, Meta Movie Gen</td><td>广告素材自动生成</td></tr>
+          <tr><td>平台策略</td><td>抖音"即创"工具, 剪映AI功能</td><td>降低创作者门槛</td></tr>
+          <tr><td>风险</td><td>深度伪造、版权争议</td><td>监管框架待完善</td></tr>
+        </tbody>
+      </table>
+      <p class="small muted" style="margin-top:0.75rem; border-left: 2px solid var(--purple); padding-left: 0.75rem;">
+        "2024年是AI视频元年，2025年将出现首个AI原生爆款IP" —— 极客公园《AI视频创业地图》
+      </p>
+    </div>
+
+    <div class="trend-card">
+      <div class="trend-title">趋势 2: 短视频电商全球化 Short-Video E-commerce Globalization</div>
+      <table class="data-table" style="margin: 0;">
+        <thead>
+          <tr><th>区域</th><th>平台</th><th>2024 GMV</th><th>模式</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>中国</td><td>抖音电商</td><td><strong>¥3.5万亿</strong></td><td>直播+货架双轮驱动</td></tr>
+          <tr><td>东南亚</td><td>TikTok Shop</td><td><strong>$150B</strong></td><td>全托管+本地商家</td></tr>
+          <tr><td>美国</td><td>TikTok Shop</td><td><strong>$50B目标</strong></td><td>跨境+本土履约</td></tr>
+          <tr><td>中东</td><td>快手Kwai</td><td><strong>$10B</strong></td><td>轻资产运营</td></tr>
+        </tbody>
+      </table>
+      <p class="small muted" style="margin-top:0.5rem;">
+        <strong>关键变化</strong>: 从"内容电商"到"全域电商"，抖音商城独立DAU破1.5亿
+      </p>
+    </div>
+
+    <div class="trend-card">
+      <div class="trend-title">趋势 3: 私密社交与反算法 Private Social & Anti-Algorithm</div>
+      <div class="grid-2" style="gap: 1rem;">
+        <div>
+          <table class="data-table" style="margin: 0;">
+            <thead>
+              <tr><th>现象</th><th>代表产品</th><th>用户动机</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>密友社交</td><td>IG Close Friends, 抖音密友</td><td>逃离表演压力</td></tr>
+              <tr><td>匿名社区</td><td>NGL, Sendit</td><td>真实表达需求</td></tr>
+              <tr><td>反推荐设计</td><td>BeReal, Locket</td><td>对抗信息茧房</td></tr>
+              <tr><td>微信状态</td><td>弱化点赞数</td><td>降低社交焦虑</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <strong>核心洞察:</strong>
+          <p class="small">用户对"被动消费"(算法推荐)和"主动社交"(关系链)的需求正在分化。平台需要在"效率"与"温度"之间寻找新平衡点。</p>
+          <span class="zh-inline small">Users' needs for "passive consumption" (algorithm) and "active social" (relationships) are diverging. Platforms need new balance between "efficiency" and "warmth".</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="trend-card">
+      <div class="trend-title">趋势 4: 多模态超级App演进 Multi-modal Super App Evolution</div>
+      <div class="grid-2" style="gap: 1.5rem; margin-top: 0.75rem;">
+        <div>
+          <strong style="color: var(--green);">微信进化路径 WeChat Evolution:</strong>
+          <div style="font-family: monospace; font-size: 0.8rem; line-height: 1.6; margin-top: 0.5rem;">
+            2011 即时通讯<br>
+            → 2013 公众号(内容)<br>
+            → 2014 支付<br>
+            → 2017 小程序(服务)<br>
+            → 2020 视频号(短视频)<br>
+            → 2024 AI搜索
+          </div>
+        </div>
+        <div>
+          <strong style="color: var(--accent);">抖音进化路径 Douyin Evolution:</strong>
+          <div style="font-family: monospace; font-size: 0.8rem; line-height: 1.6; margin-top: 0.5rem;">
+            2016 音乐短视频<br>
+            → 2018 直播<br>
+            → 2020 电商<br>
+            → 2022 本地生活<br>
+            → 2024 搜索+AI助手
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="trend-card">
+      <div class="trend-title">趋势 5: 创作者经济分层 Creator Economy Stratification</div>
+      <table class="data-table" style="margin: 0;">
+        <thead>
+          <tr><th>层级</th><th>粉丝量</th><th>变现模式</th><th>平台策略</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>头部 (0.1%)</td><td>1000万+</td><td>品牌代言、自有品牌</td><td>签约独家、定制内容</td></tr>
+          <tr><td>腰部 (5%)</td><td>100-1000万</td><td>直播带货、广告接单</td><td>流量扶持、培训体系</td></tr>
+          <tr><td>尾部 (30%)</td><td>10-100万</td><td>打赏、中视频计划</td><td>算法普惠、创作工具</td></tr>
+          <tr><td>素人 (64.9%)</td><td>&lt;10万</td><td>种草分成、任务奖励</td><td>降低门槛、AI辅助</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ═══════════ §5 中国特色 ═══════════ -->
+    <div class="section-header" id="china">
+      <h2><span class="section-num">05</span>China Characteristics<span class="zh">中国特色 &mdash; 与全球核心差异</span></h2>
+    </div>
+
+    <div class="card" style="border-left: 3px solid var(--purple);">
+      <strong>中国 vs 全球: 结构性差异 China vs Global: Structural Differences</strong>
+      <table class="data-table" style="margin-top: 0.75rem;">
+        <thead>
+          <tr><th>维度</th><th>中国 China</th><th>全球 Global</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>平台形态</strong></td><td>超级App (All-in-One)</td><td>功能垂直分工</td></tr>
+          <tr><td><strong>社交起点</strong></td><td>移动原生 (2011微信)</td><td>PC迁移 (FB 2004)</td></tr>
+          <tr><td><strong>内容消费</strong></td><td>算法推荐主导 (公域)</td><td>关系链+订阅 (私域)</td></tr>
+          <tr><td><strong>商业化</strong></td><td>电商/直播内嵌</td><td>广告为主，电商外链</td></tr>
+          <tr><td><strong>支付整合</strong></td><td>微信支付/支付宝深度绑定</td><td>Apple Pay/PayPal相对独立</td></tr>
+          <tr><td><strong>内容监管</strong></td><td>前置审核+实时巡查</td><td>事后举报为主</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="color:var(--purple);margin:1.5rem 0 0.75rem;font-size:1.1rem;">中国独特模式 Unique Chinese Models</h3>
+
+    <div class="grid-3">
+      <div class="card">
+        <strong>模式一: 私域运营体系</strong>
+        <div class="card-desc">
+          <p>微信个人号→社群→小程序→视频号闭环</p>
+          <p><strong>代表:</strong> 完美日记、瑞幸咖啡的私域模型</p>
+          <p class="small muted">来源: 36Kr《私域流量运营白皮书2024》</p>
+        </div>
+      </div>
+      <div class="card">
+        <strong>模式二: 短剧付费</strong>
+        <div class="card-desc">
+          <p>2024市场规模: <strong>¥500亿</strong></p>
+          <p>前10集免费+后续按集付费/会员</p>
+          <p><strong>出海:</strong> ReelShort、DramaBox在欧美下载量Top 100</p>
+        </div>
+      </div>
+      <div class="card">
+        <strong>模式三: 本地生活直播</strong>
+        <div class="card-desc">
+          <p>抖音"团购直播"GMV 2024年目标<strong>¥3000亿</strong></p>
+          <p>美团反击: 直播+短视频内容化改造</p>
+          <p class="small muted">来源: 晚点LatePost</p>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="color:var(--purple);margin:1.5rem 0 0.75rem;font-size:1.1rem;">监管影响 Regulatory Impact</h3>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>政策 Policy</th><th>时间</th><th>影响 Impact</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>算法推荐管理规定</td><td>2022.3</td><td>必须提供"关闭个性化推荐"选项</td></tr>
+        <tr><td>未成年人保护</td><td>持续强化</td><td>游戏/直播时长限制，打赏限额</td></tr>
+        <tr><td>数据安全法/个保法</td><td>2021-2022</td><td>数据本地化，跨境传输审批</td></tr>
+        <tr><td>平台经济反垄断</td><td>2021至今</td><td>禁止"二选一"，开放外链</td></tr>
+        <tr><td>生成式AI服务管理</td><td>2023.8</td><td>大模型备案制，内容标识</td></tr>
+        <tr><td>微短剧专项整治</td><td>2023-2024</td><td>小程序短剧先审后播，充值限额</td></tr>
+      </tbody>
+    </table>
+
+    <div class="advisory-box" style="margin-top: 1rem; border-left-color: var(--orange); background: rgba(255, 152, 0, 0.05);">
+      <strong style="color:var(--orange);">监管下的平台应对:</strong>
+      <ul style="margin: 0.5rem 0 0 1.25rem; line-height: 1.8;">
+        <li>抖音: 青少年模式时长锁死<strong>40分钟/天</strong></li>
+        <li>微信: 公众号原创保护+洗稿治理</li>
+        <li>B站: 弹幕先审后播，UP主实名认证</li>
+      </ul>
+    </div>
+
+    <!-- ═══════════ §6 投资信号 ═══════════ -->
+    <div class="section-header" id="signals">
+      <h2><span class="section-num">06</span>Investment Signals<span class="zh">投资信号 &mdash; 扩张与收缩指标</span></h2>
+    </div>
+
+    <div class="signal-grid">
+      <div class="signal-box expansion">
+        <h4>&#9650; 扩张信号 Expansion Signals</h4>
+        <table class="data-table small-table" style="margin: 0;">
+          <tbody>
+            <tr><td><strong>用户增长</strong></td><td>DAU增速&gt;15%，新市场MAU破亿</td></tr>
+            <tr><td><strong>时长渗透</strong></td><td>单日&gt;120分钟且持续增长</td></tr>
+            <tr><td><strong>商业化效率</strong></td><td>ARPU增速&gt;GMV增速，take rate提升</td></tr>
+            <tr><td><strong>创作者生态</strong></td><td>万粉作者数增长&gt;50%，中位数收入上升</td></tr>
+            <tr><td><strong>技术创新</strong></td><td>AI功能DAU渗透率&gt;30%，用户留存提升</td></tr>
+            <tr><td><strong>跨界成功</strong></td><td>新业务线收入占比&gt;10%且增速&gt;50%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="signal-box contraction">
+        <h4>&#9660; 收缩信号 Contraction Signals</h4>
+        <table class="data-table small-table" style="margin: 0;">
+          <tbody>
+            <tr><td style="color:var(--red);"><strong>用户流失</strong></td><td>DAU连续2季度下滑 &rarr; <span class="red">红线</span></td></tr>
+            <tr><td style="color:var(--orange);"><strong>时长下降</strong></td><td>日均同比下降&gt;10% &rarr; <span class="orange">黄线</span></td></tr>
+            <tr><td style="color:var(--red);"><strong>创作者出走</strong></td><td>停更率&gt;20% &rarr; <span class="red">红线</span></td></tr>
+            <tr><td style="color:var(--red);"><strong>监管罚款</strong></td><td>年收入3%+罚款 &rarr; <span class="red">红线</span></td></tr>
+            <tr><td style="color:var(--orange);"><strong>技术代差</strong></td><td>竞品新功能渗透超3倍 &rarr; <span class="orange">黄线</span></td></tr>
+            <tr><td style="color:var(--red);"><strong>现金流</strong></td><td>FCF连续4季度为负 &rarr; <span class="red">红线</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <h3 style="color:var(--text);margin:1.5rem 0 0.75rem;font-size:1.1rem;">当前关键观察 (2024Q4) Current Key Observations</h3>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>平台</th><th>扩张信号 &#9650;</th><th>收缩风险 &#9660;</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Meta</strong></td>
+          <td>Reels时长超TikTok，AI广告ROI+20%</td>
+          <td>元宇宙亏损持续，监管诉讼</td>
+        </tr>
+        <tr>
+          <td><strong>TikTok</strong></td>
+          <td>美国电商GMV Q3环比+200%</td>
+          <td>美国禁令风险，欧洲数据罚款</td>
+        </tr>
+        <tr>
+          <td><strong>微信</strong></td>
+          <td>视频号广告收入同比+80%</td>
+          <td>年轻用户时长被抖音挤压</td>
+        </tr>
+        <tr>
+          <td><strong>抖音</strong></td>
+          <td>商城独立DAU破1.5亿</td>
+          <td>直播电商增速放缓至30%</td>
+        </tr>
+        <tr>
+          <td><strong>B站</strong></td>
+          <td>游戏《三谋》收入超预期</td>
+          <td>广告加载率已近上限</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ═══════════ §7 风险分析 ═══════════ -->
+    <div class="section-header" id="risks">
+      <h2><span class="section-num">07</span>Risk Analysis<span class="zh">风险分析 &mdash; 监管/竞争/技术三维</span></h2>
+    </div>
+
+    <h3 style="color:var(--red);margin:1rem 0 0.75rem;font-size:1.1rem;">7.1 监管风险 Regulatory (概率: 高)</h3>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>风险事件</th><th>影响平台</th><th>潜在损失</th></tr>
+      </thead>
+      <tbody>
+        <tr style="background: rgba(244, 67, 54, 0.1);">
+          <td>TikTok美国强制出售/禁令</td>
+          <td>ByteDance</td>
+          <td><strong>$100B+估值损失，15亿用户</strong></td>
+        </tr>
+        <tr>
+          <td>欧盟DSA/DMA罚款</td>
+          <td>Meta, TikTok, X</td>
+          <td>全球收入6%罚款</td>
+        </tr>
+        <tr>
+          <td>中国数据出境限制</td>
+          <td>所有出海平台</td>
+          <td>合规成本+业务延迟</td>
+        </tr>
+        <tr>
+          <td>生成式AI内容责任</td>
+          <td>所有平台</td>
+          <td>诉讼风险，保险成本</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="color:var(--orange);margin:1.5rem 0 0.75rem;font-size:1.1rem;">7.2 竞争风险 Competitive (概率: 中高)</h3>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>威胁</th><th>描述</th><th>受影响者</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>AI搜索替代</strong></td>
+          <td>Perplexity/ChatGPT减少信息类搜索，降低社交发现需求</td>
+          <td>微博、Twitter/X</td>
+        </tr>
+        <tr>
+          <td><strong>下一代硬件</strong></td>
+          <td>Apple Vision Pro/AR眼镜改变内容消费场景</td>
+          <td>手机依赖型平台</td>
+        </tr>
+        <tr>
+          <td><strong>去中心化社交</strong></td>
+          <td>Bluesky, Mastodon, Nostr分流极端用户</td>
+          <td>Twitter/X, 部分社区</td>
+        </tr>
+        <tr>
+          <td><strong>垂直社区崛起</strong></td>
+          <td>Discord, Geneva替代泛社交</td>
+          <td>Facebook Groups</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="color:var(--knowledge);margin:1.5rem 0 0.75rem;font-size:1.1rem;">7.3 技术替代风险 Technological (概率: 中)</h3>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>技术变革</th><th>时间线</th><th>影响</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>AI Agent自主社交</td>
+          <td>2025-2027</td>
+          <td>人机交互替代人人交互？</td>
+        </tr>
+        <tr>
+          <td>脑机接口内容输入</td>
+          <td>2028+</td>
+          <td>文字/视频内容生产革命</td>
+        </tr>
+        <tr>
+          <td>全真互联网/元宇宙</td>
+          <td>不确定</td>
+          <td>当前投入回报比极低</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="color:var(--text);margin:1.5rem 0 0.75rem;font-size:1.1rem;">风险矩阵 Risk Matrix</h3>
+
+    <div class="risk-matrix">
+```
+影响程度 │ 高 │  TikTok禁令    AI搜索替代
+         │    │      ●            ●
+       中 │    │  监管罚款    垂直社区分流   硬件变革
+         │    │      ●           ●          ●
+       低 │    │ 去中心化社交    脑机接口
+         │    │        ●           ●
+         └────────────────────────────────────
+                低      中      高    发生概率
+```    </div>
+
+    <!-- ═══════════ §8 节点关系 ═══════════ -->
+    <div class="section-header" id="relationships">
+      <h2><span class="section-num">08</span>Node Interconnections<span class="zh">与其他节点的关系 &mdash; 生态系统依赖图谱</span></h2>
+    </div>
+
+    <h3 style="color:var(--text);margin:1rem 0 0.75rem;font-size:1.1rem;">上游依赖 Upstream Dependencies</h3>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>节点 Node</th><th>依赖关系 Dependency</th><th>关键变量 Key Variable</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>云计算/AI算力</strong></td>
+          <td>推荐算法训练、视频渲染、AIGC</td>
+          <td>GPU供应价格、模型训练成本</td>
+        </tr>
+        <tr>
+          <td><strong>智能终端</strong></td>
+          <td>手机出货量、AR/VR设备渗透</td>
+          <td>iOS/Android政策、硬件创新周期</td>
+        </tr>
+        <tr>
+          <td><strong>电信运营商</strong></td>
+          <td>流量资费、5G覆盖</td>
+          <td>提速降费政策、边缘计算部署</td>
+        </tr>
+        <tr>
+          <td><strong>支付体系</strong></td>
+          <td>电商闭环、创作者变现</td>
+          <td>费率、跨境支付合规</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="color:var(--text);margin:1.5rem 0 0.75rem;font-size:1.1rem;">下游延伸 Downstream Extensions</h3>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>节点 Node</th><th>延伸模式 Extension Mode</th><th>典型收入占比</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>电商零售</strong></td>
+          <td>直播带货、内容种草、小程序商城</td>
+          <td>抖音50%+，快手40%+</td>
+        </tr>
+        <tr>
+          <td><strong>本地生活</strong></td>
+          <td>团购、到店、外卖</td>
+          <td>抖音10%，美团核心</td>
+        </tr>
+        <tr>
+          <td><strong>游戏</strong></td>
+          <td>买量发行、小游戏、直播联运</td>
+          <td>腾讯50%+，B站30%</td>
+        </tr>
+        <tr>
+          <td><strong>企业服务</strong></td>
+          <td>私域运营工具、营销SaaS</td>
+          <td>微信10%</td>
+        </tr>
+        <tr>
+          <td><strong>金融科技</strong></td>
+          <td>支付、消费金融、保险</td>
+          <td>蚂蚁/腾讯核心</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="color:var(--purple);margin:1.5rem 0 0.75rem;font-size:1.1rem;">生态系统位图谱 Ecosystem Map</h3>
+
+    <div class="ecosystem-map">
+```
+┌─────────────────────────────────────────────────┐
+│              上游基础设施层                       │
+│  云计算(AWS/Azure/阿里云)  AI算力(NVIDIA/华为)   │
+│  终端厂商(Apple/小米/华为)  电信运营商(5G)       │
+└─────────────────────────────────────────────────┘
+                      ↓
+┌─────────────────────────────────────────────────┐
+│         本节点: 社交与内容 Social & Content       │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐  │
+│  │  关系社交  │  │ 算法内容  │  │  兴趣社区  │  │
+│  │微信/Meta │  │抖音/TikTok│  │B站/Reddit │  │
+│  └───────────┘  └───────────┘  └───────────┘  │
+└─────────────────────────────────────────────────┘
+                      ↓
+      ┌─────────┬─────────┬─────────┬─────────┐
+      ↓         ↓         ↓         ↓         ↓
+   ┌───────┐ ┌───────┐ ┌───────┐ ┌───────┐ ┌───────┐
+   │ 电商  │ │本地生活│ │ 游戏  │ │企业服务│ │金融科技│
+   │ 零售  │ │ O2O   │ │ 娱乐  │ │ SaaS  │ │ 支付  │
+   └───────┘ └───────┘ └───────┘ └───────┘ └───────┘
+```    </div>
+
+    <h3 style="color:var(--text);margin:1.5rem 0 0.75rem;font-size:1.1rem;">关键飞轮效应 Key Flywheel Effects</h3>
+
+    <div class="card" style="border-left: 3px solid var(--accent);">
+      <strong>抖音-电商飞轮 Douyin-Commerce Flywheel:</strong>
+      <div style="font-family: monospace; font-size: 0.85rem; line-height: 1.8; margin-top: 0.75rem;">
+        内容流量 → 兴趣激发 → 即时转化 → 数据反馈 → 算法优化 → 更精准内容<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↺
+      </div>
+      <p class="small muted" style="margin-top: 0.5rem;">该飞轮使抖音电商take rate (3-5%) 显著高于传统电商 (1-2%)</p>
+    </div>
+
+    <div class="card" style="border-left: 3px solid var(--green); margin-top: 1rem;">
+      <strong>微信-支付锁定效应 WeChat-Payment Lock-in:</strong>
+      <div style="font-family: monospace; font-size: 0.85rem; line-height: 1.8; margin-top: 0.75rem;">
+        社交关系链 → 红包/转账习惯 → 线下支付覆盖 → 商户接入 → 生活服务整合<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↺
+      </div>
+      <p class="small muted" style="margin-top: 0.5rem;">微信支付线下份额~40%，为小程序生态提供基础设施</p>
+    </div>
+
+    <!-- ═══════════ §9 信息源 ═══════════ -->
+    <div class="section-header" id="sources">
+      <h2><span class="section-num">09</span>Sources<span class="zh">核心信息源</span></h2>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>类型</th><th>来源</th><th>代表报告</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td rowspan="2">中文深度</td>
+          <td>晚点LatePost</td>
+          <td>《Meta的AI豪赌》《抖音电商的货架革命》</td>
+        </tr>
+        <tr>
+          <td>36Kr</td>
+          <td>年度行业白皮书、公司深度</td>
+        </tr>
+        <tr>
+          <td rowspan="2">全球数据</td>
+          <td>DataReportal</td>
+          <td>Digital 2024 Global Overview</td>
+        </tr>
+        <tr>
+          <td>eMarketer</td>
+          <td>全球数字广告预测</td>
+        </tr>
+        <tr>
+          <td>中国数据</td>
+          <td>QuestMobile</td>
+          <td>中国移动互联网报告</td>
+        </tr>
+        <tr>
+          <td>公司财报</td>
+          <td>Meta/Tencent/ByteDance</td>
+          <td>季度业绩、投资者日</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Footer -->
+    <div class="page-footer">
+      <a href="../internet_hub.html">&larr; Back to Internet Hub</a>
+      <div style="margin-top:0.5rem;">NODE 3: Social & Content &middot; Internet Research Hub &middot; 2026-03-22</div>
+    </div>
+
+  </main>
+
+  <!-- ===== Right Sidebar: Meta-cognitive ===== -->
+  <aside class="notes-sidebar">
+    <h4>Meta-cognitive 元思考</h4>
+
+    <div class="meta-note">
+      <div class="note-label pattern">Key Insight</div>
+      <p><strong>中美流量逻辑本质差异:</strong> 中国=算法分发(公域)，美国=关系链分发(私域)。这导致：1)中国平台电商内嵌，2)广告ROI计算方式不同，3)创作者变现路径不同。理解这个差异是理解整个社交内容行业的基础。</p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label strength">Chain Connection</div>
+      <p><strong>与Blockchain Hub的关系:</strong> 社交平台是加密叙事传播的主战场(Twitter/X→BTC叙事，Discord→DeFi社区)。内容创作者正在成为Web3与现实世界的连接点。稳定币为创作者经济提供跨境支付基础设施。</p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label risk">Data Gap</div>
+      <p><strong>数据透明度:</strong> ByteDance非上市公司，数据主要靠推测。微信广告收入拆分不透明。中国创作者经济规模难以准确量化。小红书DAU/MAU数据存在争议。</p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label suggestion">Next Step</div>
+      <p><strong>下一步:</strong> NODE 3框架已就位。需要深入的具体方向：</p>
+      <ul style="margin: 0.5rem 0 0 1.25rem; font-size: 0.85rem; line-height: 1.6;">
+        <li>1. 抖音 vs 快手下沉市场竞争深度分析</li>
+        <li>2. B站年轻用户货币化路径研究</li>
+        <li>3. TikTok Shop美国市场进入策略</li>
+        <li>4. AI对内容平台竞争格局影响</li>
+      </ul>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label coverage">Coverage Gap</div>
+      <p><strong>待补充节点内认知:</strong></p>
+      <ul style="margin: 0.5rem 0 0 1.25rem; font-size: 0.85rem; line-height: 1.6;">
+        <li>• 缺少：Twitter/X新管理层战略分析</li>
+        <li>• 缺少：Snapchat AR战略深度研究</li>
+        <li>• 缺少：微博转型困境与机会</li>
+        <li>• 缺少：YouTube电商化进展</li>
+      </ul>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label warning">China Watch</div>
+      <p><strong>中国观察重点:</strong></p>
+      <ul style="margin: 0.5rem 0 0 1.25rem; font-size: 0.85rem; line-height: 1.6;">
+        <li>• 视频号商业化是否威胁抖音？</li>
+        <li>• 小红书电商化能否成功？</li>
+        <li>• AI监管对中国内容平台的影响</li>
+        <li>• 短剧出海能否复制中国模式？</li>
+      </ul>
+    </div>
+  </aside>
+
+</div>
+
+<!-- Sidebar active state -->
+<script>
+const sections = document.querySelectorAll('.section-header[id]');
+const navLinks = document.querySelectorAll('.sidebar nav ul li a[href^="#"]');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + entry.target.id) link.classList.add('active');
+      });
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

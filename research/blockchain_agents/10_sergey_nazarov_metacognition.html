@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sergey Nazarov — Metacognition 元思考过程</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  .meta-card { border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:1.1rem 1.3rem; margin-bottom:0.75rem; background:var(--bg-surface); }
+  .meta-card h3 { font-size:0.95rem; font-weight:590; margin-bottom:0.5rem; color:var(--text-primary); }
+  .meta-card p { font-size:0.82rem; color:var(--text-secondary); line-height:1.6; margin-bottom:0.5rem; }
+  .bias-tag { display:inline-block; padding:0.15rem 0.5rem; border-radius:4px; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
+  .bias-confirmed { background:rgba(76,175,80,0.15); color:var(--tier-high); }
+  .bias-warning { background:rgba(255,193,7,0.15); color:var(--tier-medium); }
+  .bias-critical { background:rgba(244,67,54,0.15); color:var(--tier-low); }
+  .confidence-bar { display:flex; align-items:center; gap:0.5rem; margin:0.5rem 0; }
+  .conf-track { flex:1; height:6px; background:var(--border-subtle); border-radius:3px; overflow:hidden; }
+  .conf-fill { height:100%; border-radius:3px; }
+  .conf-label { font-size:0.72rem; font-weight:590; color:var(--text-tertiary); min-width:2.5rem; }
+  .gap-item { border-left:3px solid var(--tier-low); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(244,67,54,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .cross-ref { border-left:3px solid var(--knowledge); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(91,155,213,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .decision-log { font-size:0.78rem; color:var(--text-tertiary); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:0.8rem 1rem; background:var(--bg-elevated); margin-bottom:0.75rem; }
+  body.embedded .sidebar { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+</style>
+</head>
+<body>
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="page-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Sergey Nazarov<br>Metacognition 元思考</div>
+    <h4>Contents</h4>
+    <nav><ul>
+      <li><a href="#selection">1 Selection 选择理由</a></li>
+      <li><a href="#biases">2 Biases 认知偏差</a></li>
+      <li><a href="#corrections">3 Corrections 纠正</a></li>
+      <li><a href="#gaps">4 Gaps 信息缺口</a></li>
+      <li><a href="#crossval">5 Cross-Validation 交叉验证</a></li>
+      <li><a href="#quality">6 Quality 质量评估</a></li>
+      <li><a href="#log">7 Decision Log 决策日志</a></li>
+    </ul></nav>
+    <h4>Related</h4>
+    <nav><ul>
+      <li><a href="10_sergey_nazarov.html">Sergey Nazarov Profile</a></li>
+      <li><a href="sources_10_nazarov_v4.html">Sources V4</a></li>
+    </ul></nav>
+  </aside>
+  <main class="main-content">
+    <header class="page-header">
+      <h1>Sergey Nazarov — Metacognition<span style="display:block;font-size:0.85rem;font-weight:400;color:var(--text-tertiary);margin-top:0.2rem;">元思考过程 — 研究中的认知审计</span></h1>
+      <p style="font-size:0.82rem;color:var(--text-quaternary);">Generated: 2026-03-22 &middot; Part of Blockchain Research Hub</p>
+    </header>
+
+    <section id="selection">
+      <div class="meta-card">
+        <h3>&sect;1 Selection 选择理由</h3>
+        <p><strong>Why Sergey Nazarov deserves a dedicated cognitive agent profile.</strong></p>
+        <p><strong>为什么Sergey Nazarov值得专门的认知代理人档案。</strong></p>
+        <p style="margin-top:0.75rem;">
+          <strong>1. Oracle Monopoly (预言机垄断)</strong><br>
+          Chainlink commands 70%+ DeFi oracle market share, making it the de facto infrastructure standard. Understanding Nazarov means understanding the backbone of DeFi safety.<br>
+          <em>Chainlink占据70%+的DeFi预言机市场份额，成为事实上的基础设施标准。理解Nazarov就是理解DeFi安全的支柱。</em>
+        </p>
+        <p>
+          <strong>2. Cross-Chain Infrastructure (跨链基础设施)</strong><br>
+          CCIP positions Chainlink as the "TCP/IP of blockchain connectivity." With SWIFT partnerships and 1000+ integrations, Nazarov's vision extends far beyond oracles.<br>
+          <em>CCIP将Chainlink定位为"区块链连接的TCP/IP"。通过SWIFT合作和1000+集成，Nazarov的愿景远超预言机。</em>
+        </p>
+        <p>
+          <strong>3. Token Economics Puzzle (代币经济学难题)</strong><br>
+          LINK presents a unique case where protocol success doesn't translate to token appreciation. This disconnect makes it a critical study in value capture mechanisms.<br>
+          <em>LINK呈现了一个独特案例：协议成功并未转化为代币升值。这种脱钩使其成为价值捕获机制的重要研究对象。</em>
+        </p>
+        <p>
+          <strong>4. High-Confidence Signal Source (高置信度信号源)</strong><br>
+          As a B档 Node 3 agent, Nazarov provides consistent market-moving signals through partnerships, product launches, and ecosystem expansions.<br>
+          <em>作为B档Node 3代理人，Nazarov通过合作、产品发布和生态扩展提供一致的市场驱动信号。</em>
+        </p>
+      </div>
+    </section>
+
+    <section id="biases">
+      <div class="meta-card">
+        <h3>&sect;2 Biases 认知偏差</h3>
+        
+        <div style="margin-bottom:1rem;">
+          <span class="bias-tag bias-critical">CRITICAL 严重</span>
+          <strong style="color:var(--text-primary);"> Overconfidence in Technology Superiority</strong><br>
+          <span style="color:var(--text-secondary);">Nazarov consistently emphasizes technical superiority as the primary competitive moat. This leads to underweighting market dynamics and competitor responses.</span><br>
+          <em style="color:var(--text-tertiary);">Nazarov一贯强调技术优越性作为主要竞争优势。这导致对市场动态和竞争对手反应的重视不足。</em>
+        </div>
+
+        <div style="margin-bottom:1rem;">
+          <span class="bias-tag bias-warning">WARNING 警告</span>
+          <strong style="color:var(--text-primary);"> Narrative-Capital Disconnect</strong><br>
+          <span style="color:var(--text-secondary);">LINK token exhibits strong narrative support but weak capital fundamentals. This creates persistent valuation gaps and speculative volatility.</span><br>
+          <em style="color:var(--text-tertiary);">LINK代币表现出强烈的叙事支持但疲弱的基本面。这造成了持续的估值差距和投机性波动。</em>
+        </div>
+
+        <div style="margin-bottom:1rem;">
+          <span class="bias-tag bias-warning">WARNING 警告</span>
+          <strong style="color:var(--text-primary);"> Institutional Validation Bias</strong><br>
+          <span style="color:var(--text-secondary);">SWIFT partnership is interpreted as institutional adoption signal, but PoC ≠ production deployment. Overreliance on "validation" announcements.</span><br>
+          <em style="color:var(--text-tertiary);">SWIFT合作被解读为机构采用信号，但PoC≠生产部署。过度依赖"验证"公告。</em>
+        </div>
+
+        <div style="margin-bottom:1rem;">
+          <span class="bias-tag bias-warning">WARNING 警告</span>
+          <strong style="color:var(--text-primary);"> Team Token Dumping Blindspot</strong><br>
+          <span style="color:var(--text-secondary);">Consistent LINK sales by team members create predictable sell pressure. This fundamental risk is often dismissed in bullish analyses.</span><br>
+          <em style="color:var(--text-tertiary);">团队成员持续出售LINK造成可预测的卖压。这种基本风险在乐观分析中常被忽视。</em>
+        </div>
+
+        <div>
+          <span class="bias-tag bias-confirmed">CONFIRMED 已确认</span>
+          <strong style="color:var(--text-primary);"> Ecosystem Lock-in Assumption</strong><br>
+          <span style="color:var(--text-secondary);">Network effects are real but not permanent. Pyth (Solana), API3, and Band demonstrate that alternatives can gain traction in specific verticals.</span><br>
+          <em style="color:var(--text-tertiary);">网络效应是真实的但并非永久。Pyth(Solana)、API3和Band表明替代方案可以在特定垂直领域获得吸引力。</em>
+        </div>
+      </div>
+    </section>
+
+    <section id="corrections">
+      <div class="meta-card">
+        <h3>&sect;3 Corrections 纠正</h3>
+        <p><strong>Corrective adjustments to compensate for identified biases.</strong></p>
+        <p><strong>补偿已识别偏差的纠正调整。</strong></p>
+        
+        <div style="margin-top:1rem;">
+          <p>
+            <strong>1. Technical Moat ≠ Market Moat</strong><br>
+            <span style="color:var(--text-secondary);">When evaluating Chainlink, separate technical assessment from investment thesis. A superior product doesn't guarantee superior returns if token economics remain broken.</span><br>
+            <em style="color:var(--text-tertiary);">评估Chainlink时，将技术评估与投资论点分开。如果代币经济学持续存在问题，优质产品不能保证优质回报。</em>
+          </p>
+          
+          <p>
+            <strong>2. Treat SWIFT as Option Value, Not Certainty</strong><br>
+            <span style="color:var(--text-secondary);">Assign probability-weighted value to institutional partnerships. Current SWIFT integration is speculative; don't extrapolate to certain adoption.</span><br>
+            <em style="color:var(--text-tertiary);">对机构合作赋予概率加权价值。当前SWIFT集成是投机性的；不要推断为确定的采用。</em>
+          </p>
+          
+          <p>
+            <strong>3. Monitor On-Chain Team Activity</strong><br>
+            <span style="color:var(--text-secondary);">Track large LINK transfers to exchanges as leading indicators of sell pressure. Build this into trading models as a systematic risk factor.</span><br>
+            <em style="color:var(--text-tertiary);">追踪大额LINK转账至交易所作为卖压的领先指标。将其纳入交易模型作为系统性风险因素。</em>
+          </p>
+          
+          <p>
+            <strong>4. Diversify Oracle Exposure</strong><br>
+            <span style="color:var(--text-secondary);">Don't concentrate oracle exposure in LINK alone. Pyth's Solana growth and API3's alternative approach warrant monitoring for diversification signals.</span><br>
+            <em style="color:var(--text-tertiary);">不要将预言机敞口仅集中在LINK。Pyth的Solana增长和API3的替代方案值得监控以获取多元化信号。</em>
+          </p>
+          
+          <p>
+            <strong>5. Staking Economics Maturity Check</strong><br>
+            <span style="color:var(--text-secondary);">Re-evaluate LINK investment thesis only after staking v0.2+ demonstrates measurable value capture. Until then, treat as narrative-driven asset.</span><br>
+            <em style="color:var(--text-tertiary);">仅在质押v0.2+证明可衡量的价值捕获后才重新评估LINK投资论点。在此之前，视为叙事驱动的资产。</em>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="gaps">
+      <div class="meta-card">
+        <h3>&sect;4 Gaps 信息缺口</h3>
+        <p><strong>Acknowledged information gaps requiring further research or external validation.</strong></p>
+        <p><strong>需要进一步研究或外部验证的已知信息缺口。</strong></p>
+        
+        <div class="gap-item">
+          <strong>[GAP-1] Team Token Allocation Transparency</strong><br>
+          ExactLINK token distribution among founding team, investors, and community reserves remains opaque. Unknown unlock schedule creates asymmetric risk.<br>
+          <em>创始团队、投资者和社区储备之间的LINK代币分配细节不透明。未知的解锁时间表造成不对称风险。</em>
+        </div>
+        
+        <div class="gap-item">
+          <strong>[GAP-2] CCIP Revenue Attribution</strong><br>
+          Cross-chain transaction fees from CCIP are not transparently reported. Hard to assess whether new product generates meaningful token value capture.<br>
+          <em>CCIP跨链交易费用未透明报告。难以评估新产品是否产生有意义的代币价值捕获。</em>
+        </div>
+        
+        <div class="gap-item">
+          <strong>[GAP-3] SWIFT Integration Timeline</strong><br>
+          No clear public timeline for SWIFT production deployment. PoC stage announcements lack specificity on scale and timeline.<br>
+          <em>SWIFT生产部署没有明确的公开时间表。PoC阶段公告缺乏规模和时间的具体细节。</em>
+        </div>
+        
+        <div class="gap-item">
+          <strong>[GAP-4] Competitive Response Capability</strong><br>
+          How will Chainlink respond if Pyth or other alternatives capture 20%+ market share in key verticals? No clear documented competitive strategy.<br>
+          <em>如果Pyth或其他替代方案在关键垂直领域占据20%+市场份额，Chainlink将如何应对？没有清晰记录的竞争策略。</em>
+        </div>
+        
+        <div class="gap-item">
+          <strong>[GAP-5] Staking Economic Model Viability</strong><br>
+          LINK staking rewards depend on network fees. If CCIP adoption is slower than expected, staking yields may be insufficient to attract meaningful participation.<br>
+          <em>LINK质押奖励取决于网络费用。如果CCIP采用慢于预期，质押收益率可能不足以吸引有意义的参与。</em>
+        </div>
+        
+        <div class="gap-item">
+          <strong>[GAP-6] Regulatory Exposure Assessment</strong><br>
+          Oracle infrastructure may face increased regulatory scrutiny as DeFi grows. No public legal/compliance framework documentation available.<br>
+          <em>随着DeFi增长，预言机基础设施可能面临加强的监管审查。没有公开的法律/合规框架文档。</em>
+        </div>
+        
+        <div class="gap-item">
+          <strong>[GAP-7] Sergey Nazarov Personal Holdings</strong><br>
+          Nazarov's personal LINK holdings and recent transaction history are unknown. Cannot assess insider alignment with token holders.<br>
+          <em>Nazarov的个人LINK持仓和近期交易历史未知。无法评估内部人士与代币持有人的利益一致性。</em>
+        </div>
+      </div>
+    </section>
+
+    <section id="crossval">
+      <div class="meta-card">
+        <h3>&sect;5 Cross-Validation 交叉验证</h3>
+        <p><strong>Triangulation with external sources to verify key judgments.</strong></p>
+        <p><strong>与外部来源三角验证以核实关键判断。</strong></p>
+        
+        <div class="cross-ref">
+          <strong>[CROSS-1] Messari Oracle Market Report 2025</strong><br>
+          Confirms Chainlink's 70%+ DeFi oracle dominance. Also notes that competing networks (Pyth, API3) show faster growth rates in specific verticals (perppetual futures, liquid staking).<br>
+          <em>确认Chainlink的70%+ DeFi预言机主导地位。同时指出竞争对手网络(Pyth, API3)在特定垂直领域(永续期货、流动性质押)显示更快增长率。</em>
+        </div>
+        
+        <div class="cross-ref">
+          <strong>[CROSS-2] DeFi Llama Oracle Tracking</strong><br>
+          Real-time data shows Chainlink feeds used by 85%+ of top 100 DeFi protocols by TVL. Network effects validated, but concentration risk is systemic.<br>
+          <em>实时数据显示Chainlink喂价被85%+的TVL前100 DeFi协议使用。网络效应得到验证，但集中风险是系统性的。</em>
+        </div>
+        
+        <div class="cross-ref">
+          <strong>[CROSS-3] Token Terminal Revenue Data</strong><br>
+          Chainlink reports $250M+ annual protocol revenue (2025). However, LINK token holders capture &lt;5% through staking. Confirms "fat protocol" thesis failure for LINK.<br>
+          <em>Chainlink报告2025年协议收入2.5亿美元+。然而，LINK代币持有人通过质押捕获&lt;5%。证实LINK的"胖协议"论点失败。</em>
+        </div>
+        
+        <div class="cross-ref">
+          <strong>[CROSS-4] SmartCon 2025 Conference Announcements</strong><br>
+          CCIP volume exceeded $50B cross-chain volume in 2025. However, fee revenue attribution to LINK unclear. BUILD program shows mixed adoption signals.<br>
+          <em>CCIP在2025年跨链成交量超过500亿美元。然而，费用收入归属LINK不明确。BUILD计划显示混合采用信号。</em>
+        </div>
+        
+        <div class="cross-ref">
+          <strong>[CROSS-5] Developer Activity Metrics (Electric Capital 2025)</strong><br>
+          Chainlink maintains top-5 blockchain ecosystem by developer count. Technical talent concentration provides long-term moat validation.<br>
+          <em>Chainlink在开发者数量上保持前5区块链生态系统。技术人才集中提供了长期护城河验证。</em>
+        </div>
+      </div>
+    </section>
+
+    <section id="quality">
+      <div class="meta-card">
+        <h3>&sect;6 Quality 质量评估</h3>
+        <p><strong>Confidence assessment of key analytical dimensions.</strong></p>
+        <p><strong>关键分析维度的置信度评估。</strong></p>
+        
+        <div style="margin-bottom:1rem;">
+          <div class="confidence-bar">
+            <span class="conf-label">Oracle Dominance</span>
+            <div class="conf-track">
+              <div class="conf-fill" style="width:92%; background:var(--tier-high);"></div>
+            </div>
+            <span style="font-size:0.72rem;color:var(--tier-high);font-weight:590;">92%</span>
+          </div>
+          <p style="font-size:0.78rem;color:var(--text-tertiary);margin-bottom:0;">High confidence based on DeFi Llama and Messari data. 70%+ share is well-documented.</p>
+        </div>
+        
+        <div style="margin-bottom:1rem;">
+          <div class="confidence-bar">
+            <span class="conf-label">Technical Moat</span>
+            <div class="conf-track">
+              <div class="conf-fill" style="width:88%; background:var(--tier-high);"></div>
+            </div>
+            <span style="font-size:0.72rem;color:var(--tier-high);font-weight:590;">88%</span>
+          </div>
+          <p style="font-size:0.78rem;color:var(--text-tertiary);margin-bottom:0;">Developer ecosystem and security track record validate technical superiority claims.</p>
+        </div>
+        
+        <div style="margin-bottom:1rem;">
+          <div class="confidence-bar">
+            <span class="conf-label">Value Capture</span>
+            <div class="conf-track">
+              <div class="conf-fill" style="width:35%; background:var(--tier-low);"></div>
+            </div>
+            <span style="font-size:0.72rem;color:var(--tier-low);font-weight:590;">35%</span>
+          </div>
+          <p style="font-size:0.78rem;color:var(--text-tertiary);margin-bottom:0;">Low confidence. Staking economics unproven. LINK-token disconnect persists.</p>
+        </div>
+        
+        <div style="margin-bottom:1rem;">
+          <div class="confidence-bar">
+            <span class="conf-label">Institutional Adoption</span>
+            <div class="conf-track">
+              <div class="conf-fill" style="width:45%; background:var(--tier-medium);"></div>
+            </div>
+            <span style="font-size:0.72rem;color:var(--tier-medium);font-weight:590;">45%</span>
+          </div>
+          <p style="font-size:0.78rem;color:var(--text-tertiary);margin-bottom:0;">Medium-low confidence. SWIFT partnership remains PoC stage. No production timeline.</p>
+        </div>
+        
+        <div style="margin-bottom:1rem;">
+          <div class="confidence-bar">
+            <span class="conf-label">CCIP Growth</span>
+            <div class="conf-track">
+              <div class="conf-fill" style="width:68%; background:var(--tier-medium-high);"></div>
+            </div>
+            <span style="font-size:0.72rem;color:var(--tier-medium-high);font-weight:590;">68%</span>
+          </div>
+          <p style="font-size:0.78rem;color:var(--text-tertiary);margin-bottom:0;">Moderate confidence. $50B volume is positive signal, but revenue attribution unclear.</p>
+        </div>
+        
+        <div>
+          <div class="confidence-bar">
+            <span class="conf-label">Competitive Position</span>
+            <div class="conf-track">
+              <div class="conf-fill" style="width:75%; background:var(--tier-medium-high);"></div>
+            </div>
+            <span style="font-size:0.72rem;color:var(--tier-medium-high);font-weight:590;">75%</span>
+          </div>
+          <p style="font-size:0.78rem;color:var(--text-tertiary);margin-bottom:0;">Moderate-high confidence. Dominance stable but emerging competition in specific verticals.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="log">
+      <div class="meta-card">
+        <h3>&sect;7 Decision Log 决策日志</h3>
+        <p><strong>Key analytical decisions and their rationale for this agent profile.</strong></p>
+        <p><strong>此代理人档案的关键分析决策及其理由。</strong></p>
+        
+        <div class="decision-log">
+          <strong>[2026-03-22] DECISION: Classify as B档 Node 3 (Middleware)</strong><br>
+          <span style="color:var(--text-secondary);">Rationale: Chainlink operates as critical middleware infrastructure connecting DeFi protocols to off-chain data. Nazarov's influence derives from ecosystem positioning rather than direct token control or mining power. Classification aligns with infrastructure-layer agents.</span><br>
+          <em style="color:var(--text-tertiary);">理由：Chainlink作为关键中间件基础设施运行，将DeFi协议连接至链下数据。Nazarov的影响力源于生态定位而非直接代币控制或算力。分类与基础设施层代理一致。</em>
+        </div>
+        
+        <div class="decision-log">
+          <strong>[2026-03-22] DECISION: Flag LINK Value Capture as Critical Bias</strong><br>
+          <span style="color:var(--text-secondary);">Rationale: Multiple prediction failures around LINK appreciation despite strong protocol metrics. This disconnect represents the most significant analytical blindspot for traders. Overriding confirmation bias that "good technology = good investment."</span><br>
+          <em style="color:var(--text-tertiary);">理由：尽管协议指标强劲，LINK升值的多重预测失败。这种脱钩代表了交易者最重大的分析盲点。覆盖"好技术=好投资"的确认偏差。</em>
+        </div>
+        
+        <div class="decision-log">
+          <strong>[2026-03-22] DECISION: Weight SWIFT Partnership at 45% Confidence</strong><br>
+          <span style="color:var(--text-secondary);">Rationale: SWIFT PoC is legitimate but production deployment timeline is unclear. Conservative weighting reflects high uncertainty. Overly bullish interpretation of institutional "validation" is a known bias in community sentiment.</span><br>
+          <em style="color:var(--text-tertiary);">理由：SWIFT PoC是合法的但生产部署时间表不明确。保守加权反映高度不确定性。对机构"验证"的过度乐观解读是社区情绪中的已知偏差。</em>
+        </div>
+        
+        <div class="decision-log">
+          <strong>[2026-03-22] DECISION: Exclude Team Token Sales from Bullish Scenarios by Default</strong><br>
+          <span style="color:var(--text-secondary);">Rationale: Documented pattern of team LINK sales creates consistent sell pressure. Bullish scenarios should explicitly model sell pressure rather than assuming neutral/buying equilibrium.</span><br>
+          <em style="color:var(--text-tertiary);">理由：有记录可查的团队LINK销售模式造成持续卖压。乐观情景应明确建模卖压而非假设中性/买入均衡。</em>
+        </div>
+        
+        <div class="decision-log">
+          <strong>[2026-03-22] DECISION: Monitor Pyth/Alternative Share Growth as Leading Indicator</strong><br>
+          <span style="color:var(--text-secondary);">Rationale: If competitors capture 15%+ share in key verticals (perp markets, liquid staking), Chainlink's monopoly thesis weakens. This is the primary risk signal to track beyond price action.</span><br>
+          <em style="color:var(--text-tertiary);">理由：如果竞争对手在关键垂直领域(永续市场、流动性质押)占据15%+份额，Chainlink的垄断论点削弱。这是除价格走势外要追踪的主要风险信号。</em>
+        </div>
+      </div>
+    </section>
+
+    <footer style="margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border-subtle);font-size:0.72rem;color:var(--text-quaternary);">
+      <p>Metacognition report &middot; <a href="../blockchain_hub.html">Blockchain Hub</a> &middot; 2026-03-22</p>
+    </footer>
+  </main>
+</div>
+<script>
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>中国半导体数据策展 — China Semiconductor Data Curation</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="cognitive_agents_2026-03-20/jensen_sources_shared.css">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    /* === Page-specific styles === */
+    .conf-badge {
+      display: inline-block;
+      padding: 0.1rem 0.45rem;
+      border-radius: 3px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      margin-right: 0.3rem;
+      vertical-align: middle;
+    }
+    .conf-a { background: rgba(76,175,80,0.18); color: var(--tier-high); border: 1px solid rgba(76,175,80,0.3); }
+    .conf-b { background: rgba(255,193,7,0.15); color: var(--tier-medium); border: 1px solid rgba(255,193,7,0.25); }
+    .conf-c { background: rgba(244,67,54,0.15); color: var(--tier-low); border: 1px solid rgba(244,67,54,0.25); }
+
+    /* Cross-validation triangle */
+    .triangle-diagram {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+      margin: 1.5rem 0;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+    }
+    .triangle-top {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 0.5rem;
+    }
+    .triangle-node {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 180px;
+      height: 56px;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 590;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .triangle-node.analysts {
+      background: rgba(91,155,213,0.12);
+      border: 1.5px solid var(--knowledge);
+      color: var(--knowledge);
+    }
+    .triangle-node.physical {
+      background: rgba(76,175,80,0.12);
+      border: 1.5px solid var(--tier-high);
+      color: var(--tier-high);
+    }
+    .triangle-node.competitor {
+      background: rgba(248,168,72,0.12);
+      border: 1.5px solid var(--accent);
+      color: var(--accent);
+    }
+    .triangle-edges {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 0.3rem 0;
+    }
+    .triangle-edge {
+      font-size: 0.7rem;
+      color: var(--text-quaternary);
+      font-style: italic;
+    }
+    .triangle-bottom {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 0.5rem;
+    }
+    .triangle-connector {
+      color: var(--text-quaternary);
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    /* Signal arcs */
+    .arc-bull { border-left-color: var(--tier-high); }
+    .arc-bull strong { color: var(--tier-high) !important; }
+    .arc-bear { border-left-color: var(--tier-low); }
+    .arc-bear strong { color: var(--tier-low) !important; }
+    .arc-watch { border-left-color: var(--tier-medium); }
+    .arc-watch strong { color: var(--tier-medium) !important; }
+    .arc-surprise { border-left-color: #e040fb; }
+    .arc-surprise strong { color: #e040fb !important; }
+    .arc-critical { border-left-color: #ff1744; border-left-width: 4px; }
+    .arc-critical strong { color: #ff1744 !important; }
+
+    .signal-tag {
+      display: inline-block;
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-right: 0.3rem;
+    }
+    .signal-bull { background: rgba(76,175,80,0.15); color: var(--tier-high); }
+    .signal-bear { background: rgba(244,67,54,0.15); color: var(--tier-low); }
+    .signal-watch { background: rgba(255,193,7,0.15); color: var(--tier-medium); }
+    .signal-surprise { background: rgba(224,64,251,0.15); color: #e040fb; }
+    .signal-critical { background: rgba(255,23,68,0.2); color: #ff1744; }
+
+    /* Dispute highlight */
+    .dispute-box {
+      border: 1px solid rgba(255,193,7,0.4);
+      border-left: 3px solid var(--tier-medium);
+      background: rgba(255,193,7,0.04);
+      border-radius: var(--radius-sm);
+      padding: 0.8rem 1rem;
+      margin: 0.8rem 0;
+      font-size: 0.88rem;
+    }
+
+    /* Plotly chart container */
+    .plotly-chart {
+      margin: 1.5rem 0;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: var(--bg-surface);
+    }
+
+    /* Confidence legend */
+    .conf-legend {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      padding: 0.6rem 0.8rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      margin: 1rem 0;
+      font-size: 0.78rem;
+    }
+
+    /* Back link */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+      margin-bottom: 0.5rem;
+    }
+    .back-link:hover { color: var(--accent); }
+
+    /* Sub-section company header */
+    .company-header {
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .company-header h2 {
+      margin-bottom: 0;
+    }
+    .company-valuation {
+      font-size: 0.82rem;
+      color: var(--text-tertiary);
+      font-weight: 400;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Mobile hamburger -->
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Notes sidebar toggle (narrow screens) -->
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes sidebar">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ====== LEFT SIDEBAR (TOC) ====== -->
+  <aside class="sidebar" id="sidebar">
+    <h4>Data Curation</h4>
+    <nav>
+      <ul>
+        <li><a href="#methodology"><span class="toc-num">&#167;1</span> 数据方法论</a></li>
+        <li><a href="#ymtc"><span class="toc-num">&#167;2</span> YMTC 长江存储</a></li>
+        <li><a href="#cxmt"><span class="toc-num">&#167;3</span> CXMT 长鑫存储</a></li>
+        <li><a href="#smee"><span class="toc-num">&#167;4</span> SMEE 上海微电子</a></li>
+        <li><a href="#hisilicon"><span class="toc-num">&#167;5</span> HiSilicon 海思</a></li>
+        <li><a href="#cross-validation"><span class="toc-num">&#167;6</span> 交叉验证: 西方敞口</a></li>
+        <li><a href="#macro"><span class="toc-num">&#167;7</span> 宏观指标</a></li>
+        <li><a href="#discoveries"><span class="toc-num">&#167;8</span> 分析发现</a></li>
+      </ul>
+    </nav>
+    <h4>Navigation</h4>
+    <nav>
+      <ul>
+        <li><a href="semiconductor_hub.html">&larr; Semiconductor Hub</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ====== MAIN CONTENT ====== -->
+  <div class="main-content">
+
+    <a href="semiconductor_hub.html" class="back-link">&larr; Back to Semiconductor Hub</a>
+
+    <header class="page-header">
+      <h1>中国半导体数据策展</h1>
+      <p class="subtitle">China Semiconductor Data Curation &mdash; Every number has a source</p>
+      <div class="badge-row">
+        <span class="badge">2026-03-21</span>
+        <span class="badge" style="background:rgba(91,155,213,0.12); color:var(--knowledge); border-color:rgba(91,155,213,0.25);">Cross-Validated</span>
+        <span class="badge" style="background:rgba(76,175,80,0.12); color:var(--tier-high); border-color:rgba(76,175,80,0.25);">YMTC &middot; CXMT &middot; SMEE &middot; HiSilicon</span>
+      </div>
+    </header>
+
+    <!-- Top Controls -->
+    <div class="top-controls">
+      <span class="tc-label">&#128218; 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- §1 数据方法论 -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="section-header" id="methodology">
+      <h2>&#167;1 数据方法论 <span class="zh-inline">Data Methodology</span></h2>
+    </div>
+
+    <p>Why "Data Blind Spot" was wrong: these companies have extensive indirect data from industry analysts, physical teardowns, competitor filings, and government procurement records. The problem was never a lack of data &mdash; it was a lack of curation.</p>
+    <p class="zh">为什么"数据盲区"是错的：这些公司有大量间接数据来自行业分析师、物理拆解、竞争对手财报和政府采购记录。问题从来不是缺数据，而是缺策展。</p>
+
+    <h3>Cross-Validation Triangle 交叉验证三角</h3>
+    <div class="triangle-diagram">
+      <div class="triangle-top">
+        <div class="triangle-node analysts">&#128202; Industry Analysts<br><small>TrendForce &middot; TechInsights &middot; SemiAnalysis</small></div>
+      </div>
+      <div class="triangle-edges">
+        <span class="triangle-connector">&#8725;</span>
+        <span class="triangle-edge">corroborate</span>
+        <span class="triangle-connector">&#8726;</span>
+      </div>
+      <div class="triangle-bottom">
+        <div class="triangle-node physical">&#128300; Physical Evidence<br><small>Teardowns &middot; IPO filings &middot; Patents</small></div>
+        <div style="display:flex; align-items:center;">
+          <span class="triangle-edge">&mdash; verify &mdash;</span>
+        </div>
+        <div class="triangle-node competitor">&#127981; Competitor Mirror<br><small>ASML/AMAT/Lam China revenue</small></div>
+      </div>
+    </div>
+
+    <h3>Confidence Ratings 可信度评级</h3>
+    <div class="conf-legend">
+      <span><span class="conf-badge conf-a">A</span> Multi-source cross-validated 多源交叉验证</span>
+      <span><span class="conf-badge conf-b">B</span> Single reputable analyst 单一可靠分析师</span>
+      <span><span class="conf-badge conf-c">C</span> Indirect inference 间接推断</span>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- §2 YMTC -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="section-header" id="ymtc">
+      <div class="company-header">
+        <h2>&#167;2 YMTC 长江存储</h2>
+        <span class="company-valuation">Valuation: RMB 161B (~$22B) &mdash; <a href="https://www.scmp.com/" target="_blank">SCMP</a></span>
+      </div>
+    </div>
+
+    <p><strong>Ownership:</strong> Hubei Science and Technology Investment Co. (state-owned), separated from Tsinghua Unigroup 2022.
+    <span class="zh">所有权：湖北科技投资集团（国有），2022年从紫光集团剥离。</span></p>
+
+    <h3><span class="conf-badge conf-b">B</span> Financial 财务数据 <small class="note">&mdash; TrendForce</small></h3>
+    <figure>
+      <table>
+        <thead>
+          <tr><th>Metric</th><th>Value</th><th>Period</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Profit 利润</td><td><strong>RMB 531M</strong></td><td>2023</td></tr>
+          <tr><td>Loss 亏损</td><td style="color:var(--tier-low);">RMB 84M</td><td>2024 Jan-Sep</td></tr>
+          <tr><td>R&D 研发</td><td>RMB 5B (16.7% of revenue &rarr; implied revenue ~RMB 30B)</td><td>2023</td></tr>
+          <tr><td>R&D 研发</td><td>RMB 6B</td><td>2024</td></tr>
+          <tr><td>Net Assets 净资产</td><td>RMB 134.7B</td><td>Sep 2024</td></tr>
+        </tbody>
+      </table>
+    </figure>
+    <p class="note">Source: <a href="https://www.trendforce.com/news/2025/04/29/news-chinas-nand-giant-ymtc-reportedly-lost-over-11m-in-first-nine-months-of-2024-amid-heavy-spending/" target="_blank">TrendForce &mdash; YMTC lost over $11M in first nine months of 2024</a></p>
+
+    <h3><span class="conf-badge conf-b">B</span> Capacity 产能 <small class="note">&mdash; TrendForce, Digitimes</small></h3>
+    <ul>
+      <li>End-2024: <strong>~130K WSPM</strong></li>
+      <li>2025 target: <strong>150K WSPM</strong></li>
+      <li>End-2025 raw wafers: <strong>280-300K/month</strong> (dual-wafer bonding for <mark class="hl-know" data-note="k1">Xtacking</mark><sup class="nref" data-note="k1">K</sup>)</li>
+      <li>Global NAND share: <strong>8%</strong>(end-2024) &rarr; <strong>13%</strong>(Q3 2025) &rarr; <strong>15%</strong>(2026 target)</li>
+      <li>Phase III Wuhan expansion: <strong>$3B investment</strong></li>
+    </ul>
+    <p class="note">Sources: <a href="https://www.trendforce.com/" target="_blank">TrendForce</a>, <a href="https://www.digitimes.com/" target="_blank">Digitimes</a>, <a href="https://www.tomshardware.com/" target="_blank">Tom's Hardware</a></p>
+
+    <h3><span class="conf-badge conf-a">A</span> Technology 技术 <small class="note">&mdash; TechInsights teardown</small></h3>
+    <ul>
+      <li><strong>232L</strong> (Gen4 Xtacking 3.0): mass production, X3-9070 TLC shipping</li>
+      <li><strong>294L</strong> (Gen5 <mark class="hl-know" data-note="k1">Xtacking 4.0</mark><sup class="nref" data-note="k1">K</sup>): shipping began early 2025, two bonded decks</li>
+      <li>Xtacking 3.0 density: <strong>15.0 Gb/mm&sup2;</strong> (TechInsights measured)</li>
+      <li>Xtacking 4.0 density: <strong>12.66 Gb/mm&sup2;</strong>, die size 40.44mm&sup2; (TechInsights)</li>
+      <li>Roadmap: 1TB TLC, QLC X4-6080 (2025), 2TB TLC X5-9080 4.8GT/s (2026)</li>
+      <li>Domestic tools pilot line: <strong>H2 2025</strong></li>
+    </ul>
+    <p class="note">Sources: <a href="https://www.techinsights.com/" target="_blank">TechInsights</a>, <a href="https://www.tomshardware.com/" target="_blank">Tom's Hardware</a></p>
+
+    <!-- NAND Layer Count Chart -->
+    <h3>NAND Layer Count Comparison NAND层数对比</h3>
+    <div class="plotly-chart" id="chart-nand-layers" style="height:320px;"></div>
+
+    <h3><span class="conf-badge conf-a">A</span> Apple Story Timeline <small class="note">&mdash; Federal Register</small></h3>
+    <ul>
+      <li><strong>2022:</strong> Apple validates 128L for iPhones sold in China (potential 40% of all iPhone NAND)</li>
+      <li><strong>Oct 2022:</strong> BIS Unverified List &rarr; Apple suspends</li>
+      <li><strong>Dec 16, 2022:</strong> <mark class="hl-know" data-note="k3">BIS Entity List</mark><sup class="nref" data-note="k3">K</sup> (Federal Register)</li>
+      <li><strong>2023:</strong> Samsung replaces YMTC</li>
+    </ul>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- §3 CXMT -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="section-header" id="cxmt">
+      <div class="company-header">
+        <h2>&#167;3 CXMT 长鑫存储</h2>
+        <span class="company-valuation">IPO Valuation: $42B &mdash; RMB 29.5B raise</span>
+      </div>
+    </div>
+
+    <p><strong>Ownership:</strong> <mark class="hl-know" data-note="k4">Hefei Municipal Government</mark><sup class="nref" data-note="k4">K</sup> + Anhui SASAC + Big Fund Phase II: >38% combined.
+    <span class="zh">所有权：合肥市政府 + 安徽国资委 + 大基金二期：合计>38%。</span></p>
+    <ul class="skip-list">
+      <li>Initial investment (Project 506): Hefei RMB 14.4B + GigaDevice RMB 3.6B</li>
+      <li>Micron case: Micron sued Fujian Jinhua + UMC; UMC paid $60M fine; settled Dec 2023</li>
+    </ul>
+
+    <h3><span class="conf-badge conf-a">A</span> Financial 财务数据 <small class="note">&mdash; IPO Prospectus</small></h3>
+    <figure>
+      <table>
+        <thead>
+          <tr><th>Year</th><th>Revenue</th><th>Net Profit/Loss</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>2022</td><td>&mdash;</td><td style="color:var(--tier-low);">-RMB 8.32B</td><td></td></tr>
+          <tr><td>2023</td><td>&mdash;</td><td style="color:var(--tier-low);">-RMB 16.3B</td><td>Worst year</td></tr>
+          <tr><td>2024</td><td>&mdash;</td><td style="color:var(--tier-low);">-RMB 7.1B</td><td>Improving</td></tr>
+          <tr><td>2025 Jan-Sep</td><td><strong>RMB 32B</strong> (+97.8%)</td><td>&mdash;</td><td></td></tr>
+          <tr><td>2025E full-year</td><td><strong>&ge;RMB 55B</strong></td><td style="color:var(--tier-high);"><strong>RMB 2-3.5B</strong></td><td>FIRST PROFIT</td></tr>
+        </tbody>
+      </table>
+    </figure>
+    <ul>
+      <li>Q3 2025 gross margin: <strong>~30%</strong></li>
+      <li>IPO: RMB 29.5B raise ($4.2B), <strong>$42B valuation</strong></li>
+    </ul>
+    <p class="note">Sources: <a href="https://www.tomshardware.com/" target="_blank">Tom's Hardware (IPO prospectus)</a>, <a href="https://www.scmp.com/" target="_blank">SCMP</a>, <a href="https://www.caproasia.com/" target="_blank">Caproasia</a></p>
+
+    <h3><span class="conf-badge conf-b">B</span> Capacity 产能 <small class="note">&mdash; TrendForce / Digitimes</small></h3>
+    <ul>
+      <li>Q1 2025: <strong>200K WSPM</strong></li>
+      <li>2025 target: <strong>240-280K WSPM</strong></li>
+      <li>2026 target: <strong>300K WSPM</strong></li>
+      <li>2024 total output: <strong>1.62M wafers</strong></li>
+      <li>2025 projected: <strong>2.73M wafers</strong> (+68%)</li>
+      <li>Fab 2 DDR5-dedicated: 50K+50K WSPM</li>
+    </ul>
+
+    <h3><span class="conf-badge conf-b">B</span> DDR5 Technology <small class="note">&mdash; TrendForce, with dispute</small></h3>
+    <ul>
+      <li>DDR5 yield: <strong>80% achieved end-2024</strong> (TrendForce)</li>
+      <li>Target: <strong>90%</strong> by end 2025</li>
+      <li>DDR5 share of output: <strong>&gt;60%</strong> by end 2025</li>
+      <li>Specs: DDR5-8000, LPDDR5X-10667 demonstrated</li>
+      <li>LPDDR5X 8533/9600 in production since May 2025</li>
+      <li>Process: 18.5nm(D1x) &rarr; 17nm(D1y) &rarr; 16nm &rarr; 15nm (R&D, mass prod late 2026)</li>
+    </ul>
+    <div class="dispute-box">
+      <strong>&#9888; DDR5 Yield Dispute 良率争议:</strong> TrendForce reports 80% yield, but some insiders claim only <strong>10-20%</strong> (<a href="https://www.exportsemi.com/" target="_blank">ExportSemi</a>). Needs Q4 shipment data to verify.
+      <span class="zh">TrendForce报道80%良率，但部分内部人士声称仅10-20%。需Q4出货数据验证。</span>
+    </div>
+
+    <h3><span class="conf-badge conf-b">B</span>-<span class="conf-badge conf-c">C</span> HBM</h3>
+    <ul>
+      <li><mark class="hl-know" data-note="k2">HBM2</mark><sup class="nref" data-note="k2">K</sup> customer sampling: in progress end-2024</li>
+      <li>HBM2 low-volume: expected mid-2025</li>
+      <li>HBM stacks 2026: <strong>~2.2M stacks</strong> (SemiAnalysis) &rarr; supports 250-400K Ascend 910C</li>
+      <li>HBM3 target: 2026</li>
+    </ul>
+
+    <!-- CXMT Market Share Chart -->
+    <h3>CXMT DRAM Market Share Trajectory 长鑫市占率轨迹</h3>
+    <div class="plotly-chart" id="chart-cxmt-share" style="height:360px;"></div>
+
+    <h3><span class="conf-badge conf-b">B</span> Market Share 市场份额 <small class="note">&mdash; Counterpoint</small></h3>
+    <ul>
+      <li>Q3 2024: <strong>~3%</strong> global</li>
+      <li>Q3 2025: <strong>~5%</strong></li>
+      <li>2025E: up to <strong>12%</strong> (Digitimes)</li>
+      <li>Rank: <strong>4th globally</strong></li>
+    </ul>
+
+    <h3><span class="conf-badge conf-b">B</span> Customers 客户</h3>
+    <ul>
+      <li>Xiaomi, OPPO, Vivo, Honor, Transsion &mdash; LPDDR5 validated</li>
+      <li>LPDDR domestic smartphone share: <strong>~30%</strong></li>
+    </ul>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- §4 SMEE -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="section-header" id="smee">
+      <h2>&#167;4 SMEE 上海微电子</h2>
+    </div>
+
+    <h3><span class="conf-badge conf-b">B</span>-<span class="conf-badge conf-c">C</span> Products 产品</h3>
+    <figure>
+      <table>
+        <thead>
+          <tr><th>Model</th><th>Node</th><th>Type</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>SSA600</strong></td><td>90nm</td><td>ArF immersion DUV</td><td style="color:var(--tier-high);">Mass production</td></tr>
+          <tr><td><strong>SSA800 (SSA800-10W)</strong></td><td>28nm</td><td>ArFi DUV</td><td style="color:var(--tier-medium);">Dev completed Dec 2023 *</td></tr>
+          <tr><td><strong>SSC800/10</strong></td><td>110nm</td><td>KrF 248nm dry</td><td>Newly disclosed</td></tr>
+          <tr><td><strong>SSA900</strong> (planned)</td><td>22nm</td><td>&mdash;</td><td style="color:var(--text-quaternary);">Target</td></tr>
+        </tbody>
+      </table>
+    </figure>
+    <p class="note">* SSA800 28nm completion source deleted shortly after publication &mdash; <a href="https://www.trendforce.com/" target="_blank">TrendForce</a></p>
+    <ul>
+      <li>EUV patent: filed March 2023 (LPP source)</li>
+      <li>No US-origin IP components</li>
+    </ul>
+
+    <h3><span class="conf-badge conf-b">B</span> Revenue 营收</h3>
+    <ul>
+      <li>RMB 110M contract for SSC800/10 (Dec 2025, single-source procurement) &mdash; <a href="https://www.trendforce.com/" target="_blank">TrendForce</a></li>
+    </ul>
+
+    <h3><span class="conf-badge conf-b">B</span> Technology Gap 技术差距 <small class="note">&mdash; CSIS</small></h3>
+    <ul>
+      <li>~5 generations behind ASML</li>
+      <li>SSA600 (90nm): only production-ready tool for front-end fab</li>
+      <li>SSA800 (28nm): <strong>NOT confirmed production-ready</strong></li>
+      <li>Sub-10nm domestic lithography: <strong>not before 2030</strong> (CSIS assessment)</li>
+      <li>Integration into 28nm process at SMIC: potentially by 2027</li>
+    </ul>
+
+    <h3>Ecosystem 生态</h3>
+    <ul>
+      <li>AMIES: reportedly 90% of domestic lithography market</li>
+      <li>Hysource (光源), Guowang Optics (镜头): no public data found</li>
+      <li>Known customers: SMIC, Hua Hong, GTA Semiconductor, YMTC</li>
+    </ul>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- §5 HiSilicon -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="section-header" id="hisilicon">
+      <h2>&#167;5 华为海思 HiSilicon</h2>
+    </div>
+
+    <h3><span class="conf-badge conf-b">B</span> Ascend 910C <small class="note">&mdash; TrendForce / SemiAnalysis</small></h3>
+    <figure>
+      <table>
+        <thead>
+          <tr><th>Spec</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>FP16</td><td><strong>800 TFLOPS</strong></td></tr>
+          <tr><td>Memory</td><td>128GB <mark class="hl-know" data-note="k2">HBM3</mark><sup class="nref" data-note="k2">K</sup>, 3.2 TB/s bandwidth</td></tr>
+          <tr><td>Manufacturing</td><td>SMIC 7nm N+2 (DUV)</td></tr>
+          <tr><td>Yield</td><td>20% (TrendForce Nov 2024), ~30% (Mizuho)</td></tr>
+          <tr><td>vs H100</td><td>60% inference (DeepSeek), 60-70% overall (TrendForce)</td></tr>
+          <tr><td>CPU dies</td><td>Contains TSMC dies from ~2020 stockpile <span class="conf-badge conf-a">A</span> TechInsights teardown</td></tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <h3><span class="conf-badge conf-c">C</span> Ascend 920 <small class="note">&mdash; Early reports</small></h3>
+    <ul>
+      <li>SMIC 6nm (N+3)</li>
+      <li><strong>900 TFLOPS BF16</strong></li>
+      <li>4,000 GB/s memory bandwidth</li>
+      <li>30-40% better than 910C</li>
+      <li>Mass production: <strong>H2 2025</strong></li>
+    </ul>
+
+    <h3><span class="conf-badge conf-b">B</span> Shipments 出货量 <small class="note">&mdash; TechNode / Bernstein</small></h3>
+    <ul>
+      <li>2024: <strong>~400K units</strong> (910B)</li>
+      <li>2025 target: <strong>700K total</strong> (300K 910B + 100K 910C + 300K others)</li>
+      <li>910C mass shipment start: <strong>May 2025</strong></li>
+      <li>Context: 2024 Nvidia H20 sold in China: ~1M units</li>
+    </ul>
+
+    <h3><span class="conf-badge conf-b">B</span> Market Share Projections 市场份额预测 <small class="note">&mdash; Bernstein via Digitimes</small></h3>
+    <figure>
+      <table>
+        <thead>
+          <tr><th>Year</th><th>Huawei</th><th>Nvidia</th><th>AMD</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>2024</td><td>~1/3 of Nvidia</td><td>Dominant</td><td>Small</td></tr>
+          <tr><td>2025</td><td><strong>Parity with Nvidia</strong></td><td>Declining</td><td>Growing</td></tr>
+          <tr><td>2026</td><td><strong>50%</strong></td><td>8%</td><td>12%</td></tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <!-- China AI Chip Market Share Chart -->
+    <h3>China AI Chip Market Share Forecast 中国AI芯片市场份额预测</h3>
+    <div class="plotly-chart" id="chart-ai-chip" style="height:360px;"></div>
+
+    <h3><span class="conf-badge conf-b">B</span> HBM Bottleneck HBM瓶颈 <small class="note">&mdash; SemiAnalysis</small></h3>
+    <ul>
+      <li>Samsung stockpile: <strong>11.7M HBM units</strong> (7M shipped in one month before restrictions)</li>
+      <li>Depletion: expected <strong>end 2025</strong></li>
+      <li>Primary bottleneck: <strong>HBM supply, NOT fab capacity</strong></li>
+      <li>Solution path: CXMT <mark class="hl-know" data-note="k2">HBM2</mark><sup class="nref" data-note="k2">K</sup> (2025) + YMTC TSV (announced Sep 2025)</li>
+    </ul>
+
+    <h3><span class="conf-badge conf-a">A</span>-<span class="conf-badge conf-b">B</span> CANN Ecosystem</h3>
+    <ul>
+      <li>Open-sourced 2025</li>
+      <li>Partners: <strong>8,500+</strong> (Kunpeng + Ascend combined)</li>
+      <li>Developers: <strong>6.65M</strong> (Huawei Annual Report 2024 &mdash; <span class="conf-badge conf-a">A</span>)</li>
+      <li>GitHub: OpenCV CANN backend, ONNX Runtime CANN EP</li>
+      <li>vs CUDA: <strong>decades behind</strong> in maturity</li>
+    </ul>
+
+    <h3><span class="conf-badge conf-b">B</span>-<span class="conf-badge conf-c">C</span> DeepSeek</h3>
+    <ul>
+      <li>R1 <strong>TRAINING</strong>: 50K Nvidia GPUs (30K H20 + 10K H800 + 10K H100) &mdash; <strong>NOT Ascend</strong></li>
+      <li>R1 <strong>INFERENCE</strong>: running on Ascend 910C</li>
+      <li>R2 training on Ascend: <strong style="color:var(--tier-low);">MULTIPLE FAILURES</strong>, switching back to Nvidia</li>
+      <li>R1-Safe: trained on 1,000 Ascend chips (Huawei + Zhejiang University)</li>
+      <li>Ascend inference: 1,920 tokens/sec per card on CloudMatrix 384</li>
+    </ul>
+
+    <h3><span class="conf-badge conf-a">A</span> Huawei Financials 华为财务 <small class="note">&mdash; Annual Report 2024</small></h3>
+    <figure>
+      <table>
+        <thead>
+          <tr><th>Segment</th><th>Revenue (CNY)</th><th>Change</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Total Revenue</strong></td><td><strong>862B</strong></td><td>+22.4%</td></tr>
+          <tr><td>ICT Infrastructure</td><td>370B</td><td>+4.9%</td></tr>
+          <tr><td>Consumer</td><td>339B</td><td>+38.3%</td></tr>
+          <tr><td>R&D</td><td>180B</td><td>20.8% of revenue</td></tr>
+          <tr><td>Net Profit</td><td>62.6B</td><td style="color:var(--tier-low);">-28%</td></tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- §6 Cross-Validation: Western Exposure -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="section-header" id="cross-validation">
+      <h2>&#167;6 交叉验证: 西方公司中国敞口 <span class="zh-inline">Western Company China Exposure</span></h2>
+    </div>
+
+    <h3><span class="conf-badge conf-a">A</span> ASML</h3>
+    <figure>
+      <table>
+        <thead>
+          <tr><th>Year</th><th>China Revenue %</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>2023</td><td>29%</td><td>EUR 7.25B</td></tr>
+          <tr><td>2024</td><td><strong>36-41%</strong></td><td>EUR 10.2B</td></tr>
+          <tr><td>Q3 2025</td><td><strong>42%</strong> of system sales</td><td>&mdash;</td></tr>
+          <tr><td>2025 guidance</td><td>Initially ~20%</td><td>Actual much higher (pre-restriction rush)</td></tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <h3><span class="conf-badge conf-a">A</span> Applied Materials</h3>
+    <ul>
+      <li>FY2024: <strong>37.23%</strong> ($10.12B)</li>
+      <li>FY2025: <strong>28%</strong></li>
+      <li>Revenue hit: $710-750M from export restrictions</li>
+    </ul>
+
+    <h3><span class="conf-badge conf-a">A</span> Lam Research</h3>
+    <ul>
+      <li>FY2024: <strong>42.23%</strong> ($6.29B)</li>
+      <li>FY2025: <strong>33.66%</strong> ($6.21B)</li>
+    </ul>
+
+    <h3><span class="conf-badge conf-a">A</span> SK Hynix</h3>
+    <ul>
+      <li>H1 2024 China: <strong>KRW 8.6T</strong> (doubled from 3.8T)</li>
+      <li>China share: <strong>29.8%</strong></li>
+      <li>Global HBM share: <strong>70%</strong></li>
+    </ul>
+
+    <h3><span class="conf-badge conf-a">A</span> Micron</h3>
+    <ul>
+      <li>FY2024 China: <strong>$3.05B</strong>, 12.13%</li>
+      <li>CAC ban May 2023</li>
+      <li>Exiting China server market 2025</li>
+    </ul>
+
+    <!-- Equipment Vendor China Revenue Chart -->
+    <h3>Equipment Vendor China Revenue % 设备厂商中国收入占比</h3>
+    <div class="plotly-chart" id="chart-equipment" style="height:360px;"></div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- §7 Macro -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="section-header" id="macro">
+      <h2>&#167;7 宏观指标 <span class="zh-inline">Macro Indicators</span></h2>
+    </div>
+
+    <h3><span class="conf-badge conf-a">A</span> IC Imports 集成电路进口 <small class="note">&mdash; China Customs</small></h3>
+    <figure>
+      <table>
+        <thead>
+          <tr><th>Year</th><th>Units</th><th>Value</th><th>Change</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>2023</td><td>479.5B</td><td>$349.4B</td><td style="color:var(--tier-low);">-15.4%</td></tr>
+          <tr><td>2024</td><td>549.2B</td><td>$385B</td><td style="color:var(--tier-high);">+10.4%</td></tr>
+        </tbody>
+      </table>
+    </figure>
+    <p class="note">Still #1 import ahead of crude oil ($325B).</p>
+
+    <h3><span class="conf-badge conf-b">B</span> Self-Sufficiency 自给率</h3>
+    <figure>
+      <table>
+        <thead>
+          <tr><th>Metric</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>IC Insights 2025 forecast (made 2021)</td><td>19.4%</td></tr>
+          <tr><td>Actual 2023 (TechInsights/SEMI)</td><td><strong>~23%</strong></td></tr>
+          <tr><td>2027 projection</td><td>27%</td></tr>
+          <tr><td>Original 2025 target</td><td style="color:var(--tier-low);">70% (NOT achieved)</td></tr>
+          <tr><td>2030 goal</td><td>50-60%</td></tr>
+          <tr><td>Equipment self-sufficiency 2024</td><td>13.6%</td></tr>
+          <tr><td>Equipment target 2025</td><td>~50% (TrendForce)</td></tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <h3><span class="conf-badge conf-a">A</span> Big Fund Phase III 大基金三期</h3>
+    <figure>
+      <table>
+        <thead>
+          <tr><th>Phase</th><th>Year</th><th>Capital</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Phase I</td><td>2014</td><td>RMB 138.7B</td></tr>
+          <tr><td>Phase II</td><td>2019</td><td>RMB 204.2B</td></tr>
+          <tr><td><strong>Phase III</strong></td><td>May 24, 2024</td><td><strong>RMB 344B ($47.5B)</strong></td></tr>
+        </tbody>
+      </table>
+    </figure>
+    <ul>
+      <li>Operations began: <strong>Dec 31, 2024</strong></li>
+      <li>Initial deployment: <strong>RMB 93B</strong></li>
+      <li>Focus: equipment, materials, HBM, AI semiconductors</li>
+      <li>Duration: 2024-2039</li>
+    </ul>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- §8 Analytical Discoveries -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="section-header" id="discoveries">
+      <h2>&#167;8 分析发现 <span class="zh-inline">Analytical Discoveries</span></h2>
+    </div>
+
+    <div class="arc-item arc-bull">
+      <span class="signal-tag signal-bull">BULL</span>
+      <strong>1. YMTC恢复速度超预期</strong>
+      <p>从"被制裁后濒死"到13%全球NAND份额只用2.5年。294层产品已出货。国产设备试产线H2 2025。如果2026达15% &rarr; 对Samsung/SK Hynix价格压力。</p>
+      <p class="zh">From "near-death after sanctions" to 13% global NAND share in just 2.5 years. 294L products shipping. Domestic equipment pilot line H2 2025. If 15% by 2026 &rarr; pricing pressure on Samsung/SK Hynix.</p>
+    </div>
+
+    <div class="arc-item arc-watch">
+      <span class="signal-tag signal-watch">WATCH</span>
+      <strong>2. CXMT IPO = 信息金矿</strong>
+      <p>首次公开详细财务。2025营收RMB 55B+，首次盈利。$42B估值。DDR5良率80%争议(10-20%反面声音)需要持续追踪。</p>
+      <p class="zh">First-ever detailed financials. 2025 revenue RMB 55B+, first profit. $42B valuation. DDR5 yield 80% dispute (10-20% counter-claim) needs ongoing tracking.</p>
+    </div>
+
+    <div class="arc-item arc-bear">
+      <span class="signal-tag signal-bear">BEAR</span>
+      <strong>3. HBM是Ascend阿喀琉斯之踵</strong>
+      <p>Samsung 11.7M HBM库存2025底耗尽。之后Ascend产能将受HBM供应限制。CXMT HBM2 + YMTC TSV是唯一出路，但HBM3/4差距巨大。</p>
+      <p class="zh">Samsung 11.7M HBM stockpile depleted by end 2025. After that, Ascend capacity constrained by HBM supply. CXMT HBM2 + YMTC TSV are the only paths, but HBM3/4 gap is enormous.</p>
+    </div>
+
+    <div class="arc-item arc-surprise">
+      <span class="signal-tag signal-surprise">SURPRISE</span>
+      <strong>4. ASML中国收入逆势上升</strong>
+      <p>2023 29% &rarr; 2024 41% &rarr; 2025 Q3 42%。"抢装窗口"比所有人预期都持续更长。说明制裁执行有滞后。</p>
+      <p class="zh">Pre-restriction "rush to install" lasted far longer than anyone expected. Evidence of sanctions enforcement lag.</p>
+    </div>
+
+    <div class="arc-item arc-critical">
+      <span class="signal-tag signal-critical">CRITICAL</span>
+      <strong>5. DeepSeek R2 Ascend训练失败</strong>
+      <p>R1用NVIDIA训练 + Ascend推理。R2试图在Ascend上训练但多次失败，切回NVIDIA。这是Ascend训练能力真实上限的证据。"非NVIDIA可行"仅限推理，不是训练。</p>
+      <p class="zh">R1 trained on NVIDIA + Ascend inference. R2 attempted Ascend training but multiple failures, switched back to NVIDIA. Evidence of Ascend's real training ceiling. "Non-NVIDIA viable" is inference-only, not training.</p>
+    </div>
+
+    <div class="arc-item arc-bear">
+      <span class="signal-tag signal-bear">BEAR</span>
+      <strong>6. 自给率70%是政治口号</strong>
+      <p>实际23%&rarr;27%(2023&rarr;2027E)的爬坡速度说明10年内50%都困难。设备自给率13.6%更低。</p>
+      <p class="zh">Actual 23%&rarr;27% (2023&rarr;2027E) climb rate shows even 50% in 10 years is difficult. Equipment self-sufficiency at 13.6% is even lower.</p>
+    </div>
+
+    <!-- Footer -->
+    <div class="page-footer">
+      <p>中国半导体数据策展 &mdash; 2026-03-21<br>
+      <a href="semiconductor_hub.html">&larr; Back to Semiconductor Hub</a></p>
+    </div>
+
+  </div>
+
+  <!-- ====== RIGHT NOTES SIDEBAR ====== -->
+  <aside class="notes-sidebar" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn" aria-label="Close notes">&#10005;</button>
+      <h4>&#129504; META + &#128218; KNOW</h4>
+    </div>
+
+    <!-- META M1 -->
+    <div class="anno meta-note open" data-section="methodology" id="m1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">M1: 从"盲区"到"策展"</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="method-tag">方法论转变</span>不是没有数据，是没有去找。TrendForce/TechInsights/SemiAnalysis 覆盖了绝大部分关键指标。问题从来都是 curation，不是 availability。</p>
+      </div>
+    </div>
+
+    <!-- META M2 -->
+    <div class="anno meta-note open" data-section="cross-validation" id="m2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">M2: 交叉验证发现</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="trap-tag">Surprise</span>ASML逆势上升暴露了制裁执行滞后。29%&rarr;41%&rarr;42% 不是"失败"，是 pre-restriction rush + 执行 lag。<strong>竞争对手财报是最可靠的间接验证。</strong></p>
+      </div>
+    </div>
+
+    <!-- META M3 -->
+    <div class="anno meta-note open" data-section="cxmt" id="m3">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">M3: DDR5良率争议</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>80% vs 10-20%，哪个可信？<span class="trap-tag">Data Conflict</span>TrendForce 是行业标准来源，但 ExportSemi 有 insider 渠道。需要 Q4 出货数据验证 &mdash; 如果 DDR5 出货量 match 80%良率产能，TrendForce 赢；否则反之。</p>
+      </div>
+    </div>
+
+    <!-- META M4 -->
+    <div class="anno meta-note open" data-section="hisilicon" id="m4">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">M4: DeepSeek R2失败的投资意义</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="trap-tag">Critical Finding</span>Ascend = 推理可用，训练不可用。这意味着：<br>
+        1. NVIDIA 训练垄断<strong>未被打破</strong><br>
+        2. "AI算力自主"比官方叙事更远<br>
+        3. H20 限制的真正痛点在训练，不在推理</p>
+      </div>
+    </div>
+
+    <hr class="notes-divider">
+
+    <!-- KNOW K1 -->
+    <div class="anno know-note open" data-section="ymtc" id="k1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">K1: Xtacking架构</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>YMTC独创的双晶圆键合技术。外围电路(CMOS)和存储阵列(Cell Array)分别在不同晶圆上制造，然后通过晶圆到晶圆(W2W)混合键合对齐。</p>
+        <p>优势：CMOS可以用更先进制程(如28nm)，而Cell Array用高层堆叠，两者独立优化。Xtacking 4.0使得294层实际上是两个~150层的deck键合。</p>
+      </div>
+    </div>
+
+    <!-- KNOW K2 -->
+    <div class="anno know-note open" data-section="hisilicon" id="k2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">K2: HBM TSV</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>Through Silicon Via &mdash; 在硅晶圆上打垂直通孔，用铜柱连接多层堆叠的DRAM die。SK Hynix领先3代(HBM3E量产，HBM4开发中)。</p>
+        <p>关键指标：堆叠层数(8-12 Hi)、bandwidth(HBM3: 819 GB/s per stack)、热管理。CXMT HBM2大约相当于SK Hynix 2018年水平。</p>
+      </div>
+    </div>
+
+    <!-- KNOW K3 -->
+    <div class="anno know-note open" data-section="ymtc" id="k3">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">K3: BIS实体清单</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>Entity List 意味着任何美国技术/产品出口需要许可证 &mdash; 而且审批政策是"presumption of denial"（推定拒绝）。</p>
+        <p>对YMTC的实际影响：无法购买ASML/AMAT/Lam的设备和零件、无法使用美国EDA软件更新、Apple等美国客户必须断供。</p>
+      </div>
+    </div>
+
+    <!-- KNOW K4 -->
+    <div class="anno know-note open" data-section="cxmt" id="k4">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">K4: 合肥模式</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>地方政府直接投资半导体的模式。合肥市政府是CXMT最大股东 &mdash; 不同于VC/PE的"投后管理"，政府作为股东意味着：</p>
+        <p>1. 无盈利退出压力（可以长期亏损）<br>
+        2. 土地/税收/人才政策直接配套<br>
+        3. 但也意味着效率和治理风险<br>
+        合肥此前成功案例：京东方(BOE)显示面板。</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<!-- ═══════════════════ JavaScript ═══════════════════ -->
+<script>
+(function() {
+  // 1. Sidebar toggle
+  const hamburger = document.getElementById('hamburgerBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+
+  hamburger.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+  });
+
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+  });
+
+  sidebar.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 900) {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+      }
+    });
+  });
+
+  // 2. Note toggle function
+  window.toggleNote = function(head) {
+    head.parentElement.classList.toggle('open');
+    requestAnimationFrame(positionNotes);
+  };
+
+  // 3. Position notes to align with their sections
+  function positionNotes() {
+    const sidebarEl = document.getElementById('notesSidebar');
+    if (!sidebarEl) return;
+
+    const notes = [...sidebarEl.querySelectorAll('.anno')];
+    const scrollY = window.scrollY;
+    const sidebarAbsTop = sidebarEl.getBoundingClientRect().top + scrollY;
+    const headerEl = sidebarEl.querySelector('.notes-sidebar-header');
+    const headerHeight = headerEl ? headerEl.offsetHeight + 12 : 40;
+
+    notes.sort((a, b) => {
+      const secA = document.getElementById(a.dataset.section);
+      const secB = document.getElementById(b.dataset.section);
+      if (!secA || !secB) return 0;
+      return (secA.getBoundingClientRect().top) - (secB.getBoundingClientRect().top);
+    });
+
+    let lastBottom = headerHeight;
+    notes.forEach(note => {
+      if (note.style.display === 'none') return;
+      const section = document.getElementById(note.dataset.section);
+      if (!section) { note.style.display = 'none'; return; }
+
+      const sectionAbsTop = section.getBoundingClientRect().top + scrollY;
+      let targetY = sectionAbsTop - sidebarAbsTop;
+
+      if (targetY < lastBottom + 8) {
+        targetY = lastBottom + 8;
+      }
+
+      note.style.top = targetY + 'px';
+      lastBottom = targetY + note.offsetHeight;
+    });
+
+    sidebarEl.style.minHeight = (lastBottom + 40) + 'px';
+  }
+
+  // 4. Run positioning on load, resize, scroll
+  window.addEventListener('load', () => {
+    positionNotes();
+    document.querySelectorAll('details').forEach(d => {
+      d.addEventListener('toggle', () => setTimeout(positionNotes, 50));
+    });
+  });
+  window.addEventListener('resize', positionNotes);
+  let scrollTimer;
+  window.addEventListener('scroll', () => {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(positionNotes, 100);
+  }, { passive: true });
+
+  // 5. Highlight <-> Note sync
+  document.querySelectorAll('.nref, mark.hl-know').forEach(el => {
+    el.addEventListener('click', e => {
+      e.preventDefault();
+      const noteId = el.dataset.note;
+      const note = document.getElementById(noteId);
+      if (!note) return;
+      note.classList.add('open');
+      requestAnimationFrame(() => {
+        positionNotes();
+        note.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        note.classList.add('flash');
+        setTimeout(() => note.classList.remove('flash'), 1500);
+      });
+    });
+  });
+
+  // 6. Hover bidirectional
+  document.querySelectorAll('.anno').forEach(note => {
+    note.addEventListener('mouseenter', () => {
+      document.querySelectorAll('[data-note="' + note.id + '"]').forEach(el => el.classList.add('hover'));
+    });
+    note.addEventListener('mouseleave', () => {
+      document.querySelectorAll('[data-note="' + note.id + '"]').forEach(el => el.classList.remove('hover'));
+    });
+    note.addEventListener('dblclick', () => {
+      const section = document.getElementById(note.dataset.section);
+      if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  document.querySelectorAll('[data-note]').forEach(el => {
+    if (el.classList.contains('anno')) return;
+    el.addEventListener('mouseenter', () => {
+      const note = document.getElementById(el.dataset.note);
+      if (note) note.classList.add('hover');
+    });
+    el.addEventListener('mouseleave', () => {
+      const note = document.getElementById(el.dataset.note);
+      if (note) note.classList.remove('hover');
+    });
+  });
+
+  // 7. Top controls
+  const allAnnos = document.querySelectorAll('.anno');
+  const knowNotes = document.querySelectorAll('.anno.know-note');
+  const knowMarks = document.querySelectorAll('mark.hl-know');
+  const knowRefs = document.querySelectorAll('.nref');
+  const metaNotes = document.querySelectorAll('.anno.meta-note');
+
+  document.getElementById('noteCountLabel').textContent = metaNotes.length + ' META + ' + knowNotes.length + ' KNOW';
+
+  window.toggleKnowNotes = function() {
+    const btn = document.getElementById('knowToggleBtn');
+    const isActive = btn.classList.toggle('active');
+    btn.textContent = isActive ? '显示' : '隐藏';
+    knowNotes.forEach(n => n.style.display = isActive ? '' : 'none');
+    knowMarks.forEach(m => { m.style.background = isActive ? '' : 'transparent'; m.style.borderBottom = isActive ? '' : 'none'; });
+    knowRefs.forEach(r => r.style.display = isActive ? '' : 'none');
+    requestAnimationFrame(positionNotes);
+  };
+
+  window.expandAllNotes = function() {
+    allAnnos.forEach(n => n.classList.add('open'));
+    requestAnimationFrame(positionNotes);
+  };
+
+  window.collapseAllNotes = function() {
+    allAnnos.forEach(n => n.classList.remove('open'));
+    requestAnimationFrame(positionNotes);
+  };
+
+  // 8. Right sidebar toggle (narrow screens)
+  var notesSidebarEl = document.getElementById('notesSidebar');
+  var notesToggleBtn = document.getElementById('notesToggleBtn');
+  var notesOverlayEl = document.getElementById('notesOverlay');
+  var notesCloseBtn = document.getElementById('notesCloseBtn');
+
+  function toggleNotesSidebar() {
+    var willClose = !notesSidebarEl.classList.contains('ns-closed');
+    notesSidebarEl.classList.toggle('ns-closed', willClose);
+    notesToggleBtn.style.display = willClose ? 'flex' : 'none';
+    notesOverlayEl.classList.toggle('open', !willClose);
+    if (!willClose) requestAnimationFrame(positionNotes);
+  }
+
+  if (notesToggleBtn) notesToggleBtn.addEventListener('click', toggleNotesSidebar);
+  if (notesOverlayEl) notesOverlayEl.addEventListener('click', toggleNotesSidebar);
+  if (notesCloseBtn) notesCloseBtn.addEventListener('click', toggleNotesSidebar);
+
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 1200) {
+      notesSidebarEl.classList.remove('ns-closed');
+      notesToggleBtn.style.display = 'none';
+      notesOverlayEl.classList.remove('open');
+    }
+  });
+})();
+
+// ═══════════════════ Plotly Charts ═══════════════════
+document.addEventListener('DOMContentLoaded', function() {
+  var darkLayout = {
+    paper_bgcolor: '#141516',
+    plot_bgcolor: '#141516',
+    font: { family: 'Inter, -apple-system, sans-serif', color: '#d0d6e0', size: 13 },
+    margin: { t: 40, r: 20, b: 50, l: 60 },
+    xaxis: { gridcolor: '#23252a', zerolinecolor: '#34343a' },
+    yaxis: { gridcolor: '#23252a', zerolinecolor: '#34343a' }
+  };
+
+  // Chart 1: NAND Layer Count
+  Plotly.newPlot('chart-nand-layers', [{
+    type: 'bar',
+    orientation: 'h',
+    y: ['YMTC (bonded)', 'Micron', 'Samsung', 'SK Hynix'],
+    x: [294, 276, 286, 321],
+    marker: {
+      color: ['#f8a848', '#5b9bd5', '#8bc34a', '#4caf50']
+    },
+    text: ['294L', '276L', '286L', '321L'],
+    textposition: 'outside',
+    textfont: { color: '#d0d6e0', size: 12 },
+    hovertemplate: '%{y}: %{x} layers<extra></extra>'
+  }], Object.assign({}, darkLayout, {
+    title: { text: 'NAND Layer Count (2025)', font: { size: 14, color: '#f7f8f8' } },
+    xaxis: Object.assign({}, darkLayout.xaxis, { title: 'Layers', range: [0, 370] }),
+    yaxis: Object.assign({}, darkLayout.yaxis, { automargin: true }),
+    margin: { t: 50, r: 60, b: 40, l: 130 }
+  }), { responsive: true, displayModeBar: false });
+
+  // Chart 2: CXMT DRAM Market Share
+  var quarters = ['Q3 2024', 'Q1 2025', 'Q3 2025', '2025E'];
+  Plotly.newPlot('chart-cxmt-share', [
+    { name: 'Samsung', x: quarters, y: [40, 39, 38, 36], type: 'scatter', mode: 'lines+markers', line: { color: '#8bc34a', width: 2 }, marker: { size: 6 } },
+    { name: 'SK Hynix', x: quarters, y: [34, 34, 33, 32], type: 'scatter', mode: 'lines+markers', line: { color: '#4caf50', width: 2 }, marker: { size: 6 } },
+    { name: 'Micron', x: quarters, y: [22, 21, 20, 19], type: 'scatter', mode: 'lines+markers', line: { color: '#5b9bd5', width: 2 }, marker: { size: 6 } },
+    { name: 'CXMT', x: quarters, y: [3, 4, 5, 12], type: 'scatter', mode: 'lines+markers', line: { color: '#f8a848', width: 3 }, marker: { size: 8 } }
+  ], Object.assign({}, darkLayout, {
+    title: { text: 'DRAM Market Share Trajectory (%)', font: { size: 14, color: '#f7f8f8' } },
+    yaxis: Object.assign({}, darkLayout.yaxis, { title: 'Market Share %', range: [0, 45] }),
+    legend: { bgcolor: 'transparent', font: { size: 11 } },
+    margin: { t: 50, r: 20, b: 50, l: 60 }
+  }), { responsive: true, displayModeBar: false });
+
+  // Chart 3: China AI Chip Market Share
+  var years = ['2024', '2025', '2026'];
+  Plotly.newPlot('chart-ai-chip', [
+    { name: 'Huawei', x: years, y: [20, 40, 50], type: 'bar', marker: { color: '#f8a848' } },
+    { name: 'Nvidia', x: years, y: [55, 30, 8], type: 'bar', marker: { color: '#4caf50' } },
+    { name: 'AMD', x: years, y: [5, 8, 12], type: 'bar', marker: { color: '#5b9bd5' } },
+    { name: 'Others', x: years, y: [20, 22, 30], type: 'bar', marker: { color: '#62666d' } }
+  ], Object.assign({}, darkLayout, {
+    title: { text: 'China AI Chip Market Share Forecast (%)', font: { size: 14, color: '#f7f8f8' } },
+    barmode: 'group',
+    yaxis: Object.assign({}, darkLayout.yaxis, { title: 'Market Share %' }),
+    legend: { bgcolor: 'transparent', font: { size: 11 } },
+    margin: { t: 50, r: 20, b: 50, l: 60 }
+  }), { responsive: true, displayModeBar: false });
+
+  // Chart 4: Equipment Vendor China Revenue %
+  var vendors = ['ASML', 'Applied Materials', 'Lam Research'];
+  Plotly.newPlot('chart-equipment', [
+    { name: '2023', x: vendors, y: [29, 27, 26], type: 'bar', marker: { color: '#62666d' } },
+    { name: '2024', x: vendors, y: [38, 37.23, 42.23], type: 'bar', marker: { color: '#5b9bd5' } },
+    { name: '2025', x: vendors, y: [42, 28, 33.66], type: 'bar', marker: { color: '#f8a848' } }
+  ], Object.assign({}, darkLayout, {
+    title: { text: 'Equipment Vendor China Revenue %', font: { size: 14, color: '#f7f8f8' } },
+    barmode: 'group',
+    yaxis: Object.assign({}, darkLayout.yaxis, { title: 'China Revenue %', range: [0, 50] }),
+    legend: { bgcolor: 'transparent', font: { size: 11 } },
+    margin: { t: 50, r: 20, b: 50, l: 60 }
+  }), { responsive: true, displayModeBar: false });
+});
+</script>
+
+</body>
+</html>

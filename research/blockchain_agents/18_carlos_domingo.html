@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carlos Domingo — Cognitive Agent Profile</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="../blockchain_shared.css">
+  <style>
+    /* === C-tier Agent Profile Overrides === */
+    .page-wrapper { display: flex; min-height: 100vh; }
+    .main-content { flex: 1; min-width: 0; max-width: 900px; padding: 2.5rem 2.5rem 5rem; }
+    .page-header { margin-bottom: 2rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border-default); }
+    .page-header h1 { margin-bottom: 0.3rem; }
+    .page-header .subtitle { color: var(--text-tertiary); margin-bottom: 0.75rem; font-size: 0.88rem; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.5rem; font-size: 0.82rem; color: var(--text-tertiary); }
+    .meta-row span { padding: 0.15rem 0.5rem; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 4px; font-size: 0.75rem; }
+    blockquote { border-left: 3px solid var(--accent); padding: 0.6rem 1.25rem; margin: 1rem 0; font-style: italic; background: var(--bg-surface); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-secondary); }
+    blockquote .zh { font-style: normal; margin-top: 0.4em; padding-top: 0.4em; border-top: 1px dashed var(--border-subtle); }
+    .credibility-meter { display: flex; align-items: center; gap: 0.75rem; margin: 0.75rem 0; }
+    .meter-bar { flex: 1; height: 8px; background: var(--border-subtle); border-radius: 4px; overflow: hidden; }
+    .meter-fill { height: 100%; border-radius: 4px; }
+    .meter-label { font-size: 1.2rem; font-weight: 680; min-width: 3rem; }
+    .top-nav { position: sticky; top: 0; z-index: 999; background: rgba(8,9,10,0.95); backdrop-filter: blur(8px); padding: 0.5rem 1.5rem; border-bottom: 1px solid var(--border-subtle); font-size: 0.78rem; display: flex; gap: 1rem; align-items: center; }
+    .top-nav a { text-decoration: none; }
+    .hamburger-btn { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 200; background: var(--bg-surface); color: var(--text-primary); border: none; border-radius: 6px; width: 44px; height: 44px; font-size: 1.4rem; cursor: pointer; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+    @media (max-width: 900px) {
+      .sidebar { position: fixed; left: -280px; top: 0; transition: left 0.3s ease; box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.open { display: block; }
+      .hamburger-btn { display: block; }
+      .main-content { padding: 2rem 1rem 4rem; }
+    }
+    @media (max-width: 1200px) { .notes-sidebar { display: none; } }
+    p { color: var(--text-secondary); margin-bottom: 1rem; }
+    ul, ol { color: var(--text-secondary); padding-left: 1.2rem; }
+    li { margin-bottom: 0.35rem; line-height: 1.6; }
+    strong { color: var(--text-primary); font-weight: 590; }
+    /* Embedded + Reading mode */
+    body.embedded .sidebar { display: none !important; }
+    body.embedded .notes-sidebar { display: none !important; }
+    body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+    body.embedded .hamburger-btn { display: none !important; }
+    .reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+    .reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+    .reading-mode .hamburger-btn { display: none !important; }
+  </style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <a href="../blockchain_hub.html" style="color:var(--accent);">&larr; Blockchain Hub</a>
+  <span style="color:var(--text-quaternary);">&middot;</span>
+  <span style="color:var(--text-tertiary);">Agent #18 &middot; C-tier</span>
+</nav>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="page-wrapper">
+
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <h4>Profile</h4>
+    <nav>
+      <ul>
+        <li><a href="#summary">Overview</a></li>
+        <li><a href="#key-facts">Key Facts</a></li>
+        <li><a href="#actions">Action Evidence</a></li>
+        <li><a href="#judgment">Judgment</a></li>
+        <li><a href="#credibility">Credibility</a></li>
+      </ul>
+    </nav>
+    <div class="project-meta">
+      Node: N6 RWA<br>
+      Tier: C档 3/5<br>
+      Region: Spain / US<br>
+      Updated: 2026-03-22
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <div class="page-header">
+      <h1>Carlos Domingo</h1>
+      <div class="subtitle">CEO, Securitize — RWA Tokenization Infrastructure</div>
+      <div class="badge-row">
+        <span class="badge badge-gold">N6 RWA</span>
+        <span class="badge badge-gray">C-tier 3/5</span>
+        <span class="badge badge-gray">Spain / US</span>
+      </div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="section-header" id="summary">
+      <h2><span class="section-num">01</span> Overview<span class="zh">概要</span></h2>
+    </div>
+
+    <div class="advisory-box">
+      <strong>C-tier rationale:</strong> Mid-tier data quality. Company financials private but AUM figures are on-chain verifiable. Key importance is as BlackRock's tokenization partner — a bridge between TradFi and DeFi.
+    </div>
+
+    <p>Carlos Domingo is the CEO of Securitize, the leading platform for tokenizing real-world assets (RWA). The company manages <strong>$4.6B in tokenized AUM</strong> and serves as the fund manager for BlackRock's BUIDL fund — the largest tokenized US Treasury fund. Securitize holds a US broker-dealer license, making it one of the few crypto-native companies with full regulatory approval to handle securities.</p>
+
+    <!-- KEY FACTS -->
+    <div class="section-header" id="key-facts">
+      <h2><span class="section-num">02</span> Key Facts<span class="zh">关键事实</span></h2>
+    </div>
+
+    <div class="stats-strip">
+      <div class="stat-item"><span class="stat-value">$4.6B</span><span class="stat-label">Tokenized AUM</span></div>
+      <div class="stat-item"><span class="stat-value">BUIDL</span><span class="stat-label">BlackRock fund manager</span></div>
+      <div class="stat-item"><span class="stat-value">SEC</span><span class="stat-label">Licensed broker-dealer</span></div>
+      <div class="stat-item"><span class="stat-value">2017</span><span class="stat-label">Securitize founded</span></div>
+    </div>
+
+    <ul>
+      <li><strong>BlackRock BUIDL:</strong> Manages the tokenized US Treasury fund for BlackRock. This single partnership validates Securitize as the institutional-grade RWA platform.</li>
+      <li><strong>Broker-dealer license:</strong> SEC-registered transfer agent and broker-dealer. Regulatory moat that most crypto companies cannot replicate.</li>
+      <li><strong>Multi-chain deployment:</strong> Operates on Ethereum, Polygon, Avalanche, and Solana. Chain-agnostic infrastructure approach.</li>
+      <li><strong>Background:</strong> Former VP of Telefonica. Brings traditional telecom/enterprise experience to crypto infrastructure.</li>
+    </ul>
+
+    <!-- ACTION EVIDENCE -->
+    <div class="section-header" id="actions">
+      <h2><span class="section-num">03</span> Action Evidence<span class="zh">行动证据</span></h2>
+    </div>
+
+    <div class="card">
+      <a>BlackRock BUIDL Partnership</a>
+      <div class="card-desc">Selected by BlackRock as the tokenization platform for their $500M+ BUIDL fund. This is the single most important institutional validation in the RWA space — the world's largest asset manager choosing Securitize over all alternatives.</div>
+      <div class="card-meta">2024-present &middot; Institutional partnership</div>
+    </div>
+
+    <div class="card">
+      <a>Regulatory-First Strategy</a>
+      <div class="card-desc">Invested heavily in obtaining SEC broker-dealer and transfer agent registrations before scaling. This contrasts with the "move fast and break things" approach of most crypto companies. The regulatory moat now serves as a competitive advantage.</div>
+      <div class="card-meta">2017-present &middot; Regulatory compliance</div>
+    </div>
+
+    <!-- JUDGMENT -->
+    <div class="section-header" id="judgment">
+      <h2><span class="section-num">04</span> Judgment<span class="zh">判断</span></h2>
+    </div>
+
+    <blockquote>
+      "Tokenization needs regulated intermediaries. We are the bridge between TradFi and DeFi."
+      <span class="zh">"代币化需要受监管的中介。我们是传统金融与DeFi之间的桥梁。"</span>
+    </blockquote>
+
+    <p>Securitize occupies a unique position: it is crypto-native but regulatory-compliant. If the RWA thesis plays out (tokenized treasuries, bonds, equities becoming standard), Securitize is the leading infrastructure provider. The BlackRock relationship alone makes this company strategically important to track.</p>
+
+    <!-- CREDIBILITY -->
+    <div class="section-header" id="credibility">
+      <h2><span class="section-num">05</span> Data Credibility<span class="zh">数据可信度</span></h2>
+    </div>
+
+    <div class="credibility-meter">
+      <span class="meter-label" style="color: var(--tier-medium);">3/5</span>
+      <div class="meter-bar"><div class="meter-fill" style="width:60%; background: var(--tier-medium);"></div></div>
+    </div>
+
+    <p><strong>Medium.</strong> AUM figures are partially on-chain verifiable. BlackRock partnership is publicly confirmed. Company financials are private (pre-IPO). Regulatory filings (SEC) provide some transparency. Overall better data quality than most private crypto companies.</p>
+
+    <div class="page-footer">
+      <p>Blockchain Cognitive Agent Profile &middot; C-tier &middot; Generated 2026-03-22<br>
+      <a href="../blockchain_hub.html">Back to Blockchain Hub</a></p>
+    </div>
+  </main>
+
+  <aside class="notes-sidebar">
+    <h4>Meta-cognitive Notes</h4>
+
+    <div class="meta-note">
+      <div class="note-label chain">Pattern</div>
+      <p><strong>Securitize as BlackRock's Crypto Arm</strong></p>
+      <p>BlackRock doesn't build crypto infrastructure — it partners with specialists. Securitize is effectively BlackRock's crypto arm for asset tokenization. This mirrors how traditional finance outsources technology: Goldman uses Symphony, JPMorgan uses Onyx, BlackRock uses Securitize.</p>
+      <p class="zh">贝莱德不自建加密基础设施——而是与专家合作。Securitize实际上是贝莱德在资产代币化领域的加密臂膀。这反映了传统金融外包技术的模式。</p>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const sidebar = document.getElementById('sidebar');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+  if (hamburgerBtn) {
+    hamburgerBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      sidebarOverlay.classList.toggle('open');
+    });
+  }
+  if (sidebarOverlay) {
+    sidebarOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('open');
+    });
+  }
+  const sections = document.querySelectorAll('.section-header');
+  const navLinks = document.querySelectorAll('.sidebar nav a');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        const id = entry.target.id;
+        const link = document.querySelector(`.sidebar nav a[href="#${id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -60% 0px' });
+  sections.forEach(s => observer.observe(s));
+});
+</script>
+
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+
+</body>
+</html>

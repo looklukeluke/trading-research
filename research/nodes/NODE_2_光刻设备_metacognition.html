@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>光刻设备 — 28轮元思考过程</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <style>
+    :root {
+      --bg-base: #08090a; --bg-elevated: #0f1011; --bg-surface: #141516; --bg-overlay: #191a1b;
+      --border-subtle: #23252a; --border-default: #34343a; --border-strong: #3e3e44;
+      --text-primary: #f7f8f8; --text-secondary: #d0d6e0; --text-tertiary: #8a8f98; --text-quaternary: #62666d;
+      --accent: #f8a848; --accent-dim: rgba(248, 168, 72, 0.12); --accent-hover: rgba(248, 168, 72, 0.08);
+      --knowledge: #5b9bd5; --knowledge-dim: rgba(91, 155, 213, 0.12);
+      --green: #4caf50; --red: #f44336; --orange: #ffa726;
+      --font-sans: 'Inter', 'Inter Variable', -apple-system, system-ui, sans-serif;
+      --font-mono: 'SF Mono', 'Menlo', monospace;
+      --radius-sm: 8px; --radius-md: 12px; --sidebar-width: 240px;
+    }
+    * { box-sizing: border-box; }
+    html { font-family: var(--font-sans); font-feature-settings: 'liga' 1, 'calt' 1; letter-spacing: -0.012em; -webkit-font-smoothing: antialiased; }
+    body { margin: 0; padding: 0; background: var(--bg-base); color: var(--text-primary); font-size: 15px; line-height: 1.65; }
+    .page-wrapper { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { position: sticky; top: 0; height: 100vh; width: var(--sidebar-width); min-width: var(--sidebar-width); overflow-y: auto; padding: 1.25rem 0.75rem; border-right: 1px solid var(--border-subtle); background: var(--bg-elevated); z-index: 100; }
+    .sidebar h4 { margin-bottom: 0.5rem; padding: 0 0.5rem; font-size: 0.7rem; font-weight: 590; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-quaternary); }
+    .sidebar nav ul { list-style: none; padding: 0; margin: 0 0 1rem 0; }
+    .sidebar nav ul li a { display: block; padding: 0.25rem 0.5rem; font-size: 0.78rem; color: var(--text-tertiary); text-decoration: none; border-radius: var(--radius-sm); transition: background 0.12s, color 0.12s; line-height: 1.4; }
+    .sidebar nav ul li a:hover { background: var(--accent-hover); color: var(--text-primary); }
+    .sidebar nav ul li a .toc-num { color: var(--text-quaternary); margin-right: 0.25rem; font-size: 0.65rem; font-weight: 510; }
+
+    /* Main */
+    .main-content { flex: 1; min-width: 0; max-width: 960px; padding: 2.5rem 2.5rem 5rem; }
+
+    /* Header */
+    .page-header { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-default); }
+    .page-header h1 { margin-bottom: 0.3rem; font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 680; letter-spacing: -0.025em; }
+    .page-header .subtitle { color: var(--text-tertiary); margin-bottom: 1rem; font-size: 0.95rem; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .badge { display: inline-block; padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.75rem; font-weight: 510; background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(248, 168, 72, 0.25); }
+    .role-badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; background: rgba(91,155,213,0.12); color: var(--knowledge); }
+
+    /* Sections */
+    .section-header { margin-top: 3.5rem; margin-bottom: 1.25rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border-subtle); }
+    .section-header h2 { font-size: 1.25rem; font-weight: 590; letter-spacing: -0.015em; margin-bottom: 0; }
+    h3 { font-size: 1.1rem; font-weight: 590; margin-top: 1.5rem; }
+    p { color: var(--text-secondary); margin-bottom: 1rem; }
+    strong { color: var(--text-primary); font-weight: 590; }
+    ul, ol { color: var(--text-secondary); padding-left: 1.2rem; }
+    li { margin-bottom: 0.35rem; line-height: 1.6; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Details */
+    details { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.8rem 1rem; margin: 0.8rem 0; background: var(--bg-elevated); }
+    details summary { cursor: pointer; font-weight: 510; font-size: 0.9rem; color: var(--text-primary); }
+    details[open] summary { margin-bottom: 0.6rem; color: var(--accent); }
+
+    /* Priority box */
+    .priority-box { border: 1px solid rgba(248, 168, 72, 0.3); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin-bottom: 2rem; background: var(--bg-surface); }
+    .priority-box h2 { color: var(--accent); margin-top: 0; font-size: 1.1rem; font-weight: 590; }
+
+    /* Arc items */
+    .arc-item { margin-bottom: 1rem; padding: 0.8rem; border-left: 3px solid var(--accent); background: rgba(66, 165, 245, 0.03); border-radius: 0 6px 6px 0; }
+    .arc-item strong { color: var(--accent); }
+
+    /* Question box */
+    .question-box { border: 2px solid var(--knowledge); border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; background: rgba(91, 155, 213, 0.05); }
+    .question-box h4 { color: var(--knowledge); margin-top: 0; }
+
+    /* Tables */
+    figure { margin: 1.25rem 0; overflow-x: auto; }
+    table { font-size: 0.82rem; border-collapse: collapse; width: 100%; }
+    th, td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border-subtle); text-align: left; }
+    th { white-space: nowrap; font-weight: 510; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-quaternary); border-bottom: 1px solid var(--border-default); }
+    td { color: var(--text-secondary); }
+    tr:hover td { background: var(--bg-elevated); }
+
+    /* Blockquote */
+    blockquote { border-left: 3px solid var(--accent); padding: 0.6rem 1.25rem; margin: 1rem 0; font-style: italic; background: var(--bg-surface); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-secondary); }
+
+    /* Signals */
+    .signal { display: inline-block; font-size: 0.75rem; padding: 0.1rem 0.4rem; border-radius: 3px; font-weight: 590; margin-right: 0.3rem; }
+    .signal-bull { background: rgba(76,175,80,0.15); color: var(--green); }
+    .signal-bear { background: rgba(244,67,54,0.15); color: var(--red); }
+    .signal-watch { background: rgba(255,167,38,0.15); color: var(--orange); }
+
+    /* Phase indicator */
+    .phase-tag { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+    .phase-explore { background: rgba(91,155,213,0.12); color: var(--knowledge); }
+    .phase-diagnose { background: rgba(255,167,38,0.12); color: var(--orange); }
+    .phase-build { background: rgba(76,175,80,0.12); color: var(--green); }
+    .phase-verify { background: rgba(244,67,54,0.12); color: var(--red); }
+
+    /* Footer */
+    .page-footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 2px solid var(--border-default); text-align: center; font-size: 0.85rem; color: var(--text-tertiary); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+
+    /* Mobile */
+    .hamburger-btn { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 200; background: var(--bg-surface); color: var(--text-primary); border: none; border-radius: 6px; width: 44px; height: 44px; font-size: 1.4rem; cursor: pointer; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+    @media (max-width: 900px) {
+      .sidebar { position: fixed; left: -320px; top: 0; transition: left 0.3s ease; box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.open { display: block; }
+      .hamburger-btn { display: block; }
+      .main-content { padding: 2rem 1rem 4rem; }
+    }
+    @media (min-width: 1400px) { .main-content { max-width: 1060px; } }
+  
+/* === Embedded mode: inside Dashboard iframe === */
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+body.embedded .hamburger-btn { display: none !important; }
+body.embedded .sidebar-overlay { display: none !important; }
+
+/* === Reading mode: full-width === */
+.reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+.reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+.reading-mode .hamburger-btn { display: none !important; }
+.reading-mode .sidebar-overlay { display: none !important; }
+</style>
+</head>
+<body>
+<nav style="position:sticky;top:0;z-index:999;background:rgba(8,9,10,0.95);backdrop-filter:blur(8px);padding:0.5rem 1.5rem;border-bottom:1px solid #23252a;font-size:0.78rem;display:flex;gap:1rem;align-items:center;">
+  <a href="../semiconductor_hub.html" style="color:#f8a848;text-decoration:none;">&larr; Semiconductor Hub</a>
+  <span style="color:#62666d;">&middot;</span>
+  <a href="NODE_2_光刻设备_2026-03-19.html" style="color:#8a8f98;text-decoration:none;">Node 2 光刻设备报告</a>
+</nav>
+
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="page-wrapper">
+
+  <aside class="sidebar" id="sidebar">
+    <h4>思考旅程</h4>
+    <nav>
+      <ul>
+        <li><a href="#overview"><span class="toc-num">&#9733;</span>速览结论</a></li>
+        <li><a href="#phase1"><span class="toc-num">I</span>任务定义</a></li>
+        <li><a href="#phase2"><span class="toc-num">II</span>素材解码</a></li>
+        <li><a href="#phase3"><span class="toc-num">III</span>矛盾与张力</a></li>
+        <li><a href="#phase4"><span class="toc-num">IV</span>时间与反面</a></li>
+        <li><a href="#phase5"><span class="toc-num">V</span>报告设计</a></li>
+        <li><a href="#phase6"><span class="toc-num">VI</span>成品审视</a></li>
+        <li><a href="#phase7"><span class="toc-num">VII</span>季度验证</a></li>
+        <li><a href="#phase8"><span class="toc-num">VIII</span>信号传导</a></li>
+        <li><a href="#phase9"><span class="toc-num">IX</span>交叉验证</a></li>
+      </ul>
+    </nav>
+    <h4 style="margin-top:1rem;">最终产出</h4>
+    <nav><ul>
+      <li><a href="NODE_2_光刻设备_2026-03-19.html" style="color:var(--accent);">光刻设备节点报告 &rarr;</a></li>
+    </ul></nav>
+    <h4>供应链节点</h4>
+    <nav><ul>
+      <li><a href="NODE_3_代工制造_metacognition.html">Node 3 代工制造</a></li>
+      <li><a href="NODE_4_存储_HBM_metacognition.html">Node 4 存储/HBM</a></li>
+    </ul></nav>
+  </aside>
+
+  <main class="main-content">
+
+    <header class="page-header">
+      <div class="role-badge">METACOGNITION LOG</div>
+      <h1>光刻设备 Node 2 &mdash; 28轮元思考过程</h1>
+      <p class="subtitle">ASML EUV垄断的可投资性评估 &nbsp;|&nbsp; 2026-03-20<br>
+      <span style="color:var(--text-quaternary);font-size:0.85em;">研究笔记 &mdash; 思考过程比结论更有价值</span></p>
+      <div class="badge-row">
+        <span class="badge">28轮元思考</span>
+        <span class="badge">9个Phase</span>
+        <span class="badge">7个claims交叉验证</span>
+        <span class="badge">3条传导链</span>
+      </div>
+    </header>
+
+    <!-- Overview -->
+    <div class="priority-box" id="overview">
+      <h2>&#129504; 28轮元思考的核心结论</h2>
+      <ol>
+        <li><strong>ASML不是一个股票信号，是整个半导体CapEx周期的温度计</strong>。追踪ASML的订单积压(&#8364;38.8B)比追踪任何分析师预测都准&mdash;&mdash;因为那是签了合同的真金白银</li>
+        <li><strong>Fouquet的保守主义是系统性的，可以套利</strong>。2025年7月说"cannot confirm 2026 growth"导致$30B蒸发&rarr;5个月后交出创纪录订单。他的悲观=逆向买入信号</li>
+        <li><strong>High-NA是ASML最大的叙事风险</strong>。TSMC选择跳过High-NA用多重曝光标准EUV做2nm/1.4nm&mdash;&mdash;全球最先进foundry不需要你最贵的新产品，这个信号必须认真对待</li>
+        <li><strong>"不管谁赢都赚"的纯度最高</strong>：NVIDIA赢、AMD赢、Google TPU赢、甚至Intel翻身&mdash;&mdash;都需要ASML的光刻机。唯一输的场景是AI CapEx整体崩塌</li>
+      </ol>
+    </div>
+
+
+    <!-- Phase 1 -->
+    <section id="phase1">
+      <div class="section-header">
+        <span class="phase-tag phase-explore">PHASE I &mdash; EXPLORE</span>
+        <h2>任务定义：光刻设备节点的真正问题</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#1 表面任务 vs 真正任务</strong></summary>
+        <p><strong>表面任务</strong>：将光刻设备数据页升级为认知代理人报告。</p>
+        <p><strong>真正任务</strong>：评估ASML EUV垄断作为投资标的的<strong>可靠性和时机</strong>&mdash;&mdash;不是"ASML好不好"(所有人都知道好)，而是"现在买贵不贵、什么信号意味着拐点、High-NA到底值不值"。</p>
+        <p>交易者需要的不是ASML传记，而是：订单积压的硬度、Fouquet保守主义的套利空间、以及出口管制对收入的真实影响。</p>
+      </details>
+
+      <details>
+        <summary><strong>#2 三个代理人的选择逻辑</strong></summary>
+        <p><strong>Fouquet (ASML CEO)</strong> = GIANT：100% EUV垄断者，看到全球每一个先进fab的设备采购计划。信息优势9/10。</p>
+        <p><strong>Dickerson (AMAT CEO)</strong> = INVESTOR：最大的广谱设备商，从不同角度验证设备周期。"Super cycle"叙事的独立来源。</p>
+        <p><strong>Chris Miller (Chip War作者)</strong> = CONTRARIAN：地缘政治学者，从chokepoint角度审视ASML垄断&mdash;&mdash;垄断既是定价权也是地缘脆弱性。</p>
+        <p>三角定位：供给侧(Fouquet) + 需求侧(Dickerson) + 风险侧(Miller)。</p>
+      </details>
+
+      <details>
+        <summary><strong>#3 成功/失败标准</strong></summary>
+        <p><strong>成功</strong>：报告第一眼回答"ASML的&#8364;38.8B积压订单有多硬"；有Fouquet保守主义的交易价值分析；有出口管制的收入影响量化。</p>
+        <p><strong>失败</strong>：变成"EUV好厉害"的技术科普(没有投资洞察)；忽略High-NA争议(只讲好话)；没有与AMAT/LRCX的对比框架。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 2 -->
+    <section id="phase2">
+      <div class="section-header">
+        <span class="phase-tag phase-explore">PHASE II &mdash; EXPLORE</span>
+        <h2>素材解码：三个代理人讲了什么故事？</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#4 核心叙事：垄断者的三重视角</strong></summary>
+        <p><strong>Fouquet视角(供给)</strong>：&#8364;38.8B积压订单排到2027。EUV 100%垄断。中国收入从49%降至27%已被消化。High-NA开始贡献但采纳比预期慢。系统性保守&mdash;&mdash;"cannot confirm 2026 growth"后5个月交出创纪录订单。</p>
+        <p><strong>Dickerson视角(需求)</strong>：WFE市场$130B+(2026)进入"super cycle"。不止光刻&mdash;&mdash;GAA晶体管、先进封装、HBM设备全部受益。AMAT R&D增速10.42%超过收入增速4%=提前投资。EPIC Center $5B&mdash;&mdash;Samsung/SK Hynix/Micron同时签约。</p>
+        <p><strong>Miller视角(风险)</strong>：ASML是全球供应链最关键的单点故障。Zeiss镜头零替代。出口管制从EUV扩展到DUV是最大下行风险。中国自研光刻(SMEE)在90nm&mdash;&mdash;落后15+年。"firmly out of reach"。</p>
+
+        <h4>跨视角交叉信号</h4>
+        <figure>
+          <table>
+            <thead><tr><th>信号</th><th>来源</th><th>投资含义</th></tr></thead>
+            <tbody>
+              <tr><td>&#8364;38.8B积压订单</td><td>Fouquet (primary)</td><td><span class="signal signal-bull">BULL</span> 签约合同=2年收入可见性</td></tr>
+              <tr><td>TSMC跳过High-NA</td><td>TrendForce/TSMC</td><td><span class="signal signal-bear">BEAR</span> 最大客户不买最贵新品</td></tr>
+              <tr><td>中国收入49%&rarr;27%</td><td>Fouquet Q4数据</td><td><span class="signal signal-watch">WATCH</span> 正常化已消化，但DUV禁令是新风险</td></tr>
+              <tr><td>WFE $130B+ super cycle</td><td>Dickerson (AMAT)</td><td><span class="signal signal-bull">BULL</span> 独立验证设备需求</td></tr>
+              <tr><td>Zeiss零替代</td><td>Miller (Chip War)</td><td><span class="signal signal-bull">BULL</span> 护城河不在ASML而在供应链</td></tr>
+              <tr><td>DUV出口禁令扩大提议</td><td>欧洲智库</td><td><span class="signal signal-bear">BEAR</span> 额外10-15%收入风险</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details>
+        <summary><strong>#5 信号 vs 噪音筛选</strong></summary>
+        <p><strong>高信号</strong>：订单积压金额、High-NA采纳率、出口管制范围、TSMC设备选择、Fouquet tone变化。</p>
+        <p><strong>低信号(删减)</strong>：ASML历史回顾(科普)、EUV技术原理(教科书)、中国SMEE进度(太远)、Zeiss公司介绍(背景)。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 3 -->
+    <section id="phase3">
+      <div class="section-header">
+        <span class="phase-tag phase-diagnose">PHASE III &mdash; DIAGNOSE</span>
+        <h2>矛盾与张力：垄断者的裂缝</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#6 四个核心张力</strong></summary>
+        <div class="arc-item"><strong>张力1：保守指引 vs 创纪录交付</strong> &mdash; Fouquet 2025年7月说"cannot confirm growth"&rarr;5个月后&#8364;13.2B创纪录订单(近2x预期)。系统性under-promise&mdash;&mdash;但市场每次都信。<strong>这个模式本身是交易机会。</strong></div>
+        <div class="arc-item"><strong>张力2：EUV垄断 vs High-NA采纳困境</strong> &mdash; ASML花了数十亿开发High-NA&mdash;&mdash;但最大客户TSMC选择跳过。Intel(亏损中)和Samsung(追赶中)是仅有的买家。<strong>垄断者的新产品找不到最大客户。</strong></div>
+        <div class="arc-item"><strong>张力3：地缘武器 vs 商业利益</strong> &mdash; 出口管制让ASML变成地缘政治工具。中国收入从49%降到27%&mdash;&mdash;ASML被迫放弃全球第二大市场。进一步DUV禁令可能再削10-15%。<strong>垄断的政治代价正在显现。</strong></div>
+        <div class="arc-item"><strong>张力4：Dickerson的"Giga-cycle" vs 历史周期</strong> &mdash; Dickerson从"tipping point"升级到"super cycle"再到"giga-cycle"。每个比前一个更牛。问题：哪些是订单数据支撑的，哪些是财报电话会上的营销话术？</div>
+      </details>
+
+      <details>
+        <summary><strong>#7 信息空白&mdash;&mdash;我们不知道什么</strong></summary>
+        <ol>
+          <li><strong>High-NA真实采纳曲线</strong>&mdash;&mdash;TSMC跳过了，Intel/Samsung的采购量是否足以支撑投资回报？</li>
+          <li><strong>DUV出口管制扩展时间表</strong>&mdash;&mdash;欧洲智库建议≠政策，但方向明确</li>
+          <li><strong>中国替代进度的真实状态</strong>&mdash;&mdash;公开信息说90nm(SMEE)，但军方项目不公开</li>
+          <li><strong>Zeiss产能上限</strong>&mdash;&mdash;ASML的瓶颈不在自己而在Zeiss的光学镜头产能</li>
+          <li><strong>&#8364;38.8B积压的取消条款</strong>&mdash;&mdash;合同里有多少flexibility？客户能不能推迟交付？</li>
+        </ol>
+        <p><strong>结论</strong>：ASML的垄断比Jensen的预测更"硬"(签合同vs说话)，但出口管制和High-NA采纳是两个不可忽视的结构性不确定性。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 4 -->
+    <section id="phase4">
+      <div class="section-header">
+        <span class="phase-tag phase-diagnose">PHASE IV &mdash; DIAGNOSE</span>
+        <h2>时间与反面：如果EUV垄断被侵蚀？</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#8 什么在加速/减速？</strong></summary>
+        <p><strong>加速中(看多)</strong>：AI CapEx驱动WFE $130B+ | 积压订单&#8364;38.8B | AMAT/LRCX同步创新高 | 每个先进节点需要更多EUV层</p>
+        <p><strong>减速中(看空)</strong>：High-NA采纳率低于预期 | 中国收入永久性下降 | DUV禁令风险 | ASML从52周低已涨~140%</p>
+      </details>
+
+      <details open>
+        <summary><strong>#9 最强反面论证</strong></summary>
+        <blockquote>ASML不是"不可替代的垄断"，是<strong>"被地缘政治绑架的单点故障"</strong>。</blockquote>
+        <ol>
+          <li><strong>High-NA是ASML的"Concorde时刻"</strong>&mdash;&mdash;技术上成功但商业上可能不够成功。TSMC跳过=最大客户投票"不需要"</li>
+          <li><strong>出口管制让ASML永久失去中国市场</strong>&mdash;&mdash;49%&rarr;27%&rarr;如果DUV也禁可能到15%。这不是周期波动，是结构性市场收缩</li>
+          <li><strong>Zeiss是真正的瓶颈</strong>&mdash;&mdash;ASML的产能上限由一家德国私有公司的光学镜头产能决定。单点故障中的单点故障</li>
+          <li><strong>WFE super cycle ≠ ASML super cycle</strong>&mdash;&mdash;先进封装(CoWoS)设备增长更快，AMAT/TEL的封装设备增速可能超过光刻</li>
+          <li><strong>估值已反映乐观</strong>&mdash;&mdash;从52周低点涨140%，Forward P/E ~30x。好消息已在价格里</li>
+        </ol>
+        <p><strong>概率</strong>：15-20%。EUV垄断在物理上无可撼动(5-10年)，但High-NA和出口管制确实压缩了增长天花板。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 5 -->
+    <section id="phase5">
+      <div class="section-header">
+        <span class="phase-tag phase-build">PHASE V &mdash; BUILD</span>
+        <h2>报告结构设计</h2>
+      </div>
+
+      <details>
+        <summary><strong>#10 结构决策</strong></summary>
+        <p>核心原则：报告不是"光刻科普"，是<strong>ASML/AMAT/LRCX作为设备周期投资标的的可靠性评估</strong>。</p>
+        <ol>
+          <li>Phase 0: 独立思考&mdash;&mdash;光刻设备解决什么问题、供需状态、EUV垄断性质</li>
+          <li>Phase 0.5: 策展搜索&mdash;&mdash;Fouquet/Dickerson/Miller的一手材料</li>
+          <li>Phase 1: 三个代理人&mdash;&mdash;行动证据优先，认知时间线，可信度评分</li>
+          <li>Phase 2: 综合&mdash;&mdash;三角验证表、竞争格局、供需框架、风险矩阵、交易视角</li>
+          <li>KPI + 图表 + 溯源</li>
+        </ol>
+        <p>Phase 0偏差标记：(1)高估中国DUV替代速度 (2)未预见TSMC跳过High-NA。两个方向性错误。</p>
+      </details>
+
+      <details>
+        <summary><strong>#11 Phase 0偏差的投资意义</strong></summary>
+        <p><strong>偏差1(中国DUV高估)</strong>：CSIS评估"firmly out of reach"比预期强得多。SMEE在90nm=落后ASML 15+年。中国半导体自给率仅~30%远低于70%目标。<strong>投资含义</strong>：短期内(3-5年)中国不构成技术替代威胁，ASML垄断更硬。</p>
+        <p><strong>偏差2(High-NA低估)</strong>：没有预见TSMC选择多重曝光标准EUV跳过High-NA。<strong>投资含义</strong>：High-NA的可寻址市场缩小到Intel(挣扎中)+Samsung(追赶中)+研发机构(imec)。这实质性降低了ASML下一代收入的上行空间。</p>
+        <p>两个偏差方向相反：一个让垄断更硬(bull)，一个让增长更慢(bear)，净效应大致中性&mdash;&mdash;但风险构成与Phase 0预测不同。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 6 -->
+    <section id="phase6">
+      <div class="section-header">
+        <span class="phase-tag phase-verify">PHASE VI &mdash; VERIFY</span>
+        <h2>成品审视：诚实的自我诊断</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#12 做到了什么/没做到什么</strong></summary>
+        <p><strong>做到了</strong>：三个代理人的行动证据+认知时间线完整；三角验证表清晰展示共识(EUV垄断)和分歧(High-NA/出口管制)；竞争格局表覆盖ASML/AMAT/LRCX/TEL。</p>
+        <p><strong>没做到</strong>：Zeiss依赖性分析不够深(缺少产能数据)；LRCX的独立视角不够(只是跟随ASML/AMAT的验证)；出口管制的政策分析过于定性缺少量化模型。</p>
+      </details>
+
+      <details>
+        <summary><strong>#13-#15 Fouquet保守偏见的交易价值</strong></summary>
+        <p>Fouquet的保守主义不是性格特征，是<strong>系统性的公司治理策略</strong>。</p>
+        <div class="arc-item"><strong>模式识别</strong>：2025.07"cannot confirm growth"(股价暴跌$30B) &rarr; 2025.12 创纪录&#8364;13.2B订单。公开悲观 + 订单积压创新高 = 模式性under-promise-over-deliver。</div>
+        <div class="arc-item"><strong>交易规则</strong>：当Fouquet转悲观 + 基本面(积压/利用率)无恶化 → 逆向买入窗口。关键区分：Fouquet"真悲观"(积压下降) vs "习惯性悲观"(积压稳定/上升)。</div>
+        <div class="arc-item"><strong>可信度校准</strong>：当季度 9/10(他有数据) | 下季度 8/10(保守但准确) | 2027+ 6/10(技术转换真正不确定)</div>
+      </details>
+
+      <details>
+        <summary><strong>#16 Dickerson"Super Cycle"的拆解</strong></summary>
+        <p>Dickerson用三个递进术语：tipping point &rarr; super cycle &rarr; giga-cycle。</p>
+        <p><strong>有数据支撑的</strong>：Q1 FY2026 $7.01B创纪录 | R&D增10.42%超收入增4% | EPIC Center $5B实体投资 | 三家存储公司(Samsung/SK Hynix/Micron)同时签约&mdash;&mdash;super cycle有基础。</p>
+        <p><strong>存疑的</strong>："Giga-cycle"首次出现在Q1财报电话会=最大化股价影响的时机。裁员4%被包装为"geographic rebalancing"但也服务利润率优化。</p>
+        <p><strong>三角验证结论</strong>：super cycle是真的(Fouquet订单数据+多家Hyperscaler CapEx确认)。giga-cycle是aspirational framing。折扣Dickerson叙事~20%，用Fouquet积压作为ground truth锚。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 7 -->
+    <section id="phase7">
+      <div class="section-header">
+        <span class="phase-tag phase-build">PHASE VII &mdash; BUILD</span>
+        <h2>季度验证日历</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#18-#19 预测追踪器</strong></summary>
+        <p>光刻设备的验证周期比GPU长&mdash;&mdash;设备订单到交付有12-18个月滞后。交易者需要的领先指标不是ASML自己的财报，而是<strong>下游客户的CapEx指引</strong>。</p>
+        <figure>
+          <table>
+            <thead><tr><th>季度</th><th>最关键事件</th><th>如果成功</th><th>如果失败</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Q2 2026</strong></td><td>ASML Q1财报(4月) + TSMC CapEx确认</td><td>积压&#8364;38.8B维持/增长&rarr;叙事稳固</td><td><span class="signal signal-bear">BEAR</span> 积压下降=真正的需求放缓</td></tr>
+              <tr><td><strong>Q3 2026</strong></td><td>High-NA出货量 + Intel/Samsung采购</td><td>High-NA放量&rarr;增长引擎兑现</td><td>High-NA延迟&rarr;ASML天花板下降</td></tr>
+              <tr><td><strong>Q4 2026</strong></td><td>AMAT/LRCX创新高验证 + DUV出口管制政策</td><td>WFE $130B+兑现</td><td>DUV禁令扩大&rarr;ASML再失10-15%收入</td></tr>
+              <tr><td><strong>2027</strong></td><td>A16/14A量产拉动 + 积压消化节奏</td><td>新节点=新的EUV层数需求</td><td>CapEx周期下行&rarr;设备商集体回调</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details>
+        <summary><strong>#20 三个投资机会</strong></summary>
+        <div class="arc-item"><strong>机会1</strong>：Fouquet保守主义套利。模式：公开悲观tone+积压不减=逆向买入。下一次机会：Fouquet在某次财报上"manage expectations"</div>
+        <div class="arc-item"><strong>机会2</strong>：设备周期扩散。ASML→AMAT→LRCX→TEL&mdash;&mdash;信号在ASML订单最先出现，在TEL最后反映。时间差2-3季度</div>
+        <div class="arc-item"><strong>机会3</strong>：出口管制恐慌后的超跌。DUV禁令消息&rarr;ASML下跌10-15%&rarr;但基本面(非中国积压)未变=买入窗口</div>
+      </details>
+
+      <details>
+        <summary><strong>#21 监控方法论</strong></summary>
+        <p><strong>每月</strong>：TSMC月度营收(10日)&mdash;&mdash;光刻设备需求的最直接前瞻指标</p>
+        <p><strong>每季度</strong>：ASML积压变化 | AMAT订单趋势 | TSMC/Intel/Samsung CapEx指引</p>
+        <p><strong>事件驱动</strong>：DUV出口管制政策变化 | High-NA大额订单公告 | TSMC新节点设备选择</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 8 -->
+    <section id="phase8">
+      <div class="section-header">
+        <span class="phase-tag phase-build">PHASE VIII &mdash; BUILD</span>
+        <h2>信号传导与标的地图</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#22 三条传导链</strong></summary>
+        <div class="arc-item"><strong><span class="signal signal-bull">BULL</span> 链1：AI CapEx上行 &rarr; 设备链</strong><br>Hyperscaler CapEx &rarr; TSMC/Intel/Samsung扩产 &rarr; ASML(EUV) &rarr; AMAT(沉积/刻蚀) &rarr; LRCX(刻蚀/沉积) &rarr; TEL(涂胶/显影)<br><em>信号最先在TSMC月度营收出现，ASML订单滞后1-2季度，TEL滞后2-3季度</em></div>
+        <div class="arc-item"><strong><span class="signal signal-bear">BEAR</span> 链2：出口管制升级 &rarr; 收入收缩链</strong><br>DUV禁令扩大 &rarr; ASML中国收入再降10-15% &rarr; ASML短期股价冲击 &rarr; 但Zeiss/AMAT中国收入也受影响<br><em>信号最先在政策公告出现。ASML反应最快(直接暴露)，AMAT次之</em></div>
+        <div class="arc-item"><strong><span class="signal signal-watch">WATCH</span> 链3：先进封装崛起 &rarr; 设备结构变化</strong><br>CoWoS需求爆发 &rarr; 封装设备(AMAT/TEL/Besi)增速超光刻 &rarr; WFE份额从光刻向封装倾斜<br><em>这不是看空ASML，而是AMAT/Besi可能跑赢ASML</em></div>
+      </details>
+
+      <details open>
+        <summary><strong>#23 时间差套利</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>事件</th><th>最先反映</th><th>滞后反映</th><th>时间差</th></tr></thead>
+            <tbody>
+              <tr><td>TSMC CapEx上调</td><td>TSMC股价(当天)</td><td>ASML订单(下季度)</td><td>1-2季度</td></tr>
+              <tr><td>ASML创纪录积压</td><td>ASML股价(当天)</td><td>AMAT/LRCX订单</td><td>1-3月</td></tr>
+              <tr><td>DUV出口禁令</td><td>ASML股价(当天暴跌)</td><td>基本面验证(非中国积压)</td><td>1-2季度</td></tr>
+              <tr><td>High-NA大单</td><td>ASML(直接)</td><td>Zeiss(不上市，无法交易)</td><td>N/A</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p>最可行的时间差：TSMC月度营收↑ &rarr; ASML下季度积压↑ &rarr; 在TSMC数据公布后、ASML财报前建仓。</p>
+      </details>
+
+      <details>
+        <summary><strong>#24 "不管谁赢都赚"标的</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>标的</th><th>NVIDIA赢&rarr;</th><th>NVIDIA输&rarr;</th><th>逻辑</th></tr></thead>
+            <tbody>
+              <tr><td><strong>ASML</strong></td><td>TSMC扩产买EUV</td><td>替代者也需EUV</td><td>所有先进芯片=EUV</td></tr>
+              <tr><td><strong>AMAT</strong></td><td>GAA+封装设备↑</td><td>自研ASIC也需AMAT</td><td>最广设备覆盖</td></tr>
+              <tr><td><strong>LRCX</strong></td><td>刻蚀需求↑</td><td>存储周期也拉动</td><td>存储+逻辑双驱动</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>ASML是六个半导体节点中"不管谁赢都赚"纯度最高的标的</strong>。唯一输的场景是AI CapEx整体崩塌&mdash;&mdash;但那种情况下所有半导体都输。</p>
+      </details>
+
+      <details>
+        <summary><strong>#25 历史案例</strong></summary>
+        <div class="arc-item"><strong>2025.07 Fouquet"cannot confirm"事件</strong>：市值蒸发$30B。5个月后Q4创纪录订单。追踪者如果识别了保守主义模式&rarr;跌幅即买点。</div>
+        <div class="arc-item"><strong>2024 中国收入49%</strong>：市场恐慌"如果中国被切断"。实际执行：中国从49%降至27%，但非中国订单&#8364;38.8B填满。ASML的垄断地位意味着需求不是消失而是转移。</div>
+        <div class="arc-item"><strong>AMAT EPIC Center $5B</strong>：不是口号而是实体投资。Samsung/SK Hynix/Micron三家作为founding partner=独立验证设备需求是真的。</div>
+      </details>
+    </section>
+
+
+    <!-- Phase 9 -->
+    <section id="phase9">
+      <div class="section-header">
+        <span class="phase-tag phase-verify">PHASE IX &mdash; VERIFY</span>
+        <h2>交叉验证网络 &mdash; 最终方法论</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#26 设备节点的独特验证方法</strong></summary>
+        <p>光刻设备与GPU不同&mdash;&mdash;设备有12-18个月的订单-交付滞后。这意味着：</p>
+        <p><strong>ASML的积压订单是整个半导体行业最"硬"的前瞻指标</strong>。&#8364;38.8B不是预测，不是LOI，是签了字的合同。比任何CEO的口头预测都可靠。</p>
+        <p>但"硬"不意味着"不变"&mdash;&mdash;需要监控取消/推迟率。历史上CapEx下行周期中积压取消率可达10-15%。</p>
+      </details>
+
+      <details open>
+        <summary><strong>#27 7个Claims的交叉验证结果</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>Claim</th><th>交叉验证</th><th>综合可信度</th></tr></thead>
+            <tbody>
+              <tr><td>"EUV垄断不可替代"</td><td>Miller CSIS确认 + Zeiss零替代 + SMEE 90nm = 15年差距</td><td><strong style="color:#4caf50;">98%</strong></td></tr>
+              <tr><td>"WFE进入super cycle"</td><td>Fouquet积压&#8364;38.8B + Dickerson AMAT创纪录 + TSMC/Intel CapEx</td><td><strong style="color:#4caf50;">85%</strong></td></tr>
+              <tr><td>"中国收入正常化已消化"</td><td>49%&rarr;27%已执行 + 非中国积压填满</td><td><strong style="color:#4caf50;">80%</strong></td></tr>
+              <tr><td>"High-NA将推动下一轮增长"</td><td>TSMC跳过 + Intel/Samsung是仅有买家 + 可寻址市场收缩</td><td><strong style="color:#ffa726;">45%</strong></td></tr>
+              <tr><td>"DUV出口禁令不会扩大"</td><td>欧洲智库建议扩大 + 美国政策持续收紧 + 荷兰政府态度暧昧</td><td><strong style="color:#ffa726;">40%</strong></td></tr>
+              <tr><td>"Dickerson的giga-cycle"</td><td>super cycle有数据支撑 + giga-cycle是aspirational framing</td><td><strong style="color:#ffa726;">30%</strong> (super cycle 85%)</td></tr>
+              <tr><td>"ASML估值合理"</td><td>Forward P/E ~30x + 从低点涨140% + 但2年可见收入兜底</td><td><strong style="color:#ffa726;">55%</strong></td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <div class="question-box">
+        <h4>最终方法论 &mdash; 光刻设备投资4条规则</h4>
+        <p style="text-align:left;"><strong>规则1：ASML积压订单是Ground Truth</strong><br>&#8364;38.8B签约合同 > 所有分析师预测。积压增长=加仓信号。积压下降=减仓信号。取消率超过5%=警报。</p>
+        <p style="text-align:left;"><strong>规则2：Fouquet悲观 + 积压稳定 = 逆向买入</strong><br>系统性保守 + 市场过度反应 = 重复出现的交易机会。关键：区分"习惯性悲观"(积压稳定)和"真正悲观"(积压下降)。</p>
+        <p style="text-align:left;"><strong>规则3：High-NA是期权不是确定性</strong><br>TSMC跳过了。Intel/Samsung可能买。但不要把High-NA当作确定的增长引擎。把它当做上行期权&mdash;&mdash;如果兑现是bonus，不兑现不影响核心论据。</p>
+        <p style="text-align:left;"><strong>规则4：出口管制恐慌是买入机会(有条件)</strong><br>条件：非中国积压保持稳定。如果DUV禁令导致ASML暴跌10%+，但&#8364;30B+非中国积压不变&mdash;&mdash;这是市场给的礼物。</p>
+      </div>
+
+    </section>
+
+
+    <footer class="page-footer">
+      <p>光刻设备 Metacognition Log &nbsp;|&nbsp; 28 Rounds &nbsp;|&nbsp; 2026-03-20 &nbsp;|&nbsp; V4 Design System</p>
+      <p><a href="NODE_2_光刻设备_2026-03-19.html">节点报告</a> &nbsp;|&nbsp; <a href="../semiconductor_hub.html">Semiconductor Hub</a></p>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+(function() {
+  const hamburger = document.getElementById('hamburgerBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  hamburger.addEventListener('click', () => { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+  sidebar.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => { if (window.innerWidth <= 900) { sidebar.classList.remove('open'); overlay.classList.remove('open'); } });
+  });
+})();
+</script>
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+</body>
+</html>

@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V3 Report Template — Project Detail</title>
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+/* === Linear Docs Design System — Single Source of Truth === */
+:root {
+  --bg-base: #08090a;
+  --bg-elevated: #0f1011;
+  --bg-surface: #141516;
+  --bg-overlay: #191a1b;
+  --border-subtle: #23252a;
+  --border-default: #34343a;
+  --border-strong: #3e3e44;
+  --text-primary: #f7f8f8;
+  --text-secondary: #d0d6e0;
+  --text-tertiary: #8a8f98;
+  --text-quaternary: #62666d;
+  --accent: #f8a848;
+  --accent-dim: rgba(248, 168, 72, 0.12);
+  --accent-hover: rgba(248, 168, 72, 0.08);
+  --tier-high: #4caf50;
+  --tier-medium: #ffc107;
+  --tier-low: #f44336;
+  --font-sans: 'Inter', 'Inter Variable', -apple-system, 'SF Pro Display', system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'Menlo', 'Consolas', monospace;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  font-family: var(--font-sans);
+  font-feature-settings: 'liga' 1, 'calt' 1;
+  letter-spacing: -0.012em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* === Typography === */
+p { color: var(--text-secondary); margin-bottom: 1rem; }
+strong { color: var(--text-primary); font-weight: 590; }
+em { color: var(--text-tertiary); }
+h1 { font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 680; letter-spacing: -0.025em; margin-bottom: 0.2rem; }
+h2 { font-size: 1.25rem; font-weight: 590; margin-top: 2.5rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-subtle); }
+h3 { font-size: 1.05rem; font-weight: 590; margin-top: 2rem; margin-bottom: 0.5rem; }
+blockquote { border-left: 3px solid var(--accent); padding: 0.6rem 1.25rem; margin: 1rem 0; font-style: italic; background: var(--bg-surface); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-secondary); }
+
+/* === Bilingual === */
+.zh { display: block; font-size: 0.85em; color: var(--text-tertiary); font-style: normal; margin-top: 0.15em; line-height: 1.5; }
+.zh-inline { color: var(--text-tertiary); font-size: 0.85em; }
+blockquote .zh { font-style: normal; margin-top: 0.4em; padding-top: 0.4em; border-top: 1px dashed var(--border-subtle); }
+
+/* === Common Components === */
+.back-link { font-size: 0.82rem; margin-bottom: 2rem; display: block; }
+.subtitle { color: var(--text-tertiary); font-size: 0.88rem; margin-bottom: 1.5rem; }
+
+.badge { display: inline-block; padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.75rem; font-weight: 510; margin-right: 0.4rem; }
+.badge-gold { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(248,168,72,0.25); }
+.badge-red { background: rgba(244,67,54,0.12); color: var(--tier-low); border: 1px solid rgba(244,67,54,0.25); }
+.badge-green { background: rgba(76,175,80,0.12); color: var(--tier-high); border: 1px solid rgba(76,175,80,0.25); }
+.badge-yellow { background: rgba(255,193,7,0.12); color: var(--tier-medium); border: 1px solid rgba(255,193,7,0.25); }
+.badge-gray { background: rgba(138,143,152,0.12); color: var(--text-tertiary); border: 1px solid rgba(138,143,152,0.25); }
+
+/* === Diagnostic Strip === */
+.diag-strip {
+  border: 1px solid rgba(248,168,72,0.3);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1.25rem;
+  margin-bottom: 2rem;
+  background: var(--bg-surface);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.diag-strip .sep { color: var(--border-strong); }
+.diag-strip .metric { display: inline-flex; align-items: center; gap: 0.25rem; }
+.diag-strip .metric-value { font-weight: 590; color: var(--text-primary); font-family: var(--font-mono); font-size: 0.8rem; }
+.diag-strip .metric-ok { color: var(--tier-high); font-weight: 590; }
+.diag-strip .metric-warn { color: var(--tier-low); font-weight: 590; }
+
+/* === Timeline === */
+.timeline { position: relative; padding-left: 2rem; margin: 1.5rem 0; }
+.timeline::before { content: ''; position: absolute; left: 0.55rem; top: 0; bottom: 0; width: 2px; background: var(--border-default); }
+.tl-item { position: relative; margin-bottom: 1.25rem; padding: 0.8rem 1rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: var(--bg-elevated); }
+.tl-item::before { content: ''; position: absolute; left: -1.7rem; top: 1rem; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg-base); }
+.tl-item.completed::before { background: var(--tier-high); }
+.tl-item.pending::before { background: var(--text-quaternary); }
+.tl-item.current::before { background: var(--tier-medium); }
+.tl-date { font-size: 0.7rem; color: var(--text-quaternary); font-weight: 510; text-transform: uppercase; letter-spacing: 0.03em; }
+.tl-desc { font-size: 0.88rem; color: var(--text-secondary); margin-top: 0.2rem; }
+
+/* === Depth Meter === */
+.depth-meter { display: flex; gap: 2px; margin-top: 0.2rem; align-items: center; }
+.depth-meter .depth-block { width: 10px; height: 4px; border-radius: 1px; background: var(--border-subtle); }
+.depth-meter .depth-block.filled-green { background: var(--tier-high); }
+.depth-meter .depth-block.filled-warn { background: var(--tier-medium); }
+.depth-meter .depth-block.filled-dim { background: var(--text-quaternary); }
+.depth-meter .depth-label { font-size: 0.58rem; color: var(--text-quaternary); margin-left: 0.15rem; }
+
+/* === Deliverable List === */
+.deliverable-list { list-style: none; padding: 0; margin: 1rem 0; }
+.deliverable-list li { padding: 0.45rem 0; border-bottom: 1px solid var(--border-subtle); font-size: 0.85rem; }
+.deliverable-list li:last-child { border-bottom: none; }
+.deliverable-list a { font-weight: 510; }
+.deliverable-note { font-size: 0.82rem; color: var(--text-tertiary); margin-top: 0.75rem; }
+
+/* === Collapsible Details === */
+details { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); margin: 0.8rem 0; background: var(--bg-elevated); }
+details summary { padding: 0.8rem 1rem; cursor: pointer; font-weight: 510; font-size: 0.9rem; color: var(--text-primary); list-style: none; }
+details summary::-webkit-details-marker { display: none; }
+details summary::before { content: '\25B8'; display: inline-block; margin-right: 0.5rem; font-size: 0.75rem; color: var(--text-quaternary); transition: transform 0.15s ease; }
+details[open] summary::before { transform: rotate(90deg); color: var(--accent); }
+details[open] summary { color: var(--accent); margin-bottom: 0.4rem; }
+details .detail-body { padding: 0 1rem 1rem; }
+.deliverable-item { margin-bottom: 0.6rem; }
+.deliverable-item a { color: var(--accent); text-decoration: none; font-weight: 510; font-size: 0.88rem; }
+.deliverable-item a:hover { text-decoration: underline; }
+.deliverable-item .desc { font-size: 0.78rem; color: var(--text-tertiary); }
+
+/* === Section Numbering === */
+.section-header { margin-top: 3rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-subtle); }
+.section-header:first-of-type { margin-top: 0; }
+.section-header h2 { font-size: 1.25rem; font-weight: 590; letter-spacing: -0.015em; }
+.section-num { color: var(--text-quaternary); font-size: 0.7rem; font-weight: 510; margin-right: 0.35rem; }
+
+/* === Context Block === */
+.context-block { margin-top: 1.5rem; border-left: 3px solid var(--accent); padding: 0.8rem 1.25rem; background: var(--bg-surface); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+.context-block .context-label { display: inline-block; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--bg-base); background: var(--accent); padding: 0.1rem 0.45rem; border-radius: 3px; margin-bottom: 0.5rem; }
+.context-block p { font-size: 0.88rem; font-style: italic; color: var(--text-secondary); margin-bottom: 0.5rem; }
+.context-block p:last-child { margin-bottom: 0; }
+
+/* === Enhanced Details (with chevron + count) === */
+details summary { display: flex; align-items: center; justify-content: space-between; user-select: none; }
+details summary .count { font-size: 0.72rem; font-weight: 500; color: var(--text-quaternary); background: var(--bg-surface); padding: 0.1rem 0.5rem; border-radius: 10px; border: 1px solid var(--border-subtle); }
+details summary .chevron { width: 16px; height: 16px; stroke: var(--text-quaternary); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.2s; margin-left: 0.5rem; }
+details[open] summary .chevron { transform: rotate(90deg); }
+.group-description { padding: 0.5rem 1rem 0.75rem; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.55; }
+.group-description .zh { display: block; margin-top: 0.35rem; margin-left: 0; font-size: 0.92em; }
+.deliverable-list .dl-label { color: var(--text-tertiary); font-size: 0.82rem; }
+
+/* === Timeline with titles (cognitive-agents style) === */
+.timeline-item { position: relative; margin-bottom: 1.25rem; padding: 0.85rem 1.15rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: var(--bg-elevated); }
+.timeline-item::before { content: ''; position: absolute; left: -1.7rem; top: 1.1rem; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--bg-base); z-index: 1; }
+.timeline-item.completed::before { background: var(--tier-high); }
+.timeline-item.in-progress::before { background: var(--tier-medium); }
+.timeline-item.pending::before { background: var(--border-strong); }
+.timeline-item .tl-title { font-weight: 590; font-size: 0.92rem; color: var(--text-primary); margin-bottom: 0.15rem; }
+
+/* === Phase badges (diagnostic strip) === */
+.diag-strip .phase-complete { color: var(--tier-high); font-weight: 590; }
+.diag-strip .phase-pending { color: var(--tier-medium); font-weight: 590; }
+.diag-strip .metric-label { color: var(--text-tertiary); }
+
+/* === Empty State === */
+.empty-state { border: 1px dashed var(--border-default); border-radius: var(--radius-md); padding: 2rem; text-align: center; color: var(--text-quaternary); font-size: 0.88rem; margin: 1rem 0; }
+
+/* === Page Footer === */
+.page-footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--border-default); font-size: 0.78rem; color: var(--text-quaternary); }
+
+/* === Advisory Box === */
+.advisory-box {
+  border: 1px solid rgba(248,168,72,0.3);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 1.25rem 1.5rem;
+  margin: 2rem 0;
+  background: var(--bg-surface);
+}
+.advisory-box .advisory-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+.advisory-box .advisory-label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bg-base); background: var(--accent); padding: 0.15rem 0.5rem; border-radius: 3px; }
+.advisory-box .advisory-title { font-size: 0.95rem; font-weight: 590; color: var(--accent); }
+.advisory-box ul { margin: 0; padding-left: 1.25rem; }
+.advisory-box li { font-size: 0.88rem; margin-bottom: 0.6rem; line-height: 1.55; color: var(--text-secondary); }
+.advisory-box li strong { color: var(--text-primary); }
+.advisory-box .advisory-verdict { margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border-subtle); font-size: 0.85rem; color: var(--text-tertiary); font-style: italic; }
+
+/* === Gantt Chart === */
+.gantt-chart { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+.gantt-chart th { font-size: 0.6rem; font-weight: 510; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-quaternary); padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--border-default); text-align: center; white-space: nowrap; }
+.gantt-chart th:first-child { text-align: left; width: 170px; min-width: 170px; }
+.gantt-chart th.current-week { color: var(--accent); border-bottom: 2px solid var(--accent); }
+.gantt-chart td { padding: 0.25rem 0.1rem; border-bottom: 1px solid var(--border-subtle); vertical-align: middle; }
+.gantt-chart td:first-child { padding: 0.4rem 0.5rem; }
+.gantt-bar-cell { height: 28px; }
+.gantt-bar { height: 20px; border-radius: 4px; position: relative; overflow: hidden; }
+.gantt-bar.completed { background: rgba(76,175,80,0.2); border: 1px solid rgba(76,175,80,0.4); }
+.gantt-bar.in-progress { background: rgba(255,193,7,0.15); border: 1px solid rgba(255,193,7,0.35); }
+.gantt-bar.stale { background: rgba(244,67,54,0.12); border: 1px solid rgba(244,67,54,0.3); }
+.gantt-bar.design-only { background: rgba(138,143,152,0.12); border: 1px dashed rgba(138,143,152,0.3); }
+.gantt-bar .gantt-fill { height: 100%; border-radius: 3px; }
+.gantt-bar.completed .gantt-fill { background: rgba(76,175,80,0.5); }
+.gantt-bar.in-progress .gantt-fill { background: rgba(255,193,7,0.4); }
+.gantt-bar.stale .gantt-fill { background: rgba(244,67,54,0.25); }
+.gantt-bar.design-only .gantt-fill { background: rgba(138,143,152,0.2); }
+.gantt-project-name { font-size: 0.82rem; font-weight: 510; color: var(--text-primary); line-height: 1.3; }
+.gantt-project-name a { color: var(--accent); font-weight: 510; text-decoration: none; }
+.gantt-project-name a:hover { text-decoration: underline; }
+.gantt-project-name .new-badge { display: inline-block; font-size: 0.55rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--bg-base); background: var(--accent); padding: 0.05rem 0.35rem; border-radius: 3px; margin-left: 0.3rem; vertical-align: middle; }
+/* L1 group rows */
+.gantt-chart tr.l1-group td { padding: 0.55rem 0.5rem 0.2rem; border-bottom: none; }
+.l1-label { font-size: 0.65rem; font-weight: 590; text-transform: uppercase; letter-spacing: 0.05em; }
+.l1-label.core { color: var(--tier-high); }
+.l1-label.research { color: var(--accent); }
+.l1-label.infra { color: var(--text-quaternary); }
+.l1-label.complete { color: var(--tier-high); }
+.l1-label.active { color: var(--accent); }
+.l1-label.blocked { color: var(--tier-low); }
+.l1-ratio { font-size: 0.6rem; color: var(--text-quaternary); font-family: var(--font-mono); margin-left: 0.4rem; }
+.gantt-chart tr.l2 td:first-child { padding-left: 1.2rem; }
+.gantt-legend { display: flex; gap: 1.25rem; margin-top: 0.75rem; font-size: 0.7rem; color: var(--text-tertiary); }
+.gantt-legend-item { display: flex; align-items: center; gap: 0.35rem; }
+.gantt-legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+.gantt-legend-dot.completed { background: rgba(76,175,80,0.5); border: 1px solid rgba(76,175,80,0.6); }
+.gantt-legend-dot.in-progress { background: rgba(255,193,7,0.4); border: 1px solid rgba(255,193,7,0.5); }
+.gantt-legend-dot.stale { background: rgba(244,67,54,0.3); border: 1px solid rgba(244,67,54,0.4); }
+.gantt-legend-dot.design-only { background: rgba(138,143,152,0.2); border: 1px dashed rgba(138,143,152,0.4); }
+
+/* === System Map (directed graph) === */
+.system-map { margin: 1.5rem 0; }
+.map-goal { text-align: center; margin-bottom: 1rem; }
+.map-goal .goal-text { font-size: 1rem; font-weight: 680; color: var(--accent); }
+.map-goal .goal-sub { font-size: 0.75rem; color: var(--text-quaternary); margin-top: 0.15rem; }
+.map-goal .vline { display: block; width: 2px; height: 16px; background: var(--border-default); margin: 0.4rem auto; }
+.map-row { display: flex; justify-content: center; gap: 0.75rem; margin-bottom: 0.5rem; position: relative; flex-wrap: wrap; }
+.map-connector { display: flex; justify-content: center; margin: 0; }
+.map-connector .vline { display: block; width: 2px; height: 14px; background: var(--border-default); }
+.map-connector .vline-gold { background: rgba(248,168,72,0.4); }
+.map-connector .vline-green { background: rgba(76,175,80,0.4); }
+.map-divider { border: none; border-top: 1px dashed var(--border-strong); margin: 1rem 0 0.75rem; position: relative; }
+.map-divider-label { position: absolute; top: -0.55rem; left: 50%; transform: translateX(-50%); background: var(--bg-base); padding: 0 0.75rem; font-size: 0.6rem; font-weight: 590; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-quaternary); white-space: nowrap; }
+.graph-node { padding: 0.6rem 0.8rem; border-radius: 6px; background: var(--bg-elevated); min-width: 140px; max-width: 200px; position: relative; text-align: left; }
+.graph-node .node-name { font-size: 0.78rem; font-weight: 510; color: var(--text-primary); line-height: 1.3; }
+.graph-node .node-name a { color: inherit; text-decoration: none; }
+.graph-node .node-name a:hover { color: var(--accent); }
+.graph-node .node-zh { font-size: 0.68rem; color: var(--text-tertiary); margin-top: 0.05rem; }
+.graph-node .node-depth { display: flex; gap: 2px; margin-top: 0.3rem; align-items: center; }
+.graph-node .node-depth .nd { width: 10px; height: 4px; border-radius: 1px; background: var(--border-subtle); }
+.graph-node .node-tag { display: inline-block; font-size: 0.52rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.08rem 0.35rem; border-radius: 3px; margin-top: 0.3rem; }
+/* Node variants */
+.graph-node.core-driver { border: 1px solid rgba(76,175,80,0.5); border-left: 3px solid var(--tier-high); }
+.graph-node.core-driver .node-depth .nd.f { background: var(--tier-high); }
+.graph-node.core-driver .node-tag { background: rgba(76,175,80,0.15); color: var(--tier-high); }
+.graph-node.core-blocked { border: 1px solid rgba(244,67,54,0.4); border-left: 3px solid var(--tier-low); }
+.graph-node.core-blocked .node-depth .nd.f { background: var(--tier-low); }
+.graph-node.core-blocked .node-tag { background: rgba(244,67,54,0.15); color: var(--tier-low); }
+.graph-node.core-waiting { border: 1px solid var(--border-default); border-left: 3px solid var(--text-quaternary); }
+.graph-node.core-waiting .node-depth .nd.f { background: var(--text-quaternary); }
+.graph-node.core-waiting .node-tag { background: rgba(98,102,109,0.15); color: var(--text-tertiary); }
+.graph-node.research { border: 1px solid rgba(248,168,72,0.35); border-left: 3px solid var(--accent); }
+.graph-node.research .node-depth .nd.f { background: var(--accent); }
+.graph-node.research .node-tag { background: var(--accent-dim); color: var(--accent); }
+.graph-node.support-done { border: 1px solid rgba(76,175,80,0.4); border-left: 3px solid var(--tier-high); }
+.graph-node.support-done .node-depth .nd.f { background: var(--tier-high); }
+.graph-node.support-done .node-tag { background: rgba(76,175,80,0.12); color: var(--tier-high); }
+.graph-node.adhd-leaf { border: 1px solid rgba(244,67,54,0.25); border-left: 3px solid rgba(244,67,54,0.5); }
+.graph-node.adhd-leaf .node-depth .nd.f { background: var(--tier-low); }
+.graph-node.adhd-leaf .node-tag { background: rgba(244,67,54,0.1); color: var(--tier-low); }
+.graph-node.kill { border: 1px solid rgba(138,143,152,0.3); border-left: 3px solid var(--text-quaternary); opacity: 0.6; text-decoration: line-through; }
+.graph-node.kill .node-depth .nd.f { background: var(--text-quaternary); }
+.graph-node.kill .node-tag { background: rgba(138,143,152,0.12); color: var(--text-quaternary); }
+
+
+/* === Three-column layout === */
+.page-wrapper { display: flex; min-height: 100vh; }
+.sidebar { position: sticky; top: 0; height: 100vh; width: 220px; min-width: 220px; overflow-y: auto; padding: 1.5rem 0.75rem; border-right: 1px solid var(--border-subtle); background: var(--bg-elevated); z-index: 100; }
+.sidebar h4 { padding: 0 0.5rem; font-size: 0.65rem; font-weight: 590; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-quaternary); margin-bottom: 0.5rem; }
+.sidebar nav ul { list-style: none; margin: 0 0 1.5rem 0; }
+.sidebar nav ul li a { display: block; padding: 0.3rem 0.5rem; font-size: 0.8rem; font-weight: 400; color: var(--text-tertiary); text-decoration: none; border-radius: var(--radius-sm); transition: background 0.12s, color 0.12s; line-height: 1.45; }
+.sidebar nav ul li a:hover { background: var(--accent-hover); color: var(--text-primary); }
+.sidebar .back-link { display: block; padding: 0.5rem; margin-bottom: 1.5rem; font-size: 0.8rem; color: var(--text-tertiary); text-decoration: none; }
+.sidebar .back-link:hover { color: var(--accent); }
+.sidebar .project-meta { font-size: 0.7rem; color: var(--text-quaternary); padding: 0 0.5rem; margin-bottom: 1rem; line-height: 1.4; }
+.sidebar .badge-sm { display: inline-block; padding: 0.12rem 0.45rem; border-radius: 10px; font-size: 0.62rem; font-weight: 590; background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(248,168,72,0.25); margin-bottom: 0.3rem; }
+.main-content { flex: 1; min-width: 0; max-width: 900px; padding: 2.5rem 3rem 5rem; }
+.notes-sidebar { position: sticky; top: 0; height: 100vh; width: 320px; min-width: 320px; overflow-y: auto; padding: 1.5rem 1rem; border-left: 1px solid var(--border-subtle); background: var(--bg-elevated); z-index: 50; }
+.notes-sidebar h4 { margin-bottom: 0.75rem; padding: 0 0.25rem; font-size: 0.65rem; font-weight: 590; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-quaternary); }
+.meta-note { margin-bottom: 1rem; padding: 0.6rem 0.75rem; border-left: 2px solid var(--accent); border-radius: 0 6px 6px 0; background: rgba(248,168,72,0.04); font-size: 0.78rem; line-height: 1.55; color: var(--text-secondary); }
+.meta-note .note-label { display: inline-block; font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bg-base); padding: 0.1rem 0.4rem; border-radius: 3px; margin-bottom: 0.35rem; }
+.meta-note .note-label.strength { background: var(--tier-high); }
+.meta-note .note-label.risk { background: var(--tier-low); }
+.meta-note .note-label.chain { background: #64b5f6; }
+.meta-note .note-label.suggestion { background: var(--accent); }
+.meta-note .note-label.pattern { background: var(--tier-medium); color: var(--bg-base); }
+.meta-note p { font-size: 0.78rem; margin-bottom: 0.3rem; color: var(--text-secondary); }
+.meta-note .zh { display: block; font-size: 0.9em; color: var(--text-tertiary); margin-top: 0.1em; }
+.notes-divider { border: none; border-top: 1px solid var(--border-subtle); margin: 0.75rem 0; }
+
+/* === Page-specific === */
+.page-header { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-default); }
+.page-header .subtitle { color: var(--text-tertiary); font-size: 0.88rem; }
+.stats-strip { display: flex; gap: 0; margin-bottom: 1.5rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); overflow: hidden; }
+.stats-stat { flex: 1; padding: 0.65rem 0.75rem; text-align: center; border-right: 1px solid var(--border-subtle); background: var(--bg-elevated); position: relative; cursor: default; }
+.stats-stat:last-child { border-right: none; }
+.stats-stat .s-val { font-size: 1.3rem; font-weight: 680; font-family: var(--font-mono); line-height: 1.2; }
+.stats-stat .s-val.warn { color: var(--tier-low); }
+.stats-stat .s-val.ok { color: var(--tier-high); }
+.stats-stat .s-val.neutral { color: var(--accent); }
+.stats-stat .s-label { font-size: 0.6rem; font-weight: 510; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-quaternary); margin-top: 0.1rem; }
+.stats-stat .tooltip { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--bg-overlay); border: 1px solid var(--border-default); border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.72rem; color: var(--text-secondary); white-space: nowrap; z-index: 200; box-shadow: 0 4px 12px rgba(0,0,0,0.4); line-height: 1.5; text-align: left; }
+.stats-stat .tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: var(--border-default); }
+.stats-stat:hover .tooltip { display: block; }
+.advisory-box .adv-label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bg-base); background: var(--accent); padding: 0.1rem 0.45rem; border-radius: 3px; margin-right: 0.4rem; }
+.advisory-box .adv-title { font-weight: 590; color: var(--accent); font-size: 0.9rem; }
+.deliverable-group { margin-bottom: 1.5rem; }
+.deliverable-item { margin-bottom: 0.75rem; padding-left: 0.5rem; border-left: 2px solid var(--border-subtle); }
+.deliverable-item .desc { font-size: 0.78rem; color: var(--text-tertiary); margin-top: 0.1rem; }
+details.collapsible { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); margin-top: 2rem; background: var(--bg-elevated); }
+details.collapsible summary { padding: 0.8rem 1rem; cursor: pointer; font-weight: 590; font-size: 0.95rem; list-style: none; }
+details.collapsible summary::-webkit-details-marker { display: none; }
+details.collapsible summary::before { content: '&#9656; '; color: var(--text-quaternary); }
+details.collapsible[open] summary::before { content: '&#9662; '; color: var(--accent); }
+details.collapsible[open] summary { color: var(--accent); border-bottom: 1px solid var(--border-subtle); }
+details.collapsible .detail-body { padding: 1rem 1.25rem; }
+details.collapsible .detail-body p { font-size: 0.88rem; }
+.highlight { color: var(--accent); font-weight: 590; }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+@media (max-width: 1200px) { .notes-sidebar { display: none; } }
+@media (max-width: 900px) { .sidebar { display: none; } .main-content { padding: 1.5rem 1rem 3rem; } }
+/* Reading Mode */
+#readingModeBtn { position: fixed; top: 1rem; right: 1rem; z-index: 9999; width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--border-default, #34343a); background: var(--bg-surface, #141516); color: var(--text-secondary, #d0d6e0); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.7; transition: opacity 0.2s; }
+#readingModeBtn:hover { opacity: 1; }
+.reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+.reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+.reading-mode .hamburger-btn { display: none !important; }
+.reading-mode .sidebar-overlay { display: none !important; }
+
+/* === Embedded mode: inside Dashboard iframe === */
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+body.embedded .hamburger-btn { display: none !important; }
+body.embedded .sidebar-overlay { display: none !important; }
+</style>
+</head>
+<body>
+
+
+<div class="page-wrapper">
+
+  <!-- ===== Left Sidebar ===== -->
+  <aside class="sidebar">
+    <a href="../2026-W12-v3.html" class="back-link">&larr; W12 Synthesis<br><span style="font-size:0.85em;color:var(--text-quaternary)">&larr; &#36820;&#22238;&#21608;&#32508;&#21512;</span></a>
+
+    <h4>Project</h4>
+    <div style="padding:0 0.5rem;">
+      <div class="badge-sm">In Progress ~80%</div>
+    </div>
+    <div class="depth-meter">
+      <span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block"></span>
+      <span class="depth-label">4/5</span>
+    </div>
+    <div class="project-meta">
+      Research &middot; Content<br>
+      W9&ndash;W12 &middot; 4 weeks<br>
+      9 templates &middot; 4 CSS files<br>
+      1 V3 report delivered
+    </div>
+
+    <h4>Sections</h4>
+    <nav>
+      <ul>
+        <li><a href="#gantt">Gantt</a></li>
+        <li><a href="#chain">System Map</a></li>
+        <li><a href="#milestones">Milestones</a></li>
+        <li><a href="#deliverables">Deliverables</a></li>
+        <li><a href="#reference">Overview & Thesis</a></li>
+      </ul>
+    </nav>
+
+    <h4>Key Numbers</h4>
+    <div class="project-meta">
+      9 Jinja2 templates<br>
+      4 CSS files<br>
+      7 component types<br>
+      &gt;50% provenance<br>
+      SMH V3 Final: 4.8MB
+    </div>
+  </aside>
+
+  <!-- ===== Main Content ===== -->
+  <main class="main-content">
+
+    <div class="page-header">
+      <h1>V3 Report Template<span class="zh">V3&#25253;&#21578;&#27169;&#26495;&#31995;&#32479;</span></h1>
+      <div class="subtitle">Research &middot; Content &middot; Plotly+Jinja2+Provenance &middot; "&#20174;70%&#21019;&#20316;&#21040;40/60&#31574;&#23637;"</div>
+    </div>
+
+    <!-- 1 Advisory (top) -->
+    <div class="advisory-box">
+      <span class="adv-label">Advisory</span>
+      <span class="adv-title">Current Focus</span>
+      <ul>
+        <li><strong>Apply to second industry.</strong> Template system is proven on semiconductor (SMH V3 Final delivered, 4.8MB). The real test: does it generalize? Pick XLE Energy or XLF Financials and run the full template pipeline. If it works without major adaptation, the system is validated.<span class="zh">&#27169;&#26495;&#22312;&#21322;&#23548;&#20307;&#19978;&#24050;&#35777;&#26126;&#12290;&#19979;&#19968;&#27493;&#65306;&#31532;&#20108;&#20010;&#34892;&#19994;&#39564;&#35777;&#36890;&#29992;&#24615;&#12290;</span></li>
+        <li><strong>Automate provenance scoring.</strong> Currently manual &mdash; curator_checklist.py has the authority source map but coverage calculation is eyeball. Wire it to output a percentage per section. 2-hour task, high leverage.<span class="zh">Provenance&#35206;&#30422;&#29575;&#30446;&#21069;&#38752;&#25163;&#24037;&#26816;&#26597;&#12290;&#33258;&#21160;&#21270;&#23427;&#12290;</span></li>
+        <li><strong>Do not add more components.</strong> 7 component types is enough. The bottleneck is not tooling &mdash; it's applying the existing tooling to more industries. Resist the urge to refine CSS further.<span class="zh">7&#20010;&#32452;&#20214;&#24050;&#36275;&#22815;&#12290;&#29942;&#39048;&#26159;&#24212;&#29992;&#19981;&#26159;&#24037;&#20855;&#12290;</span></li>
+      </ul>
+    </div>
+
+    <!-- 2 Stats strip -->
+    <div class="stats-strip">
+      <div class="stats-stat">
+        <div class="s-val neutral">9</div>
+        <div class="s-label">Templates</div>
+        <div class="tooltip">
+          base.html<br>
+          report.html<br>
+          section.html<br>
+          + 6 more Jinja2 templates
+        </div>
+      </div>
+      <div class="stats-stat">
+        <div class="s-val neutral">4</div>
+        <div class="s-label">CSS Files</div>
+        <div class="tooltip">
+          tokens.css &middot; design tokens<br>
+          components.css &middot; 7 component types<br>
+          layout.css &middot; grid/spacing<br>
+          print.css &middot; print stylesheet
+        </div>
+      </div>
+      <div class="stats-stat">
+        <div class="s-val ok">7</div>
+        <div class="s-label">Components</div>
+        <div class="tooltip">
+          KPI cards<br>
+          Wave positioning cards<br>
+          Callout boxes<br>
+          Chart frames (Plotly)<br>
+          Data tables<br>
+          Signal dots<br>
+          Provenance badges
+        </div>
+      </div>
+      <div class="stats-stat">
+        <div class="s-val ok">1</div>
+        <div class="s-label">V3 Delivered</div>
+        <div class="tooltip">
+          <strong style="color:var(--tier-high)">SMH Semiconductor V3 Final</strong><br>
+          4.8MB &middot; Plotly interactive charts<br>
+          6 supply chain node reports
+        </div>
+      </div>
+      <div class="stats-stat">
+        <div class="s-val" style="color:var(--tier-medium)">&gt;50%</div>
+        <div class="s-label">Provenance</div>
+        <div class="tooltip">V3 target: &gt;50% coverage<br>V2 baseline: 3% (119 lines, 3 sourced)</div>
+      </div>
+      <div class="stats-stat">
+        <div class="s-val" style="color:var(--tier-medium)">80%</div>
+        <div class="s-label">Completion</div>
+        <div class="tooltip">Template &amp; renderer: done<br>SMH delivery: done<br>Remaining: 2nd industry + docs</div>
+      </div>
+    </div>
+
+    <!-- 3 Gantt -->
+    <div class="section-header" id="gantt">
+      <h2>Project Gantt<span class="zh">&#39033;&#30446;&#29976;&#29305;&#22270;</span></h2>
+    </div>
+
+    <table class="gantt-chart">
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>W9<br><span style="font-weight:400;font-size:0.55rem">Feb 24</span></th>
+          <th>W10<br><span style="font-weight:400;font-size:0.55rem">Mar 3</span></th>
+          <th>W11<br><span style="font-weight:400;font-size:0.55rem">Mar 10</span></th>
+          <th class="current-week">W12<br><span style="font-weight:400;font-size:0.55rem">Mar 17</span></th>
+          <th>W13<br><span style="font-weight:400;font-size:0.55rem">Mar 24</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- L1: Design System -->
+        <tr class="l1-group">
+          <td colspan="6"><span class="l1-label complete">L1: Design System</span><span class="l1-ratio">2 modules &middot; all done</span></td>
+        </tr>
+        <tr class="l2">
+          <td>
+            <div class="gantt-project-name">CSS Token System
+              <div class="depth-meter"><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-label">Done</span></div>
+            </div>
+          </td>
+          <td class="gantt-bar-cell"><div class="gantt-bar completed" style="width:100%"><div class="gantt-fill" style="width:100%"></div></div></td>
+          <td class="gantt-bar-cell"></td><td class="gantt-bar-cell"></td><td class="gantt-bar-cell"></td><td class="gantt-bar-cell"></td>
+        </tr>
+        <tr class="l2">
+          <td>
+            <div class="gantt-project-name">Jinja2 Templates (9)
+              <div class="depth-meter"><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-label">Done</span></div>
+            </div>
+          </td>
+          <td class="gantt-bar-cell"></td>
+          <td class="gantt-bar-cell"><div class="gantt-bar completed" style="width:100%"><div class="gantt-fill" style="width:100%"></div></div></td>
+          <td class="gantt-bar-cell"></td><td class="gantt-bar-cell"></td><td class="gantt-bar-cell"></td>
+        </tr>
+
+        <!-- L1: Rendering Engine -->
+        <tr class="l1-group">
+          <td colspan="6"><span class="l1-label complete">L1: Rendering Engine</span><span class="l1-ratio">2 modules &middot; all done</span></td>
+        </tr>
+        <tr class="l2">
+          <td>
+            <div class="gantt-project-name">report_renderer.py
+              <div class="depth-meter"><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-label">Done</span></div>
+            </div>
+          </td>
+          <td class="gantt-bar-cell"></td>
+          <td class="gantt-bar-cell"><div class="gantt-bar completed" style="width:100%"><div class="gantt-fill" style="width:100%"></div></div></td>
+          <td class="gantt-bar-cell"><div class="gantt-bar completed" style="width:100%"><div class="gantt-fill" style="width:100%"></div></div></td>
+          <td class="gantt-bar-cell"></td><td class="gantt-bar-cell"></td>
+        </tr>
+        <tr class="l2">
+          <td>
+            <div class="gantt-project-name">cognitive_engine.py
+              <div class="depth-meter"><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-label">Done</span></div>
+            </div>
+          </td>
+          <td class="gantt-bar-cell"></td><td class="gantt-bar-cell"></td>
+          <td class="gantt-bar-cell"><div class="gantt-bar completed" style="width:100%"><div class="gantt-fill" style="width:100%"></div></div></td>
+          <td class="gantt-bar-cell"></td><td class="gantt-bar-cell"></td>
+        </tr>
+
+        <!-- L1: Delivery -->
+        <tr class="l1-group">
+          <td colspan="6"><span class="l1-label active">L1: Delivery</span><span class="l1-ratio">3 items &middot; 2 done, 1 active</span></td>
+        </tr>
+        <tr class="l2">
+          <td>
+            <div class="gantt-project-name">curator_checklist.py
+              <div class="depth-meter"><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-label">Done</span></div>
+            </div>
+          </td>
+          <td class="gantt-bar-cell"></td><td class="gantt-bar-cell"></td>
+          <td class="gantt-bar-cell"><div class="gantt-bar completed" style="width:100%"><div class="gantt-fill" style="width:100%"></div></div></td>
+          <td class="gantt-bar-cell"></td><td class="gantt-bar-cell"></td>
+        </tr>
+        <tr class="l2">
+          <td>
+            <div class="gantt-project-name">SMH V3 Final (4.8MB)
+              <div class="depth-meter"><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-label">Done</span></div>
+            </div>
+          </td>
+          <td class="gantt-bar-cell"></td><td class="gantt-bar-cell"></td><td class="gantt-bar-cell"></td>
+          <td class="gantt-bar-cell"><div class="gantt-bar completed" style="width:100%"><div class="gantt-fill" style="width:100%"></div></div></td>
+          <td class="gantt-bar-cell"></td>
+        </tr>
+        <tr class="l2">
+          <td>
+            <div class="gantt-project-name">2nd Industry <span class="new-badge">NEXT</span>
+              <div class="depth-meter"><span class="depth-block filled-dim"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-label">1/5</span></div>
+            </div>
+          </td>
+          <td class="gantt-bar-cell"></td><td class="gantt-bar-cell"></td><td class="gantt-bar-cell"></td><td class="gantt-bar-cell"></td>
+          <td class="gantt-bar-cell"><div class="gantt-bar in-progress" style="width:100%"><div class="gantt-fill" style="width:20%"></div></div></td>
+        </tr>
+
+        <!-- L1: Documentation -->
+        <tr class="l1-group">
+          <td colspan="6"><span class="l1-label infra">L1: Documentation</span><span class="l1-ratio">2 items &middot; pending</span></td>
+        </tr>
+        <tr class="l2">
+          <td>
+            <div class="gantt-project-name" style="color:var(--text-tertiary)">Print CSS optimization
+              <div class="depth-meter"><span class="depth-block filled-dim"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-label">1/5</span></div>
+            </div>
+          </td>
+          <td class="gantt-bar-cell"></td><td class="gantt-bar-cell"></td><td class="gantt-bar-cell"></td><td class="gantt-bar-cell"></td>
+          <td class="gantt-bar-cell"><div class="gantt-bar design-only" style="width:100%"><div class="gantt-fill" style="width:0%"></div></div></td>
+        </tr>
+        <tr class="l2">
+          <td>
+            <div class="gantt-project-name" style="color:var(--text-tertiary)">Template API docs
+              <div class="depth-meter"><span class="depth-block filled-dim"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-label">1/5</span></div>
+            </div>
+          </td>
+          <td class="gantt-bar-cell"></td><td class="gantt-bar-cell"></td><td class="gantt-bar-cell"></td><td class="gantt-bar-cell"></td>
+          <td class="gantt-bar-cell"><div class="gantt-bar design-only" style="width:100%"><div class="gantt-fill" style="width:0%"></div></div></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="gantt-legend">
+      <div class="gantt-legend-item"><div class="gantt-legend-dot completed"></div> Done</div>
+      <div class="gantt-legend-item"><div class="gantt-legend-dot in-progress"></div> Active</div>
+      <div class="gantt-legend-item"><div class="gantt-legend-dot design-only"></div> Planned</div>
+    </div>
+
+    <!-- 4 System Map -->
+    <div class="section-header" id="chain">
+      <h2>System Map<span class="zh">&#24605;&#32500;&#38142;&#20840;&#26223; &mdash; V3 Reports &#22312;&#29983;&#24577;&#20013;&#30340;&#20301;&#32622;</span></h2>
+    </div>
+
+    <div class="system-map">
+      <!-- Goal -->
+      <div class="map-goal">
+        <div class="goal-text">"Reproducible, high-quality industry analysis reports"</div>
+        <div class="goal-sub">&#21487;&#22797;&#21046;&#30340;&#39640;&#36136;&#37327;&#34892;&#19994;&#20998;&#26512; &middot; Curation &gt; Creation &middot; Provenance-tracked</div>
+        <span class="vline"></span>
+      </div>
+
+      <!-- Row 1: This project (the hub) -->
+      <div class="map-row">
+        <div class="graph-node research" style="min-width:220px;">
+          <div class="node-name">V3 Report Template &#9733;</div>
+          <div class="node-zh">Jinja2 + Plotly + Provenance</div>
+          <div class="node-depth"><span class="nd f"></span><span class="nd f"></span><span class="nd f"></span><span class="nd f"></span><span class="nd"></span></div>
+          <div class="node-tag">CORE SYSTEM 4/5</div>
+        </div>
+      </div>
+
+      <!-- Connectors -->
+      <div style="display:flex;justify-content:center;gap:6rem;">
+        <div class="map-connector"><span class="vline vline-green"></span></div>
+        <div class="map-connector"><span class="vline vline-gold"></span></div>
+        <div class="map-connector"><span class="vline vline-green"></span></div>
+      </div>
+
+      <!-- Row 2: Core components -->
+      <div class="map-row">
+        <div class="graph-node support-done">
+          <div class="node-name">Jinja2 Templates</div>
+          <div class="node-zh">9&#20010;HTML&#27169;&#26495; + 4&#20010;CSS</div>
+          <div class="node-depth"><span class="nd f"></span><span class="nd f"></span><span class="nd f"></span><span class="nd f"></span><span class="nd f"></span></div>
+          <div class="node-tag">DONE</div>
+        </div>
+
+        <div class="graph-node support-done">
+          <div class="node-name">report_renderer.py</div>
+          <div class="node-zh">8&#20010;&#28210;&#26579;&#26041;&#27861;</div>
+          <div class="node-depth"><span class="nd f"></span><span class="nd f"></span><span class="nd f"></span><span class="nd f"></span><span class="nd f"></span></div>
+          <div class="node-tag">DONE</div>
+        </div>
+
+        <div class="graph-node support-done">
+          <div class="node-name">curator_checklist.py</div>
+          <div class="node-zh">&#26435;&#23041;&#26469;&#28304;&#26144;&#23556; + provenance</div>
+          <div class="node-depth"><span class="nd f"></span><span class="nd f"></span><span class="nd f"></span><span class="nd f"></span><span class="nd f"></span></div>
+          <div class="node-tag">DONE</div>
+        </div>
+      </div>
+
+      <!-- Connector down -->
+      <div class="map-connector"><span class="vline vline-green"></span></div>
+
+      <!-- Row 3: Delivered output -->
+      <div class="map-row">
+        <div class="graph-node core-driver" style="min-width:220px;">
+          <div class="node-name">SMH V3 Final (4.8MB)</div>
+          <div class="node-zh">&#21322;&#23548;&#20307;V3&#32456;&#29256; + 6&#20010;&#33410;&#28857;&#25253;&#21578;</div>
+          <div class="node-depth"><span class="nd f"></span><span class="nd f"></span><span class="nd f"></span><span class="nd f"></span><span class="nd f"></span></div>
+          <div class="node-tag">DELIVERED</div>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="map-divider">
+        <span class="map-divider-label">Upstream &#8593; &#20215;&#20540;&#38142; &middot; Template feeds Dashboard &middot; &#27169;&#26495;&#20379;&#32473;&#20202;&#34920;&#30424; &#8595; Downstream</span>
+      </div>
+
+      <!-- Row 4: Connections -->
+      <div class="map-row">
+        <div class="graph-node research">
+          <div class="node-name"><a href="trading-dashboard.html">Trading Dashboard</a></div>
+          <div class="node-zh">&#20132;&#26131;&#20202;&#34920;&#30424; &middot; &#28040;&#36153;V3&#25253;&#21578;</div>
+          <div class="node-depth"><span class="nd f"></span><span class="nd f"></span><span class="nd f"></span><span class="nd f"></span><span class="nd"></span></div>
+          <div class="node-tag">CONSUMER</div>
+        </div>
+
+        <div class="graph-node core-waiting">
+          <div class="node-name">2nd Industry (XLE/XLF)</div>
+          <div class="node-zh">&#39564;&#35777;&#27169;&#26495;&#36890;&#29992;&#24615;</div>
+          <div class="node-depth"><span class="nd f"></span><span class="nd"></span><span class="nd"></span><span class="nd"></span><span class="nd"></span></div>
+          <div class="node-tag">NEXT STEP</div>
+        </div>
+
+        <div class="graph-node research">
+          <div class="node-name"><a href="cognitive-agents.html">Cognitive Agents</a></div>
+          <div class="node-zh">&#35748;&#30693;&#20195;&#29702;&#20154; &middot; &#30740;&#31350;&#20869;&#23481;&#28304;</div>
+          <div class="node-depth"><span class="nd f"></span><span class="nd f"></span><span class="nd"></span><span class="nd"></span><span class="nd"></span></div>
+          <div class="node-tag">CONTENT SOURCE</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5 Milestones -->
+    <div class="section-header" id="milestones">
+      <h2>Milestones<span class="zh">&#20851;&#38190;&#37324;&#31243;&#30865;</span></h2>
+    </div>
+
+    <div class="timeline">
+      <div class="tl-item completed">
+        <div class="tl-date">W9 &mdash; Feb 24</div>
+        <div class="tl-desc">Template design + CSS token system. 5-color semantic palette, 4-layer dark backgrounds. Design tokens established as single source of truth.<span class="zh">&#27169;&#26495;&#35774;&#35745; + CSS token&#31995;&#32479;&#12290;5&#33394;&#35821;&#20041;&#35843;&#33394;&#26495;&#65292;4&#23618;&#26263;&#33394;&#32972;&#26223;&#12290;</span></div>
+      </div>
+      <div class="tl-item completed">
+        <div class="tl-date">W10 &mdash; Mar 3</div>
+        <div class="tl-desc">Jinja2 implementation + report_renderer.py. 9 HTML templates, 4 CSS files, 8 render methods. Component library: KPI cards, wave cards, callouts, chart frames, data tables, signal dots, provenance badges.<span class="zh">Jinja2&#23454;&#29616; + &#28210;&#26579;&#22120;&#12290;9&#20010;&#27169;&#26495;&#65292;7&#31181;&#32452;&#20214;&#12290;</span></div>
+      </div>
+      <div class="tl-item completed">
+        <div class="tl-date">W11 &mdash; Mar 10</div>
+        <div class="tl-desc">Plotly integration + cognitive_engine.py Phase 0.5 curation search. curator_checklist.py: authority source map + provenance scan. V2&rarr;V3 upgrade from 70% creation to &lt;40/60 curation.<span class="zh">Plotly&#38598;&#25104; + &#35748;&#30693;&#24341;&#25806;Phase 0.5&#31574;&#23637;&#25628;&#32034;&#12290;V2&#8594;V3&#21319;&#32423;&#12290;</span></div>
+      </div>
+      <div class="tl-item current">
+        <div class="tl-date">W12 &mdash; Mar 17</div>
+        <div class="tl-desc">V3 Final semiconductor delivery (4.8MB) with Plotly interactive charts. 6 supply chain node reports using template system. First complete V3 output.<span class="zh">V3&#32456;&#29256;&#21322;&#23548;&#20307;&#25253;&#21578;&#20132;&#20184;(4.8MB)&#12290;6&#20010;&#20379;&#24212;&#38142;&#33410;&#28857;&#25253;&#21578;&#12290;</span></div>
+      </div>
+      <div class="tl-item pending">
+        <div class="tl-date">W13+ &mdash; Mar 24+</div>
+        <div class="tl-desc">Second industry application (XLE/XLF). Automated provenance scoring. Print stylesheet optimization. Template API documentation.<span class="zh">&#31532;&#20108;&#20010;&#34892;&#19994;&#24212;&#29992;&#12290;&#33258;&#21160;&#21270;provenance&#35780;&#20998;&#12290;&#25171;&#21360;&#26679;&#24335;&#34920;&#12290;&#27169;&#26495;API&#25991;&#26723;&#12290;</span></div>
+      </div>
+    </div>
+
+    <!-- 6 Deliverables -->
+    <div class="section-header" id="deliverables">
+      <h2>Deliverables<span class="zh">&#20135;&#20986;&#29289;&#65288;&#20840;&#37096;&#21487;&#28857;&#20987;&#25171;&#24320;&#65289;</span></h2>
+    </div>
+
+    <h3>Industry Reports &#34892;&#19994;&#25253;&#21578; (15)</h3>
+    <div class="deliverable-group">
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/INDUSTRY_XLK_Technology_2026-03-18.html" target="_blank">XLK Technology</a>
+        <div class="desc">&#31185;&#25216; Technology</div>
+      </div>
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/INDUSTRY_XLV_Healthcare_2026-03-18.html" target="_blank">XLV Healthcare</a>
+        <div class="desc">&#21307;&#30103; Healthcare</div>
+      </div>
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/INDUSTRY_XLRE_RealEstate_2026-03-18.html" target="_blank">XLRE RealEstate</a>
+        <div class="desc">&#25151;&#22320;&#20135; Real Estate</div>
+      </div>
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/INDUSTRY_GDX_GoldMiners_2026-03-18.html" target="_blank">GDX GoldMiners</a>
+        <div class="desc">&#37329;&#30719; Gold Miners</div>
+      </div>
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/INDUSTRY_TLT_Bonds_2026-03-18.html" target="_blank">TLT Bonds</a>
+        <div class="desc">&#22269;&#20538; Bonds</div>
+      </div>
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/INDUSTRY_XLB_Materials_2026-03-18.html" target="_blank">XLB Materials</a>
+        <div class="desc">&#26448;&#26009; Materials</div>
+      </div>
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/INDUSTRY_XLC_CommServices_2026-03-18.html" target="_blank">XLC CommServices</a>
+        <div class="desc">&#36890;&#20449; Comm Services</div>
+      </div>
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/INDUSTRY_XLE_Energy_2026-03-18.html" target="_blank">XLE Energy</a>
+        <div class="desc">&#33021;&#28304; Energy</div>
+      </div>
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/INDUSTRY_XLF_Financials_2026-03-18.html" target="_blank">XLF Financials</a>
+        <div class="desc">&#37329;&#34701; Financials</div>
+      </div>
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/INDUSTRY_XLI_Industrials_2026-03-18.html" target="_blank">XLI Industrials</a>
+        <div class="desc">&#24037;&#19994; Industrials</div>
+      </div>
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/INDUSTRY_XLP_ConsumerStaples_2026-03-18.html" target="_blank">XLP ConsumerStaples</a>
+        <div class="desc">&#24517;&#38656;&#28040;&#36153; Consumer Staples</div>
+      </div>
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/INDUSTRY_XLU_Utilities_2026-03-18.html" target="_blank">XLU Utilities</a>
+        <div class="desc">&#20844;&#29992;&#20107;&#19994; Utilities</div>
+      </div>
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/INDUSTRY_XLY_ConsumerDiscretionary_2026-03-18.html" target="_blank">XLY ConsumerDiscretionary</a>
+        <div class="desc">&#21487;&#36873;&#28040;&#36153; Consumer Discretionary</div>
+      </div>
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/INDUSTRY_BTCETH_Crypto_2026-03-18.html" target="_blank">BTCETH Crypto</a>
+        <div class="desc">&#21152;&#23494;&#36135;&#24065; Crypto</div>
+      </div>
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/INDUSTRY_SMH_Semiconductor_2026-03-18.html" target="_blank">SMH Semiconductor</a>
+        <div class="desc">&#21322;&#23548;&#20307; Semiconductor</div>
+      </div>
+    </div>
+
+    <h3>Semiconductor Deep Dives &#21322;&#23548;&#20307;&#28145;&#24230; (3)</h3>
+    <div class="deliverable-group">
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/INDUSTRY_V3_FINAL_SMH_Semiconductor_2026-03-19.html" target="_blank">V3 Final &#21322;&#23548;&#20307;&#32456;&#29256;</a>
+        <div class="desc">4.8MB &middot; Plotly interactive charts &middot; Provenance-tracked &middot; V3 Final</div>
+      </div>
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/INDUSTRY_V3_SMH_Semiconductor_2026-03-19.html" target="_blank">V3 Draft</a>
+        <div class="desc">V3 Draft iteration</div>
+      </div>
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/THINKING_semiconductor_first_principles_2026-03-19.html" target="_blank">First Principles Analysis</a>
+        <div class="desc">&#31532;&#19968;&#24615;&#21407;&#29702; &middot; Phase 0 independent thinking</div>
+      </div>
+    </div>
+
+    <h3>Supply Chain Nodes &#20379;&#24212;&#38142;&#33410;&#28857; (6)</h3>
+    <div class="deliverable-group">
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/nodes/NODE_1_GPU_AI芯片设计_2026-03-19.html" target="_blank">NODE 1: GPU/AI Chip Design</a>
+        <div class="desc">GPU/AI&#33455;&#29255;&#35774;&#35745;</div>
+      </div>
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/nodes/NODE_2_光刻设备_2026-03-19.html" target="_blank">NODE 2: Lithography</a>
+        <div class="desc">&#20809;&#21051;&#35774;&#22791;</div>
+      </div>
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/nodes/NODE_3_代工制造_2026-03-19.html" target="_blank">NODE 3: Foundry</a>
+        <div class="desc">&#20195;&#24037;&#21046;&#36896;</div>
+      </div>
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/nodes/NODE_4_存储_HBM_2026-03-19.html" target="_blank">NODE 4: Memory/HBM</a>
+        <div class="desc">&#23384;&#20648;/HBM</div>
+      </div>
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/nodes/NODE_5_定制芯片_ASIC_2026-03-19.html" target="_blank">NODE 5: Custom/ASIC</a>
+        <div class="desc">&#23450;&#21046;&#33455;&#29255;/ASIC</div>
+      </div>
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/nodes/NODE_6_EDA_IP授权_2026-03-19.html" target="_blank">NODE 6: EDA/IP</a>
+        <div class="desc">EDA/IP&#25480;&#26435;</div>
+      </div>
+    </div>
+
+    <h3>V3 Demos &#28436;&#31034; (4)</h3>
+    <div class="deliverable-group">
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/V3_DEMO_treemap.html" target="_blank">Treemap</a>
+        <div class="desc">Interactive Treemap demo</div>
+      </div>
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/V3_DEMO_plotly_charts.html" target="_blank">Plotly Charts</a>
+        <div class="desc">Plotly Charts Demo</div>
+      </div>
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/V3_DEMO_semiconductor.html" target="_blank">Semiconductor Demo</a>
+        <div class="desc">Semiconductor component demo</div>
+      </div>
+      <div class="deliverable-item">
+        <a href="../../../trade-pipeline/output/reports/V3_wave_only.html" target="_blank">Wave Analysis</a>
+        <div class="desc">Wave Analysis Demo</div>
+      </div>
+    </div>
+
+    <!-- 7 Overview & Thesis (collapsible, default closed) -->
+    <details class="collapsible" id="reference">
+      <summary>Overview: What V3 is &#27010;&#36848;&#65306;V3&#26159;&#20160;&#20040;</summary>
+      <div class="detail-body">
+        <p><strong>V3 is the first report system that enforces provenance tracking &mdash; every claim must have a source.</strong><span class="zh"><strong>V3&#26159;&#31532;&#19968;&#20010;&#24378;&#21046;provenance&#36861;&#36394;&#30340;&#25253;&#21578;&#31995;&#32479; &mdash; &#27599;&#20010;&#35770;&#28857;&#24517;&#39035;&#26377;&#26469;&#28304;&#12290;</strong></span></p>
+        <p>V2 had three fundamental problems: <strong>creator bias</strong> (70% creation / 30% curation), <strong>invisible process</strong> (only final report, no per-step logs), and <strong>opaque sourcing</strong> (provenance = 3%, 119 lines with only 3 sourced). V3 solves all three.<span class="zh">V2&#19977;&#20010;&#26681;&#26412;&#38382;&#39064;&#65306;&#21019;&#20316;&#32773;&#20559;&#35265;(70/30)&#12289;&#36807;&#31243;&#19981;&#21487;&#35265;&#12289;&#26469;&#28304;&#19981;&#36879;&#26126;(3%)&#12290;V3&#35299;&#20915;&#20102;&#36825;&#19977;&#20010;&#12290;</span></p>
+        <p><strong>Tool upgrades:</strong> matplotlib (static PNG) &rarr; <strong>Plotly</strong> (interactive HTML). Python string concatenation &rarr; <strong>Jinja2</strong> component system (9 templates + 4 CSS). New: ReportRenderer class with 8 render methods.<span class="zh"><strong>&#24037;&#20855;&#21319;&#32423;&#65306;</strong>&#22270;&#34920;&#20174;&#38745;&#24577;PNG&#21040;Plotly&#20132;&#20114;&#24335;&#12290;&#27169;&#26495;&#20174;&#23383;&#31526;&#20018;&#25340;&#25509;&#21040;Jinja2&#32452;&#20214;&#31995;&#32479;&#12290;</span></p>
+        <p><strong>V4 target:</strong> 30/70 curation ratio (V3 achieved ~40/60). Second industry validates template generality before further tooling investment.<span class="zh"><strong>V4&#30446;&#26631;&#65306;</strong>30/70&#31574;&#23637;&#27604;&#12290;&#31532;&#20108;&#20010;&#34892;&#19994;&#20808;&#39564;&#35777;&#36890;&#29992;&#24615;&#12290;</span></p>
+      </div>
+    </details>
+
+    <details class="collapsible">
+      <summary>V2 &rarr; V3 Quality Comparison &#36136;&#37327;&#23545;&#27604;</summary>
+      <div class="detail-body">
+        <table style="width:100%;border-collapse:collapse;font-size:0.85rem;margin:0.5rem 0;">
+          <thead><tr>
+            <th style="text-align:left;padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-default);font-size:0.65rem;font-weight:510;text-transform:uppercase;color:var(--text-quaternary);">Metric</th>
+            <th style="text-align:left;padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-default);font-size:0.65rem;font-weight:510;text-transform:uppercase;color:var(--tier-low);">V2</th>
+            <th style="text-align:left;padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-default);font-size:0.65rem;font-weight:510;text-transform:uppercase;color:var(--tier-high);">V3</th>
+          </tr></thead>
+          <tbody>
+            <tr><td style="padding:0.35rem 0.6rem;border-bottom:1px solid var(--border-subtle);color:var(--text-tertiary);">Provenance coverage</td><td style="padding:0.35rem 0.6rem;border-bottom:1px solid var(--border-subtle);color:var(--tier-low);font-weight:590;">3%</td><td style="padding:0.35rem 0.6rem;border-bottom:1px solid var(--border-subtle);color:var(--tier-high);font-weight:590;">&gt;50%</td></tr>
+            <tr><td style="padding:0.35rem 0.6rem;border-bottom:1px solid var(--border-subtle);color:var(--text-tertiary);">Creation / Curation ratio</td><td style="padding:0.35rem 0.6rem;border-bottom:1px solid var(--border-subtle);color:var(--tier-low);font-weight:590;">70/30</td><td style="padding:0.35rem 0.6rem;border-bottom:1px solid var(--border-subtle);color:var(--tier-high);font-weight:590;">&lt;40/60</td></tr>
+            <tr><td style="padding:0.35rem 0.6rem;border-bottom:1px solid var(--border-subtle);color:var(--text-tertiary);">Process logs</td><td style="padding:0.35rem 0.6rem;border-bottom:1px solid var(--border-subtle);color:var(--tier-low);font-weight:590;">0</td><td style="padding:0.35rem 0.6rem;border-bottom:1px solid var(--border-subtle);color:var(--tier-high);font-weight:590;">Per-CP</td></tr>
+            <tr><td style="padding:0.35rem 0.6rem;border-bottom:1px solid var(--border-subtle);color:var(--text-tertiary);">HTML components</td><td style="padding:0.35rem 0.6rem;border-bottom:1px solid var(--border-subtle);color:var(--tier-low);font-weight:590;">0</td><td style="padding:0.35rem 0.6rem;border-bottom:1px solid var(--border-subtle);color:var(--tier-high);font-weight:590;">7 Jinja2</td></tr>
+            <tr><td style="padding:0.35rem 0.6rem;border-bottom:1px solid var(--border-subtle);color:var(--text-tertiary);">Charts</td><td style="padding:0.35rem 0.6rem;border-bottom:1px solid var(--border-subtle);color:var(--text-secondary);">Static PNG</td><td style="padding:0.35rem 0.6rem;border-bottom:1px solid var(--border-subtle);color:var(--tier-high);font-weight:590;">Plotly interactive</td></tr>
+            <tr><td style="padding:0.35rem 0.6rem;color:var(--text-tertiary);">Wave positioning</td><td style="padding:0.35rem 0.6rem;color:var(--tier-low);font-weight:590;">None</td><td style="padding:0.35rem 0.6rem;color:var(--tier-high);font-weight:590;">Multi-level cards</td></tr>
+          </tbody>
+        </table>
+        <p style="margin-top:0.75rem;">The V2&rarr;V3 improvement was massive. V4 would push curation to 30/70, but first we need to validate V3 on a second industry.<span class="zh">V2&#8594;V3&#25552;&#21319;&#24040;&#22823;&#12290;V4&#30446;&#26631;30/70&#31574;&#23637;&#65292;&#20294;&#20808;&#35201;&#22312;&#31532;&#20108;&#20010;&#34892;&#19994;&#39564;&#35777;V3&#12290;</span></p>
+      </div>
+    </details>
+
+    <details class="collapsible">
+      <summary>Key Files &#20851;&#38190;&#25991;&#20214;</summary>
+      <div class="detail-body">
+        <table style="width:100%;border-collapse:collapse;font-size:0.85rem;margin:0.5rem 0;">
+          <thead><tr>
+            <th style="text-align:left;padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-default);font-size:0.65rem;font-weight:510;text-transform:uppercase;color:var(--text-quaternary);">File</th>
+            <th style="text-align:left;padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-default);font-size:0.65rem;font-weight:510;text-transform:uppercase;color:var(--text-quaternary);">Purpose</th>
+          </tr></thead>
+          <tbody>
+            <tr><td style="padding:0.35rem 0.6rem;border-bottom:1px solid var(--border-subtle);color:var(--accent);font-family:var(--font-mono);font-size:0.8rem;">templates/</td><td style="padding:0.35rem 0.6rem;border-bottom:1px solid var(--border-subtle);color:var(--text-secondary);">9 Jinja2 HTML + 4 CSS files</td></tr>
+            <tr><td style="padding:0.35rem 0.6rem;border-bottom:1px solid var(--border-subtle);color:var(--accent);font-family:var(--font-mono);font-size:0.8rem;">report_renderer.py</td><td style="padding:0.35rem 0.6rem;border-bottom:1px solid var(--border-subtle);color:var(--text-secondary);">ReportRenderer class, 8 render methods</td></tr>
+            <tr><td style="padding:0.35rem 0.6rem;border-bottom:1px solid var(--border-subtle);color:var(--accent);font-family:var(--font-mono);font-size:0.8rem;">curator_checklist.py</td><td style="padding:0.35rem 0.6rem;border-bottom:1px solid var(--border-subtle);color:var(--text-secondary);">Authority source map + provenance scan</td></tr>
+            <tr><td style="padding:0.35rem 0.6rem;border-bottom:1px solid var(--border-subtle);color:var(--accent);font-family:var(--font-mono);font-size:0.8rem;">cognitive_engine.py</td><td style="padding:0.35rem 0.6rem;border-bottom:1px solid var(--border-subtle);color:var(--text-secondary);">Phase 0.5 curation search</td></tr>
+            <tr><td style="padding:0.35rem 0.6rem;color:var(--accent);font-family:var(--font-mono);font-size:0.8rem;">industry_report_template.py</td><td style="padding:0.35rem 0.6rem;color:var(--text-secondary);">process_log_dir integration</td></tr>
+          </tbody>
+        </table>
+        <p style="margin-top:0.75rem;font-size:0.82rem;color:var(--text-tertiary);">All files in <code style="background:var(--bg-surface);padding:0.1rem 0.3rem;border-radius:3px;font-size:0.8rem;">~/trade-pipeline/industry/templates/</code></p>
+      </div>
+    </details>
+
+    <div class="page-footer">
+      <a href="../2026-W12-v3.html">&larr; Back to W12 Synthesis</a>
+      <div style="margin-top:0.5rem;">Cognitive Observatory V3 &middot; Project Detail &middot; 2026-03-21</div>
+    </div>
+
+  </main>
+
+  <!-- ===== Right Sidebar ===== -->
+  <aside class="notes-sidebar">
+    <h4>Meta-cognitive</h4>
+
+    <div class="meta-note">
+      <div class="note-label strength">Strength</div>
+      <p>First report system that enforces provenance tracking. Every claim must have a source. V2 had 3% coverage; V3 achieved &gt;50%. This is a structural improvement, not cosmetic.<span class="zh">&#31532;&#19968;&#20010;&#24378;&#21046;provenance&#36861;&#36394;&#30340;&#25253;&#21578;&#31995;&#32479;&#12290;&#27599;&#20010;&#35770;&#28857;&#24517;&#39035;&#26377;&#26469;&#28304;&#12290;&#32467;&#26500;&#24615;&#25913;&#36827;&#19981;&#26159;&#34920;&#38754;&#32654;&#21270;&#12290;</span></p>
+    </div>
+
+    <div class="meta-note">
+      <div class="note-label chain">Chain</div>
+      <p>Template &rarr; Renderer &rarr; Cognitive Engine &rarr; V3 Report &rarr; Trading Dashboard input. The V3 report is consumed by the dashboard pipeline for industry analysis. Every upstream improvement flows down.<span class="zh">&#27169;&#26495;&#8594;&#28210;&#26579;&#22120;&#8594;&#35748;&#30693;&#24341;&#25806;&#8594;V3&#25253;&#21578;&#8594;&#20132;&#26131;&#20202;&#34920;&#30424;&#36755;&#20837;&#12290;&#27599;&#19968;&#27493;&#19978;&#28216;&#25913;&#36827;&#37117;&#21521;&#19979;&#27969;&#21160;&#12290;</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label risk">Single-industry risk</div>
+      <p>Template tested on only 1 industry (semiconductor). May be over-fitted to SMH data structure. Supply chain nodes, Plotly chart types, and KPI metrics may need adaptation for non-chip sectors like energy or financials.<span class="zh">&#27169;&#26495;&#21482;&#22312;1&#20010;&#34892;&#19994;&#27979;&#35797;&#36807;&#12290;&#21487;&#33021;&#23545;&#21322;&#23548;&#20307;&#25968;&#25454;&#32467;&#26500;&#36807;&#25311;&#21512;&#12290;</span></p>
+    </div>
+
+    <div class="meta-note">
+      <div class="note-label risk">Manual provenance</div>
+      <p>Provenance coverage scoring is currently manual eyeball. curator_checklist.py has authority source map but no automated percentage output. One bad run could ship a report with low coverage unnoticed.<span class="zh">Provenance&#35206;&#30422;&#29575;&#35780;&#20998;&#38752;&#25163;&#21160;&#12290;&#33258;&#21160;&#21270;&#23427;&#38450;&#27490;&#20302;&#35206;&#30422;&#29575;&#25253;&#21578;&#28316;&#36807;&#12290;</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label pattern">V2&rarr;V3 leap</div>
+      <p>V2&rarr;V3 improvement was massive (70% creation &rarr; 40/60 curation). V4 would target 30/70. The pattern: each version should shift the ratio by ~10% toward curation. Diminishing returns after V5.<span class="zh">V2&#8594;V3&#25552;&#21319;&#24040;&#22823;&#12290;V4&#30446;&#26631;30/70&#12290;&#27169;&#24335;&#65306;&#27599;&#29256;&#21521;&#31574;&#23637;&#20559;&#31227;10%&#12290;V5&#21518;&#25910;&#30410;&#36882;&#20943;&#12290;</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label suggestion">Next Step</div>
+      <p><strong>Apply template to XLE Energy or XLF Financials.</strong> Do not refine CSS. Do not add components. The system is proven &mdash; now validate generality. If it works on a second industry without major changes, confidence upgrades to 5/5.<span class="zh"><strong>&#25226;&#27169;&#26495;&#24212;&#29992;&#21040;XLE&#25110;XLF&#12290;</strong>&#19981;&#35201;&#20248;&#21270;CSS&#12290;&#19981;&#35201;&#21152;&#32452;&#20214;&#12290;&#39564;&#35777;&#36890;&#29992;&#24615;&#12290;</span></p>
+    </div>
+
+    <div class="meta-note">
+      <div class="note-label suggestion">Automate</div>
+      <p>Wire curator_checklist.py to output provenance percentage per section automatically. 2-hour task. Prevents silent regression on source quality.<span class="zh">&#35753;curator_checklist.py&#33258;&#21160;&#36755;&#20986;&#27599;&#33410;provenance&#30334;&#20998;&#27604;&#12290;2&#23567;&#26102;&#20219;&#21153;&#12290;</span></p>
+    </div>
+  </aside>
+
+</div>
+
+
+
+<script src="../priority-sync.js"></script>
+<script>PQ_sync.render('v3-reports');</script>
+<script src="../ctx-injector.js"></script>
+<script src="../../lib/reading-mode.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+</body>
+</html>

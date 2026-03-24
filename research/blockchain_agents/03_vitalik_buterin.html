@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vitalik Buterin — 认知代理人 V4</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="../blockchain_shared.css">
+  <style>
+    /* === V4 Page-specific: Right sidebar annotations + controls === */
+    .notes-sidebar { position: relative; width: 320px; min-width: 320px; padding: 1.25rem 1rem; border-left: 1px solid var(--border-subtle); background: var(--bg-elevated); z-index: 50; }
+    .notes-sidebar-header { position: sticky; top: 0; z-index: 60; background: var(--bg-elevated); padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-subtle); margin-bottom: 0.75rem; }
+    .anno { position: absolute; left: 1rem; right: 1rem; }
+    .anno.meta-note { padding: 0.6rem 0.75rem; border-left: 2px solid var(--accent); border-radius: 0 6px 6px 0; background: rgba(248,168,72,0.04); font-size: 0.78rem; line-height: 1.5; color: var(--text-secondary); cursor: pointer; transition: box-shadow 0.2s, top 0.3s ease; }
+    .anno.meta-note:hover { box-shadow: 0 0 0 1px var(--accent); }
+    .anno .note-label { display: inline-block; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bg-base); background: var(--accent); padding: 0.1rem 0.4rem; border-radius: 3px; margin-bottom: 0.3rem; }
+    .anno .note-label.know { background: var(--knowledge); color: white; }
+    .anno .mn-head { display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
+    .anno .mn-title { flex: 1; font-weight: 510; font-size: 0.75rem; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .anno .mn-fold { font-size: 0.55rem; color: var(--text-quaternary); transition: transform 0.2s; margin-left: auto; }
+    .anno.open .mn-fold { transform: rotate(180deg); }
+    .anno .mn-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+    .anno.open .mn-body { max-height: 2000px; }
+    .anno .mn-body p { font-size: 0.78rem; margin-bottom: 0.3rem; color: var(--text-secondary); }
+    .anno.know-note { padding: 0.6rem 0.75rem; border-left: 2px solid var(--knowledge); border-radius: 0 6px 6px 0; background: rgba(91,155,213,0.04); font-size: 0.78rem; line-height: 1.5; color: var(--text-secondary); cursor: pointer; transition: box-shadow 0.2s, top 0.3s ease; }
+    .anno.know-note:hover { box-shadow: 0 0 0 1px var(--knowledge); }
+    .anno .trap-tag { display: inline-block; font-size: 0.6rem; padding: 0.05rem 0.35rem; border-radius: 3px; background: rgba(244,67,54,0.15); color: var(--tier-low); font-weight: 590; margin-right: 0.3rem; }
+    .anno .method-tag { display: inline-block; font-size: 0.6rem; padding: 0.05rem 0.35rem; border-radius: 3px; background: rgba(76,175,80,0.15); color: var(--tier-high); font-weight: 590; margin-right: 0.3rem; }
+    mark.hl-know { background: rgba(91,155,213,0.12); border-bottom: 1.5px solid var(--knowledge); padding: 0 2px; border-radius: 2px; color: inherit; cursor: pointer; transition: background 0.15s; }
+    mark.hl-know:hover, mark.hl-know.hover { background: rgba(91,155,213,0.28); }
+    .nref { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 50%; font-size: 0.48rem; font-weight: 700; cursor: pointer; margin-left: 1px; vertical-align: super; transition: transform 0.15s; text-decoration: none; background: var(--knowledge); color: white; }
+    .nref:hover { transform: scale(1.25); box-shadow: 0 0 6px rgba(91,155,213,0.4); }
+    .anno.flash { animation: noteFlash 1.5s ease; }
+    @keyframes noteFlash { 0%,100% { box-shadow: none; } 15%,85% { box-shadow: 0 0 0 3px var(--accent); } }
+    .anno.know-note.flash { animation: noteFlashBlue 1.5s ease; }
+    @keyframes noteFlashBlue { 0%,100% { box-shadow: none; } 15%,85% { box-shadow: 0 0 0 3px var(--knowledge); } }
+    .anno.hover { outline: 2px solid var(--accent); outline-offset: -1px; }
+    .anno.know-note.hover { outline-color: var(--knowledge); }
+    .top-controls { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; padding: 0.35rem 0.7rem; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 0.72rem; flex-wrap: wrap; }
+    .top-controls .tc-label { font-weight: 590; color: var(--knowledge); }
+    .top-controls button { padding: 0.15rem 0.45rem; border-radius: 4px; border: 1px solid var(--border-subtle); background: transparent; color: var(--text-tertiary); cursor: pointer; font-size: 0.68rem; font-family: inherit; transition: all 0.15s; }
+    .top-controls button:hover { border-color: var(--knowledge); color: var(--text-primary); }
+    .top-controls button.active { background: var(--knowledge-dim); color: var(--knowledge); border-color: rgba(91,155,213,0.3); }
+    .top-controls .tc-sep { color: var(--border-default); margin: 0 0.15rem; }
+    .rel-card { margin-bottom: 0.75rem; }
+    .rel-card summary { font-weight: 510; font-size: 0.88rem; }
+    .rel-body { padding: 0.8rem 1rem; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.55; }
+    .arc-item { border-left: 3px solid var(--accent); background: rgba(66,165,245,0.03); padding: 0.8rem 1rem; margin-bottom: 0.75rem; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+    .arc-item strong { color: var(--text-primary); }
+    .arc-item p { font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.3rem; }
+    .question-box { border: 2px solid var(--knowledge); background: rgba(91,155,213,0.05); border-radius: var(--radius-sm); padding: 1.25rem; text-align: center; margin: 2rem 0; }
+    .question-box blockquote { border: none; background: none; padding: 0; margin: 0; }
+    .question-box p { font-size: 1rem; font-weight: 510; color: var(--text-primary); }
+    .pred-table td:first-child { font-weight: 700; text-align: center; width: 2.5rem; }
+    .notes-toggle-btn { position: fixed; right: 1rem; bottom: 1.5rem; z-index: 200; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border-default); background: var(--bg-surface); color: var(--text-secondary); cursor: pointer; font-size: 1.1rem; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(0,0,0,0.4); font-family: inherit; transition: border-color 0.15s, color 0.15s; }
+    .notes-toggle-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .notes-close-btn { float: right; background: none; border: none; color: var(--text-tertiary); cursor: pointer; font-size: 1.1rem; padding: 0; margin: -0.2rem 0 0; display: none; font-family: inherit; }
+    .notes-close-btn:hover { color: var(--text-primary); }
+    @media (max-width: 1200px) { .notes-sidebar { position: fixed; right: 0; top: 0; height: 100vh; overflow-y: auto; transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow: -4px 0 20px rgba(0,0,0,0.4); z-index: 150; } .notes-sidebar.ns-closed { transform: translateX(100%); box-shadow: none; } .notes-close-btn { display: block; } .notes-toggle-btn { display: flex; } }
+    .notes-overlay-right { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 140; }
+    .notes-overlay-right.open { display: block; }
+    @media (min-width: 1600px) { main { max-width: 1000px; } .notes-sidebar { width: 360px; min-width: 360px; } }
+    @media (min-width: 1800px) { main { max-width: 1100px; } .notes-sidebar { width: 380px; min-width: 380px; } }
+    .hamburger-btn { display: none; position: fixed; top: 0.75rem; left: 0.75rem; z-index: 200; width: 36px; height: 36px; border-radius: var(--radius-sm); border: 1px solid var(--border-default); background: var(--bg-surface); color: var(--text-secondary); cursor: pointer; font-size: 1.1rem; font-family: inherit; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; }
+    .sidebar-overlay.open { display: block; }
+    @media (max-width: 900px) { .sidebar { position: fixed; left: 0; top: 0; transform: translateX(-100%); transition: transform 0.3s; z-index: 100; } .sidebar.open { transform: translateX(0); } .hamburger-btn { display: block; } main { padding: 2rem 1rem; } }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+    .badge-row .badge { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(248,168,72,0.25); }
+    blockquote { border-left: 3px solid var(--accent); background: var(--bg-surface); padding: 0.6rem 1.25rem; font-style: italic; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin: 0.75rem 0; font-size: 0.88rem; color: var(--text-secondary); }
+    /* Embedded + Reading mode */
+    body.embedded .sidebar { display: none !important; }
+    body.embedded .notes-sidebar { display: none !important; }
+    body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+    body.embedded .hamburger-btn { display: none !important; }
+    .reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+    .reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+    .reading-mode .hamburger-btn { display: none !important; }
+  </style>
+</head>
+<body>
+
+<!-- Hamburger button (mobile) -->
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Notes sidebar toggle + overlay -->
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes sidebar">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ========== LEFT SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <a class="back-link" href="../blockchain_hub.html">&larr; Blockchain Hub</a>
+    <div class="project-meta">N2 L1协议 &middot; A档 5/5</div>
+    <h4>目录导航</h4>
+    <nav>
+      <ul>
+        <li><a href="#overview"><span class="toc-num">1</span>概览 Overview</a></li>
+        <li><a href="#evidence"><span class="toc-num">2</span>行动证据 Action Evidence</a></li>
+        <li><a href="#judgment"><span class="toc-num">3</span>核心判断 Core Judgment</a></li>
+        <li><a href="#credibility"><span class="toc-num">4</span>可信度 Credibility</a></li>
+        <li><a href="#predictions"><span class="toc-num">5</span>预测追踪 Prediction Track</a></li>
+        <li><a href="#relationships"><span class="toc-num">6</span>关键关系 Relationships</a></li>
+        <li><a href="#narratives"><span class="toc-num">7</span>关键叙事弧 Narrative Arcs</a></li>
+        <li><a href="#trading"><span class="toc-num">8</span>交易启示 Trading Implications</a></li>
+        <li><a href="#question"><span class="toc-num">9</span>核心问题 Core Question</a></li>
+        <li><a href="#gaps"><span class="toc-num">10</span>信息空白 Info Gaps</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main>
+
+    <!-- Header -->
+    <header class="page-header">
+      <h1>Vitalik Buterin &mdash; 认知代理人 V4</h1>
+      <p class="subtitle">Co-founder, Ethereum &nbsp;|&nbsp; Node: N2 L1协议 &nbsp;|&nbsp; Tier: A档 5/5<br>
+      <span class="zh-inline">以太坊联合创始人 &middot; 区块链最具影响力的思想家 &middot; 可编程区块链（智能合约）缔造者</span></p>
+      <div class="badge-row">
+        <span class="badge">Ethereum Co-founder</span>
+        <span class="badge">A档 5/5</span>
+        <span class="badge">N2 L1协议</span>
+        <span class="badge">PoS Architect</span>
+        <span class="badge">Rollup-centric Roadmap</span>
+        <span class="badge">Public Intellectual</span>
+      </div>
+    </header>
+
+    <!-- Top Controls -->
+    <div class="top-controls">
+      <span class="tc-label">&#128218; 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <!-- ==================== SECTION 1: OVERVIEW ==================== -->
+    <section id="overview">
+      <div class="section-header"><h2><span class="section-num">01</span>概览 Overview</h2></div>
+
+      <div class="advisory-box">
+        <strong>Agent Summary 代理人摘要</strong><br>
+        Ethereum co-founder and the most influential blockchain thinker alive. Created the concept of programmable blockchain via smart contracts, transforming crypto from "digital gold" to "decentralized world computer." At 19, wrote the Ethereum whitepaper; by 31, orchestrated <mark class="hl-know" data-note="k1">The Merge</mark><sup class="nref" data-note="k1">K</sup> &mdash; the largest infrastructure upgrade in crypto history.
+        <span class="zh">以太坊联合创始人，在世最具影响力的区块链思想家。通过智能合约创造了可编程区块链的概念，将加密货币从"数字黄金"转变为"去中心化世界计算机"。19岁撰写以太坊白皮书，31岁主导完成The Merge——加密史上最大的基础设施升级。</span>
+      </div>
+
+      <div class="stats-strip">
+        <div class="stat-item"><span class="stat-value">2015</span><span class="stat-label">ETH Launch</span></div>
+        <div class="stat-item"><span class="stat-value">2022</span><span class="stat-label">The Merge</span></div>
+        <div class="stat-item"><span class="stat-value">~$230B</span><span class="stat-label">ETH Market Cap</span></div>
+        <div class="stat-item"><span class="stat-value">5/5</span><span class="stat-label">Credibility</span></div>
+        <div class="stat-item"><span class="stat-value">L2</span><span class="stat-label">Scaling Path</span></div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 2: ACTION EVIDENCE ==================== -->
+    <section id="evidence">
+      <div class="section-header"><h2><span class="section-num">02</span>行动证据 Action Evidence</h2></div>
+
+      <table>
+        <thead><tr>
+          <th>#</th>
+          <th>Event 事件</th>
+          <th>Year 年份</th>
+          <th>Impact 影响</th>
+          <th>Notes 备注</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td><strong>ETH Creation</strong><br><small class="zh-inline">以太坊创建</small></td>
+            <td>2015</td>
+            <td><span class="badge badge-gold">Foundational</span></td>
+            <td>Invented programmable blockchain. Smart contracts enabled DeFi, NFTs, DAOs &mdash; entire crypto ecosystem built on this foundation.<br><small class="zh-inline">发明可编程区块链。智能合约催生DeFi、NFT、DAO——整个加密生态建立在此基础上。</small></td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><strong><mark class="hl-know" data-note="k1">The Merge</mark><sup class="nref" data-note="k1">K</sup>: PoW &rarr; PoS</strong><br><small class="zh-inline">合并：工作量证明→权益证明</small></td>
+            <td>2022</td>
+            <td><span class="badge badge-gold">Historic</span></td>
+            <td>Largest crypto infrastructure upgrade ever. Reduced ETH energy consumption by ~99.95%. Equivalent to swapping an airplane engine mid-flight. Zero downtime.<br><small class="zh-inline">加密史上最大基础设施升级。ETH能耗降低约99.95%。相当于飞行中更换飞机引擎，零停机。</small></td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><strong><mark class="hl-know" data-note="k2">EIP-1559</mark><sup class="nref" data-note="k2">K</sup> Fee Burn</strong><br><small class="zh-inline">EIP-1559费用销毁</small></td>
+            <td>2021</td>
+            <td><span class="badge badge-green">Structural</span></td>
+            <td>Base fee burn mechanism = ETH deflationary under high usage. Changed ETH monetary policy from inflationary to potentially deflationary. "Ultrasound money" narrative.<br><small class="zh-inline">基础费用销毁机制=高使用率下ETH通缩。将ETH货币政策从通胀变为潜在通缩。"超声波货币"叙事。</small></td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td><strong><mark class="hl-know" data-note="k3">Rollup-centric Roadmap</mark><sup class="nref" data-note="k3">K</sup></strong><br><small class="zh-inline">以Rollup为中心的路线图</small></td>
+            <td>2020</td>
+            <td><span class="badge badge-gold">Strategic</span></td>
+            <td>Chose L2 rollups over execution sharding. Preserved L1 decentralization while enabling massive scaling via Optimistic &amp; ZK rollups. This is THE defining architectural decision.<br><small class="zh-inline">选择L2 rollup而非执行分片。在保持L1去中心化的同时通过Optimistic和ZK rollup实现大规模扩展。这是最关键的架构决策。</small></td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td><strong>Long-form Blog Posts</strong><br><small class="zh-inline">长文博客</small></td>
+            <td>Ongoing</td>
+            <td><span class="badge badge-cyan">Transparency</span></td>
+            <td>Regular publication of deeply technical blog posts on vitalik.eth.limo. Extreme transparency about tradeoffs, doubts, and reasoning. Unique among industry leaders.<br><small class="zh-inline">定期发表深度技术博客。对权衡、疑虑和推理极度透明。在行业领袖中独一无二。</small></td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td><strong>Account Abstraction Push</strong><br><small class="zh-inline">账户抽象推动</small></td>
+            <td>2023&ndash;</td>
+            <td><span class="badge badge-green">UX</span></td>
+            <td>ERC-4337 and Pectra's native AA (EIP-7702). Makes wallets programmable &mdash; social recovery, session keys, gas sponsorship. Critical for mass adoption.<br><small class="zh-inline">ERC-4337及Pectra原生AA（EIP-7702）。使钱包可编程——社交恢复、会话密钥、Gas赞助。对大规模采用至关重要。</small></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <details class="collapsible">
+        <summary>Deep Dive: The Merge &mdash; 技术复杂度与执行风险</summary>
+        <div class="detail-body">
+          <p>The Merge was not just a software update. It required coordinating thousands of node operators worldwide to switch consensus mechanisms simultaneously. The Beacon Chain ran in parallel for ~1.5 years (since Dec 2020) before the merge. Key risks: chain split, validator confusion, MEV reorganization attacks during transition.</p>
+          <p class="zh">合并不仅仅是软件更新。它需要协调全球数千个节点运营者同时切换共识机制。信标链在合并前并行运行约1.5年（自2020年12月起）。关键风险：链分裂、验证者混乱、过渡期间的MEV重组攻击。</p>
+          <p>Vitalik's role was architectural vision + community coordination, not direct code execution. The actual implementation was split across multiple client teams (Prysm, Lighthouse, Teku, Nimbus, Lodestar). This distributed development model is itself a Vitalik design philosophy: no single point of failure.</p>
+          <p class="zh">Vitalik的角色是架构愿景+社区协调，而非直接代码执行。实际实现分散在多个客户端团队。这种分布式开发模式本身就是Vitalik的设计哲学：没有单点故障。</p>
+        </div>
+      </details>
+
+      <details class="collapsible">
+        <summary>Deep Dive: Rollup-centric vs Monolithic &mdash; 架构分歧的深层逻辑</summary>
+        <div class="detail-body">
+          <p>The 2020 pivot to rollup-centric scaling was Vitalik's most consequential strategic decision. The alternative (execution sharding) would have required fundamental protocol changes, taken 5+ more years, and risked breaking composability. Rollups move execution off-chain while inheriting L1 security.</p>
+          <p class="zh">2020年转向以rollup为中心的扩展是Vitalik最具影响力的战略决策。替代方案（执行分片）需要根本性的协议变更，多花5年以上时间，并有破坏可组合性的风险。Rollup将执行移到链下同时继承L1安全性。</p>
+          <p>This decision created the L2 ecosystem (Arbitrum, Optimism, Base, zkSync, Starknet) but also fragmented liquidity &mdash; a tradeoff Vitalik acknowledges. Solana took the opposite path (monolithic scaling), and the market has rewarded SOL's performance story. Whether modular (ETH) or monolithic (SOL) wins is THE open question.</p>
+          <p class="zh">该决策创建了L2生态（Arbitrum、Optimism、Base、zkSync、Starknet）但也碎片化了流动性——Vitalik承认的权衡。Solana走了相反路径（单片扩展），市场奖励了SOL的性能叙事。模块化（ETH）还是单片（SOL）胜出是悬而未决的核心问题。</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- ==================== SECTION 3: CORE JUDGMENT ==================== -->
+    <section id="judgment">
+      <div class="section-header"><h2><span class="section-num">03</span>核心判断 Core Judgment</h2></div>
+
+      <blockquote>
+        <p>"Ethereum should be the decentralized settlement layer of the internet. L2 rollups are the scaling solution."</p>
+        <p class="zh" style="border-top: 1px dashed var(--border-subtle); padding-top: 0.4em;">"以太坊应该成为互联网的去中心化结算层。L2 rollup是扩展解决方案。"</p>
+      </blockquote>
+
+      <p style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 1rem; line-height: 1.6;">
+        This is the Ethereum thesis in one sentence. L1 optimizes for decentralization + security (the "settlement layer"); L2s optimize for speed + cost (the "execution layer"). The bet is that long-term, security and decentralization matter more than raw TPS. This mirrors the TCP/IP model: a simple, secure base layer with complexity at the edges.
+        <span class="zh">这是一句话总结的以太坊论文。L1优化去中心化+安全性（"结算层"）；L2优化速度+成本（"执行层"）。赌注是长期来看，安全性和去中心化比原始TPS更重要。这类似TCP/IP模型：简单安全的基础层，复杂性在边缘。</span>
+      </p>
+    </section>
+
+    <!-- ==================== SECTION 4: CREDIBILITY ==================== -->
+    <section id="credibility">
+      <div class="section-header"><h2><span class="section-num">04</span>可信度评估 Credibility Assessment</h2></div>
+
+      <div class="stats-strip">
+        <div class="stat-item"><span class="stat-value" style="color: var(--tier-high);">5/5</span><span class="stat-label">Overall</span></div>
+        <div class="stat-item">
+          <div class="dot-grid">
+            <div class="dot filled high"></div>
+            <div class="dot filled high"></div>
+            <div class="dot filled high"></div>
+            <div class="dot filled high"></div>
+            <div class="dot filled high"></div>
+          </div>
+          <span class="dot-label">highest in crypto</span>
+        </div>
+      </div>
+
+      <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6;">
+        <strong>Why 5/5:</strong> Public intellectual with verified track record. Transparent about tradeoffs &mdash; regularly publishes blog posts detailing what went wrong, what surprised him, and what he was wrong about. Does not engage in price hype. Has donated billions to public goods (Kanro, Gitcoin, India COVID relief). No financial conflicts: sold ETH at market prices, always disclosed.
+        <span class="zh"><strong>为何5/5：</strong>有验证过的记录的公共知识分子。对权衡极度透明——定期发表博客详述出了什么问题、什么让他意外、以及他哪里错了。不参与价格炒作。向公共物品捐赠数十亿（Kanro、Gitcoin、印度COVID救济）。无财务冲突：以市场价格出售ETH，始终披露。</span>
+      </p>
+
+      <div class="alert alert-gold">
+        <strong>Caveat:</strong> High credibility on technology vision ≠ price prediction. ETH has underperformed BTC and SOL despite Vitalik being right on most technical calls. The market prices narratives, not architectural elegance.
+        <span class="zh"><strong>警告：</strong>技术愿景的高可信度≠价格预测。尽管Vitalik在大多数技术判断上正确，ETH仍跑输BTC和SOL。市场定价的是叙事，而非架构优雅。</span>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 5: PREDICTION TRACK ==================== -->
+    <section id="predictions">
+      <div class="section-header"><h2><span class="section-num">05</span>预测追踪 Prediction Track Record</h2></div>
+
+      <table class="pred-table">
+        <thead><tr>
+          <th>Result</th>
+          <th>Prediction 预测</th>
+          <th>Outcome 结果</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td style="color: var(--tier-high);">&#10004;</td>
+            <td><strong>PoS feasibility</strong><br><small class="zh-inline">PoS可行性</small></td>
+            <td>Said ETH could transition to PoS without chain split. Executed successfully in Sep 2022. Critics said it was impossible for years.</td>
+          </tr>
+          <tr>
+            <td style="color: var(--tier-high);">&#10004;</td>
+            <td><strong>Rollup scaling superiority</strong><br><small class="zh-inline">Rollup扩展优越性</small></td>
+            <td>L2 TVL grew from $1B (2021) to $40B+ (2024). Arbitrum, Optimism, Base became dominant execution layers. Transaction costs dropped 100x.</td>
+          </tr>
+          <tr>
+            <td style="color: var(--tier-high);">&#10004;</td>
+            <td><strong>Account abstraction need</strong><br><small class="zh-inline">账户抽象需求</small></td>
+            <td>ERC-4337 adoption growing. Coinbase Smart Wallet, Safe, and major wallets implementing AA. Pectra upgrade bakes it into protocol.</td>
+          </tr>
+          <tr>
+            <td style="color: var(--tier-medium);">&#9888;</td>
+            <td><strong>Timeline estimation</strong><br><small class="zh-inline">时间线估计</small></td>
+            <td>Everything takes 2x longer than Vitalik predicts. The Merge was 2+ years late. Sharding timeline repeatedly pushed. Danksharding still in progress.</td>
+          </tr>
+          <tr>
+            <td style="color: var(--tier-low);">&#10008;</td>
+            <td><strong>ETH price outperformance</strong><br><small class="zh-inline">ETH价格跑赢</small></td>
+            <td>Despite technical success, <mark class="hl-know" data-note="k4">ETH/BTC ratio</mark><sup class="nref" data-note="k4">K</sup> at historic lows (~0.02). SOL outperformed 10x in 2023-2024 cycle. Technical excellence ≠ price performance.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <details class="collapsible">
+        <summary>Deep Dive: Timeline Bias &mdash; 为什么Vitalik永远乐观</summary>
+        <div class="detail-body">
+          <p>Vitalik's timeline optimism is structural, not accidental. As the visionary, he sees the end state clearly but underestimates coordination costs across independent client teams, community governance, and security auditing. The Merge roadmap was first proposed in 2016 (Casper FFG) and delivered in 2022. Danksharding (full data availability) was proposed in 2022 and is still incomplete in 2026.</p>
+          <p class="zh">Vitalik的时间线乐观是结构性的，非偶然的。作为远见者，他清楚看到终态但低估了跨独立客户端团队、社区治理和安全审计的协调成本。Merge路线图2016年首次提出（Casper FFG），2022年交付。Danksharding（完整数据可用性）2022年提出，2026年仍未完成。</p>
+          <p><strong>Trading implication:</strong> When Vitalik announces a timeline, add 50-100% to the estimate. This is useful for positioning ahead of actual delivery dates.</p>
+          <p class="zh"><strong>交易启示：</strong>当Vitalik宣布时间线时，在估计上加50-100%。这对于在实际交付日期前布局有用。</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- ==================== SECTION 6: KEY RELATIONSHIPS ==================== -->
+    <section id="relationships">
+      <div class="section-header"><h2><span class="section-num">06</span>关键关系 Key Relationships</h2></div>
+
+      <details class="collapsible rel-card" id="rel-gavin">
+        <summary>&#8596; Gavin Wood (Polkadot)</summary>
+        <div class="rel-body">
+          <p><strong>Relationship essence:</strong> Co-founded Ethereum together. Wood wrote the Yellow Paper (formal specification) and created Solidity. Split in 2016 over governance philosophy &mdash; Wood wanted more structured governance, Vitalik preferred rough consensus.</p>
+          <p class="zh"><strong>关系本质：</strong>共同创立以太坊。Wood撰写黄皮书（形式化规范）并创建Solidity。2016年因治理理念分歧分道扬镳——Wood想要更结构化的治理，Vitalik偏好粗略共识。</p>
+          <p><strong>Key moment:</strong> The DAO hack (2016) was the breaking point. Hard fork decision revealed fundamentally different views on immutability vs pragmatism.</p>
+          <p><strong>Investment implication:</strong> Polkadot (DOT) represents the "structured governance" counter-thesis to Ethereum's "rough consensus" approach. Both paths have tradeoffs.</p>
+          <p class="zh"><strong>投资启示：</strong>Polkadot（DOT）代表"结构化治理"对以太坊"粗略共识"方式的反命题。两条路径各有权衡。</p>
+        </div>
+      </details>
+
+      <details class="collapsible rel-card" id="rel-changpeng">
+        <summary>&#8596; Changpeng Zhao (Binance / BNB Chain)</summary>
+        <div class="rel-body">
+          <p><strong>Relationship essence:</strong> Complex rivalry. Binance was early ETH supporter but launched BNB Chain (fork of Geth) as direct competitor. CZ prioritized speed/cost over decentralization &mdash; the exact opposite of Vitalik's philosophy.</p>
+          <p class="zh"><strong>关系本质：</strong>复杂竞争关系。币安是早期ETH支持者但推出BNB Chain（Geth分叉）作为直接竞争者。CZ优先考虑速度/成本而非去中心化——与Vitalik哲学完全相反。</p>
+          <p><strong>Key moment:</strong> Vitalik publicly criticized BNB Chain's centralization (21 validators), calling it "not a real blockchain." CZ responded with "but our users don't care."</p>
+          <p><strong>Investment implication:</strong> The Vitalik-CZ tension reflects the decentralization vs UX tradeoff that defines the entire L1 market. Watch which side users actually choose.</p>
+        </div>
+      </details>
+
+      <details class="collapsible rel-card" id="rel-anatoly">
+        <summary>&#8596; Anatoly Yakovenko (Solana)</summary>
+        <div class="rel-body">
+          <p><strong>Relationship essence:</strong> Respectful intellectual rivalry. Anatoly chose monolithic scaling (single high-performance L1); Vitalik chose modular scaling (L1 settlement + L2 execution). This is THE architectural debate in crypto.</p>
+          <p class="zh"><strong>关系本质：</strong>尊重的智识竞争。Anatoly选择单片扩展（单一高性能L1）；Vitalik选择模块化扩展（L1结算+L2执行）。这是加密领域最核心的架构辩论。</p>
+          <p><strong>Key moment:</strong> Solana's 2023-2024 resurgence (from $8 post-FTX to $200+) challenged the modular thesis. Vitalik acknowledged Solana's UX advantages while defending rollup long-term scalability.</p>
+          <p><strong>Investment implication:</strong> ETH/SOL ratio is the direct expression of this debate. If modular wins long-term, ETH/SOL mean-reverts upward. If monolithic wins, SOL continues outperforming.</p>
+          <p class="zh"><strong>投资启示：</strong>ETH/SOL比率是这场辩论的直接表达。如果模块化长期获胜，ETH/SOL向上均值回归。如果单片获胜，SOL继续跑赢。</p>
+        </div>
+      </details>
+
+      <details class="collapsible rel-card" id="rel-ethereum-foundation">
+        <summary>&#8596; Ethereum Foundation (Aya Miyaguchi)</summary>
+        <div class="rel-body">
+          <p><strong>Relationship essence:</strong> Vitalik is the spiritual leader but EF is operationally independent. Recent criticism (2024-2025) about EF's slow pace, lack of urgency, and treasury management. Vitalik defended EF's neutrality model but acknowledged need for faster execution.</p>
+          <p class="zh"><strong>关系本质：</strong>Vitalik是精神领袖但EF运营上独立。近期（2024-2025）关于EF节奏慢、缺乏紧迫感和国库管理的批评。Vitalik为EF的中立模型辩护但承认需要更快执行。</p>
+          <p><strong>Investment implication:</strong> EF organizational velocity is a bottleneck for Ethereum roadmap delivery. Watch for leadership changes and treasury diversification signals.</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- ==================== SECTION 7: NARRATIVE ARCS ==================== -->
+    <section id="narratives">
+      <div class="section-header"><h2><span class="section-num">07</span>关键叙事弧 Narrative Arcs</h2></div>
+
+      <div class="arc-item">
+        <strong>Arc 1: The Prodigy (2013&ndash;2015) &mdash; 从白皮书到创世区块</strong>
+        <p>19-year-old Bitcoin Magazine writer publishes Ethereum whitepaper. Crowdfunded $18M in 2014 ICO. Launched mainnet July 2015. At this stage, Vitalik is a visionary teenager with no management experience. The early Ethereum team was chaotic &mdash; 8 co-founders, many conflicts.</p>
+        <p class="zh">19岁的Bitcoin Magazine撰稿人发表以太坊白皮书。2014年ICO众筹1800万美元。2015年7月主网上线。此阶段Vitalik是没有管理经验的远见少年。早期以太坊团队混乱——8位联合创始人，多次冲突。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>Arc 2: Trial by Fire (2016&ndash;2020) &mdash; DAO黑客、ICO泡沫、DeFi Summer</strong>
+        <p>The DAO hack ($60M, 2016) forced the hardest decision: hard fork and break immutability, or let investors lose funds. Vitalik chose the fork. Then survived the 2017 ICO bubble and 95% ETH price crash. DeFi Summer (2020) validated the smart contract thesis but also revealed scaling limits (gas fees >$100).</p>
+        <p class="zh">DAO黑客事件（6000万美元，2016年）迫使最艰难的决定：硬分叉打破不可变性，还是让投资者损失资金。Vitalik选择了分叉。然后熬过2017年ICO泡沫和ETH价格95%暴跌。DeFi Summer（2020）验证了智能合约论文但也暴露了扩展限制（Gas费>$100）。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>Arc 3: The Architect (2020&ndash;present) &mdash; 路线图大师</strong>
+        <p>Pivoted to rollup-centric roadmap. Delivered The Merge (2022), EIP-4844 Proto-Danksharding (2024), pushing Account Abstraction and Pectra upgrade (2025). Now faces the hardest challenge: ETH price underperformance despite technical success. The market wants narratives, not infrastructure elegance.</p>
+        <p class="zh">转向以rollup为中心的路线图。交付The Merge（2022）、EIP-4844 Proto-Danksharding（2024），推动账户抽象和Pectra升级（2025）。现在面临最艰难的挑战：尽管技术成功，ETH价格表现不佳。市场要的是叙事，不是基础设施优雅。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>Arc 4: The Philosopher-King Dilemma &mdash; 去中心化领袖的悖论</strong>
+        <p>Vitalik is the most influential person in a system designed to have no single influential person. His blog posts move markets. His opinions shape protocol development. Every time he speaks, he creates a centralization event in a decentralized system. This is the fundamental contradiction he lives with.</p>
+        <p class="zh">Vitalik是一个旨在没有单一影响力人物的系统中最有影响力的人。他的博客文章移动市场。他的意见塑造协议开发。每次他发言，都在去中心化系统中创造一个中心化事件。这是他与之共存的根本矛盾。</p>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 8: TRADING IMPLICATIONS ==================== -->
+    <section id="trading">
+      <div class="section-header"><h2><span class="section-num">08</span>交易启示 Trading Implications</h2></div>
+
+      <div class="advisory-box">
+        <strong>Core Position 核心定位</strong><br>
+        ETH is the "tech platform" play in crypto &mdash; analogous to AWS/Azure in cloud. Not a store-of-value play (that's BTC) and not a high-beta momentum play (that's SOL/memes). ETH trades on infrastructure adoption metrics, not retail hype.
+        <span class="zh">ETH是加密领域的"技术平台"赌注——类似云计算中的AWS/Azure。不是价值储存（那是BTC），也不是高贝塔动量赌注（那是SOL/memes）。ETH基于基础设施采用指标交易，而非零售炒作。</span>
+      </div>
+
+      <table>
+        <thead><tr>
+          <th>Signal 信号</th>
+          <th>Watch 关注</th>
+          <th>Implication 含义</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Pectra Upgrade</strong></td>
+            <td>EIP-7702 (native AA), blob throughput increase</td>
+            <td>Successful delivery = bullish catalyst. Delay = more "ETH can't ship" narrative pressure.<br><small class="zh-inline">成功交付=利好催化。延迟=更多"ETH不能交付"叙事压力。</small></td>
+          </tr>
+          <tr>
+            <td><strong>L2 TVL Growth</strong></td>
+            <td>Arbitrum + Optimism + Base combined TVL</td>
+            <td>Rising L2 TVL = ETH demand for settlement + data availability. Track L2Beat.com.<br><small class="zh-inline">L2 TVL上升=ETH结算和数据可用性需求。跟踪L2Beat.com。</small></td>
+          </tr>
+          <tr>
+            <td><strong><mark class="hl-know" data-note="k4">ETH/BTC Ratio</mark><sup class="nref" data-note="k4">K</sup></strong></td>
+            <td>Currently at historic lows (~0.02)</td>
+            <td>Mean reversion opportunity? Or structural decline? This is the $230B question. Watch for catalyst (ETF flows, L2 adoption inflection).<br><small class="zh-inline">均值回归机会？还是结构性下滑？这是2300亿美元的问题。关注催化剂（ETF流入、L2采用拐点）。</small></td>
+          </tr>
+          <tr>
+            <td><strong>ETH vs SOL</strong></td>
+            <td>Modular vs monolithic debate resolution</td>
+            <td>If Solana hits scaling ceiling or suffers outages, modular thesis strengthened. If SOL keeps scaling without issues, ETH bear case grows.<br><small class="zh-inline">如果Solana遇到扩展瓶颈或宕机，模块化论文增强。如果SOL持续无问题扩展，ETH看空案例增长。</small></td>
+          </tr>
+          <tr>
+            <td><strong>Vitalik Blog Posts</strong></td>
+            <td>vitalik.eth.limo new publications</td>
+            <td>Every blog post can be FUD or catalyst. Market overreacts to Vitalik's nuanced technical discussions. Trade the overreaction.<br><small class="zh-inline">每篇博客都可能成为FUD或催化剂。市场对Vitalik微妙的技术讨论反应过度。交易过度反应。</small></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="alert alert-gold" style="margin-top: 1rem;">
+        <strong>Volatility Profile:</strong> ETH is more volatile than BTC but less volatile than SOL. In bull markets, ETH typically underperforms SOL but outperforms BTC. In bear markets, ETH drawdowns are deeper than BTC (~80% vs ~75%) but shallower than SOL (~95%).
+        <span class="zh"><strong>波动性特征：</strong>ETH比BTC波动更大但比SOL小。牛市中，ETH通常跑输SOL但跑赢BTC。熊市中，ETH回撤比BTC更深（约80% vs 75%）但比SOL浅（约95%）。</span>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 9: CORE QUESTION ==================== -->
+    <section id="question">
+      <div class="section-header"><h2><span class="section-num">09</span>核心投资问题 Core Investment Question</h2></div>
+
+      <div class="question-box">
+        <blockquote>
+          <p>Can Ethereum's modular architecture (L1 settlement + L2 execution) capture more value than monolithic chains (Solana), given that L2s may commoditize L1 settlement and users don't care about decentralization?</p>
+          <p class="zh" style="border-top: 1px dashed var(--border-subtle); padding-top: 0.5em; font-style: normal; font-size: 0.88rem;">以太坊的模块化架构（L1结算+L2执行）能否比单片链（Solana）捕获更多价值，考虑到L2可能使L1结算商品化，且用户不关心去中心化？</p>
+        </blockquote>
+      </div>
+
+      <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6;">
+        This is the Ethereum bear case articulated precisely: if L2s become the execution layer and users never touch L1, does ETH accrue value? EIP-1559 burn + blob fees are the value accrual mechanism, but are they enough? The market is voting "not yet" with the ETH/BTC ratio at 2020 levels.
+        <span class="zh">这是精确阐述的以太坊看空案例：如果L2成为执行层且用户永远不接触L1，ETH能否积累价值？EIP-1559销毁+blob费用是价值积累机制，但够吗？市场以ETH/BTC比率回到2020水平的方式投票"还不够"。</span>
+      </p>
+    </section>
+
+    <!-- ==================== SECTION 10: INFO GAPS ==================== -->
+    <section id="gaps">
+      <div class="section-header"><h2><span class="section-num">10</span>信息空白 Information Gaps</h2></div>
+
+      <ul style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.8; padding-left: 1.25rem;">
+        <li><strong>EF Treasury:</strong> Ethereum Foundation holds ~$1B in ETH + fiat but disclosure is limited. How they allocate grants affects ecosystem velocity.</li>
+        <li><strong>Vitalik's personal ETH holdings:</strong> Known to have donated large amounts (SHIB $1B to India). Current holdings not fully transparent.</li>
+        <li><strong>Regulatory exposure:</strong> SEC's position on ETH (security vs commodity) remains ambiguous. ETH ETF approval was a positive signal but staking within ETFs is still blocked.</li>
+        <li><strong>China dimension:</strong> Ethereum developer ecosystem is global but China's regulatory ban limits Chinese developer/user participation. Watch for policy shifts under new leadership.</li>
+        <li><strong>No authoritative biography:</strong> Unlike traditional tech leaders, no definitive book on Vitalik. Best substitute: his blog archive + Laura Shin's "The Cryptopians" (covers early ETH history).</li>
+      </ul>
+    </section>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="page-footer">
+      <p>Vitalik Buterin &mdash; Cognitive Agent V4 &nbsp;|&nbsp; 2026-03-22 &nbsp;|&nbsp; Node: N2 L1协议 &nbsp;|&nbsp; Tier: A档 5/5</p>
+      <p>AI扩写 &mdash; 基于行业知识 + V4模板升级</p>
+    </footer>
+
+  </main>
+
+  <!-- ========== RIGHT SIDEBAR: ANNOTATIONS ========== -->
+  <aside class="notes-sidebar" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&#10005;</button>
+      <h4>&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+
+    <!-- META 1 -->
+    <div class="anno meta-note" data-section="overview" id="m1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Transparency is Double-Edged</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="trap-tag">TRAP</span> Vitalik's radical transparency (blog posts, public debates, acknowledging weaknesses) is unique among industry leaders. But every nuanced technical discussion gets distorted by crypto media into FUD. When he writes "rollups have fragmentation tradeoffs," headlines become "Vitalik admits Ethereum is broken."</p>
+        <p class="zh">Vitalik的激进透明（博客、公开辩论、承认弱点）在行业领袖中独一无二。但每次微妙的技术讨论都被加密媒体扭曲为FUD。当他写"rollup有碎片化权衡"时，标题变成"Vitalik承认以太坊坏了"。</p>
+        <p><strong>Trading signal:</strong> Buy Vitalik blog post FUD dips if the underlying technical argument is sound.</p>
+      </div>
+    </div>
+
+    <hr class="notes-divider">
+
+    <!-- META 2 -->
+    <div class="anno meta-note" data-section="predictions" id="m2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">ETH/BTC at Historic Lows</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="method-tag">METHOD</span> ETH/BTC ratio at ~0.02 is at 2020 levels despite: The Merge complete, L2 ecosystem thriving, ETH ETF approved. This suggests the market is pricing in structural value leakage to L2s and competition from Solana.</p>
+        <p class="zh">ETH/BTC比率约0.02处于2020水平，尽管：Merge已完成、L2生态繁荣、ETH ETF获批。这表明市场正在定价L2的结构性价值泄漏和Solana的竞争。</p>
+        <p>Mean reversion thesis requires a catalyst: either Solana stumbles (outage, scaling wall) or ETH L2 adoption reaches inflection point where blob fees generate significant ETH burn.</p>
+      </div>
+    </div>
+
+    <hr class="notes-divider">
+
+    <!-- META 3 -->
+    <div class="anno meta-note" data-section="trading" id="m3">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">SOL Competition Pressure</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="trap-tag">TRAP</span> Solana's UX advantage (fast, cheap, single chain) is real and measurable. Retail users and meme coin traders overwhelmingly prefer Solana. The "modularity wins long-term" thesis is untested at scale &mdash; it may be a cope for ETH's current underperformance.</p>
+        <p class="zh">Solana的UX优势（快速、便宜、单链）是真实可衡量的。散户和meme币交易者绝大多数偏好Solana。"模块化长期获胜"的论文在规模上未经验证——可能是对ETH当前表现不佳的自我安慰。</p>
+        <p>Counter-argument: Solana has had multiple outages and has ~1,500 validators vs ETH's ~900,000. In a regulated world, decentralization matters. But "when" is the question.</p>
+      </div>
+    </div>
+
+    <hr class="notes-divider">
+
+    <!-- META 4 -->
+    <div class="anno meta-note" data-section="evidence" id="m4">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Socratic Q: What Would Falsify the ETH Thesis?</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>Q1: If Solana achieves >100K TPS sustained without outages for 2+ years, does the modular thesis still hold?</p>
+        <p>Q2: If L2s launch their own tokens and stop settling on Ethereum, does ETH become MySpace?</p>
+        <p>Q3: If ETH/BTC breaks below 0.015 (2019 levels), is it a structural breakdown or capitulation bottom?</p>
+        <p class="zh">Q1: 如果Solana在2年以上无宕机情况下实现>100K TPS，模块化论文还成立吗？Q2: 如果L2发行自己的代币并停止在以太坊上结算，ETH会变成MySpace吗？Q3: 如果ETH/BTC跌破0.015（2019水平），是结构性崩溃还是投降底部？</p>
+      </div>
+    </div>
+
+    <hr class="notes-divider">
+
+    <!-- META 5 -->
+    <div class="anno meta-note" data-section="credibility" id="m5">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Credibility ≠ Price Prediction</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="trap-tag">TRAP</span> 5/5 credibility on technology vision does not translate to investment alpha. Vitalik has been right about almost every technical question and wrong about value accrual. This is the classic "great technology, wrong investment" trap. TCP/IP is the most important internet protocol; nobody made money investing in TCP/IP directly.</p>
+        <p class="zh">技术愿景5/5可信度不等于投资alpha。Vitalik在几乎每个技术问题上都对了，但在价值积累上错了。这是经典的"伟大技术，错误投资"陷阱。TCP/IP是最重要的互联网协议；没人直接投资TCP/IP赚到钱。</p>
+      </div>
+    </div>
+
+    <hr class="notes-divider">
+
+    <!-- META 6 -->
+    <div class="anno meta-note" data-section="judgment" id="m6">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Information Provenance</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="method-tag">METHOD</span> Primary sources: vitalik.eth.limo blog (first-party), Ethereum improvement proposals on GitHub (first-party), EF blog posts, conference talks (Devcon, ETHDenver). Secondary: Bankless podcast interviews, Laura Shin's "The Cryptopians," ultrasound.money for on-chain data.</p>
+        <p class="zh">一手来源：vitalik.eth.limo博客、GitHub上的以太坊改进提案、EF博客、会议演讲（Devcon、ETHDenver）。二手来源：Bankless播客采访、Laura Shin的《The Cryptopians》、ultrasound.money链上数据。</p>
+      </div>
+    </div>
+
+    <hr class="notes-divider">
+
+    <!-- META 7 -->
+    <div class="anno meta-note" data-section="narratives" id="m7">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Time Dimension: What Changes in 3 Years?</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>By 2029: Full Danksharding should be live (massive L2 data throughput). Account abstraction fully native. If ETH blob fees generate meaningful burn, the "ultrasound money" thesis is validated. If not, ETH becomes a utility token with limited value accrual.</p>
+        <p class="zh">到2029年：完整Danksharding应上线（大规模L2数据吞吐）。账户抽象完全原生。如果ETH blob费用产生有意义的销毁，"超声波货币"论文得到验证。如果没有，ETH成为价值积累有限的实用代币。</p>
+      </div>
+    </div>
+
+    <hr class="notes-divider">
+
+    <!-- KNOW 1 -->
+    <div class="anno know-note" data-section="evidence" id="k1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">The Merge (PoW→PoS)</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>Completed September 15, 2022. Transitioned Ethereum from Proof of Work to Proof of Stake. Reduced energy consumption by ~99.95%. The Beacon Chain (PoS consensus) ran alongside PoW mainnet for 1.5 years before merge. No downtime, no chain split. Largest live infrastructure migration in crypto history.</p>
+        <p class="zh">2022年9月15日完成。将以太坊从工作量证明过渡到权益证明。能耗降低约99.95%。信标链（PoS共识）在合并前与PoW主网并行运行1.5年。零停机、零链分裂。加密史上最大的实时基础设施迁移。</p>
+      </div>
+    </div>
+
+    <hr class="notes-divider">
+
+    <!-- KNOW 2 -->
+    <div class="anno know-note" data-section="evidence" id="k2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">EIP-1559 Fee Burn</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>Implemented August 2021 (London upgrade). Splits gas fees into base fee (burned) + priority tip (to validators). During high usage periods, more ETH is burned than issued, making ETH net deflationary. Since The Merge, ~4M ETH has been burned. "Ultrasound money" meme originated from this mechanism.</p>
+        <p class="zh">2021年8月实施（伦敦升级）。将Gas费分为基础费（销毁）+优先小费（给验证者）。高使用期间，销毁的ETH多于发行，使ETH净通缩。合并以来约400万ETH被销毁。"超声波货币" meme源自此机制。</p>
+      </div>
+    </div>
+
+    <hr class="notes-divider">
+
+    <!-- KNOW 3 -->
+    <div class="anno know-note" data-section="evidence" id="k3">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">Rollup-centric Roadmap</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>Announced October 2020 in Vitalik's post "A rollup-centric ethereum roadmap." Key insight: instead of scaling execution on L1 (sharding), make L1 a data availability layer for L2 rollups. Two types: Optimistic (fraud proofs, 7-day withdrawal) and ZK (validity proofs, instant withdrawal). Current L2 ecosystem: Arbitrum, Optimism, Base (Coinbase), zkSync, Starknet, Scroll.</p>
+        <p class="zh">2020年10月在Vitalik的文章"以rollup为中心的以太坊路线图"中宣布。关键洞察：不在L1上扩展执行（分片），而是使L1成为L2 rollup的数据可用性层。两种类型：Optimistic（欺诈证明，7天提款）和ZK（有效性证明，即时提款）。当前L2生态：Arbitrum、Optimism、Base（Coinbase）、zkSync、Starknet、Scroll。</p>
+      </div>
+    </div>
+
+    <hr class="notes-divider">
+
+    <!-- KNOW 4 -->
+    <div class="anno know-note" data-section="predictions" id="k4">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">ETH/BTC Ratio</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>ETH/BTC measures Ethereum's relative performance vs Bitcoin. Peak: ~0.085 (June 2017, Dec 2021). Current: ~0.02 (March 2026) &mdash; lowest since early 2020. Drivers of decline: Bitcoin ETF narrative dominance, Solana competition, L2 value leakage concerns, lack of ETH-specific catalyst. Historical mean: ~0.05. If mean reversion occurs, that's a 2.5x from current levels.</p>
+        <p class="zh">ETH/BTC衡量以太坊相对比特币的表现。峰值：约0.085（2017年6月、2021年12月）。当前：约0.02（2026年3月）——2020年初以来最低。下跌驱动：比特币ETF叙事主导、Solana竞争、L2价值泄漏担忧、缺乏ETH特定催化剂。历史均值：约0.05。如果均值回归发生，比当前水平高2.5倍。</p>
+      </div>
+    </div>
+
+    <hr class="notes-divider">
+
+    <!-- KNOW 5 -->
+    <div class="anno know-note" data-section="relationships" id="k5">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">The DAO Hack (2016)</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>June 2016: $60M drained from The DAO (first major smart contract). Vitalik led the community vote to hard fork and reverse the hack. Result: Ethereum (forked, hack reversed) and Ethereum Classic (original chain, hack preserved). The decision established that Ethereum prioritizes pragmatism over absolute immutability &mdash; a philosophical stance that defines the chain to this day.</p>
+        <p class="zh">2016年6月：6000万美元从The DAO（首个重大智能合约）被盗。Vitalik主导社区投票硬分叉并逆转黑客。结果：Ethereum（分叉，黑客逆转）和Ethereum Classic（原链，黑客保留）。该决定确立了以太坊优先考虑实用主义而非绝对不可变性——至今定义该链的哲学立场。</p>
+      </div>
+    </div>
+
+    <hr class="notes-divider">
+
+    <!-- KNOW 6 -->
+    <div class="anno know-note" data-section="trading" id="k6">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">Pectra Upgrade (2025)</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>Next major Ethereum upgrade combining Prague (execution layer) + Electra (consensus layer). Key EIPs: 7702 (native account abstraction), increased blob count (more L2 data capacity), validator improvements. Expected Q2-Q3 2025. This is the next binary catalyst for ETH price &mdash; successful delivery vs delay.</p>
+        <p class="zh">下一个主要以太坊升级，结合Prague（执行层）+Electra（共识层）。关键EIP：7702（原生账户抽象）、增加blob数量（更多L2数据容量）、验证者改进。预计2025年Q2-Q3。这是ETH价格的下一个二元催化剂——成功交付vs延迟。</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<!-- ========== JAVASCRIPT ========== -->
+<script>
+// 1. Sidebar toggle (mobile <900px)
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const sidebar = document.getElementById('sidebar');
+const sidebarOverlay = document.getElementById('sidebarOverlay');
+hamburgerBtn.addEventListener('click', () => { sidebar.classList.toggle('open'); sidebarOverlay.classList.toggle('open'); });
+sidebarOverlay.addEventListener('click', () => { sidebar.classList.remove('open'); sidebarOverlay.classList.remove('open'); });
+
+// 2. Toggle individual note
+function toggleNote(head) {
+  const anno = head.closest('.anno');
+  anno.classList.toggle('open');
+  positionNotes();
+}
+
+// 3. Position notes (absolute positioning with collision avoidance)
+function positionNotes() {
+  const notes = document.querySelectorAll('.anno');
+  let lastBottom = 60;
+  notes.forEach(n => {
+    if (n.offsetParent === null) return;
+    const sectionId = n.dataset.section;
+    const section = document.getElementById(sectionId);
+    if (!section) { n.style.top = lastBottom + 'px'; lastBottom = n.offsetTop + n.offsetHeight + 8; return; }
+    const sidebarRect = n.parentElement.getBoundingClientRect();
+    const sectionRect = section.getBoundingClientRect();
+    let desired = sectionRect.top - sidebarRect.top + n.parentElement.scrollTop;
+    if (desired < lastBottom) desired = lastBottom;
+    n.style.top = desired + 'px';
+    lastBottom = desired + n.offsetHeight + 8;
+  });
+}
+
+// 4. Highlight→Note sync
+document.querySelectorAll('mark.hl-know, .nref').forEach(el => {
+  el.addEventListener('click', e => {
+    e.preventDefault();
+    const noteId = el.dataset.note;
+    const note = document.getElementById(noteId);
+    if (!note) return;
+    note.classList.add('open');
+    positionNotes();
+    note.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    note.classList.add('flash');
+    setTimeout(() => note.classList.remove('flash'), 1500);
+  });
+});
+
+// 5. Hover bidirectional
+document.querySelectorAll('mark.hl-know, .nref').forEach(el => {
+  el.addEventListener('mouseenter', () => { const n = document.getElementById(el.dataset.note); if (n) n.classList.add('hover'); });
+  el.addEventListener('mouseleave', () => { const n = document.getElementById(el.dataset.note); if (n) n.classList.remove('hover'); });
+});
+document.querySelectorAll('.anno').forEach(anno => {
+  anno.addEventListener('mouseenter', () => { document.querySelectorAll(`[data-note="${anno.id}"]`).forEach(el => el.classList.add('hover')); });
+  anno.addEventListener('mouseleave', () => { document.querySelectorAll(`[data-note="${anno.id}"]`).forEach(el => el.classList.remove('hover')); });
+});
+
+// 6. Toggle knowledge notes
+function toggleKnowNotes() {
+  const btn = document.getElementById('knowToggleBtn');
+  const knowNotes = document.querySelectorAll('.anno.know-note');
+  const marks = document.querySelectorAll('mark.hl-know, .nref');
+  const visible = btn.classList.contains('active');
+  knowNotes.forEach(n => n.style.display = visible ? 'none' : '');
+  marks.forEach(m => m.style.visibility = visible ? 'hidden' : '');
+  btn.textContent = visible ? '显示' : '隐藏';
+  btn.classList.toggle('active');
+  positionNotes();
+}
+
+// 7. Expand/Collapse all
+function expandAllNotes() { document.querySelectorAll('.anno').forEach(n => n.classList.add('open')); positionNotes(); }
+function collapseAllNotes() { document.querySelectorAll('.anno').forEach(n => n.classList.remove('open')); positionNotes(); }
+
+// 8. Notes sidebar toggle (<1200px)
+const notesToggleBtn = document.getElementById('notesToggleBtn');
+const notesSidebar = document.getElementById('notesSidebar');
+const notesOverlay = document.getElementById('notesOverlay');
+const notesCloseBtn = document.getElementById('notesCloseBtn');
+function openNotes() { notesSidebar.classList.remove('ns-closed'); notesOverlay.classList.add('open'); notesToggleBtn.style.display = 'none'; positionNotes(); }
+function closeNotes() { notesSidebar.classList.add('ns-closed'); notesOverlay.classList.remove('open'); notesToggleBtn.style.display = 'flex'; }
+notesToggleBtn.addEventListener('click', openNotes);
+notesCloseBtn.addEventListener('click', closeNotes);
+notesOverlay.addEventListener('click', closeNotes);
+if (window.innerWidth <= 1200) { notesSidebar.classList.add('ns-closed'); notesToggleBtn.style.display = 'flex'; }
+
+// 9. Resize handler
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 1200) { notesSidebar.classList.remove('ns-closed'); notesOverlay.classList.remove('open'); notesToggleBtn.style.display = 'none'; }
+  else if (!notesSidebar.classList.contains('ns-closed')) { /* keep open */ } else { notesToggleBtn.style.display = 'flex'; }
+  positionNotes();
+});
+
+// Init
+window.addEventListener('load', () => {
+  positionNotes();
+  const metaCount = document.querySelectorAll('.anno.meta-note').length;
+  const knowCount = document.querySelectorAll('.anno.know-note').length;
+  document.getElementById('noteCountLabel').textContent = metaCount + ' META + ' + knowCount + ' KNOW';
+});
+</script>
+
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+
+</body>
+</html>

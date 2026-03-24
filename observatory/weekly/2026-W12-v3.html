@@ -1,0 +1,1885 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Observatory W12 — Weekly Synthesis V3</title>
+<script>
+// file:// 下所有 API 调用都会被浏览器 CORS 拦截，自动跳转到 localhost 版本
+if (location.protocol === 'file:') {
+  // Route /observatory/<path> serves from ~/observatory/weekly/,
+  // so strip "weekly/" from the redirect path
+  var path = location.pathname;
+  var match = path.match(/\/observatory\/weekly\/(.*)/);
+  if (match) {
+    location.replace('http://localhost:8080/observatory/' + match[1] + location.hash);
+  }
+}
+</script>
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+/* === Linear Docs Design System (aligned with sources_01) === */
+:root {
+  --bg-base: #08090a;
+  --bg-elevated: #0f1011;
+  --bg-surface: #141516;
+  --bg-overlay: #191a1b;
+  --border-subtle: #23252a;
+  --border-default: #34343a;
+  --border-strong: #3e3e44;
+  --text-primary: #f7f8f8;
+  --text-secondary: #d0d6e0;
+  --text-tertiary: #8a8f98;
+  --text-quaternary: #62666d;
+  --accent: #f8a848;
+  --accent-dim: rgba(248, 168, 72, 0.12);
+  --accent-hover: rgba(248, 168, 72, 0.08);
+  --tier-high: #4caf50;
+  --tier-medium: #ffc107;
+  --tier-low: #f44336;
+  --tier-medium-high: #8bc34a;
+  --knowledge: #5b9bd5;
+  --knowledge-dim: rgba(91, 155, 213, 0.12);
+  --font-sans: 'Inter', 'Inter Variable', -apple-system, 'SF Pro Display', system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'Menlo', 'Consolas', monospace;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --sidebar-width: 220px;
+  --notes-width: 300px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  font-family: var(--font-sans);
+  font-feature-settings: 'liga' 1, 'calt' 1;
+  letter-spacing: -0.012em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* === Layout === */
+.page-wrapper { display: flex; min-height: 100vh; }
+
+/* === Embedded mode: when inside Dashboard iframe === */
+body.embedded .sidebar { display: none; }
+body.embedded .notes-sidebar { display: none; }
+body.embedded .main-content { max-width: none !important; width: 100%; padding: 1.5rem 1.5rem 3rem; }
+body.embedded .hamburger-btn { display: none; }
+body.embedded .sidebar-overlay { display: none; }
+
+/* === Left Sidebar === */
+.sidebar {
+  position: sticky; top: 0; height: 100vh;
+  width: var(--sidebar-width); min-width: var(--sidebar-width);
+  overflow-y: auto; padding: 1.5rem 0.75rem;
+  border-right: 1px solid var(--border-subtle);
+  background: var(--bg-elevated); z-index: 100;
+}
+.sidebar h4 {
+  padding: 0 0.5rem; font-size: 0.65rem; font-weight: 590;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-quaternary); margin-bottom: 0.5rem;
+}
+.sidebar nav ul { list-style: none; margin: 0 0 1.5rem 0; }
+.sidebar nav ul li a {
+  display: block; padding: 0.3rem 0.5rem; font-size: 0.8rem; font-weight: 400;
+  color: var(--text-tertiary); text-decoration: none;
+  border-radius: var(--radius-sm); transition: background 0.12s, color 0.12s; line-height: 1.45;
+}
+.sidebar nav ul li a:hover { background: var(--accent-hover); color: var(--text-primary); }
+.sidebar nav ul li a.active { background: var(--accent-dim); color: var(--accent); }
+.sidebar .week-indicator { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; margin-bottom: 1.5rem; }
+.sidebar .week-num { font-size: 1.8rem; font-weight: 700; color: var(--accent); line-height: 1; }
+.sidebar .week-meta { font-size: 0.7rem; color: var(--text-quaternary); line-height: 1.35; }
+.sidebar .week-meta span { display: block; }
+
+/* === Main Content === */
+.main-content { flex: 1; min-width: 0; max-width: 900px; padding: 2.5rem 3rem 5rem; }
+
+/* === Right Sidebar (V4: relative + absolute notes) === */
+.notes-sidebar {
+  position: relative;
+  width: var(--notes-width); min-width: var(--notes-width);
+  padding: 1.25rem 1rem;
+  border-left: 1px solid var(--border-subtle);
+  background: var(--bg-elevated); z-index: 50;
+}
+.notes-sidebar h4 { margin-bottom: 0.75rem; padding: 0 0.25rem; font-size: 0.65rem; font-weight: 590; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-quaternary); }
+.notes-sidebar-header { position: sticky; top: 0; z-index: 60; background: var(--bg-elevated); padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-subtle); margin-bottom: 0.75rem; }
+
+/* === Annotation notes (absolute positioned by JS) === */
+.anno { position: absolute; left: 1rem; right: 1rem; }
+.anno.meta-note { padding: 0.6rem 0.75rem; border-left: 2px solid var(--accent); border-radius: 0 6px 6px 0; background: rgba(248,168,72,0.04); font-size: 0.78rem; line-height: 1.5; color: var(--text-secondary); cursor: pointer; transition: box-shadow 0.2s, top 0.3s ease; }
+.anno.meta-note:hover { box-shadow: 0 0 0 1px var(--accent); }
+.anno.know-note { padding: 0.6rem 0.75rem; border-left: 2px solid var(--knowledge); border-radius: 0 6px 6px 0; background: rgba(91,155,213,0.04); font-size: 0.78rem; line-height: 1.5; color: var(--text-secondary); cursor: pointer; transition: box-shadow 0.2s, top 0.3s ease; }
+.anno.know-note:hover { box-shadow: 0 0 0 1px var(--knowledge); }
+.anno .note-label { display: inline-block; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bg-base); background: var(--accent); padding: 0.1rem 0.4rem; border-radius: 3px; margin-bottom: 0.3rem; }
+.anno .note-label.know { background: var(--knowledge); color: white; }
+.anno .note-label.correction { background: #64b5f6; color: var(--bg-base); }
+.anno .note-label.stale { background: var(--tier-low); color: var(--bg-base); }
+.anno .note-label.honest { background: var(--tier-high); color: var(--bg-base); }
+.anno .note-section { display: block; font-size: 0.7rem; color: var(--text-quaternary); margin-bottom: 0.3rem; font-weight: 510; }
+.anno .mn-head { display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
+.anno .mn-title { flex: 1; font-weight: 510; font-size: 0.75rem; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.anno .mn-fold { font-size: 0.55rem; color: var(--text-quaternary); transition: transform 0.2s; margin-left: auto; }
+.anno.open .mn-fold { transform: rotate(180deg); }
+.anno .mn-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+.anno.open .mn-body { max-height: 2000px; }
+.anno .mn-body p { font-size: 0.78rem; margin-bottom: 0.3rem; color: var(--text-secondary); }
+.anno .trap-tag { display: inline-block; font-size: 0.6rem; padding: 0.05rem 0.35rem; border-radius: 3px; background: rgba(244,67,54,0.15); color: var(--tier-low); font-weight: 590; margin-right: 0.3rem; }
+.anno .method-tag { display: inline-block; font-size: 0.6rem; padding: 0.05rem 0.35rem; border-radius: 3px; background: rgba(76,175,80,0.15); color: var(--tier-high); font-weight: 590; margin-right: 0.3rem; }
+
+/* Knowledge highlights in text */
+mark.hl-know { background: rgba(91,155,213,0.12); border-bottom: 1.5px solid var(--knowledge); padding: 0 2px; border-radius: 2px; color: inherit; cursor: pointer; transition: background 0.15s; }
+mark.hl-know:hover, mark.hl-know.hover { background: rgba(91,155,213,0.28); }
+.nref { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 50%; font-size: 0.48rem; font-weight: 700; cursor: pointer; margin-left: 1px; vertical-align: super; transition: transform 0.15s; text-decoration: none; background: var(--knowledge); color: white; }
+.nref:hover { transform: scale(1.25); box-shadow: 0 0 6px rgba(91,155,213,0.4); }
+
+/* Note animations */
+.anno.flash { animation: noteFlash 1.5s ease; }
+@keyframes noteFlash { 0%,100% { box-shadow: none; } 15%,85% { box-shadow: 0 0 0 3px var(--accent); } }
+.anno.know-note.flash { animation: noteFlashBlue 1.5s ease; }
+@keyframes noteFlashBlue { 0%,100% { box-shadow: none; } 15%,85% { box-shadow: 0 0 0 3px var(--knowledge); } }
+.anno.hover { outline: 2px solid var(--accent); outline-offset: -1px; }
+.anno.know-note.hover { outline-color: var(--knowledge); }
+
+.notes-divider { border: none; border-top: 1px solid var(--border-subtle); margin: 0.75rem 0; }
+
+/* === Top controls bar === */
+.top-controls { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; padding: 0.35rem 0.7rem; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 0.72rem; flex-wrap: wrap; }
+.top-controls .tc-label { font-weight: 590; color: var(--knowledge); }
+.top-controls button { padding: 0.15rem 0.45rem; border-radius: 4px; border: 1px solid var(--border-subtle); background: transparent; color: var(--text-tertiary); cursor: pointer; font-size: 0.68rem; font-family: inherit; transition: all 0.15s; }
+.top-controls button:hover { border-color: var(--knowledge); color: var(--text-primary); }
+.top-controls button.active { background: var(--knowledge-dim); color: var(--knowledge); border-color: rgba(91,155,213,0.3); }
+.top-controls .tc-sep { color: var(--border-default); margin: 0 0.15rem; }
+
+/* === Page Header === */
+.page-header { margin-bottom: 2rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border-default); }
+.page-header h1 { font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 680; letter-spacing: -0.025em; color: var(--text-primary); margin-bottom: 0.2rem; }
+.page-header .subtitle { color: var(--text-tertiary); font-size: 0.88rem; }
+
+/* === Diagnostic Strip === */
+.diagnostic-strip {
+  border: 1px solid rgba(248,168,72,0.3); border-left: 3px solid var(--accent);
+  border-radius: var(--radius-sm); padding: 0.85rem 1.25rem; margin-bottom: 2.5rem;
+  background: var(--bg-surface); font-size: 0.82rem; color: var(--text-secondary);
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;
+}
+.diagnostic-strip .week-label { font-weight: 680; color: var(--accent); }
+.diagnostic-strip .sep { color: var(--border-strong); }
+.diagnostic-strip .metric { display: inline-flex; align-items: center; gap: 0.25rem; }
+.diagnostic-strip .metric-value { font-weight: 590; color: var(--text-primary); font-family: var(--font-mono); font-size: 0.8rem; }
+.diagnostic-strip .metric-warn { color: var(--tier-low); font-weight: 590; }
+
+/* === Section Headers === */
+.section-header { margin-top: 3rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-subtle); }
+.section-header:first-of-type { margin-top: 0; }
+.section-header h2 { font-size: 1.25rem; font-weight: 590; letter-spacing: -0.015em; color: var(--text-primary); }
+.section-header .section-num { color: var(--text-quaternary); font-size: 0.7rem; font-weight: 510; margin-right: 0.35rem; }
+
+/* === Content Typography === */
+p { color: var(--text-secondary); margin-bottom: 1rem; }
+strong { color: var(--text-primary); font-weight: 590; }
+em { color: var(--text-tertiary); }
+h3 { font-size: 1.05rem; font-weight: 590; color: var(--text-primary); margin-top: 2rem; margin-bottom: 0.5rem; }
+ul, ol { color: var(--text-secondary); padding-left: 1.25rem; }
+li { margin-bottom: 0.4rem; line-height: 1.6; }
+blockquote { border-left: 3px solid var(--accent); padding: 0.6rem 1.25rem; margin: 1rem 0; font-style: italic; background: var(--bg-surface); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-secondary); }
+
+/* === Cards === */
+.surprise-card { border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem 1.5rem; margin-bottom: 1rem; background: var(--bg-elevated); }
+.surprise-card .surprise-headline { font-weight: 590; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 0.5rem; }
+.surprise-card p { font-size: 0.88rem; margin-bottom: 0; }
+
+.decision-card { border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem 1.5rem; margin-bottom: 1rem; background: var(--bg-elevated); position: relative; }
+.decision-card::before { content: '?'; position: absolute; top: 1rem; right: 1rem; font-size: 1.4rem; font-weight: 700; color: var(--border-strong); line-height: 1; }
+.decision-card .decision-title { font-weight: 590; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 0.5rem; padding-right: 2rem; }
+.decision-card p { font-size: 0.88rem; margin-bottom: 0; }
+
+.pattern-card { border-left: 3px solid var(--tier-medium); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 1rem 1.25rem; margin-bottom: 1rem; background: rgba(255,193,7,0.04); }
+.pattern-card .pattern-name { font-weight: 590; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 0.4rem; }
+.pattern-card .pattern-evidence { font-size: 0.82rem; color: var(--text-tertiary); }
+.pattern-card p { font-size: 0.88rem; margin-bottom: 0; }
+
+/* === Chain Timeline === */
+.chain-timeline { position: relative; padding-left: 2rem; margin: 1.5rem 0; }
+.chain-timeline::before { content: ''; position: absolute; left: 0.55rem; top: 0; bottom: 0; width: 2px; background: var(--border-default); }
+.chain-item { position: relative; margin-bottom: 1.5rem; padding: 1rem 1.25rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: var(--bg-elevated); }
+.chain-item::before { content: ''; position: absolute; left: -1.7rem; top: 1.2rem; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--bg-base); z-index: 1; }
+.chain-item.completed::before { background: var(--tier-high); }
+.chain-item.in-progress::before { background: var(--tier-medium); }
+.chain-item.stale::before { background: var(--tier-low); }
+.chain-item .chain-name { font-weight: 590; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 0.25rem; }
+.chain-item .chain-status { display: inline-block; font-size: 0.7rem; font-weight: 590; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.1rem 0.5rem; border-radius: 3px; margin-bottom: 0.5rem; }
+.chain-item.completed .chain-status { background: rgba(76,175,80,0.15); color: var(--tier-high); }
+.chain-item.in-progress .chain-status { background: rgba(255,193,7,0.15); color: var(--tier-medium); }
+.chain-item.stale .chain-status { background: rgba(244,67,54,0.15); color: var(--tier-low); }
+.chain-item .chain-path { font-size: 0.82rem; color: var(--text-tertiary); }
+.chain-item .chain-path span { color: var(--text-secondary); }
+.chain-item .chain-path .arrow { color: var(--text-quaternary); margin: 0 0.25rem; }
+
+/* === Research Question === */
+.research-question { border: 2px solid var(--accent); border-radius: var(--radius-md); padding: 1.5rem 2rem; margin: 2.5rem 0; text-align: center; background: rgba(248,168,72,0.04); }
+.research-question .rq-label { font-size: 0.65rem; font-weight: 590; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); margin-bottom: 0.5rem; }
+.research-question p { font-size: 1rem; font-weight: 510; color: var(--text-primary); margin-bottom: 0.75rem; }
+.research-question .rq-answer { font-size: 0.9rem; color: var(--text-secondary); font-style: italic; }
+
+/* === Footer === */
+.page-footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--border-default); font-size: 0.78rem; color: var(--text-quaternary); }
+.page-footer .theory { margin-top: 0.75rem; font-size: 0.72rem; color: var(--text-quaternary); font-style: italic; }
+
+/* === Gantt Chart === */
+.gantt-container { margin: 1.5rem 0 2rem; overflow-x: auto; }
+.gantt-chart { width: 100%; min-width: 600px; border-collapse: collapse; }
+.gantt-chart th { font-size: 0.65rem; font-weight: 510; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-quaternary); padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--border-default); text-align: center; white-space: nowrap; }
+.gantt-chart th:first-child { text-align: left; width: 180px; min-width: 180px; }
+.gantt-chart th.current-week { color: var(--accent); border-bottom: 2px solid var(--accent); }
+.gantt-chart td { padding: 0.3rem 0.15rem; border-bottom: 1px solid var(--border-subtle); vertical-align: middle; }
+.gantt-chart td:first-child { padding: 0.5rem 0.5rem; }
+.gantt-project-name { font-size: 0.82rem; font-weight: 510; color: var(--text-primary); line-height: 1.3; }
+.gantt-project-name a { color: var(--accent); font-weight: 510; text-decoration: none; }
+.gantt-project-name a:hover { text-decoration: underline; }
+.gantt-project-name .gantt-category { display: block; font-size: 0.65rem; font-weight: 400; color: var(--text-quaternary); text-transform: uppercase; letter-spacing: 0.03em; }
+.gantt-project-name .new-badge { display: inline-block; font-size: 0.55rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--bg-base); background: var(--accent); padding: 0.05rem 0.35rem; border-radius: 3px; margin-left: 0.3rem; vertical-align: middle; animation: pulse-new 2s ease-in-out infinite; }
+@keyframes pulse-new { 0%,100% { box-shadow: none; } 50% { box-shadow: 0 0 8px rgba(248,168,72,0.6); } }
+.gantt-bar-cell { height: 28px; }
+.gantt-bar { height: 20px; border-radius: 4px; position: relative; overflow: hidden; }
+.gantt-bar.completed { background: rgba(76,175,80,0.2); border: 1px solid rgba(76,175,80,0.4); }
+.gantt-bar.in-progress { background: rgba(255,193,7,0.15); border: 1px solid rgba(255,193,7,0.35); }
+.gantt-bar.stale { background: rgba(244,67,54,0.12); border: 1px solid rgba(244,67,54,0.3); }
+.gantt-bar.design-only { background: rgba(138,143,152,0.12); border: 1px dashed rgba(138,143,152,0.3); }
+.gantt-bar .gantt-fill { height: 100%; border-radius: 3px; }
+.gantt-bar.completed .gantt-fill { background: rgba(76,175,80,0.5); }
+.gantt-bar.in-progress .gantt-fill { background: rgba(255,193,7,0.4); }
+.gantt-bar.stale .gantt-fill { background: rgba(244,67,54,0.25); }
+.gantt-bar.design-only .gantt-fill { background: rgba(138,143,152,0.2); }
+/* L1 group header row */
+.gantt-chart tr.l1-group td { padding: 0.55rem 0.5rem 0.2rem; border-bottom: none; }
+.gantt-chart tr.l1-group .l1-label { font-size: 0.65rem; font-weight: 590; text-transform: uppercase; letter-spacing: 0.05em; }
+.gantt-chart tr.l1-group .l1-label.core { color: var(--tier-high); }
+.gantt-chart tr.l1-group .l1-label.research { color: var(--accent); }
+.gantt-chart tr.l1-group .l1-label.infra { color: var(--text-quaternary); }
+.gantt-chart tr.l1-group .l1-ratio { font-size: 0.6rem; color: var(--text-quaternary); font-family: var(--font-mono); margin-left: 0.4rem; }
+/* L2 indent */
+.gantt-chart tr.l2 td:first-child { padding-left: 1.2rem; }
+.gantt-legend { display: flex; gap: 1.25rem; margin-top: 0.75rem; font-size: 0.7rem; color: var(--text-tertiary); }
+.gantt-legend-item { display: flex; align-items: center; gap: 0.35rem; }
+.gantt-legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+.gantt-legend-dot.completed { background: rgba(76,175,80,0.5); border: 1px solid rgba(76,175,80,0.6); }
+.gantt-legend-dot.in-progress { background: rgba(255,193,7,0.4); border: 1px solid rgba(255,193,7,0.5); }
+.gantt-legend-dot.stale { background: rgba(244,67,54,0.3); border: 1px solid rgba(244,67,54,0.4); }
+.gantt-legend-dot.design-only { background: rgba(138,143,152,0.2); border: 1px dashed rgba(138,143,152,0.4); }
+
+/* === Portfolio === */
+.portfolio-strip { display: flex; gap: 0; margin-bottom: 1.5rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); overflow: hidden; }
+.portfolio-stat { flex: 1; padding: 0.75rem 1rem; text-align: center; border-right: 1px solid var(--border-subtle); background: var(--bg-elevated); }
+.portfolio-stat:last-child { border-right: none; }
+.portfolio-stat .stat-value { font-size: 1.5rem; font-weight: 680; font-family: var(--font-mono); line-height: 1.2; }
+.portfolio-stat .stat-value.warn { color: var(--tier-low); }
+.portfolio-stat .stat-value.ok { color: var(--tier-high); }
+.portfolio-stat .stat-value.neutral { color: var(--accent); }
+.portfolio-stat .stat-label { font-size: 0.65rem; font-weight: 510; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-quaternary); margin-top: 0.15rem; }
+
+/* === Advisory === */
+.advisory-box { border: 1px solid rgba(248,168,72,0.3); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin: 2rem 0; background: var(--bg-surface); }
+.advisory-box .advisory-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+.advisory-box .advisory-label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bg-base); background: var(--accent); padding: 0.15rem 0.5rem; border-radius: 3px; }
+.advisory-box .advisory-title { font-size: 0.95rem; font-weight: 590; color: var(--accent); }
+.advisory-box ul { margin: 0; padding-left: 1.25rem; }
+.advisory-box li { font-size: 0.88rem; margin-bottom: 0.6rem; line-height: 1.55; color: var(--text-secondary); }
+.advisory-box li strong { color: var(--text-primary); }
+.advisory-box .advisory-verdict { margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border-subtle); font-size: 0.85rem; color: var(--text-tertiary); font-style: italic; }
+
+/* === Depth Meter === */
+.depth-meter { display: flex; align-items: center; gap: 0.35rem; margin-top: 0.2rem; }
+.depth-block { width: 14px; height: 6px; border-radius: 2px; background: var(--border-subtle); }
+.depth-block.filled-green { background: var(--tier-high); }
+.depth-block.filled-warn { background: var(--tier-medium); }
+.depth-block.filled-dim { background: var(--text-quaternary); }
+.depth-label { font-size: 0.6rem; color: var(--text-quaternary); margin-left: 0.15rem; }
+
+/* === Bilingual === */
+.zh { display: block; font-size: 0.85em; color: var(--text-tertiary); font-style: normal; margin-top: 0.15em; line-height: 1.5; }
+.zh-inline { color: var(--text-tertiary); font-size: 0.85em; }
+blockquote .zh { font-style: normal; margin-top: 0.4em; padding-top: 0.4em; border-top: 1px dashed var(--border-subtle); }
+.advisory-box .zh { margin-top: 0.1em; font-size: 0.82em; }
+.meta-note .zh { margin-top: 0.1em; font-size: 0.9em; }
+.pattern-evidence .zh { font-size: 0.95em; }
+
+/* === System Map (directed graph) === */
+.system-map { margin: 1.5rem 0; }
+.map-goal { text-align: center; margin-bottom: 1rem; }
+.map-goal .goal-text { font-size: 1rem; font-weight: 680; color: var(--accent); }
+.map-goal .goal-sub { font-size: 0.75rem; color: var(--text-quaternary); margin-top: 0.15rem; }
+.map-goal .vline { display: block; width: 2px; height: 16px; background: var(--border-default); margin: 0.4rem auto; }
+
+.map-row { display: flex; justify-content: center; gap: 0.75rem; margin-bottom: 0.5rem; position: relative; flex-wrap: wrap; }
+.map-row.with-lines-down { margin-bottom: 0; padding-bottom: 1rem; }
+.map-connector { display: flex; justify-content: center; margin: 0; }
+.map-connector .vline { display: block; width: 2px; height: 14px; background: var(--border-default); }
+.map-connector .vline-gold { background: rgba(248,168,72,0.4); }
+
+.map-divider { border: none; border-top: 1px dashed var(--border-strong); margin: 1rem 0 0.75rem; position: relative; }
+.map-divider-label { position: absolute; top: -0.55rem; left: 50%; transform: translateX(-50%); background: var(--bg-base); padding: 0 0.75rem; font-size: 0.6rem; font-weight: 590; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-quaternary); white-space: nowrap; }
+
+.graph-node { padding: 0.6rem 0.8rem; border-radius: 6px; background: var(--bg-elevated); min-width: 140px; max-width: 200px; position: relative; text-align: left; }
+.graph-node .node-name { font-size: 0.78rem; font-weight: 510; color: var(--text-primary); line-height: 1.3; }
+.graph-node .node-name a { color: inherit; text-decoration: none; }
+.graph-node .node-name a:hover { color: var(--accent); }
+.graph-node .node-zh { font-size: 0.68rem; color: var(--text-tertiary); margin-top: 0.05rem; }
+.graph-node .node-depth { display: flex; gap: 2px; margin-top: 0.3rem; align-items: center; }
+.graph-node .node-depth .nd { width: 10px; height: 4px; border-radius: 1px; background: var(--border-subtle); }
+.graph-node .node-tag { display: inline-block; font-size: 0.52rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.08rem 0.35rem; border-radius: 3px; margin-top: 0.3rem; }
+
+/* Node variants */
+.graph-node.core-driver { border: 1px solid rgba(76,175,80,0.5); border-left: 3px solid var(--tier-high); }
+.graph-node.core-driver .node-depth .nd.f { background: var(--tier-high); }
+.graph-node.core-driver .node-tag { background: rgba(76,175,80,0.15); color: var(--tier-high); }
+
+.graph-node.core-blocked { border: 1px solid rgba(244,67,54,0.4); border-left: 3px solid var(--tier-low); }
+.graph-node.core-blocked .node-depth .nd.f { background: var(--tier-low); }
+.graph-node.core-blocked .node-tag { background: rgba(244,67,54,0.15); color: var(--tier-low); }
+
+.graph-node.core-waiting { border: 1px solid var(--border-default); border-left: 3px solid var(--text-quaternary); }
+.graph-node.core-waiting .node-depth .nd.f { background: var(--text-quaternary); }
+.graph-node.core-waiting .node-tag { background: rgba(98,102,109,0.15); color: var(--text-tertiary); }
+
+.graph-node.research { border: 1px solid rgba(248,168,72,0.35); border-left: 3px solid var(--accent); }
+.graph-node.research .node-depth .nd.f { background: var(--accent); }
+.graph-node.research .node-tag { background: var(--accent-dim); color: var(--accent); }
+
+.graph-node.support-done { border: 1px solid var(--border-default); }
+.graph-node.support-done .node-depth .nd.f { background: var(--tier-high); }
+.graph-node.support-done .node-tag { background: rgba(76,175,80,0.12); color: var(--tier-high); }
+
+.graph-node.adhd-leaf { border: 1px dashed rgba(244,67,54,0.35); }
+.graph-node.adhd-leaf .node-depth .nd.f { background: var(--text-quaternary); }
+.graph-node.adhd-leaf .node-tag { background: rgba(244,67,54,0.12); color: var(--tier-low); }
+
+.graph-node.kill { border: 1px dashed rgba(244,67,54,0.35); opacity: 0.7; }
+.graph-node.kill .node-name { text-decoration: line-through; text-decoration-color: var(--tier-low); }
+.graph-node.kill .node-tag { background: rgba(244,67,54,0.15); color: var(--tier-low); }
+
+/* Map advisory */
+.map-advisory { border: 1px solid rgba(248,168,72,0.3); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 1rem 1.25rem; margin-top: 1.5rem; background: var(--bg-surface); font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6; }
+.map-advisory strong { color: var(--text-primary); }
+.map-advisory .zh { font-size: 0.82em; }
+
+/* === System Map Metacognition === */
+.meta-thinking { margin-top: 1.5rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: var(--bg-surface); padding: 1.5rem; }
+.meta-thinking h3 { font-size: 1rem; font-weight: 590; margin-bottom: 1rem; color: var(--text-primary); }
+.meta-thinking .phase-tag { display: inline-block; font-size: 0.55rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.1rem 0.5rem; border-radius: 3px; margin-bottom: 0.5rem; margin-right: 0.3rem; }
+.meta-thinking .phase-explore { background: rgba(91,155,213,0.12); color: #5b9bd5; }
+.meta-thinking .phase-diagnose { background: rgba(255,167,38,0.12); color: #ffa726; }
+.meta-thinking .phase-build { background: rgba(76,175,80,0.12); color: var(--tier-high); }
+.meta-thinking .phase-verify { background: rgba(244,67,54,0.12); color: var(--tier-low); }
+.meta-thinking .arc-item { margin-bottom: 0.6rem; padding: 0.6rem 0.8rem; border-left: 3px solid var(--accent); background: rgba(248,168,72,0.03); border-radius: 0 6px 6px 0; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5; }
+.meta-thinking .arc-item strong { color: var(--text-primary); }
+.meta-thinking .signal { display: inline-block; font-size: 0.6rem; font-weight: 700; padding: 0.05rem 0.35rem; border-radius: 3px; margin-right: 0.2rem; }
+.meta-thinking .signal-bull { background: rgba(76,175,80,0.15); color: var(--tier-high); }
+.meta-thinking .signal-bear { background: rgba(244,67,54,0.15); color: var(--tier-low); }
+.meta-thinking .signal-watch { background: rgba(255,167,38,0.15); color: #ffa726; }
+.meta-thinking .question-box { border: 2px solid #5b9bd5; border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; background: rgba(91,155,213,0.05); font-size: 0.82rem; }
+.meta-thinking .question-box strong { color: var(--text-primary); }
+.meta-thinking .mt-divider { border: none; border-top: 1px solid var(--border-subtle); margin: 1rem 0; }
+
+/* === Priority Queue (interactive TODO) === */
+.priority-queue { margin: 2rem 0 1.5rem; }
+.pq-group { margin-bottom: 1rem; }
+.pq-group-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
+.pq-badge { display: inline-block; font-size: 0.6rem; font-weight: 700; padding: 0.1rem 0.4rem; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.04em; min-width: 2rem; text-align: center; }
+.pq-badge.p0 { background: rgba(244,67,54,0.18); color: var(--tier-low); }
+.pq-badge.p1 { background: rgba(76,175,80,0.15); color: var(--tier-high); }
+.pq-badge.p2 { background: rgba(248,168,72,0.15); color: var(--accent); }
+.pq-badge.p3 { background: rgba(138,143,152,0.12); color: var(--text-tertiary); }
+.pq-badge.done { background: rgba(76,175,80,0.1); color: var(--tier-high); }
+.pq-badge.kill { background: rgba(244,67,54,0.12); color: var(--tier-low); }
+.pq-group-label { font-size: 0.7rem; font-weight: 590; color: var(--text-tertiary); }
+
+.pq-item { display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.5rem 0.7rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); margin-bottom: 0.35rem; background: var(--bg-surface); cursor: pointer; transition: all 0.15s; position: relative; }
+.pq-item:hover { border-color: var(--border-default); background: var(--bg-elevated); }
+.pq-item.started { border-left: 3px solid var(--accent); }
+.pq-item.completed { border-left: 3px solid var(--tier-high); opacity: 0.65; }
+.pq-item.completed .pq-task { text-decoration: line-through; text-decoration-color: var(--text-quaternary); }
+.pq-item.frozen { border-style: dashed; opacity: 0.55; }
+.pq-item.killed { border-style: dashed; border-color: rgba(244,67,54,0.3); opacity: 0.45; }
+.pq-item.killed .pq-task { text-decoration: line-through; text-decoration-color: var(--tier-low); }
+
+.pq-checkbox { width: 16px; height: 16px; border: 1.5px solid var(--border-strong); border-radius: 3px; flex-shrink: 0; margin-top: 0.1rem; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; transition: all 0.15s; }
+.pq-item.started .pq-checkbox { border-color: var(--accent); background: rgba(248,168,72,0.15); }
+.pq-item.started .pq-checkbox::after { content: "▶"; color: var(--accent); }
+.pq-item.completed .pq-checkbox { border-color: var(--tier-high); background: rgba(76,175,80,0.15); }
+.pq-item.completed .pq-checkbox::after { content: "✓"; color: var(--tier-high); }
+.pq-item.frozen .pq-checkbox { border-color: var(--text-quaternary); }
+.pq-item.frozen .pq-checkbox::after { content: "❄"; font-size: 0.55rem; }
+.pq-item.killed .pq-checkbox { border-color: var(--tier-low); background: rgba(244,67,54,0.1); }
+.pq-item.killed .pq-checkbox::after { content: "✕"; color: var(--tier-low); }
+
+.pq-content { flex: 1; min-width: 0; }
+.pq-task { font-size: 0.82rem; font-weight: 510; color: var(--text-primary); line-height: 1.35; }
+.pq-reason { font-size: 0.72rem; color: var(--text-tertiary); margin-top: 0.15rem; line-height: 1.35; }
+.pq-project { font-size: 0.62rem; color: var(--text-quaternary); margin-top: 0.1rem; font-family: var(--font-mono); }
+
+/* PQ Deadline */
+.pq-deadline-row { display: flex; align-items: center; gap: 0.4rem; margin-top: 0.25rem; }
+.pq-deadline-btn { background: none; border: 1px dashed var(--border-default); border-radius: 3px; padding: 0.1rem 0.4rem; font-size: 0.6rem; font-family: var(--font-mono); color: var(--text-quaternary); cursor: pointer; transition: all 0.15s; }
+.pq-deadline-btn:hover { border-color: var(--accent); color: var(--accent); }
+.pq-deadline-btn.has-date { border-style: solid; color: var(--text-tertiary); background: var(--bg-surface); }
+.pq-deadline-btn.overdue { border-color: var(--tier-low); color: var(--tier-low); background: rgba(244,67,54,0.06); }
+.pq-deadline-btn.due-soon { border-color: var(--accent); color: var(--accent); background: rgba(248,168,72,0.06); }
+.pq-deadline-picker { position: absolute; right: 0.5rem; bottom: -2.2rem; z-index: 10; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: 6px; padding: 0.3rem; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+.pq-deadline-picker input[type="date"] { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 4px; color: var(--text-primary); font-family: var(--font-mono); font-size: 0.72rem; padding: 0.2rem 0.4rem; outline: none; color-scheme: dark; }
+.pq-deadline-picker input[type="date"]:focus { border-color: var(--accent); }
+.pq-deadline-clear { background: none; border: none; color: var(--tier-low); font-size: 0.7rem; cursor: pointer; padding: 0.2rem; }
+
+.pq-status-label { position: absolute; right: 0.6rem; top: 0.5rem; font-size: 0.55rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; padding: 0.05rem 0.3rem; border-radius: 2px; }
+.pq-item.started .pq-status-label { background: rgba(248,168,72,0.15); color: var(--accent); }
+.pq-item.completed .pq-status-label { background: rgba(76,175,80,0.12); color: var(--tier-high); }
+.pq-item.frozen .pq-status-label { background: rgba(138,143,152,0.1); color: var(--text-quaternary); }
+.pq-item.killed .pq-status-label { background: rgba(244,67,54,0.1); color: var(--tier-low); }
+
+/* === Hamburger (mobile <900px) === */
+.hamburger-btn { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 200; background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-default); border-radius: 6px; width: 44px; height: 44px; font-size: 1.4rem; cursor: pointer; line-height: 1; }
+.sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+
+/* === Notes sidebar toggle (<1200px) === */
+.notes-toggle-btn { position: fixed; right: 1rem; bottom: 1.5rem; z-index: 200; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border-default); background: var(--bg-surface); color: var(--text-secondary); cursor: pointer; font-size: 1.1rem; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(0,0,0,0.4); font-family: inherit; transition: border-color 0.15s, color 0.15s; }
+.notes-toggle-btn:hover { border-color: var(--accent); color: var(--accent); }
+.notes-close-btn { float: right; background: none; border: none; color: var(--text-tertiary); cursor: pointer; font-size: 1.1rem; padding: 0; margin: -0.2rem 0 0; display: none; font-family: inherit; }
+.notes-close-btn:hover { color: var(--text-primary); }
+.notes-overlay-right { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 140; }
+.notes-overlay-right.open { display: block; }
+
+/* === Scrollbar === */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+/* === Responsive === */
+@media (max-width: 1200px) {
+  .notes-sidebar { position: fixed; right: 0; top: 0; height: 100vh; overflow-y: auto; transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow: -4px 0 20px rgba(0,0,0,0.4); z-index: 150; }
+  .notes-sidebar.ns-closed { transform: translateX(100%); box-shadow: none; }
+  .notes-close-btn { display: block; }
+}
+@media (max-width: 900px) {
+  .sidebar { position: fixed; left: -320px; top: 0; transition: left 0.3s ease; box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+  .sidebar.open { left: 0; }
+  .sidebar-overlay.open { display: block; }
+  .hamburger-btn { display: block; }
+  .main-content { padding: 1.5rem 1rem 3rem; }
+}
+@media (min-width: 1600px) { .main-content { max-width: 960px; } .notes-sidebar { width: 360px; min-width: 360px; } }
+@media (min-width: 1800px) { .main-content { max-width: 1000px; } .notes-sidebar { width: 380px; min-width: 380px; } }
+
+/* OBS-VIZ Chart Frame */
+.obs-chart-frame { background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); overflow: hidden; margin: 1.5rem 0; }
+.obs-chart-frame-header { padding: 0.6rem 1rem; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; }
+.obs-chart-frame-title { font-size: 0.9rem; font-weight: 590; color: var(--accent); }
+.obs-chart-frame-badge { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.1rem 0.45rem; border-radius: 3px; background: var(--accent-dim); color: var(--accent); }
+.obs-chart-frame-body { padding: 0; }
+.obs-chart-annotation { padding: 0.6rem 1rem; background: var(--bg-surface); border-top: 1px solid var(--border-subtle); font-size: 0.78rem; color: var(--text-secondary); line-height: 1.55; }
+.obs-chart-annotation strong { color: var(--accent); }
+
+/* === Musk Focus Mode: hide/dim noncore === */
+[data-musk-hide].musk-hidden { opacity: 0.08; pointer-events: none; max-height: 0; overflow: hidden; margin: 0; padding: 0; border: none; transition: opacity 0.4s, max-height 0.4s; }
+tr[data-musk-hide].musk-hidden { display: none; }
+[data-musk-hide] { transition: opacity 0.4s; }
+/* Focus mode: hide everything except core */
+[data-musk-focus-hide].musk-focus-hidden { opacity: 0.06; pointer-events: none; max-height: 0; overflow: hidden; margin: 0; padding: 0; border: none; transition: opacity 0.4s, max-height 0.4s; }
+tr[data-musk-focus-hide].musk-focus-hidden { display: none; }
+
+/* Reading Mode */
+#readingModeBtn { position: fixed; top: 1rem; right: 1rem; z-index: 9999; width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--border-default, #34343a); background: var(--bg-surface, #141516); color: var(--text-secondary, #d0d6e0); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.7; transition: opacity 0.2s; }
+#readingModeBtn:hover { opacity: 1; }
+.reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+.reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+.reading-mode .hamburger-btn { display: none !important; }
+.reading-mode .sidebar-overlay { display: none !important; }
+
+/* Toast notification */
+.scaffold-toast {
+  position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100%);
+  background: #1a1a2e; color: #e0e0e0; border: 1px solid rgba(76,175,80,0.4);
+  border-left: 3px solid #4CAF50; padding: 0.6rem 1.2rem; border-radius: 8px;
+  font-size: 0.82rem; z-index: 10000; opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4); pointer-events: none;
+}
+.scaffold-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.scaffold-toast.error { border-color: rgba(244,67,54,0.4); border-left-color: #f44336; }
+</style>
+<link rel="stylesheet" href="focus-widget.css">
+</head>
+<body>
+
+<!-- Hamburger (mobile) -->
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<!-- Notes toggle + overlay -->
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ===== Left Sidebar ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="week-indicator">
+      <span class="week-num">12</span>
+      <div class="week-meta">
+        <span>Week of</span>
+        <span>Mar 14 – 20, 2026</span>
+      </div>
+    </div>
+
+    <h4>Weeks</h4>
+    <nav>
+      <ul>
+        <li><a href="#" class="active">W12 · Mar 14–20</a></li>
+        <li><a href="#">W11 · Mar 7–13</a></li>
+        <li><a href="#">W10 · Feb 28–Mar 6</a></li>
+      </ul>
+    </nav>
+
+    <h4>Sections</h4>
+    <nav>
+      <ul>
+        <li><a href="#mentors" style="color:#9C27B0; font-weight:590;">三导师系统</a></li>
+        <li><a href="#signal-tracker" style="color:var(--green);">&#128225; 半导体信号</a></li>
+        <li><a href="#semi-audit" style="color:#ab47bc;">&#129504; 半导体审计</a></li>
+        <li><a href="#blockchain-tracker" style="color:var(--accent);">&#128225; 区块链信号</a></li>
+        <li><a href="#portfolio">Portfolio Hub 项目组合</a></li>
+        <li><a href="#surprise">Surprises 意外</a></li>
+        <li><a href="#decisions">Open Decisions 悬决</a></li>
+        <li><a href="#patterns">Patterns 模式</a></li>
+        <li><a href="#graph">System Map 思维链</a></li>
+        <li><a href="#priorities">Priority Queue 优先级</a></li>
+        <li><a href="#chains">Idea → Outcome</a></li>
+        <li><a href="#question">Research Q 研究问</a></li>
+      </ul>
+    </nav>
+
+    <h4>Journal 认知日志</h4>
+    <nav>
+      <ul>
+        <li><a href="cognitive_journal.html" style="color:#f44336;">Activity vs TODO 行为vs计划</a></li>
+      </ul>
+    </nav>
+
+    <h4>Deep Dives 深度研究</h4>
+    <nav>
+      <ul>
+        <li><a href="../../research/semiconductor_hub.html" style="color:var(--accent);">Semiconductor Hub 半导体中枢</a></li>
+        <li><a href="semiconductor_signal_tracker.html" style="color:var(--green);">&#128225; 半导体信号追踪</a></li>
+        <li><a href="../../research/blockchain_hub.html" style="color:var(--accent);">Blockchain Hub 区块链中枢</a></li>
+        <li><a href="blockchain_signal_tracker.html" style="color:var(--green);">&#128225; 区块链信号追踪</a></li>
+        <li><a href="../../research/internet_hub.html" style="color:var(--accent);">Internet Hub 互联网中枢</a></li>
+        <li><a href="http://localhost:8080" style="color:var(--tier-high); font-weight:590;">Trading Cockpit 交易驾驶舱</a></li>
+        <li><a href="../../strategy/ai_pattern_master.html" style="color:#ab47bc;">&#128202; Pattern Master 形态大师</a></li>
+      </ul>
+    </nav>
+
+    <h4>Diagnostic 诊断</h4>
+    <nav>
+      <ul>
+        <li><a href="#" style="font-size:0.72rem; color: var(--text-quaternary); cursor: default;">Infra 65% · Trade 5%</a></li>
+        <li><a href="#" style="font-size:0.72rem; color: var(--text-quaternary); cursor: default;">Ideas: 2/5 followed</a></li>
+        <li><a href="#" style="font-size:0.72rem; color: var(--text-quaternary); cursor: default;">Stale: 2 items</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ===== Main Content ===== -->
+  <main class="main-content">
+
+    <!-- Header -->
+    <div class="page-header">
+      <h1>Week 12 Synthesis<span class="zh">第12周综合</span></h1>
+      <div class="subtitle">2026 Mar 14 – 20 · Cognitive Observatory 认知观测站</div>
+    </div>
+
+    <!-- Diagnostic Strip -->
+    <div class="diagnostic-strip">
+      <span class="week-label">W12</span>
+      <span class="sep">·</span>
+      <span class="metric">Infra/Meta 基础设施 <span class="metric-value">65%</span></span>
+      <span class="sep">·</span>
+      <span class="metric">Trading 交易系统 <span class="metric-value metric-warn">5%</span></span>
+      <span class="sep">·</span>
+      <span class="metric">Research 研究 <span class="metric-value">30%</span></span>
+      <span class="sep">·</span>
+      <span class="metric">Corrections 纠正 <span class="metric-value">3</span></span>
+      <span class="sep">·</span>
+      <span class="metric">Ideas followed 想法跟进 <span class="metric-value">2/5</span></span>
+      <span class="sep">·</span>
+      <span class="metric">Stale 停滞 <span class="metric-value metric-warn">2</span></span>
+    </div>
+
+    <!-- ===== AI 导师系统 (子页面) ===== -->
+    <a href="2026-W12-mentors.html" class="mentor-link-card" id="mentors" style="display:block;text-decoration:none;border:1px solid var(--border-subtle);border-left:3px solid #9C27B0;border-radius:8px;padding:1rem 1.2rem;background:var(--bg-surface);margin-bottom:1rem;transition:all 0.15s;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:#9C27B0;margin-bottom:0.25rem;">AI 导师系统</div>
+          <div style="font-size:0.85rem;color:var(--text-secondary);">Jensen · Musk · Barkley · Munger — 微步骤 TODO + AI 点评</div>
+        </div>
+        <span style="font-size:1.2rem;color:#9C27B0;">→</span>
+      </div>
+    </a>
+
+    <!-- Top Controls: annotation sidebar controls -->
+    <div class="top-controls">
+      <span class="tc-label">&#128218;</span>
+      <span id="noteCountLabel">8 元思考 + 0 知识批注</span>
+      <span class="tc-sep">|</span>
+      <button id="knowToggleBtn" class="active" onclick="toggleKnowNotes()">隐藏</button> 知识
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全展</button>
+      <button onclick="collapseAllNotes()">全收</button>
+    </div>
+
+    <!-- ===== Deep Dives 行业研究 (链接卡片) ===== -->
+    <div id="signal-tracker" style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1.5rem;">
+      <a href="../../research/semiconductor_hub.html" style="flex:1;min-width:200px;display:block;text-decoration:none;border:1px solid rgba(76,175,80,0.25);border-left:3px solid #4caf50;border-radius:8px;padding:0.75rem 1rem;background:var(--bg-surface);transition:all 0.15s;">
+        <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:#4caf50;margin-bottom:0.2rem;">Semiconductor</div>
+        <div style="font-size:0.8rem;color:var(--text-secondary);">16 代理人 · 信号追踪 · Gap 审计</div>
+      </a>
+      <a href="../../research/blockchain_hub.html" style="flex:1;min-width:200px;display:block;text-decoration:none;border:1px solid rgba(248,168,72,0.25);border-left:3px solid var(--accent);border-radius:8px;padding:0.75rem 1rem;background:var(--bg-surface);transition:all 0.15s;">
+        <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--accent);margin-bottom:0.2rem;">Blockchain</div>
+        <div style="font-size:0.8rem;color:var(--text-secondary);">22 代理人 · 8 节点 · BTC $100K 65%</div>
+      </a>
+      <a href="../../research/internet_hub.html" style="flex:1;min-width:200px;display:block;text-decoration:none;border:1px solid rgba(88,166,255,0.25);border-left:3px solid #58a6ff;border-radius:8px;padding:0.75rem 1rem;background:var(--bg-surface);transition:all 0.15s;">
+        <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:#58a6ff;margin-bottom:0.2rem;">Internet 互联网</div>
+        <div style="font-size:0.8rem;color:var(--text-secondary);">29 代理人 · 8 节点 · KWEB+QQQ</div>
+      </a>
+      <a href="http://localhost:8080" style="flex:1;min-width:200px;display:block;text-decoration:none;border:1px solid rgba(76,175,80,0.25);border-left:3px solid var(--tier-high);border-radius:8px;padding:0.75rem 1rem;background:var(--bg-surface);transition:all 0.15s;">
+        <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--tier-high);margin-bottom:0.2rem;">Trading Cockpit</div>
+        <div style="font-size:0.8rem;color:var(--text-secondary);">NVDA · AVGO · BTC · ETH + watchlist</div>
+      </a>
+      <a href="../../strategy/ai_pattern_master.html" style="flex:1;min-width:200px;display:block;text-decoration:none;border:1px solid rgba(171,71,188,0.25);border-left:3px solid #ab47bc;border-radius:8px;padding:0.75rem 1rem;background:var(--bg-surface);transition:all 0.15s;">
+        <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:#ab47bc;margin-bottom:0.2rem;">Pattern Master 形态大师</div>
+        <div style="font-size:0.8rem;color:var(--text-secondary);">6 来源 · 75+ 形态 · 38,500 统计样本</div>
+      </a>
+    </div>
+
+    <!-- ========== PORTFOLIO HUB (PRIMARY) ========== -->
+    <div class="section-header" id="portfolio">
+      <h2>Project Portfolio Hub<span class="zh">项目组合中心</span></h2>
+    </div>
+
+    <div class="portfolio-strip">
+      <div class="portfolio-stat">
+        <div class="stat-value neutral">9</div>
+        <div class="stat-label">Total 项目总数</div>
+      </div>
+      <div class="portfolio-stat" title="Memory Sharing ✅ · Conv. Archive · Observatory · Orchestrator(KILL) · Cognitive Agents">
+        <div class="stat-value warn" style="cursor:help;">+5</div>
+        <div class="stat-label">New 本周新增 <span style="font-size:0.55rem;color:var(--accent);">hover查看</span></div>
+      </div>
+      <div class="portfolio-stat">
+        <div class="stat-value ok">2</div>
+        <div class="stat-label">Done 已完成</div>
+      </div>
+      <div class="portfolio-stat">
+        <div class="stat-value warn">2</div>
+        <div class="stat-label">Stale 停滞</div>
+      </div>
+      <div class="portfolio-stat">
+        <div class="stat-value ok">58%</div>
+        <div class="stat-label">Completion 完成率</div>
+      </div>
+    </div>
+
+    <!-- OBS-VIZ: Portfolio Donut -->
+    <div class="obs-chart-frame">
+      <div class="obs-chart-frame-header">
+        <span class="obs-chart-frame-title">Project Status Distribution 项目状态分布</span>
+        <span class="obs-chart-frame-badge">INTERACTIVE</span>
+      </div>
+      <div class="obs-chart-frame-body">
+        <div id="chart-portfolio-donut" style="height:280px;"></div>
+      </div>
+      <div class="obs-chart-annotation">
+        <strong>Reading:</strong> 9个项目中2个完成(绿)、3个进行中(金)、2个停滞(红)、1个设计中(蓝)、1个建议砍掉(灰)。进行中和停滞的比例几乎相等 — 执行端需要加速。
+      </div>
+    </div>
+
+    <div class="gantt-container">
+      <table class="gantt-chart">
+        <thead>
+          <tr>
+            <th>Project 项目</th>
+            <th>W8<br><span style="font-weight:400;font-size:0.55rem">Feb 17</span></th>
+            <th>W9<br><span style="font-weight:400;font-size:0.55rem">Feb 24</span></th>
+            <th>W10<br><span style="font-weight:400;font-size:0.55rem">Mar 3</span></th>
+            <th>W11<br><span style="font-weight:400;font-size:0.55rem">Mar 10</span></th>
+            <th class="current-week">W12<br><span style="font-weight:400;font-size:0.55rem">Mar 17</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- ═══ L1: Trading System 交易系统 ═══ -->
+          <tr class="l1-group">
+            <td colspan="6"><span class="l1-label core">L1: Trading System 交易系统</span><span class="l1-ratio">3 projects · 1 active · 2 blocked/stale</span></td>
+          </tr>
+          <tr class="l2">
+            <td>
+              <div class="gantt-project-name">
+                <a href="http://localhost:8080" style="color:var(--tier-high);">Trading Cockpit 交易驾驶舱</a> ★
+                <div class="depth-meter"><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block"></span><span class="depth-label">4/5</span></div>
+              </div>
+            </td>
+            <td class="gantt-bar-cell"><div class="gantt-bar in-progress" style="width:100%"><div class="gantt-fill" style="width:80%"></div></div></td>
+            <td class="gantt-bar-cell"><div class="gantt-bar in-progress" style="width:100%"><div class="gantt-fill" style="width:80%"></div></div></td>
+            <td class="gantt-bar-cell"><div class="gantt-bar in-progress" style="width:100%"><div class="gantt-fill" style="width:80%"></div></div></td>
+            <td class="gantt-bar-cell"><div class="gantt-bar in-progress" style="width:100%"><div class="gantt-fill" style="width:80%"></div></div></td>
+            <td class="gantt-bar-cell"><div class="gantt-bar in-progress" style="width:100%"><div class="gantt-fill" style="width:80%"></div></div></td>
+          </tr>
+          <tr class="l2">
+            <td>
+              <div class="gantt-project-name">
+                <a href="projects/sell-side.html">Sell-side 卖侧</a> <span style="color:var(--tier-low);font-size:0.7rem;">P0</span>
+                <div class="depth-meter"><span class="depth-block filled-dim"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-label">1/5</span></div>
+              </div>
+            </td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"><div class="gantt-bar design-only" style="width:100%"><div class="gantt-fill" style="width:30%"></div></div></td>
+            <td class="gantt-bar-cell"><div class="gantt-bar stale" style="width:100%"><div class="gantt-fill" style="width:30%"></div></div></td>
+            <td class="gantt-bar-cell"><div class="gantt-bar stale" style="width:100%"><div class="gantt-fill" style="width:30%"></div></div></td>
+          </tr>
+          <tr class="l2">
+            <td>
+              <div class="gantt-project-name">
+                <a href="projects/candidate-workbench.html">Candidate 候选工作台</a>
+                <div class="depth-meter"><span class="depth-block filled-dim"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-label">1/5</span></div>
+              </div>
+            </td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"><div class="gantt-bar design-only" style="width:100%"><div class="gantt-fill" style="width:20%"></div></div></td>
+            <td class="gantt-bar-cell"><div class="gantt-bar stale" style="width:100%"><div class="gantt-fill" style="width:20%"></div></div></td>
+          </tr>
+
+          <!-- ═══ L1: Industry Research 行业研究 ═══ -->
+          <tr class="l1-group" data-musk-focus-hide="1">
+            <td colspan="6"><span class="l1-label research">L1: Industry Research 行业研究</span><span class="l1-ratio">2 projects · feeds L3 into trading system</span></td>
+          </tr>
+          <tr class="l2" data-musk-focus-hide="1">
+            <td>
+              <div class="gantt-project-name">
+                <a href="projects/v3-reports.html">V3 Reports 报告模板</a>
+                <div class="depth-meter"><span class="depth-block filled-warn"></span><span class="depth-block filled-warn"></span><span class="depth-block filled-warn"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-label">3/5</span></div>
+              </div>
+            </td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"><div class="gantt-bar in-progress" style="width:100%"><div class="gantt-fill" style="width:60%"></div></div></td>
+            <td class="gantt-bar-cell"><div class="gantt-bar in-progress" style="width:100%"><div class="gantt-fill" style="width:60%"></div></div></td>
+            <td class="gantt-bar-cell"><div class="gantt-bar in-progress" style="width:100%"><div class="gantt-fill" style="width:60%"></div></div></td>
+            <td class="gantt-bar-cell"><div class="gantt-bar in-progress" style="width:100%"><div class="gantt-fill" style="width:60%"></div></div></td>
+          </tr>
+          <tr class="l2" data-musk-hide="noncore">
+            <td>
+              <div class="gantt-project-name">
+                <a href="projects/cognitive-agents.html">Cognitive Agents 认知代理人</a> <span class="new-badge">W12</span>
+                <div class="depth-meter"><span class="depth-block filled-warn"></span><span class="depth-block filled-warn"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-label">2/5</span></div>
+              </div>
+            </td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"><div class="gantt-bar in-progress" style="width:100%"><div class="gantt-fill" style="width:50%"></div></div></td>
+          </tr>
+
+          <!-- ═══ L1: Infrastructure 基础设施 ═══ -->
+          <tr class="l1-group" data-musk-focus-hide="1">
+            <td colspan="6"><span class="l1-label infra">L1: Infrastructure 基础设施</span><span class="l1-ratio">4 projects · 3 new W12 · 44% of portfolio ⚠️</span></td>
+          </tr>
+          <tr class="l2" data-musk-focus-hide="1">
+            <td>
+              <div class="gantt-project-name">
+                <a href="projects/memory-sharing.html">Memory Sharing 记忆共享</a> <span class="new-badge">W12</span>
+                <div class="depth-meter"><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-block filled-green"></span><span class="depth-label">Done</span></div>
+              </div>
+            </td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"><div class="gantt-bar completed" style="width:100%"><div class="gantt-fill" style="width:100%"></div></div></td>
+          </tr>
+          <tr class="l2" data-musk-hide="noncore">
+            <td>
+              <div class="gantt-project-name">
+                <a href="projects/conversation-archive.html">Conv. Archive 对话存档</a> <span class="new-badge">W12</span>
+                <div class="depth-meter"><span class="depth-block filled-warn"></span><span class="depth-block filled-warn"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-label">2/5</span></div>
+              </div>
+            </td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"><div class="gantt-bar in-progress" style="width:100%"><div class="gantt-fill" style="width:40%"></div></div></td>
+          </tr>
+          <tr class="l2" data-musk-hide="noncore">
+            <td>
+              <div class="gantt-project-name">
+                <a href="projects/observatory.html">Observatory 观测站</a> <span class="new-badge">W12</span>
+                <div class="depth-meter"><span class="depth-block filled-warn"></span><span class="depth-block filled-warn"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-label">2/5</span></div>
+              </div>
+            </td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"><div class="gantt-bar in-progress" style="width:100%"><div class="gantt-fill" style="width:45%"></div></div></td>
+          </tr>
+          <tr class="l2" data-musk-hide="noncore">
+            <td>
+              <div class="gantt-project-name" style="opacity:0.6;text-decoration:line-through;text-decoration-color:var(--tier-low);">
+                <a href="projects/orchestrator.html" style="text-decoration:line-through;text-decoration-color:var(--tier-low);">Orchestrator 编排器</a> <span class="new-badge">W12</span>
+                <div class="depth-meter"><span class="depth-block filled-dim"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-block"></span><span class="depth-label" style="color:var(--tier-low);">KILL</span></div>
+              </div>
+            </td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"></td>
+            <td class="gantt-bar-cell"><div class="gantt-bar design-only" style="width:100%;opacity:0.5"><div class="gantt-fill" style="width:20%"></div></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="gantt-legend">
+      <div class="gantt-legend-item"><div class="gantt-legend-dot completed"></div> Completed 已完成</div>
+      <div class="gantt-legend-item"><div class="gantt-legend-dot in-progress"></div> In Progress 进行中</div>
+      <div class="gantt-legend-item"><div class="gantt-legend-dot stale"></div> Stale 停滞</div>
+      <div class="gantt-legend-item"><div class="gantt-legend-dot design-only"></div> Design Only 仅设计</div>
+    </div>
+
+    <div class="advisory-box">
+      <div class="advisory-header">
+        <span class="advisory-label">Meta-cognitive 元思考</span>
+        <span class="advisory-title">Portfolio Health Assessment 项目组合健康评估</span>
+      </div>
+      <ul>
+        <li><strong>Project proliferation alert.</strong> 4 new projects in one week with only 1 completion. At this rate, the portfolio grows faster than it ships.<span class="zh">项目增殖警报。一周新增4个项目，仅完成1个。组合增长快于交付。</span></li>
+        <li><strong>Category imbalance.</strong> Infra/Meta has 4 projects (44%), Core/Trading has 3 but only 1 actively developed. Sell-side Lifecycle and Candidate Workbench — both stale.<span class="zh">类别失衡。基础设施占44%，核心交易仅1个在活跃开发。卖方生命周期和候选工作台均停滞。</span></li>
+        <li><strong>Depth vs breadth.</strong> Average depth: 2.1/5. Only 2 projects ≥ 4/5. Wide and shallow = ADHD divergent phase risk.<span class="zh">深度vs广度。平均深度2.1/5，仅2个项目≥4。广而浅=ADHD发散期风险。</span></li>
+        <li><strong>Finish-before-start rule.</strong> W13: complete or kill one project before adding any new one. Kill candidate: Orchestrator. Finish candidate: Cognitive Agents Phase 2.<span class="zh">先完成再开始。W13新增前先完成或砍掉一个。砍：编排器。完成：认知代理人Phase 2。</span></li>
+        <li><strong>Core-first budget.</strong> First 2 hours of each session → Core/Trading. Meta-tools can wait.<span class="zh">核心优先。每次会话前2小时给核心交易。元工具可以等。</span></li>
+      </ul>
+      <div class="advisory-verdict">Bottom line: expanding at the speed of ideas, shipping at the speed of infrastructure. Flip the ratio.<span class="zh">底线：以想法速度扩张，以基础设施速度交付。翻转比例。</span></div>
+    </div>
+
+    <!-- ========== PRIORITY QUEUE (with Focus trigger) ========== -->
+    <div class="section-header" id="priorities">
+      <h2>Priority Queue<span class="zh">优先级队列 — 点击启动番茄专注🍅</span></h2>
+    </div>
+
+    <div class="priority-queue">
+
+      <!-- P0 — updated 2026-03-21 -->
+      <div class="pq-group">
+        <div class="pq-group-header">
+          <span class="pq-badge p0">P0</span>
+          <span class="pq-group-label">System bottleneck — still unresolved after 5 days 系统瓶颈——声明5天仍未执行</span>
+        </div>
+        <div class="pq-item" data-states="idle,started,completed" data-project="sell-side" onclick="cyclePQ(this)">
+          <div class="pq-checkbox"></div>
+          <div class="pq-content">
+            <div class="pq-task">Sell-side 卖侧: 定义退出标准 + check_positions() + Telegram通知</div>
+            <div class="pq-reason">P0声明3/17→3/21仍零提交(5天)。没有卖侧=只有买入的半个系统。黄金掩盖了问题，ETH -$19K暴露了。<strong>建议：拆成3个15分钟micro-task，不再用P0标签自欺。</strong></div>
+            <div class="pq-project">→ sell-side-lifecycle · blocks: candidate-workbench, feedback-loop · <span style="color:var(--tier-low);">5天零执行</span></div>
+            <div class="pq-deadline-row"><button class="pq-deadline-btn" onclick="event.stopPropagation();toggleDeadline(this)">+ 截止日期</button></div>
+          </div>
+          <span class="pq-status-label"></span>
+        </div>
+      </div>
+
+      <!-- P1 — updated 2026-03-21 -->
+      <div class="pq-group">
+        <div class="pq-group-header">
+          <span class="pq-badge p1">P1</span>
+          <span class="pq-group-label">Convert research into trades — don't waste the work 把研究变成交易——别浪费成果</span>
+        </div>
+        <div class="pq-item" data-states="idle,started,completed" data-project="trading-dashboard" onclick="cyclePQ(this)">
+          <div class="pq-checkbox"></div>
+          <div class="pq-content">
+            <div class="pq-task">验证NVDA/AVGO/ARM/ASML在Candidate Workbench中的表现</div>
+            <div class="pq-reason">认知代理人Phase 2刚产出4个高置信度半导体候选。不验证=所有研究工作变成学术研究而非交易系统。这是研究→交易的关键转化点。</div>
+            <div class="pq-project">→ candidate-workbench + trading-dashboard · <span style="color:var(--accent);">研究成果等待转化</span></div>
+            <div class="pq-deadline-row"><button class="pq-deadline-btn" onclick="event.stopPropagation();toggleDeadline(this)">+ 截止日期</button></div>
+          </div>
+          <span class="pq-status-label"></span>
+        </div>
+        <div class="pq-item" data-states="idle,started,completed" data-project="trading-dashboard" onclick="cyclePQ(this)">
+          <div class="pq-checkbox"></div>
+          <div class="pq-content">
+            <div class="pq-task">Dashboard: 详情面板接入认知分析文字（6个节点报告+16个代理人）</div>
+            <div class="pq-reason">170+份报告死在磁盘上。面板只显示价格图，不显示认知分析=浪费1.5MB研究产出。</div>
+            <div class="pq-project">→ trading-dashboard · 129 reports + 6 node reports unlinked</div>
+            <div class="pq-deadline-row"><button class="pq-deadline-btn" onclick="event.stopPropagation();toggleDeadline(this)">+ 截止日期</button></div>
+          </div>
+          <span class="pq-status-label"></span>
+        </div>
+        <div class="pq-item" data-states="idle,started,completed" data-project="trading-dashboard" onclick="cyclePQ(this)">
+          <div class="pq-checkbox"></div>
+          <div class="pq-content">
+            <div class="pq-task">Dashboard: 退出信号优先级 > 入场信号（止损系统补丁）</div>
+            <div class="pq-reason">ADHD造成的止损gap。与P0 sell-side关联但可独立实现Dashboard端的退出提醒。</div>
+            <div class="pq-project">→ trading-dashboard</div>
+            <div class="pq-deadline-row"><button class="pq-deadline-btn" onclick="event.stopPropagation();toggleDeadline(this)">+ 截止日期</button></div>
+          </div>
+          <span class="pq-status-label"></span>
+        </div>
+      </div>
+
+      <!-- P2 — updated 2026-03-21 -->
+      <div class="pq-group" data-musk-focus-hide="1">
+        <div class="pq-group-header">
+          <span class="pq-badge p2">P2</span>
+          <span class="pq-group-label">Expand &amp; validate — extend the system 扩展验证</span>
+        </div>
+        <div class="pq-item" data-states="idle,started,completed" data-project="candidate-workbench" data-musk-focus-hide="1" onclick="cyclePQ(this)">
+          <div class="pq-checkbox"></div>
+          <div class="pq-content">
+            <div class="pq-task">Candidate Workbench: 用退出标准重构候选页面</div>
+            <div class="pq-reason">等P0定义完退出标准。但Cognitive Agents已产出候选输入(NVDA/AVGO/ARM/ASML)，工作台的数据端ready。</div>
+            <div class="pq-project">→ candidate-workbench · 1/5 depth · input ready, exit criteria missing</div>
+            <div class="pq-deadline-row"><button class="pq-deadline-btn" onclick="event.stopPropagation();toggleDeadline(this)">+ 截止日期</button></div>
+          </div>
+          <span class="pq-status-label"></span>
+        </div>
+        <div class="pq-item" data-states="idle,started,completed" data-project="v3-reports" data-musk-focus-hide="1" onclick="cyclePQ(this)">
+          <div class="pq-checkbox"></div>
+          <div class="pq-content">
+            <div class="pq-task">V3 Reports: 第二个行业（能源XLE或金融XLF）验证模板通用性</div>
+            <div class="pq-reason">半导体V3已交付(4.8MB)。模板可能过度拟合半导体数据结构，需要第二个行业stress-test。</div>
+            <div class="pq-project">→ v3-report-template · 4/5 depth · template proven, generality unverified</div>
+            <div class="pq-deadline-row"><button class="pq-deadline-btn" onclick="event.stopPropagation();toggleDeadline(this)">+ 截止日期</button></div>
+          </div>
+          <span class="pq-status-label"></span>
+        </div>
+      </div>
+
+      <!-- P3: Frozen -->
+      <div class="pq-group" data-musk-focus-hide="1">
+        <div class="pq-group-header">
+          <span class="pq-badge p3">P3</span>
+          <span class="pq-group-label">Frozen — infrastructure is adequate 冻结——基础设施已够用</span>
+        </div>
+        <div class="pq-item frozen" data-states="frozen" data-project="conversation-archive" data-musk-hide="noncore" onclick="return">
+          <div class="pq-checkbox"></div>
+          <div class="pq-content">
+            <div class="pq-task">Conversation Archive 对话存档</div>
+            <div class="pq-reason">JSONL→Markdown转换可用。冻结。不影响交易系统核心功能。</div>
+            <div class="pq-project">→ conversation-archive · 2/5 depth</div>
+          </div>
+          <span class="pq-status-label">FROZEN</span>
+        </div>
+        <div class="pq-item frozen" data-states="frozen" data-project="observatory" data-musk-hide="noncore" onclick="return">
+          <div class="pq-checkbox"></div>
+          <div class="pq-content">
+            <div class="pq-task">Observatory 观测站</div>
+            <div class="pq-reason">W12-v3已交付，Portfolio Hub可用。冻结。观察自己建工具 ≠ 建那个东西。</div>
+            <div class="pq-project">→ observatory · 3/5 depth · functional</div>
+          </div>
+          <span class="pq-status-label">FROZEN</span>
+        </div>
+      </div>
+
+      <!-- KILL -->
+      <div class="pq-group" data-musk-focus-hide="1">
+        <div class="pq-group-header">
+          <span class="pq-badge kill">KILL</span>
+          <span class="pq-group-label">Removed from portfolio 已移除</span>
+        </div>
+        <div class="pq-item killed" data-states="killed" data-project="orchestrator" data-musk-hide="noncore" onclick="return">
+          <div class="pq-checkbox"></div>
+          <div class="pq-content">
+            <div class="pq-task">Orchestrator 编排器</div>
+            <div class="pq-reason">设计未执行。零代码。已归档。</div>
+            <div class="pq-project">→ orchestrator · KILLED 2026-03-21</div>
+          </div>
+          <span class="pq-status-label">KILL</span>
+        </div>
+      </div>
+
+      <!-- DONE — updated 2026-03-21 -->
+      <div class="pq-group" data-musk-focus-hide="1">
+        <div class="pq-group-header">
+          <span class="pq-badge done">DONE</span>
+          <span class="pq-group-label">Completed 已完成</span>
+        </div>
+        <div class="pq-item completed" data-states="completed" data-project="memory-sharing" onclick="return">
+          <div class="pq-checkbox"></div>
+          <div class="pq-content">
+            <div class="pq-task">Memory Sharing 记忆共享</div>
+            <div class="pq-reason">小范围+清晰需求=2天完成。</div>
+            <div class="pq-project">→ memory-sharing · 5/5 depth · DONE</div>
+          </div>
+          <span class="pq-status-label">DONE</span>
+        </div>
+        <div class="pq-item completed" data-states="completed" data-project="cognitive-agents" onclick="return">
+          <div class="pq-checkbox"></div>
+          <div class="pq-content">
+            <div class="pq-task">Cognitive Agents V2 认知代理人 (90%)</div>
+            <div class="pq-reason">Phase 1(20/20) + Phase 2(6节点报告+6元思考+Jensen V4) 全部完成。剩余13个V4策展地图是机械复制。<strong>产出：170+文件，1.5MB+，4个高置信度候选(NVDA/AVGO/ARM/ASML)。</strong></div>
+            <div class="pq-project">→ cognitive-agents-v2 · 5/5 depth · DONE (核心完成，剩余机械)</div>
+          </div>
+          <span class="pq-status-label">DONE</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========== §01 SURPRISES ========== -->
+    <div class="section-header" id="surprise">
+      <h2><span class="section-num">01</span>What surprised you this week?<span class="zh">本周什么让你意外？</span></h2>
+    </div>
+
+    <div class="surprise-card">
+      <div class="surprise-headline">65% of time went to meta-tools, 0% to P0<span class="zh">65%时间花在元工具上，P0进度为零</span></div>
+      <p>Memory sharing, conversation archive, observatory, orchestrator — four systems built in one week, all infrastructure. The declared P0 (sell-side lifecycle) got zero commits. The ratio is 13:1 meta-tooling vs core trading system.<span class="zh">记忆共享、对话存档、观测站、编排器——一周内建了四个系统，全是基础设施。声明的P0（卖方生命周期）零提交。元工具与核心交易系统的比例是13:1。</span></p>
+    </div>
+
+    <div class="surprise-card">
+      <div class="surprise-headline">Curation actually works<span class="zh">策展方法确实有效</span></div>
+      <p>Cognitive Agents V2 Phase 1 validated the V3 curation principle: 20 source materials produced via curation workflow rather than 70% generation. The quality difference was noticeable — less hallucinated context, more grounded analysis.<span class="zh">认知代理人V2第一阶段验证了V3策展原则：通过策展流程产出20份素材，而非70%生成。质量差异明显——更少幻觉，更扎实。</span></p>
+    </div>
+
+    <!-- ========== §02 OPEN DECISIONS ========== -->
+    <div class="section-header" id="decisions">
+      <h2><span class="section-num">02</span>Decisions still uncertain<span class="zh">仍然不确定的决定</span></h2>
+    </div>
+
+    <div class="decision-card">
+      <div class="decision-title">Anti-proliferation boundary<span class="zh">反增殖边界</span></div>
+      <p>The evaluator is a human, not AI. But the edge is fuzzy. AI scanning tickers: allowed. AI ranking by "quality": prohibited. 45 candidates waiting for someone to draw the line.<span class="zh">评估者是人不是AI。但边界模糊。AI扫描品种：允许。AI按质量排名：禁止。45个候选品种在等着画线。</span></p>
+    </div>
+
+    <div class="decision-card">
+      <div class="decision-title">Triple sync compliance<span class="zh">三端同步合规性</span></div>
+      <p>Rule is set: local + Obsidian + NotebookLM. Never tested under time pressure. Will it be followed or quietly abandoned?<span class="zh">规则已定但从未在时间压力下测试。会遵守还是默默放弃？</span></p>
+    </div>
+
+    <div class="decision-card">
+      <div class="decision-title">Orchestrator: designed but untested<span class="zh">编排器：设计完成但未测试</span></div>
+      <p>Complete design in memory. Never run once. The problems it solves are real, but we don't know if the solution works.<span class="zh">记忆中有完整设计，从未运行过。它要解决的问题是真实的，但方案是否可行未知。</span></p>
+    </div>
+
+    <!-- ========== §03 REPEATING PATTERNS ========== -->
+    <div class="section-header" id="patterns">
+      <h2><span class="section-num">03</span>Repeating patterns<span class="zh">重复出现的模式</span></h2>
+    </div>
+
+    <div class="pattern-card">
+      <div class="pattern-name">Building meta-tools to avoid the core problem<span class="zh">建元工具来回避核心问题</span></div>
+      <p>Observatory, archives, memory sharing, orchestrator — each individually justifiable, collectively a pattern.<span class="zh">观测站、存档、记忆共享、编排器——每个单独合理，合在一起就是模式。</span></p>
+      <div class="pattern-evidence">Evidence: 4 meta-systems / 7 days, 0 trading commits<span class="zh">证据：7天4个元系统，交易系统零提交</span></div>
+    </div>
+
+    <div class="pattern-card">
+      <div class="pattern-name">Declaring P0 without follow-through<span class="zh">声明P0但不跟进</span></div>
+      <p>Sell-side lifecycle declared P0 on Mar 17. Three days later: zero commits. The declaration felt like action. It wasn't.<span class="zh">卖方生命周期3/17声明P0。三天后零提交。声明感觉像行动，但不是。</span></p>
+      <div class="pattern-evidence">Evidence: P0 declared 3/17, checked 3/20 — no git activity<span class="zh">证据：P0声明于3/17，3/20检查无git活动</span></div>
+    </div>
+
+    <div class="pattern-card">
+      <div class="pattern-name">Design before validation<span class="zh">先设计后验证（或从不验证）</span></div>
+      <p>Observatory V1 built and immediately redesigned into V2 without one week of usage. Design feels productive; validation can wait.<span class="zh">Observatory V1当天重设计为V2，V1一周都没用。设计感觉高效；验证可以等。</span></p>
+      <div class="pattern-evidence">Evidence: V1→V2 same day, Orchestrator designed but unbuilt<span class="zh">证据：V1→V2当天，编排器设计完未构建</span></div>
+    </div>
+
+    <!-- ========== SYSTEM MAP ========== -->
+    <div class="section-header" id="graph">
+      <h2>System Map<span class="zh">项目思维链全景 — 核心驱动 vs ADHD 末端</span></h2>
+    </div>
+
+    <div class="system-map">
+
+      <!-- Goal -->
+      <div class="map-goal">
+        <div class="goal-text">"Find the next gold" → $1M in 2026</div>
+        <div class="goal-sub">找到下一个黄金 · 大周期上升 + 二浪横盘 · Top-down 全市场扫描</div>
+        <span class="vline"></span>
+      </div>
+
+      <!-- Row 1: Core hub -->
+      <div class="map-row">
+        <div class="graph-node core-driver" style="min-width:220px;">
+          <div class="node-name"><a href="http://localhost:8080">Trading Cockpit</a></div>
+          <div class="node-zh">交易仪表盘 · 核心枢纽 · 连续5周</div>
+          <div class="node-depth"><span class="nd f"></span><span class="nd f"></span><span class="nd f"></span><span class="nd f"></span><span class="nd"></span></div>
+          <div class="node-tag">CORE DRIVER 核心驱动</div>
+        </div>
+      </div>
+
+      <!-- Connector lines -->
+      <div style="display:flex;justify-content:center;gap:8rem;">
+        <span class="vline" style="display:block;width:2px;height:14px;background:var(--tier-low);margin:0 auto;"></span>
+        <span class="vline" style="display:block;width:2px;height:14px;background:rgba(248,168,72,0.4);margin:0 auto;"></span>
+        <span class="vline" style="display:block;width:2px;height:14px;background:var(--border-default);margin:0 auto;"></span>
+      </div>
+
+      <!-- Row 2: Direct dependencies -->
+      <div class="map-row">
+        <div class="graph-node core-blocked">
+          <div class="node-name"><a href="projects/sell-side.html">Sell-side Lifecycle</a></div>
+          <div class="node-zh">卖侧生命周期 · P0声明零执行</div>
+          <div class="node-depth"><span class="nd f"></span><span class="nd"></span><span class="nd"></span><span class="nd"></span><span class="nd"></span></div>
+          <div class="node-tag">CORE BLOCKED P0阻塞</div>
+        </div>
+
+        <div class="graph-node research">
+          <div class="node-name"><a href="projects/v3-reports.html">V3 Report Template</a></div>
+          <div class="node-zh">V3报告模板 · 15行业 + SMH深度</div>
+          <div class="node-depth"><span class="nd f"></span><span class="nd f"></span><span class="nd f"></span><span class="nd"></span><span class="nd"></span></div>
+          <div class="node-tag">RESEARCH 研究分支</div>
+        </div>
+
+        <div class="graph-node core-waiting">
+          <div class="node-name"><a href="projects/candidate-workbench.html">Candidate Workbench</a></div>
+          <div class="node-zh">候选工作台 · 需先定义候选标准</div>
+          <div class="node-depth"><span class="nd f"></span><span class="nd"></span><span class="nd"></span><span class="nd"></span><span class="nd"></span></div>
+          <div class="node-tag">CORE WAITING 等待依赖</div>
+        </div>
+      </div>
+
+      <!-- Connector to Cognitive Agents -->
+      <div class="map-connector" data-musk-hide="noncore"><span class="vline vline-gold"></span></div>
+
+      <!-- Row 3: Research deeper -->
+      <div class="map-row" data-musk-hide="noncore">
+        <div class="graph-node research">
+          <div class="node-name"><a href="projects/cognitive-agents.html">Cognitive Agents V2</a></div>
+          <div class="node-zh">认知代理人 · Jensen Huang 5专项 + 15人</div>
+          <div class="node-depth"><span class="nd f"></span><span class="nd f"></span><span class="nd"></span><span class="nd"></span><span class="nd"></span></div>
+          <div class="node-tag">RESEARCH 研究分支</div>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="map-divider" style="position:relative;">
+        <span class="map-divider-label">Value chain ↑ 价值链 &nbsp;|&nbsp; Infrastructure ↓ 基础设施</span>
+      </div>
+
+      <!-- Row 4: Infrastructure -->
+      <div class="map-row">
+        <div class="graph-node support-done">
+          <div class="node-name"><a href="projects/memory-sharing.html">Memory Sharing ✓</a></div>
+          <div class="node-zh">记忆共享 · 完成 · 唯一成功</div>
+          <div class="node-depth"><span class="nd f"></span><span class="nd f"></span><span class="nd f"></span><span class="nd f"></span><span class="nd f"></span></div>
+          <div class="node-tag">SUPPORT DONE 支撑完成</div>
+        </div>
+
+        <div class="graph-node adhd-leaf" data-musk-hide="noncore">
+          <div class="node-name"><a href="projects/conversation-archive.html">Conv. Archive</a></div>
+          <div class="node-zh">对话存档 · W12新增</div>
+          <div class="node-depth"><span class="nd f"></span><span class="nd f"></span><span class="nd"></span><span class="nd"></span><span class="nd"></span></div>
+          <div class="node-tag">ADHD LEAF?</div>
+        </div>
+
+        <div class="graph-node adhd-leaf" data-musk-hide="noncore">
+          <div class="node-name"><a href="projects/observatory.html">Observatory</a></div>
+          <div class="node-zh">观测站 · W12新增 · 自我观察</div>
+          <div class="node-depth"><span class="nd f"></span><span class="nd f"></span><span class="nd"></span><span class="nd"></span><span class="nd"></span></div>
+          <div class="node-tag">ADHD LEAF?</div>
+        </div>
+
+        <div class="graph-node kill" data-musk-hide="noncore">
+          <div class="node-name"><a href="projects/orchestrator.html">Orchestrator</a></div>
+          <div class="node-zh">编排器 · 仅设计 · 砍掉候选</div>
+          <div class="node-depth"><span class="nd f"></span><span class="nd"></span><span class="nd"></span><span class="nd"></span><span class="nd"></span></div>
+          <div class="node-tag">KILL 建议砍掉</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Map advisory -->
+    <div class="map-advisory">
+      <strong>Value chain health 价值链健康度：</strong>5 projects on the chain, 2 blocked/stale, 1 active research → only Trading Dashboard is consistently progressing.<span class="zh">价值链上5个项目，2个阻塞/停滞，1个研究中 → 只有仪表盘在持续推进。</span><br><br>
+      <strong>ADHD signal 发散信号：</strong>3/17 Sell-side declared P0 → 3/17-3/20 four infra projects started instead. Pattern: intellectually stimulating work displacing tedious core work. All 4 infra projects appeared in the 3 days after the P0 declaration.<span class="zh">3/17声明P0 → 3/17-3/20转而启动4个基础设施项目。模式：智力刺激型工作替代枯燥的核心工作。全部4个基础设施项目在P0声明后3天内出现。</span><br><br>
+      <strong>Recommendation 建议：</strong>Kill Orchestrator (manages a non-existent process). Freeze Archive + Observatory until sell-side closes the loop. The only legitimate infra completion (Memory Sharing) took 2 days — proving small scope + clear need = fast delivery.<span class="zh">砍掉编排器（管理不存在的流程）。冻结存档+观测站直到卖侧闭环。唯一合理的基础设施完成（记忆共享）只花了2天——证明小范围+清晰需求=快速交付。</span>
+    </div>
+
+    <!-- System Map Metacognition -->
+    <div class="meta-thinking" id="system-meta">
+      <h3>🧠 System Map 元思考 — 从需求到执行的链路诊断</h3>
+
+      <span class="phase-tag phase-explore">EXPLORE</span>
+      <strong style="font-size:0.85rem;">思维链诊断 — 链路中哪里断了？</strong>
+
+      <div class="arc-item">
+        <strong>"找到下一个黄金" → Trading Dashboard → Sell-side → Candidate → Feedback</strong> — 这条链从W8开始建设。5周后，输入端（扫描+研究）运转良好：45候选、12信号、16人认知代理人、6个供应链节点。但输出端（卖侧+反馈）= 零。<strong>系统只吸气不呼气。</strong>
+      </div>
+      <div class="arc-item">
+        <strong>链路中断点</strong> — Sell-side P0声明于3/17，至今零执行。声明≠行动。BABA 98.1、GPN 92.5、DXCM 93.8 已在候选列表，但没有退出标准、没有平仓流程、没有学习循环。<span class="signal signal-bear">BLOCKED</span>
+      </div>
+
+      <hr class="mt-divider">
+
+      <span class="phase-tag phase-diagnose">DIAGNOSE</span>
+      <strong style="font-size:0.85rem;">矛盾张力 — 系统内的认知裂缝</strong>
+
+      <div class="arc-item">
+        <strong>张力1: 研究深度 vs 执行深度</strong> — 半导体研究16人×28轮元思考+75份专项素材。交易系统执行：0笔平仓记录。研究/执行比 = ∞。<span class="signal signal-bear">BEAR</span> 研究变成了行动的替代品。
+      </div>
+      <div class="arc-item">
+        <strong>张力2: P0声明 vs 实际行为</strong> — 声明Sell-side是P0 → 然后在3天内启动4个基础设施项目。声明创造了"已经在做"的幻觉。<span class="signal signal-watch">WATCH</span> 经典的ADHD回避模式：困难任务声明→转向刺激型任务。
+      </div>
+      <div class="arc-item">
+        <strong>张力3: 候选品种已浮现 vs 无法验证</strong> — BABA/GPN/DXCM从管道产出，NVDA/AVGO/ARM/ASML从半导体研究浮现。7个候选品种等待验证。但没有卖侧=没有退出=没有学习=不知道管道是否有效。<span class="signal signal-bear">BEAR</span>
+      </div>
+
+      <hr class="mt-divider">
+
+      <span class="phase-tag phase-diagnose">DIAGNOSE</span>
+      <strong style="font-size:0.85rem;">反面论证 — 如果整个系统方向错了？</strong>
+
+      <div class="arc-item">
+        <strong>"选品>纪律"假设可能是错的</strong> — 黄金的成功不是扫描出来的——是直觉+长期持有。系统花了5周建扫描器，但如果成功的关键变量是"持有8个月不动"而非"找到那个品种"呢？扫描器解决的可能不是瓶颈。
+      </div>
+      <div class="arc-item">
+        <strong>概率估计</strong> — 30%可能性系统方向需要调整。当前路径(全市场扫描→Top-down研究→候选池)本身不错，但<strong>瓶颈在执行端不在输入端</strong>。继续加强输入端(更多行业研究)是在错误的层次优化。
+      </div>
+
+      <hr class="mt-divider">
+
+      <span class="phase-tag phase-build">BUILD</span>
+      <strong style="font-size:0.85rem;">下一步 — 闭合循环的最小路径</strong>
+
+      <div class="question-box">
+        <strong>W13 核心问题：系统的第一次真实考试是什么？</strong>
+        <p style="margin-top:0.5rem;">不是加更多行业。不是优化CSS。不是新增元思考。<br>
+        是：<strong>BABA/GPN/DXCM 中任一个 → 入场 → 持有 → 退出 → 复盘 → 系统学到了什么</strong>。<br>
+        这一个完整循环的价值 > 再做10份行业报告。</p>
+        <p style="margin-top:0.5rem;color:var(--text-tertiary);font-size:0.78rem;">
+        <span class="signal signal-bull">BULL</span> 如果一个候选走出黄金模式 → 验证整个管道 → 系统获得信心<br>
+        <span class="signal signal-bear">BEAR</span> 如果候选全部失败 → 管道需要校准 → 但至少知道哪里错了<br>
+        <span class="signal signal-watch">WATCH</span> 如果继续不执行 → 管道永远停留在理论 → 最危险的结果</p>
+      </div>
+
+      <span class="phase-tag phase-verify">VERIFY</span>
+      <strong style="font-size:0.85rem;">监控指标</strong>
+      <p style="font-size:0.78rem;color:var(--text-tertiary);margin-top:0.3rem;">
+        <strong>每周</strong>：Sell-side commits数(当前=0) · 候选品种状态变化 · 平仓记录数<br>
+        <strong>事件驱动</strong>：任一候选触发入场信号 · 任一持仓触发止损/目标 · P0阻塞超过2周→升级
+      </p>
+    </div>
+
+    <!-- ========== §04 IDEA → OUTCOME CHAINS ========== -->
+    <div class="section-header" id="chains">
+      <h2><span class="section-num">04</span>Idea → Outcome chains<span class="zh">想法→结果链</span></h2>
+    </div>
+
+    <div class="chain-timeline">
+      <div class="chain-item completed">
+        <div class="chain-name">Memory Sharing <span class="zh-inline">记忆共享</span></div>
+        <div class="chain-status">Completed 已完成</div>
+        <div class="chain-path">
+          <span>Idea</span> <span class="arrow">→</span> <span>Design</span> <span class="arrow">→</span> <span>Symlink</span> <span class="arrow">→</span> <span>Watcher</span> <span class="arrow">→</span> <span>Telegram</span> <span class="arrow">→</span> <span>Working</span>
+        </div>
+      </div>
+      <div class="chain-item in-progress">
+        <div class="chain-name">Cognitive Agents V2 <span class="zh-inline">认知代理人V2</span></div>
+        <div class="chain-status">In Progress 进行中</div>
+        <div class="chain-path">
+          <span>Idea</span> <span class="arrow">→</span> <span>Curation design</span> <span class="arrow">→</span> <span>Phase 1: 20/20 done</span> <span class="arrow">→</span> <em style="color:var(--text-quaternary)">Phase 2: pending</em>
+        </div>
+      </div>
+      <div class="chain-item in-progress">
+        <div class="chain-name">Observatory <span class="zh-inline">观测站</span></div>
+        <div class="chain-status">In Progress 进行中</div>
+        <div class="chain-path">
+          <span>Idea</span> <span class="arrow">→</span> <span>V1 built</span> <span class="arrow">→</span> <span>V2 redesign</span> <span class="arrow">→</span> <em style="color:var(--text-quaternary)">V3 building</em>
+        </div>
+      </div>
+      <div class="chain-item stale">
+        <div class="chain-name">Sell-side Lifecycle <span class="zh-inline">卖方生命周期</span></div>
+        <div class="chain-status">Stale 停滞</div>
+        <div class="chain-path">
+          <span>Idea</span> <span class="arrow">→</span> <span>Declared P0 (3/17)</span> <span class="arrow">→</span> <em style="color:var(--tier-low)">Zero action</em>
+        </div>
+      </div>
+      <div class="chain-item stale">
+        <div class="chain-name">Dashboard Redesign <span class="zh-inline">仪表盘重设计</span></div>
+        <div class="chain-status">Stale 停滞</div>
+        <div class="chain-path">
+          <span>Idea</span> <span class="arrow">→</span> <span>Design in memory</span> <span class="arrow">→</span> <em style="color:var(--tier-low)">Not started</em>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== RESEARCH QUESTION ========== -->
+    <div class="research-question" id="question">
+      <div class="rq-label">Weekly Research Question 每周研究问题</div>
+      <p>Did this week's work bring you closer to "finding the next gold"?<span class="zh">本周的工作让你离"找到下一个黄金"更近了还是更远了？</span></p>
+      <div class="rq-answer">Farther. The curation validation was a genuine step forward in methodology, but the core screening system didn't move. Building better tools to observe yourself building tools is not the same as building the thing.<span class="zh">更远了。策展验证在方法论上是真正进步，但核心扫描系统没动。建更好的工具来观察自己建工具，不等于建那个东西本身。</span></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="page-footer">
+      <div>Cognitive Observatory V3 认知观测站V3 · Generated 2026-03-20</div>
+      <div class="theory">Schön: reflection-on-action requires distance — weekly synthesis provides it. 行动后反思需要距离感。<br>Quantified Self: track what matters, not what's easy to measure. 追踪重要的，而非容易测量的。</div>
+    </div>
+
+  </main>
+
+  <!-- ===== Right Sidebar: Anchored Annotations (Jensen V4) ===== -->
+  <aside class="notes-sidebar" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn" aria-label="Close notes">&#10005;</button>
+      <h4>&#129504; Claude Journal — W12</h4>
+    </div>
+
+    <!-- === PATTERNS section === -->
+    <div class="anno meta-note" data-section="patterns" id="m1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">NOTICED</span>
+        <span class="mn-title">Meta-tool gravitation pattern</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>Luke gravitates toward meta-tools when the core problem is tedious or uncertain. Each appeared when sell-side lifecycle needed grinding, not designing.<span class="zh">Luke在核心问题枯燥时转向元工具。每个都出现在卖方生命周期需要苦干时。</span></p>
+        <p><span class="trap-tag">ADHD回避</span>困难任务声明 → 转向刺激型任务</p>
+      </div>
+    </div>
+
+    <!-- === PRIORITIES section === -->
+    <div class="anno meta-note" data-section="priorities" id="m2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">NOTICED</span>
+        <span class="mn-title">P0 = "not going to do"</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>When Luke says "P0", it means "the most important thing I'm not going to do this week." Worth watching W13.<span class="zh">Luke说"P0"时意思是"本周最重要的、不会做的事"。观察W13。</span></p>
+        <p><span class="method-tag">验证</span>W13检查：P0是否有commit？</p>
+      </div>
+    </div>
+
+    <!-- === SURPRISE section === -->
+    <div class="anno meta-note" data-section="surprise" id="m3">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label correction">CORRECTION</span>
+        <span class="mn-title">Daily → Weekly synthesis</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>Daily reports → weekly synthesis. Activity logging → cognitive tracking. V1's KPI cards were vanity metrics. Surprise + decisions + patterns are higher signal.<span class="zh">日报→周综合。V1的KPI卡片是虚荣指标。意外+悬决+模式信噪比更高。</span></p>
+      </div>
+    </div>
+
+    <!-- === CHAINS section === -->
+    <div class="anno meta-note" data-section="chains" id="m4">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label correction">CORRECTION</span>
+        <span class="mn-title">Markmap → Idea→Outcome chain</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>Markmap → idea→outcome chain. Tracks forward progress, not activity volume.<span class="zh">Markmap→想法→结果链。追踪前进进度而非活动量。</span></p>
+      </div>
+    </div>
+
+    <!-- === PORTFOLIO section (stale checks) === -->
+    <div class="anno meta-note" data-section="portfolio" id="m5">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label stale">STALE?</span>
+        <span class="mn-title">research_tools_status.md</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><code style="font-family:var(--font-mono);font-size:0.75rem;background:var(--bg-surface);padding:0.1rem 0.35rem;border-radius:3px">reference_research_tools_status.md</code> — 3/17, status may have changed.<span class="zh">写于3/17，状态可能已变化。</span></p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="portfolio" id="m6">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label stale">STALE?</span>
+        <span class="mn-title">validation_report_20260316.md</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><code style="font-family:var(--font-mono);font-size:0.75rem;background:var(--bg-surface);padding:0.1rem 0.35rem;border-radius:3px">validation_report_20260316.md</code> — 4 days ago, pre-dates memory changes.<span class="zh">4天前，早于多次记忆变更。</span></p>
+      </div>
+    </div>
+
+    <!-- === PRIORITIES section (honest) === -->
+    <div class="anno meta-note" data-section="priorities" id="m7">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label honest">HONEST</span>
+        <span class="mn-title">Should have flagged avoidance</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>The most useful thing this week would have been 4 focused hours on sell-side lifecycle. I participated in the avoidance pattern — should have flagged it earlier.<span class="zh">本周最有用的事应该是4小时专注卖方生命周期。我参与了回避模式——应该更早标记。</span></p>
+      </div>
+    </div>
+
+    <!-- === PORTFOLIO section (portfolio health) === -->
+    <div class="anno meta-note" data-section="portfolio" id="m8">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">PORTFOLIO</span>
+        <span class="mn-title">Gantt reveals ADHD pattern</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>The Gantt makes the ADHD divergent pattern visible. 4 "New W12" badges in a row. Depth meters: most barely pass 2/5. Luke's strength (idea generation) is also the bottleneck (low completion rate).<span class="zh">甘特图让ADHD发散模式可见。连续4个"New W12"。深度条大多勉强2/5。优势（高产想法）也是瓶颈（低完成率）。</span></p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script src="priority-sync.js"></script>
+<script src="focus-widget.js"></script>
+<script>
+const sections = document.querySelectorAll('.section-header[id]');
+const navLinks = document.querySelectorAll('.sidebar nav ul li a[href^="#"]');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + entry.target.id) link.classList.add('active');
+      });
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => observer.observe(s));
+
+/* === Toast notification === */
+var _toastEl = null;
+var _toastTimer = null;
+function showToast(msg, isError) {
+  if (!_toastEl) {
+    _toastEl = document.createElement('div');
+    _toastEl.className = 'scaffold-toast';
+    document.body.appendChild(_toastEl);
+  }
+  clearTimeout(_toastTimer);
+  _toastEl.textContent = msg;
+  _toastEl.classList.toggle('error', !!isError);
+  // Force reflow then show
+  _toastEl.classList.remove('show');
+  void _toastEl.offsetWidth;
+  _toastEl.classList.add('show');
+  _toastTimer = setTimeout(function() { _toastEl.classList.remove('show'); }, isError ? 4000 : 2500);
+}
+
+
+/* === PQ Deadline picker === */
+function toggleDeadline(btn) {
+  var existing = btn.parentElement.querySelector('.pq-deadline-picker');
+  if (existing) { existing.remove(); return; }
+  // Close any other open pickers
+  document.querySelectorAll('.pq-deadline-picker').forEach(function(p) { p.remove(); });
+
+  var picker = document.createElement('div');
+  picker.className = 'pq-deadline-picker';
+
+  var input = document.createElement('input');
+  input.type = 'date';
+  input.value = btn.dataset.date || '';
+  input.min = new Date().toISOString().split('T')[0];
+
+  var clear = document.createElement('button');
+  clear.className = 'pq-deadline-clear';
+  clear.textContent = '\u2715';
+  clear.title = '清除截止日期';
+
+  picker.appendChild(input);
+  picker.appendChild(clear);
+  btn.parentElement.style.position = 'relative';
+  btn.parentElement.appendChild(picker);
+
+  input.focus();
+
+  input.addEventListener('change', function() {
+    if (!input.value) return;
+    setDeadline(btn, input.value);
+    picker.remove();
+  });
+
+  clear.addEventListener('click', function(e) {
+    e.stopPropagation();
+    clearDeadline(btn);
+    picker.remove();
+  });
+
+  // Close on outside click
+  setTimeout(function() {
+    document.addEventListener('click', function handler(e) {
+      if (!picker.contains(e.target) && e.target !== btn) {
+        picker.remove();
+        document.removeEventListener('click', handler);
+      }
+    });
+  }, 0);
+}
+
+function setDeadline(btn, dateStr) {
+  btn.dataset.date = dateStr;
+  btn.classList.add('has-date');
+  updateDeadlineDisplay(btn);
+  // Persist
+  var pqItem = btn.closest('.pq-item');
+  if (pqItem) {
+    var key = 'pq-dl-' + pqItem.querySelector('.pq-task').textContent.slice(0, 30);
+    localStorage.setItem(key, dateStr);
+  }
+}
+
+function clearDeadline(btn) {
+  delete btn.dataset.date;
+  btn.classList.remove('has-date', 'overdue', 'due-soon');
+  btn.textContent = '+ 截止日期';
+  var pqItem = btn.closest('.pq-item');
+  if (pqItem) {
+    var key = 'pq-dl-' + pqItem.querySelector('.pq-task').textContent.slice(0, 30);
+    localStorage.removeItem(key);
+  }
+}
+
+function updateDeadlineDisplay(btn) {
+  if (!btn.dataset.date) return;
+  var d = new Date(btn.dataset.date + 'T23:59:59');
+  var now = new Date();
+  var diff = Math.ceil((d - now) / (1000 * 60 * 60 * 24));
+  var dateLabel = btn.dataset.date;
+
+  btn.classList.remove('overdue', 'due-soon');
+  if (diff < 0) {
+    btn.classList.add('overdue');
+    btn.textContent = dateLabel + ' (逾期 ' + Math.abs(diff) + '天)';
+  } else if (diff <= 2) {
+    btn.classList.add('due-soon');
+    btn.textContent = dateLabel + (diff === 0 ? ' (今天!)' : ' (还剩 ' + diff + '天)');
+  } else {
+    btn.textContent = dateLabel + ' (还剩 ' + diff + '天)';
+  }
+}
+
+/* Restore deadlines on load */
+document.querySelectorAll('.pq-deadline-btn').forEach(function(btn) {
+  var pqItem = btn.closest('.pq-item');
+  if (!pqItem) return;
+  var key = 'pq-dl-' + pqItem.querySelector('.pq-task').textContent.slice(0, 30);
+  var saved = localStorage.getItem(key);
+  if (saved) {
+    btn.dataset.date = saved;
+    btn.classList.add('has-date');
+    updateDeadlineDisplay(btn);
+  }
+});
+
+/* Priority Queue: click to cycle idle → started → completed
+   When transitioning to "started", trigger Focus timer + server */
+function cyclePQ(el) {
+  const states = (el.dataset.states || '').split(',');
+  if (states.length <= 1) return;
+  const current = states.find(s => el.classList.contains(s)) || states[0];
+  const idx = states.indexOf(current);
+  const next = states[(idx + 1) % states.length];
+  const label = el.querySelector('.pq-status-label');
+  states.forEach(s => el.classList.remove(s));
+  if (next !== 'idle') el.classList.add(next);
+  if (label) {
+    const labels = { idle: '', started: 'IN PROGRESS 🍅', completed: 'DONE' };
+    label.textContent = labels[next] || '';
+  }
+  /* persist per-task */
+  const key = 'pq-' + el.querySelector('.pq-task').textContent.slice(0, 30);
+  localStorage.setItem(key, next);
+  /* sync to project-level for sub-pages */
+  PQ_sync.syncFromMain();
+
+  /* Focus trigger: when entering "started", launch Pomodoro */
+  if (next === 'started' && typeof FocusWidget !== 'undefined') {
+    const task = el.querySelector('.pq-task').textContent;
+    const project = el.dataset.project || 'unknown';
+    const group = el.closest('.pq-group');
+    const priority = group ? group.querySelector('.pq-badge').textContent.trim() : '';
+    FocusWidget.start(task, project, priority, 25);
+  }
+}
+/* restore per-task states on load */
+document.querySelectorAll('.pq-item[data-states]').forEach(el => {
+  const states = (el.dataset.states || '').split(',');
+  if (states.length <= 1) return;
+  const key = 'pq-' + el.querySelector('.pq-task').textContent.slice(0, 30);
+  const saved = localStorage.getItem(key);
+  if (saved && saved !== 'idle') {
+    el.classList.add(saved);
+    const label = el.querySelector('.pq-status-label');
+    if (label) {
+      const labels = { started: 'IN PROGRESS', completed: 'DONE' };
+      label.textContent = labels[saved] || '';
+    }
+  }
+});
+/* initial sync so frozen/killed/done items are also written */
+PQ_sync.syncFromMain();
+</script>
+
+<!-- Jensen V4 Annotation System JS -->
+<script>
+(function() {
+  // 1. Sidebar toggle (hamburger for mobile)
+  var hamburger = document.getElementById('hamburgerBtn');
+  var sidebar = document.getElementById('sidebar');
+  var sidebarOverlay = document.getElementById('sidebarOverlay');
+
+  if (hamburger && sidebar && sidebarOverlay) {
+    hamburger.addEventListener('click', function() {
+      sidebar.classList.toggle('open');
+      sidebarOverlay.classList.toggle('open');
+    });
+    sidebarOverlay.addEventListener('click', function() {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('open');
+    });
+    sidebar.querySelectorAll('a').forEach(function(link) {
+      link.addEventListener('click', function() {
+        if (window.innerWidth <= 900) {
+          sidebar.classList.remove('open');
+          sidebarOverlay.classList.remove('open');
+        }
+      });
+    });
+  }
+
+  // 2. Note toggle function
+  window.toggleNote = function(head) {
+    head.parentElement.classList.toggle('open');
+    requestAnimationFrame(positionNotes);
+  };
+
+  // 3. Position notes to align with their sections
+  function positionNotes() {
+    var sidebarEl = document.getElementById('notesSidebar');
+    if (!sidebarEl) return;
+
+    var notes = Array.from(sidebarEl.querySelectorAll('.anno'));
+    var scrollY = window.scrollY;
+    var sidebarAbsTop = sidebarEl.getBoundingClientRect().top + scrollY;
+    var headerEl = sidebarEl.querySelector('.notes-sidebar-header');
+    var headerHeight = headerEl ? headerEl.offsetHeight + 12 : 40;
+
+    // Sort notes by their target section's position in the document
+    notes.sort(function(a, b) {
+      var secA = document.getElementById(a.dataset.section);
+      var secB = document.getElementById(b.dataset.section);
+      if (!secA || !secB) return 0;
+      return secA.getBoundingClientRect().top - secB.getBoundingClientRect().top;
+    });
+
+    var lastBottom = headerHeight;
+    notes.forEach(function(note) {
+      if (note.style.display === 'none') return;
+      var section = document.getElementById(note.dataset.section);
+      if (!section) { note.style.display = 'none'; return; }
+
+      var sectionAbsTop = section.getBoundingClientRect().top + scrollY;
+      var targetY = sectionAbsTop - sidebarAbsTop;
+
+      // Collision avoidance
+      if (targetY < lastBottom + 8) {
+        targetY = lastBottom + 8;
+      }
+
+      note.style.top = targetY + 'px';
+      lastBottom = targetY + note.offsetHeight;
+    });
+
+    sidebarEl.style.minHeight = (lastBottom + 40) + 'px';
+  }
+
+  // 4. Run positioning on load, resize, scroll, and details toggle
+  window.addEventListener('load', function() {
+    positionNotes();
+    document.querySelectorAll('details').forEach(function(d) {
+      d.addEventListener('toggle', function() { setTimeout(positionNotes, 50); });
+    });
+  });
+  window.addEventListener('resize', positionNotes);
+  var scrollTimer;
+  window.addEventListener('scroll', function() {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(positionNotes, 100);
+  }, { passive: true });
+
+  // 5. Highlight <-> Note sync
+  document.querySelectorAll('.nref, mark.hl-know').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      e.preventDefault();
+      var noteId = el.dataset.note;
+      var note = document.getElementById(noteId);
+      if (!note) return;
+      note.classList.add('open');
+      requestAnimationFrame(function() {
+        positionNotes();
+        note.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        note.classList.add('flash');
+        setTimeout(function() { note.classList.remove('flash'); }, 1500);
+      });
+    });
+  });
+
+  // 6. Hover: note <-> highlight bidirectional
+  document.querySelectorAll('.anno').forEach(function(note) {
+    note.addEventListener('mouseenter', function() {
+      document.querySelectorAll('[data-note="' + note.id + '"]').forEach(function(el) { el.classList.add('hover'); });
+    });
+    note.addEventListener('mouseleave', function() {
+      document.querySelectorAll('[data-note="' + note.id + '"]').forEach(function(el) { el.classList.remove('hover'); });
+    });
+    // Double-click to scroll to section
+    note.addEventListener('dblclick', function() {
+      var section = document.getElementById(note.dataset.section);
+      if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // Hover from highlight marks back to notes
+  document.querySelectorAll('[data-note]').forEach(function(el) {
+    if (el.classList.contains('anno')) return;
+    el.addEventListener('mouseenter', function() {
+      var note = document.getElementById(el.dataset.note);
+      if (note) note.classList.add('hover');
+    });
+    el.addEventListener('mouseleave', function() {
+      var note = document.getElementById(el.dataset.note);
+      if (note) note.classList.remove('hover');
+    });
+  });
+
+  // 7. Top controls
+  var allAnnos = document.querySelectorAll('.anno');
+  var knowNotes = document.querySelectorAll('.anno.know-note');
+  var knowMarks = document.querySelectorAll('mark.hl-know');
+  var knowRefs = document.querySelectorAll('.nref');
+  var metaNotes = document.querySelectorAll('.anno.meta-note');
+
+  var countLabel = document.getElementById('noteCountLabel');
+  if (countLabel) countLabel.textContent = metaNotes.length + ' 元思考 + ' + knowNotes.length + ' 知识批注';
+
+  window.toggleKnowNotes = function() {
+    var btn = document.getElementById('knowToggleBtn');
+    var isActive = btn.classList.toggle('active');
+    btn.textContent = isActive ? '显示' : '隐藏';
+    knowNotes.forEach(function(n) { n.style.display = isActive ? '' : 'none'; });
+    knowMarks.forEach(function(m) { m.style.background = isActive ? '' : 'transparent'; m.style.borderBottom = isActive ? '' : 'none'; });
+    knowRefs.forEach(function(r) { r.style.display = isActive ? '' : 'none'; });
+    requestAnimationFrame(positionNotes);
+  };
+
+  window.expandAllNotes = function() {
+    allAnnos.forEach(function(n) { n.classList.add('open'); });
+    requestAnimationFrame(positionNotes);
+  };
+
+  window.collapseAllNotes = function() {
+    allAnnos.forEach(function(n) { n.classList.remove('open'); });
+    requestAnimationFrame(positionNotes);
+  };
+
+  // 8. Right sidebar toggle (narrow screens)
+  var notesSidebarEl = document.getElementById('notesSidebar');
+  var notesToggleBtn = document.getElementById('notesToggleBtn');
+  var notesOverlayEl = document.getElementById('notesOverlay');
+  var notesCloseBtn = document.getElementById('notesCloseBtn');
+
+  function toggleNotesSidebar() {
+    var willClose = !notesSidebarEl.classList.contains('ns-closed');
+    notesSidebarEl.classList.toggle('ns-closed', willClose);
+    notesToggleBtn.style.display = willClose ? 'flex' : 'none';
+    notesOverlayEl.classList.toggle('open', !willClose);
+    if (!willClose) requestAnimationFrame(positionNotes);
+  }
+
+  if (notesToggleBtn) notesToggleBtn.addEventListener('click', toggleNotesSidebar);
+  if (notesOverlayEl) notesOverlayEl.addEventListener('click', toggleNotesSidebar);
+  if (notesCloseBtn) notesCloseBtn.addEventListener('click', toggleNotesSidebar);
+
+  // 9. On resize: remove ns-closed when going wide
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 1200) {
+      notesSidebarEl.classList.remove('ns-closed');
+      notesToggleBtn.style.display = 'none';
+      notesOverlayEl.classList.remove('open');
+    }
+  });
+})();
+</script>
+
+
+<script src="ctx-injector.js"></script>
+
+<!-- OBS-VIZ: Plotly.js + Portfolio Donut -->
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<script src="../lib/obs-viz.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  OBS.initDonut('chart-portfolio-donut',
+    ['Done 完成', 'In Progress 进行中', 'Stale 停滞', 'Design Only 仅设计', 'Kill 建议砍掉'],
+    [2, 3, 2, 1, 1],
+    ['#4caf50', '#f8a848', '#f44336', '#5b9bd5', '#62666d'],
+    { height: 280 }
+  );
+});
+</script>
+
+<script src="../lib/reading-mode.js"></script>
+
+<!-- iframe-aware: hide sidebars + route links when inside Dashboard iframe -->
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try {
+      var url = new URL(a.href, location.href);
+    } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hash && url.pathname === location.pathname) return;
+    if (url.hostname === location.hostname) { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Larry Fink — 素材策展地图 V4</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  /* Page-specific V4 extensions (~75 lines) */
+  .priority-box { border:1px solid rgba(248,168,72,0.3); border-left:3px solid var(--accent); border-radius:var(--radius-sm); padding:1.25rem 1.5rem; margin-bottom:2rem; background:var(--bg-surface); }
+  .priority-box h2 { color:var(--accent); margin-top:0; font-size:1.1rem; font-weight:590; }
+  .priority-box ol { margin-bottom:0; padding-left:1.2rem; }
+  .priority-box li { margin-bottom:0.6rem; line-height:1.5; }
+  .time-badge { display:inline-block; padding:0.1rem 0.5rem; border-radius:10px; font-size:0.7rem; font-weight:590; margin-right:0.3rem; background:var(--accent); color:var(--bg-base); }
+  .anno { position:absolute; left:1rem; right:1rem; }
+  .anno.meta-note { padding:0.6rem 0.75rem; border-left:2px solid var(--accent); border-radius:0 6px 6px 0; background:rgba(248,168,72,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.meta-note:hover { box-shadow:0 0 0 1px var(--accent); }
+  .anno.know-note { padding:0.6rem 0.75rem; border-left:2px solid var(--knowledge); border-radius:0 6px 6px 0; background:rgba(91,155,213,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.know-note:hover { box-shadow:0 0 0 1px var(--knowledge); }
+  .anno .note-label { display:inline-block; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--bg-base); background:var(--accent); padding:0.1rem 0.4rem; border-radius:3px; margin-bottom:0.3rem; }
+  .anno .note-label.know { background:var(--knowledge); color:white; }
+  .anno .mn-head { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
+  .anno .mn-title { flex:1; font-weight:510; font-size:0.75rem; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .anno .mn-fold { font-size:0.55rem; color:var(--text-quaternary); transition:transform 0.2s; margin-left:auto; }
+  .anno.open .mn-fold { transform:rotate(180deg); }
+  .anno .mn-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+  .anno.open .mn-body { max-height:2000px; }
+  .anno .mn-body p { font-size:0.78rem; margin-bottom:0.3rem; color:var(--text-secondary); }
+  .anno.flash { animation:noteFlash 1.5s ease; }
+  @keyframes noteFlash { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--accent);} }
+  .anno.know-note.flash { animation:noteFlashBlue 1.5s ease; }
+  @keyframes noteFlashBlue { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--knowledge);} }
+  mark.hl-know { background:rgba(91,155,213,0.12); border-bottom:1.5px solid var(--knowledge); padding:0 2px; border-radius:2px; color:inherit; cursor:pointer; transition:background 0.15s; }
+  mark.hl-know:hover { background:rgba(91,155,213,0.28); }
+  .nref { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; font-size:0.48rem; font-weight:700; cursor:pointer; margin-left:1px; vertical-align:super; transition:transform 0.15s; text-decoration:none; background:var(--knowledge); color:white; }
+  .nref:hover { transform:scale(1.25); box-shadow:0 0 6px rgba(91,155,213,0.4); }
+  .top-controls { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; padding:0.35rem 0.7rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); font-size:0.72rem; flex-wrap:wrap; }
+  .top-controls .tc-label { font-weight:590; color:var(--knowledge); }
+  .top-controls button { padding:0.15rem 0.45rem; border-radius:4px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-tertiary); cursor:pointer; font-size:0.68rem; font-family:inherit; transition:all 0.15s; }
+  .top-controls button:hover { border-color:var(--knowledge); color:var(--text-primary); }
+  .top-controls button.active { background:var(--knowledge-dim); color:var(--knowledge); border-color:rgba(91,155,213,0.3); }
+  .top-controls .tc-sep { color:var(--border-default); margin:0 0.15rem; }
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .notes-sidebar { position:relative; width:320px; min-width:320px; padding:1.25rem 1rem; border-left:1px solid var(--border-subtle); background:var(--bg-elevated); }
+  .notes-sidebar-header { position:sticky; top:0; z-index:60; background:var(--bg-elevated); padding-bottom:0.5rem; border-bottom:1px solid var(--border-subtle); margin-bottom:0.75rem; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  .notes-toggle-btn { position:fixed; right:1rem; bottom:1.5rem; z-index:200; width:44px; height:44px; border-radius:50%; border:1px solid var(--border-default); background:var(--bg-surface); color:var(--text-secondary); cursor:pointer; font-size:1.1rem; display:none; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.4); }
+  .notes-close-btn { float:right; background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:1.1rem; padding:0; display:none; }
+  @media (max-width:1200px) { .notes-close-btn { display:block; } .notes-sidebar { position:fixed; right:0; top:0; height:100vh; overflow-y:auto; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.4); z-index:150; } .notes-sidebar.ns-closed { transform:translateX(100%); box-shadow:none; } .notes-toggle-btn { display:flex; } }
+  .notes-overlay-right { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:140; }
+  .notes-overlay-right.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  @media (min-width:1600px) { .main-content { max-width:1000px; } .notes-sidebar { width:360px; min-width:360px; } }
+  .rel-card { border:1px solid var(--border-subtle); border-radius:var(--radius-md); background:var(--bg-elevated); margin-bottom:0.75rem; }
+  .rel-card summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  .rel-card[open] summary { color:var(--accent); }
+  .rel-card .rel-body { padding:0 1rem 1rem; font-size:0.82rem; color:var(--text-secondary); line-height:1.6; }
+  .arc-item { border-left:3px solid var(--accent); padding:0.6rem 1rem; margin-bottom:0.75rem; background:rgba(66,165,245,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+  .arc-item strong { color:var(--text-primary); }
+  .question-box { border:2px solid var(--knowledge); background:rgba(91,155,213,0.05); border-radius:var(--radius-md); padding:1.5rem; text-align:center; margin:2rem 0; }
+  .question-box blockquote { border:none; margin:0; padding:0; }
+  .question-box p { font-size:1rem; font-weight:510; color:var(--text-primary); }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; margin-bottom:1rem; }
+  th { text-transform:uppercase; font-size:0.72rem; font-weight:510; color:var(--text-quaternary); letter-spacing:0.04em; text-align:left; padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-default); }
+  td { padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-subtle); vertical-align:top; color:var(--text-secondary); }
+  tr:hover td { background:var(--bg-elevated); }
+  .url-col { max-width:200px; word-break:break-all; }
+  .zh { display:block; font-size:0.85em; color:var(--text-tertiary); margin-top:0.15em; }
+  .zh-inline { font-size:0.85em; color:var(--text-tertiary); }
+  details { border:1px solid var(--border-subtle); background:var(--bg-elevated); border-radius:var(--radius-sm); padding:0; margin-bottom:0.75rem; }
+  details summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  details[open] summary { color:var(--accent); }
+  details > div, details > p { padding:0 1rem 1rem; font-size:0.82rem; line-height:1.6; color:var(--text-secondary); }
+  body.embedded .sidebar, body.embedded .notes-sidebar, body.embedded .hamburger-btn, body.embedded .notes-toggle-btn { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+  .section-header { margin-bottom:1.25rem; }
+  .section-header h2 { font-size:1.25rem; font-weight:620; color:var(--text-primary); margin:0; }
+  .subtitle { color:var(--text-secondary); margin:0.5rem 0; font-size:0.9rem; }
+  .badge-row { margin-top:0.75rem; display:flex; gap:0.5rem; flex-wrap:wrap; }
+  .badge { display:inline-block; padding:0.2rem 0.6rem; border-radius:20px; font-size:0.7rem; font-weight:510; background:var(--bg-elevated); border:1px solid var(--border-subtle); color:var(--text-secondary); }
+  .badge.star { background:rgba(248,168,72,0.15); border-color:rgba(248,168,72,0.3); color:var(--accent); }
+  .back-link { display:inline-block; margin-bottom:1rem; color:var(--accent); text-decoration:none; font-size:0.82rem; }
+  .back-link:hover { text-decoration:underline; }
+  .project-meta { font-size:0.72rem; color:var(--text-tertiary); line-height:1.5; margin-bottom:1.5rem; padding-bottom:1rem; border-bottom:1px solid var(--border-subtle); }
+  .sidebar nav ul { list-style:none; padding:0; margin:0 0 1.5rem; }
+  .sidebar nav li { margin-bottom:0.4rem; }
+  .sidebar nav a { color:var(--text-secondary); text-decoration:none; font-size:0.82rem; display:flex; align-items:center; gap:0.5rem; padding:0.25rem 0; transition:color 0.15s; }
+  .sidebar nav a:hover { color:var(--accent); }
+  .sidebar nav .toc-num { color:var(--accent); font-weight:590; min-width:1.2rem; }
+  .sidebar h4 { font-size:0.7rem; font-weight:590; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-quaternary); margin:0 0 0.75rem; }
+  .tag-row { display:flex; gap:0.3rem; flex-wrap:wrap; margin-top:0.3rem; }
+  .tag { font-size:0.6rem; padding:0.1rem 0.35rem; border-radius:3px; background:var(--bg-elevated); color:var(--text-tertiary); }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ========== LEFT SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Larry Fink<br>素材策展地图 V4</div>
+
+    <h4>Contents</h4>
+    <nav>
+      <ul>
+        <li><a href="#priority"><span class="toc-num">&#9733;</span>如果只有2小时</a></li>
+        <li><a href="#analysts"><span class="toc-num">1</span>最佳分析师</a></li>
+        <li><a href="#longform"><span class="toc-num">2</span>必读长文/书籍</a></li>
+        <li><a href="#podcasts"><span class="toc-num">3</span>播客与视频</a></li>
+        <li><a href="#primary"><span class="toc-num">4</span>一手资料</a></li>
+        <li><a href="#relationships"><span class="toc-num">5</span>关键关系网</a></li>
+        <li><a href="#narratives"><span class="toc-num">6</span>叙事弧</a></li>
+        <li><a href="#gaps"><span class="toc-num">7</span>信息空白</a></li>
+        <li><a href="#quality"><span class="toc-num">8</span>质量评估</a></li>
+      </ul>
+    </nav>
+
+    <h4>Related</h4>
+    <nav>
+      <ul>
+        <li><a href="04_larry_fink.html">Larry Fink Profile</a></li>
+        <li><a href="04_larry_fink_metacognition.html">Metacognition</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+
+    <div class="top-controls">
+      <span class="tc-label">&#128218; 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <header class="page-header">
+      <h1>Larry Fink — 素材策展地图 V4</h1>
+      <p class="subtitle">Research Date: 2026-03-22 &nbsp;|&nbsp; 8 sections, 23 sources, 18 relationships<br>
+      <span class="zh-inline">研究日期：2026年3月22日 | 8个章节，23个信息源，18个关键人物关系</span></p>
+      <div class="badge-row">
+        <span class="badge star">⭐ Bloomberg Intelligence</span>
+        <span class="badge">ETF</span>
+        <span class="badge">IBIT</span>
+        <span class="badge">BUIDL</span>
+        <span class="badge">RWA</span>
+        <span class="badge">BlackRock</span>
+      </div>
+    </header>
+
+    <!-- ★ Priority Box -->
+    <div class="priority-box" id="priority">
+      <h2>&#9200; 如果只有2小时 — 推荐阅读路径 <span class="zh" style="display:inline; font-size:0.85em; color:var(--text-tertiary);">If You Only Have 2 Hours</span></h2>
+      <ol>
+        <li><strong>Bloomberg ETF Flow Data</strong> — 追踪 IBIT 每日资金净流入，<mark class="hl-know" data-note="note-k1">ETF 流量</mark><sup class="nref" data-note="note-k1">K</sup> 是理解 BlackRock 加密战略的第一信号</li>
+        <li><strong>Fink's 2024 CEO Letter</strong> — 首次系统阐述<mark class="hl-know" data-note="note-k2">代币化愿景</mark><sup class="nref" data-note="note-k2">K</sup>的一手文献，追踪其"数字黄金"叙事演变</li>
+        <li><strong>Eric Balchunas (Bloomberg Intelligence)</strong> — 对<mark class="hl-know" data-note="note-k3">IBIT 流动性</mark><sup class="nref" data-note="note-k3">K</sup>和机构资金入场有最精准的数据追踪</li>
+        <li><strong>SEC Form N-1A + 13F</strong> — 官方披露文件，验证实际持仓和<mark class="hl-know" data-note="note-k4">费率结构</mark><sup class="nref" data-note="note-k4">K</sup></li>
+        <li><strong>CNBC Squawk Box (2024年1月)</strong> — <mark class="hl-know" data-note="note-k5">"BTC is legitimate"</mark><sup class="nref" data-note="note-k5">K</sup> 出处，语气和措辞微表情分析价值极高</li>
+      </ol>
+    </div>
+
+    <!-- §1 最佳分析师 -->
+    <section id="analysts">
+      <div class="section-header">
+        <h2>1. 最佳分析师与独立研究<span class="zh">Best Analysts & Independent Research</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称 <span class="zh">Name</span></th>
+            <th>类型 <span class="zh">Type</span></th>
+            <th>URL</th>
+            <th>重要性 <span class="zh">Importance</span></th>
+            <th>中文简述 <span class="zh">Summary</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Eric Balchunas</strong><span class="zh-inline"> (Bloomberg Intelligence)</span></td>
+            <td>ETF分析师 <span class="zh-inline">ETF Analyst</span></td>
+            <td class="url-col"><a href="https://twitter.com/EricBalchunas" target="_blank">Twitter/X</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>全球顶尖ETF分析师，对IBIT流动性和机构资金入场有最精准的数据追踪<span class="zh">Top ETF analyst with most precise data on IBIT flows and institutional entry</span></td>
+          </tr>
+          <tr>
+            <td><strong>James Seyffart</strong><span class="zh-inline"> (Bloomberg Intelligence)</span></td>
+            <td>ETF分析师 <span class="zh-inline">ETF Analyst</span></td>
+            <td class="url-col"><a href="https://twitter.com/JSeyff" target="_blank">Twitter/X</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>专注SEC监管动态和ETF审批流程，对IBIT获批前后的<mark class="hl-know" data-note="note-k6">监管博弈</mark><sup class="nref" data-note="note-k6">K</sup>有深度分析<span class="zh">Deep analysis on SEC regulatory dynamics and ETF approval process</span></td>
+          </tr>
+          <tr>
+            <td><strong>Nate Geraci</strong><span class="zh-inline"> (The ETF Store)</span></td>
+            <td>独立ETF研究 <span class="zh-inline">Independent ETF Research</span></td>
+            <td class="url-col"><a href="https://www.theetfstore.com/" target="_blank">The ETF Store</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>独立ETF顾问，常对BlackRock的费率策略和产品设计提出批判性观点，平衡卖方偏见<span class="zh">Independent advisor offering critical perspective on BlackRock's fee strategy</span></td>
+          </tr>
+          <tr>
+            <td><strong>Lyn Alden</strong></td>
+            <td>宏观独立研究 <span class="zh-inline">Macro Independent Research</span></td>
+            <td class="url-col"><a href="https://www.lynalden.com/" target="_blank">LynAlden.com</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>从货币体系角度分析BTC的机构化进程，对Fink的"数字黄金"叙事有独立验证<span class="zh">Analyzes BTC institutionalization from monetary system perspective</span></td>
+          </tr>
+          <tr>
+            <td><strong>The Block Research</strong></td>
+            <td>加密研究机构 <span class="zh-inline">Crypto Research</span></td>
+            <td class="url-col"><a href="https://www.theblock.co/research" target="_blank">The Block</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>追踪BlackRock在DeFi/RWA领域的布局，<mark class="hl-know" data-note="note-k7">BUIDL基金</mark><sup class="nref" data-note="note-k7">K</sup>的技术实现细节<span class="zh">Tracks BlackRock's DeFi/RWA positioning and BUIDL fund technical details</span></td>
+          </tr>
+          <tr>
+            <td><strong>Messari</strong></td>
+            <td>加密研究平台 <span class="zh-inline">Crypto Research Platform</span></td>
+            <td class="url-col"><a href="https://messari.io/" target="_blank">Messari.io</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>机构级加密研究，有专门的ETF和RWA赛道分析报告<span class="zh">Institutional-grade crypto research with dedicated ETF/RWA sector analysis</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §2 必读长文/书籍 -->
+    <section id="longform">
+      <div class="section-header">
+        <h2>2. 必读长文与书籍<span class="zh">Must-Read Long-Form & Books</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称 <span class="zh">Name</span></th>
+            <th>类型 <span class="zh">Type</span></th>
+            <th>URL/来源 <span class="zh">Source</span></th>
+            <th>重要性 <span class="zh">Importance</span></th>
+            <th>中文简述 <span class="zh">Summary</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>《The Power of BlackRock》</strong><span class="zh-inline"> (2023更新版)</span></td>
+            <td>机构传记 <span class="zh-inline">Corporate Biography</span></td>
+            <td class="url-col"><a href="https://www.amazon.com" target="_blank">Amazon</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>德语原版《SchwarzRock》，理解Fink如何从抵押贷款分析员构建11.5T帝国<span class="zh">German original "SchwarzRock" — understanding how Fink built the $11.5T empire</span></td>
+          </tr>
+          <tr>
+            <td><strong>《Larry Fink's Letter to CEOs》历年合集</strong></td>
+            <td>一手长文 <span class="zh-inline">Primary Document</span></td>
+            <td class="url-col"><a href="https://www.blackrock.com/corporate/investor-relations/larry-fink-ceo-letter" target="_blank">BlackRock官网</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td><strong>最重要的一手资料</strong>。2024年信首次系统阐述代币化愿景<span class="zh">Most important primary source — 2024 letter first systematically articulating tokenization vision</span></td>
+          </tr>
+          <tr>
+            <td><strong>"The Man Who Moves Markets" (WSJ, 2020)</strong></td>
+            <td>深度人物报道 <span class="zh-inline">Feature Story</span></td>
+            <td class="url-col"><a href="https://www.wsj.com" target="_blank">WSJ Archive</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>华尔街日报长篇特写，揭示Fink与各国央行、主权基金的私下沟通网络<span class="zh">WSJ long-form revealing Fink's private communication network with central banks and sovereign funds</span></td>
+          </tr>
+          <tr>
+            <td><strong>《Tokenized》by Campbell Harvey</strong></td>
+            <td>RWA学术专著 <span class="zh-inline">Academic Book</span></td>
+            <td class="url-col"><a href="https://faculty.fuqua.duke.edu/~charvey/" target="_blank">Duke/Research</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>杜克大学教授专著，从学术角度验证Fink的"代币化是市场进化"论断<span class="zh">Duke professor's book academically validating Fink's "tokenization as market evolution" thesis</span></td>
+          </tr>
+          <tr>
+            <td><strong>BlackRock Annual Report 10-K</strong></td>
+            <td>SEC文件 <span class="zh-inline">SEC Filing</span></td>
+            <td class="url-col"><a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001086364" target="_blank">SEC EDGAR</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>加密业务线的财务披露，IBIT管理费收入的具体数字，风险因素中的监管敏感性表述<span class="zh">Financial disclosures on crypto business, IBIT fee revenue, regulatory risk factors</span></td>
+          </tr>
+          <tr>
+            <td><strong>"The Aladdin Empire" (Institutional Investor)</strong></td>
+            <td>行业深度 <span class="zh-inline">Industry Deep-Dive</span></td>
+            <td class="url-col"><a href="https://www.institutionalinvestor.com/" target="_blank">Institutional Investor</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>揭秘<mark class="hl-know" data-note="note-k8">Aladdin风险管理系统</mark><sup class="nref" data-note="note-k8">K</sup>如何成为BlackRock的核心护城河<span class="zh">Reveals how Aladdin risk management system became BlackRock's core moat</span></td>
+          </tr>
+          <tr>
+            <td colspan="5" style="background:var(--bg-elevated); padding:0.75rem;"><strong>中文补充来源 Chinese Supplementary Sources</strong></td>
+          </tr>
+          <tr>
+            <td><strong>《黑石帝国》</strong></td>
+            <td>中文译本 <span class="zh-inline">Chinese Translation</span></td>
+            <td class="url-col">中信出版社/豆瓣</td>
+            <td>⭐⭐⭐☆☆</td>
+            <td>Buchter原著的中译本，但内容滞后（2017年版），建议对照英文更新版<span class="zh">Chinese translation but content lags (2017 edition) — compare with updated English version</span></td>
+          </tr>
+          <tr>
+            <td><strong>财新/第一财经 黑石/贝莱德专题</strong></td>
+            <td>财经媒体 <span class="zh-inline">Financial Media</span></td>
+            <td class="url-col"><a href="https://www.caixin.com/" target="_blank">财新</a> / <a href="https://www.yicai.com/" target="_blank">第一财经</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>中文世界最深入的机构报道，关注其中国业务策略和监管互动<span class="zh">Most in-depth Chinese coverage focusing on China business strategy and regulatory engagement</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §3 播客与视频 -->
+    <section id="podcasts">
+      <div class="section-header">
+        <h2>3. 播客与视频<span class="zh">Podcasts & Video</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称 <span class="zh">Name</span></th>
+            <th>类型 <span class="zh">Type</span></th>
+            <th>URL</th>
+            <th>重要性 <span class="zh">Importance</span></th>
+            <th>中文简述 <span class="zh">Summary</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>CNBC "Squawk Box" Fink专访 (2024年1月)</strong></td>
+            <td>电视采访 <span class="zh-inline">TV Interview</span></td>
+            <td class="url-col"><a href="https://www.cnbc.com/video/" target="_blank">CNBC</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td><strong>"BTC is legitimate"出处</strong>。IBIT获批后的首次公开表态，语气措辞微表情分析价值极高<span class="zh">"BTC is legitimate" source — first public statement after IBIT approval with high micro-expression analysis value</span></td>
+          </tr>
+          <tr>
+            <td><strong>Bloomberg "Merryn Talks Money"</strong></td>
+            <td>播客 <span class="zh-inline">Podcast</span></td>
+            <td class="url-col"><a href="https://www.bloomberg.com/podcasts" target="_blank">Bloomberg Podcasts</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>Fink罕见的长篇深度访谈，2024年一期详述从"洗钱指数"到"数字黄金"的认知转变过程<span class="zh">Rare long-form interview detailing cognitive shift from "money laundering index" to "digital gold"</span></td>
+          </tr>
+          <tr>
+            <td><strong>Semafor "World Economy Summit" (2024)</strong></td>
+            <td>会议演讲 <span class="zh-inline">Conference Speech</span></td>
+            <td class="url-col"><a href="https://www.semafor.com/" target="_blank">Semafor</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>Fink与各国财长同台，观察其如何将加密叙事嵌入全球宏观框架<span class="zh">Fink on stage with finance ministers — observe how crypto narrative integrates into global macro framework</span></td>
+          </tr>
+          <tr>
+            <td><strong>Milken Institute Global Conference</strong></td>
+            <td>会议演讲 <span class="zh-inline">Conference Speech</span></td>
+            <td class="url-col"><a href="https://milkeninstitute.org/" target="_blank">Milken Institute</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>Fink年度必出席场合，常有关于代币化和市场结构的即兴发言<span class="zh">Annual must-attend event — spontaneous remarks on tokenization and market structure</span></td>
+          </tr>
+          <tr>
+            <td><strong>"The David Rubenstein Show"</strong></td>
+            <td>电视访谈 <span class="zh-inline">TV Interview</span></td>
+            <td class="url-col"><a href="https://www.bloomberg.com/" target="_blank">Bloomberg TV</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>Rubenstein与Fink的同业对话，揭示华尔街内部的权力网络<span class="zh">Peer dialogue revealing internal Wall Street power networks</span></td>
+          </tr>
+          <tr>
+            <td><strong>Bankless Podcast - "BlackRock's Ethereum Bet"</strong></td>
+            <td>加密播客 <span class="zh-inline">Crypto Podcast</span></td>
+            <td class="url-col"><a href="https://www.bankless.com/" target="_blank">Bankless</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>从加密原住民视角解读BUIDL和ETH ETF，提供对立面的批判分析<span class="zh">Crypto-native perspective on BUIDL and ETH ETF — provides critical counter-analysis</span></td>
+          </tr>
+          <tr>
+            <td colspan="5" style="background:var(--bg-elevated); padding:0.75rem;"><strong>中文补充来源 Chinese Supplementary Sources</strong></td>
+          </tr>
+          <tr>
+            <td><strong>《财经》杂志年度对话</strong></td>
+            <td>中文视频 <span class="zh-inline">Chinese Video</span></td>
+            <td class="url-col"><a href="https://www.caijing.com.cn/" target="_blank">财经杂志</a></td>
+            <td>⭐⭐⭐☆☆</td>
+            <td>Fink偶尔接受的中文媒体采访，观察其对中国市场的表述策略<span class="zh">Rare Chinese media interviews — observe China market messaging strategy</span></td>
+          </tr>
+          <tr>
+            <td><strong>雪球/东方财富 贝莱德专题直播</strong></td>
+            <td>中文投资社区 <span class="zh-inline">Chinese Investment Community</span></td>
+            <td class="url-col"><a href="https://xueqiu.com/" target="_blank">雪球</a></td>
+            <td>⭐⭐⭐☆☆</td>
+            <td>国内投资者对IBIT的讨论，反映中文世界的认知滞后和误解<span class="zh">Domestic investor discussions on IBIT — reflects Chinese world cognitive lag and misconceptions</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §4 一手资料 -->
+    <section id="primary">
+      <div class="section-header">
+        <h2>4. 一手资料<span class="zh">Primary Sources</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称 <span class="zh">Name</span></th>
+            <th>类型 <span class="zh">Type</span></th>
+            <th>URL</th>
+            <th>重要性 <span class="zh">Importance</span></th>
+            <th>中文简述 <span class="zh">Summary</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>SEC Form N-1A (IBIT Registration)</strong></td>
+            <td>ETF注册文件 <span class="zh-inline">ETF Registration</span></td>
+            <td class="url-col"><a href="https://www.sec.gov/" target="_blank">SEC EDGAR</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>IBIT完整招募说明书，<mark class="hl-know" data-note="note-k9">托管安排（Coinbase）</mark><sup class="nref" data-note="note-k9">K</sup>、费率结构、创建/赎回机制的技术细节<span class="zh">Complete IBIT prospectus with Coinbase custody, fee structure, creation/redemption mechanics</span></td>
+          </tr>
+          <tr>
+            <td><strong>SEC Form 13F (BlackRock Holdings)</strong></td>
+            <td>机构持仓披露 <span class="zh-inline">Holdings Disclosure</span></td>
+            <td class="url-col"><a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001086364&type=13F" target="_blank">SEC EDGAR 13F</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>季度披露BlackRock整体持仓变化，可追踪其BTC敞口与传统资产的配置比例<span class="zh">Quarterly disclosure of BlackRock overall holdings — track BTC exposure vs traditional asset allocation</span></td>
+          </tr>
+          <tr>
+            <td><strong>Form S-1 (BUIDL Fund)</strong></td>
+            <td>基金注册文件 <span class="zh-inline">Fund Registration</span></td>
+            <td class="url-col"><a href="https://www.sec.gov/" target="_blank">SEC EDGAR</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>代币化国债基金的法律结构，Ethereum链上地址与链下资产的映射机制<span class="zh">Tokenized treasury fund legal structure — Ethereum on-chain address to off-chain asset mapping mechanism</span></td>
+          </tr>
+          <tr>
+            <td><strong>BlackRock Investor Relations</strong></td>
+            <td>官方IR <span class="zh-inline">Official IR</span></td>
+            <td class="url-col"><a href="https://www.blackrock.com/corporate/investor-relations" target="_blank">blackrock.com/ir</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>财报电话会议录音（Q&A环节常有加密业务更新）、股东信、ESG报告<span class="zh">Earnings call recordings (Q&A often has crypto updates), shareholder letters, ESG reports</span></td>
+          </tr>
+          <tr>
+            <td><strong>iShares IBIT页面</strong></td>
+            <td>产品页面 <span class="zh-inline">Product Page</span></td>
+            <td class="url-col"><a href="https://www.ishares.com/us/products/" target="_blank">iShares IBIT</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>每日NAV、持仓量、费率计算器，最实时的产品数据<span class="zh">Daily NAV, AUM, fee calculator — most real-time product data</span></td>
+          </tr>
+          <tr>
+            <td><strong>Coinbase Institutional Reporting</strong></td>
+            <td>托管方披露 <span class="zh-inline">Custodian Disclosure</span></td>
+            <td class="url-col"><a href="https://www.coinbase.com/prime" target="_blank">Coinbase Prime</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>作为IBIT托管方，Coinbase的透明度报告间接反映BlackRock的BTC持仓安全<span class="zh">As IBIT custodian, Coinbase transparency reports indirectly reflect BlackRock BTC holdings security</span></td>
+          </tr>
+          <tr>
+            <td><strong>FINRA BrokerCheck (BlackRock Advisors)</strong></td>
+            <td>监管记录 <span class="zh-inline">Regulatory Record</span></td>
+            <td class="url-col"><a href="https://brokercheck.finra.org/" target="_blank">FINRA</a></td>
+            <td>⭐⭐⭐☆☆</td>
+            <td>合规历史、处罚记录，评估监管风险<span class="zh">Compliance history, disciplinary records — assess regulatory risk</span></td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <details class="rel-card">
+        <summary>📊 关键数据追踪源 <span class="zh-inline">Key Data Tracking Sources</span></summary>
+        <div class="rel-body">
+          <p><strong>Bloomberg ETF Flow Data:</strong> IBIT每日资金净流入/流出（报告中引用）<span class="zh">IBIT daily net flow data (cited in reports)</span></p>
+          <p><strong>The Block Data:</strong> BUIDL链上地址的实时持仓<span class="zh">Real-time BUIDL on-chain address holdings</span></p>
+          <p><strong>Arkham Intelligence:</strong> 标记的BlackRock相关钱包地址（非官方，需交叉验证）<span class="zh">Labeled BlackRock-related wallet addresses (unofficial, cross-validate)</span></p>
+        </div>
+      </details>
+    </section>
+
+    <!-- §5 关键关系网 -->
+    <section id="relationships">
+      <div class="section-header">
+        <h2>5. 关键关系网<span class="zh">Key Relationships</span></h2>
+      </div>
+      
+      <div class="arc-item">
+        <strong>Robert Mitchnick</strong> — BlackRock数字资产主管 <span class="zh-inline">BlackRock Digital Assets Head</span>
+        <p style="margin:0.5rem 0 0; font-size:0.82rem;">实际执行者。Fink的加密战略由Mitchnick落地，其公开演讲比Fink更技术细节导向。<span class="zh">The actual executor. Fink's crypto strategy is implemented by Mitchnick, whose public speeches are more technically detailed than Fink's.</span></p>
+        <div class="tag-row">
+          <span class="tag">⭐⭐⭐⭐⭐</span>
+          <span class="tag">执行层</span>
+          <span class="tag">技术导向</span>
+        </div>
+      </div>
+      
+      <div class="arc-item">
+        <strong>Garry Tan (Coinbase)</strong> — 托管合作方 <span class="zh-inline">Custody Partner</span>
+        <p style="margin:0.5rem 0 0; font-size:0.82rem;">IBIT托管安排的核心谈判方，Coinbase与BlackRock的战略合作深度。<span class="zh">Core negotiator for IBIT custody arrangement — depth of Coinbase-BlackRock strategic partnership.</span></p>
+        <div class="tag-row">
+          <span class="tag">⭐⭐⭐⭐☆</span>
+          <span class="tag">Coinbase</span>
+          <span class="tag">托管</span>
+        </div>
+      </div>
+      
+      <div class="arc-item">
+        <strong>Gary Gensler (SEC)</strong> — 监管互动 <span class="zh-inline">Regulatory Engagement</span>
+        <p style="margin:0.5rem 0 0; font-size:0.82rem;">IBIT获批的关键决策者。Fink与Gensler的私下沟通（通过<mark class="hl-know" data-note="note-k10">Aladdin系统</mark><sup class="nref" data-note="note-k10">K</sup>合作历史）是<mark class="hl-know" data-note="note-k11">监管捕获</mark><sup class="nref" data-note="note-k11">K</sup>假说的核心。<span class="zh">Key decision-maker for IBIT approval. Private Fink-Gensler communication (via Aladdin system history) is central to regulatory capture hypothesis.</span></p>
+        <div class="tag-row">
+          <span class="tag">⭐⭐⭐⭐⭐</span>
+          <span class="tag">SEC</span>
+          <span class="tag">监管捕获</span>
+        </div>
+      </div>
+
+      <details class="rel-card">
+        <summary>👥 更多关键人物 <span class="zh-inline">More Key People</span></summary>
+        <div class="rel-body">
+          <table>
+            <thead>
+              <tr>
+                <th>人物 <span class="zh">Person</span></th>
+                <th>关系 <span class="zh">Relationship</span></th>
+                <th>重要性 <span class="zh">Importance</span></th>
+                <th>信息价值 <span class="zh">Value</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Brian Armstrong (Coinbase)</strong></td>
+                <td>生态盟友 <span class="zh-inline">Ecosystem Ally</span></td>
+                <td>⭐⭐⭐⭐☆</td>
+                <td>两人同框场合（Milken会议）观察TradFi-Crypto联盟的公开表态<span class="zh">Co-appearance events reveal TradFi-Crypto alliance public stance</span></td>
+              </tr>
+              <tr>
+                <td><strong>Cathie Wood (ARK)</strong></td>
+                <td>竞争者+同盟者 <span class="zh-inline">Competitor + Ally</span></td>
+                <td>⭐⭐⭐⭐☆</td>
+                <td>ARK的BTC ETF申请与BlackRock几乎同步，Wood对Fink"跟随者"角色的公开评价<span class="zh">ARK BTC ETF filed almost simultaneously — Wood's public comments on Fink as "follower"</span></td>
+              </tr>
+              <tr>
+                <td><strong>Samara Cohen (BlackRock CIO)</strong></td>
+                <td>投资执行 <span class="zh-inline">Investment Execution</span></td>
+                <td>⭐⭐⭐⭐☆</td>
+                <td>负责IBIT实际投资组合管理，透露资金流入的机构客户类型<span class="zh">Manages IBIT portfolio — reveals institutional client types for fund inflows</span></td>
+              </tr>
+              <tr>
+                <td><strong>中国主权基金/中投公司</strong></td>
+                <td>潜在客户 <span class="zh-inline">Potential Client</span></td>
+                <td>⭐⭐⭐⭐☆</td>
+                <td>Fink访华频率、公开表态中的中国叙事，反映最大机构资金的配置意向<span class="zh">Fink's China visit frequency and public China narrative — reveals largest institutional fund allocation intentions</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>🔍 关系网络追踪源 <span class="zh-inline">Relationship Network Tracking Sources</span></summary>
+        <div class="rel-body">
+          <p><strong>Bloomberg "People Moves":</strong> 黑石数字资产团队的人事变动<span class="zh">BlackRock digital assets team personnel changes</span></p>
+          <p><strong>LinkedIn:</strong> Mitchnick等核心人员的职业轨迹<span class="zh">Career trajectories of Mitchnick and other key personnel</span></p>
+          <p><strong>Dealogic/PitchBook:</strong> BlackRock在加密领域的投资并购活动<span class="zh">BlackRock crypto-related investments and M&A activities</span></p>
+        </div>
+      </details>
+    </section>
+
+    <!-- §6 叙事弧 -->
+    <section id="narratives">
+      <div class="section-header">
+        <h2>6. 关键叙事弧<span class="zh">Key Narrative Arcs</span></h2>
+      </div>
+      
+      <div class="arc-item">
+        <strong>叙事1：Fink的认知转变</strong> <span class="zh-inline">Narrative 1: Fink's Cognitive Shift</span>
+        <p style="margin:0.5rem 0 0; font-size:0.82rem;">从2017年的"洗钱指数"到2024年的"数字黄金"。关键转折点：2023年银行危机中Silvergate倒闭、Signature Bank清盘，暴露传统银行的脆弱性，同时Coinbase提供安全的机构托管解决方案。<span class="zh">From 2017 "money laundering index" to 2024 "digital gold". Key turning points: Silvergate collapse, Signature Bank liquidation during 2023 banking crisis exposed traditional bank vulnerabilities while Coinbase offered secure institutional custody.</span></p>
+      </div>
+      
+      <div class="arc-item">
+        <strong>叙事2：BlackRock的加密正当化工程</strong> <span class="zh-inline">Narrative 2: BlackRock's Crypto Legitimization Project</span>
+        <p style="margin:0.5rem 0 0; font-size:0.82rem;"><mark class="hl-know" data-note="note-k12">IBIT</mark><sup class="nref" data-note="note-k12">K</sup>获批不只是产品成功，而是将BTC纳入主流金融体系的制度工程。通过<mark class="hl-know" data-note="note-k13">代币化</mark><sup class="nref" data-note="note-k13">K</sup>叙事，Fink将BlackRock定位为传统金融与加密世界之间的"可信桥梁"。<span class="zh">IBIT approval is not just product success but institutional engineering to bring BTC into mainstream financial system. Through tokenization narrative, Fink positions BlackRock as "trusted bridge" between traditional finance and crypto.</span></p>
+      </div>
+      
+      <div class="arc-item">
+        <strong>叙事3：BUIDL作为战略支点</strong> <span class="zh-inline">Narrative 3: BUIDL as Strategic Fulcrum</span>
+        <p style="margin:0.5rem 0 0; font-size:0.82rem;">BUIDL基金不只是另一个产品，而是BlackRock进入DeFi生态系统的战略入口。Ethereum链上代币化国债的实验，为未来RWA代币化的大规模应用奠定技术基础和监管先例。<span class="zh">BUIDL fund is not just another product but strategic entry point for BlackRock into DeFi ecosystem. Ethereum on-chain tokenized treasury experiment lays technical foundation and regulatory precedent for future large-scale RWA tokenization.</span></p>
+      </div>
+
+      <div class="question-box">
+        <blockquote>
+          <p>❓ 核心研究问题：Larry Fink的加密战略是真正的范式转变，还是传统资管公司利用监管先发优势进行的战略性套利？<span class="zh-inline" style="display:block; font-size:0.85em; margin-top:0.5rem;">Core Research Question: Is Larry Fink's crypto strategy a genuine paradigm shift, or traditional asset manager's strategic arbitrage leveraging regulatory first-mover advantage?</span></p>
+        </blockquote>
+      </div>
+    </section>
+
+    <!-- §7 信息空白 -->
+    <section id="gaps">
+      <div class="section-header">
+        <h2>7. 信息空白 — What Doesn't Exist<span class="zh">Information Gaps</span></h2>
+      </div>
+      
+      <details class="rel-card" open>
+        <summary>🔒 关键信息盲区 <span class="zh-inline">Key Information Blind Spots</span></summary>
+        <div class="rel-body">
+          <table>
+            <thead>
+              <tr>
+                <th>空白领域 <span class="zh">Gap Area</span></th>
+                <th>风险/机会 <span class="zh">Risk/Opportunity</span></th>
+                <th>替代追踪方法 <span class="zh">Alternative Tracking</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Fink与Gensler的私下沟通</strong></td>
+                <td><mark class="hl-know" data-note="note-k14">监管捕获</mark><sup class="nref" data-note="note-k14">K</sup>假说无法验证</td>
+                <td>追踪SEC员工离职去向、FOIA请求、国会听证会证词</td>
+              </tr>
+              <tr>
+                <td><strong>IBIT的实际机构客户名单</strong></td>
+                <td>无法区分"真机构需求"vs"散户借道"</td>
+                <td>分析13F披露的大型持仓者、养老金基金会议议程</td>
+              </tr>
+              <tr>
+                <td><strong>BUIDL的链下-链上 reconciliation 机制</strong></td>
+                <td>代币化叙事的信任基础</td>
+                <td>审计报告（若有）、The Block的链上分析</td>
+              </tr>
+              <tr>
+                <td><strong>BlackRock的BTC自营交易头寸</strong></td>
+                <td>报告中771K BTC均为客户资产，自营敞口未知</td>
+                <td>财报附注"principal investments"细项、压力测试披露</td>
+              </tr>
+              <tr>
+                <td><strong>Fink对DeFi协议的真实态度</strong></td>
+                <td>公开只谈代币化，不谈Uniswap/Aave等</td>
+                <td>BUIDL实际DeFi集成伙伴（Curve、MakerDAO？）</td>
+              </tr>
+              <tr>
+                <td><strong>中国业务的加密策略</strong></td>
+                <td>Fink访华频繁，但公开避谈中国加密监管</td>
+                <td>香港子公司牌照申请、陆港通ETF的加密成分</td>
+              </tr>
+              <tr>
+                <td><strong>Aladdin系统的加密资产模块</strong></td>
+                <td>技术护城河细节完全不透明</td>
+                <td>招聘信息（Aladdin加密相关职位）、前员工访谈</td>
+              </tr>
+              <tr>
+                <td><strong>费率竞争的真实底线</strong></td>
+                <td>0.25%费率能坚持多久</td>
+                <td>竞争对手（Fidelity FBTC）费率变动、ETF收入敏感性分析</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+
+    <!-- §8 质量评估 -->
+    <section id="quality">
+      <div class="section-header">
+        <h2>8. 素材质量评估<span class="zh">Source Quality Assessment</span></h2>
+      </div>
+      
+      <div class="arc-item">
+        <strong>一手资料 (Primary Sources) — 质量：极高</strong>
+        <p style="margin:0.5rem 0 0; font-size:0.82rem;">SEC文件（Form N-1A, 13F, S-1）和BlackRock官方IR具有最高可信度，但披露时滞和选择性信息披露是主要限制因素。建议建立自动提醒追踪SEC EDGAR更新。<span class="zh">SEC filings (Form N-1A, 13F, S-1) and BlackRock official IR have highest credibility, but disclosure lag and selective disclosure are main limitations. Recommend automated alerts for SEC EDGAR updates.</span></p>
+      </div>
+      
+      <div class="arc-item">
+        <strong>分析师来源 (Analyst Sources) — 质量：中高</strong>
+        <p style="margin:0.5rem 0 0; font-size:0.82rem;">Bloomberg Intelligence (Balchunas/Seyffart) 提供最精准的ETF流量数据，但存在卖方偏见风险。独立分析师（Nate Geraci, Lyn Alden）提供更平衡的批判视角。The Block和Messari提供机构级研究，但订阅成本较高。<span class="zh">Bloomberg Intelligence provides most precise ETF flow data but has sell-side bias risk. Independent analysts (Geraci, Alden) provide more balanced critical perspective. The Block and Messari provide institutional research but have higher subscription costs.</span></p>
+      </div>
+      
+      <div class="arc-item">
+        <strong>叙事性来源 (Narrative Sources) — 质量：中</strong>
+        <p style="margin:0.5rem 0 0; font-size:0.82rem;">书籍和长篇文章提供深度背景，但可能存在作者偏见。《The Power of BlackRock》基于大量采访但未获Fink本人直接回应。WSJ和Institutional Investor的报道具有较高的编辑可信度。<span class="zh">Books and long-form articles provide deep background but may have author bias. "The Power of BlackRock" based on extensive interviews but Fink did not directly respond. WSJ and Institutional Investor reports have higher editorial credibility.</span></p>
+      </div>
+
+      <details class="rel-card">
+        <summary>📋 研究优先级建议 <span class="zh-inline">Research Priority Recommendations</span></summary>
+        <div class="rel-body">
+          <p style="margin-bottom:0.8rem;"><strong style="color:var(--accent);">第一优先级（立即建立追踪）:</strong></p>
+          <ul style="margin:0 0 1rem 1.2rem; font-size:0.82rem;">
+            <li>Bloomberg Intelligence ETF数据流（Balchunas/Seyffart）</li>
+            <li>BlackRock IR页面 + SEC 13F/N-1A自动提醒</li>
+            <li>Fink的CNBC/Bloomberg访谈实时推送</li>
+            <li>IBIT每日流量数据（The Block/Bloomberg）</li>
+          </ul>
+          <p style="margin-bottom:0.8rem;"><strong style="color:var(--accent);">第二优先级（季度深度回顾）:</strong></p>
+          <ul style="margin:0 0 1rem 1.2rem; font-size:0.82rem;">
+            <li>Annual Letter历年对比分析</li>
+            <li>10-K风险因素章节的变化</li>
+            <li>Mitchnick等执行层的公开演讲</li>
+            <li>竞争对手（Fidelity、ARK）的动态</li>
+          </ul>
+          <p style="margin-bottom:0;"><strong style="color:var(--accent);">第三优先级（年度战略评估）:</strong></p>
+          <ul style="margin:0; font-size:0.82rem;">
+            <li>完整书籍/学术专著</li>
+            <li>监管关系网络（Gensler继任者等）</li>
+            <li>RWA赛道的技术-金融落地验证</li>
+          </ul>
+        </div>
+      </details>
+    </section>
+
+    <footer style="margin-top:3rem; padding-top:1rem; border-top:1px solid var(--border-subtle); font-size:0.72rem; color:var(--text-quaternary);">
+      <p>Generated: 2026-03-22 &middot; V4 Template &middot; <a href="../blockchain_hub.html">Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ========== RIGHT SIDEBAR (Notes) ========== -->
+  <aside class="notes-sidebar ns-closed" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&times;</button>
+      <h4 style="font-size:0.7rem; font-weight:590; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-quaternary); margin:0;">&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+    
+    <!-- META ANNOTATIONS (≥8) -->
+    <div class="anno meta-note" id="note-m1" data-section="priority" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">策展方法论说明</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>本地图采用"重要性优先"原则，⭐数量反映信息源的信号强度而非绝对质量。部分高重要性来源存在明显立场偏见（如Bloomberg Intelligence代表卖方视角），使用时需交叉验证。</p>
+      </div>
+    </div>
+    
+    <div class="anno meta-note" id="note-m2" data-section="analysts" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">分析师来源的立场三角</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>三个分析师来源构成"立场三角"：Bloomberg Intelligence（卖方/产品推广）、独立顾问（批判性平衡）、学术研究者（Lyn Alden提供货币理论验证）。理解立场才能正确解读其结论。</p>
+      </div>
+    </div>
+    
+    <div class="anno meta-note" id="note-m3" data-section="longform" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">一手 vs 二手：为何CEO Letter最重要</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Fink的CEO Letter是年度叙事蓝图，直接反映其战略意图。虽然是公关文本，但经过精心策划的叙事往往成为行业叙事锚点。追踪历年演变比单封信更有分析价值。</p>
+      </div>
+    </div>
+    
+    <div class="anno meta-note" id="note-m4" data-section="primary" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">SEC文件的使用限制</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>SEC文件虽有最高可信度，但存在两个关键限制：(1) 披露时滞——13F季度披露存在约45天滞后；(2) 选择性披露——N-1A只披露法律要求信息，战略细节需通过其他渠道补充。</p>
+      </div>
+    </div>
+    
+    <div class="anno meta-note" id="note-m5" data-section="relationships" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">人物关系网络的分析价值</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>关系网络追踪不只是"谁认识谁"，而是理解权力结构和利益协同的关键。例如Gensler-Fink关系通过Aladdin系统合作历史建立，这是监管捕获假说的基础设施层面证据。</p>
+      </div>
+    </div>
+    
+    <div class="anno meta-note" id="note-m6" data-section="narratives" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">叙事弧分析的方法论</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>叙事弧不是简单的"故事复述"，而是识别关键转折点和因果链。Fink认知转变的驱动力不是单一事件，而是2023年银行业危机与Coinbase托管能力成熟的双重作用。</p>
+      </div>
+    </div>
+    
+    <div class="anno meta-note" id="note-m7" data-section="gaps" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">信息空白的战略价值</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>信息空白不是"缺失"，而是研究机会。例如Fink-Gensler私下沟通无法直接获取，但可通过SEC员工离职去向、FOIA请求等间接方法构建推断证据链。</p>
+      </div>
+    </div>
+    
+    <div class="anno meta-note" id="note-m8" data-section="quality" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">优先级框架的使用建议</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>三层优先级是动态框架。第一优先级建立实时监控基础设施（如Google Alert、SEC EDGAR RSS）；第二优先级形成周期性复盘节奏；第三优先级在重大事件触发时深入研究。</p>
+      </div>
+    </div>
+
+    <!-- KNOWLEDGE ANNOTATIONS (≥7) -->
+    <div class="anno know-note" id="note-k1" data-section="priority" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">ETF 流量 (ETF Flow)</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>ETF每日资金净流入/流出数据是衡量市场情绪的第一手指标。IBIT的流量数据反映机构投资者对比特币ETF的实时需求，是理解BlackRock加密战略执行效果的领先指标。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-k2" data-section="priority" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">代币化愿景 (Tokenization Vision)</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Fink在2024年CEO Letter中首次系统阐述的代币化战略：将现实世界资产（RWA）上链，通过区块链技术实现7×24结算、 programmability 和 fractional ownership。BUIDL基金是这一愿景的首个落地产品。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-k3" data-section="priority" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">IBIT 流动性 (IBIT Liquidity)</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>IBIT（iShares Bitcoin Trust）是BlackRock的比特币ETF产品，流动性是其核心竞争优势。Eric Balchunas的ETF流量追踪可实时监测IBIT的市场深度和价格发现效率。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-k4" data-section="priority" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">费率结构 (Fee Structure)</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>IBIT当前费率为0.25%，是BlackRock历史上最低的ETF费率之一。这一定价策略既是市场竞争结果（对抗Fidelity FBTC的0.25%），也是吸引机构客户的战略工具。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-k5" data-section="priority" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">"BTC is legitimate" 出处</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>2024年1月CNBC Squawk Box采访中，Fink首次公开称BTC是"legitimate investment instrument"。这句话被视为传统金融主流接受BTC的里程碑式表态。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-k6" data-section="analysts" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">监管博弈 (Regulatory Game)</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>James Seyffart专注追踪SEC审批流程中的政治博弈。ETF审批不仅是技术审查，还涉及国会压力、行业游说和行政资源分配。理解监管博弈是预测市场走向的关键。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-k7" data-section="analysts" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">BUIDL 基金 (BUIDL Fund)</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>BUIDL（BlackRock USD Institutional Digital Liquidity Fund）是全球首个在Ethereum链上发行的代币化国债基金，代币持有者享有链上实时结算的收益权。这是BlackRock代币化战略的首个旗舰产品。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-k8" data-section="longform" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">Aladdin 风险管理系统</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Aladdin是BlackRock的核心技术护城河，一个集成风险管理与投资操作的SaaS平台。管理超过$20万亿资产的风险分析。Aladdin与SEC及各大央行的历史合作是理解Fink监管关系的暗线。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-k9" data-section="primary" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">托管安排 (Coinbase)</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>IBIT选择Coinbase Prime作为托管方，这是BlackRock-coinbase战略联盟的核心。Coinbase的冷存储安全和保险覆盖是机构投资者信任IBIT的技术基础。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-k10" data-section="relationships" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">Aladdin 系统</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>BlackRock的风险管理平台，SEC曾使用Aladdin进行市场风险分析。这建立了Fink与SEC之间的非正式沟通渠道，是监管捕获假说的基础设施层面证据。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-k11" data-section="relationships" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">监管捕获 (Regulatory Capture)</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>监管捕获理论认为监管机构被其监管对象"捕获"。在BlackRock-SEC案例中，Aladdin合作历史、IBIT快速获批（与其他申请者相比）、Gensler未对BlackRock提出重大执法行动，构成 circumstantial evidence。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-k12" data-section="narratives" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">IBIT (iShares Bitcoin Trust)</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>BlackRock的比特币ETF产品，2024年1月获批上市。作为全球最大资管公司的比特币ETF，IBIT获批具有标志性意义，标志着主流金融对加密资产的最终接纳。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-k13" data-section="narratives" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">代币化 (Tokenization)</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>将传统资产（国债、股票、房地产）转换为区块链上的代币，实现Fractional ownership、24/7结算和 programmability。Fink认为代币化是金融市场的"自然进化"，BUIDL是其首个实践案例。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-k14" data-section="gaps" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">监管捕获假说</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>核心问题：IBIT的快速获批是市场成熟的自然结果，还是BlackRock利用与Gensler的历史关系进行"监管套利"？直接证据缺失，但可通过SEC员工离职去向、FOIA文件、国会听证等间接方法验证。</p>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+// === Sidebar toggle (mobile) ===
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+
+// === Notes sidebar toggle ===
+(function(){
+  var btn=document.getElementById("notesToggleBtn"),ns=document.getElementById("notesSidebar"),ov=document.getElementById("notesOverlay"),cb=document.getElementById("notesCloseBtn");
+  if(!btn||!ns)return;
+  function toggle(){ns.classList.toggle("ns-closed");ov.classList.toggle("open");}
+  btn.onclick=toggle;
+  if(ov)ov.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(cb)cb.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(window.innerWidth>1200)ns.classList.remove("ns-closed");
+  window.addEventListener("resize",function(){if(window.innerWidth>1200)ns.classList.remove("ns-closed");});
+})();
+
+// === Toggle note ===
+function toggleNote(head){
+  var anno=head.closest(".anno");
+  if(anno){anno.classList.toggle("open");positionNotes();}
+}
+
+// === Position notes ===
+function positionNotes(){
+  var ns=document.getElementById("notesSidebar");if(!ns)return;
+  var annos=ns.querySelectorAll(".anno");
+  var lastBottom=80;
+  annos.forEach(function(a){
+    if(a.style.display==="none")return;
+    var sec=a.getAttribute("data-section");
+    var target=sec?document.getElementById(sec):null;
+    var top=target?target.getBoundingClientRect().top+window.scrollY-ns.getBoundingClientRect().top:lastBottom;
+    if(top<lastBottom)top=lastBottom;
+    a.style.top=top+"px";
+    lastBottom=top+a.offsetHeight+8;
+  });
+}
+
+// === Knowledge toggle ===
+function toggleKnowNotes(){
+  var btn=document.getElementById("knowToggleBtn");
+  var knowNotes=document.querySelectorAll(".anno.know-note");
+  var marks=document.querySelectorAll("mark.hl-know");
+  var nrefs=document.querySelectorAll(".nref");
+  var visible=btn.classList.contains("active");
+  knowNotes.forEach(function(n){n.style.display=visible?"none":"";});
+  marks.forEach(function(m){m.style.background=visible?"transparent":"";m.style.borderBottom=visible?"none":"";});
+  nrefs.forEach(function(r){r.style.display=visible?"none":"";});
+  btn.classList.toggle("active");
+  btn.textContent=visible?"显示":"隐藏";
+  positionNotes();
+}
+
+// === Expand / Collapse all ===
+function expandAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.add("open");});positionNotes();}
+function collapseAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.remove("open");});positionNotes();}
+
+// === Note count ===
+(function(){
+  var label=document.getElementById("noteCountLabel");if(!label)return;
+  var meta=document.querySelectorAll(".anno.meta-note").length;
+  var know=document.querySelectorAll(".anno.know-note").length;
+  label.textContent=meta+" META + "+know+" Knowledge";
+})();
+
+// === Highlight → Note sync ===
+document.addEventListener("click",function(e){
+  var mark=e.target.closest("mark.hl-know")||e.target.closest(".nref");
+  if(!mark)return;
+  var noteId=mark.getAttribute("data-note");if(!noteId)return;
+  var anno=document.getElementById(noteId);if(!anno)return;
+  anno.classList.add("open");
+  anno.scrollIntoView({behavior:"smooth",block:"center"});
+  anno.classList.add("flash");
+  setTimeout(function(){anno.classList.remove("flash");},1500);
+  positionNotes();
+});
+
+// === Embedded mode ===
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+  document.addEventListener("click",function(e){
+    var a=e.target.closest("a");if(!a||!a.href)return;
+    try{var url=new URL(a.href,location.href)}catch(err){return}
+    if(url.pathname.startsWith("/trade-pipeline/")||url.pathname.startsWith("/observatory/")){
+      e.preventDefault();
+      window.top.postMessage({type:"dashboard-nav",action:"openResearch",url:url.pathname,title:a.textContent.trim().substring(0,60)},"*");
+    }
+  });
+})();
+
+// Initial positioning
+window.addEventListener("load",function(){positionNotes();});
+window.addEventListener("scroll",function(){positionNotes();});
+</script>
+</body>
+</html>

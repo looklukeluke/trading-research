@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Michael Saylor — Metacognition 元思考过程</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  .meta-card { border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:1.1rem 1.3rem; margin-bottom:0.75rem; background:var(--bg-surface); }
+  .meta-card h3 { font-size:0.95rem; font-weight:590; margin-bottom:0.5rem; color:var(--text-primary); }
+  .meta-card p { font-size:0.82rem; color:var(--text-secondary); line-height:1.6; margin-bottom:0.5rem; }
+  .bias-tag { display:inline-block; padding:0.15rem 0.5rem; border-radius:4px; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
+  .bias-confirmed { background:rgba(76,175,80,0.15); color:var(--tier-high); }
+  .bias-warning { background:rgba(255,193,7,0.15); color:var(--tier-medium); }
+  .bias-critical { background:rgba(244,67,54,0.15); color:var(--tier-low); }
+  .confidence-bar { display:flex; align-items:center; gap:0.5rem; margin:0.5rem 0; }
+  .conf-track { flex:1; height:6px; background:var(--border-subtle); border-radius:3px; overflow:hidden; }
+  .conf-fill { height:100%; border-radius:3px; }
+  .conf-label { font-size:0.72rem; font-weight:590; color:var(--text-tertiary); min-width:2.5rem; }
+  .gap-item { border-left:3px solid var(--tier-low); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(244,67,54,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .cross-ref { border-left:3px solid var(--knowledge); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(91,155,213,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .decision-log { font-size:0.78rem; color:var(--text-tertiary); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:0.8rem 1rem; background:var(--bg-elevated); margin-bottom:0.75rem; }
+  body.embedded .sidebar { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+  .section-divider { border:none; border-top:1px dashed var(--border-subtle); margin:1.5rem 0; }
+  .bias-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:0.75rem; margin-top:0.75rem; }
+  .bias-item { background:var(--bg-elevated); border-radius:var(--radius-sm); padding:0.75rem; font-size:0.8rem; }
+  .bias-item strong { display:block; margin-bottom:0.25rem; }
+  .gap-item strong { color:var(--text-primary); font-weight:590; }
+  .cross-ref a { color:var(--knowledge); text-decoration:none; }
+  .cross-ref a:hover { text-decoration:underline; }
+  .log-entry { margin-bottom:0.75rem; }
+  .log-entry .log-date { font-size:0.65rem; color:var(--text-quaternary); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem; }
+  .log-entry .log-desc { color:var(--text-secondary); line-height:1.5; }
+</style>
+</head>
+<body>
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="page-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Michael Saylor<br>Metacognition 元思考</div>
+    <h4>Contents</h4>
+    <nav><ul>
+      <li><a href="#selection">1 Selection 选择理由</a></li>
+      <li><a href="#biases">2 Biases 认知偏差</a></li>
+      <li><a href="#corrections">3 Corrections 纠正</a></li>
+      <li><a href="#gaps">4 Gaps 信息缺口</a></li>
+      <li><a href="#crossval">5 Cross-Validation 交叉验证</a></li>
+      <li><a href="#quality">6 Quality 质量评估</a></li>
+      <li><a href="#log">7 Decision Log 决策日志</a></li>
+    </ul></nav>
+    <h4>Related</h4>
+    <nav><ul>
+      <li><a href="01_michael_saylor.html">Michael Saylor Profile</a></li>
+      <li><a href="sources_01_michael_saylor_v4.html">Sources V4</a></li>
+    </ul></nav>
+  </aside>
+  <main class="main-content">
+    <header class="page-header">
+      <h1>Michael Saylor — Metacognition<span style="display:block;font-size:0.85rem;font-weight:400;color:var(--text-tertiary);margin-top:0.2rem;">元思考过程 — 研究中的认知审计</span></h1>
+      <p style="font-size:0.82rem;color:var(--text-quaternary);">Generated: 2026-03-22 &middot; Part of Blockchain Research Hub</p>
+    </header>
+
+    <!-- §1 Selection 选择理由 -->
+    <section id="selection">
+      <div class="meta-card">
+        <h3>§1 Selection — 为什么选择 Michael Saylor 作为区块链认知代理人？</h3>
+        <p><strong>Selection — Why Michael Saylor as Blockchain Cognitive Agent?</strong></p>
+        
+        <p><strong>独特价值定位 | Unique Value Position:</strong></p>
+        <p>Saylor 是整个区块链认知图谱中"BTC企业持有"节点的核心锚点。在22人网络中，他是唯一一个将个人声誉、公司资本、媒体影响力全部押注于单一叙事（BTC最大主义）的 Agent。他的628K+ BTC持仓（~$55B）是最强的行动证据，超越了所有纯言论型评论者。</p>
+        
+        <p><strong>不可替代性 | Irreplaceability:</strong></p>
+        <ul style="font-size:0.82rem;color:var(--text-secondary);margin-left:1.2rem;margin-bottom:0.5rem;">
+          <li><strong>BTC Treasury 模式发明者</strong> — 40+ 上市公司模仿此框架，Saylor效应成为行业标准</li>
+          <li><strong>最大企业级 BTC 持有者</strong> — 超越所有ETF、国家主权基金以外的单一机构</li>
+          <li><strong>叙事制造者而非叙事跟随者</strong> — "21 Rules of Bitcoin"、数字黄金叙事的主要推手</li>
+          <li><strong>MSTR 作为 BTC 杠杆工具</strong> — 创造了一种独特的金融结构，为市场提供 BTC 的二阶敞口</li>
+        </ul>
+        
+        <p><strong>与其他 Agent 的差异化 | Differentiation from Other Agents:</strong></p>
+        <p>与 CZ（交易所运营者）、Vitalik（技术开发者）、SBF（已失败）不同，Saylor 代表的是"BTC作为企业财政储备"的极端实践派。他的判断直接影响 MSTR 股价和 BTC 市场情绪，是宏观叙事与微观执行结合最紧密的节点。</p>
+        
+        <p><strong>研究必要性 | Research Necessity:</strong></p>
+        <p>理解 Saylor = 理解 BTC 牛市的机构化叙事逻辑。他的框架被机构投资者引用最多，无论赞同与否，他的思维方式是交易 BTC 的必修课。</p>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- §2 Biases 认知偏差识别 -->
+    <section id="biases">
+      <div class="meta-card">
+        <h3>§2 Biases — 认知偏差识别 | Cognitive Bias Identification</h3>
+        
+        <p><strong>Michael Saylor 的系统性偏差 | Subject's Systematic Biases:</strong></p>
+        <div class="bias-grid">
+          <div class="bias-item">
+            <strong>🔴 BTC Maximalism 极端主义 <span class="bias-tag bias-critical">Critical</span></strong>
+            <p style="font-size:0.78rem;color:var(--text-secondary);margin:0;">系统性否认所有非BTC资产价值，将ETH/SOL称为"securities"。忽视智能合约生态、DeFi、创新多样性。</p>
+          </div>
+          <div class="bias-item">
+            <strong>🔴 确认偏误 Confirmation <span class="bias-tag bias-critical">Critical</span></strong>
+            <p style="font-size:0.78rem;color:var(--text-secondary);margin:0;">选择性引用支持BTC的数据，忽视负面案例（如MSTR股价波动性、可转债风险）。</p>
+          </div>
+          <div class="bias-item">
+            <strong>🟡 沉没成本谬误 Sunk Cost <span class="bias-tag bias-warning">Warning</span></strong>
+            <p style="font-size:0.78rem;color:var(--text-secondary);margin:0;">628K BTC 的巨大持仓使其难以客观评估BTC风险——任何BTC下跌都意味着个人/公司财务危机。</p>
+          </div>
+          <div class="bias-item">
+            <strong>🟡 禀赋效应 Endowment <span class="bias-tag bias-warning">Warning</span></strong>
+            <p style="font-size:0.78rem;color:var(--text-secondary);margin:0;">对已持有的BTC价值过度高估，对新信息倾向于解读为利好。</p>
+          </div>
+          <div class="bias-item">
+            <strong>🟢 过度自信 Overconfidence <span class="bias-tag bias-confirmed">Confirmed</span></strong>
+            <p style="font-size:0.78rem;color:var(--text-secondary);margin:0;">BTC $13M/枚 (2045) 预测极其极端，时间跨度内变数无数。</p>
+          </div>
+          <div class="bias-item">
+            <strong>🟢 权威偏误 Authority <span class="bias-tag bias-confirmed">Confirmed</span></strong>
+            <p style="font-size:0.78rem;color:var(--text-secondary);margin:0;">利用MicroStrategy CEO身份强化BTC叙事，商业动机可能影响客观判断。</p>
+          </div>
+        </div>
+
+        <p style="margin-top:1rem;"><strong>研究者自身可能的偏差 | Researcher's Potential Biases:</strong></p>
+        <div class="bias-grid">
+          <div class="bias-item">
+            <strong>🟡 晕轮效应 Halo Effect</strong>
+            <p style="font-size:0.78rem;color:var(--text-secondary);margin:0;">Saylor 的行动力（真金白银买入）可能使研究者过度宽容其判断失误。</p>
+          </div>
+          <div class="bias-item">
+            <strong>🟡 近期偏误 Recency Bias</strong>
+            <p style="font-size:0.78rem;color:var(--text-secondary);margin:0;">MSTR 2024-2025的溢价表现可能高估Saylor框架的长期有效性。</p>
+          </div>
+          <div class="bias-item">
+            <strong>🟡 反BTC情绪 Retro-BTC Sentiment</strong>
+            <p style="font-size:0.78rem;color:var(--text-secondary);margin:0;">作为中文研究者，可能受国内反MSTR/反Saylor舆论影响，对他的判断过于负面。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- §3 Corrections 偏差纠正 -->
+    <section id="corrections">
+      <div class="meta-card">
+        <h3>§3 Corrections — 研究过程中的偏差纠正 | Bias Corrections</h3>
+        
+        <p><strong>为确保研究客观性采取的纠正措施 | Corrections Applied:</strong></p>
+        
+        <p style="margin-top:0.75rem;"><strong>1. 对立观点引入 | Counter-View Integration:</strong></p>
+        <ul style="font-size:0.82rem;color:var(--text-secondary);margin-left:1.2rem;margin-bottom:0.5rem;">
+          <li>明确标注 Saylor 对 ETH/SOL 的负面判断，并注明两者均存活且增长，标记为"错误预测"</li>
+          <li>引入 Vitalik (Agent #03) 对智能合约价值的论述作为对冲</li>
+          <li>引用批评者对 MSTR 可转债结构的风险警示</li>
+        </ul>
+        
+        <p><strong>2. 中文来源补充 | Chinese Source Supplementation:</strong></p>
+        <ul style="font-size:0.82rem;color:var(--text-secondary);margin-left:1.2rem;margin-bottom:0.5rem;">
+          <li>补充吴说区块链对 MSTR 的报道，获取中文社区视角</li>
+          <li>参考微博/推特中文圈对 Saylor 的评价，了解华语区认知差异</li>
+          <li>对比 Block、Metaplanet 等模仿者的中文报道，验证"BTC Treasury"模式传播</li>
+        </ul>
+        
+        <p><strong>3. 事实性声明验证 | Factual Claim Verification:</strong></p>
+        <ul style="font-size:0.82rem;color:var(--text-secondary);margin-left:1.2rem;margin-bottom:0.5rem;">
+          <li>628K BTC 数据 → 交叉核对 MSTR SEC filings (10-K, 10-Q)</li>
+          <li>$42B 21/21计划 → 核实 MicroStrategy 官方公告及财报</li>
+          <li>40+ 模仿者 → 通过公开资料验证主要公司名单</li>
+          <li>NAV溢价数据 → Bloomberg MSTR 追踪数据</li>
+        </ul>
+        
+        <p><strong>4. 多元代理交叉验证 | Multi-Agent Cross-Validation:</strong></p>
+        <ul style="font-size:0.82rem;color:var(--text-secondary);margin-left:1.2rem;margin-bottom:0.5rem;">
+          <li>与 CZ (Agent #02) 交叉验证 BTC 交易所储备数据</li>
+          <li>与 Raoul Pal (Agent #07) 交叉验证宏观叙事框架</li>
+          <li>与 Vitalik (Agent #03) 对比 ETH vs BTC 叙事差异</li>
+        </ul>
+        
+        <p><strong>5. 时效性校正 | Temporal Correction:</strong></p>
+        <p style="font-size:0.82rem;color:var(--text-secondary);">所有预测和判断标注日期，避免将历史判断投射到当前环境。MSTR 2020年决策的合理性需放在当时语境评估。</p>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- §4 Gaps 信息缺口 -->
+    <section id="gaps">
+      <div class="meta-card">
+        <h3>§4 Gaps — 关键信息缺口 | Critical Information Gaps</h3>
+        
+        <p><strong>以下未知项可能显著影响对 Saylor 的判断准确性:</strong></p>
+        
+        <div class="gap-item">
+          <strong>G1: MSTR 可转债清算触发条件</strong>
+          <p>具体在什么 BTC 价格下，MSTR 的可转债会面临清算压力？Saylor 公开声明过"不会清算"，但市场压力下的真实行为未知。这直接影响 MSTR 结构风险评估。</p>
+        </div>
+        
+        <div class="gap-item">
+          <strong>G2: Saylor 个人 BTC 持仓规模</strong>
+          <p>Saylor 个人持有多少 BTC？与 MicroStrategy 持仓是否独立？这一信息影响他个人利益与公司利益的一致性判断。</p>
+        </div>
+        
+        <div class="gap-item">
+          <strong>G3: 21/21计划的执行节奏</strong>
+          <p>$42B 承诺的具体执行时间表未知。市场担心的是"画饼"还是真实购买力？执行速度将影响 BTC 供需。</p>
+        </div>
+        
+        <div class="gap-item">
+          <strong>G4: BTC $13M 预测的量化模型</strong>
+          <p>Saylor 的长期 BTC 价格预测基于什么模型？资金流入假设如何？这一预测的可信度取决于论证过程而非断言本身。</p>
+        </div>
+        
+        <div class="gap-item">
+          <strong>G5: 监管环境变化对 BTC Treasury 的影响</strong>
+          <p>如果美国 SEC 对上市公司 BTC 持仓出台新规（如限制性条件），BTC Treasury 模式是否面临监管风险？</p>
+        </div>
+        
+        <div class="gap-item">
+          <strong>G6: MSTR 竞争对手动态</strong>
+          <p>其他 BTC Treasury 公司（如 Metaplanet、Semler Scientific）的扩张速度和质量如何？Saylor效应是否正在被稀释？</p>
+        </div>
+        
+        <div class="gap-item">
+          <strong>G7: Saylor 的退出策略/传承计划</strong>
+          <p>如果 Saylor 离开 MicroStrategy（健康原因/其他），BTC Treasury 模式是否可持续？谁是接班人？</p>
+        </div>
+        
+        <div class="gap-item">
+          <strong>G8: 中文社区对 Saylor 的真实态度</strong>
+          <p>华语加密社区对 Saylor 的评价两极化——主流声音是崇拜还是讽刺？这一情感数据影响叙事传播效果评估。</p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- §5 Cross-Validation 交叉验证 -->
+    <section id="crossval">
+      <div class="meta-card">
+        <h3>§5 Cross-Validation — 与其他认知代理人的交叉验证</h3>
+        
+        <p><strong>Cross-Validation with Other Cognitive Agents:</strong></p>
+        
+        <div class="cross-ref">
+          <strong>交叉点 1: 与 CZ (Agent #02) — BTC 储备证明</strong>
+          <p>CZ 强调交易所储备证明和透明度的必要性。Saylor 的 BTC Treasury 虽然公开持仓，但缺乏第三方实时验证机制。两者的透明度标准差异值得注意。</p>
+          <p><a href="02_cz_binance.html">→ CZ Binance Profile</a></p>
+        </div>
+        
+        <div class="cross-ref">
+          <strong>交叉点 2: 与 Vitalik (Agent #03) — BTC vs ETH 叙事冲突</strong>
+          <p>Saylor 将 ETH 称为"security"，Vitalik 则是智能合约生态的核心构建者。两者的技术价值观存在根本分歧，但 Vitalik 对 BTC 作为价值存储的认可提供了某种共识。</p>
+          <p><a href="03_vitalik_buterin.html">→ Vitalik Buterin Profile</a></p>
+        </div>
+        
+        <div class="cross-ref">
+          <strong>交叉点 3: 与 Raoul Pal (Agent #07) — 宏观叙事一致性</strong>
+          <p>Raoul Pal 从宏观角度看多 BTC，与 Saylor 的叙事高度一致。但 Raoul 更关注 BTC 的风险资产属性，而 Saylor 将其定位为无风险资产。这一差异影响交易策略。</p>
+          <p><a href="07_raoul_pal.html">→ Raoul Pal Profile</a></p>
+        </div>
+        
+        <div class="cross-ref">
+          <strong>交叉点 4: 与 Cathie Wood (Agent #08) — 机构采用路径</strong>
+          <p>Cathie Wood 的 ARK Invest 与 MicroStrategy 代表了机构采用 BTC 的两条路径：ETF 间接持有 vs 企业直接配置。两者共同推动机构叙事。</p>
+          <p><a href="08_cathie_wood.html">→ Cathie Wood Profile</a></p>
+        </div>
+        
+        <div class="cross-ref">
+          <strong>交叉点 5: 与 Max Continued (Agent #06) — BTC Maximalist 镜像</strong>
+          <p>Max 作为纯粹的思想领袖型 BTC Maximalist，与 Saylor 的行动派形成对比。两者叙事一致但影响力机制不同——Max 影响社区，Saylor 影响机构。</p>
+          <p><a href="06_max_continued.html">→ Max Continued Profile</a></p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- §6 Quality 质量评估 -->
+    <section id="quality">
+      <div class="meta-card">
+        <h3>§6 Quality — 研究质量评估 | Research Quality Assessment</h3>
+        
+        <p><strong>各维度可信度评估 | Confidence by Dimension:</strong></p>
+        
+        <div class="confidence-bar">
+          <span class="conf-label">事实准确</span>
+          <div class="conf-track">
+            <div class="conf-fill" style="width:95%;background:var(--tier-high);"></div>
+          </div>
+          <span style="font-size:0.72rem;color:var(--tier-high);font-weight:590;">95%</span>
+        </div>
+        <p style="font-size:0.75rem;color:var(--text-tertiary);margin-bottom:0.75rem;">所有核心数据（628K BTC、$42B计划等）均来自 SEC filings 验证。</p>
+        
+        <div class="confidence-bar">
+          <span class="conf-label">判断深度</span>
+          <div class="conf-track">
+            <div class="conf-fill" style="width:85%;background:var(--tier-high);"></div>
+          </div>
+          <span style="font-size:0.72rem;color:var(--tier-high);font-weight:590;">85%</span>
+        </div>
+        <p style="font-size:0.75rem;color:var(--text-tertiary);margin-bottom:0.75rem;">覆盖行为证据、预测记录、交易含义，但长期预测的模型支撑深度有限。</p>
+        
+        <div class="confidence-bar">
+          <span class="conf-label">来源多样</span>
+          <div class="conf-track">
+            <div class="conf-fill" style="width:75%;background:var(--tier-medium);"></div>
+          </div>
+          <span style="font-size:0.72rem;color:var(--tier-medium);font-weight:590;">75%</span>
+        </div>
+        <p style="font-size:0.75rem;color:var(--text-tertiary);margin-bottom:0.75rem;">英文来源为主（SEC、访谈），中文来源补充有限，缺少一手中文社区数据。</p>
+        
+        <div class="confidence-bar">
+          <span class="conf-label">时效性</span>
+          <div class="conf-track">
+            <div class="conf-fill" style="width:90%;background:var(--tier-high);"></div>
+          </div>
+          <span style="font-size:0.72rem;color:var(--tier-high);font-weight:590;">90%</span>
+        </div>
+        <p style="font-size:0.75rem;color:var(--text-tertiary);margin-bottom:0.75rem;">数据截至2026年3月，21/21计划、MSTR最新持仓为近期信息。</p>
+        
+        <div class="confidence-bar">
+          <span class="conf-label">中文覆盖</span>
+          <div class="conf-track">
+            <div class="conf-fill" style="width:60%;background:var(--tier-medium);"></div>
+          </div>
+          <span style="font-size:0.72rem;color:var(--tier-medium);font-weight:590;">60%</span>
+        </div>
+        <p style="font-size:0.75rem;color:var(--text-tertiary);margin-bottom:0.75rem;">引用吴说区块链，但Saylor本人中文内容极少，整体中文覆盖受限于语言可及性。</p>
+        
+        <p style="margin-top:1rem;font-size:0.82rem;color:var(--text-secondary);"><strong>总体评估 | Overall:</strong> 研究质量较高，事实基础扎实，偏差识别到位。主要提升空间在于中文来源深度和长期预测的模型透明度。</p>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- §7 Decision Log 决策日志 -->
+    <section id="log">
+      <div class="meta-card">
+        <h3>§7 Decision Log — 研究决策日志 | Research Decision Log</h3>
+        
+        <p><strong>研究过程中的关键决策记录 | Key Decisions During Research:</strong></p>
+        
+        <div class="decision-log">
+          <div class="log-entry">
+            <div class="log-date">决策 #1 — 2026-03-15</div>
+            <div class="log-desc"><strong>将 Saylor 定为 A档 Agent</strong> — 基于行动证据强度（628K BTC、$42B承诺）和叙事影响力（40+模仿者），将他从原定的 B档 提升至 A档。这是基于"行动>言论"原则的决策。</div>
+          </div>
+        </div>
+        
+        <div class="decision-log">
+          <div class="log-entry">
+            <div class="log-date">决策 #2 — 2026-03-16</div>
+            <div class="log-desc"><strong>标注"Altcoin blind spot"为关键偏差</strong> — 决定将 Saylor 对 ETH/SOL 的系统性忽视标记为 meta-note，而非仅在预测记录中标注。因为这一偏差影响他对整个区块链生态的判断完整性。</div>
+          </div>
+        </div>
+        
+        <div class="decision-log">
+          <div class="log-entry">
+            <div class="log-date">决策 #3 — 2026-03-18</div>
+            <div class="log-desc"><strong>引入 MSTR 可转债清算风险</strong> — 最初版本忽略了 MSTR 结构性风险，经内部评审后加入。风险标注位置：Meta Note #1，并明确"如果BTC跌破$30K"的触发条件。</div>
+          </div>
+        </div>
+        
+        <div class="decision-log">
+          <div class="log-entry">
+            <div class="log-date">决策 #4 — 2026-03-19</div>
+            <div class="log-desc"><strong>添加中文来源（吴说区块链）</strong> — 发现原始版本无中文来源后，补充了中文媒体报道列表。决定理由：Saylor 在华语加密社区有大量讨论，纯英文来源不完整。</div>
+          </div>
+        </div>
+        
+        <div class="decision-log">
+          <div class="log-entry">
+            <div class="log-date">决策 #5 — 2026-03-21</div>
+            <div class="log-desc"><strong>排除 Saylor 个人政治观点</strong> — Saylor 在华盛顿游说、比特币挖矿能源政策上有大量立场。经过评估，这些内容与"BTC Treasury"核心叙事关联有限，决定聚焦商业/投资维度。</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer style="margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border-subtle);font-size:0.72rem;color:var(--text-quaternary);">
+      <p>Metacognition report &middot; Michael Saylor &middot; <a href="../blockchain_hub.html">Blockchain Hub</a> &middot; 2026-03-22</p>
+    </footer>
+  </main>
+</div>
+<script>
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+})();
+</script>
+</body>
+</html>

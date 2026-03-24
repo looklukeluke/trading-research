@@ -1,0 +1,1805 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Observatory W12 — AI 导师系统</title>
+<script>
+// file:// 下所有 API 调用都会被浏览器 CORS 拦截，自动跳转到 localhost 版本
+if (location.protocol === 'file:') {
+  var path = location.pathname;
+  var match = path.match(/\/observatory\/weekly\/(.*)/);
+  if (match) {
+    location.replace('http://localhost:8080/observatory/' + match[1] + location.hash);
+  }
+}
+</script>
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+/* === CSS Variables (shared with main page) === */
+:root {
+  --bg-base: #08090a;
+  --bg-elevated: #0f1011;
+  --bg-surface: #141516;
+  --bg-overlay: #191a1b;
+  --border-subtle: #23252a;
+  --border-default: #34343a;
+  --border-strong: #3e3e44;
+  --text-primary: #f7f8f8;
+  --text-secondary: #d0d6e0;
+  --text-tertiary: #8a8f98;
+  --text-quaternary: #62666d;
+  --accent: #f8a848;
+  --accent-dim: rgba(248, 168, 72, 0.12);
+  --accent-hover: rgba(248, 168, 72, 0.08);
+  --tier-high: #4caf50;
+  --tier-medium: #ffc107;
+  --tier-low: #f44336;
+  --tier-medium-high: #8bc34a;
+  --knowledge: #5b9bd5;
+  --knowledge-dim: rgba(91, 155, 213, 0.12);
+  --font-sans: 'Inter', 'Inter Variable', -apple-system, 'SF Pro Display', system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'Menlo', 'Consolas', monospace;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  font-family: var(--font-sans);
+  font-feature-settings: 'liga' 1, 'calt' 1;
+  letter-spacing: -0.012em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* === Content Typography === */
+p { color: var(--text-secondary); margin-bottom: 1rem; }
+strong { color: var(--text-primary); font-weight: 590; }
+em { color: var(--text-tertiary); }
+ul, ol { color: var(--text-secondary); padding-left: 1.25rem; }
+li { margin-bottom: 0.4rem; line-height: 1.6; }
+blockquote { border-left: 3px solid var(--accent); padding: 0.6rem 1.25rem; margin: 1rem 0; font-style: italic; background: var(--bg-surface); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-secondary); }
+
+/* === Page layout === */
+.page-container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 2.5rem 5rem;
+}
+
+.back-link {
+  display: inline-block;
+  font-size: 0.82rem;
+  color: var(--text-tertiary);
+  text-decoration: none;
+  margin-bottom: 1.5rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+.back-link:hover { color: var(--accent); background: var(--accent-hover); text-decoration: none; }
+
+.page-header { margin-bottom: 2rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border-default); }
+.page-header h1 { font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 680; letter-spacing: -0.025em; color: var(--text-primary); margin-bottom: 0.2rem; }
+.page-header .subtitle { color: var(--text-tertiary); font-size: 0.88rem; }
+
+/* === Scrollbar === */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+/* === Mentor Cards === */
+.mentor-strip { display: flex; gap: 1rem; margin-bottom: 2rem; }
+.mentor-card { flex: 1; border-radius: var(--radius-md); background: var(--bg-elevated); padding: 1.25rem 1.5rem; position: relative; overflow: hidden; }
+.mentor-card-jensen { border: 1px solid rgba(118,185,0,0.35); border-left: 4px solid #76b900; }
+.mentor-card-musk { border: 1px solid rgba(29,161,242,0.35); border-left: 4px solid #1DA1F2; }
+.mentor-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+.mentor-avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; }
+.mentor-card-jensen .mentor-avatar { background: rgba(118,185,0,0.15); color: #76b900; border: 2px solid rgba(118,185,0,0.4); }
+.mentor-card-musk .mentor-avatar { background: rgba(29,161,242,0.15); color: #1DA1F2; border: 2px solid rgba(29,161,242,0.4); }
+.mentor-name { font-weight: 680; font-size: 1rem; color: var(--text-primary); }
+.mentor-role { font-size: 0.72rem; color: var(--text-tertiary); }
+.mentor-insights { margin-bottom: 1rem; }
+.mentor-insights blockquote { border-left-width: 2px; padding: 0.4rem 0.8rem; margin: 0.5rem 0; font-size: 0.82rem; line-height: 1.5; }
+.mentor-card-jensen .mentor-insights blockquote { border-left-color: #76b900; background: rgba(118,185,0,0.04); }
+.mentor-card-musk .mentor-insights blockquote { border-left-color: #1DA1F2; background: rgba(29,161,242,0.04); }
+.mentor-todos { margin-bottom: 1rem; }
+.mentor-todo-label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem; }
+.mentor-card-jensen .mentor-todo-label { color: #76b900; }
+.mentor-card-musk .mentor-todo-label { color: #1DA1F2; }
+.mentor-todos ul { padding-left: 0; margin: 0; list-style: none; }
+.mentor-todos .mt-item { display: flex; align-items: flex-start; gap: 0.5rem; padding: 0.4rem 0.6rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); margin-bottom: 0.3rem; background: var(--bg-surface); cursor: pointer; transition: all 0.15s; position: relative; }
+.mentor-todos .mt-item:hover { border-color: var(--border-default); background: var(--bg-elevated); }
+.mentor-todos .mt-item.mt-started { border-left: 3px solid var(--accent); }
+.mentor-todos .mt-item.mt-done { border-left: 3px solid var(--tier-high); opacity: 0.65; }
+.mentor-todos .mt-item.mt-done .mt-text { text-decoration: line-through; text-decoration-color: var(--text-quaternary); }
+.mentor-todos .mt-cb { width: 15px; height: 15px; border: 1.5px solid var(--border-strong); border-radius: 3px; flex-shrink: 0; margin-top: 0.15rem; display: flex; align-items: center; justify-content: center; font-size: 0.55rem; transition: all 0.15s; }
+.mentor-todos .mt-item.mt-started .mt-cb { border-color: var(--accent); background: rgba(248,168,72,0.15); }
+.mentor-todos .mt-item.mt-started .mt-cb::after { content: "\25B6"; color: var(--accent); }
+.mentor-todos .mt-item.mt-done .mt-cb { border-color: var(--tier-high); background: rgba(76,175,80,0.15); }
+.mentor-todos .mt-item.mt-done .mt-cb::after { content: "\2713"; color: var(--tier-high); }
+.mentor-todos .mt-text { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.45; flex: 1; }
+.mentor-todos .mt-status { position: absolute; right: 0.5rem; top: 0.4rem; font-size: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; padding: 0.05rem 0.25rem; border-radius: 2px; }
+.mentor-todos .mt-item.mt-started .mt-status { background: rgba(248,168,72,0.15); color: var(--accent); }
+.mentor-todos .mt-item.mt-done .mt-status { background: rgba(76,175,80,0.12); color: var(--tier-high); }
+.mentor-detail { margin-bottom: 1rem; }
+.mentor-detail summary { font-size: 0.78rem; font-weight: 510; cursor: pointer; padding: 0.4rem 0; color: var(--text-tertiary); transition: color 0.15s; list-style: none; }
+.mentor-detail summary::-webkit-details-marker { display: none; }
+.mentor-detail summary::before { content: '▸ '; }
+.mentor-detail[open] summary::before { content: '▾ '; }
+.mentor-detail summary:hover { color: var(--text-primary); }
+.mentor-detail-body { padding: 0.75rem 0; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6; }
+.mentor-detail-body h4 { font-size: 0.88rem; font-weight: 590; color: var(--text-primary); margin: 1rem 0 0.4rem; }
+.mentor-detail-body h4:first-child { margin-top: 0; }
+.mentor-detail-body p { font-size: 0.82rem; margin-bottom: 0.6rem; }
+.mentor-detail-body blockquote { font-size: 0.82rem; }
+.mentor-detail-body ul { padding-left: 1.1rem; }
+.mentor-detail-body li { font-size: 0.82rem; margin-bottom: 0.3rem; }
+.mentor-consult-btn { display: block; width: 100%; padding: 0.55rem 1rem; border-radius: 6px; border: none; font-family: inherit; font-size: 0.78rem; font-weight: 590; cursor: pointer; transition: all 0.15s; }
+.mentor-card-jensen .mentor-consult-btn { background: rgba(118,185,0,0.12); color: #76b900; border: 1px solid rgba(118,185,0,0.3); }
+.mentor-card-jensen .mentor-consult-btn:hover { background: rgba(118,185,0,0.2); }
+.mentor-card-musk .mentor-consult-btn { background: rgba(29,161,242,0.12); color: #1DA1F2; border: 1px solid rgba(29,161,242,0.3); }
+.mentor-card-musk .mentor-consult-btn:hover { background: rgba(29,161,242,0.2); }
+.mentor-card-barkley { border: 1px solid rgba(156,39,176,0.35); border-left: 4px solid #9C27B0; }
+.mentor-card-barkley .mentor-avatar { background: rgba(156,39,176,0.15); color: #9C27B0; border: 2px solid rgba(156,39,176,0.4); }
+.mentor-card-barkley .mentor-insights blockquote { border-left-color: #9C27B0; background: rgba(156,39,176,0.04); }
+.mentor-card-barkley .mentor-todo-label { color: #9C27B0; }
+.mentor-card-barkley .mentor-consult-btn { background: rgba(156,39,176,0.12); color: #9C27B0; border: 1px solid rgba(156,39,176,0.3); }
+.mentor-card-barkley .mentor-consult-btn:hover { background: rgba(156,39,176,0.2); }
+.mentor-card-barkley .mt-group-fill { background: #9C27B0; }
+.mentor-card-barkley .mentor-progress-fill { background: #9C27B0; }
+.mentor-card-barkley .mentor-progress-label { color: #9C27B0; }
+
+/* Scaffold action button (click to execute) */
+.mt-item.mt-scaffold { border-left: 2px solid #9C27B0; cursor: pointer; }
+.mt-item.mt-scaffold:hover { background: rgba(156,39,176,0.06); border-color: #9C27B0; }
+.mt-item.mt-scaffold .mt-cb { border-color: #9C27B0; }
+.mt-item.mt-scaffold.mt-done { border-left-color: var(--tier-high); opacity: 0.65; }
+.mt-item.mt-scaffold.mt-done .mt-cb { border-color: var(--tier-high); background: rgba(76,175,80,0.15); }
+.mt-item.mt-scaffold.mt-done .mt-cb::after { content: "\2713"; color: var(--tier-high); }
+.mt-item.mt-scaffold .mt-exec-tag { font-size: 0.55rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.05rem 0.3rem; border-radius: 3px; background: rgba(156,39,176,0.12); color: #9C27B0; margin-left: 0.3rem; white-space: nowrap; }
+.mt-item.mt-scaffold.mt-running .mt-exec-tag { background: rgba(248,168,72,0.15); color: var(--accent); }
+.mt-item.mt-scaffold.mt-done .mt-exec-tag { background: rgba(76,175,80,0.12); color: var(--tier-high); }
+
+/* Mentor Modal */
+.mentor-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 300; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.mentor-modal-overlay.open { opacity: 1; pointer-events: auto; }
+.mentor-modal { width: min(680px, 92vw); max-height: 85vh; overflow-y: auto; border-radius: var(--radius-md); background: var(--bg-elevated); padding: 2rem; position: relative; }
+.mentor-modal-jensen { border: 1px solid rgba(118,185,0,0.35); border-top: 3px solid #76b900; }
+.mentor-modal-musk { border: 1px solid rgba(29,161,242,0.35); border-top: 3px solid #1DA1F2; }
+.mentor-modal-barkley { border: 1px solid rgba(156,39,176,0.35); border-top: 3px solid #9C27B0; }
+.mentor-modal-barkley h3 { color: #9C27B0; }
+.mentor-modal-barkley .advice-block { border-left: 3px solid #9C27B0; background: rgba(156,39,176,0.04); }
+.mentor-modal-barkley .mentor-modal-tab.active { border-bottom-color: #9C27B0; color: #9C27B0; }
+.mentor-modal-close { position: absolute; top: 0.75rem; right: 1rem; background: none; border: none; color: var(--text-tertiary); font-size: 1.2rem; cursor: pointer; font-family: inherit; }
+.mentor-modal-close:hover { color: var(--text-primary); }
+.mentor-modal h3 { font-size: 1.1rem; font-weight: 680; margin-bottom: 1.25rem; }
+.mentor-modal-jensen h3 { color: #76b900; }
+.mentor-modal-musk h3 { color: #1DA1F2; }
+.mentor-modal .facts-section { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 1rem 1.25rem; margin-bottom: 1.25rem; }
+.mentor-modal .facts-section h4 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-quaternary); margin-bottom: 0.5rem; }
+.mentor-modal .facts-section .fact-row { display: flex; justify-content: space-between; padding: 0.3rem 0; border-bottom: 1px solid var(--border-subtle); font-size: 0.8rem; }
+.mentor-modal .facts-section .fact-row:last-child { border-bottom: none; }
+.mentor-modal .facts-section .fact-label { color: var(--text-tertiary); }
+.mentor-modal .facts-section .fact-value { color: var(--text-primary); font-weight: 510; font-family: var(--font-mono); }
+.mentor-modal .advice-block { margin-bottom: 1rem; padding: 0.75rem 1rem; border-radius: var(--radius-sm); font-size: 0.85rem; line-height: 1.6; }
+.mentor-modal-jensen .advice-block { border-left: 3px solid #76b900; background: rgba(118,185,0,0.04); }
+.mentor-modal-musk .advice-block { border-left: 3px solid #1DA1F2; background: rgba(29,161,242,0.04); }
+.mentor-modal .advice-block strong { color: var(--text-primary); }
+.mentor-modal .check-section { background: rgba(248,168,72,0.04); border: 1px solid rgba(248,168,72,0.2); border-radius: var(--radius-sm); padding: 1rem 1.25rem; margin-top: 1rem; }
+.mentor-modal .check-section h4 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); margin-bottom: 0.5rem; }
+.mentor-modal .check-section ul { padding-left: 1.1rem; margin: 0; }
+.mentor-modal .check-section li { font-size: 0.82rem; margin-bottom: 0.3rem; color: var(--text-secondary); }
+
+/* === Musk Focus Mode: hide/dim noncore === */
+[data-musk-hide].musk-hidden { opacity: 0.08; pointer-events: none; max-height: 0; overflow: hidden; margin: 0; padding: 0; border: none; transition: opacity 0.4s, max-height 0.4s; }
+tr[data-musk-hide].musk-hidden { display: none; }
+[data-musk-hide] { transition: opacity 0.4s; }
+/* Focus mode: hide everything except core */
+[data-musk-focus-hide].musk-focus-hidden { opacity: 0.06; pointer-events: none; max-height: 0; overflow: hidden; margin: 0; padding: 0; border: none; transition: opacity 0.4s, max-height 0.4s; }
+tr[data-musk-focus-hide].musk-focus-hidden { display: none; }
+
+/* Action todo variant */
+.mt-item.mt-action { border-left: 2px solid #1DA1F2; }
+.mt-item.mt-action.mt-done { border-left-color: var(--tier-high); background: rgba(76,175,80,0.04); }
+.mt-item.mt-action .mt-cb { border-color: #1DA1F2; }
+.mt-item.mt-action.mt-done .mt-cb { border-color: var(--tier-high); background: rgba(76,175,80,0.15); }
+.mt-item.mt-action.mt-done .mt-cb::after { content: "\2713"; color: var(--tier-high); }
+
+/* === ADHD Micro-step groups === */
+.mt-group { margin-bottom: 0.75rem; }
+.mt-group-head { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem; }
+.mt-group-label { font-size: 0.72rem; font-weight: 590; color: var(--text-tertiary); }
+.mt-group-time { font-size: 0.6rem; font-family: var(--font-mono); color: var(--text-quaternary); }
+.mt-group-progress { flex: 1; display: flex; align-items: center; gap: 0.3rem; }
+.mt-group-bar { flex: 1; height: 4px; background: var(--border-subtle); border-radius: 2px; overflow: hidden; max-width: 80px; }
+.mt-group-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+.mentor-card-jensen .mt-group-fill { background: #76b900; }
+.mentor-card-musk .mt-group-fill { background: #1DA1F2; }
+.mt-group-count { font-size: 0.58rem; font-family: var(--font-mono); color: var(--text-quaternary); }
+
+/* Micro-step item -- smaller, tighter */
+.mt-item.mt-micro { padding: 0.3rem 0.5rem; border-color: transparent; background: transparent; margin-bottom: 0.15rem; }
+.mt-item.mt-micro:hover { background: var(--bg-elevated); border-color: var(--border-subtle); }
+.mt-item.mt-micro .mt-cb { width: 13px; height: 13px; border-radius: 2px; }
+.mt-item.mt-micro .mt-text { font-size: 0.78rem; }
+.mt-item.mt-micro .mt-time { font-size: 0.58rem; color: var(--text-quaternary); font-family: var(--font-mono); margin-left: auto; white-space: nowrap; padding-left: 0.5rem; }
+.mt-item.mt-micro.mt-done { opacity: 0.5; }
+.mt-item.mt-micro.mt-done .mt-text { text-decoration: line-through; text-decoration-color: var(--text-quaternary); }
+
+/* Original advice quote (kept above micro-steps) */
+.mt-original { font-size: 0.72rem; color: var(--text-quaternary); font-style: italic; padding: 0.3rem 0.6rem; margin-bottom: 0.3rem; border-left: 2px dashed var(--border-default); line-height: 1.4; }
+
+/* Mentor overall progress */
+.mentor-progress { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; padding: 0.5rem 0.6rem; background: var(--bg-surface); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); }
+.mentor-progress-bar { flex: 1; height: 6px; background: var(--border-subtle); border-radius: 3px; overflow: hidden; }
+.mentor-progress-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }
+.mentor-card-jensen .mentor-progress-fill { background: #76b900; }
+.mentor-card-musk .mentor-progress-fill { background: #1DA1F2; }
+.mentor-progress-label { font-size: 0.68rem; font-weight: 590; font-family: var(--font-mono); min-width: 3.5rem; text-align: right; }
+.mentor-card-jensen .mentor-progress-label { color: #76b900; }
+.mentor-card-musk .mentor-progress-label { color: #1DA1F2; }
+.mentor-progress-text { font-size: 0.65rem; color: var(--text-quaternary); }
+
+/* === Mentor Action Row === */
+.mentor-actions { display: flex; gap: 0.5rem; }
+.mentor-actions .mentor-consult-btn { flex: 1; }
+.mentor-history-btn { flex: 0 0 auto; padding: 0.55rem 0.8rem; border-radius: 6px; font-family: inherit; font-size: 0.78rem; font-weight: 590; cursor: pointer; transition: all 0.15s; background: var(--bg-surface); color: var(--text-tertiary); border: 1px solid var(--border-default); }
+.mentor-history-btn:hover { border-color: var(--text-tertiary); color: var(--text-primary); }
+.mentor-history-btn .hist-count { font-family: var(--font-mono); font-size: 0.68rem; margin-left: 0.2rem; opacity: 0.7; }
+
+/* === History Timeline in Modal === */
+.mentor-history-timeline { margin-top: 1.25rem; }
+.mh-entry { position: relative; padding: 1rem 1.25rem 1rem 2.5rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); margin-bottom: 0.75rem; background: var(--bg-surface); transition: border-color 0.15s; }
+.mh-entry:hover { border-color: var(--border-default); }
+.mh-entry::before { content: ''; position: absolute; left: 1rem; top: 1.35rem; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--bg-base); }
+.mh-entry:not(:last-child)::after { content: ''; position: absolute; left: 1.35rem; top: 2rem; bottom: -0.75rem; width: 2px; background: var(--border-subtle); }
+.mh-entry.latest::before { background: var(--accent); }
+.mh-entry:not(.latest)::before { background: var(--text-quaternary); }
+
+.mh-date { font-size: 0.72rem; font-weight: 590; color: var(--text-tertiary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+.mh-date .mh-badge { font-size: 0.55rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.05rem 0.35rem; border-radius: 3px; }
+.mh-date .mh-badge.latest { background: var(--accent-dim); color: var(--accent); }
+.mh-date .mh-badge.old { background: rgba(138,143,152,0.1); color: var(--text-quaternary); }
+
+.mh-metrics { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; margin-bottom: 0.5rem; }
+.mh-metric { font-size: 0.75rem; color: var(--text-secondary); }
+.mh-metric .mh-val { font-weight: 590; font-family: var(--font-mono); font-size: 0.72rem; }
+.mh-metric .mh-delta { font-size: 0.65rem; margin-left: 0.2rem; }
+.mh-metric .mh-delta.up { color: var(--tier-high); }
+.mh-metric .mh-delta.down { color: var(--tier-low); }
+.mh-metric .mh-delta.same { color: var(--text-quaternary); }
+
+.mh-todos { margin-top: 0.4rem; font-size: 0.75rem; }
+.mh-todos .mh-todo { display: inline-block; padding: 0.1rem 0.4rem; border-radius: 3px; margin-right: 0.3rem; margin-bottom: 0.2rem; }
+.mh-todo.done { background: rgba(76,175,80,0.12); color: var(--tier-high); text-decoration: line-through; text-decoration-color: rgba(76,175,80,0.4); }
+.mh-todo.started { background: rgba(248,168,72,0.12); color: var(--accent); }
+.mh-todo.pending { background: rgba(138,143,152,0.08); color: var(--text-quaternary); }
+
+.mh-score { margin-top: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+.mh-score-bar { flex: 1; height: 6px; background: var(--border-subtle); border-radius: 3px; overflow: hidden; }
+.mh-score-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+.mh-score-label { font-size: 0.68rem; font-weight: 590; font-family: var(--font-mono); min-width: 2.5rem; text-align: right; }
+
+.mh-empty { text-align: center; padding: 2rem 1rem; color: var(--text-quaternary); font-size: 0.85rem; }
+.mh-clear-btn { margin-top: 1rem; text-align: right; }
+.mh-clear-btn button { background: none; border: 1px solid rgba(244,67,54,0.3); border-radius: 4px; color: var(--tier-low); font-size: 0.68rem; font-family: inherit; padding: 0.2rem 0.5rem; cursor: pointer; }
+.mh-clear-btn button:hover { background: rgba(244,67,54,0.08); }
+
+/* Modal tabs */
+.mentor-modal-tabs { display: flex; gap: 0; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-subtle); }
+.mentor-modal-tab { padding: 0.5rem 1rem; font-size: 0.78rem; font-weight: 510; color: var(--text-tertiary); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; background: none; border-top: none; border-left: none; border-right: none; font-family: inherit; }
+.mentor-modal-tab:hover { color: var(--text-primary); }
+.mentor-modal-tab.active { border-bottom-color: var(--accent); color: var(--accent); }
+.mentor-modal-jensen .mentor-modal-tab.active { border-bottom-color: #76b900; color: #76b900; }
+.mentor-modal-musk .mentor-modal-tab.active { border-bottom-color: #1DA1F2; color: #1DA1F2; }
+
+@media (max-width: 900px) {
+  .mentor-strip { flex-direction: column; }
+  .mentor-actions { flex-direction: column; }
+  .page-container { padding: 1.5rem 1rem 3rem; }
+}
+
+/* Toast notification */
+.scaffold-toast {
+  position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100%);
+  background: #1a1a2e; color: #e0e0e0; border: 1px solid rgba(76,175,80,0.4);
+  border-left: 3px solid #4CAF50; padding: 0.6rem 1.2rem; border-radius: 8px;
+  font-size: 0.82rem; z-index: 10000; opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4); pointer-events: none;
+}
+.scaffold-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.scaffold-toast.error { border-color: rgba(244,67,54,0.4); border-left-color: #f44336; }
+
+/* Reading mode */
+#readingModeBtn { position: fixed; top: 1rem; right: 1rem; z-index: 9999; width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--border-default, #34343a); background: var(--bg-surface, #141516); color: var(--text-secondary, #d0d6e0); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.7; transition: opacity 0.2s; }
+#readingModeBtn:hover { opacity: 1; }
+.reading-mode .mentor-strip { flex-direction: column; }
+.reading-mode .mentor-card { max-width: 100%; }
+.reading-mode .page-container { max-width: 900px; margin: 0 auto; padding: 1rem 2rem; }
+</style>
+</head>
+<body>
+
+<div class="page-container">
+
+  <a href="2026-W12-v3.html" class="back-link">&larr; 返回 Weekly Synthesis</a>
+
+  <div class="page-header">
+    <h1>AI 导师系统</h1>
+    <div class="subtitle">W12 · Jensen · Musk · Barkley — 微步骤 TODO + AI 点评</div>
+  </div>
+
+  <!-- ===== Mentor Cards ===== -->
+  <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:0.5rem;">
+    <button id="refresh-todos-btn" onclick="refreshTodos()" style="font-family:inherit;font-size:0.72rem;font-weight:600;padding:0.35rem 0.8rem;border-radius:5px;border:1px solid rgba(156,39,176,0.3);background:rgba(156,39,176,0.1);color:#9C27B0;cursor:pointer;transition:all 0.15s;">
+      <span id="refresh-todos-label">刷新 TODO</span>
+    </button>
+  </div>
+  <div class="mentor-strip" id="mentors">
+
+    <!-- Jensen Huang -->
+    <div class="mentor-card mentor-card-jensen">
+      <div class="mentor-header">
+        <div class="mentor-avatar">JH</div>
+        <div>
+          <div class="mentor-name">Jensen Huang</div>
+          <div class="mentor-role">执行导师 · "没有Plan B"</div>
+        </div>
+      </div>
+      <div class="mentor-insights">
+        <blockquote>"你研究了我，但没学到最重要的一课——execution &gt; planning。你花了5份专项素材、5轮迭代研究 Jensen Huang。但我的核心教训是 execution &gt; planning。你研究了我，然后继续做了更多研究而不是执行。这是最讽刺的地方。"</blockquote>
+        <blockquote>"Sell-side 不是一个项目。它是三行代码。我在 NVIDIA 推行'每人每周给我发5个最重要事情'的邮件文化。不是优先级队列系统，是5行文字。<code>if position_pnl &lt; -8%: sell()</code> — 写完，上线，迭代。30分钟不是30天。"</blockquote>
+        <blockquote>"你不需要 Observatory 来观察自己。你需要一笔交易。不要通过增加自我观察工具来解决执行力问题——整个 Observatory 系统本身就是它试图诊断的那个病。"</blockquote>
+        <blockquote>"你的目标是 'Find the next gold → $1M'。你已经有了 gold——在你的持仓里。你的问题不是找不到金子，是你在给金子建展示柜。你对 accelerated computing 的研究已经超过大多数华尔街分析师了。你还在等什么评估？你是在用'需要更多研究'来回避下注的恐惧。"</blockquote>
+        <p style="font-size:0.78rem;color:var(--text-tertiary);margin-top:0.5rem;"><strong style="color:#76b900;">Jensen 的原版药方：</strong>把 sell-side 从"项目"降级为"今天下午的事"。完成 BABA/GPN/DXCM 任一完整交易循环：入场→持有→退出→复盘。停止更新 Observatory 直到有真实交易数据可以写进去。</p>
+      </div>
+      <div class="mentor-todos" data-mentor="jensen">
+        <div class="mentor-todo-label">Jensen's TODO — ADHD微步骤</div>
+        <div class="mentor-progress">
+          <span class="mentor-progress-text">执行进度</span>
+          <div class="mentor-progress-bar"><div class="mentor-progress-fill" id="jensen-progress-fill"></div></div>
+          <span class="mentor-progress-label" id="jensen-progress-label">0/9</span>
+        </div>
+        <ul>
+          <!-- Group 1: Sell-side 闭环 -->
+          <div class="mt-group" data-group="jensen-sell">
+            <div class="mt-group-head">
+              <span class="mt-group-label">Sell-side 闭环</span>
+              <span class="mt-group-time">~5 min</span>
+              <div class="mt-group-progress"><div class="mt-group-bar"><div class="mt-group-fill" style="width:0%"></div></div><span class="mt-group-count">0/3</span></div>
+            </div>
+            <div class="mt-original">"Sell-side 不是一个项目。它是三行代码。管道已有 check_positions()，你只需要告诉 Claude 止损线是多少。"</div>
+            <li class="mt-item mt-micro mt-scaffold" data-mt-id="jensen-1a" onclick="execScaffoldInline(this,'positions')">
+              <div class="mt-cb"></div>
+              <div class="mt-text">查看持仓 — DXYZ 已 -17.6% 穿了止损线 <span class="mt-exec-tag">点击查看</span></div>
+              <span class="mt-status"></span>
+            </li>
+            <li class="mt-item mt-micro mt-scaffold" data-mt-id="jensen-1b" onclick="execScaffoldInline(this,'monitor')">
+              <div class="mt-cb"></div>
+              <div class="mt-text">跑退出检查 — 看 8 个 paper trades 谁该平仓 <span class="mt-exec-tag">点击执行</span></div>
+              <span class="mt-status"></span>
+            </li>
+            <li class="mt-item mt-micro" data-mt-id="jensen-1c" onclick="cycleMicroTodo(this)">
+              <div class="mt-cb"></div>
+              <div class="mt-text">做一个决定：DXYZ -17.6%，卖还是不卖？写一句话理由</div>
+              <span class="mt-time">2 min 你决定</span>
+              <span class="mt-status"></span>
+            </li>
+          </div>
+
+          <!-- Group 2: 验证半导体候选 -->
+          <div class="mt-group" data-group="jensen-semi">
+            <div class="mt-group-head">
+              <span class="mt-group-label">验证半导体候选</span>
+              <span class="mt-group-time">~5 min</span>
+              <div class="mt-group-progress"><div class="mt-group-bar"><div class="mt-group-fill" style="width:0%"></div></div><span class="mt-group-count">0/3</span></div>
+            </div>
+            <div class="mt-original">"你对 accelerated computing 的研究已经超过大多数华尔街分析师了。你还在等什么评估？"</div>
+            <li class="mt-item mt-micro mt-scaffold" data-mt-id="jensen-2a" onclick="execScaffoldInline(this,'positions')">
+              <div class="mt-cb"></div>
+              <div class="mt-text">查看 NVDA 持仓状态 — 你已经有 5.3 股 +216% <span class="mt-exec-tag">点击查看</span></div>
+              <span class="mt-status"></span>
+            </li>
+            <li class="mt-item mt-micro" data-mt-id="jensen-2b" onclick="cycleMicroTodo(this)">
+              <div class="mt-cb"></div>
+              <div class="mt-text">AVGO/ARM/ASML — 选一个，决定：加入观察还是放弃？</div>
+              <span class="mt-time">2 min 你决定</span>
+              <span class="mt-status"></span>
+            </li>
+            <li class="mt-item mt-micro" data-mt-id="jensen-2c" onclick="cycleMicroTodo(this)">
+              <div class="mt-cb"></div>
+              <div class="mt-text">把这个决定告诉 Claude Code，让它记到 obs.py</div>
+              <span class="mt-time">1 min 你说</span>
+              <span class="mt-status"></span>
+            </li>
+          </div>
+
+          <!-- Group 3: Dashboard 数据刷新 -->
+          <div class="mt-group" data-group="jensen-dashboard">
+            <div class="mt-group-head">
+              <span class="mt-group-label">Dashboard 数据刷新</span>
+              <span class="mt-group-time">~3 min</span>
+              <div class="mt-group-progress"><div class="mt-group-bar"><div class="mt-group-fill" style="width:0%"></div></div><span class="mt-group-count">0/3</span></div>
+            </div>
+            <div class="mt-original">"你的数据停在 3/6，已经 15 天没更新。不需要 Observatory 来观察自己。你需要一笔交易。"</div>
+            <li class="mt-item mt-micro mt-scaffold" data-mt-id="jensen-3a" onclick="execScaffold(this,'sync_dashboard')">
+              <div class="mt-cb"></div>
+              <div class="mt-text">同步 Dashboard 数据 — 你的数据停在 3/6，已经 15 天没更新 <span class="mt-exec-tag">点击执行</span></div>
+              <span class="mt-status"></span>
+            </li>
+            <li class="mt-item mt-micro mt-scaffold" data-mt-id="jensen-3b" onclick="execScaffold(this,'chrome_pin_dashboard')">
+              <div class="mt-cb"></div>
+              <div class="mt-text">在 Chrome 打开 Dashboard <span class="mt-exec-tag">点击执行</span></div>
+              <span class="mt-status"></span>
+            </li>
+            <li class="mt-item mt-micro" data-mt-id="jensen-3c" onclick="cycleMicroTodo(this)">
+              <div class="mt-cb"></div>
+              <div class="mt-text">看完持仓后写一句：最需要处理的是___</div>
+              <span class="mt-time">1 min 你决定</span>
+              <span class="mt-status"></span>
+            </li>
+          </div>
+          <!-- Inline results container -->
+          <div id="jensen-inline-results" style="margin-top:0.5rem;"></div>
+        </ul>
+      </div>
+      <details class="mentor-detail">
+        <summary>完整分析 →</summary>
+        <div class="mentor-detail-body">
+          <h4>Jensen 的核心操作系统</h4>
+          <p>执行 &gt; 规划，速度 &gt; 完美，扁平 &gt; 分层。40个直接汇报、"距离破产只有30天"的紧迫感、"没有Plan B"的All-in哲学。</p>
+
+          <h4>他会先看什么</h4>
+          <p>直接跳到 Diagnostic Strip → Trading 5% → 然后看 P0 → "5天零执行"。不会看 CSS。</p>
+
+          <h4>"你研究了我，但没学到最重要的一课。"</h4>
+          <p>你花了5份专项素材、5轮迭代研究 Jensen Huang。但 Jensen 的核心教训是 execution &gt; planning。你研究了他，然后继续做了更多研究而不是执行。这是他会觉得最讽刺的地方。</p>
+
+          <h4>"Sell-side 不是一个项目。它是三行代码。"</h4>
+          <p>Jensen 在 NVIDIA 推行"每人每周给我发5个最重要事情"的邮件文化。不是优先级队列系统，是5行文字。他会说：<code>if position_pnl &lt; -8%: sell()</code> — 写完，上线，迭代。30分钟不是30天。</p>
+
+          <h4>"你不需要 Observatory 来观察自己。你需要一笔交易。"</h4>
+          <p>NVIDIA 的管理哲学：不通过增加管理层来解决管理问题。类比：不通过增加自我观察工具来解决执行力问题。他会认为整个 Observatory 系统本身就是它试图诊断的那个病。</p>
+
+          <h4>关于 NVDA/AVGO/ARM/ASML 候选</h4>
+          <p>Jensen 会说："你对 accelerated computing 的研究已经超过大多数华尔街分析师了。你还在等什么评估？你是在用'需要更多研究'来回避下注的恐惧。" 他自己1993年把整个公司押注在 CUDA 上，没等 TAM 分析。</p>
+
+          <h4>最致命一击</h4>
+          <blockquote>"你的目标是 'Find the next gold → $1M'。你已经有了 gold——在你的持仓里。你的问题不是找不到金子，是你在给金子建展示柜。"</blockquote>
+        </div>
+      </details>
+      <div class="mentor-actions">
+        <button class="mentor-consult-btn" onclick="openMentorConsult('jensen')">让 Jensen 点评最新进展</button>
+        <button class="mentor-history-btn" onclick="openMentorHistory('jensen')">历史 <span class="hist-count" id="hist-count-jensen"></span></button>
+      </div>
+    </div>
+
+    <!-- Elon Musk -->
+    <div class="mentor-card mentor-card-musk">
+      <div class="mentor-header">
+        <div class="mentor-avatar">EM</div>
+        <div>
+          <div class="mentor-name">Elon Musk</div>
+          <div class="mentor-role">第一性原理 · "删除 &gt; 优化"</div>
+        </div>
+      </div>
+      <div class="mentor-insights">
+        <blockquote>"First principles. 目标：赚钱。方法：趋势交易。需要：找到好品种 + 管理风险。你实际在做的：建 HTML 页面。收益 = 正确品种数 × 持仓时间 × 涨幅 − 错误品种数 × 亏损。你这周哪个活动改变了这个公式里的任何一个变量？零。"</blockquote>
+        <blockquote>"170份报告，0笔交易。在 SpaceX，最被鄙视的行为叫 PowerPoint engineering——用精美的幻灯片代替实际造火箭。你的 Cognitive Agents 产出了 170+ 文件、1.5MB 数据，产出了 0 笔交易。这 exactly is PowerPoint engineering。"</blockquote>
+        <blockquote>"你建了一个观测站来观察自己不做事。如果你今天删掉 Observatory，你的交易结果会变差吗？不会？那它为什么存在？SpaceX 的删除原则：任何流程，如果删掉后不需要重新加回来，那它一开始就不应该存在。"</blockquote>
+        <blockquote>"你的 System Map 画了从目标到9个节点的图。SpaceX 的系统地图是：Build rocket. Launch rocket. Land rocket. Repeat. 你的地图上有9个节点但没有一个叫'交易'。"</blockquote>
+        <blockquote>"你的 ADHD 不是问题，你的选项太多才是问题。不是'冻结'7个项目，是删除7个项目。让 AI 做所有它能做的，你的时间花在 AI 做不了的事上。你不同意就 overrule。不要预设限制。"</blockquote>
+        <p style="font-size:0.78rem;color:var(--text-tertiary);margin-top:0.5rem;"><strong style="color:#1DA1F2;">Musk 的原版药方：</strong>删掉 Observatory、Conv Archive、Orchestrator、Cognitive Agents。系统缩减到 2个项目：Dashboard（买）+ Sell-side（卖）。设一个不可推迟的公开截止日期。用物理约束替代自律——Screen Time 限制浏览器、开机自动启动交易工具。</p>
+      </div>
+      <div class="mentor-todos" data-mentor="musk">
+        <div class="mentor-todo-label">Musk's TODO — 温和执行版</div>
+        <div class="mentor-progress">
+          <span class="mentor-progress-text">执行进度</span>
+          <div class="mentor-progress-bar"><div class="mentor-progress-fill" id="musk-progress-fill"></div></div>
+          <span class="mentor-progress-label" id="musk-progress-label">0/9</span>
+        </div>
+        <ul>
+          <!-- Group 1: 隐藏 + 聚焦 -->
+          <div class="mt-group" data-group="musk-hide">
+            <div class="mt-group-head">
+              <span class="mt-group-label">隐藏 + 聚焦</span>
+              <span class="mt-group-time">~2 min</span>
+              <div class="mt-group-progress"><div class="mt-group-bar"><div class="mt-group-fill" style="width:0%"></div></div><span class="mt-group-count">0/3</span></div>
+            </div>
+            <div class="mt-original">"删掉 Observatory、Conv Archive、Orchestrator、Cognitive Agents。如果删掉后不需要加回来，它一开始就不该存在。"</div>
+            <li class="mt-item mt-micro mt-action" data-mt-id="musk-1" onclick="toggleMuskHide(this)">
+              <div class="mt-cb"></div>
+              <div class="mt-text">隐藏非核心项目 <span style="font-size:0.65rem;color:var(--text-quaternary);">点击切换</span></div>
+              <span class="mt-time">1 click</span>
+              <span class="mt-status"></span>
+            </li>
+            <li class="mt-item mt-micro mt-action" data-mt-id="musk-2" onclick="toggleMuskFocus(this)">
+              <div class="mt-cb"></div>
+              <div class="mt-text">聚焦模式：只剩 Dashboard + Sell-side <span style="font-size:0.65rem;color:var(--text-quaternary);">点击切换</span></div>
+              <span class="mt-time">1 click</span>
+              <span class="mt-status"></span>
+            </li>
+            <li class="mt-item mt-micro" data-mt-id="musk-1c" onclick="cycleMicroTodo(this)">
+              <div class="mt-cb"></div>
+              <div class="mt-text">看看隐藏后的页面 — 是不是更清楚该做什么了？</div>
+              <span class="mt-time">1 min</span>
+              <span class="mt-status"></span>
+            </li>
+          </div>
+
+          <!-- Group 2: 关闭干扰 -->
+          <div class="mt-group" data-group="musk-distract">
+            <div class="mt-group-head">
+              <span class="mt-group-label">关闭干扰</span>
+              <span class="mt-group-time">~3 min</span>
+              <div class="mt-group-progress"><div class="mt-group-bar"><div class="mt-group-fill" style="width:0%"></div></div><span class="mt-group-count">0/3</span></div>
+            </div>
+            <div class="mt-original">"9个节点没有一个叫'交易'。缩减到2个：Dashboard（买）+ Sell-side（卖）。"</div>
+            <li class="mt-item mt-micro mt-scaffold" data-mt-id="musk-2b" onclick="execScaffold(this,'close_distractions')">
+              <div class="mt-cb"></div>
+              <div class="mt-text">关闭 Chrome 干扰标签（X.com/n8n 等） <span class="mt-exec-tag">点击执行</span></div>
+              <span class="mt-status"></span>
+            </li>
+            <li class="mt-item mt-micro mt-scaffold" data-mt-id="musk-2c" onclick="execScaffold(this,'chrome_set_homepage')">
+              <div class="mt-cb"></div>
+              <div class="mt-text">设 Chrome 启动页 = Dashboard <span class="mt-exec-tag">点击执行</span></div>
+              <span class="mt-status"></span>
+            </li>
+            <li class="mt-item mt-micro" data-mt-id="musk-2d" onclick="cycleMicroTodo(this)">
+              <div class="mt-cb"></div>
+              <div class="mt-text">承诺：今天不打开任何新的 HTML 编辑任务</div>
+              <span class="mt-time">你承诺</span>
+              <span class="mt-status"></span>
+            </li>
+          </div>
+
+          <!-- Group 3: 截止日期 -->
+          <div class="mt-group" data-group="musk-deadline">
+            <div class="mt-group-head">
+              <span class="mt-group-label">截止日期</span>
+              <span class="mt-group-time">~3 min</span>
+              <div class="mt-group-progress"><div class="mt-group-bar"><div class="mt-group-fill" style="width:0%"></div></div><span class="mt-group-count">0/3</span></div>
+            </div>
+            <div class="mt-original">"不要依赖自律。设计环境让你无法分心。公开承诺是最强的执行力工具。"</div>
+            <li class="mt-item mt-micro" data-mt-id="musk-3a" onclick="cycleMicroTodo(this)">
+              <div class="mt-cb"></div>
+              <div class="mt-text">滚动到 PQ 的 P0 sell-side → 点 <code>+ 截止日期</code> 设为本周五</div>
+              <span class="mt-time">30 sec</span>
+              <span class="mt-status"></span>
+            </li>
+            <li class="mt-item mt-micro" data-mt-id="musk-3b" onclick="cycleMicroTodo(this)">
+              <div class="mt-cb"></div>
+              <div class="mt-text">告诉 Claude Code 通过 Telegram 发承诺消息</div>
+              <span class="mt-time">1 min 你说</span>
+              <span class="mt-status"></span>
+            </li>
+            <li class="mt-item mt-micro" data-mt-id="musk-3c" onclick="cycleMicroTodo(this)">
+              <div class="mt-cb"></div>
+              <div class="mt-text">写下：如果周五没完成第一笔循环，W13 只做 sell-side 一件事</div>
+              <span class="mt-time">1 min 你写</span>
+              <span class="mt-status"></span>
+            </li>
+          </div>
+        </ul>
+      </div>
+      <details class="mentor-detail">
+        <summary>完整分析 →</summary>
+        <div class="mentor-detail-body">
+          <h4>Musk 的核心操作系统</h4>
+          <p>第一性原理、删除 &gt; 优化、极端时间压缩、鄙视 process theater。同时运营6家公司、收购 Twitter 后砍80%员工、"如果删掉之后没人注意到，它本来就不该存在"。</p>
+
+          <h4>第一反应（可能发 X/推特）</h4>
+          <blockquote>"Saw someone's 'cognitive observatory' weekly synthesis. 9 projects, 2 completed, 65% on meta-tools. Peak productivity theater."</blockquote>
+
+          <h4>"First principles: 你到底在做什么？"</h4>
+          <p>目标：赚钱。方法：趋势交易。需要：找到好品种 + 管理风险。你实际在做的：建 HTML 页面。</p>
+          <p>收益 = 正确品种数 × 持仓时间 × 涨幅 − 错误品种数 × 亏损。"你这周哪个活动改变了这个公式里的任何一个变量？零。"</p>
+
+          <h4>"170份报告，0笔交易。这就是学术界。"</h4>
+          <p>在 SpaceX，最被鄙视的行为叫 "PowerPoint engineering"——用精美的幻灯片代替实际造火箭。你的 Cognitive Agents 产出了 170+ 文件、1.5MB 数据，产出了 0 笔交易。在他眼里，这 exactly is PowerPoint engineering。</p>
+
+          <h4>"你的 Anti-proliferation 原则在问错误的问题。"</h4>
+          <p>"让 AI 做所有它能做的。你的时间花在 AI 做不了的事上。如果 AI 能排名品种质量，让它排。你不同意就 overrule。不要预设限制。" — 直接挑战反增殖原则，认为这个原则出于恐惧而非逻辑。</p>
+
+          <h4>"你的 ADHD 不是问题，你的选项太多才是问题。"</h4>
+          <ul>
+            <li><strong>删除选项：</strong>不是"冻结"7个项目，是删除7个项目</li>
+            <li><strong>物理约束：</strong>SpaceX 工程师住在工厂旁边。类比：你的电脑应该只能打开交易界面和代码编辑器</li>
+            <li><strong>公开截止日期：</strong>在 X 上公开宣布日期。"本周五前完成第一笔完整循环，否则删掉所有项目从零开始"</li>
+          </ul>
+
+          <h4>关于 NVDA/AVGO/ARM/ASML</h4>
+          <p>与 Jensen 截然不同。"NVIDIA 是当前赢家。但加速计算的长期赢家不一定是 NVIDIA。" 他会指向 Tesla Dojo、xAI 自研芯片、以及"垂直整合+自研"路线。</p>
+          <p>反直觉建议："与其买 NVDA，不如研究谁在建 NVIDIA 的替代品。那才是你说的'下一个黄金'。Triton、TPU、Trainium — CUDA 的护城河正在被侵蚀。"</p>
+
+          <h4>最致命一击</h4>
+          <blockquote>"你的 System Map 画了从目标到9个节点的图。SpaceX 的系统地图是：Build rocket. Launch rocket. Land rocket. Repeat. 你的地图上有9个节点但没有一个叫'交易'。"</blockquote>
+        </div>
+      </details>
+      <div class="mentor-actions">
+        <button class="mentor-consult-btn" onclick="openMentorConsult('musk')">让 Musk 点评最新进展</button>
+        <button class="mentor-history-btn" onclick="openMentorHistory('musk')">历史 <span class="hist-count" id="hist-count-musk"></span></button>
+      </div>
+    </div>
+
+    <!-- Russell Barkley -->
+    <div class="mentor-card mentor-card-barkley">
+      <div class="mentor-header">
+        <div class="mentor-avatar">RB</div>
+        <div>
+          <div class="mentor-name">Russell Barkley</div>
+          <div class="mentor-role">ADHD 诊断者 · "这不是意志力问题"</div>
+        </div>
+      </div>
+      <div class="mentor-insights">
+        <blockquote>"ADHD is not a disorder of knowing what to do. It is a disorder of doing what you know. 你不是不知道 sell-side 该写。你的 170 份报告证明你不懒。但你的大脑在'写三行止损代码'和'建一个新的 Observatory 页面'之间，永远选后者——因为后者给多巴胺，前者不给。这不是意志力问题，是神经递质问题。"</blockquote>
+        <blockquote>"你在用 hyperfocus 自我治疗。建 Conv Archive、Orchestrator、Cognitive Agents——每一个都是你大脑找到的'替代刺激源'。它们看起来像生产力，但本质是你的大脑在回避一个低多巴胺任务（sell-side），转向高多巴胺任务（建新东西）。Jensen 和 Musk 告诉你做什么。但你的问题不是不知道做什么——是大脑在执行点（point of performance）失灵了。"</blockquote>
+        <blockquote>"你的 TODO 系统本身就是症状。ADHD 患者最擅长建计划系统，因为建系统有多巴胺。你建了 Priority Queue、截止日期、ADHD 微步骤、进度条——全是元系统。问问自己：你花在设计 TODO 系统上的时间，和花在执行 TODO 上的时间，比例是多少？"</blockquote>
+        <blockquote>"停止依赖动机。开始依赖环境。ADHD 的解法不是'更努力'、不是'更好的计划'、不是'更强的意志'。是让正确的行为变成最容易发生的行为。你的桌面应该打开的是富途，不是 VS Code。你的 cron 应该跑 monitor --once，不是 generate_journal.py。环境决定行为，不是你决定行为。"</blockquote>
+        <p style="font-size:0.78rem;color:var(--text-tertiary);margin-top:0.5rem;"><strong style="color:#9C27B0;">Barkley 的处方：</strong>不要改变你的意图（你的意图已经对了）。改变你的环境——让执行交易比建工具更容易发生。外部脚手架替代内部执行功能。</p>
+      </div>
+      <div class="mentor-todos" data-mentor="barkley">
+        <div class="mentor-todo-label">Barkley 的外部脚手架 — 不靠意志力</div>
+        <div class="mentor-progress">
+          <span class="mentor-progress-text">脚手架进度</span>
+          <div class="mentor-progress-bar"><div class="mentor-progress-fill" id="barkley-progress-fill"></div></div>
+          <span class="mentor-progress-label" id="barkley-progress-label">0/9</span>
+        </div>
+        <ul>
+          <!-- Group 1: 注意力环境 -->
+          <div class="mt-group" data-group="barkley-env">
+            <div class="mt-group-head">
+              <span class="mt-group-label">注意力环境</span>
+              <span class="mt-group-time">3 clicks</span>
+              <div class="mt-group-progress"><div class="mt-group-bar"><div class="mt-group-fill" style="width:0%"></div></div><span class="mt-group-count">0/3</span></div>
+            </div>
+            <div class="mt-original">"你的 Chrome 有 20+ 标签页但没有 Trading Dashboard。富途已经开着了 15 天，问题不是工具没开，是 Dashboard 不在你的视野中。"</div>
+            <li class="mt-item mt-micro mt-scaffold" data-mt-id="barkley-1a" onclick="execScaffold(this,'chrome_pin_dashboard')">
+              <div class="mt-cb"></div>
+              <div class="mt-text">在 Chrome 打开 Dashboard <span class="mt-exec-tag">点击执行</span></div>
+              <span class="mt-status"></span>
+            </li>
+            <li class="mt-item mt-micro mt-scaffold" data-mt-id="barkley-1b" onclick="execScaffold(this,'close_distractions')">
+              <div class="mt-cb"></div>
+              <div class="mt-text">关闭干扰标签 <span class="mt-exec-tag">点击执行</span></div>
+              <span class="mt-status"></span>
+            </li>
+            <li class="mt-item mt-micro mt-scaffold" data-mt-id="barkley-1c" onclick="execScaffold(this,'reminders')">
+              <div class="mt-cb"></div>
+              <div class="mt-text">创建 macOS 提醒事项 <span class="mt-exec-tag">点击执行</span></div>
+              <span class="mt-status"></span>
+            </li>
+          </div>
+
+          <!-- Group 2: 自动化替代记忆 -->
+          <div class="mt-group" data-group="barkley-auto">
+            <div class="mt-group-head">
+              <span class="mt-group-label">自动化替代记忆</span>
+              <span class="mt-group-time">3 clicks</span>
+              <div class="mt-group-progress"><div class="mt-group-bar"><div class="mt-group-fill" style="width:0%"></div></div><span class="mt-group-count">0/3</span></div>
+            </div>
+            <div class="mt-original">"ADHD 对时间流逝没有感知。'5天零执行'但你没感觉到5天过去了。TODO 没有紧迫感，macOS 提醒弹窗有。"</div>
+            <li class="mt-item mt-micro mt-scaffold" data-mt-id="barkley-2a" onclick="execScaffold(this,'monitor_cron')">
+              <div class="mt-cb"></div>
+              <div class="mt-text">配置每天 9:00/15:00 自动跑 monitor <span class="mt-exec-tag">点击执行</span></div>
+              <span class="mt-status"></span>
+            </li>
+            <li class="mt-item mt-micro mt-scaffold" data-mt-id="barkley-2b" onclick="execScaffold(this,'telegram_checkin')">
+              <div class="mt-cb"></div>
+              <div class="mt-text">Telegram bot 每日 17:00 问你 <span class="mt-exec-tag">点击执行</span></div>
+              <span class="mt-status"></span>
+            </li>
+            <li class="mt-item mt-micro mt-scaffold" data-mt-id="barkley-2c" onclick="execScaffoldInline(this,'monitor')">
+              <div class="mt-cb"></div>
+              <div class="mt-text">现在跑一次 monitor（结果显示在下方） <span class="mt-exec-tag">点击执行</span></div>
+              <span class="mt-status"></span>
+            </li>
+          </div>
+
+          <!-- Group 3: 即时反馈 -->
+          <div class="mt-group" data-group="barkley-reward">
+            <div class="mt-group-head">
+              <span class="mt-group-label">即时反馈</span>
+              <span class="mt-group-time">~3 min</span>
+              <div class="mt-group-progress"><div class="mt-group-bar"><div class="mt-group-fill" style="width:0%"></div></div><span class="mt-group-count">0/3</span></div>
+            </div>
+            <div class="mt-original">"ADHD 对延迟奖励不敏感。下面两个按钮让你不离开这个页面就能看持仓、跑退出检查。做完就是一个交易动作。"</div>
+            <li class="mt-item mt-micro mt-scaffold" data-mt-id="barkley-3a" onclick="execScaffoldInline(this,'positions')">
+              <div class="mt-cb"></div>
+              <div class="mt-text">现在看一眼持仓（DXYZ -17.6% 需要你注意） <span class="mt-exec-tag">点击查看</span></div>
+              <span class="mt-status"></span>
+            </li>
+            <li class="mt-item mt-micro mt-scaffold" data-mt-id="barkley-3b" onclick="execScaffold(this,'completion_notify')">
+              <div class="mt-cb"></div>
+              <div class="mt-text">开启完成通知 <span class="mt-exec-tag">点击开启</span></div>
+              <span class="mt-status"></span>
+            </li>
+            <li class="mt-item mt-micro" data-mt-id="barkley-3c" onclick="cycleMicroTodo(this)">
+              <div class="mt-cb"></div>
+              <div class="mt-text">做完以上步骤了吗？你刚完成了 8 个交易相关动作 — 这比过去 5 天都多</div>
+              <span class="mt-time">你确认</span>
+              <span class="mt-status"></span>
+            </li>
+          </div>
+          <!-- Inline results container -->
+          <div id="barkley-inline-results" style="margin-top:0.5rem;"></div>
+        </ul>
+      </div>
+      <details class="mentor-detail">
+        <summary>完整分析 →</summary>
+        <div class="mentor-detail-body">
+          <h4>Barkley 的核心理论：执行功能缺陷模型</h4>
+          <p>ADHD 不是注意力缺陷，是<strong>执行功能缺陷</strong>。执行功能 = 抑制冲动 + 工作记忆 + 情绪调节 + 自我激励 + 计划执行。你的 170 份报告证明注意力没问题（hyperfocus 恰恰是注意力过剩）。问题出在：当任务低多巴胺（sell-side）时，你的大脑无法抑制转向高多巴胺替代（建新工具）的冲动。</p>
+
+          <h4>为什么 Jensen 和 Musk 的建议你"听懂了但做不到"</h4>
+          <p>Jensen 说"execution &gt; planning"——对。Musk 说"删除 &gt; 优化"——对。但他们都在假设你有正常的执行功能。就像对一个近视的人说"看清楚点"——建议是对的，但忽略了你需要眼镜。Barkley 的角色是给你配眼镜（外部脚手架），不是告诉你"看清楚点"。</p>
+
+          <h4>你的 ADHD 行为模式（从数据中诊断）</h4>
+          <ul>
+            <li><strong>Hyperfocus 自我治疗：</strong>P0 声明后 3 天内启动 4 个基础设施项目——不是拖延，是大脑在寻找多巴胺替代</li>
+            <li><strong>时间盲（time blindness）：</strong>"5天零执行"但你没有感觉到5天过去了，因为每天都在"做事"</li>
+            <li><strong>计划系统增殖：</strong>Priority Queue → 截止日期 → 微步骤 → 进度条 → 导师系统——每一层都是对前一层失败的"修复"，但修复本身也是高多巴胺活动</li>
+            <li><strong>知行差距不是意志力：</strong>你能写出 Jensen 会怎么批评你、Musk 会怎么讽刺你——证明你完全理解问题。理解力没问题，执行力失灵</li>
+          </ul>
+
+          <h4>外部脚手架的核心原则</h4>
+          <p>不要改变意图（你的意图已经对了）。改变环境，让正确行为在执行点自动发生：</p>
+          <ul>
+            <li><strong>物理接近：</strong>让交易工具在物理上比代码编辑器更近、更可见</li>
+            <li><strong>时间外化：</strong>用 timer/闹钟/cron 把时间变成外部信号，修复时间盲</li>
+            <li><strong>即时反馈：</strong>每个微动作后立刻给奖励，不是等一周看进度条</li>
+            <li><strong>情绪标注：</strong>行动前写"我现在感受是___"，激活前额叶抑制杏仁核</li>
+            <li><strong>问责外部化：</strong>不是自我承诺（ADHD 的自我承诺不可靠），是让外部系统/他人提醒</li>
+          </ul>
+        </div>
+      </details>
+      <div class="mentor-actions">
+        <button class="mentor-consult-btn" onclick="openMentorConsult('barkley')">让 Barkley 诊断最新状态</button>
+        <button class="mentor-history-btn" onclick="openMentorHistory('barkley')">历史 <span class="hist-count" id="hist-count-barkley"></span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mentor Consult Modal -->
+  <div class="mentor-modal-overlay" id="mentorModalOverlay">
+    <div class="mentor-modal" id="mentorModal">
+      <button class="mentor-modal-close" onclick="closeMentorConsult()">&#10005;</button>
+      <div id="mentorModalContent"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* === Toast notification === */
+var _toastEl = null;
+var _toastTimer = null;
+function showToast(msg, isError) {
+  if (!_toastEl) {
+    _toastEl = document.createElement('div');
+    _toastEl.className = 'scaffold-toast';
+    document.body.appendChild(_toastEl);
+  }
+  clearTimeout(_toastTimer);
+  _toastEl.textContent = msg;
+  _toastEl.classList.toggle('error', !!isError);
+  _toastEl.classList.remove('show');
+  void _toastEl.offsetWidth;
+  _toastEl.classList.add('show');
+  _toastTimer = setTimeout(function() { _toastEl.classList.remove('show'); }, isError ? 4000 : 2500);
+}
+
+/* === Mentor Micro-TODO: click to toggle done === */
+function cycleMicroTodo(el) {
+  var isDone = el.classList.contains('mt-done');
+  el.classList.toggle('mt-done', !isDone);
+  el.classList.remove('mt-started');
+  var label = el.querySelector('.mt-status');
+  if (label) label.textContent = isDone ? '' : '';
+  localStorage.setItem('mt-' + el.dataset.mtId, isDone ? 'idle' : 'mt-done');
+  if (!isDone) {
+    var text = el.querySelector('.mt-text');
+    var taskName = text ? text.textContent.trim().slice(0, 25) : '';
+    showToast('\u2713 ' + taskName);
+  }
+  updateAllProgress();
+}
+
+/* Also keep cycleMentorTodo for backward compat (non-micro items) */
+function cycleMentorTodo(el) {
+  var states = ['idle', 'mt-started', 'mt-done'];
+  var current = states.find(function(s) { return el.classList.contains(s); }) || 'idle';
+  var idx = states.indexOf(current);
+  var next = states[(idx + 1) % states.length];
+  states.forEach(function(s) { el.classList.remove(s); });
+  if (next !== 'idle') el.classList.add(next);
+  var label = el.querySelector('.mt-status');
+  if (label) {
+    var labels = { 'idle': '', 'mt-started': 'IN PROGRESS', 'mt-done': 'DONE' };
+    label.textContent = labels[next] || '';
+  }
+  localStorage.setItem('mt-' + el.dataset.mtId, next);
+  updateAllProgress();
+}
+
+/* Track previous group completion state for detecting newly-completed groups */
+var _prevGroupDone = {};
+var _prevMentorDone = {};
+var _progressInitialized = false;
+
+/* Update group progress bars and mentor overall progress */
+function updateAllProgress() {
+  document.querySelectorAll('.mt-group[data-group]').forEach(function(group) {
+    var items = group.querySelectorAll('.mt-item[data-mt-id]');
+    var total = items.length;
+    var done = 0;
+    items.forEach(function(it) { if (it.classList.contains('mt-done')) done++; });
+    var fill = group.querySelector('.mt-group-fill');
+    var count = group.querySelector('.mt-group-count');
+    if (fill) fill.style.width = (total > 0 ? Math.round(done / total * 100) : 0) + '%';
+    if (count) count.textContent = done + '/' + total;
+
+    var gid = group.dataset.group;
+    var wasComplete = _prevGroupDone[gid];
+    var isComplete = total > 0 && done === total;
+    _prevGroupDone[gid] = isComplete;
+    if (_progressInitialized && isComplete && !wasComplete && total > 0) {
+      var groupLabel = group.querySelector('.mt-group-label');
+      var name = groupLabel ? groupLabel.textContent.trim().slice(0, 20) : gid;
+      var mentorContainer = group.closest('.mentor-todos');
+      var allGroups = mentorContainer ? mentorContainer.querySelectorAll('.mt-group[data-group]') : [];
+      var nextGroup = null;
+      var foundCurrent = false;
+      for (var i = 0; i < allGroups.length; i++) {
+        if (allGroups[i] === group) { foundCurrent = true; continue; }
+        if (foundCurrent) {
+          var nItems = allGroups[i].querySelectorAll('.mt-item[data-mt-id]');
+          var nDone = 0;
+          nItems.forEach(function(it) { if (it.classList.contains('mt-done')) nDone++; });
+          if (nDone < nItems.length) { nextGroup = allGroups[i]; break; }
+        }
+      }
+      if (nextGroup) {
+        var nextLabel = nextGroup.querySelector('.mt-group-label');
+        var nextName = nextLabel ? nextLabel.textContent.trim().slice(0, 20) : '';
+        showToast('\u2713 ' + name + ' 完成！下一步: ' + nextName);
+        setTimeout(function() { nextGroup.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 500);
+      } else {
+        showToast('\u2713 ' + name + ' 完成！这个导师的任务全部搞定');
+      }
+    }
+  });
+
+  ['jensen', 'musk', 'barkley'].forEach(function(mentor) {
+    var container = document.querySelector('.mentor-todos[data-mentor="' + mentor + '"]');
+    if (!container) return;
+    var items = container.querySelectorAll('.mt-item[data-mt-id]');
+    var total = items.length;
+    var done = 0;
+    items.forEach(function(it) { if (it.classList.contains('mt-done')) done++; });
+    var fill = document.getElementById(mentor + '-progress-fill');
+    var label = document.getElementById(mentor + '-progress-label');
+    if (fill) fill.style.width = (total > 0 ? Math.round(done / total * 100) : 0) + '%';
+    if (label) label.textContent = done + '/' + total;
+
+    var wasComplete = _prevMentorDone[mentor];
+    var isComplete = total > 0 && done === total;
+    _prevMentorDone[mentor] = isComplete;
+    if (_progressInitialized && isComplete && !wasComplete) {
+      var refreshBtn = container.querySelector('.mt-refresh-prompt');
+      if (!refreshBtn) {
+        refreshBtn = document.createElement('div');
+        refreshBtn.className = 'mt-refresh-prompt';
+        refreshBtn.style.cssText = 'text-align:center;padding:0.6rem;margin-top:0.5rem;background:rgba(76,175,80,0.08);border-radius:6px;border:1px dashed rgba(76,175,80,0.3);';
+        refreshBtn.innerHTML = '<span style="font-size:0.78rem;color:var(--tier-high);">全部完成！</span> '
+          + '<a href="#" onclick="event.preventDefault();refreshTodos()" style="font-size:0.75rem;color:#9C27B0;text-decoration:underline;">点击刷新获取新建议</a>';
+        container.appendChild(refreshBtn);
+      }
+    }
+  });
+}
+
+/* === Musk Hide/Focus Mode === */
+var muskHideActive = localStorage.getItem('musk-hide-noncore') === 'true';
+var muskFocusActive = localStorage.getItem('musk-focus-mode') === 'true';
+
+function applyMuskHide(active) {
+  document.querySelectorAll('[data-musk-hide="noncore"]').forEach(function(el) {
+    if (active) el.classList.add('musk-hidden');
+    else el.classList.remove('musk-hidden');
+  });
+}
+
+function applyMuskFocus(active) {
+  document.querySelectorAll('[data-musk-focus-hide]').forEach(function(el) {
+    if (active) el.classList.add('musk-focus-hidden');
+    else el.classList.remove('musk-focus-hidden');
+  });
+  document.querySelectorAll('[data-musk-hide="noncore"]').forEach(function(el) {
+    if (active) el.classList.add('musk-focus-hidden');
+    else el.classList.remove('musk-focus-hidden');
+  });
+}
+
+function toggleMuskHide(el) {
+  muskHideActive = !muskHideActive;
+  localStorage.setItem('musk-hide-noncore', muskHideActive);
+  applyMuskHide(muskHideActive);
+  el.classList.toggle('mt-done', muskHideActive);
+  el.classList.remove('mt-started');
+  var label = el.querySelector('.mt-status');
+  if (label) label.textContent = muskHideActive ? 'HIDDEN' : '';
+  localStorage.setItem('mt-' + el.dataset.mtId, muskHideActive ? 'mt-done' : 'idle');
+  showToast(muskHideActive ? '\u2713 已隐藏非核心项目 — 只剩交易相关内容' : '\u21A9 已恢复所有项目');
+  updateAllProgress();
+}
+
+function toggleMuskFocus(el) {
+  muskFocusActive = !muskFocusActive;
+  localStorage.setItem('musk-focus-mode', muskFocusActive);
+  applyMuskFocus(muskFocusActive);
+  el.classList.toggle('mt-done', muskFocusActive);
+  el.classList.remove('mt-started');
+  var label = el.querySelector('.mt-status');
+  if (label) label.textContent = muskFocusActive ? 'FOCUS MODE' : '';
+  localStorage.setItem('mt-' + el.dataset.mtId, muskFocusActive ? 'mt-done' : 'idle');
+  showToast(muskFocusActive ? '\u2713 聚焦模式开启 — 只显示 Dashboard + 卖出决策' : '\u21A9 聚焦模式关闭');
+  updateAllProgress();
+}
+
+/* === Scaffold Execution === */
+function execScaffold(el, action) {
+  if (el.classList.contains('mt-done')) {
+    el.classList.remove('mt-done', 'mt-running');
+    var tag = el.querySelector('.mt-exec-tag');
+    if (tag) tag.textContent = '点击执行';
+    var status = el.querySelector('.mt-status');
+    if (status) status.textContent = '';
+    localStorage.setItem('mt-' + el.dataset.mtId, 'idle');
+    updateAllProgress();
+    return;
+  }
+
+  if (action === 'open_dashboard') {
+    window.open('http://localhost:8080', '_blank');
+    el.classList.add('mt-done');
+    var tag = el.querySelector('.mt-exec-tag');
+    if (tag) tag.textContent = '已打开';
+    localStorage.setItem('mt-' + el.dataset.mtId, 'mt-done');
+    updateAllProgress();
+    return;
+  }
+
+  var appActions = ['open_futu'];
+  if (appActions.indexOf(action) >= 0) {
+    var tag = el.querySelector('.mt-exec-tag');
+    if (tag) tag.textContent = '启动中...';
+  }
+
+  el.classList.add('mt-running');
+  var tag = el.querySelector('.mt-exec-tag');
+  if (tag) tag.textContent = '执行中...';
+
+  fetch('http://localhost:8080/api/scaffold-exec', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: action }),
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(resp) {
+      el.classList.remove('mt-running');
+      window.focus();
+      if (resp.success) {
+        el.classList.add('mt-done');
+        if (tag) tag.textContent = '已完成';
+        localStorage.setItem('mt-' + el.dataset.mtId, 'mt-done');
+        var label = el.querySelector('.mt-text');
+        var taskName = label ? label.textContent.replace(/点击执行|已完成|执行中.*/g,'').trim().slice(0,20) : action;
+        var output = (resp.results || []).map(function(r){ return (r.out || '').trim(); }).filter(Boolean).join('\n');
+        if (output) {
+          var detail = el.querySelector('.mt-exec-detail');
+          if (!detail) {
+            detail = document.createElement('div');
+            detail.className = 'mt-exec-detail';
+            detail.style.cssText = 'font-size:0.72rem; color:var(--text-tertiary); margin-top:0.3rem; padding:0.4rem 0.6rem; background:rgba(76,175,80,0.06); border-radius:4px; border-left:2px solid var(--tier-high); white-space:pre-line; line-height:1.5;';
+            el.appendChild(detail);
+          }
+          detail.textContent = output;
+        }
+        showToast('\u2713 ' + taskName + ' — 执行成功');
+        if (localStorage.getItem('mt-barkley-3a') === 'mt-done') {
+          fetch('http://localhost:8080/api/scaffold-exec', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'completion_notify' }),
+          }).catch(function(){});
+        }
+      } else {
+        if (tag) tag.textContent = '失败 — 重试';
+        var errMsg = resp.results ? resp.results.map(function(r){return r.err;}).join(' ').slice(0,80) : '未知错误';
+        showToast('\u2717 执行失败: ' + errMsg, true);
+        var status = el.querySelector('.mt-status');
+        if (status) status.textContent = errMsg.slice(0,50);
+      }
+      updateAllProgress();
+    })
+    .catch(function(err) {
+      el.classList.remove('mt-running');
+      if (tag) tag.textContent = 'Dashboard 未运行';
+      showToast('\u2717 无法连接 Dashboard (localhost:8080)', true);
+      updateAllProgress();
+    });
+}
+
+/* Inline scaffold: show results in page without leaving */
+function execScaffoldInline(el, type) {
+  var mentorCard = el.closest('.mentor-card') || el.closest('.mentor-todos');
+  var container = mentorCard ? mentorCard.querySelector('[id$="-inline-results"]') : null;
+  if (!container) container = document.getElementById('barkley-inline-results');
+  if (!container) return;
+  var tag = el.querySelector('.mt-exec-tag');
+
+  if (type === 'positions') {
+    if (tag) tag.textContent = '加载中...';
+    window.open('http://localhost:8080', '_blank');
+    fetch('http://localhost:8080/api/dashboard')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var pos = data.positions || [];
+        var worst = null;
+        pos.forEach(function(p) {
+          var pnl = p.pnl_pct || p.unrealized_pnl_pct || 0;
+          if (!worst || pnl < worst.pnl) {
+            var sym = (p.symbol || '').replace(/^US\./, '').replace(/\*+$/, '');
+            if (sym && sym !== 'SPAXX') worst = { symbol: sym, pnl: pnl };
+          }
+        });
+        var alerts = pos.filter(function(p) { return (p.pnl_pct || p.unrealized_pnl_pct || 0) < -5; });
+        var best = null;
+        pos.forEach(function(p) {
+          var pnl = p.pnl_pct || p.unrealized_pnl_pct || 0;
+          if (!best || pnl > best.v) best = { p: p, v: pnl };
+        });
+        var html = '<div style="border:1px solid var(--border-subtle);border-left:3px solid #9C27B0;border-radius:6px;padding:0.75rem 1rem;background:var(--bg-surface);font-size:0.78rem;margin-bottom:0.5rem;">';
+        html += '<div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:#9C27B0;margin-bottom:0.4rem;">持仓摘要 — ' + pos.length + ' 个品种</div>';
+        if (pos.length === 0) {
+          html += '<div style="color:var(--text-quaternary);">无持仓数据</div>';
+        } else {
+          if (alerts.length > 0) {
+            html += '<div style="color:var(--tier-low);font-weight:600;margin-bottom:0.3rem;">\u26A0 ' + alerts.length + ' 个需要注意：</div>';
+            alerts.forEach(function(p) {
+              var pnl = p.pnl_pct || p.unrealized_pnl_pct || 0;
+              var sym = (p.symbol || '?').replace(/^US\./, '');
+              html += '<div style="display:flex;justify-content:space-between;padding:0.3rem 0.5rem;margin-bottom:0.2rem;background:rgba(244,67,54,0.08);border-radius:4px;">';
+              html += '<span style="font-weight:600;color:var(--tier-low);">' + sym + '</span>';
+              html += '<span style="font-family:var(--font-mono);color:var(--tier-low);">' + pnl.toFixed(1) + '%</span></div>';
+            });
+          } else {
+            html += '<div style="color:var(--tier-high);">\u2713 所有持仓正常，无需行动</div>';
+          }
+          if (best && best.v > 0) {
+            var bs = best.p;
+            html += '<div style="margin-top:0.3rem;color:var(--text-quaternary);font-size:0.7rem;">最佳: ' + ((bs.symbol||'?').replace(/^US\./,'')) + ' +' + best.v.toFixed(1) + '%</div>';
+          }
+          if (worst && worst.symbol) {
+            html += '<div style="margin-top:0.4rem;"><a href="https://www.tradingview.com/chart/?symbol=' + worst.symbol + '" target="_blank" style="font-size:0.75rem;color:#9C27B0;text-decoration:underline;">打开 ' + worst.symbol + ' TradingView 图表 \u2192</a></div>';
+          }
+        }
+        html += '</div>';
+        container.innerHTML = html;
+        el.classList.add('mt-done');
+        if (tag) tag.textContent = '已查看';
+        localStorage.setItem('mt-' + el.dataset.mtId, 'mt-done');
+        showToast('\u2713 已打开 Dashboard + TradingView' + (worst ? ' (' + worst.symbol + ')' : ''));
+        updateAllProgress();
+      })
+      .catch(function() {
+        container.innerHTML = '<div style="color:var(--tier-low);font-size:0.78rem;padding:0.5rem;">Dashboard 未运行 — 先启动 app.py</div>';
+        if (tag) tag.textContent = '失败';
+        showToast('\u2717 无法连接 Dashboard', true);
+      });
+  } else if (type === 'monitor') {
+    if (tag) tag.textContent = '执行中（约30秒）...';
+    container.innerHTML = '<div style="color:var(--text-quaternary);font-size:0.78rem;padding:0.5rem;">正在执行 monitor --once，检查所有持仓的退出信号...</div>';
+    fetch('http://localhost:8080/api/scaffold-exec', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'run_monitor' }),
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(resp) {
+        var rawOutput = '';
+        if (resp.results) {
+          resp.results.forEach(function(r) { rawOutput += (r.out || '') + (r.err || ''); });
+        }
+        var lines = rawOutput.split('\n');
+        var okItems = [], alertItems = [], totalChecked = 0;
+        lines.forEach(function(line) {
+          var okMatch = line.match(/\[OK\]\s+(\S+)\s+@\s+([\d.]+)\s+\(([-+]?[\d.]+)%\)/);
+          if (okMatch) {
+            totalChecked++;
+            var pct = parseFloat(okMatch[3]);
+            var item = { symbol: okMatch[1], price: okMatch[2], pct: pct };
+            if (pct < -10) { alertItems.push(item); } else { okItems.push(item); }
+          }
+          var exitMatch = line.match(/\[EXIT\]\s+(\S+)/i) || line.match(/exit.*signal.*(\S+)/i);
+          if (exitMatch) {
+            alertItems.push({ symbol: exitMatch[1], price: '\u2014', pct: 0, exit: true });
+          }
+          if (line.match(/Checking\s+(\d+)\s+symbols/)) {
+            totalChecked = parseInt(line.match(/(\d+)\s+symbols/)[1]);
+          }
+        });
+        var html = '<div style="border:1px solid var(--border-subtle);border-left:3px solid #9C27B0;border-radius:6px;padding:0.75rem 1rem;background:var(--bg-surface);font-size:0.78rem;margin-bottom:0.5rem;">';
+        html += '<div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:#9C27B0;margin-bottom:0.4rem;">Monitor 退出信号检查</div>';
+        html += '<div style="margin-bottom:0.4rem;color:var(--text-secondary);">检查了 ' + (totalChecked || (okItems.length + alertItems.length)) + ' 个品种';
+        if (alertItems.length > 0) {
+          html += '，<span style="color:var(--tier-low);font-weight:600;">' + alertItems.length + ' 个需要注意</span>';
+        } else {
+          html += '，<span style="color:var(--tier-high);">全部正常</span>';
+        }
+        html += '</div>';
+        alertItems.forEach(function(a) {
+          html += '<div style="display:flex;justify-content:space-between;padding:0.3rem 0.5rem;margin-bottom:0.2rem;background:rgba(244,67,54,0.08);border-radius:4px;">';
+          html += '<span style="font-weight:600;color:var(--tier-low);">' + (a.exit ? '\uD83D\uDEA8 EXIT ' : '\u26A0 ') + a.symbol + '</span>';
+          html += '<span style="font-family:var(--font-mono);color:var(--tier-low);">' + (a.exit ? '退出信号' : a.pct.toFixed(1) + '%') + '</span></div>';
+        });
+        if (okItems.length > 0) {
+          html += '<div style="margin-top:0.3rem;color:var(--text-quaternary);font-size:0.7rem;">\u2713 正常: ';
+          html += okItems.map(function(o) { return o.symbol + ' (' + (o.pct >= 0 ? '+' : '') + o.pct.toFixed(1) + '%)'; }).join(', ');
+          html += '</div>';
+        }
+        var rawId = 'monitor-raw-' + Date.now();
+        html += '<div style="margin-top:0.5rem;">';
+        html += '<a href="#" onclick="event.preventDefault();var e=document.getElementById(\'' + rawId + '\');e.style.display=e.style.display===\'none\'?\'block\':\'none\';this.textContent=e.style.display===\'none\'?\'查看原始输出 \u25B8\':\'隐藏原始输出 \u25BE\'" style="font-size:0.68rem;color:var(--text-quaternary);">查看原始输出 \u25B8</a>';
+        html += '<pre id="' + rawId + '" style="display:none;white-space:pre-wrap;color:var(--text-quaternary);font-family:var(--font-mono);font-size:0.68rem;margin:0.3rem 0 0;max-height:200px;overflow-y:auto;padding:0.4rem;background:rgba(0,0,0,0.15);border-radius:4px;">' + (rawOutput || '无输出') + '</pre>';
+        html += '</div></div>';
+        container.innerHTML = html;
+        el.classList.add('mt-done');
+        if (tag) tag.textContent = '已执行';
+        localStorage.setItem('mt-' + el.dataset.mtId, 'mt-done');
+        showToast('\u2713 Monitor 完成: ' + okItems.length + ' 正常' + (alertItems.length > 0 ? ', ' + alertItems.length + ' 需注意' : ''));
+        updateAllProgress();
+      })
+      .catch(function() {
+        container.innerHTML = '<div style="color:var(--tier-low);font-size:0.78rem;padding:0.5rem;">执行失败 — Dashboard 未运行或 SMB 未连接</div>';
+        if (tag) tag.textContent = '失败';
+        showToast('\u2717 Monitor 执行失败', true);
+      });
+  }
+}
+
+/* === Refresh TODOs via AI === */
+function refreshTodos() {
+  var btn = document.getElementById('refresh-todos-btn');
+  var label = document.getElementById('refresh-todos-label');
+  if (!btn || !label) return;
+  btn.disabled = true;
+  label.textContent = 'AI 分析中...';
+  btn.style.opacity = '0.6';
+
+  var todoStates = {};
+  document.querySelectorAll('.mt-item[data-mt-id]').forEach(function(el) {
+    todoStates[el.dataset.mtId] = el.classList.contains('mt-done') ? 'done' : 'idle';
+  });
+
+  fetch('http://localhost:8080/api/todo-redesign', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ todo_states: todoStates }),
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(resp) {
+      if (resp.error) {
+        label.textContent = '失败: ' + resp.error.slice(0, 30);
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        return;
+      }
+      var mentors = ['jensen', 'musk', 'barkley'];
+      mentors.forEach(function(mentor) {
+        var data = resp[mentor];
+        if (!data || !data.groups) return;
+        var container = document.querySelector('.mentor-todos[data-mentor="' + mentor + '"] ul');
+        if (!container) return;
+        var inlineResults = container.querySelector('[id$="-inline-results"]');
+        container.innerHTML = '';
+        data.groups.forEach(function(group, gi) {
+          var groupDiv = document.createElement('div');
+          groupDiv.className = 'mt-group';
+          groupDiv.setAttribute('data-group', mentor + '-ai-' + gi);
+          var headHtml = '<div class="mt-group-head">';
+          headHtml += '<span class="mt-group-label">' + (group.label || '') + '</span>';
+          headHtml += '<span class="mt-group-time">' + (group.time || '') + '</span>';
+          headHtml += '<div class="mt-group-progress"><div class="mt-group-bar"><div class="mt-group-fill" style="width:0%"></div></div><span class="mt-group-count">0/' + (group.steps ? group.steps.length : 0) + '</span></div>';
+          headHtml += '</div>';
+          if (group.quote) headHtml += '<div class="mt-original">"' + group.quote + '"</div>';
+          groupDiv.innerHTML = headHtml;
+          (group.steps || []).forEach(function(step, si) {
+            var li = document.createElement('li');
+            var id = mentor + '-ai-' + gi + String.fromCharCode(97 + si);
+            li.setAttribute('data-mt-id', id);
+            if (step.type === 'scaffold' || step.type === 'inline') {
+              li.className = 'mt-item mt-micro mt-scaffold';
+              var action = step.action || '';
+              if (step.type === 'inline') {
+                li.setAttribute('onclick', "execScaffoldInline(this,'" + action + "')");
+              } else {
+                li.setAttribute('onclick', "execScaffold(this,'" + action + "')");
+              }
+              li.innerHTML = '<div class="mt-cb"></div><div class="mt-text">' + step.text + ' <span class="mt-exec-tag">点击执行</span></div><span class="mt-status"></span>';
+            } else {
+              li.className = 'mt-item mt-micro';
+              li.setAttribute('onclick', 'cycleMicroTodo(this)');
+              li.innerHTML = '<div class="mt-cb"></div><div class="mt-text">' + step.text + '</div><span class="mt-time">' + (step.time || '') + '</span><span class="mt-status"></span>';
+            }
+            groupDiv.appendChild(li);
+          });
+          container.appendChild(groupDiv);
+        });
+        if (inlineResults) container.appendChild(inlineResults);
+      });
+      updateAllProgress();
+      label.textContent = '已刷新';
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      setTimeout(function() { label.textContent = '刷新 TODO'; }, 3000);
+    })
+    .catch(function(err) {
+      label.textContent = 'Dashboard 未运行';
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      setTimeout(function() { label.textContent = '刷新 TODO'; }, 3000);
+    });
+}
+
+/* === Restore localStorage states === */
+// Restore micro-TODO states (skip action items)
+document.querySelectorAll('.mt-item[data-mt-id]:not(.mt-action)').forEach(function(el) {
+  var key = 'mt-' + el.dataset.mtId;
+  var saved = localStorage.getItem(key);
+  if (saved && saved !== 'idle') {
+    el.classList.add(saved);
+  }
+});
+
+// Restore scaffold states
+document.querySelectorAll('.mt-scaffold[data-mt-id]').forEach(function(el) {
+  var saved = localStorage.getItem('mt-' + el.dataset.mtId);
+  if (saved === 'mt-done') {
+    el.classList.add('mt-done');
+    var tag = el.querySelector('.mt-exec-tag');
+    if (tag) tag.textContent = '已完成';
+  }
+});
+
+// Restore Musk hide/focus
+if (muskHideActive) {
+  applyMuskHide(true);
+  var el1 = document.querySelector('[data-mt-id="musk-1"]');
+  if (el1) { el1.classList.add('mt-done'); var l = el1.querySelector('.mt-status'); if (l) l.textContent = 'HIDDEN'; }
+}
+if (muskFocusActive) {
+  applyMuskFocus(true);
+  var el2 = document.querySelector('[data-mt-id="musk-2"]');
+  if (el2) { el2.classList.add('mt-done'); var l = el2.querySelector('.mt-status'); if (l) l.textContent = 'FOCUS MODE'; }
+}
+
+// Initial progress update
+updateAllProgress();
+_progressInitialized = true;
+</script>
+
+<script>
+// === Mentor Consult Modal + History Journal ===
+(function() {
+  var overlay = document.getElementById('mentorModalOverlay');
+  var modal = document.getElementById('mentorModal');
+  var content = document.getElementById('mentorModalContent');
+
+  // ---- Data layer ----
+  function getFacts() {
+    // On the sub-page we don't have the diagnostic strip, so use defaults
+    return {
+      infra: '65%', trading: '5%', research: '30%',
+      corrections: '3', ideas: '2/5', stale: '2',
+      pq: { completed: 0, started: 0, frozen: 0, killed: 0, total: 0 }
+    };
+  }
+
+  function getMentorTodoStates(mentor) {
+    var items = document.querySelectorAll('.mt-item[data-mt-id^="' + mentor + '-"]');
+    var result = [];
+    items.forEach(function(el) {
+      var text = el.querySelector('.mt-text').textContent.trim();
+      var state = 'pending';
+      if (el.classList.contains('mt-done')) state = 'done';
+      else if (el.classList.contains('mt-started')) state = 'started';
+      result.push({ text: text.slice(0, 40), state: state });
+    });
+    return result;
+  }
+
+  function computeScore(facts, todos) {
+    var score = 0;
+    var tradePct = parseInt(facts.trading) || 0;
+    score += Math.min(30, tradePct);
+    var infraPct = parseInt(facts.infra) || 0;
+    score += Math.max(0, 20 - Math.floor(infraPct / 5));
+    var pqRatio = facts.pq.total > 0 ? facts.pq.completed / facts.pq.total : 0;
+    score += Math.round(pqRatio * 20);
+    var staleN = parseInt(facts.stale) || 0;
+    score += Math.max(0, 10 - staleN * 3);
+    var todoDone = todos.filter(function(t) { return t.state === 'done'; }).length;
+    var todoStarted = todos.filter(function(t) { return t.state === 'started'; }).length;
+    score += Math.round((todoDone * 20 + todoStarted * 7) / Math.max(todos.length, 1));
+    return Math.min(100, Math.max(0, score));
+  }
+
+  // ---- History storage ----
+  var HISTORY_KEY_PREFIX = 'mentor-history-';
+
+  function getHistory(mentor) {
+    try { return JSON.parse(localStorage.getItem(HISTORY_KEY_PREFIX + mentor) || '[]'); }
+    catch(e) { return []; }
+  }
+
+  function saveHistory(mentor, entries) {
+    localStorage.setItem(HISTORY_KEY_PREFIX + mentor, JSON.stringify(entries.slice(-50)));
+  }
+
+  function saveSnapshot(mentor) {
+    var facts = getFacts();
+    var todos = getMentorTodoStates(mentor);
+    var score = computeScore(facts, todos);
+    var now = new Date();
+    var entry = {
+      ts: now.toISOString(),
+      date: now.toLocaleDateString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }),
+      facts: facts,
+      todos: todos,
+      score: score
+    };
+    var history = getHistory(mentor);
+    if (history.length > 0) {
+      var lastTs = new Date(history[history.length - 1].ts);
+      if (now - lastTs < 60000) return;
+    }
+    history.push(entry);
+    saveHistory(mentor, history);
+    updateHistoryCount(mentor);
+  }
+
+  function updateHistoryCount(mentor) {
+    var el = document.getElementById('hist-count-' + mentor);
+    if (el) {
+      var count = getHistory(mentor).length;
+      el.textContent = count > 0 ? count : '';
+    }
+  }
+
+  // ---- Mentor data ----
+  var mentorData = {
+    jensen: {
+      name: 'Jensen Huang',
+      color: '#76b900',
+      modalClass: 'mentor-modal-jensen',
+      greeting: '"让我看看你这周的数字。"',
+      advice: [
+        { title: '关于时间分配', text: '基础设施<strong>{infra}</strong>，交易<strong>{trading}</strong>。这个比例是病态的。在 NVIDIA，如果一个团队把 65% 时间花在工具而不是产品上，我会当天重组这个团队。你的"产品"是交易收益。一切不直接产生交易收益的活动，本周暂停。' },
+        { title: '关于 Priority Queue', text: '你有 {pq_total} 个任务，完成了 {pq_completed} 个，冻结了 {pq_frozen} 个，砍了 {pq_killed} 个。这说明你把太多东西放进了队列。我的原则：如果它重要到需要排队，它就重要到今天完成。如果今天完不成，它不重要。' },
+        { title: '下一步行动', text: '不要打开任何 HTML 编辑器。打开你的交易终端。选一个你最熟悉的持仓品种。写一条卖出规则（3行代码），设好止损，然后关掉电脑去散步。明天回来看结果。这就是你的第一个完整循环。' }
+      ],
+      checkpoints: [
+        '是否完成了至少一笔交易的完整循环（入场→持有→退出→复盘）？',
+        'sell-side 规则是否已经用代码实现（不是用文档描述）？',
+        '本周 Trading 时间占比是否 > 30%？'
+      ]
+    },
+    musk: {
+      name: 'Elon Musk',
+      color: '#1DA1F2',
+      modalClass: 'mentor-modal-musk',
+      greeting: '"First principles. 让我拆解你的数据。"',
+      advice: [
+        { title: '删除测试', text: '你有 {pq_total} 个排队任务。问自己：如果我删掉其中 80%，下周会发生什么坏事？如果答案是"没什么"——那就删。SpaceX 有一条规则：任何流程、任何零件，如果删掉后不需要重新加回来，那它一开始就不应该存在。对你来说：Observatory、Conv Archive、Orchestrator —— 删掉，看看你是否需要加回来。' },
+        { title: '收益公式', text: '收益 = 正确品种数 × 持仓时间 × 涨幅 − 错误品种数 × 亏损。你这周改变了这个公式里的哪个变量？{corrections} 次纠正、{ideas} 想法跟进——但这些都是 meta 层面的。没有一个直接改变了公式里的任何一项。这周的 ROI 是负数，因为你花了时间但没改变任何收益变量。' },
+        { title: '物理约束方案', text: '不要依赖自律。设计环境让你无法分心。1) 把 dashboard 和交易终端设为默认启动程序。2) 用 Screen Time 限制浏览器每天2小时。3) 在 Telegram 群里宣布："周五前完成第一笔完整循环，否则删掉所有项目从零开始。" 公开承诺是最强的执行力工具。' }
+      ],
+      checkpoints: [
+        '是否删掉了至少 3 个非核心项目（不是冻结，是删除）？',
+        '系统是否缩减到 ≤ 3 个活跃项目？',
+        '是否设定了一个公开的、不可推迟的截止日期？'
+      ]
+    },
+    barkley: {
+      name: 'Russell Barkley',
+      color: '#9C27B0',
+      modalClass: 'mentor-modal-barkley',
+      greeting: '"让我看看你的行为数据，不是你的计划。"',
+      advice: [
+        { title: '执行功能诊断', text: '你有 {pq_total} 个排队任务，完成了 {pq_completed} 个。但更重要的是：你花了多少时间<strong>规划</strong>这些任务 vs <strong>执行</strong>它们？如果规划:执行的比例 > 2:1，这是典型的 ADHD 计划增殖——建计划系统给多巴胺，执行不给。修复：删掉计划系统的一半，用省下的时间执行剩下的一半。' },
+        { title: '多巴胺审计', text: '基础设施 {infra}，交易 {trading}。这不是"优先级错误"——这是你的大脑在选择多巴胺更高的路径。建 HTML 页面 = 即时反馈（看到漂亮的结果）。执行交易 = 延迟反馈 + 可能亏损。ADHD 大脑永远选即时反馈。对策：给交易动作附加即时奖励——每看一次持仓 P&L 就允许自己做一件喜欢的小事。' },
+        { title: '外部脚手架处方', text: '你需要的不是更好的计划，是更好的环境。1) 让 monitor --once 自动跑+推送，你不需要"记得去看"——系统替你看。2) 把交易终端设为开机默认，让"不交易"比"交易"需要更多动作。3) 设 timer 不是 TODO——ADHD 对时间流逝没有感知，TODO 没有紧迫感，timer 有。' }
+      ],
+      checkpoints: [
+        '环境是否已重设？（交易终端 > 代码编辑器的可见性）',
+        '是否有自动运行的 timer/cron 替你"记得"做交易检查？',
+        '是否定义了即时奖励？（不是一周后看进度条）'
+      ]
+    }
+  };
+
+  // ---- Render helpers ----
+  function renderFactsHTML(facts) {
+    var html = '<div class="facts-section">';
+    html += '<h4>页面指标 Page Metrics</h4>';
+    html += '<div class="fact-row"><span class="fact-label">基础设施时间</span><span class="fact-value">' + facts.infra + '</span></div>';
+    html += '<div class="fact-row"><span class="fact-label">交易系统时间</span><span class="fact-value" style="color:var(--tier-low);">' + facts.trading + '</span></div>';
+    html += '<div class="fact-row"><span class="fact-label">研究时间</span><span class="fact-value">' + facts.research + '</span></div>';
+    html += '<div class="fact-row"><span class="fact-label">PQ 任务</span><span class="fact-value">' + facts.pq.completed + ' 完成 / ' + facts.pq.started + ' 进行中 / ' + facts.pq.frozen + ' 冻结 / ' + facts.pq.total + ' 总计</span></div>';
+    html += '</div>';
+    return html;
+  }
+
+  function renderLiveDataHTML(live) {
+    var html = '';
+
+    if (live.positions && !live.positions.error) {
+      var pos = live.positions;
+      html += '<div class="facts-section" style="border-left:2px solid var(--tier-high);">';
+      html += '<h4>实时持仓 Live Positions (Futu)</h4>';
+      html += '<div class="fact-row"><span class="fact-label">持仓数</span><span class="fact-value">' + pos.count + '</span></div>';
+      html += '<div class="fact-row"><span class="fact-label">总未实现 P&L</span><span class="fact-value" style="color:' + (pos.total_pnl >= 0 ? 'var(--tier-high)' : 'var(--tier-low)') + ';">$' + pos.total_pnl.toLocaleString() + '</span></div>';
+      if (pos.worst) {
+        html += '<div class="fact-row"><span class="fact-label">最差持仓</span><span class="fact-value" style="color:var(--tier-low);">' + pos.worst.symbol + ' ' + pos.worst.pnl_pct + '%</span></div>';
+      }
+      if (pos.best) {
+        html += '<div class="fact-row"><span class="fact-label">最佳持仓</span><span class="fact-value" style="color:var(--tier-high);">' + pos.best.symbol + ' +' + pos.best.pnl_pct + '%</span></div>';
+      }
+      html += '<div class="fact-row"><span class="fact-label">今日交易数</span><span class="fact-value">' + (pos.recent_trades || 0) + '</span></div>';
+      if (pos.items && pos.items.length > 0) {
+        html += '<div style="margin-top:0.5rem;font-size:0.72rem;color:var(--text-quaternary);">';
+        pos.items.forEach(function(p) {
+          var color = p.pnl_pct >= 0 ? 'var(--tier-high)' : 'var(--tier-low)';
+          html += '<div style="display:flex;justify-content:space-between;padding:0.15rem 0;border-bottom:1px solid var(--border-subtle);">';
+          html += '<span>' + p.symbol + '</span>';
+          html += '<span style="color:' + color + ';font-family:var(--font-mono);">' + (p.pnl_pct >= 0 ? '+' : '') + p.pnl_pct + '% ($' + p.pnl + ')</span>';
+          html += '</div>';
+        });
+        html += '</div>';
+      }
+      html += '</div>';
+    }
+
+    if (live.pipeline && !live.pipeline.error) {
+      var pip = live.pipeline;
+      html += '<div class="facts-section" style="border-left:2px solid var(--accent);">';
+      html += '<h4>管道状态 Pipeline</h4>';
+      html += '<div class="fact-row"><span class="fact-label">Paper Trades</span><span class="fact-value">' + pip.paper_trades_open + ' 持仓 / ' + pip.paper_trades_closed + ' 已平</span></div>';
+      html += '<div class="fact-row"><span class="fact-label">7天入场信号</span><span class="fact-value">' + pip.signals_7d + '</span></div>';
+      html += '<div class="fact-row"><span class="fact-label">候选品种</span><span class="fact-value">' + pip.candidates_total + '</span></div>';
+      html += '<div class="fact-row"><span class="fact-label">研究报告</span><span class="fact-value">' + pip.reports_count + '</span></div>';
+      html += '<div class="fact-row"><span class="fact-label">反馈样本</span><span class="fact-value">' + pip.feedback_count + '</span></div>';
+      html += '<div class="fact-row"><span class="fact-label">卖侧退出预警</span><span class="fact-value" style="color:' + (pip.sell_side_active ? 'var(--tier-high)' : 'var(--tier-low)') + ';">' + (pip.sell_side_active ? pip.exit_warnings.length + ' 条活跃' : '无 — 卖侧未触发') + '</span></div>';
+      if (pip.paper_trades && pip.paper_trades.length > 0) {
+        html += '<div style="margin-top:0.5rem;font-size:0.72rem;color:var(--text-quaternary);">';
+        pip.paper_trades.slice(0, 8).forEach(function(t) {
+          var pnl = t.pnl_pct || 0;
+          var color = pnl >= 0 ? 'var(--tier-high)' : 'var(--tier-low)';
+          var status = t.status === 'open' ? '持仓' : '已平';
+          html += '<div style="display:flex;justify-content:space-between;padding:0.15rem 0;border-bottom:1px solid var(--border-subtle);">';
+          html += '<span>' + t.symbol + ' <span style="opacity:0.6;">' + status + '</span></span>';
+          html += '<span style="color:' + color + ';font-family:var(--font-mono);">' + (pnl >= 0 ? '+' : '') + pnl.toFixed(1) + '%</span>';
+          html += '</div>';
+        });
+        html += '</div>';
+      }
+      html += '</div>';
+    }
+
+    if (live.git_activity) {
+      html += '<div class="facts-section" style="border-left:2px solid var(--knowledge);">';
+      html += '<h4>Git 活动 (7天)</h4>';
+      Object.keys(live.git_activity).forEach(function(repo) {
+        var g = live.git_activity[repo];
+        html += '<div class="fact-row"><span class="fact-label">' + repo + '</span><span class="fact-value">' + g.commits_7d + ' commits</span></div>';
+        if (g.recent && g.recent.length > 0) {
+          html += '<div style="font-size:0.68rem;color:var(--text-quaternary);padding-left:0.5rem;margin-bottom:0.3rem;">';
+          g.recent.slice(0, 3).forEach(function(c) {
+            html += '<div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + c + '</div>';
+          });
+          html += '</div>';
+        }
+      });
+      html += '</div>';
+    }
+
+    if (live.launchd) {
+      html += '<div class="facts-section" style="border-left:2px solid var(--text-quaternary);">';
+      html += '<h4>自动化 & 产出</h4>';
+      html += '<div class="fact-row"><span class="fact-label">Launchd 交易任务</span><span class="fact-value">' + (live.launchd.count || 0) + ' 个</span></div>';
+      if (live.files) {
+        html += '<div class="fact-row"><span class="fact-label">研究文件总数</span><span class="fact-value">' + live.files.total_research + ' (' + live.files.html_reports + ' HTML + ' + live.files.md_files + ' MD)</span></div>';
+      }
+      html += '</div>';
+    }
+
+    return html;
+  }
+
+  function renderAdviceHTML(data, facts) {
+    var html = '';
+    data.advice.forEach(function(a) {
+      var text = a.text
+        .replace('{infra}', facts.infra).replace('{trading}', facts.trading)
+        .replace('{pq_total}', facts.pq.total).replace('{pq_completed}', facts.pq.completed)
+        .replace('{pq_frozen}', facts.pq.frozen).replace('{pq_killed}', facts.pq.killed)
+        .replace('{corrections}', facts.corrections).replace('{ideas}', facts.ideas);
+      html += '<div class="advice-block"><strong>' + a.title + '</strong><br>' + text + '</div>';
+    });
+    html += '<div class="check-section"><h4>下周 ' + data.name + ' 会检查什么</h4><ul>';
+    data.checkpoints.forEach(function(c) { html += '<li>' + c + '</li>'; });
+    html += '</ul></div>';
+    return html;
+  }
+
+  function scoreColor(score) {
+    if (score >= 60) return 'var(--tier-high)';
+    if (score >= 35) return 'var(--accent)';
+    return 'var(--tier-low)';
+  }
+
+  function deltaStr(current, previous, key) {
+    var cur = parseInt(current) || 0;
+    var prev = parseInt(previous) || 0;
+    var diff = cur - prev;
+    if (diff === 0) return '<span class="mh-delta same">=</span>';
+    var goodUp = ['trading', 'pq_completed', 'score'].indexOf(key) >= 0;
+    var isGood = goodUp ? (diff > 0) : (diff < 0);
+    var cls = isGood ? 'up' : 'down';
+    var arrow = diff > 0 ? '+' + diff : '' + diff;
+    return '<span class="mh-delta ' + cls + '">' + arrow + '</span>';
+  }
+
+  function renderHistoryHTML(mentor) {
+    var history = getHistory(mentor);
+    var data = mentorData[mentor];
+
+    if (history.length === 0) {
+      return '<div class="mh-empty">还没有历史记录。<br>点击"让 ' + data.name + ' 点评最新进展"生成第一条快照。</div>';
+    }
+
+    var html = '<div class="mentor-history-timeline">';
+
+    for (var i = history.length - 1; i >= 0; i--) {
+      var entry = history[i];
+      var prev = i > 0 ? history[i - 1] : null;
+      var isLatest = (i === history.length - 1);
+
+      html += '<div class="mh-entry' + (isLatest ? ' latest' : '') + '">';
+      html += '<div class="mh-date">' + entry.date;
+      html += ' <span class="mh-badge ' + (isLatest ? 'latest' : 'old') + '">' + (isLatest ? '最新' : '#' + (i + 1)) + '</span>';
+      html += '</div>';
+
+      var sc = entry.score || 0;
+      html += '<div class="mh-score">';
+      html += '<div class="mh-score-bar"><div class="mh-score-fill" style="width:' + sc + '%;background:' + scoreColor(sc) + '"></div></div>';
+      html += '<span class="mh-score-label" style="color:' + scoreColor(sc) + '">' + sc + '/100</span>';
+      if (prev) html += deltaStr(sc, prev.score || 0, 'score');
+      html += '</div>';
+
+      html += '<div class="mh-metrics">';
+      var f = entry.facts;
+      html += '<span class="mh-metric">Infra <span class="mh-val">' + f.infra + '</span>';
+      if (prev) html += deltaStr(f.infra, prev.facts.infra, 'infra');
+      html += '</span>';
+      html += '<span class="mh-metric">Trading <span class="mh-val">' + f.trading + '</span>';
+      if (prev) html += deltaStr(f.trading, prev.facts.trading, 'trading');
+      html += '</span>';
+      html += '<span class="mh-metric">Stale <span class="mh-val">' + f.stale + '</span>';
+      if (prev) html += deltaStr(f.stale, prev.facts.stale, 'stale');
+      html += '</span>';
+      html += '<span class="mh-metric">PQ Done <span class="mh-val">' + f.pq.completed + '/' + f.pq.total + '</span>';
+      if (prev) html += deltaStr(f.pq.completed, prev.facts.pq.completed, 'pq_completed');
+      html += '</span>';
+      html += '</div>';
+
+      if (entry.todos && entry.todos.length > 0) {
+        html += '<div class="mh-todos">';
+        entry.todos.forEach(function(t) {
+          html += '<span class="mh-todo ' + t.state + '">' + t.text + '</span>';
+        });
+        html += '</div>';
+      }
+
+      html += '</div>';
+    }
+
+    html += '</div>';
+
+    html += '<div class="mh-clear-btn"><button onclick="clearMentorHistory(\'' + mentor + '\')">清除全部历史</button></div>';
+
+    return html;
+  }
+
+  // ---- Modal: Consult (with auto-snapshot) ----
+  var currentMentor = null;
+  var currentTab = 'consult';
+
+  function openModal(mentor, tab) {
+    currentMentor = mentor;
+    currentTab = tab || 'consult';
+    var data = mentorData[mentor];
+    if (!data) return;
+
+    modal.className = 'mentor-modal ' + data.modalClass;
+    var facts = getFacts();
+
+    var tabTitles = { consult: ' 点评你的最新进展', history: ' 评价历史日志', ai: ' AI 实时点评' };
+    var html = '<h3>' + data.name + (tabTitles[currentTab] || '') + '</h3>';
+    html += '<div class="mentor-modal-tabs">';
+    html += '<button class="mentor-modal-tab' + (currentTab === 'consult' ? ' active' : '') + '" onclick="switchMentorTab(\'consult\')">模板点评</button>';
+    html += '<button class="mentor-modal-tab' + (currentTab === 'ai' ? ' active' : '') + '" onclick="switchMentorTab(\'ai\')" style="' + (currentTab === 'ai' ? '' : 'border-bottom-color:transparent;') + '">AI 实时点评</button>';
+    html += '<button class="mentor-modal-tab' + (currentTab === 'history' ? ' active' : '') + '" onclick="switchMentorTab(\'history\')">历史 (' + getHistory(mentor).length + ')</button>';
+    html += '</div>';
+
+    if (currentTab === 'consult') {
+      html += '<p style="font-size:0.88rem; color:var(--text-tertiary); font-style:italic; margin-bottom:1.25rem;">' + data.greeting + '</p>';
+      html += renderFactsHTML(facts);
+      html += '<div id="live-data-container" style="opacity:0.5;text-align:center;padding:1rem;font-size:0.8rem;color:var(--text-quaternary);">正在从 Dashboard API 加载实时数据...</div>';
+      html += renderAdviceHTML(data, facts);
+      saveSnapshot(mentor);
+
+      fetch('http://localhost:8080/api/mentor-review')
+        .then(function(r) { return r.json(); })
+        .then(function(live) {
+          var container = document.getElementById('live-data-container');
+          if (container) { container.style.opacity = '1'; container.innerHTML = renderLiveDataHTML(live); }
+          var enriched = getHistory(mentor);
+          if (enriched.length > 0) {
+            enriched[enriched.length - 1].live = {
+              positions_count: (live.positions || {}).count || 0,
+              total_pnl: (live.positions || {}).total_pnl || 0,
+              paper_open: (live.pipeline || {}).paper_trades_open || 0,
+              sell_side_active: (live.pipeline || {}).sell_side_active || false,
+              git_commits: Object.values(live.git_activity || {}).reduce(function(s, g) { return s + (g.commits_7d || 0); }, 0),
+              research_files: (live.files || {}).total_research || 0,
+            };
+            saveHistory(mentor, enriched);
+          }
+        })
+        .catch(function(err) {
+          var container = document.getElementById('live-data-container');
+          if (container) { container.innerHTML = '<span style="color:var(--tier-low);">Dashboard 未运行 — 启动 <code>python app.py</code> 后重试</span>'; container.style.opacity = '1'; }
+        });
+
+    } else if (currentTab === 'ai') {
+      html += '<div id="ai-review-container">';
+      html += '<div style="text-align:center;padding:2rem 1rem;">';
+      html += '<div style="font-size:0.85rem;color:var(--text-tertiary);margin-bottom:1rem;">' + data.name + ' 正在审阅你的实时数据...</div>';
+      html += '<div style="font-size:0.7rem;color:var(--text-quaternary);">采集 10 类数据源 → Claude CLI 深度思考（约30-60秒）</div>';
+      html += '<div style="margin-top:1rem;font-size:2rem;animation:pulse-new 1.5s ease-in-out infinite;">\u23F3</div>';
+      html += '</div></div>';
+
+      fetch('http://localhost:8080/api/mentor-ai-review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mentor: mentor }),
+      })
+        .then(function(r) { return r.json(); })
+        .then(function(resp) {
+          var container = document.getElementById('ai-review-container');
+          if (!container) return;
+          if (resp.error) {
+            container.innerHTML = '<div style="padding:1.5rem;"><div class="advice-block" style="border-left-color:var(--tier-low);background:rgba(244,67,54,0.04);"><strong>错误</strong><br>' + resp.error + '</div></div>';
+            if (resp.data) container.innerHTML += renderLiveDataHTML(resp.data);
+            return;
+          }
+          var aiHtml = '';
+          var lines = (resp.review || '').split('\n');
+          var inBlock = false;
+          lines.forEach(function(line) {
+            line = line.trim();
+            if (!line) { if (inBlock) { aiHtml += '</div>'; inBlock = false; } return; }
+            if (line.match(/^#{1,3}\s/)) {
+              if (inBlock) aiHtml += '</div>';
+              var title = line.replace(/^#{1,3}\s*/, '');
+              aiHtml += '<div class="advice-block"><strong>' + title + '</strong><br>';
+              inBlock = true;
+            } else if (line.match(/^\*\*.*\*\*$/)) {
+              if (inBlock) aiHtml += '</div>';
+              var title = line.replace(/\*\*/g, '');
+              aiHtml += '<div class="advice-block"><strong>' + title + '</strong><br>';
+              inBlock = true;
+            } else if (line.startsWith('- ') || line.startsWith('* ')) {
+              aiHtml += '<div style="padding-left:0.8rem;margin:0.2rem 0;font-size:0.85rem;">\u2022 ' + line.slice(2) + '</div>';
+            } else {
+              if (!inBlock) { aiHtml += '<div class="advice-block">'; inBlock = true; }
+              aiHtml += '<span style="font-size:0.85rem;line-height:1.6;">' + line + '</span><br>';
+            }
+          });
+          if (inBlock) aiHtml += '</div>';
+
+          container.innerHTML = '<div style="padding:0.5rem 0;">' + aiHtml + '</div>';
+          if (resp.data) container.innerHTML += renderLiveDataHTML(resp.data);
+          container.innerHTML += '<div style="text-align:center;margin-top:1rem;"><button onclick="switchMentorTab(\'ai\')" style="padding:0.4rem 1rem;border-radius:6px;border:1px solid var(--border-default);background:var(--bg-surface);color:var(--text-tertiary);font-family:inherit;font-size:0.75rem;cursor:pointer;">重新生成</button></div>';
+
+          var history = getHistory(mentor);
+          if (history.length > 0) {
+            history[history.length - 1].ai_review = (resp.review || '').slice(0, 500);
+          } else {
+            saveSnapshot(mentor);
+            history = getHistory(mentor);
+            if (history.length > 0) history[history.length - 1].ai_review = (resp.review || '').slice(0, 500);
+          }
+          saveHistory(mentor, history);
+        })
+        .catch(function(err) {
+          var container = document.getElementById('ai-review-container');
+          if (container) {
+            container.innerHTML = '<div style="padding:1.5rem;text-align:center;"><div style="color:var(--tier-low);font-size:0.85rem;margin-bottom:0.5rem;">连接失败</div><div style="font-size:0.78rem;color:var(--text-quaternary);">确保 Dashboard 在运行: <code>cd ~/trading-dashboard/trading-dashboard && ./venv/bin/python3 app.py</code></div></div>';
+          }
+        });
+
+    } else {
+      html += renderHistoryHTML(mentor);
+    }
+
+    content.innerHTML = html;
+    overlay.classList.add('open');
+  }
+
+  window.openMentorConsult = function(mentor) { openModal(mentor, 'consult'); };
+  window.openMentorHistory = function(mentor) { openModal(mentor, 'history'); };
+
+  window.switchMentorTab = function(tab) {
+    if (currentMentor) openModal(currentMentor, tab);
+  };
+
+  window.clearMentorHistory = function(mentor) {
+    if (confirm('确定清除 ' + mentorData[mentor].name + ' 的全部历史记录？')) {
+      localStorage.removeItem(HISTORY_KEY_PREFIX + mentor);
+      updateHistoryCount(mentor);
+      openModal(mentor, 'history');
+    }
+  };
+
+  window.closeMentorConsult = function() {
+    overlay.classList.remove('open');
+  };
+
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) closeMentorConsult();
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeMentorConsult();
+  });
+
+  // Init: show history counts
+  updateHistoryCount('jensen');
+  updateHistoryCount('musk');
+  updateHistoryCount('barkley');
+})();
+</script>
+<script src="/lib/reading-mode.js"></script>
+
+</body>
+</html>

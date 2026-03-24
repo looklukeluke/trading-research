@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>区块链产业信号追踪器 — Blockchain Signal Tracker</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="../../research/blockchain_shared.css">
+  <link rel="stylesheet" href="../../research/semiconductor_shared.css">
+  <style>
+/* === Signal-tracker-specific extensions only === */
+/* Embedded mode */
+body.embedded .sidebar,body.embedded .notes-sidebar{display:none}
+body.embedded .main-content{max-width:none!important;width:100%;padding:1.5rem 1.5rem 3rem}
+body.embedded .hamburger-btn{display:none}
+/* Signal panel + cards */
+.signal-panel{border:1px solid var(--border-default);border-radius:var(--radius-md);margin-bottom:2rem;overflow:hidden}
+.signal-panel-header{background:var(--bg-overlay);padding:.75rem 1.25rem;border-bottom:1px solid var(--border-subtle);display:flex;justify-content:space-between;align-items:center}
+.signal-panel-title{font-size:.85rem;font-weight:590;color:var(--accent)}
+.signal-panel-date{font-size:.68rem;color:var(--text-quaternary)}
+.signal-card{padding:1rem 1.25rem;border-bottom:1px solid var(--border-subtle);display:grid;grid-template-columns:4px 1fr auto;gap:.75rem;align-items:start}
+.signal-card:last-child{border-bottom:none}
+.signal-dot{width:4px;border-radius:2px;min-height:3rem;margin-top:.2rem}
+.signal-dot.bull{background:var(--tier-high)}.signal-dot.bear{background:var(--tier-low)}.signal-dot.watch{background:var(--tier-medium)}
+.signal-data{font-size:.88rem;font-weight:590;color:var(--text-primary);margin-bottom:.25rem}
+.signal-impact{font-size:.8rem;color:var(--text-secondary);line-height:1.5}
+.signal-action{font-size:.78rem;color:var(--accent);font-weight:510;margin-top:.35rem}
+.signal-action a{color:var(--accent)}
+.signal-meta{font-size:.65rem;color:var(--text-quaternary);text-align:right;white-space:nowrap}
+/* Node cards */
+.node-card{border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:1.25rem;margin:1rem 0;background:var(--bg-elevated);border-left:3px solid var(--accent)}
+.node-card h3{margin-top:0;font-size:1rem;font-weight:590;color:var(--accent)}
+.node-core{font-size:.88rem;font-weight:590;color:var(--text-primary);margin-bottom:.5rem}
+.node-label{display:inline-block;padding:.1rem .5rem;border-radius:4px;font-size:.65rem;font-weight:700;letter-spacing:.04em;margin-bottom:.5rem;background:var(--accent-dim);color:var(--accent)}
+/* Tier cards */
+.tier-card{border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:1rem 1.25rem;margin:.75rem 0;background:var(--bg-surface)}
+.tier-1{border-left:3px solid var(--tier-high)}.tier-2{border-left:3px solid var(--tier-medium)}.tier-3{border-left:3px solid var(--tier-low)}
+.tier-avoid{border-left:3px solid rgba(244,67,54,.6);background:rgba(244,67,54,.03)}
+/* Badges: signal, action, confidence, role, ticker */
+.signal{display:inline-block;font-size:.68rem;padding:.1rem .4rem;border-radius:3px;font-weight:590;margin-right:.3rem}
+.signal-bull{background:rgba(76,175,80,.15);color:var(--tier-high)}.signal-bear{background:rgba(244,67,54,.15);color:var(--tier-low)}.signal-watch{background:rgba(255,193,7,.15);color:var(--tier-medium)}
+.action-badge{display:inline-block;font-size:.68rem;padding:.1rem .4rem;border-radius:3px;font-weight:510}
+.conf-high{color:var(--tier-high);font-weight:590}.conf-mid{color:var(--tier-medium);font-weight:590}.conf-low{color:var(--tier-low);font-weight:590}
+.role-badge{display:inline-block;padding:.15rem .6rem;border-radius:4px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.5rem;background:rgba(76,175,80,.12);color:var(--tier-high)}
+.ticker{font-family:var(--font-mono);font-size:.75rem;font-weight:510;color:var(--text-tertiary)}.ticker a{color:var(--accent);text-decoration:none}
+.data-ctx{display:inline-block;font-size:.68rem;color:var(--text-quaternary);background:var(--bg-surface);padding:.1rem .4rem;border-radius:3px;border-left:2px solid var(--knowledge);margin-left:.3rem}
+/* Arc items */
+.arc-item{margin-bottom:1rem;padding:.8rem;border-left:3px solid var(--accent);background:rgba(66,165,245,.03);border-radius:0 6px 6px 0}
+.arc-item strong{color:var(--accent)}
+.arc-item.bull{border-left-color:var(--tier-high);background:rgba(76,175,80,.03)}.arc-item.bull strong{color:var(--tier-high)}
+.arc-item.bear{border-left-color:var(--tier-low);background:rgba(244,67,54,.03)}.arc-item.bear strong{color:var(--tier-low)}
+.arc-item.watch{border-left-color:var(--tier-medium);background:rgba(255,193,7,.03)}.arc-item.watch strong{color:var(--tier-medium)}
+/* Signal pyramid */
+.signal-pyramid{display:flex;flex-direction:column;align-items:center;gap:0;margin:1.5rem 0}
+.pyramid-level{text-align:center;padding:.6rem 0;border-radius:4px;font-size:.78rem;font-weight:590;color:var(--text-primary)}
+.pyramid-l1{width:40%;background:rgba(244,67,54,.2);border:1px solid var(--tier-low)}
+.pyramid-l2{width:60%;background:rgba(255,193,7,.15);border:1px solid var(--tier-medium);border-top:none}
+.pyramid-l3{width:80%;background:rgba(76,175,80,.1);border:1px solid var(--tier-high);border-top:none}
+.pyramid-label{font-size:.65rem;color:var(--text-quaternary);margin-top:.15rem}
+/* Agent briefing grid */
+.agent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:.75rem;margin:1rem 0}
+.ab-card{border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:.75rem 1rem;background:var(--bg-surface);display:grid;grid-template-columns:4px 1fr auto;gap:.6rem;align-items:start}
+.ab-name{font-size:.82rem;font-weight:590;color:var(--text-primary)}.ab-co{font-size:.68rem;color:var(--text-tertiary);margin-left:.3rem}
+.ab-stance{font-size:.78rem;color:var(--text-secondary);line-height:1.45;margin-top:.15rem}
+.ab-action{font-size:.7rem;color:var(--text-tertiary);margin-top:.1rem}.ab-action strong{color:var(--accent);font-weight:510}
+.ab-cred{display:inline-block;font-size:.58rem;font-weight:700;padding:.08rem .35rem;border-radius:3px;margin-left:.25rem;vertical-align:middle}
+.cred-t1{background:rgba(76,175,80,.12);color:var(--tier-high)}.cred-t2{background:rgba(255,193,7,.12);color:var(--tier-medium)}.cred-t3{background:rgba(248,168,72,.12);color:var(--accent)}
+.stance-summary{display:flex;gap:1.25rem;padding:.65rem 1rem;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:var(--radius-sm);margin-bottom:1.25rem;font-size:.82rem;flex-wrap:wrap;align-items:center}
+.stance-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:.2rem;vertical-align:middle}
+/* Prediction dashboard */
+.pred-quarter-header{font-size:.82rem;font-weight:590;color:var(--accent);padding:.45rem .85rem;background:var(--bg-overlay);border-radius:var(--radius-sm) var(--radius-sm) 0 0;border:1px solid var(--border-subtle);border-bottom:none;margin-top:1.5rem}
+.pred-status{display:inline-block;font-size:.6rem;padding:.08rem .35rem;border-radius:3px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.pred-pending{background:rgba(255,193,7,.12);color:var(--tier-medium)}.pred-verified{background:rgba(76,175,80,.12);color:var(--tier-high)}.pred-failed{background:rgba(244,67,54,.12);color:var(--tier-low)}
+/* Decision matrix (table override) */
+.decision-matrix{width:100%;border-collapse:collapse;margin:.5rem 0;font-size:.78rem}
+.decision-matrix th{background:var(--bg-surface);color:var(--text-quaternary);font-size:.65rem;text-transform:uppercase;letter-spacing:.04em;padding:.4rem .6rem;border-bottom:1px solid var(--border-default);text-align:left}
+.decision-matrix td{padding:.4rem .6rem;border-bottom:1px solid var(--border-subtle);color:var(--text-secondary);vertical-align:top}
+.decision-matrix .if-true{color:var(--tier-high)}.decision-matrix .if-false{color:var(--tier-low)}
+/* Reading mode (extends shared) */
+.reading-mode .sidebar,.reading-mode .notes-sidebar{display:none!important}
+.reading-mode .main-content{max-width:none!important;width:100%;margin:0;padding-left:2rem;padding-right:2rem}
+.reading-mode .hamburger-btn,.reading-mode .sidebar-overlay{display:none!important}
+/* Knowledge ref dot */
+.nref{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;font-size:.48rem;font-weight:700;cursor:pointer;margin-left:1px;vertical-align:super;transition:transform .15s;text-decoration:none;background:var(--knowledge);color:white}
+.nref:hover{transform:scale(1.25);box-shadow:0 0 6px rgba(91,155,213,.4)}
+  </style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes sidebar">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ═══════════ LEFT SIDEBAR ═══════════ -->
+  <aside class="sidebar" id="sidebar">
+    <a class="back-link" href="blockchain_hub.html">&#8592; Blockchain Hub</a>
+    <h4>信号追踪 Signal Tracker</h4>
+    <nav><ul>
+      <li><a href="#latest-signals"><span class="toc-num">&#9733;</span>实时信号<br><span class="zh-inline">Latest Signals</span></a></li>
+      <li><a href="#baseline"><span class="toc-num">&#9733;</span>基线判断<br><span class="zh-inline">Baseline Probabilities</span></a></li>
+      <li><a href="#monthly"><span class="toc-num">I</span>月度追踪<br><span class="zh-inline">Monthly Signals</span></a></li>
+      <li><a href="#quarterly"><span class="toc-num">II</span>季度追踪<br><span class="zh-inline">Quarterly Signals</span></a></li>
+      <li><a href="#annual"><span class="toc-num">III</span>年度追踪<br><span class="zh-inline">Annual Signals</span></a></li>
+      <li><a href="#milestones"><span class="toc-num">IV</span>2026里程碑<br><span class="zh-inline">Key Milestones</span></a></li>
+      <li><a href="#nodes"><span class="toc-num">V</span>八节点变量<br><span class="zh-inline">Node Variables</span></a></li>
+      <li><a href="#signal-tiers"><span class="toc-num">VI</span>信号分级<br><span class="zh-inline">Signal Tiers</span></a></li>
+      <li><a href="#china-crypto" style="color:var(--tier-low);"><span class="toc-num">VII</span>中国/亚洲加密<br><span class="zh-inline">China/Asia Crypto</span></a></li>
+      <li><a href="#tracking"><span class="toc-num">VIII</span>追踪清单<br><span class="zh-inline">Tracking List</span></a></li>
+      <li><a href="#agent-briefing" style="color:var(--knowledge);"><span class="toc-num">IX</span>代理人简报<br><span class="zh-inline">Agent Briefing &#9733;</span></a></li>
+      <li><a href="#predictions" style="color:var(--knowledge);"><span class="toc-num">X</span>预测验证<br><span class="zh-inline">Predictions &#9733;</span></a></li>
+      <li><a href="#portfolio"><span class="toc-num">XI</span>投资组合<br><span class="zh-inline">Portfolio Framework</span></a></li>
+    </ul></nav>
+    <h4>链接 Links</h4>
+    <nav><ul>
+      <li><a href="blockchain_hub.html">&#8594; Blockchain Hub</a></li>
+      <li><a href="2026-W12-v3.html">&#8594; W12 Synthesis</a></li>
+      <li><a href="/">&#8594; Trading Dashboard</a></li>
+    </ul></nav>
+  </aside>
+
+  <!-- ═══════════ MAIN CONTENT ═══════════ -->
+  <main class="main-content">
+
+    <!-- PAGE HEADER -->
+    <header class="page-header">
+      <div class="role-badge">SIGNAL TRACKER</div>
+      <h1>区块链产业信号追踪器<span class="zh">Blockchain Signal Tracker</span></h1>
+      <p class="subtitle">基于22代理人+8节点认知积累 &mdash; From cognitive accumulation to forward-looking tracking &nbsp;|&nbsp; 2026-03-22</p>
+      <div class="badge-row">
+        <span class="badge">8节点</span>
+        <span class="badge">22代理人</span>
+        <span class="badge">4层频率</span>
+        <span class="badge">3级信号</span>
+        <span class="badge">实时更新</span>
+      </div>
+    </header>
+
+    <div class="top-controls">
+      <span class="tc-label">&#129504; 注解控制</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+
+    <!-- ══════════ ★ LATEST SIGNALS ══════════ -->
+    <div class="section-header" id="latest-signals">
+      <h2>&sect;&#9733; 实时信号面板<span class="zh">Latest Signals Panel</span></h2>
+    </div>
+
+    <div class="signal-panel">
+      <div class="signal-panel-header">
+        <span class="signal-panel-title">&#128225; Latest Signals &mdash; 实时追踪</span>
+        <span class="signal-panel-date">Last updated: 2026-03-22</span>
+      </div>
+
+      <!-- Signal 1: BTC ETF -->
+      <div class="signal-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div class="signal-data">&#x1F7E2; BULL: BTC ETF持续净流入 &mdash; $350B+累计，机构化不可逆 <small class="data-ctx">2024年1月ETF获批 &rarr; 2026年3月累计$350B+ AUM，BlackRock IBIT单只超$60B</small></div>
+          <div class="signal-impact">ETF从根本上改变了BTC的持有者结构。机构持仓占比从2023年的~15%上升到~40%。流动性深度提升使单日波动率从4%+压缩到2%以内。这不是周期性信号，是结构性转变。</div>
+          <div class="signal-action">&#8594; 维持BTC趋势多头，ETF净流入是最可靠的机构情绪指标 &nbsp;|&nbsp; <span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">BTC</a>, <a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">IBIT</a></span></div>
+        </div>
+        <div class="signal-meta">Bloomberg<br>2026-03-20</div>
+      </div>
+
+      <!-- Signal 2: US Regulation -->
+      <div class="signal-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div class="signal-data">&#x1F7E2; BULL: 美国监管转向友好 &mdash; GENIUS Act推进，SEC态度180&deg;转变</div>
+          <div class="signal-impact">Gensler时代SEC诉讼式监管结束。Hester Peirce领导加密工作组，David Sacks任白宫AI/加密沙皇。GENIUS Act为稳定币提供联邦框架 &mdash; 若通过将释放万亿级合规资金入场。</div>
+          <div class="signal-action">&#8594; 监管友好利好合规交易所(COIN)和稳定币发行方 &nbsp;|&nbsp; <span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">COIN</a></span></div>
+        </div>
+        <div class="signal-meta">Congress.gov<br>2026-03-18</div>
+      </div>
+
+      <!-- Signal 3: ETH/BTC Ratio -->
+      <div class="signal-card">
+        <div class="signal-dot watch"></div>
+        <div>
+          <div class="signal-data">&#x1F7E1; WATCH: ETH/BTC比值历史低位 &mdash; 0.04，均值回归还是新常态？ <small class="data-ctx">2021年峰值0.088 &rarr; 2026年0.04，跌幅55%</small></div>
+          <div class="signal-impact">ETH叙事从"超声波货币"转向"基础设施层"。L2分流价值、Solana竞争、ETH通胀回归，三重压力。但Pectra升级和RWA叙事可能成为催化剂。ETH/BTC是加密市场最重要的相对强弱指标。</div>
+          <div class="signal-action">&#8594; ETH等待Pectra升级确认和ETH/BTC反弹信号再布局 &nbsp;|&nbsp; <span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">ETH</a></span></div>
+        </div>
+        <div class="signal-meta">TradingView<br>2026-03-22</div>
+      </div>
+
+      <!-- Signal 4: Mining Geopolitical Risk -->
+      <div class="signal-card">
+        <div class="signal-dot bear"></div>
+        <div>
+          <div class="signal-data">&#x1F534; BEAR: 矿机供应链地缘风险 &mdash; 95%中国制造，类ASML卡脖子</div>
+          <div class="signal-impact">Bitmain+MicroBT控制全球95%矿机产能。若中国实施出口限制，全球BTC算力将在6-12个月内下降30-50%。这是BTC生态中最大的未被追踪风险 &mdash; 类似半导体行业对ASML的依赖，但更集中。</div>
+          <div class="signal-action">&#8594; 监控中国矿机出口政策变化，持有美国矿企(MARA)作对冲 &nbsp;|&nbsp; <span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">MARA</a></span></div>
+        </div>
+        <div class="signal-meta">Hashrate Index<br>2026-03-15</div>
+      </div>
+
+      <!-- Signal 5: Stablecoin Supply -->
+      <div class="signal-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div class="signal-data">&#x1F7E2; BULL: 稳定币供应量持续增长 &mdash; $200B+，资金入场信号 <small class="data-ctx">2023年$120B &rarr; 2024年$160B &rarr; 2026年$200B+，USDT占65%</small></div>
+          <div class="signal-impact">稳定币供应是加密市场的"干火药"指标。供应增长意味着法币正在流入链上，准备部署。USDT在TRON上的铸造量是领先指标 &mdash; 发展中国家美元需求持续增长。</div>
+          <div class="signal-action">&#8594; 稳定币供应持续增长 = 牛市基础设施就位 &nbsp;|&nbsp; <span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">BTC</a></span></div>
+        </div>
+        <div class="signal-meta">DefiLlama<br>2026-03-21</div>
+      </div>
+
+      <!-- Signal 6: TRON -->
+      <div class="signal-card">
+        <div class="signal-dot watch"></div>
+        <div>
+          <div class="signal-data">&#x1F7E1; WATCH: TRON发展中市场数据 &mdash; 3.3亿账户但真实活跃度存疑</div>
+          <div class="signal-impact">TRON是稳定币转账的主要网络(低手续费)，在东南亚/非洲/拉美有大量采用。但3.3亿"账户"中真实活跃用户可能不到10%。孙宇晨的合规风险始终悬而未决。数据需要三角验证。</div>
+          <div class="signal-action">&#8594; TRON数据反映发展中市场真实需求但需打折估计 &nbsp;|&nbsp; 观察不建仓</div>
+        </div>
+        <div class="signal-meta">TRONSCAN<br>2026-03-19</div>
+      </div>
+    </div>
+
+
+    <!-- ══════════ ★ BASELINE PROBABILITIES ══════════ -->
+    <div class="section-header" id="baseline">
+      <h2>&sect;&#9733; 基线判断概率表<span class="zh">Baseline Probability Table</span></h2>
+    </div>
+
+    <div class="priority-box">
+      <h2 style="margin-top:0;">&#127919; 6个基线判断 &mdash; 来自22代理人+8节点交叉验证</h2>
+      <p>每个概率基于多代理人共识度和链上/市场硬数据支撑。概率是活的工具，不是一次性判断。</p>
+      <figure>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Judgment 判断</th>
+              <th style="text-align:center;">Probability 概率</th>
+              <th style="text-align:center;">Confidence 置信度</th>
+              <th>Timeframe 时间框架</th>
+              <th>Key Agent 关键代理人</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1</strong></td>
+              <td><strong>BTC 2026年内创新高($100K+)</strong></td>
+              <td style="text-align:center;"><span class="conf-high">65%</span></td>
+              <td style="text-align:center;"><span class="conf-high">High</span></td>
+              <td>2026H2</td>
+              <td>Saylor / Alden</td>
+            </tr>
+            <tr>
+              <td><strong>2</strong></td>
+              <td><strong>ETH Pectra升级成功</strong></td>
+              <td style="text-align:center;"><span class="conf-high">80%</span></td>
+              <td style="text-align:center;"><span class="conf-high">High</span></td>
+              <td>2025-2026</td>
+              <td>Vitalik</td>
+            </tr>
+            <tr>
+              <td><strong>3</strong></td>
+              <td><strong>稳定币立法(GENIUS Act)通过</strong></td>
+              <td style="text-align:center;"><span class="conf-mid">55%</span></td>
+              <td style="text-align:center;"><span class="conf-mid">Medium</span></td>
+              <td>2025-2026</td>
+              <td>Peirce / Sacks</td>
+            </tr>
+            <tr>
+              <td><strong>4</strong></td>
+              <td><strong>USDT储备无重大问题</strong></td>
+              <td style="text-align:center;"><span class="conf-mid">70%</span></td>
+              <td style="text-align:center;"><span class="conf-mid">Medium</span></td>
+              <td>持续</td>
+              <td>Ardoino</td>
+            </tr>
+            <tr>
+              <td><strong>5</strong></td>
+              <td><strong>RWA代币化达$50B</strong></td>
+              <td style="text-align:center;"><span class="conf-low">40%</span></td>
+              <td style="text-align:center;"><span class="conf-low">Low</span></td>
+              <td>2026</td>
+              <td>Allman / Fink</td>
+            </tr>
+            <tr>
+              <td><strong>6</strong></td>
+              <td><strong>中国放松加密禁令</strong></td>
+              <td style="text-align:center;"><span class="conf-low">10%</span></td>
+              <td style="text-align:center;"><span class="conf-low">Low</span></td>
+              <td>3年+</td>
+              <td>周小川</td>
+            </tr>
+          </tbody>
+        </table>
+      </figure>
+    </div>
+
+
+    <!-- ══════════ §I MONTHLY SIGNALS ══════════ -->
+    <div class="section-header" id="monthly">
+      <h2>&sect;I 月度追踪信号<span class="zh">Monthly Tracking Signals</span></h2>
+    </div>
+
+    <figure>
+      <table class="decision-matrix">
+        <thead>
+          <tr>
+            <th>Signal 信号</th>
+            <th>Source 来源</th>
+            <th>Direction 方向</th>
+            <th>Action 行动</th>
+            <th>Monitor 频率</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>BTC ETF净流入/流出</strong></td>
+            <td>Bloomberg / SoSoValue</td>
+            <td><span class="signal signal-bull">BULL</span>/<span class="signal signal-bear">BEAR</span></td>
+            <td>净流入 &gt;$1B/周 = 加仓信号</td>
+            <td>每周</td>
+          </tr>
+          <tr>
+            <td><strong>稳定币总供应量变化</strong></td>
+            <td>DefiLlama</td>
+            <td><span class="signal signal-bull">BULL</span>/<span class="signal signal-bear">BEAR</span></td>
+            <td>供应增长 = 资金入场</td>
+            <td>每周</td>
+          </tr>
+          <tr>
+            <td><strong>矿工收入/盈亏平衡</strong></td>
+            <td>Hashrate Index</td>
+            <td><span class="signal signal-bull">BULL</span>/<span class="signal signal-bear">BEAR</span></td>
+            <td>矿工投降(hash ribbon) = 底部信号</td>
+            <td>每月</td>
+          </tr>
+          <tr>
+            <td><strong>DeFi TVL变化</strong></td>
+            <td>DefiLlama</td>
+            <td><span class="signal signal-bull">BULL</span>/<span class="signal signal-bear">BEAR</span></td>
+            <td>TVL增长 = 生态活跃度上升</td>
+            <td>每月</td>
+          </tr>
+          <tr>
+            <td><strong>交易所BTC净流入/流出</strong></td>
+            <td>CryptoQuant</td>
+            <td><span class="signal signal-bull">BULL</span>/<span class="signal signal-bear">BEAR</span></td>
+            <td>净流出 = 囤币 = 看涨</td>
+            <td>每周</td>
+          </tr>
+        </tbody>
+      </table>
+    </figure>
+
+
+    <!-- ══════════ §II QUARTERLY SIGNALS ══════════ -->
+    <div class="section-header" id="quarterly">
+      <h2>&sect;II 季度追踪信号<span class="zh">Quarterly Tracking Signals</span></h2>
+    </div>
+
+    <figure>
+      <table class="decision-matrix">
+        <thead>
+          <tr>
+            <th>Signal 信号</th>
+            <th>Source 来源</th>
+            <th>Direction 方向</th>
+            <th>Action 行动</th>
+            <th>Monitor 频率</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Coinbase财报 (COIN)</strong></td>
+            <td>Coinbase IR</td>
+            <td><span class="signal signal-bull">BULL</span>/<span class="signal signal-bear">BEAR</span></td>
+            <td>交易量+订阅收入增长 = 采用加速</td>
+            <td>季度</td>
+          </tr>
+          <tr>
+            <td><strong>MicroStrategy BTC持仓 (MSTR)</strong></td>
+            <td>MSTR 8-K filings</td>
+            <td><span class="signal signal-bull">BULL</span></td>
+            <td>持续增持 = 机构信念指标</td>
+            <td>季度</td>
+          </tr>
+          <tr>
+            <td><strong>BTC减半周期位置</strong></td>
+            <td>On-chain data</td>
+            <td><span class="signal signal-bull">BULL</span>/<span class="signal signal-watch">WATCH</span></td>
+            <td>减半后12-18个月 = 历史新高窗口</td>
+            <td>季度</td>
+          </tr>
+          <tr>
+            <td><strong>ETH Staking收益率</strong></td>
+            <td>Rated.network</td>
+            <td><span class="signal signal-watch">WATCH</span></td>
+            <td>收益率下降 = 质押过度或需求减弱</td>
+            <td>季度</td>
+          </tr>
+          <tr>
+            <td><strong>RWA代币化AUM</strong></td>
+            <td>RWA.xyz / Dune</td>
+            <td><span class="signal signal-bull">BULL</span></td>
+            <td>AUM增长加速 = 机构采用拐点</td>
+            <td>季度</td>
+          </tr>
+        </tbody>
+      </table>
+    </figure>
+
+
+    <!-- ══════════ §III ANNUAL SIGNALS ══════════ -->
+    <div class="section-header" id="annual">
+      <h2>&sect;III 年度追踪信号<span class="zh">Annual Tracking Signals</span></h2>
+    </div>
+
+    <figure>
+      <table class="decision-matrix">
+        <thead>
+          <tr>
+            <th>Signal 信号</th>
+            <th>Description 描述</th>
+            <th>Direction 方向</th>
+            <th>Action 行动</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>BTC减半周期阶段</strong></td>
+            <td>4次减半&rarr;4次新高(12-18个月后)。当前位置：减半后~12个月，进入历史性新高窗口</td>
+            <td><span class="signal signal-bull">BULL</span></td>
+            <td>周期信号最可靠 &mdash; 顺势做多</td>
+          </tr>
+          <tr>
+            <td><strong>全球监管框架进展</strong></td>
+            <td>MiCA(欧盟)全面执行、GENIUS Act(美国)、香港SFC牌照体系 &mdash; 合规化是长期趋势</td>
+            <td><span class="signal signal-bull">BULL</span></td>
+            <td>合规化降低尾部风险，利好机构入场</td>
+          </tr>
+          <tr>
+            <td><strong>机构采用里程碑</strong></td>
+            <td>BlackRock BUIDL基金、Fidelity/Goldman加密产品扩张、主权基金配置</td>
+            <td><span class="signal signal-bull">BULL</span></td>
+            <td>每个里程碑确认机构化不可逆趋势</td>
+          </tr>
+          <tr>
+            <td><strong>挖矿地理迁移</strong></td>
+            <td>中国2021年禁矿后算力迁移至美国(35%)、哈萨克斯坦、俄罗斯。但矿机仍95%中国制造</td>
+            <td><span class="signal signal-watch">WATCH</span></td>
+            <td>矿机出口政策是隐性地缘风险</td>
+          </tr>
+        </tbody>
+      </table>
+    </figure>
+
+
+    <!-- ══════════ §IV 2026 MILESTONES ══════════ -->
+    <div class="section-header" id="milestones">
+      <h2>&sect;IV 2026关键里程碑<span class="zh">Key Milestones Calendar</span></h2>
+    </div>
+
+    <figure>
+      <table class="decision-matrix">
+        <thead>
+          <tr>
+            <th>Date 日期</th>
+            <th>Event 事件</th>
+            <th class="if-true">If Positive 若利好</th>
+            <th class="if-false">If Negative 若利空</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>2026 Q1</strong></td>
+            <td>GENIUS Act投票</td>
+            <td class="if-true">稳定币行业爆发，合规资金涌入</td>
+            <td class="if-false">监管不确定性持续，市场观望</td>
+          </tr>
+          <tr>
+            <td><strong>2026 Q2</strong></td>
+            <td>ETH Pectra升级</td>
+            <td class="if-true">ETH/BTC反弹，L2生态加速</td>
+            <td class="if-false">ETH叙事进一步受损</td>
+          </tr>
+          <tr>
+            <td><strong>2026 Q2-Q3</strong></td>
+            <td>BTC减半效应释放期</td>
+            <td class="if-true">创新高$100K+，周期效应验证</td>
+            <td class="if-false">周期失效论抬头</td>
+          </tr>
+          <tr>
+            <td><strong>2026 H2</strong></td>
+            <td>BlackRock BUIDL突破$1B</td>
+            <td class="if-true">RWA拐点确认，跟随者涌入</td>
+            <td class="if-false">RWA仍过早，机构观望</td>
+          </tr>
+          <tr>
+            <td><strong>2026 H2</strong></td>
+            <td>MiCA全面执行</td>
+            <td class="if-true">欧洲合规化完成，交易量增长</td>
+            <td class="if-false">Tether退出欧洲市场</td>
+          </tr>
+        </tbody>
+      </table>
+    </figure>
+
+
+    <!-- ══════════ §V NODE VARIABLES ══════════ -->
+    <div class="section-header" id="nodes">
+      <h2>&sect;V 八节点追踪变量<span class="zh">Node Variables</span></h2>
+    </div>
+
+    <p style="font-size:0.82rem;color:var(--text-tertiary);margin-bottom:1.5rem;">每个节点包含核心追踪变量、当前值、方向判断和监控频率。8个节点覆盖区块链产业全链条。</p>
+
+    <!-- Node 1: Mining -->
+    <div class="node-card">
+      <span class="node-label">NODE 1</span>
+      <h3>&#9935; 挖矿 Mining</h3>
+      <div class="node-core">核心变量：全网算力 + 矿工收入</div>
+      <table class="decision-matrix" style="margin-top:0.5rem;">
+        <tr><td><strong>全网算力</strong></td><td>~750 EH/s</td><td><span class="signal signal-bull">&#8593;</span> 历史新高</td><td>每周</td></tr>
+        <tr><td><strong>矿工日收入</strong></td><td>~$35M/day</td><td><span class="signal signal-watch">&#8594;</span> 减半后恢复中</td><td>每月</td></tr>
+        <tr><td><strong>矿机效率</strong></td><td>Antminer S21 17.5 J/TH</td><td><span class="signal signal-bull">&#8593;</span> 效率持续提升</td><td>季度</td></tr>
+      </table>
+    </div>
+
+    <!-- Node 2: L1 Protocol -->
+    <div class="node-card">
+      <span class="node-label">NODE 2</span>
+      <h3>&#9939; L1协议 Layer 1 Protocols</h3>
+      <div class="node-core">核心变量：BTC价格 + ETH TVL</div>
+      <table class="decision-matrix" style="margin-top:0.5rem;">
+        <tr><td><strong>BTC价格</strong></td><td>~$85K</td><td><span class="signal signal-bull">&#8593;</span> 减半后上升通道</td><td>每日</td></tr>
+        <tr><td><strong>ETH TVL</strong></td><td>~$60B</td><td><span class="signal signal-watch">&#8594;</span> 横盘整理</td><td>每周</td></tr>
+        <tr><td><strong>SOL TPS</strong></td><td>~4,000</td><td><span class="signal signal-bull">&#8593;</span> 性能持续优化</td><td>每月</td></tr>
+      </table>
+    </div>
+
+    <!-- Node 3: Middleware -->
+    <div class="node-card">
+      <span class="node-label">NODE 3</span>
+      <h3>&#128279; 中间件 Middleware</h3>
+      <div class="node-core">核心变量：Chainlink集成数 + 跨链桥TVL</div>
+      <table class="decision-matrix" style="margin-top:0.5rem;">
+        <tr><td><strong>Chainlink集成</strong></td><td>2,100+ feeds</td><td><span class="signal signal-bull">&#8593;</span> Oracle标准化</td><td>季度</td></tr>
+        <tr><td><strong>跨链桥TVL</strong></td><td>~$15B</td><td><span class="signal signal-watch">&#8594;</span> 安全事故频发</td><td>每月</td></tr>
+      </table>
+    </div>
+
+    <!-- Node 4: Exchanges -->
+    <div class="node-card">
+      <span class="node-label">NODE 4</span>
+      <h3>&#127970; 交易所 Exchanges</h3>
+      <div class="node-core">核心变量：ETF AUM + CEX交易量</div>
+      <table class="decision-matrix" style="margin-top:0.5rem;">
+        <tr><td><strong>BTC ETF总AUM</strong></td><td>$350B+</td><td><span class="signal signal-bull">&#8593;</span> 持续净流入</td><td>每周</td></tr>
+        <tr><td><strong>全球CEX月交易量</strong></td><td>~$3T/月</td><td><span class="signal signal-watch">&#8594;</span> 波动性压缩</td><td>每月</td></tr>
+        <tr><td><strong>DEX/CEX比</strong></td><td>~15%</td><td><span class="signal signal-bull">&#8593;</span> 缓慢上升</td><td>季度</td></tr>
+      </table>
+    </div>
+
+    <!-- Node 5: Stablecoins -->
+    <div class="node-card">
+      <span class="node-label">NODE 5</span>
+      <h3>&#128178; 稳定币 Stablecoins</h3>
+      <div class="node-core">核心变量：总供应量 + USDT/USDC比</div>
+      <table class="decision-matrix" style="margin-top:0.5rem;">
+        <tr><td><strong>稳定币总供应</strong></td><td>$200B+</td><td><span class="signal signal-bull">&#8593;</span> 持续增长</td><td>每周</td></tr>
+        <tr><td><strong>USDT市场份额</strong></td><td>~65%</td><td><span class="signal signal-watch">&#8594;</span> 仍然主导</td><td>每月</td></tr>
+        <tr><td><strong>USDC增长率</strong></td><td>+25% YoY</td><td><span class="signal signal-bull">&#8593;</span> 合规市场增长</td><td>季度</td></tr>
+      </table>
+    </div>
+
+    <!-- Node 6: RWA -->
+    <div class="node-card">
+      <span class="node-label">NODE 6</span>
+      <h3>&#127968; RWA Real World Assets</h3>
+      <div class="node-core">核心变量：代币化资产总值</div>
+      <table class="decision-matrix" style="margin-top:0.5rem;">
+        <tr><td><strong>RWA代币化总值</strong></td><td>~$15B</td><td><span class="signal signal-bull">&#8593;</span> 快速增长</td><td>季度</td></tr>
+        <tr><td><strong>国债代币化</strong></td><td>~$5B</td><td><span class="signal signal-bull">&#8593;</span> BlackRock BUIDL领先</td><td>季度</td></tr>
+        <tr><td><strong>私募信贷代币化</strong></td><td>~$8B</td><td><span class="signal signal-watch">&#8594;</span> Maple/Centrifuge</td><td>季度</td></tr>
+      </table>
+    </div>
+
+    <!-- Node 7: DeFi -->
+    <div class="node-card">
+      <span class="node-label">NODE 7</span>
+      <h3>&#128200; DeFi 去中心化金融</h3>
+      <div class="node-core">核心变量：TVL + DEX/CEX比</div>
+      <table class="decision-matrix" style="margin-top:0.5rem;">
+        <tr><td><strong>DeFi总TVL</strong></td><td>~$120B</td><td><span class="signal signal-watch">&#8594;</span> 缓慢恢复</td><td>每月</td></tr>
+        <tr><td><strong>Uniswap月交易量</strong></td><td>~$80B</td><td><span class="signal signal-bull">&#8593;</span></td><td>每月</td></tr>
+        <tr><td><strong>借贷协议利用率</strong></td><td>~45%</td><td><span class="signal signal-watch">&#8594;</span> 健康水平</td><td>每月</td></tr>
+      </table>
+    </div>
+
+    <!-- Node 8: Regulation -->
+    <div class="node-card">
+      <span class="node-label">NODE 8</span>
+      <h3>&#9878; 监管 Regulation</h3>
+      <div class="node-core">核心变量：立法进度 + 全球牌照数</div>
+      <table class="decision-matrix" style="margin-top:0.5rem;">
+        <tr><td><strong>美国立法进度</strong></td><td>GENIUS Act委员会通过</td><td><span class="signal signal-bull">&#8593;</span> 推进中</td><td>季度</td></tr>
+        <tr><td><strong>MiCA执行状态</strong></td><td>2026H2全面执行</td><td><span class="signal signal-watch">&#8594;</span> 过渡期</td><td>季度</td></tr>
+        <tr><td><strong>香港SFC牌照</strong></td><td>12家持牌</td><td><span class="signal signal-bull">&#8593;</span> 亚洲合规化</td><td>半年</td></tr>
+      </table>
+    </div>
+
+
+    <!-- ══════════ §VI SIGNAL TIERS ══════════ -->
+    <div class="section-header" id="signal-tiers">
+      <h2>&sect;VI 信号分级框架<span class="zh">Signal Tier Framework</span></h2>
+    </div>
+
+    <p style="font-size:0.82rem;color:var(--text-tertiary);margin-bottom:1rem;">三级信号分级决定响应速度和投资行动。Tier 1需要立即行动，Tier 2需要密切关注，Tier 3作为背景持续积累。</p>
+
+    <div class="signal-pyramid">
+      <div class="pyramid-level pyramid-l1">
+        <strong>Tier 1: ACTION &#x1F534; 立即行动</strong>
+        <div class="pyramid-label">BTC ETF大规模流出反转 &nbsp;|&nbsp; USDT脱锚 &gt;1% &nbsp;|&nbsp; 主要国家加密禁令</div>
+      </div>
+      <div class="pyramid-level pyramid-l2">
+        <strong>Tier 2: WATCH &#x1F7E1; 密切关注</strong>
+        <div class="pyramid-label">ETH/BTC比值变化 &gt;20% &nbsp;|&nbsp; 算力难度暴增 &nbsp;|&nbsp; DeFi TVL下跌 &gt;30%</div>
+      </div>
+      <div class="pyramid-level pyramid-l3">
+        <strong>Tier 3: BACKGROUND &#x1F7E2; 背景积累</strong>
+        <div class="pyramid-label">开发者活跃度趋势 &nbsp;|&nbsp; CBDC进展 &nbsp;|&nbsp; 新L1发布</div>
+      </div>
+    </div>
+
+    <div style="margin-top:1.5rem;">
+      <h3 style="font-size:0.92rem;color:var(--text-primary);">Tier 1 行动触发器 (Action Triggers)</h3>
+      <div class="arc-item bear">
+        <strong>BTC ETF大规模净流出</strong> &mdash; 连续5个交易日净流出超$500M = 机构撤退信号。立即减仓BTC至半仓，评估是否为短期获利了结还是趋势反转。
+      </div>
+      <div class="arc-item bear">
+        <strong>USDT脱锚 &gt;1%</strong> &mdash; USDT/USD低于0.99超过24小时 = 系统性风险。立即将所有加密仓位缩减至最低，USDT脱锚会引发全市场流动性危机。
+      </div>
+      <div class="arc-item bear">
+        <strong>主要国家加密禁令</strong> &mdash; 美国/欧盟/日本任一发布全面禁令 = 黑天鹅。概率极低(&lt;5%)但影响极大。预案：48小时内清仓。
+      </div>
+
+      <h3 style="font-size:0.92rem;color:var(--text-primary);margin-top:1.5rem;">Tier 2 观察触发器 (Watch Triggers)</h3>
+      <div class="arc-item watch">
+        <strong>ETH/BTC比值剧变 &gt;20%</strong> &mdash; 快速上涨可能意味着alt season开启；快速下跌可能意味着资金回流BTC避险。调整ETH仓位权重。
+      </div>
+      <div class="arc-item watch">
+        <strong>BTC算力难度暴增</strong> &mdash; 单次调整超+15% = 新矿机大规模上线或价格飙升吸引矿工。关注矿工盈亏平衡线。
+      </div>
+      <div class="arc-item watch">
+        <strong>DeFi TVL下跌 &gt;30%</strong> &mdash; 可能是协议安全事故、利率下降或资金外逃。检查是否有系统性原因。
+      </div>
+
+      <h3 style="font-size:0.92rem;color:var(--text-primary);margin-top:1.5rem;">Tier 3 背景信号 (Background Signals)</h3>
+      <div class="arc-item bull">
+        <strong>开发者活跃度趋势</strong> &mdash; Electric Capital Developer Report年度追踪。开发者增长是长期采用的领先指标。
+      </div>
+      <div class="arc-item">
+        <strong>CBDC进展</strong> &mdash; e-CNY(35亿笔)、数字欧元、FedNow。CBDC与加密的关系：短期竞争，长期互补。
+      </div>
+      <div class="arc-item">
+        <strong>新L1发布</strong> &mdash; Monad/Sei/Berachain等新链。关注是否带来真正的技术创新vs炒作。
+      </div>
+    </div>
+
+
+    <!-- ══════════ §VII CHINA/ASIA CRYPTO ══════════ -->
+    <div class="section-header" id="china-crypto">
+      <h2>&sect;VII 中国/亚洲加密生态<span class="zh">China/Asia Crypto Ecosystem</span></h2>
+    </div>
+
+    <blockquote style="margin-bottom:1.5rem;">
+      <strong>&#128680; 英文偏见修正：</strong>西方加密追踪器系统性忽略中国/亚洲信号。本节刻意包含被遗漏的关键实体和数据源。矿机地缘风险、TRON在发展中国家的实际采用、e-CNY的进展 &mdash; 这些在英文媒体中覆盖严重不足。
+    </blockquote>
+
+    <figure>
+      <table class="decision-matrix">
+        <thead>
+          <tr>
+            <th>Entity 实体</th>
+            <th>Status 状态</th>
+            <th>Signal 信号</th>
+            <th>Monitor 监控</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Bitmain矿机</strong></td>
+            <td>95%全球份额</td>
+            <td><span class="signal signal-bear">BEAR</span> 出口限制 = 全球算力危机</td>
+            <td>中国出口政策 / 海关数据</td>
+          </tr>
+          <tr>
+            <td><strong>TRON/孙宇晨</strong></td>
+            <td>3.3亿账户</td>
+            <td><span class="signal signal-watch">WATCH</span> 发展中市场采用</td>
+            <td>TRON活跃地址 / TRONSCAN</td>
+          </tr>
+          <tr>
+            <td><strong>e-CNY数字人民币</strong></td>
+            <td>35亿笔交易</td>
+            <td><span class="signal signal-watch">WATCH</span> CBDC进展</td>
+            <td>试点城市扩展 / 央行报告</td>
+          </tr>
+          <tr>
+            <td><strong>香港SFC</strong></td>
+            <td>12家持牌</td>
+            <td><span class="signal signal-bull">BULL</span> 亚洲合规化窗口</td>
+            <td>牌照申请数 / SFC公告</td>
+          </tr>
+          <tr>
+            <td><strong>Upbit韩国</strong></td>
+            <td>80%韩国市场</td>
+            <td><span class="signal signal-watch">WATCH</span> 韩国零售情绪</td>
+            <td>泡菜溢价(Kimchi Premium)</td>
+          </tr>
+          <tr>
+            <td><strong>Bitget</strong></td>
+            <td>120M用户</td>
+            <td><span class="signal signal-bull">BULL</span> 亚洲散户增长</td>
+            <td>用户数 / 交易量 / 衍生品数据</td>
+          </tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <div class="arc-item bear" style="margin-top:1.5rem;">
+      <strong>矿机地缘风险 &mdash; 无人追踪的最大风险</strong>：Bitmain(比特大陆)和MicroBT合计控制全球95%以上的BTC矿机产能。所有ASIC芯片在台积电或中芯国际制造，组装在中国深圳。如果中国将矿机列入出口管制清单（如同芯片出口管制），全球BTC网络安全将面临前所未有的挑战。这个风险在Western crypto分析中几乎完全缺失。
+    </div>
+
+    <div class="arc-item watch">
+      <strong>信息源覆盖</strong>：本节数据来源包括巨潮资讯(cninfo.com.cn)、东方财富(eastmoney.com)、SFC香港证监会、TRONSCAN链上数据、中国央行年度报告。不能只依赖CoinDesk/The Block等英文来源。
+    </div>
+
+
+    <!-- ══════════ §VIII TRACKING LIST ══════════ -->
+    <div class="section-header" id="tracking">
+      <h2>&sect;VIII 追踪清单<span class="zh">Tracking List</span></h2>
+    </div>
+
+    <figure>
+      <table class="decision-matrix">
+        <thead>
+          <tr>
+            <th>What to Monitor 监控项</th>
+            <th>Frequency 频率</th>
+            <th>Source 来源</th>
+            <th>Action Threshold 行动阈值</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>BTC ETF净流入/流出</td>
+            <td>每周</td>
+            <td>SoSoValue / Bloomberg</td>
+            <td>连续5日净流出 &gt;$500M</td>
+          </tr>
+          <tr>
+            <td>稳定币总供应量</td>
+            <td>每周</td>
+            <td>DefiLlama</td>
+            <td>月度变化 &gt;5%</td>
+          </tr>
+          <tr>
+            <td>BTC链上活跃地址</td>
+            <td>每周</td>
+            <td>Glassnode / CryptoQuant</td>
+            <td>30日均值跌破1年MA</td>
+          </tr>
+          <tr>
+            <td>ETH/BTC比值</td>
+            <td>每日</td>
+            <td>TradingView</td>
+            <td>突破0.05或跌破0.03</td>
+          </tr>
+          <tr>
+            <td>全网算力变化</td>
+            <td>每周</td>
+            <td>Hashrate Index</td>
+            <td>单次调整 &gt;15%</td>
+          </tr>
+          <tr>
+            <td>DeFi TVL</td>
+            <td>每月</td>
+            <td>DefiLlama</td>
+            <td>月跌幅 &gt;20%</td>
+          </tr>
+          <tr>
+            <td>Coinbase/COIN财报</td>
+            <td>季度</td>
+            <td>Coinbase IR</td>
+            <td>交易量YoY &gt;30%变化</td>
+          </tr>
+          <tr>
+            <td>监管立法进度</td>
+            <td>季度</td>
+            <td>Congress.gov / EUR-Lex</td>
+            <td>法案通过/否决</td>
+          </tr>
+          <tr>
+            <td>泡菜溢价(韩国)</td>
+            <td>每周</td>
+            <td>CryptoQuant</td>
+            <td>溢价 &gt;5% = 散户狂热</td>
+          </tr>
+          <tr>
+            <td>Bitmain矿机出货</td>
+            <td>季度</td>
+            <td>矿机经销商/海关数据</td>
+            <td>出口限制信号</td>
+          </tr>
+        </tbody>
+      </table>
+    </figure>
+
+
+    <!-- ══════════ §IX AGENT BRIEFING ══════════ -->
+    <div class="section-header" id="agent-briefing">
+      <h2>&sect;IX 22代理人简报<span class="zh">Agent Briefing</span></h2>
+    </div>
+
+    <div class="stance-summary">
+      <span><span class="stance-dot" style="background:var(--tier-high)"></span> BULL: 14</span>
+      <span><span class="stance-dot" style="background:var(--tier-medium)"></span> WATCH: 5</span>
+      <span><span class="stance-dot" style="background:var(--tier-low)"></span> BEAR: 3</span>
+    </div>
+
+    <h3 style="font-size:0.88rem;color:var(--accent);margin-top:1.5rem;">&#9935; Node 1: 挖矿 Mining (3 agents)</h3>
+    <div class="agent-grid">
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div class="ab-name">Jihan Wu 吴忌寒 <span class="ab-co">Bitmain</span> <span class="ab-cred cred-t1">T1</span></div>
+          <div class="ab-stance">算力持续增长，S21系列效率突破；矿机出口政策是最大变量</div>
+          <div class="ab-action"><strong>Signal:</strong> 矿机效率提升 &rarr; 挖矿门槛降低</div>
+        </div>
+        <div class="signal-meta"><span class="signal signal-bull">BULL</span></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div class="ab-name">Fred Thiel <span class="ab-co">Marathon (MARA)</span> <span class="ab-cred cred-t2">T2</span></div>
+          <div class="ab-stance">北美矿企持续扩产，减半后效率淘汰加速，强者恒强</div>
+          <div class="ab-action"><strong>Signal:</strong> MARA算力占比上升 &rarr; 行业集中化</div>
+        </div>
+        <div class="signal-meta"><span class="signal signal-bull">BULL</span></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot watch"></div>
+        <div>
+          <div class="ab-name">Nishant Sharma <span class="ab-co">BlocksBridge</span> <span class="ab-cred cred-t3">T3</span></div>
+          <div class="ab-stance">矿业数据分析：矿工投降指标尚未触发，但利润率压缩</div>
+          <div class="ab-action"><strong>Signal:</strong> Hash Ribbon反转 &rarr; 底部确认</div>
+        </div>
+        <div class="signal-meta"><span class="signal signal-watch">WATCH</span></div>
+      </div>
+    </div>
+
+    <h3 style="font-size:0.88rem;color:var(--accent);margin-top:1.5rem;">&#9939; Node 2: L1协议 (3 agents)</h3>
+    <div class="agent-grid">
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div class="ab-name">Vitalik Buterin <span class="ab-co">Ethereum</span> <span class="ab-cred cred-t1">T1</span></div>
+          <div class="ab-stance">Pectra升级推进中，EIP-7702账户抽象将大幅改善UX</div>
+          <div class="ab-action"><strong>Signal:</strong> Pectra成功 &rarr; ETH叙事反转</div>
+        </div>
+        <div class="signal-meta"><span class="signal signal-bull">BULL</span></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div class="ab-name">Anatoly Yakovenko <span class="ab-co">Solana</span> <span class="ab-cred cred-t2">T2</span></div>
+          <div class="ab-stance">Firedancer客户端即将上线，SOL交易量和开发者生态超越预期</div>
+          <div class="ab-action"><strong>Signal:</strong> Firedancer稳定运行 &rarr; SOL性能飞跃</div>
+        </div>
+        <div class="signal-meta"><span class="signal signal-bull">BULL</span></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot watch"></div>
+        <div>
+          <div class="ab-name">Satoshi (Protocol) <span class="ab-co">Bitcoin Core</span> <span class="ab-cred cred-t1">T1</span></div>
+          <div class="ab-stance">BTC协议层保守升级，Ordinals/BRC-20争议持续，L2生态发展缓慢</div>
+          <div class="ab-action"><strong>Signal:</strong> BTC L2 TVL突破$5B &rarr; 生态转折点</div>
+        </div>
+        <div class="signal-meta"><span class="signal signal-watch">WATCH</span></div>
+      </div>
+    </div>
+
+    <h3 style="font-size:0.88rem;color:var(--accent);margin-top:1.5rem;">&#128279; Node 3: 中间件 Middleware (2 agents)</h3>
+    <div class="agent-grid">
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div class="ab-name">Sergey Nazarov <span class="ab-co">Chainlink</span> <span class="ab-cred cred-t2">T2</span></div>
+          <div class="ab-stance">CCIP跨链协议采用加速，SWIFT合作验证机构需求</div>
+          <div class="ab-action"><strong>Signal:</strong> CCIP交易量增长 &rarr; 跨链标准化</div>
+        </div>
+        <div class="signal-meta"><span class="signal signal-bull">BULL</span></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot bear"></div>
+        <div>
+          <div class="ab-name">Security Researcher <span class="ab-co">Independent</span> <span class="ab-cred cred-t3">T3</span></div>
+          <div class="ab-stance">跨链桥安全事故累计损失超$3B，桥接设计存在根本性安全缺陷</div>
+          <div class="ab-action"><strong>Signal:</strong> 重大桥接黑客事件 &rarr; TVL逃离</div>
+        </div>
+        <div class="signal-meta"><span class="signal signal-bear">BEAR</span></div>
+      </div>
+    </div>
+
+    <h3 style="font-size:0.88rem;color:var(--accent);margin-top:1.5rem;">&#127970; Node 4: 交易所 Exchanges (3 agents)</h3>
+    <div class="agent-grid">
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div class="ab-name">Brian Armstrong <span class="ab-co">Coinbase (COIN)</span> <span class="ab-cred cred-t1">T1</span></div>
+          <div class="ab-stance">合规交易所受益于监管清晰化，订阅+服务收入占比提升至50%+</div>
+          <div class="ab-action"><strong>Signal:</strong> COIN订阅收入增长 &rarr; 收入结构健康化</div>
+        </div>
+        <div class="signal-meta"><span class="signal signal-bull">BULL</span></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div class="ab-name">Larry Fink <span class="ab-co">BlackRock</span> <span class="ab-cred cred-t1">T1</span></div>
+          <div class="ab-stance">IBIT是史上增长最快ETF，加密是"数字黄金"叙事推动机构配置</div>
+          <div class="ab-action"><strong>Signal:</strong> IBIT AUM突破$100B &rarr; 机构化里程碑</div>
+        </div>
+        <div class="signal-meta"><span class="signal signal-bull">BULL</span></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot bear"></div>
+        <div>
+          <div class="ab-name">CZ (Changpeng Zhao) <span class="ab-co">Binance</span> <span class="ab-cred cred-t3">T3</span></div>
+          <div class="ab-stance">Binance合规化进行中但信誉受损，市场份额持续被合规交易所侵蚀</div>
+          <div class="ab-action"><strong>Signal:</strong> Binance合规清理完成 &rarr; 行业信任恢复</div>
+        </div>
+        <div class="signal-meta"><span class="signal signal-bear">BEAR</span></div>
+      </div>
+    </div>
+
+    <h3 style="font-size:0.88rem;color:var(--accent);margin-top:1.5rem;">&#128178; Node 5: 稳定币 Stablecoins (3 agents)</h3>
+    <div class="agent-grid">
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div class="ab-name">Paolo Ardoino <span class="ab-co">Tether (USDT)</span> <span class="ab-cred cred-t2">T2</span></div>
+          <div class="ab-stance">USDT储备充足($100B+国债)，MiCA合规是主要挑战</div>
+          <div class="ab-action"><strong>Signal:</strong> USDT审计报告 &rarr; 储备透明度验证</div>
+        </div>
+        <div class="signal-meta"><span class="signal signal-bull">BULL</span></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div class="ab-name">Jeremy Allaire <span class="ab-co">Circle (USDC)</span> <span class="ab-cred cred-t2">T2</span></div>
+          <div class="ab-stance">USDC合规优势在GENIUS Act下放大，市场份额有望回升</div>
+          <div class="ab-action"><strong>Signal:</strong> USDC份额超30% &rarr; 合规稳定币崛起</div>
+        </div>
+        <div class="signal-meta"><span class="signal signal-bull">BULL</span></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot watch"></div>
+        <div>
+          <div class="ab-name">Hester Peirce <span class="ab-co">SEC Commissioner</span> <span class="ab-cred cred-t1">T1</span></div>
+          <div class="ab-stance">"Crypto Mom"推动稳定币联邦框架，GENIUS Act是历史性机遇</div>
+          <div class="ab-action"><strong>Signal:</strong> GENIUS Act通过 &rarr; 稳定币行业起飞</div>
+        </div>
+        <div class="signal-meta"><span class="signal signal-watch">WATCH</span></div>
+      </div>
+    </div>
+
+    <h3 style="font-size:0.88rem;color:var(--accent);margin-top:1.5rem;">&#127968; Node 6: RWA (2 agents)</h3>
+    <div class="agent-grid">
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div class="ab-name">Larry Fink <span class="ab-co">BlackRock BUIDL</span> <span class="ab-cred cred-t1">T1</span></div>
+          <div class="ab-stance">BUIDL基金增长超预期，"每种资产都将被代币化"的愿景正在实现</div>
+          <div class="ab-action"><strong>Signal:</strong> BUIDL AUM &gt;$1B &rarr; RWA拐点确认</div>
+        </div>
+        <div class="signal-meta"><span class="signal signal-bull">BULL</span></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot watch"></div>
+        <div>
+          <div class="ab-name">Sid Powell <span class="ab-co">Maple Finance</span> <span class="ab-cred cred-t3">T3</span></div>
+          <div class="ab-stance">链上信贷市场恢复中，但机构信任重建需要时间</div>
+          <div class="ab-action"><strong>Signal:</strong> 私募信贷代币化 &gt;$15B &rarr; 机构信任恢复</div>
+        </div>
+        <div class="signal-meta"><span class="signal signal-watch">WATCH</span></div>
+      </div>
+    </div>
+
+    <h3 style="font-size:0.88rem;color:var(--accent);margin-top:1.5rem;">&#128200; Node 7: DeFi (3 agents)</h3>
+    <div class="agent-grid">
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div class="ab-name">Hayden Adams <span class="ab-co">Uniswap</span> <span class="ab-cred cred-t2">T2</span></div>
+          <div class="ab-stance">Uniswap V4 hooks生态爆发，DEX交易量市占率持续提升</div>
+          <div class="ab-action"><strong>Signal:</strong> DEX/CEX比超20% &rarr; DeFi结构性转折</div>
+        </div>
+        <div class="signal-meta"><span class="signal signal-bull">BULL</span></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div class="ab-name">Stani Kulechov <span class="ab-co">Aave</span> <span class="ab-cred cred-t2">T2</span></div>
+          <div class="ab-stance">Aave V4和GHO稳定币增长，借贷协议安全记录优秀</div>
+          <div class="ab-action"><strong>Signal:</strong> Aave TVL &gt;$30B &rarr; DeFi蓝筹确认</div>
+        </div>
+        <div class="signal-meta"><span class="signal signal-bull">BULL</span></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot bear"></div>
+        <div>
+          <div class="ab-name">Nassim Taleb <span class="ab-co">Risk Analyst</span> <span class="ab-cred cred-t2">T2</span></div>
+          <div class="ab-stance">DeFi"可组合性"是系统性风险放大器，协议间依赖创造隐性杠杆</div>
+          <div class="ab-action"><strong>Signal:</strong> DeFi级联清算事件 &rarr; 系统性风险爆发</div>
+        </div>
+        <div class="signal-meta"><span class="signal signal-bear">BEAR</span></div>
+      </div>
+    </div>
+
+    <h3 style="font-size:0.88rem;color:var(--accent);margin-top:1.5rem;">&#9878; Node 8: 监管 Regulation (3 agents)</h3>
+    <div class="agent-grid">
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div class="ab-name">David Sacks <span class="ab-co">White House AI/Crypto Czar</span> <span class="ab-cred cred-t1">T1</span></div>
+          <div class="ab-stance">行政命令推动加密友好政策，战略BTC储备讨论中</div>
+          <div class="ab-action"><strong>Signal:</strong> BTC战略储备确认 &rarr; 国家级采用</div>
+        </div>
+        <div class="signal-meta"><span class="signal signal-bull">BULL</span></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div class="ab-name">Michael Saylor <span class="ab-co">MicroStrategy (MSTR)</span> <span class="ab-cred cred-t2">T2</span></div>
+          <div class="ab-stance">MSTR持续增持BTC(500K+ BTC)，公司级采用标杆</div>
+          <div class="ab-action"><strong>Signal:</strong> 其他上市公司效仿MSTR &rarr; 企业采用加速</div>
+        </div>
+        <div class="signal-meta"><span class="signal signal-bull">BULL</span></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot watch"></div>
+        <div>
+          <div class="ab-name">Lyn Alden <span class="ab-co">Independent Macro</span> <span class="ab-cred cred-t1">T1</span></div>
+          <div class="ab-stance">BTC作为"全球流动性指标"，与M2货币供应高度相关</div>
+          <div class="ab-action"><strong>Signal:</strong> 全球M2转向扩张 &rarr; BTC上行催化剂</div>
+        </div>
+        <div class="signal-meta"><span class="signal signal-watch">WATCH</span></div>
+      </div>
+    </div>
+
+
+    <!-- ══════════ §X PREDICTION DASHBOARD ══════════ -->
+    <div class="section-header" id="predictions">
+      <h2>&sect;X 预测验证仪表盘<span class="zh">Prediction Verification Dashboard</span></h2>
+    </div>
+
+    <div class="pred-quarter-header">2026 Q1 预测</div>
+    <figure>
+      <table class="decision-matrix">
+        <thead>
+          <tr>
+            <th>Prediction 预测</th>
+            <th>Agent 代理人</th>
+            <th>Deadline 截止</th>
+            <th>Status 状态</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>GENIUS Act委员会投票通过</td>
+            <td>Peirce / Sacks</td>
+            <td>2026-03-31</td>
+            <td><span class="pred-status pred-verified">VERIFIED</span></td>
+          </tr>
+          <tr>
+            <td>BTC ETF累计AUM突破$300B</td>
+            <td>Fink / Saylor</td>
+            <td>2026-03-31</td>
+            <td><span class="pred-status pred-verified">VERIFIED</span></td>
+          </tr>
+          <tr>
+            <td>稳定币总供应突破$200B</td>
+            <td>Ardoino / Allaire</td>
+            <td>2026-03-31</td>
+            <td><span class="pred-status pred-verified">VERIFIED</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <div class="pred-quarter-header">2026 Q2 预测</div>
+    <figure>
+      <table class="decision-matrix">
+        <thead>
+          <tr>
+            <th>Prediction 预测</th>
+            <th>Agent 代理人</th>
+            <th>Deadline 截止</th>
+            <th>Status 状态</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>ETH Pectra升级成功上线</td>
+            <td>Vitalik</td>
+            <td>2026-06-30</td>
+            <td><span class="pred-status pred-pending">PENDING</span></td>
+          </tr>
+          <tr>
+            <td>BTC价格突破$95K</td>
+            <td>Saylor / Alden</td>
+            <td>2026-06-30</td>
+            <td><span class="pred-status pred-pending">PENDING</span></td>
+          </tr>
+          <tr>
+            <td>RWA代币化总值突破$25B</td>
+            <td>Fink / Allman</td>
+            <td>2026-06-30</td>
+            <td><span class="pred-status pred-pending">PENDING</span></td>
+          </tr>
+          <tr>
+            <td>Solana Firedancer主网稳定运行</td>
+            <td>Yakovenko</td>
+            <td>2026-06-30</td>
+            <td><span class="pred-status pred-pending">PENDING</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <div class="pred-quarter-header">2026 H2 预测</div>
+    <figure>
+      <table class="decision-matrix">
+        <thead>
+          <tr>
+            <th>Prediction 预测</th>
+            <th>Agent 代理人</th>
+            <th>Deadline 截止</th>
+            <th>Status 状态</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>BTC创新高突破$100K</td>
+            <td>Saylor / Alden</td>
+            <td>2026-12-31</td>
+            <td><span class="pred-status pred-pending">PENDING</span></td>
+          </tr>
+          <tr>
+            <td>BlackRock BUIDL AUM突破$1B</td>
+            <td>Fink</td>
+            <td>2026-12-31</td>
+            <td><span class="pred-status pred-pending">PENDING</span></td>
+          </tr>
+          <tr>
+            <td>GENIUS Act总统签署成法</td>
+            <td>Sacks / Peirce</td>
+            <td>2026-12-31</td>
+            <td><span class="pred-status pred-pending">PENDING</span></td>
+          </tr>
+          <tr>
+            <td>MiCA全面执行，USDT欧洲合规</td>
+            <td>Ardoino</td>
+            <td>2026-12-31</td>
+            <td><span class="pred-status pred-pending">PENDING</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </figure>
+
+
+    <!-- ══════════ §XI PORTFOLIO FRAMEWORK ══════════ -->
+    <div class="section-header" id="portfolio">
+      <h2>&sect;XI 投资组合框架<span class="zh">Portfolio Framework</span></h2>
+    </div>
+
+    <div class="tier-card tier-1">
+      <h3 style="margin-top:0;color:var(--tier-high);font-size:0.95rem;">Tier 1: Core &#127919; 核心持仓</h3>
+      <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6;">
+        <strong>BTC</strong> &mdash; 趋势仓位，减半周期+ETF机构化+全球流动性驱动。减半后12-18个月是历史性新高窗口。
+        <br><span style="font-size:0.75rem;color:var(--text-tertiary);">策略：顺趋势持有，月线级别止损。ETF净流入是加仓/减仓的核心信号。</span>
+      </p>
+    </div>
+
+    <div class="tier-card tier-2">
+      <h3 style="margin-top:0;color:var(--tier-medium);font-size:0.95rem;">Tier 2: Satellite &#128752; 卫星仓位</h3>
+      <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6;">
+        <strong>ETH</strong> &mdash; Pectra升级催化剂+RWA叙事。等ETH/BTC比值企稳后布局。
+        <br><strong>COIN</strong> (Coinbase) &mdash; 合规交易所龙头，订阅收入增长提供下行保护。
+        <br><strong>MSTR</strong> (MicroStrategy) &mdash; BTC杠杆代理，波动性>BTC但长期相关性高。
+        <br><span style="font-size:0.75rem;color:var(--text-tertiary);">策略：事件驱动，升级前/财报前布局，触发条件明确后入场。</span>
+      </p>
+    </div>
+
+    <div class="tier-card tier-3">
+      <h3 style="margin-top:0;color:var(--accent);font-size:0.95rem;">Tier 3: Tactical &#9889; 战术仓位</h3>
+      <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6;">
+        <strong>SOL</strong> &mdash; Firedancer催化剂+DeFi生态增长，波段交易。
+        <br><strong>MARA</strong> (Marathon) &mdash; 北美矿企龙头，BTC上涨时的杠杆工具。
+        <br><span style="font-size:0.75rem;color:var(--text-tertiary);">策略：波段操作，短期催化剂驱动，严格止损。</span>
+      </p>
+    </div>
+
+    <div class="tier-card tier-avoid">
+      <h3 style="margin-top:0;color:var(--tier-low);font-size:0.95rem;">&#x26A0; Avoid 回避清单</h3>
+      <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6;">
+        <strong>TRON/TRX</strong> &mdash; 合规风险(孙宇晨SEC诉讼未了结)、数据真实性存疑。
+        <br><strong>小型DeFi代币</strong> &mdash; 波动性过大，流动性不足，不适合趋势交易系统。
+        <br><strong>新发L1代币</strong> &mdash; 叙事驱动不可持续，等待至少6个月的链上数据验证。
+        <br><span style="font-size:0.75rem;color:var(--text-tertiary);">原则：不碰无法做趋势交易的品种，不碰合规风险未解决的品种。</span>
+      </p>
+    </div>
+
+
+    <!-- FOOTER -->
+    <footer style="text-align:center; padding:2.5rem 1rem; margin-top:3rem; border-top:1px solid var(--border-subtle); color:var(--text-quaternary); font-size:0.75rem;">
+      <p style="margin-bottom:0.5rem;">
+        <a href="blockchain_hub.html">Blockchain Hub</a> &nbsp;&middot;&nbsp;
+        <a href="2026-W12-v3.html">W12 Synthesis</a> &nbsp;&middot;&nbsp;
+        <a href="/">Trading Dashboard</a>
+      </p>
+      <p style="font-size:0.75rem;color:var(--text-quaternary);margin-top:1rem;">
+        Blockchain Signal Tracker &nbsp;&middot;&nbsp; Part of Cognitive Observatory V3 &nbsp;&middot;&nbsp; 2026-03-22 &nbsp;|&nbsp; 8 Nodes &times; 22 Agents &times; 4 Layers &times; 3 Tiers
+      </p>
+    </footer>
+
+  </main>
+
+  <!-- ═══════════ RIGHT NOTES SIDEBAR ═══════════ -->
+  <aside class="notes-sidebar" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&#10005;</button>
+      <h4>&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+
+    <!-- META 1: Halving Cycle -->
+    <div class="anno meta-note" data-section="latest-signals" id="m1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">减半周期是最可靠的信号</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>4 cycles, 4 new highs 12-18 months after halving.</strong> 2012减半 &rarr; 2013年$1,000。2016减半 &rarr; 2017年$20,000。2020减半 &rarr; 2021年$69,000。2024减半 &rarr; 当前位置：减半后~12个月。</p>
+        <p><strong>当前位置：</strong>2024年4月第四次减半后约12个月。根据历史模式，我们正处于"牛市加速期"的前端。最大的区别是ETF的存在 &mdash; 机构化可能使这次周期更平滑（涨幅可能小于往周期但回撤也更小）。减半周期是BTC最可靠的结构性信号，因为供给减少是写在代码里的确定性事件。</p>
+      </div>
+    </div>
+
+    <!-- META 2: Stablecoin Leading Indicator -->
+    <div class="anno meta-note" data-section="baseline" id="m2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">稳定币供应是领先指标</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Rising stablecoin supply = dry powder = bullish.</strong> 稳定币是加密市场的"待部署资金"。当USDT/USDC供应增长时，意味着法币正在流入链上，但还没有买入BTC/ETH &mdash; 这些是"干火药"，随时可能引爆需求。</p>
+        <p><strong>Watch USDT minting on TRON.</strong> USDT在TRON上的铸造量是最灵敏的领先指标。TRON的低手续费使其成为大额资金转移的首选。当TRON上的USDT铸造量突增时，通常意味着场外大资金正在入场准备。</p>
+      </div>
+    </div>
+
+    <!-- META 3: English Bias Correction -->
+    <div class="anno meta-note" data-section="china-crypto" id="m3">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">英文偏见修正</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>This tracker deliberately includes China/Asia signals that Western trackers miss.</strong> 英文加密媒体(CoinDesk, The Block, Decrypt)系统性低估亚洲信号。Bitmain的矿机垄断、TRON在发展中国家的真实采用、e-CNY的进展、Upbit的泡菜溢价 &mdash; 这些在英文世界几乎不被追踪。</p>
+        <p><strong>修正机制：</strong>§VII专门覆盖中国/亚洲加密生态。数据来源必须包含中文源(巨潮资讯、东方财富、央行报告)。当本tracker的判断与英文主流分析不同时，需要明确标注差异来源是否是因为覆盖了被忽略的亚洲数据。</p>
+      </div>
+    </div>
+
+    <!-- META 4: Mining Geopolitical Risk -->
+    <div class="anno meta-note" data-section="nodes" id="m4">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">矿机地缘风险无人追踪</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>95% China-made hardware is the biggest untracked risk in the entire BTC ecosystem.</strong> 半导体行业有ASML卡脖子问题，全世界都在讨论。BTC挖矿有Bitmain/MicroBT卡脖子问题，几乎没人讨论。</p>
+        <p><strong>类比：</strong>ASML控制100%先进光刻机 &rarr; 全世界讨论。Bitmain+MicroBT控制95%矿机 &rarr; 几乎无人讨论。两者的地缘政治含义完全相同：一个出口禁令就能让整个行业瘫痪。区别是ASML是荷兰公司(受美国压力配合管制)，而Bitmain是中国公司(受中国政策控制)。</p>
+        <p><strong>为什么无人追踪：</strong>(1)BTC社区倾向于强调去中心化叙事，不愿承认硬件集中度问题 (2)矿机供应链数据不透明 (3)英文分析师很少深入中国制造业生态。这个盲点本身就是alpha。</p>
+      </div>
+    </div>
+
+    <!-- META 5: ETF Changed Everything -->
+    <div class="anno meta-note" data-section="portfolio" id="m5">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">ETF改变了一切</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Pre-ETF: crypto was retail-driven, high volatility. Post-ETF: institutional flows smooth cycles but also create correlation with traditional markets.</strong></p>
+        <p><strong>ETF之前(2009-2024)：</strong>BTC由散户驱动，日波动率4%+，周期剧烈(涨10x跌80%)，与传统市场低相关性。交易对手主要是散户和OG whales。</p>
+        <p><strong>ETF之后(2024-)：</strong>机构持仓占比从~15%升至~40%。日波动率压缩到2%以内。周期可能更平滑(涨幅小但回撤也小)。但新问题出现：BTC开始与传统风险资产(SPX/QQQ)高度相关，因为同一批机构在同时管理这些资产。当传统市场恐慌时，BTC也会被作为流动性工具卖出。ETF是双刃剑：提高了合法性和流动性，但也消除了一部分"不相关资产"的价值。</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+(function() {
+  // 1. Left sidebar toggle
+  var hamburger = document.getElementById('hamburgerBtn');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('sidebarOverlay');
+  hamburger.addEventListener('click', function() { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', function() { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+  sidebar.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() { if (window.innerWidth <= 900) { sidebar.classList.remove('open'); overlay.classList.remove('open'); } });
+  });
+
+  // 2. Note toggle
+  window.toggleNote = function(head) { head.parentElement.classList.toggle('open'); requestAnimationFrame(positionNotes); };
+
+  // 3. Position notes alongside their target sections
+  function positionNotes() {
+    var sidebarEl = document.getElementById('notesSidebar');
+    if (!sidebarEl) return;
+    var notes = Array.from(sidebarEl.querySelectorAll('.anno'));
+    var scrollY = window.scrollY;
+    var sidebarAbsTop = sidebarEl.getBoundingClientRect().top + scrollY;
+    var headerEl = sidebarEl.querySelector('.notes-sidebar-header');
+    var headerHeight = headerEl ? headerEl.offsetHeight + 12 : 40;
+    notes.sort(function(a, b) {
+      var secA = document.getElementById(a.dataset.section);
+      var secB = document.getElementById(b.dataset.section);
+      if (!secA || !secB) return 0;
+      return secA.getBoundingClientRect().top - secB.getBoundingClientRect().top;
+    });
+    var lastBottom = headerHeight;
+    notes.forEach(function(note) {
+      if (note.style.display === 'none') return;
+      var section = document.getElementById(note.dataset.section);
+      if (!section) { note.style.display = 'none'; return; }
+      var sectionAbsTop = section.getBoundingClientRect().top + scrollY;
+      var targetY = sectionAbsTop - sidebarAbsTop;
+      if (targetY < lastBottom + 8) targetY = lastBottom + 8;
+      note.style.top = targetY + 'px';
+      lastBottom = targetY + note.offsetHeight;
+    });
+    sidebarEl.style.minHeight = (lastBottom + 40) + 'px';
+  }
+
+  // 4. Run positioning on load, details toggle, resize, scroll
+  window.addEventListener('load', function() {
+    positionNotes();
+    document.querySelectorAll('details').forEach(function(d) { d.addEventListener('toggle', function() { setTimeout(positionNotes, 50); }); });
+  });
+  window.addEventListener('resize', positionNotes);
+  var scrollTimer;
+  window.addEventListener('scroll', function() { clearTimeout(scrollTimer); scrollTimer = setTimeout(positionNotes, 100); }, { passive: true });
+
+  // 5. Highlight <-> Note sync
+  document.querySelectorAll('.nref, mark.hl-know').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      e.preventDefault();
+      var noteId = el.dataset.note;
+      var note = document.getElementById(noteId);
+      if (!note) return;
+      note.classList.add('open');
+      requestAnimationFrame(function() {
+        positionNotes();
+        note.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        note.classList.add('flash');
+        setTimeout(function() { note.classList.remove('flash'); }, 1500);
+      });
+    });
+  });
+
+  // 6. Hover bidirectional
+  document.querySelectorAll('.anno').forEach(function(note) {
+    note.addEventListener('mouseenter', function() { document.querySelectorAll('[data-note="' + note.id + '"]').forEach(function(el) { el.classList.add('hover'); }); });
+    note.addEventListener('mouseleave', function() { document.querySelectorAll('[data-note="' + note.id + '"]').forEach(function(el) { el.classList.remove('hover'); }); });
+    note.addEventListener('dblclick', function() { var section = document.getElementById(note.dataset.section); if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  });
+  document.querySelectorAll('[data-note]').forEach(function(el) {
+    if (el.classList.contains('anno')) return;
+    el.addEventListener('mouseenter', function() { var note = document.getElementById(el.dataset.note); if (note) note.classList.add('hover'); });
+    el.addEventListener('mouseleave', function() { var note = document.getElementById(el.dataset.note); if (note) note.classList.remove('hover'); });
+  });
+
+  // 7. Top controls: toggle knowledge notes, expand/collapse
+  var allAnnos = document.querySelectorAll('.anno');
+  var knowNotes = document.querySelectorAll('.anno.know-note');
+  var knowMarks = document.querySelectorAll('mark.hl-know');
+  var knowRefs = document.querySelectorAll('.nref');
+  var metaNotes = document.querySelectorAll('.anno.meta-note');
+  document.getElementById('noteCountLabel').textContent = metaNotes.length + ' 元思考注解';
+  window.toggleKnowNotes = function() {
+    var btn = document.getElementById('knowToggleBtn');
+    var isActive = btn.classList.toggle('active');
+    btn.textContent = isActive ? '显示' : '隐藏';
+    knowNotes.forEach(function(n) { n.style.display = isActive ? '' : 'none'; });
+    knowMarks.forEach(function(m) { m.style.background = isActive ? '' : 'transparent'; m.style.borderBottom = isActive ? '' : 'none'; });
+    knowRefs.forEach(function(r) { r.style.display = isActive ? '' : 'none'; });
+    requestAnimationFrame(positionNotes);
+  };
+  window.expandAllNotes = function() { allAnnos.forEach(function(n) { n.classList.add('open'); }); requestAnimationFrame(positionNotes); };
+  window.collapseAllNotes = function() { allAnnos.forEach(function(n) { n.classList.remove('open'); }); requestAnimationFrame(positionNotes); };
+
+  // 8. Right sidebar toggle (narrow screens)
+  var notesSidebarEl = document.getElementById('notesSidebar');
+  var notesToggleBtn = document.getElementById('notesToggleBtn');
+  var notesOverlayEl = document.getElementById('notesOverlay');
+  var notesCloseBtn = document.getElementById('notesCloseBtn');
+  function toggleNotesSidebar() {
+    var willClose = !notesSidebarEl.classList.contains('ns-closed');
+    notesSidebarEl.classList.toggle('ns-closed', willClose);
+    notesToggleBtn.style.display = willClose ? 'flex' : 'none';
+    notesOverlayEl.classList.toggle('open', !willClose);
+    if (!willClose) requestAnimationFrame(positionNotes);
+  }
+  if (notesToggleBtn) notesToggleBtn.addEventListener('click', toggleNotesSidebar);
+  if (notesOverlayEl) notesOverlayEl.addEventListener('click', toggleNotesSidebar);
+  if (notesCloseBtn) notesCloseBtn.addEventListener('click', toggleNotesSidebar);
+
+  // 9. Resize handler + ensure sidebar state on load
+  if (window.innerWidth > 1200) {
+    notesSidebarEl.classList.remove('ns-closed');
+    notesToggleBtn.style.display = 'none';
+  } else {
+    notesSidebarEl.classList.add('ns-closed');
+    notesToggleBtn.style.display = 'flex';
+  }
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 1200) { notesSidebarEl.classList.remove('ns-closed'); notesToggleBtn.style.display = 'none'; notesOverlayEl.classList.remove('open'); }
+  });
+
+  // 10. Default: expand all annotations on load
+  expandAllNotes();
+
+  // 11. Active TOC highlighting
+  var navLinks = document.querySelectorAll('.sidebar nav ul li a[href^="#"]');
+  var tocObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        navLinks.forEach(function(link) { link.classList.remove('active'); if (link.getAttribute('href') === '#' + entry.target.id) link.classList.add('active'); });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  document.querySelectorAll('[id="latest-signals"], [id="baseline"], [id="monthly"], [id="quarterly"], [id="annual"], [id="milestones"], [id="nodes"], [id="signal-tiers"], [id="china-crypto"], [id="tracking"], [id="agent-briefing"], [id="predictions"], [id="portfolio"]').forEach(function(s) { tocObserver.observe(s); });
+})();
+</script>
+<script src="ctx-injector.js"></script>
+<script src="../lib/reading-mode.js"></script>
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && !url.pathname.startsWith('http')) { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+</body>
+</html>

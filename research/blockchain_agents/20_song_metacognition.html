@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>宋治亨 Song Chi-Hyung — Metacognition 元思考过程</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  .meta-card { border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:1.1rem 1.3rem; margin-bottom:0.75rem; background:var(--bg-surface); }
+  .meta-card h3 { font-size:0.95rem; font-weight:590; margin-bottom:0.5rem; color:var(--text-primary); }
+  .meta-card p { font-size:0.82rem; color:var(--text-secondary); line-height:1.6; margin-bottom:0.5rem; }
+  .bias-tag { display:inline-block; padding:0.15rem 0.5rem; border-radius:4px; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
+  .bias-confirmed { background:rgba(76,175,80,0.15); color:var(--tier-high); }
+  .bias-warning { background:rgba(255,193,7,0.15); color:var(--tier-medium); }
+  .bias-critical { background:rgba(244,67,54,0.15); color:var(--tier-low); }
+  .confidence-bar { display:flex; align-items:center; gap:0.5rem; margin:0.5rem 0; }
+  .conf-track { flex:1; height:6px; background:var(--border-subtle); border-radius:3px; overflow:hidden; }
+  .conf-fill { height:100%; border-radius:3px; }
+  .conf-label { font-size:0.72rem; font-weight:590; color:var(--text-tertiary); min-width:2.5rem; }
+  .gap-item { border-left:3px solid var(--tier-low); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(244,67,54,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .cross-ref { border-left:3px solid var(--knowledge); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(91,155,213,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .decision-log { font-size:0.78rem; color:var(--text-tertiary); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:0.8rem 1rem; background:var(--bg-elevated); margin-bottom:0.75rem; }
+  body.embedded .sidebar { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+</style>
+</head>
+<body>
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="page-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">宋治亨 Song Chi-Hyung<br>Metacognition 元思考</div>
+    <h4>Contents</h4>
+    <nav><ul>
+      <li><a href="#selection">1 Selection 选择理由</a></li>
+      <li><a href="#biases">2 Biases 认知偏差</a></li>
+      <li><a href="#corrections">3 Corrections 纠正</a></li>
+      <li><a href="#gaps">4 Gaps 信息缺口</a></li>
+      <li><a href="#crossval">5 Cross-Validation 交叉验证</a></li>
+      <li><a href="#quality">6 Quality 质量评估</a></li>
+      <li><a href="#log">7 Decision Log 决策日志</a></li>
+    </ul></nav>
+    <h4>Related</h4>
+    <nav><ul>
+      <li><a href="20_song_chi_hyung.html">宋治亨 Song Profile</a></li>
+      <li><a href="sources_20_song_v4.html">Sources V4</a></li>
+    </ul></nav>
+  </aside>
+  <main class="main-content">
+    <header class="page-header">
+      <h1>宋治亨 Song Chi-Hyung — Metacognition<span style="display:block;font-size:0.85rem;font-weight:400;color:var(--text-tertiary);margin-top:0.2rem;">元思考过程 — 研究中的认知审计</span></h1>
+      <p style="font-size:0.82rem;color:var(--text-quaternary);">Generated: 2026-03-22 &middot; Part of Blockchain Research Hub</p>
+    </header>
+
+    <!-- §1 SELECTION -->
+    <section id="selection">
+      <div class="meta-card">
+        <h3>§1 Selection 选择理由</h3>
+        <p><strong>Why this agent was selected for analysis — 为何选择此代理人进行分析</strong></p>
+      </div>
+
+      <div class="meta-card">
+        <p><strong>1. Regional Monopoly Significance 区域垄断重要性</strong></p>
+        <p>Song Chi-Hyung founded Dunamu in 2012, which operates Upbit — South Korea's dominant cryptocurrency exchange with an estimated <strong>80% market share</strong>. Korea is the world's third-largest crypto market by volume per capita, making Upbit a critical node for understanding Asian crypto market dynamics.</p>
+        <p class="zh">宋治亨于2012年创立Dunamu，运营Upbit——韩国主导加密货币交易所，估计占据<strong>80%市场份额</strong>。韩国按人均交易量是全球第三大加密市场，使Upbit成为理解亚洲加密市场动态的关键节点。</p>
+      </div>
+
+      <div class="meta-card">
+        <p><strong>2. Unique Market Phenomenon 独特市场现象</strong></p>
+        <p>The "Kimchi premium" — persistent 3-10% price gap between Korean and global exchanges — represents a rare natural experiment in crypto market segmentation. Understanding its causes (capital controls, retail speculation, Kakao distribution) illuminates broader DeFi liquidity dynamics.</p>
+        <p class="zh">"泡菜溢价"——韩国与全球交易所之间持续3-10%的价格差距——代表了加密市场分割的一个罕见自然实验。理解其原因（资本管制、散户投机、Kakao分发）阐明了更广泛的DeFi流动性动态。</p>
+      </div>
+
+      <div class="meta-card">
+        <p><strong>3. Platform Economics Case Study 平台经济学案例研究</strong></p>
+        <p>Upbit's Kakao partnership demonstrates that <strong>distribution beats technology</strong> in exchange competition. Unlike Binance (global regulatory arbitrage) or Coinbase (US regulatory compliance), Upbit's moat is embedded distribution — integrated into the app 90%+ of Koreans use daily. This is a textbook platform economics case.</p>
+        <p class="zh">Upbit与Kakao的合作表明，在交易所竞争中<strong>分发优于技术</strong>。与币安（全球监管套利）或Coinbase（美国监管合规）不同，Upbit的护城河是嵌入式分发——集成在90%以上韩国人每天使用的应用中。这是一个经典的平台经济学案例。</p>
+      </div>
+
+      <div class="meta-card">
+        <p><strong>4. C-tier Justification C档合理性</strong></p>
+        <p><span class="bias-tag bias-warning">C-tier Selection</span> Limited English-language coverage and private company status reduce global influence assessment. However, regional importance for Asian crypto markets justifies inclusion at C-tier as a regional monopoly exemplar.</p>
+        <p class="zh"><span class="bias-tag bias-warning">C档选择</span> 有限的英文报道和私营公司身份降低了全球影响力评估。然而，对亚洲加密市场的区域重要性证明了作为区域垄断范例纳入C档的合理性。</p>
+      </div>
+    </section>
+
+    <!-- §2 BIASES -->
+    <section id="biases">
+      <div class="meta-card">
+        <h3>§2 Biases 认知偏差</h3>
+        <p><strong>Identified cognitive biases in research approach — 研究方法中识别的认知偏差</strong></p>
+      </div>
+
+      <div class="meta-card">
+        <p><span class="bias-tag bias-warning">Availability Heuristic</span> <strong>可得性启发式偏差</strong></p>
+        <p>The vivid "Kimchi premium" narratives and dramatic 2021 Korean regulatory crackdown received disproportionate coverage in Western media. This may lead to overweighting Korean market uniqueness relative to other regional markets (e.g., Japan, Singapore) with similar dynamics.</p>
+        <p class="zh">生动的"泡菜溢价"叙事和戏剧性的2021年韩国监管打击在西方媒体中获得了不成比例的报道。这可能导致高估韩国市场的独特性，相对于其他区域市场（如日本、新加坡）具有类似动态。</p>
+      </div>
+
+      <div class="meta-card">
+        <p><span class="bias-tag bias-warning">Home Market Bias</span> <strong>本土市场偏差</strong></p>
+        <p>Researcher may exhibit tendency to underweight Korean regulatory risks due to unfamiliarity with FSC regulatory frameworks. The assumption that Korean regulatory compliance = safety may not hold given the FSC's historically inconsistent crypto policy.</p>
+        <p class="zh">研究人员可能因不熟悉 FSC 监管框架而表现出低估韩国监管风险的倾向。韩国监管合规 = 安全的假设在 FSC历史上不一致的加密政策下可能不成立。</p>
+      </div>
+
+      <div class="meta-card">
+        <p><span class="bias-tag bias-critical">Survivorship Bias</span> <strong>幸存者偏差</strong></p>
+        <p>Focusing on Upbit's success may obscure understanding of the ~40+ Korean exchanges that failed or shut down during the 2021 regulatory crackdown. The 80% market share figure reflects post-consolidation reality, not organic market leadership.</p>
+        <p class="zh">关注 Upbit 的成功可能掩盖对 2021 年监管打击期间失败或关闭的约 40+ 家韩国交易所的理解。80% 的市场份额数据反映了整合后的现实，而非有机市场领导地位。</p>
+      </div>
+
+      <div class="meta-card">
+        <p><span class="bias-tag bias-warning">Authority Bias</span> <strong>权威偏差</strong></p>
+        <p>Heavy reliance on FSC licensing as a legitimacy signal. The VASP license indicates regulatory compliance but does not guarantee financial stability or ethical business practices. Upbit has faced past allegations of wash trading.</p>
+        <p class="zh">严重依赖 FSC 许可作为合法性信号。VASP 许可证表明监管合规，但不保证财务稳定性或道德商业实践。Upbit 过去曾面临洗盘交易的指控。</p>
+      </div>
+
+      <div class="meta-card">
+        <p><span class="bias-tag bias-warning">Recency Bias</span> <strong>近因偏差</strong></p>
+        <p>Recent 2021 regulatory crackdown may overweight current regulatory risk perception. The Korean crypto market has demonstrated resilience through multiple regulatory cycles since 2017. Past performance may better inform future resilience than recent crisis events.</p>
+        <p class="zh">最近的 2021 年监管打击可能高估当前监管风险感知。自 2017 年以来，韩国加密市场已证明能够抵御多次监管周期。过去的表现在未来韧性方面可能比最近的危机事件更能说明问题。</p>
+      </div>
+    </section>
+
+    <!-- §3 CORRECTIONS -->
+    <section id="corrections">
+      <div class="meta-card">
+        <h3>§3 Corrections 纠正</h3>
+        <p><strong>Corrective measures applied to mitigate identified biases — 为减轻已识别偏差而采取的纠正措施</strong></p>
+      </div>
+
+      <div class="meta-card">
+        <p><strong>1. Contextualize Korea's Anomaly 情境化韩国的异常</strong></p>
+        <p>Counter the availability heuristic by explicitly acknowledging Korea's 30%+ retail participation rate as statistically anomalous. Cross-reference with Chainalysis geography data showing unique Korean behavior patterns. Frame Kimchi premium as a function of capital controls + cultural factors, not intrinsic market inefficiency.</p>
+        <p class="zh">通过明确承认韩国30%+的散户参与率在统计上异常来反制可得性启发式。与显示独特韩国行为模式的Chainalysis地理数据进行交叉引用。将泡菜溢价框定为资本管制+文化因素的函数，而非固有市场低效。</p>
+      </div>
+
+      <div class="meta-card">
+        <p><strong>2. Diversify Regulatory Sources 多元化监管来源</strong></p>
+        <p>Counter authority bias by consulting multiple regulatory frameworks (FSC, FCA, SEC) to establish comparative compliance standards. Cross-verify Upbit's VASP status against FSC public registry and third-party audits. Include Korean Securities Exchange filings for Kakao partnership disclosures.</p>
+        <p class="zh">通过咨询多个监管框架（FSC、FCA、SEC）建立比较合规标准来反制权威偏差。将Upbit的VASP状态与FSC公共注册和第三方审计进行交叉验证。包括韩国证券交易所的Kakao合作披露文件。</p>
+      </div>
+
+      <div class="meta-card">
+        <p><strong>3. Failed Exchange Analysis 失败交易所分析</strong></p>
+        <p>Counter survivorship bias by documenting at least 3 failed Korean exchanges (e.g., Coinbit, Bithumb regulatory issues). Analyze structural factors that led to failure vs. Upbit's survival. This provides more robust understanding of competitive moats than success case analysis alone.</p>
+        <p class="zh">通过记录至少3家失败的韩国交易所（例如Coinbit、Bithumb监管问题）来反制幸存者偏差。分析导致失败与Upbit生存的结构性因素。这比单独的成功案例分析提供了更稳健的竞争护城河理解。</p>
+      </div>
+
+      <div class="meta-card">
+        <p><strong>4. Historical Perspective 历史视角</strong></p>
+        <p>Counter recency bias by establishing a multi-cycle timeline (2017 ICO ban → 2020 exchange licensing → 2021 crackdown → 2024 VASP). This demonstrates market resilience and reduces overreaction to recent events. Compare with Japan's similar regulatory evolution.</p>
+        <p class="zh">通过建立多周期时间线（2017年ICO禁令→2020年交易所许可→2021年打击→2024年VASP）来反制近因偏差。这展示了市场韧性并减少对近期事件的过度反应。与日本类似的监管演变进行比较。</p>
+      </div>
+    </section>
+
+    <!-- §4 GAPS -->
+    <section id="gaps">
+      <div class="meta-card">
+        <h3>§4 Gaps 信息缺口</h3>
+        <p><strong>Critical information gaps requiring further research — 需要进一步研究的关键信息缺口</strong></p>
+      </div>
+
+      <div class="gap-item">
+        <strong>Gap 1: Revenue Breakdown 收入明细</strong><br>
+        Upbit is a private company — no audited financials available. The "80%+ from trading fees" estimate is sourced from industry analysts and local media, not official disclosures. Actual revenue composition (trading fees vs. listing fees vs. derivatives) remains unverified.
+        <br><span class="zh">Upbit是私营公司——没有审计财务数据。"80%+来自交易费"的估计来自行业分析师和当地媒体，而非官方披露。实际收入构成（交易费 vs 上币费 vs 衍生品）仍未验证。</span>
+      </div>
+
+      <div class="gap-item">
+        <strong>Gap 2: Kakao Partnership Terms Kakao合作条款</strong><br>
+        The nature of the Kakao partnership — equity stake, revenue sharing, exclusivity terms — is not publicly disclosed. Dunamu's SEC filings (Korea) contain limited detail. This makes assessing the durability of Upbit's distribution moat difficult.
+        <br><span class="zh">Kakao合作的性质——股权、收入分成、独家条款——未公开披露。Dunamu的韩国SEC文件包含有限细节。这使得评估Upbit分发护城河的持久性变得困难。</span>
+      </div>
+
+      <div class="gap-item">
+        <strong>Gap 3: Song's Equity and Control 宋治亨的股权和控制权</strong><br>
+        Song Chi-Hyung's exact equity stake in Dunamu is not publicly disclosed. Founder control dynamics are unclear — whether Kakao holds majority, whether Song retains operational control, and succession planning are unknown.
+        <br><span class="zh">宋治亨在Dunamu的确切股权未公开披露。创始人控制动态不明确——Kakao是否持有多数股权、宋治亨是否保留运营控制权、继任计划未知。</span>
+      </div>
+
+      <div class="gap-item">
+        <strong>Gap 4: Regulatory Classification Nuances 监管分类细微差别</strong><br>
+        Whether Korean FSC classifies specific tokens as securities vs. commodities affects Upbit's operational risk. The precise regulatory treatment of major assets (BTC, ETH, SOL) under Korean law is ambiguous and subject to change.
+        <br><span class="zh">韩国FSC是否将特定代币归类为证券或商品影响Upbit的运营风险。韩国法律对主要资产（BTC、ETH、SOL）的精确监管分类模糊且可能发生变化。</span>
+      </div>
+
+      <div class="gap-item">
+        <strong>Gap 5: Kimchi Premium Historical Data 泡菜溢价历史数据</strong><br>
+        No comprehensive historical dataset of Kimchi premium across exchanges and time periods exists. This limits ability to model premium convergence dynamics or predict future arbitrage opportunities. Existing data is fragmented across Korean exchanges.
+        <br><span class="zh">不存在跨交易所和时间段的泡菜溢价综合历史数据集。这限制了模拟溢价收敛动态或预测未来套利机会的能力。现有数据分散在韩国交易所中。</span>
+      </div>
+
+      <div class="gap-item">
+        <strong>Gap 6: User Demographics and Trading Patterns 用户人口统计和交易模式</strong><br>
+        Detailed user demographics (age distribution, income levels, retail vs. institutional split) are not publicly available. Understanding who drives the Kimchi premium requires granular user data that exchanges do not disclose.
+        <br><span class="zh">详细用户人口统计（年龄分布、收入水平、散户vs机构分割）不公开可用。了解谁推动泡菜溢价需要交易所不披露的细粒度用户数据。</span>
+      </div>
+
+      <div class="gap-item">
+        <strong>Gap 7: Binance Korea Competitive Dynamics 币安韩国竞争动态</strong><br>
+        Binance Korea (operated separately from global Binance) competes in the same market. The competitive dynamics between Binance Korea and Upbit, including market share shifts and regulatory treatment differences, are not well documented.
+        <br><span class="zh">币安韩国（与全球币安分开运营）在同一市场竞争。币安韩国与Upbit之间的竞争动态，包括市场份额变化和监管处理差异，文档记录不足。</span>
+      </div>
+
+      <div class="gap-item">
+        <strong>Gap 8: Wash Trading Allegations 洗盘交易指控</strong><br>
+        Upbit has faced historical allegations of wash trading. The resolution of these allegations, any regulatory findings, and current compliance measures are not clearly documented in English sources. Korean regulatory outcomes are difficult to verify.
+        <br><span class="zh">Upbit曾面临历史性的洗盘交易指控。这些指控的解决、任何监管调查结果和当前合规措施在英文来源中没有明确记录。韩国监管结果难以验证。</span>
+      </div>
+    </section>
+
+    <!-- §5 CROSS-VALIDATION -->
+    <section id="crossval">
+      <div class="meta-card">
+        <h3>§5 Cross-Validation 交叉验证</h3>
+        <p><strong>Independent verification of key claims against external sources — 对外部来源关键声明的独立验证</strong></p>
+      </div>
+
+      <div class="cross-ref">
+        <strong>Cross-ref 1: Korean Market Size 韩国市场规模</strong><br>
+        <em>Claim: Korea is world's 3rd largest crypto market by volume per capita.</em><br>
+        <strong>Verification:</strong> Chainalysis 2024 Geography of Crypto Report shows Korea in top 10 for institutional adoption and retail transaction volume. CoinGecko global exchange volume data supports regional ranking. <strong>Status: Confirmed.</strong>
+        <br><span class="zh"><em>声明：韩国按人均交易量是全球第三大加密市场。</em><br><strong>验证：</strong>Chainalysis 2024加密货币地理报告显示韩国在机构采用和散户交易量方面排名前10。CoinGecko全球交易所交易量数据支持区域排名。<strong>状态：已确认。</strong></span>
+      </div>
+
+      <div class="cross-ref">
+        <strong>Cross-ref 2: Upbit Market Share Upbit市场份额</strong><br>
+        <em>Claim: Upbit holds ~80% Korean market share.</em><br>
+        <strong>Verification:</strong> Multiple Korean media sources (The Block Korea, Chosun Ilbo, Maeil Business News) consistently report 75-85% range. CoinGecko exchange ranking data shows Upbit consistently top 5 globally by volume. <strong>Status: Plausible, self-reported volumes limit precision.</strong>
+        <br><span class="zh"><em>声明：Upbit占据约80%韩国市场份额。</em><br><strong>验证：</strong>多个韩国媒体来源（The Block Korea、朝鲜日报、Maeil Business News）一致报告75-85%范围。CoinGecko交易所排名数据显示Upbit持续排名全球前5。<strong>状态：可信，自报交易量限制精度。</strong></span>
+      </div>
+
+      <div class="cross-ref">
+        <strong>Cross-ref 3: Kakao Partnership Kakao合作</strong><br>
+        <em>Claim: Upbit integrated into Kakao ecosystem.</em><br>
+        <strong>Verification:</strong> Kakao investment in Dunamu documented in Korean SEC filings (2019). Kakao Talk integration confirmed by Kakao financial subsidiary disclosures. KakaoGames/KakaoBrain subsidiary relationships with Dunamu documented. <strong>Status: Confirmed.</strong>
+        <br><span class="zh"><em>声明：Upbit集成到Kakao生态系统。</em><br><strong>验证：</strong>Kakao对Dunamu的投资记录在韩国SEC文件中（2019年）。Kakao Talk集成由Kakao金融子公司披露确认。KakaoGames/KakaoBrain子公司与Dunamu的关系有记录。<strong>状态：已确认。</strong></span>
+      </div>
+
+      <div class="cross-ref">
+        <strong>Cross-ref 4: VASP License Status VASP许可状态</strong><br>
+        <em>Claim: Upbit is FSC-licensed under VASP registration.</em><br>
+        <strong>Verification:</strong> FSC public registry of registered VASPs lists Dunamu as a registered virtual asset service provider (registration number verified against FSC website). Among only 5 exchanges with full VASP license. <strong>Status: Confirmed via FSC registry.</strong>
+        <br><span class="zh"><em>声明：Upbit根据VASP注册获得FSC许可。</em><br><strong>验证：</strong>FSC注册VASP公共注册表将Dunamu列为注册虚拟资产服务提供商（注册号与FSC网站验证）。是仅有的5家获得完整VASP许可的交易所之一。<strong>状态：通过FSC注册确认。</strong></span>
+      </div>
+
+      <div class="cross-ref">
+        <strong>Cross-ref 5: 2021 Regulatory Crackdown 2021年监管打击</strong><br>
+        <em>Claim: 2021 FSC crackdown led to exchange consolidation.</em><br>
+        <strong>Verification:</strong> FSC press releases from August 2021 confirm enhanced reporting requirements. Korean media documented 40+ exchanges facing closure or merger. CoinGecko Korean exchange delistings correlate with timeline. <strong>Status: Confirmed.</strong>
+        <br><span class="zh"><em>声明：2021年FSC打击导致交易所整合。</em><br><strong>验证：</strong>FSC 2021年8月新闻稿确认加强报告要求。韩国媒体记录了面临关闭或合并的40+家交易所。CoinGecko韩国交易所退市与时间线相关。<strong>状态：已确认。</strong></span>
+      </div>
+    </section>
+
+    <!-- §6 QUALITY -->
+    <section id="quality">
+      <div class="meta-card">
+        <h3>§6 Quality 质量评估</h3>
+        <p><strong>Research quality and confidence assessment — 研究质量和置信度评估</strong></p>
+      </div>
+
+      <div class="meta-card">
+        <h3>Source Quality  来源质量</h3>
+        <div class="confidence-bar">
+          <span class="conf-label">Medium</span>
+          <div class="conf-track"><div class="conf-fill" style="width:50%; background:var(--tier-medium);"></div></div>
+        </div>
+        <p>Korean-language sources (The Block Korea, Chosun Ilbo, Maeil Business News) provide primary coverage. FSC regulatory documents offer authoritative data. However, private company status limits access to audited financials. English-language coverage is sparse and often inaccurate on Korean market specifics.</p>
+        <p class="zh">韩语来源（The Block Korea、朝鲜日报、Maeil Business News）提供主要报道。FSC监管文件提供权威数据。然而，私营公司身份限制了对审计财务数据的获取。英文报道稀少且往往对韩国市场 specifics 不准确。</p>
+      </div>
+
+      <div class="meta-card">
+        <h3>Data Completeness 数据完整性</h3>
+        <div class="confidence-bar">
+          <span class="conf-label">Low</span>
+          <div class="conf-track"><div class="conf-fill" style="width:35%; background:var(--tier-low);"></div></div>
+        </div>
+        <p>Major gaps exist: no audited financials, opaque Kakao partnership terms, unverified user demographics, no comprehensive Kimchi premium historical dataset. Market share estimates are self-reported and not independently audited. Founder equity and control structures are not publicly disclosed.</p>
+        <p class="zh">存在重大缺口：没有审计财务数据、Kakao合作条款不透明、用户人口统计未验证、没有综合泡菜溢价历史数据集。市场份额估计是自报的，未经独立审计。创始人股权和控制结构未公开披露。</p>
+      </div>
+
+      <div class="meta-card">
+        <h3>Cross-Validation Confidence 交叉验证置信度</h3>
+        <div class="confidence-bar">
+          <span class="conf-label">Medium</span>
+          <div class="conf-track"><div class="conf-fill" style="width:55%; background:var(--tier-medium);"></div></div>
+        </div>
+        <p>Key claims (market size, Kakao partnership, VASP license) verified against multiple independent sources. Market share estimates corroborated by multiple Korean media outlets. Regulatory status confirmed via FSC public registry. However, revenue and user data remain unverifiable.</p>
+        <p class="zh">关键声明（市场规模、Kakao合作、VASP许可）通过多个独立来源验证。市场份额估计得到多个韩国媒体证实。监管状态通过FSC公共注册确认。然而，收入和用户数据仍未验证。</p>
+      </div>
+
+      <div class="meta-card">
+        <h3>Overall Quality Assessment 整体质量评估</h3>
+        <div class="confidence-bar">
+          <span class="conf-label">Low-Med</span>
+          <div class="conf-track"><div class="conf-fill" style="width:45%; background:var(--tier-low);"></div></div>
+        </div>
+        <p><strong>Composite Confidence: 45%</strong></p>
+        <p>Research quality is limited by language barriers, private company opacity, and limited English-language coverage. Korean-language sources provide adequate regional context but cannot substitute for verified financial data. Findings should be treated as informed estimates rather than definitive assessments.</p>
+        <p class="zh"><strong>综合置信度：45%</strong></p>
+        <p>研究质量受语言障碍、私营公司不透明和有限的英文报道限制。韩语来源提供充分的区域背景，但不能替代经过验证的财务数据。发现应被视为知情估计而非确定性评估。</p>
+      </div>
+    </section>
+
+    <!-- §7 DECISION LOG -->
+    <section id="log">
+      <div class="meta-card">
+        <h3>§7 Decision Log 决策日志</h3>
+        <p><strong>Key decisions made during research with rationale — 研究过程中做出的关键决策及理由</strong></p>
+      </div>
+
+      <div class="decision-log">
+        <strong>Decision 1: C-tier Classification despite Regional Importance</strong><br>
+        <em>尽管区域重要性仍定为C档的决定</em><br><br>
+        <strong>Decision:</strong> Assigned Song Chi-Hyung C-tier (2/5) despite Upbit's dominant 80% Korean market share.<br><br>
+        <strong>Rationale:</strong> Limited English-language coverage and private company status reduce verifiability. Regional monopoly significance is high for Asian crypto markets but low for global protocol development influence. C-tier reflects information quality constraints, not importance dismissal.<br><br>
+        <strong>Alternative considered:</strong> B-tier based on market share alone. Rejected because lack of audited financials and founder disclosure creates unacceptable confidence gap for higher tier assignment.<br><br>
+        <strong>Date:</strong> 2026-03-22
+      </div>
+
+      <div class="decision-log">
+        <strong>Decision 2: Focus on Kakao Distribution Moat as Primary Analysis Lens</strong><br>
+        <em>以Kakao分发护城河为主要分析视角的决定</em><br><br>
+        <strong>Decision:</strong> Prioritized Upbit's Kakao partnership as the central analytical framework over technology, fees, or regulatory compliance.<br><br>
+        <strong>Rationale:</strong> The Kakao integration represents the most distinctive and durable competitive advantage. Unlike Binance (global reach) or Coinbase (regulatory compliance), Upbit's moat is platform-embedded distribution that cannot be easily replicated by fee discounts or product improvements.<br><br>
+        <strong>Alternative considered:</strong> Regulatory compliance focus. Rejected because regulatory moats are more fragile (policy changes) and less distinctive (many exchanges pursue compliance).<br><br>
+        <strong>Date:</strong> 2026-03-22
+      </div>
+
+      <div class="decision-log">
+        <strong>Decision 3: Source Language Prioritization (Korean-first)</strong><br>
+        <em>来源语言优先顺序决定（韩语优先）</em><br><br>
+        <strong>Decision:</strong> Prioritized Korean-language sources (The Block Korea, Chosun Ilbo, Maeil Business News) over Western crypto media for Korean market data.<br><br>
+        <strong>Rationale:</strong> English-language coverage of Korean crypto markets is consistently inaccurate, particularly on regulatory specifics and market dynamics. Korean financial media has deeper institutional knowledge and access to FSC regulatory documents.<br><br>
+        <strong>Alternative considered:</strong> Equal weight to English and Korean sources. Rejected because English sources on Korean markets are secondary consumers of Korean media content, adding noise rather than independent verification.<br><br>
+        <strong>Date:</strong> 2026-03-22
+      </div>
+
+      <div class="decision-log">
+        <strong>Decision 4: Acknowledge Kimchi Premium as Anomaly, Not Pattern</strong><br>
+        <em>承认泡菜溢价为异常而非模式的决定</em><br><br>
+        <strong>Decision:</strong> Framed Kimchi premium as a statistically anomalous Korean-specific phenomenon rather than a generalizable market inefficiency pattern.<br><br>
+        <strong>Rationale:</strong> Korea's 30%+ retail crypto participation rate is unique globally. Capital controls + cultural factors + Kakao integration combine to create conditions not replicable elsewhere. Treating Kimchi premium as a general pattern would overfit to Korean-specific conditions.<br><br>
+        <strong>Alternative considered:</strong> Generalize Kimchi premium as evidence of crypto market segmentation. Rejected because generalization would mislead on other regional markets lacking Korea's specific conditions.<br><br>
+        <strong>Date:</strong> 2026-03-22
+      </div>
+
+      <div class="decision-log">
+        <strong>Decision 5: Defer Analysis of Founder Background</strong><br>
+        <em>推迟创始人背景分析的决定</em><br><br>
+        <strong>Decision:</strong> Limited coverage of Song Chi-Hyung's personal background, education, and prior ventures due to lack of verified English-language biographical data.<br><br>
+        <strong>Rationale:</strong> Available English sources on Song's personal history are sparse and unverified. Korean biographical sources exist but require translation and verification not available in current research phase. Founder analysis would be speculative without reliable primary sources.<br><br>
+        <strong>Alternative considered:</strong> Include whatever biographical data available in English. Rejected because inclusion of unverified biographical data would reduce overall research quality and introduce potential inaccuracies.<br><br>
+        <strong>Date:</strong> 2026-03-22
+      </div>
+    </section>
+
+    <footer style="margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border-subtle);font-size:0.72rem;color:var(--text-quaternary);">
+      <p>Metacognition report &middot; <a href="../blockchain_hub.html">Blockchain Hub</a> &middot; 2026-03-22</p>
+    </footer>
+  </main>
+</div>
+<script>
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+})();
+</script>
+</body>
+</html>

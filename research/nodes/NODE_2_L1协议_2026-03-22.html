@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>认知节点报告: L1协议 — Node 2</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="../blockchain_shared.css">
+  <style>
+/* === Node-specific extensions (keep under 80 lines) === */
+/* KPI Cards */
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+.kpi-card { background: var(--bg-surface); border-radius: var(--radius-md); padding: 1.25rem; border: 1px solid var(--border-subtle); }
+.kpi-label { font-size: 0.72rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.kpi-value { font-size: 1.5rem; font-weight: 680; font-feature-settings: 'tnum' 1; margin-bottom: 4px; }
+.kpi-change { font-size: 0.78rem; font-weight: 600; }
+.kpi-change.positive { color: #4caf50; }
+.kpi-subtitle { font-size: 0.72rem; color: var(--text-quaternary); margin-top: 4px; }
+/* Risk Matrix */
+.risk-matrix td:nth-child(2), .risk-matrix td:nth-child(3) { text-align: center; }
+.risk-high { color: #f44336; font-weight: 700; }
+.risk-medium { color: #ffc107; font-weight: 700; }
+.risk-low { color: #4caf50; font-weight: 700; }
+/* Callout Boxes */
+.callout { background: var(--bg-surface); border-radius: var(--radius-sm); padding: 1rem 1.25rem; margin: 1rem 0; border-left: 3px solid var(--accent); }
+.callout-title { font-size: 0.8rem; font-weight: 590; color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+.callout-body { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; }
+.callout.risk { border-left-color: #f44336; }
+.callout.risk .callout-title { color: #f44336; }
+.callout.insight { border-left-color: var(--knowledge); }
+.callout.insight .callout-title { color: var(--knowledge); }
+/* Phase Headers */
+.phase-header { display: flex; align-items: center; gap: 0.75rem; margin: 2.5rem 0 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle); }
+.phase-num { font-size: 0.72rem; font-weight: 700; color: var(--bg-base); background: var(--accent); padding: 3px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+.phase-title { font-size: 1.15rem; font-weight: 590; color: var(--text-primary); }
+/* Agent Cards */
+.agent-header { display: flex; align-items: center; gap: 0.75rem; margin: 2rem 0 1rem; }
+.agent-role-badge { font-size: 0.68rem; font-weight: 510; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+.agent-role-badge.giant { background: rgba(248,168,72,0.15); color: var(--accent); }
+.agent-role-badge.investor { background: rgba(91,155,213,0.15); color: var(--knowledge); }
+.agent-role-badge.contrarian { background: rgba(244,67,54,0.15); color: #f44336; }
+/* Triangulation */
+.consensus { color: #4caf50; font-weight: 600; }
+.disagreement { color: #f44336; font-weight: 600; }
+/* Provenance */
+.prov-badge { font-size: 0.65rem; padding: 1px 6px; border-radius: 3px; font-weight: 600; }
+.prov-primary { background: rgba(76,175,80,0.12); color: #4caf50; }
+.prov-industry { background: rgba(91,155,213,0.12); color: var(--knowledge); }
+.prov-media { background: rgba(248,168,72,0.12); color: var(--accent); }
+.prov-analysis { background: rgba(171,71,188,0.12); color: #ab47bc; }
+/* Chart Frames */
+.chart-frame { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); margin: 1rem 0; overflow: hidden; }
+.chart-frame-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-subtle); }
+.chart-frame-title { font-size: 0.82rem; font-weight: 590; color: var(--text-secondary); letter-spacing: 0.02em; }
+.chart-frame-body { padding: 0; }
+.chart-source { padding: 0.5rem 1rem; font-size: 0.7rem; color: var(--text-quaternary); border-top: 1px solid var(--border-subtle); }
+/* Embedded + Reading mode */
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+body.embedded .hamburger-btn { display: none !important; }
+body.embedded .sidebar-overlay { display: none !important; }
+.reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+.reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+.reading-mode .hamburger-btn { display: none !important; }
+.reading-mode .sidebar-overlay { display: none !important; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes sidebar">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ═══════════ LEFT SIDEBAR ═══════════ -->
+  <aside class="sidebar" id="sidebar">
+    <a class="back-link" href="../blockchain_hub.html" style="display:block;padding:0.4rem 0.5rem;margin-bottom:1rem;font-size:0.8rem;color:var(--accent);text-decoration:none;border:1px solid var(--accent-dim);border-radius:var(--radius-sm);">&#8592; Blockchain Hub</a>
+    <h4>目录导航 Contents</h4>
+    <nav><ul>
+      <li><a href="#metacognition" style="color:var(--accent);"><span class="toc-num">&#9733;</span>元思考<br><span class="zh-inline">Metacognition</span></a></li>
+      <li><a href="#phase0"><span class="toc-num">0</span>独立思考<br><span class="zh-inline">Independent Thinking</span></a></li>
+      <li><a href="#phase05"><span class="toc-num">0.5</span>策展搜索<br><span class="zh-inline">Curated Search</span></a></li>
+      <li><a href="#phase1"><span class="toc-num">1</span>认知代理人<br><span class="zh-inline">Cognitive Agents</span></a></li>
+      <li><a href="#vitalik"><span class="toc-num">1.1</span>Vitalik Buterin<br><span class="zh-inline">GIANT &middot; Ethereum</span></a></li>
+      <li><a href="#justin-sun"><span class="toc-num">1.2</span>Justin Sun 孙宇晨<br><span class="zh-inline">CONTRARIAN &middot; TRON</span></a></li>
+      <li><a href="#satoshi"><span class="toc-num">1.3</span>Satoshi Nakamoto 中本聪<br><span class="zh-inline">REFERENCE &middot; Bitcoin</span></a></li>
+      <li><a href="#phase2"><span class="toc-num">2</span>综合分析<br><span class="zh-inline">Synthesis</span></a></li>
+      <li><a href="#triangulation"><span class="toc-num">2.1</span>三角验证<br><span class="zh-inline">Triangulation</span></a></li>
+      <li><a href="#competitive"><span class="toc-num">2.2</span>竞争格局<br><span class="zh-inline">Competitive Landscape</span></a></li>
+      <li><a href="#risk-matrix"><span class="toc-num">2.3</span>风险矩阵<br><span class="zh-inline">Risk Matrix</span></a></li>
+      <li><a href="#node-judgment"><span class="toc-num">2.4</span>节点判断<br><span class="zh-inline">Node Judgment</span></a></li>
+      <li><a href="#trading"><span class="toc-num">2.5</span>交易视角<br><span class="zh-inline">Trading Perspective</span></a></li>
+      <li><a href="#kpi-dashboard"><span class="toc-num">3</span>KPI仪表盘<br><span class="zh-inline">Dashboard</span></a></li>
+      <li><a href="#provenance"><span class="toc-num">4</span>溯源表<br><span class="zh-inline">Provenance Table</span></a></li>
+    </ul></nav>
+    <h4>&#129504; 元思考 Metacognition</h4>
+    <nav><ul>
+      <li><a href="NODE_2_L1_metacognition.html" style="color:var(--accent);">元思考过程<br><span class="zh-inline">Thinking Log &rarr;</span></a></li>
+    </ul></nav>
+    <h4>价值链节点 Value Chain Nodes</h4>
+    <nav><ul>
+      <li><a href="NODE_1_挖矿与能源_2026-03-22.html">Node 1: 挖矿与能源<br><span class="zh-inline">Mining &amp; Energy</span></a></li>
+      <li><a href="NODE_2_L1协议_2026-03-22.html" class="active">Node 2: L1协议<br><span class="zh-inline">Layer 1 Protocols</span></a></li>
+      <li><a href="NODE_3_中间件与预言机_2026-03-22.html">Node 3: 中间件<br><span class="zh-inline">Middleware &amp; Oracles</span></a></li>
+      <li><a href="NODE_4_交易所与托管_2026-03-22.html">Node 4: 交易所<br><span class="zh-inline">Exchanges &amp; Custody</span></a></li>
+      <li><a href="NODE_5_稳定币与支付_2026-03-22.html">Node 5: 稳定币<br><span class="zh-inline">Stablecoins &amp; Payments</span></a></li>
+      <li><a href="NODE_6_RWA代币化_2026-03-22.html">Node 6: RWA<br><span class="zh-inline">Real World Assets</span></a></li>
+      <li><a href="NODE_7_DeFi应用层_2026-03-22.html">Node 7: DeFi<br><span class="zh-inline">DeFi Applications</span></a></li>
+      <li><a href="NODE_8_监管与政策_2026-03-22.html">Node 8: 监管<br><span class="zh-inline">Regulation &amp; Policy</span></a></li>
+    </ul></nav>
+  </aside>
+
+  <!-- ═══════════ MAIN CONTENT ═══════════ -->
+  <main class="main-content">
+
+    <header class="page-header">
+      <h1>认知节点报告: L1协议<span class="zh">Cognitive Node Report: Layer 1 Protocols</span></h1>
+      <div class="subtitle">Node 2 of 8 &middot; Phase 0&rarr;2 + 3 Cognitive Agents &middot; 2026-03-22</div>
+      <div class="badge-row">
+        <span class="badge badge-gold">BTC $1.2T</span>
+        <span class="badge badge-gold">ETH $400B</span>
+        <span class="badge badge-red">SOL $80B</span>
+        <span class="badge badge-cyan">TRON 3.3亿账户</span>
+        <span class="badge badge-gray">3 Agents</span>
+      </div>
+    </header>
+
+    <!-- ═══════════ METACOGNITIVE SUMMARY ═══════════ -->
+    <div class="priority-box" id="metacognition">
+      <h2 style="margin-top:0; font-size:1.1rem; font-weight:680; color:var(--accent);">&#9733; 元思考: 这份报告的核心发现<span class="zh" style="font-weight:400; font-size:0.85rem;"> Metacognitive Summary</span></h2>
+
+      <div style="margin:1rem 0; padding:1rem 1.25rem; background:var(--bg-overlay); border-radius:var(--radius-sm); border-left:3px solid var(--accent);">
+        <p style="font-size:0.92rem; font-weight:590; color:var(--text-primary); margin:0 0 0.75rem;">&#128270; 核心分析焦点</p>
+        <p style="color:var(--text-secondary); font-size:0.88rem; line-height:1.65; margin:0;">L1协议节点的真正问题<strong>不是"哪个链最快"</strong>&mdash;&mdash;而是L1协议正在分化为两种完全不同的物种：BTC作为"数字黄金"价值存储 vs ETH/SOL作为"世界计算机"智能合约平台。两种叙事对应完全不同的估值框架和交易逻辑。<br><br>
+        <strong>关键洞察：L1不是赢者通吃市场。</strong>BTC、ETH、SOL/TRON各自占据不同生态位&mdash;&mdash;就像生物生态系统中不同物种占据不同生态位。分析应按生态位估值而非互相比较。<strong>TPS不决定价值（BTC最慢但最大）。</strong></p>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin:1rem 0;">
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid #4caf50;">
+          <p style="font-size:0.72rem; font-weight:510; color:#4caf50; text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#10003; 三角验证共识</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;">BTC的数字黄金叙事最强（ETF验证+主权储备讨论）。ETH是DeFi/NFT基础设施层。多链共存而非赢者通吃。<strong>代币经济模型都趋向稀缺（通缩或固定上限）。</strong></p>
+        </div>
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid #f44336;">
+          <p style="font-size:0.72rem; font-weight:510; color:#f44336; text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#10007; 三角验证分歧</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;">ETH vs SOL性能路线之争。TRON的3.3亿账户是真实采用还是刷量？L1代币的估值框架（货币 vs 平台 vs 公用事业）。<strong>L1的核心价值定义三方完全不同。</strong></p>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin:1rem 0;">
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid var(--knowledge);">
+          <p style="font-size:0.72rem; font-weight:510; color:var(--knowledge); text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#128200; 交易指引</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;"><strong>BTC</strong>: 趋势交易（减半周期+ETF流入），月线MA10/50。<strong>ETH</strong>: 看Pectra升级催化剂，ETH/BTC比值处于历史低位=均值回归？<strong>SOL</strong>: 高beta适合波段（周线）。<strong>TRON</strong>: 不可交易（流动性/合规风险）。</p>
+        </div>
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid var(--accent);">
+          <p style="font-size:0.72rem; font-weight:510; color:var(--accent); text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#9888; 认知陷阱预警</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;"><strong>技术偏见</strong>: TPS不决定价值&mdash;&mdash;BTC最慢但最大。<strong>英文偏见</strong>: TRON在发展中市场的真实使用量被严重低估，西方加密媒体报道硅谷项目，忽视发展中市场支付通道。</p>
+        </div>
+      </div>
+
+      <details style="margin-top:0.75rem;">
+        <summary style="font-size:0.82rem; font-weight:510; color:var(--text-tertiary); cursor:pointer;">&#128214; 三位代理人一句话摘要</summary>
+        <div style="padding:0.75rem 0; font-size:0.82rem; color:var(--text-secondary); line-height:1.65;">
+          <p><strong>Vitalik Buterin (GIANT, 9/10)</strong>: "ETH应成为去中心化互联网的结算层" &mdash; L2扩展+blob数据+account abstraction=可用性拐点。ETH TVL ~$60B，市值~$400B。</p>
+          <p><strong>Justin Sun 孙宇晨 (CONTRARIAN, 5/10)</strong>: "用户不在乎去中心化，只在乎便宜和快" &mdash; TRON 0.1美分手续费+3秒确认。3.3亿累计账户，日均USDT转账$10B+。争议极大但数据不可忽视。</p>
+          <p><strong>Satoshi Nakamoto 中本聪 (REFERENCE, historical)</strong>: "A purely peer-to-peer version of electronic cash" &mdash; 但BTC已从"电子现金"演变为"数字黄金"，~100万BTC未动（~$90B+）。</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- ═══════════ PHASE 0: 独立思考 ═══════════ -->
+    <div class="section-header" id="phase0">
+      <h2>&sect;0 Phase 0: 独立思考<span class="zh">Independent Thinking (Before Search)</span></h2>
+    </div>
+
+    <h3>1. 节点解决什么问题？</h3>
+    <p>L1协议解决<strong>"去中心化信任"</strong>问题&mdash;&mdash;让陌生人在无中介环境下进行价值转移和程序执行。没有L1：没有BTC转账、没有DeFi、没有NFT、没有稳定币。L1是整个加密生态的<strong>"地基层"</strong>&mdash;&mdash;所有上层应用都建在L1之上。</p>
+
+    <h3>2. 供给约束？</h3>
+    <ul>
+      <li><strong>区块空间有限</strong>：BTC 7 TPS, ETH 15-30 TPS, SOL ~4000 TPS理论值</li>
+      <li><strong>L2扩展</strong>：ETH rollups（Arbitrum/Optimism/Base）和分片是主要扩容方案</li>
+      <li><strong>验证者/矿工资源</strong>：PoS需要质押资本，PoW需要算力和能源</li>
+      <li><strong>开发者供给</strong>：ETH月活开发者6000+仍然是最大池，SOL增长最快(+80% YoY)</li>
+    </ul>
+
+    <h3>3. 需求驱动力？</h3>
+    <ul>
+      <li><strong>DeFi TVL</strong>：~$200B+，智能合约平台的核心需求来源</li>
+      <li><strong>稳定币流通</strong>：$200B+（USDT/USDC），L1是稳定币的结算层</li>
+      <li><strong>NFT回暖</strong>：数字资产发行和交易需要L1基础设施</li>
+      <li><strong>RWA代币化起步</strong>：传统资产上链（房产、国债、股票）需要L1</li>
+      <li><strong>机构化趋势</strong>：BTC ETF验证+ETH ETF期待+主权储备讨论</li>
+    </ul>
+
+    <h3>4. 当前供需状态？</h3>
+    <p>BTC后减半周期看涨。ETH面临SOL竞争压力（DEX交易量、新项目首选链）。SOL在零售端崛起但停机历史引发信任问题。TRON在发展中市场USDT转账领域静默主导&mdash;&mdash;<strong>巴西90%加密活动是TRON-USDT美元储蓄</strong>。L1之间不是零和博弈，而是各自占据不同生态位。</p>
+
+    <!-- ═══════════ PHASE 0.5: 策展搜索 ═══════════ -->
+    <div class="section-header" id="phase05">
+      <h2>&sect;1 Phase 0.5: 策展搜索<span class="zh">Curated Search</span></h2>
+    </div>
+
+    <h3>最佳分析源</h3>
+    <figure>
+      <table>
+        <thead>
+          <tr><th>Source 来源</th><th>Type 类型</th><th>Value 价值</th><th>Credibility 可信度</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Messari</strong></td><td>Industry research</td><td>L1估值框架、协议经济学</td><td><span class="tier-high">Very High</span></td></tr>
+          <tr><td><strong>DefiLlama</strong></td><td>On-chain data</td><td>各链TVL、DEX量、协议对比</td><td><span class="tier-high">Very High</span></td></tr>
+          <tr><td><strong>Dune Analytics</strong></td><td>On-chain data</td><td>日活地址、交易量、gas费用</td><td><span class="tier-high">Very High</span></td></tr>
+          <tr><td><strong>Electric Capital Developer Report</strong></td><td>Industry report</td><td>各链开发者活动、增长趋势</td><td><span class="tier-high">Very High</span></td></tr>
+          <tr><td><strong>Vitalik's Blog</strong></td><td>Primary source</td><td>ETH路线图、设计权衡</td><td><span class="tier-high">Primary</span></td></tr>
+          <tr><td><strong>TRON DAO Reports</strong></td><td>Industry data</td><td>TRON账户数据、交易量</td><td><span class="tier-medium-high">High (verify)</span></td></tr>
+          <tr><td><strong>Chainalysis Geography of Crypto</strong></td><td>Industry report</td><td>发展中市场加密采用</td><td><span class="tier-high">Very High</span></td></tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <h3>Key Curated Findings</h3>
+
+    <div class="callout">
+      <div class="callout-title">CURATED-1 &mdash; BTC ETF机构化拐点</div>
+      <div class="callout-body">BTC ETF累计净流入$350B+，标志着加密资产从零售投机向机构配置的转折点。BlackRock IBIT成为史上增长最快的ETF。<strong>ETF验证了BTC作为"数字黄金"的叙事</strong>&mdash;&mdash;主权基金和养老金开始将BTC纳入资产配置。<br><small class="zh-inline">Source: Bloomberg ETF data, 2024-2026</small></div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">CURATED-2 &mdash; ETH Pectra升级</div>
+      <div class="callout-body">ETH Pectra升级(2025)引入<strong>account abstraction</strong>（EIP-7702, 降低用户门槛）和<strong>blob扩容</strong>（降低L2成本）。这是The Merge后最重要的升级。如果成功执行，ETH用户体验将接近Web2水平。<br><small class="zh-inline">Source: Vitalik's blog, Ethereum Foundation, 2025</small></div>
+    </div>
+
+    <div class="callout risk">
+      <div class="callout-title">CURATED-3 &mdash; SOL日活超ETH（含水分）</div>
+      <div class="callout-body">SOL日活地址超过ETH，但<strong>大量bot交易</strong>（MEV机器人、套利bot）推高了数据。真实用户活跃度可能被高估2-3倍。SOL的零售体验确实优于ETH（低gas、快确认），但网络停机历史（多次中断）仍是信任隐患。<br><small class="zh-inline">Source: Dune Analytics, 2026-03</small></div>
+    </div>
+
+    <div class="callout insight">
+      <div class="callout-title">CURATED-4 &mdash; TRON发展中市场隐形主导</div>
+      <div class="callout-body">TRON 3.3亿累计账户，日均USDT转账$10B+。<strong>尼日利亚$921亿年加密交易量中大部分通过TRON-USDT</strong>。巴西90%加密活动是TRON-USDT美元储蓄。西方分析把TRON当笑话&mdash;&mdash;但330M账户和$10B+日均转账是真实使用量。<br><small class="zh-inline">Source: Chainalysis Geography of Crypto, TRON DAO reports, 2025-2026</small></div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">CURATED-5 &mdash; 开发者活动分布</div>
+      <div class="callout-body">ETH仍然拥有最大的开发者社区（月活开发者6000+），SOL增长最快(+80% YoY)。开发者活动是L1长期价值的领先指标&mdash;&mdash;有开发者的地方就有应用，有应用的地方就有用户和TVL。<br><small class="zh-inline">Source: Electric Capital Developer Report, 2025</small></div>
+    </div>
+
+    <!-- ═══════════ PHASE 1: 认知代理人 ═══════════ -->
+    <div class="section-header" id="phase1">
+      <h2>&sect;2 Phase 1: 认知代理人<span class="zh">Cognitive Agents</span></h2>
+    </div>
+
+    <!-- ─── Agent 1: Vitalik Buterin ─── -->
+    <div id="vitalik">
+      <div class="agent-header">
+        <span class="agent-role-badge giant">GIANT</span>
+        <h3>Vitalik Buterin &mdash; Ethereum Creator</h3>
+      </div>
+
+      <p><strong>选择理由</strong>: ETH创始人，公共知识分子，区块链领域最有影响力的思想家。ETH市值~$400B，DeFi/NFT基础设施层。Vitalik的透明度在CEO/创始人中极为罕见&mdash;&mdash;定期发表长文讨论问题和权衡。<strong>可信度: 9/10</strong>（技术判断和行动记录极强，但有ETH利益偏差）。</p>
+
+      <h4>行动证据（重于言论）</h4>
+      <ol>
+        <li><strong>The Merge (2022)</strong>: ETH从PoW成功转PoS&mdash;&mdash;史上最大加密基础设施升级，无停机完成。证明技术执行能力。</li>
+        <li><strong>EIP-1559燃烧机制</strong>: ETH变通缩资产&mdash;&mdash;部分gas费永久销毁，改变代币经济模型。</li>
+        <li><strong>Rollup-centric roadmap</strong>: 放弃分片选择L2路线，承认ETH L1不追求速度而是安全+去中心化。战略清晰。</li>
+        <li><strong>Account abstraction推动</strong>: EIP-7702降低用户门槛，向"无需管理私钥"的用户体验进化。</li>
+        <li><strong>定期长文分析</strong>: 透明讨论ETH的问题、权衡、路线图。信息供给极其充足。</li>
+      </ol>
+
+      <h4>核心判断</h4>
+      <blockquote>"ETH应成为去中心化互联网的结算层"<span class="zh">L2扩展+blob数据+account abstraction=可用性拐点</span></blockquote>
+      <ul>
+        <li>ETH不追求最快，而是<strong>最安全+最去中心化</strong>的结算层</li>
+        <li>L2承担速度和用户体验，L1承担最终结算和数据可用性</li>
+        <li>ETH TVL ~$60B (DeFi主导), 市值~$400B&mdash;&mdash;生态深度是最大护城河</li>
+      </ul>
+
+      <details>
+        <summary>市场份额与估值详情</summary>
+        <p><strong>市值</strong>: ~$400B。TVL: ~$60B (DeFi主导)。月活开发者: 6000+。</p>
+        <p><strong>竞争压力</strong>: SOL在DEX交易量、新项目首选链上挑战ETH。ETH/BTC比值处于历史低位(~0.04)。</p>
+      </details>
+    </div>
+
+    <hr>
+
+    <!-- ─── Agent 2: Justin Sun 孙宇晨 ─── -->
+    <div id="justin-sun">
+      <div class="agent-header">
+        <span class="agent-role-badge contrarian">CONTRARIAN</span>
+        <h3>Justin Sun 孙宇晨 &mdash; TRON Founder</h3>
+      </div>
+
+      <p><strong>选择理由</strong>: TRON创始人，3.3亿累计账户，发展中市场隐形巨人。争议极大但用户数据不可忽视。西方加密媒体把TRON当笑话或骗局&mdash;&mdash;但330M账户和$10B+日均USDT转账是真实使用量。<strong>可信度: 5/10</strong>（用户数据真实但公司治理和合规风险极高，SEC诉讼进行中）。</p>
+
+      <h4>行动证据</h4>
+      <ol>
+        <li><strong>TRON-USDT成为发展中市场事实标准</strong>: 尼日利亚$921亿年交易量，巴西90%加密活动是TRON-USDT美元储蓄。0.1美分手续费+3秒确认。</li>
+        <li><strong>激进扩张</strong>: 收购BitTorrent、Poloniex&mdash;&mdash;通过收购而非有机增长扩大版图。</li>
+        <li><strong>SEC诉讼</strong>: 合规风险极高&mdash;&mdash;但TRON网络本身作为去中心化协议继续运行。</li>
+        <li><strong>日均USDT转账$10B+</strong>: 在支付通道领域，TRON的实际使用量超过ETH。</li>
+        <li><strong>21超级代表机制</strong>: 高度中心化的验证模型，换取速度和低成本。</li>
+      </ol>
+
+      <h4>核心判断</h4>
+      <blockquote>"用户不在乎去中心化，只在乎便宜和快"<span class="zh">TRON 0.1美分手续费+3秒确认 = 发展中市场事实标准支付通道</span></blockquote>
+      <ul>
+        <li>TRON在支付通道领域的<strong>实际采用</strong>远超西方认知</li>
+        <li>3.3亿累计账户&mdash;&mdash;但去中心化程度极低（21超级代表）</li>
+        <li>市值仅$12B&mdash;&mdash;如果用户数据真实，估值被严重低估；如果刷量，则虚高</li>
+      </ul>
+
+      <details>
+        <summary>市场份额与数据</summary>
+        <p><strong>账户</strong>: 3.3亿累计。日均USDT转账: $10B+。市值: ~$12B。</p>
+        <p><strong>风险</strong>: SEC诉讼、中心化治理、创始人争议、合规不确定性。</p>
+      </details>
+    </div>
+
+    <hr>
+
+    <!-- ─── Agent 3: Satoshi Nakamoto ─── -->
+    <div id="satoshi">
+      <div class="agent-header">
+        <span class="agent-role-badge investor">REFERENCE</span>
+        <h3>Satoshi Nakamoto 中本聪 &mdash; Bitcoin Creator</h3>
+      </div>
+
+      <p><strong>选择理由</strong>: BTC创造者，身份未知，仅历史档案价值。白皮书定义了整个行业。~100万BTC未动（~$90B+）&mdash;&mdash;最大的"diamond hands"。2010年底退出，完全匿名&mdash;&mdash;无任何个人利益暴露。<strong>可信度: historical archive only</strong>（无法更新判断，但原始设计影响深远）。</p>
+
+      <h4>行动证据</h4>
+      <ol>
+        <li><strong>2008白皮书+2009创世区块</strong>: 定义了去中心化电子现金的概念和实现。</li>
+        <li><strong>~100万BTC未动（~$90B+）</strong>: 最大的"diamond hands"&mdash;&mdash;从未卖出一个BTC。</li>
+        <li><strong>2010年底退出</strong>: 完全匿名，无个人利益暴露&mdash;&mdash;这本身就是去中心化的终极证明。</li>
+        <li><strong>设计减半机制</strong>: 每4年区块奖励减半&mdash;&mdash;最成功的货币政策实验。2100万上限是数学确定的。</li>
+      </ol>
+
+      <h4>核心判断</h4>
+      <blockquote>"A purely peer-to-peer version of electronic cash"<span class="zh">但BTC已从"电子现金"演变为"数字黄金"&mdash;&mdash;这是否背离了原始设计意图？</span></blockquote>
+      <ul>
+        <li>白皮书标题是"electronic cash"&mdash;&mdash;但BTC的7 TPS和高手续费使其不适合日常支付</li>
+        <li>BTC演变为<strong>"数字黄金"价值存储</strong>&mdash;&mdash;这可能背离原始设计但获得了市场验证</li>
+        <li>减半机制+2100万上限=<strong>最强硬的货币政策</strong>，任何人无法更改</li>
+      </ul>
+
+      <details>
+        <summary>历史影响</summary>
+        <p><strong>BTC市值</strong>: ~$1.2T。白皮书发表: 2008-10-31。创世区块: 2009-01-03。</p>
+        <p><strong>遗产</strong>: 整个$2T+加密行业建立在Satoshi的原始设计之上。身份之谜是加密文化的核心叙事之一。</p>
+      </details>
+    </div>
+
+    <!-- ═══════════ PHASE 2: 综合分析 ═══════════ -->
+    <div class="section-header" id="phase2">
+      <h2>&sect;3 Phase 2: 综合分析<span class="zh">Synthesis</span></h2>
+    </div>
+
+    <!-- §3.1 Triangulation -->
+    <div id="triangulation">
+      <h3>&sect;3.1 三角验证: 行动 vs 言论 vs 数据</h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Dimension 维度</th><th>Vitalik (ETH)</th><th>Justin Sun (TRON)</th><th>Satoshi (BTC)</th><th>Consistency 一致性</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>L1的核心价值</strong></td><td>去中心化+可编程性</td><td>便宜+快速+用户数</td><td>去中心化+稀缺性</td><td><span class="disagreement">&#10007; 三种不同定义</span></td></tr>
+            <tr><td><strong>扩展路线</strong></td><td>L2 rollup</td><td>高TPS主链</td><td>Layer 2 (Lightning)</td><td><span class="disagreement">&#10007; 分歧</span></td></tr>
+            <tr><td><strong>去中心化优先级</strong></td><td>最高（宁可慢）</td><td>低（21超级代表）</td><td>最高（PoW设计）</td><td><span class="disagreement">&#10007; 分歧</span></td></tr>
+            <tr><td><strong>代币经济模型</strong></td><td>通缩(EIP-1559)</td><td>通缩(燃烧)</td><td>固定上限2100万</td><td><span class="consensus">&#10003; 都趋向稀缺</span></td></tr>
+            <tr><td><strong>实际使用场景</strong></td><td>DeFi/NFT/L2</td><td>USDT转账/支付</td><td>价值存储/ETF</td><td><span class="consensus">&#10003; 各占一个生态位</span></td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <div class="callout insight">
+        <div class="callout-title">Key Insight 关键洞察</div>
+        <div class="callout-body">L1不是赢者通吃市场。BTC、ETH、SOL/TRON各自占据不同生态位&mdash;&mdash;就像生物生态系统中不同物种。<strong>BTC=数字黄金（commodity），ETH=可编程结算层（equity-like），TRON=发展中市场支付通道（utility）</strong>。分析应按生态位估值而非互相比较。代币经济模型的共识（都趋向稀缺）是值得注意的一致性信号。</div>
+      </div>
+    </div>
+
+    <!-- §3.2 Competition -->
+    <div id="competitive">
+      <h3>&sect;3.2 竞争格局<span class="zh">Competitive Landscape</span></h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Player</th><th>Type</th><th>Market Cap</th><th>Strength 优势</th><th>Weakness 劣势</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>BTC</strong></td><td>价值存储</td><td>$1.2T</td><td>最强共识/ETF/主权储备讨论</td><td>不可编程/慢(7 TPS)</td></tr>
+            <tr><td><strong>ETH</strong></td><td>智能合约平台</td><td>$400B</td><td>最大DeFi生态/开发者(6000+)</td><td>高gas/L2碎片化</td></tr>
+            <tr><td><strong>SOL</strong></td><td>高性能链</td><td>$80B</td><td>速度/零售体验/开发者增长</td><td>停机历史/中心化倾向</td></tr>
+            <tr><td><strong>TRON</strong></td><td>支付通道</td><td>$12B</td><td>3.3亿用户/低费/发展中市场</td><td>中心化/合规风险/SEC</td></tr>
+            <tr><td><strong>AVAX</strong></td><td>企业级链</td><td>$15B</td><td>子网定制/机构合作</td><td>增长停滞/用户少</td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </div>
+
+    <!-- §3.3 Risk Matrix -->
+    <div id="risk-matrix">
+      <h3>&sect;3.3 风险矩阵<span class="zh">Risk Matrix</span></h3>
+
+      <figure class="table-responsive">
+        <table class="risk-matrix">
+          <thead>
+            <tr><th>Risk 风险</th><th>Probability</th><th>Impact</th><th>Timeframe</th><th>Monitoring 监控指标</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>BTC价格暴跌</strong></td><td><span class="risk-medium">Medium</span></td><td><span class="risk-high">High</span></td><td>随时</td><td>BTC价格/ETF流量</td></tr>
+            <tr><td><strong>ETH被SOL超越(flippening论)</strong></td><td><span class="risk-low">Low</span></td><td><span class="risk-medium">Medium</span></td><td>2-3年</td><td>DEX量/开发者活动/TVL</td></tr>
+            <tr><td><strong>TRON监管执法(SEC)</strong></td><td><span class="risk-medium">Medium</span></td><td><span class="risk-high">High (对TRON)</span></td><td>1-2年</td><td>SEC诉讼进展</td></tr>
+            <tr><td><strong>量子计算威胁</strong></td><td><span class="risk-low">Very Low</span></td><td><span class="risk-high">Extreme</span></td><td>10年+</td><td>量子计算进展</td></tr>
+            <tr><td><strong>L1竞争格局重新洗牌</strong></td><td><span class="risk-medium">Medium</span></td><td><span class="risk-medium">Medium</span></td><td>2-3年</td><td>新链TVL增长/开发者迁移</td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </div>
+
+    <!-- §3.4 Node Judgment -->
+    <div id="node-judgment">
+      <h3>&sect;3.4 节点判断<span class="zh">Node Judgment</span></h3>
+
+      <div class="callout" style="border-left-color: var(--knowledge);">
+        <div class="callout-body" style="font-size: 0.92rem;">
+          <p><strong>供需状态</strong>: BTC后减半期（历史最佳窗口）。ETH处于竞争压力期但生态最深。SOL零售热潮但可持续性存疑。</p>
+          <p><strong>周期位置</strong>: BTC减半后12-18月=黄金窗口。ETH/SOL跟随BTC周期但beta更高。</p>
+          <p><strong>最大确定性</strong>: BTC作为数字黄金的叙事已被ETF验证&mdash;&mdash;$350B+净流入是真金白银的背书。</p>
+          <p><strong>最大不确定性</strong>: ETH vs SOL的智能合约平台之争&mdash;&mdash;哪个捕获更多价值？L2是否会吸干ETH L1的价值？</p>
+          <p style="margin-bottom:0;"><strong>投资启示</strong>: BTC是趋势交易核心持仓。ETH看升级催化剂（Pectra）。SOL是高beta波段标的。TRON不可交易（流动性/合规风险）。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- §3.5 Trading -->
+    <div id="trading">
+      <h3>&sect;3.5 交易视角<span class="zh">Trading Perspective</span></h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Dimension 维度</th><th>BTC</th><th>ETH</th><th>SOL</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>市值</strong></td><td>$1.2T</td><td>$400B</td><td>$80B</td></tr>
+            <tr><td><strong>周期位置</strong></td><td>减半后看涨</td><td>竞争压力期</td><td>零售热潮</td></tr>
+            <tr><td><strong>Beta</strong></td><td>1x (基准)</td><td>~1.3x</td><td>~2-3x</td></tr>
+            <tr><td><strong>适合风格</strong></td><td>趋势(月线)</td><td>事件驱动(升级)</td><td>波段(周线)</td></tr>
+            <tr><td><strong>催化剂</strong></td><td>ETF流入+减半周期</td><td>Pectra升级</td><td>生态扩张/新项目</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <div class="callout">
+        <div class="callout-title">Luke交易视角</div>
+        <div class="callout-body">
+          <p><strong>BTC</strong>: 核心持仓。减半周期+ETF制度化=趋势交易最佳标的。月线MA10/50看趋势。减半后12-18月窗口是历史验证最强的周期性信号。</p>
+          <p><strong>ETH</strong>: 等催化剂。Pectra升级成功+L2 TVL增长可能触发补涨。ETH/BTC比值处于历史低位(~0.04)=均值回归机会？但需要具体触发事件。</p>
+          <p style="margin-bottom:0;"><strong>SOL</strong>: 高beta波段。零售情绪驱动，适合短周期操作（周线级别）。注意停机风险和bot交易水分。不适合趋势交易&mdash;&mdash;波动太大。</p>
+        </div>
+      </div>
+    </div>
+
+    <hr style="border:none; border-top:1px solid var(--border-subtle); margin:2.5rem 0;">
+
+    <!-- ═══════════ KPI DASHBOARD ═══════════ -->
+    <div class="section-header" id="kpi-dashboard">
+      <h2>&sect;4 KPI仪表盘<span class="zh">KPI Dashboard</span></h2>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">BTC Market Cap</div>
+        <div class="kpi-value">~$1.2T</div>
+        <div class="kpi-change positive">+X% YTD</div>
+        <div class="kpi-subtitle">数字黄金 · ETF验证</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">ETH TVL</div>
+        <div class="kpi-value">~$60B</div>
+        <div class="kpi-change positive">DeFi dominant</div>
+        <div class="kpi-subtitle">最大智能合约生态</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">SOL Daily Active</div>
+        <div class="kpi-value">~1.5M</div>
+        <div class="kpi-change positive">addresses</div>
+        <div class="kpi-subtitle">含bot交易水分</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">TRON Accounts</div>
+        <div class="kpi-value">3.3亿</div>
+        <div class="kpi-change">cumulative</div>
+        <div class="kpi-subtitle">发展中市场主导</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">ETH/BTC Ratio</div>
+        <div class="kpi-value">~0.04</div>
+        <div class="kpi-change" style="color:#f44336;">historic low</div>
+        <div class="kpi-subtitle">均值回归机会？</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">L1 Developer Activity</div>
+        <div class="kpi-value">ETH 6000+</div>
+        <div class="kpi-change positive">/month</div>
+        <div class="kpi-subtitle">SOL +80% YoY增长</div>
+      </div>
+    </div>
+
+    <!-- ═══════════ PROVENANCE TABLE ═══════════ -->
+    <div class="section-header" id="provenance">
+      <h2>&sect;5 来源溯源<span class="zh">Provenance Table</span></h2>
+    </div>
+
+    <figure class="table-responsive">
+      <table>
+        <thead>
+          <tr><th>Claim 判断</th><th>Source 来源</th><th>Type</th><th>Confidence</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>BTC ETF净流入$350B+</td><td>Bloomberg ETF data</td><td><span class="prov-badge prov-primary">PRIMARY</span></td><td>9/10</td></tr>
+          <tr><td>ETH TVL ~$60B</td><td>DefiLlama 2026-03</td><td><span class="prov-badge prov-primary">PRIMARY</span></td><td>9/10</td></tr>
+          <tr><td>TRON 3.3亿账户</td><td>TRON DAO report</td><td><span class="prov-badge prov-industry">INDUSTRY</span></td><td>7/10</td></tr>
+          <tr><td>SOL日活地址>ETH</td><td>Dune Analytics</td><td><span class="prov-badge prov-primary">PRIMARY</span></td><td>8/10</td></tr>
+          <tr><td>尼日利亚$921亿交易量</td><td>Chainalysis Geography of Crypto</td><td><span class="prov-badge prov-industry">INDUSTRY</span></td><td>7/10</td></tr>
+          <tr><td>ETH开发者6000+/月</td><td>Electric Capital 2025</td><td><span class="prov-badge prov-industry">INDUSTRY</span></td><td>8/10</td></tr>
+          <tr><td>BTC 2100万上限</td><td>Bitcoin protocol (code)</td><td><span class="prov-badge prov-primary">PRIMARY</span></td><td>10/10</td></tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <!-- Footer -->
+    <footer style="margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--border-subtle); font-size:0.72rem; color:var(--text-quaternary); text-align:center;">
+      <p>Blockchain Node 2: L1 Protocols &middot; Part of Cognitive Observatory V3 &middot; 2026-03-22</p>
+      <p><a href="NODE_2_L1_metacognition.html">&#129504; 元思考过程</a> &nbsp;|&nbsp; <a href="../blockchain_hub.html">&larr; Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ═══════════ RIGHT NOTES SIDEBAR ═══════════ -->
+  <aside class="notes-sidebar" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&#10005;</button>
+      <h4>&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+
+    <!-- ── META NOTES ── -->
+
+    <div class="anno meta-note" data-section="phase0" id="m1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">三种L1 = 三种资产类别</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>BTC是数字大宗商品(commodity)，ETH是平台代币(equity-like)，TRON是支付通道(utility)。</strong>不能用同一个框架估值。BTC用稀缺性+供需估值（类似黄金），ETH用现金流/TVL估值（类似平台股票），TRON用交易量/用户数估值（类似支付网络）。</p>
+        <p><strong>Implication:</strong> Most crypto analysis compares L1s on a single axis (TPS, TVL, market cap). This is like comparing gold, Apple stock, and Visa on the same metric. The frameworks must be different because the asset classes are different.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="vitalik" id="m2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Vitalik的透明度是双刃剑</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Vitalik定期发表长文讨论ETH的问题和权衡，这在CEO/创始人中极为罕见。</strong>好处是信息充足&mdash;&mdash;投资者和开发者可以清楚了解ETH的方向和挑战。坏处是每篇文章都可能被市场解读为"ETH有问题"。</p>
+        <p><strong>Compare with Satoshi:</strong> Complete absence. No updates, no commentary, no direction. Yet BTC thrives. This suggests that for a "digital gold" asset, silence is actually optimal. For a "platform" asset like ETH, the CEO/founder communication matters more&mdash;which makes Vitalik's transparency both a strength and a vulnerability.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="justin-sun" id="m3">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">TRON的不可见性</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Western analysis treats TRON as a joke or scam.</strong> But 330M accounts and $10B+ daily USDT transfers are real usage. The bias is structural: English-language crypto media covers Silicon Valley projects, not developing-world payment rails.</p>
+        <p><strong>Nigeria's $921B annual crypto volume is mostly TRON-USDT.</strong> Brazil's 90% of crypto activity is TRON-USDT dollar savings. These are not speculative traders&mdash;they are people using crypto for real economic survival (inflation hedging, cross-border remittance). This is the most "real" use case in all of crypto, and it's almost invisible in Western analysis.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="triangulation" id="m4">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">生态位理论 vs 赢者通吃</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Most crypto analysis assumes winner-take-all.</strong> Reality is more like biological ecology: different species occupy different niches. BTC = digital gold, ETH = programmable settlement, SOL = retail experience, TRON = developing-world payments.</p>
+        <p><strong>The niche model has important investment implications:</strong> Instead of asking "which L1 will win?", ask "which niche is growing fastest?" and "which L1 has the strongest position in its niche?" BTC's niche (store of value) is being validated by institutional adoption. ETH's niche (DeFi/settlement) faces competition from SOL. TRON's niche (payments) is growing silently in the developing world.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="trading" id="m5">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">交易员适配度</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>For trend trading, BTC is the only L1 with clean enough trends</strong> (monthly timeframe, halving cycle). ETH and SOL are too noisy for trend following&mdash;better suited to event-driven or swing strategies.</p>
+        <p><strong>BTC's halving cycle is the strongest recurring pattern in crypto:</strong> Every halving (2012, 2016, 2020, 2024) has been followed by a 12-18 month bull run. This is the kind of structural, repeatable pattern that trend traders can build a system around. ETH's patterns are driven by upgrades (unpredictable timing) and SOL's by retail sentiment (noisy). For Luke's style, BTC is the core holding; ETH is a tactical overlay; SOL is optional high-beta.</p>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+(function() {
+  // 1. Sidebar toggle
+  var hamburger = document.getElementById('hamburgerBtn');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('sidebarOverlay');
+  hamburger.addEventListener('click', function() { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', function() { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+  sidebar.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() { if (window.innerWidth <= 900) { sidebar.classList.remove('open'); overlay.classList.remove('open'); } });
+  });
+
+  // 2. Note toggle
+  window.toggleNote = function(head) { head.parentElement.classList.toggle('open'); };
+
+  // 3. Right sidebar toggle
+  var notesSidebarEl = document.getElementById('notesSidebar');
+  var notesToggleBtn = document.getElementById('notesToggleBtn');
+  var notesOverlayEl = document.getElementById('notesOverlay');
+  var notesCloseBtn = document.getElementById('notesCloseBtn');
+  function toggleNotesSidebar() {
+    var willClose = !notesSidebarEl.classList.contains('ns-closed');
+    notesSidebarEl.classList.toggle('ns-closed', willClose);
+    notesToggleBtn.style.display = willClose ? 'flex' : 'none';
+    notesOverlayEl.classList.toggle('open', !willClose);
+  }
+  if (notesToggleBtn) notesToggleBtn.addEventListener('click', toggleNotesSidebar);
+  if (notesOverlayEl) notesOverlayEl.addEventListener('click', toggleNotesSidebar);
+  if (notesCloseBtn) notesCloseBtn.addEventListener('click', toggleNotesSidebar);
+
+  // 4. Resize handler
+  if (window.innerWidth > 1200) {
+    notesSidebarEl.classList.remove('ns-closed');
+    notesToggleBtn.style.display = 'none';
+  } else {
+    notesSidebarEl.classList.add('ns-closed');
+    notesToggleBtn.style.display = 'flex';
+  }
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 1200) { notesSidebarEl.classList.remove('ns-closed'); notesToggleBtn.style.display = 'none'; notesOverlayEl.classList.remove('open'); }
+  });
+
+  // 5. Expand all notes on load
+  document.querySelectorAll('.anno').forEach(function(n) { n.classList.add('open'); });
+
+  // 6. Active TOC
+  var navLinks = document.querySelectorAll('.sidebar nav ul li a[href^="#"]');
+  var tocObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        navLinks.forEach(function(link) { link.classList.remove('active'); if (link.getAttribute('href') === '#' + entry.target.id) link.classList.add('active'); });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  document.querySelectorAll('.section-header[id], [id="vitalik"], [id="justin-sun"], [id="satoshi"], [id="triangulation"], [id="competitive"], [id="risk-matrix"], [id="node-judgment"], [id="trading"]').forEach(function(s) { tocObserver.observe(s); });
+})();
+</script>
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+</body>
+</html>

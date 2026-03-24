@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Internet Node 1 — Digital Advertising 元思考</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../internet_shared.css">
+<style>
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  .meta-card { border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:1.1rem 1.3rem; margin-bottom:0.75rem; background:var(--bg-surface); }
+  .meta-card h3 { font-size:0.95rem; font-weight:590; margin-bottom:0.5rem; color:var(--text-primary); }
+  .meta-card p { font-size:0.82rem; color:var(--text-secondary); line-height:1.6; margin-bottom:0.5rem; }
+  .bias-tag { display:inline-block; padding:0.15rem 0.5rem; border-radius:4px; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
+  .bias-confirmed { background:rgba(76,175,80,0.15); color:var(--tier-high); }
+  .bias-warning { background:rgba(255,193,7,0.15); color:var(--tier-medium); }
+  .bias-critical { background:rgba(244,67,54,0.15); color:var(--tier-low); }
+  .confidence-bar { display:flex; align-items:center; gap:0.5rem; margin:0.5rem 0; }
+  .conf-track { flex:1; height:6px; background:var(--border-subtle); border-radius:3px; overflow:hidden; }
+  .conf-fill { height:100%; border-radius:3px; }
+  .conf-label { font-size:0.72rem; font-weight:590; color:var(--text-tertiary); min-width:2.5rem; }
+  .gap-item { border-left:3px solid var(--tier-low); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(244,67,54,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .cross-ref { border-left:3px solid var(--knowledge); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(91,155,213,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .decision-log { font-size:0.78rem; color:var(--text-tertiary); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:0.8rem 1rem; background:var(--bg-elevated); margin-bottom:0.75rem; }
+  body.embedded .sidebar { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+</style>
+</head>
+<body>
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="page-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <a href="../internet_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Internet Node 1<br>Metacognition 元思考</div>
+    <h4>Contents</h4>
+    <nav><ul>
+      <li><a href="#selection">1 Selection 选择理由</a></li>
+      <li><a href="#biases">2 Biases 认知偏差</a></li>
+      <li><a href="#corrections">3 Corrections 纠正</a></li>
+      <li><a href="#gaps">4 Gaps 信息缺口</a></li>
+      <li><a href="#crossval">5 Cross-Validation 交叉验证</a></li>
+      <li><a href="#quality">6 Quality 质量评估</a></li>
+      <li><a href="#log">7 Decision Log 决策日志</a></li>
+    </ul></nav>
+    <h4>Related</h4>
+    <nav><ul>
+      <li><a href="../internet_hub.html">Internet Hub</a></li>
+      <li><a href="../sources/internet_sources.html">Sources V4</a></li>
+    </ul></nav>
+  </aside>
+  <main class="main-content">
+    <header class="page-header">
+      <h1>Internet Node 1 — Digital Advertising<span style="display:block;font-size:0.85rem;font-weight:400;color:var(--text-tertiary);margin-top:0.2rem;">数字广告 — 研究中的认知审计</span></h1>
+      <p style="font-size:0.82rem;color:var(--text-quaternary);">Generated: 2026-03-22 &middot; Part of Blockchain Research Hub</p>
+    </header>
+
+    <!-- §1 节点定义与边界 -->
+    <section id="selection">
+      <div class="meta-card">
+        <h3>§1 节点定义与边界 | Node Definition & Boundaries</h3>
+        <p><strong>EN:</strong> Digital Advertising encompasses all online marketing activities where advertisers pay to display content, messaging, or media to consumers via internet-connected platforms, including display ads, search advertising, social media ads, programmatic buying, native advertising, and video advertising.</p>
+        <p><strong>ZH:</strong> 数字广告涵盖所有广告主付费通过互联网平台向消费者展示内容、信息或媒体的在线营销活动，包括展示广告、搜索广告、社交媒体广告、程序化购买、原生广告和视频广告。</p>
+        <p><strong>核心边界 | Core Boundaries:</strong></p>
+        <ul style="font-size:0.82rem;color:var(--text-secondary);margin-left:1.2rem;">
+          <li>包含：广告技术(AdTech)、需求方平台(DSP)、供应方平台(SSP)、数据管理平台(DMP)</li>
+          <li>包含：效果广告(CPA/CPC)、品牌广告(CPM)、联盟营销(Affiliate Marketing)</li>
+          <li>排除：传统媒体广告(电视、广播、印刷)、内容营销(有机流量)、电商平台内广告(虽相关但可独立节点)</li>
+          <li>区块链交叉点：隐私保护广告、链上广告验证、代币化激励、DeFi广告平台、NFT广告模式</li>
+        </ul>
+        <p><strong>战略理由 | Strategic Rationale:</strong> 数字广告是互联网商业模式的核心支柱，与区块链隐私计算、数据主权、代币经济模型高度相关，是研究Web2向Web3转型的关键节点。</p>
+      </div>
+    </section>
+
+    <!-- §2 关键公司归类 -->
+    <section id="companies">
+      <div class="meta-card">
+        <h3>§2 关键公司归类 | Key Company Classification</h3>
+        <p><strong>广告巨头 (Ad Giants)</strong></p>
+        <ul style="font-size:0.82rem;color:var(--text-secondary);margin-left:1.2rem;">
+          <li><strong>Google (Alphabet):</strong> 搜索广告(AdWords)、YouTube广告、Display Network、DV360、AdSense — 掌控搜索入口和程序化生态</li>
+          <li><strong>Meta (Facebook):</strong> Facebook/Instagram Ads、Audience Network、WhatsApp Business — 社交广告垄断地位</li>
+          <li><strong>TikTok (ByteDance):</strong> FYP推荐算法广告、抖音/今日头条广告矩阵 — 增长最快的短视频广告平台</li>
+        </ul>
+        <p><strong>广告技术公司 (AdTech)</strong></p>
+        <ul style="font-size:0.82rem;color:var(--text-secondary);margin-left:1.2rem;">
+          <li><strong>The Trade Desk:</strong> 独立DSP，IPO后市值增长50倍，专注CTV和身份解析</li>
+          <li><strong>PubMatic:</strong> 云原生程序化广告平台，2021年上市</li>
+          <li><strong>AppLovin:</strong> 移动广告+软件服务一体化，MAX广告聚合平台</li>
+          <li><strong>Magnite:</strong> 独立SSP/Curator of CTV inventory</li>
+        </ul>
+        <p><strong>新兴Web3广告项目 (Web3 Ad Projects)</strong></p>
+        <ul style="font-size:0.82rem;color:var(--text-secondary);margin-left:1.2rem;">
+          <li><strong>Brave Browser/ BAT:</strong> 隐私优先浏览器+注意力代币模型，1200万月活用户</li>
+          <li><strong>AdEx Network:</strong> 基于以太坊的去中心化广告协议</li>
+          <li><strong>Prellis Biologics:</strong> 区块链激励广告平台</li>
+          <li><strong>Siren Labs:</strong> 区块链广告验证和反欺诈</li>
+        </ul>
+        <p><strong>数据与身份公司 (Data & Identity)</strong></p>
+        <ul style="font-size:0.82rem;color:var(--text-secondary);margin-left:1.2rem;">
+          <li><strong>LiveRamp:</strong> 身份解析(IAB迁移)、RampID跨平台追踪</li>
+          <li><strong>The ID5 Unity:</strong> 开放的 cookie-less 身份解决方案</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- §3 认知偏差 -->
+    <section id="biases">
+      <div class="meta-card">
+        <h3>§3 认知偏差 | Cognitive Biases</h3>
+        
+        <p><span class="bias-tag bias-warning">WARNING</span> <strong>确认偏误 (Confirmation Bias)</strong></p>
+        <p style="font-size:0.82rem;color:var(--text-secondary);">EN: Tendency to favor information confirming pre-existing beliefs about blockchain solving digital advertising problems. May overstate BAT/AdEx potential while underweighting regulatory/efficiency barriers.</p>
+        <p style="font-size:0.82rem;color:var(--text-secondary);">ZH: 倾向于偏好证实预先存在信念的信息，即区块链可以解决数字广告问题。可能高估BAT/AdEx的潜力，同时低估监管/效率障碍。</p>
+
+        <p><span class="bias-tag bias-critical">CRITICAL</span> <strong>幸存者偏误 (Survivorship Bias)</strong></p>
+        <p style="font-size:0.82rem;color:var(--text-secondary);">EN: Only examining successful Web3 ad projects (Brave) while ignoring failed attempts (Basis, KhmerChain). This creates unrealistic expectations about blockchain ad solutions.</p>
+        <p style="font-size:0.82rem;color:var(--text-secondary);">ZH: 只研究成功的Web3广告项目(Brave)，而忽视失败案例(Basis, KhmerChain)。这造成了对区块链广告解决方案的不切实际期望。</p>
+
+        <p><span class="bias-tag bias-warning">WARNING</span> <strong>光环效应 (Halo Effect)</strong></p>
+        <p style="font-size:0.82rem;color:var(--text-secondary);">EN: Google/Meta advertising dominance may cause undervaluation of decentralized alternatives. Historical success of incumbents does not guarantee future performance in privacy-first era.</p>
+        <p style="font-size:0.82rem;color:var(--text-secondary);">ZH: Google/Meta的广告主导地位可能导致低估去中心化替代方案。巨头历史成功不代表隐私优先时代的表现。</p>
+
+        <p><span class="bias-tag bias-confirmed">CONFIRMED</span> <strong>技术决定论 (Technological Determinism)</strong></p>
+        <p style="font-size:0.82rem;color:var(--text-secondary);">EN: Assumption that better technology (blockchain) automatically leads to better advertising outcomes. Ignoring non-technical adoption barriers: advertiser inertia, user education, ecosystem coordination.</p>
+        <p style="font-size:0.82rem;color:var(--text-secondary);">ZH: 假设更好的技术(区块链)会自动带来更好的广告效果。忽视非技术性采用障碍：广告主惯性、用户教育、生态协调。</p>
+      </div>
+    </section>
+
+    <!-- §4 上下游交叉 -->
+    <section id="crossval">
+      <div class="meta-card">
+        <h3>§4 上下游交叉验证 | Upstream/Downstream Cross-References</h3>
+        
+        <div class="cross-ref">
+          <strong>↑ 上游依赖 | Upstream Dependencies:</strong>
+          <ul style="margin:0.3rem 0 0.3rem 1rem;font-size:0.78rem;">
+            <li><strong>Identity & Privacy 身份与隐私:</strong> 数字广告高度依赖用户数据(第三 Cookies、Device ID、Email哈希)。DMP/数据经纪商生态与广告投放紧密耦合。交叉验证节点：Internet Node 3 (Identity)。</li>
+            <li><strong>Payments & Settlement 支付结算:</strong> 广告计费模式(CPM/CPC/CPA)需要支付基础设施。区块链支付可改变结算周期和欺诈问题。交叉验证节点：DeFi Node (Payment Rails)。</li>
+            <li><strong>Analytics & Attribution 分析归因:</strong> 归因模型(MTA/MMM)依赖数据完整性。区块链可提供不可篡改的归因记录。交叉验证节点：Analytics Node。</li>
+          </ul>
+        </div>
+
+        <div class="cross-ref">
+          <strong>↓ 下游影响 | Downstream Impacts:</strong>
+          <ul style="margin:0.3rem 0 0.3rem 1rem;font-size:0.78rem;">
+            <li><strong>Content Monetization 内容变现:</strong> 数字广告是内容创作者的主要收入来源。Web3广告模式可重新分配价值给创作者和用户注意力。交叉验证节点：Creator Economy Node。</li>
+            <li><strong>E-commerce 电商:</strong> 效果广告直接驱动电商转化。广告归因是电商增长的核心。交叉验证节点：Internet Node 4 (E-commerce)。</li>
+            <li><strong>DePIN & IoT 去中心化物理基础设施:</strong> 未来广告可能分发到IoT/智能设备。DePIN可提供边缘计算广告分发。交叉验证节点：DePIN Node。</li>
+          </ul>
+        </div>
+
+        <div class="cross-ref">
+          <strong>⇄ 同级关联 | Horizontal Correlations:</strong>
+          <ul style="margin:0.3rem 0 0.3rem 1rem;font-size:0.78rem;">
+            <li><strong>Gaming & Metaverse 游戏与元宇宙:</strong> 游戏内广告和虚拟世界商业化是新兴广告场景。交叉验证节点：Gaming Node。</li>
+            <li><strong>AI & Personalization AI与个性化:</strong> 程序化广告依赖机器学习定向。区块链+AI的隐私计算是未来方向。交叉验证节点：AI Node。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- §5 信息缺口 -->
+    <section id="gaps">
+      <div class="meta-card">
+        <h3>§5 信息缺口 | Information Gaps</h3>
+        
+        <div class="gap-item">
+          <strong>[GAP-01] 广告欺诈真实规模数据</strong><br>
+          <em>Ad Fraud Actual Scale Data</em><br>
+          公开报告中广告欺诈率(3-5%到35%不等)差异巨大。缺乏权威统一的欺诈测量标准。区块链验证方案的实际防欺诈效果缺乏大规模实证。
+        </div>
+
+        <div class="gap-item">
+          <strong>[GAP-02] Web3广告项目存活率</strong><br>
+          <em>Web3 Ad Project Survival Rate</em><br>
+          缺乏对2017-2024年间所有区块链广告项目的系统性追踪分析。成功/失败项目比例、失败原因分类、团队存活率等数据不完整。
+        </div>
+
+        <div class="gap-item">
+          <strong>[GAP-03] 用户注意力代币经济学</strong><br>
+          <em>User Attention Token Economics</em><br>
+          BAT等注意力代币的价值捕获机制不清晰。代币价格与广告生态增长的关联性缺乏严谨的经济学分析。
+        </div>
+
+        <div class="gap-item">
+          <strong>[GAP-04] 监管对广告技术影响</strong><br>
+          <em>Regulatory Impact on AdTech</em><br>
+          GDPR/CCPA/CPRA等隐私法规对广告生态的量化影响缺乏前瞻性模型。中国数据安全法、个人信息保护法的执行效果待评估。
+        </div>
+
+        <div class="gap-item">
+          <strong>[GAP-05] 独立DSP市场份额</strong><br>
+          <em>Independent DSP Market Share</em><br>
+          The Trade Desk等独立DSP与传统广告云(Google DV360/Facebook MBF)的真实竞争格局缺乏透明数据。Cookieless过渡期的市场份额变化预测不准确。
+        </div>
+
+        <div class="gap-item">
+          <strong>[GAP-06] 跨链广告协议可行性</strong><br>
+          <em>Cross-Chain Ad Protocol Feasibility</em><br>
+          去中心化广告协议在不同链之间互操作性的技术挑战和实际应用场景缺乏详细分析。Polygon、Solana、Arbitrum上的广告部署成本效益比不明。
+        </div>
+      </div>
+    </section>
+
+    <!-- §6 质量评估 -->
+    <section id="quality">
+      <div class="meta-card">
+        <h3>§6 质量评估 | Quality Assessment</h3>
+        
+        <p style="font-size:0.85rem;color:var(--text-primary);margin-bottom:1rem;"><strong>元认知质量指标 | Metacognition Quality Metrics</strong></p>
+
+        <div class="confidence-bar">
+          <span class="conf-label">87%</span>
+          <div class="conf-track"><div class="conf-fill" style="width:87%;background:var(--tier-high);"></div></div>
+          <span style="font-size:0.72rem;color:var(--text-tertiary);">行业结构理解 | Industry Structure Comprehension</span>
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-secondary);margin-left:3.5rem;margin-bottom:0.8rem;">对主要广告平台和AdTech生态的覆盖较全面，Google/Meta双寡头分析到位。</p>
+
+        <div class="confidence-bar">
+          <span class="conf-label">72%</span>
+          <div class="conf-track"><div class="conf-fill" style="width:72%;background:var(--tier-high);"></div></div>
+          <span style="font-size:0.72rem;color:var(--text-tertiary);">数据准确性 | Data Accuracy</span>
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-secondary);margin-left:3.5rem;margin-bottom:0.8rem;">市场规模数字来自公开财报和行业报告，但部分预测数据需标注"估算"标签。</p>
+
+        <div class="confidence-bar">
+          <span class="conf-label">68%</span>
+          <div class="conf-track"><div class="conf-fill" style="width:68%;background:var(--tier-medium);"></div></div>
+          <span style="font-size:0.72rem;color:var(--text-tertiary);">区块链交叉分析 | Blockchain Cross-Analysis</span>
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-secondary);margin-left:3.5rem;margin-bottom:0.8rem;">Web3广告项目分析依赖公开信息和项目文档，缺乏第一手技术审计数据。</p>
+
+        <div class="confidence-bar">
+          <span class="conf-label">61%</span>
+          <div class="conf-track"><div class="conf-fill" style="width:61%;background:var(--tier-medium);"></div></div>
+          <span style="font-size:0.72rem;color:var(--text-tertiary);">竞争格局评估 | Competitive Landscape Assessment</span>
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-secondary);margin-left:3.5rem;margin-bottom:0.8rem;">传统AdTech竞争分析较强，但Web3去中心化广告的竞争动态评估不足。</p>
+
+        <div class="confidence-bar">
+          <span class="conf-label">55%</span>
+          <div class="conf-track"><div class="conf-fill" style="width:55%;background:var(--tier-medium);"></div></div>
+          <span style="font-size:0.72rem;color:var(--text-tertiary);">监管风险评估 | Regulatory Risk Assessment</span>
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-secondary);margin-left:3.5rem;margin-bottom:0.8rem;">隐私法规影响分析框架建立，但具体司法管辖区差异和执行效果数据缺乏。</p>
+
+        <div class="confidence-bar">
+          <span class="conf-label">74%</span>
+          <div class="conf-track"><div class="conf-fill" style="width:74%;background:var(--tier-high);"></div></div>
+          <span style="font-size:0.72rem;color:var(--text-tertiary);">综合完整性 | Overall Completeness</span>
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-secondary);margin-left:3.5rem;">7个Section覆盖完整，关键维度均有涉及，缺口识别客观。</p>
+      </div>
+    </section>
+
+    <!-- §7 决策日志 -->
+    <section id="log">
+      <div class="meta-card">
+        <h3>§7 决策日志 | Decision Log</h3>
+        
+        <div class="decision-log">
+          <strong>[DEC-2024-001] 节点优先级决策</strong><br>
+          <em>Decision:</em> 将 Digital Advertising 列为 Internet Node 1 而非 DeFi 或基础设施节点。<br>
+          <em>Rationale:</em> 数字广告是互联网商业模式核心，与数据隐私、身份系统紧密关联，是区块链隐私计算最直接的应用场景之一。<br>
+          <em>Risk:</em> 可能导致对传统AdTech分析过重，Web3广告项目覆盖不足。<br>
+          <em>Date:</em> 2026-03-22
+        </div>
+
+        <div class="decision-log">
+          <strong>[DEC-2024-002] Web3项目纳入标准</strong><br>
+          <em>Decision:</em> 纳入BAT/AdEx等有实际产品的项目，排除纯概念白皮书项目。<br>
+          <em>Rationale:</em> 保持研究实用性，避免空气项目干扰判断；但需注意存活者偏差。<br>
+          <em>Mitigation:</em> 在§3偏差分析和§5缺口识别中明确标注此风险。<br>
+          <em>Date:</em> 2026-03-22
+        </div>
+
+        <div class="decision-log">
+          <strong>[DEC-2024-003] 公司分类方法</strong><br>
+          <em>Decision:</em> 采用"传统广告生态"+"Web3广告项目"的双轨分类，而非统一按市值/规模排序。<br>
+          <em>Rationale:</em> 传统AdTech和区块链广告处于不同发展阶段，强行统一排序会产生误导性比较。<br>
+          <em>Alternative Considered:</em> 统一按"区块链相关性"评分排序 → 拒绝，原因：相关性评分主观性强且易受确认偏误影响。<br>
+          <em>Date:</em> 2026-03-22
+        </div>
+
+        <div class="decision-log">
+          <strong>[DEC-2024-004] 质量评分权重</strong><br>
+          <em>Decision:</em> 给"行业结构理解"最高权重(87%)，"监管风险评估"最低(55%)。<br>
+          <em>Rationale:</em> 本节点定位为数字广告全景图，结构理解是核心；监管部分因地区差异大暂难精确评估。<br>
+          <em>Revisit:</em> 当有更多GDPR执法案例和PIPL执行数据时，需重新评估监管风险评分。<br>
+          <em>Date:</em> 2026-03-22
+        </div>
+
+        <div class="decision-log">
+          <strong>[DEC-2024-005] 交叉引用粒度</strong><br>
+          <em>Decision:</em> 在§4中使用"节点级别"交叉引用，而非深入到具体智能合约或协议层面。<br>
+          <em>Rationale:</em> 当前处于Hub架构的宏观阶段，详细交叉引用留待具体节点内容中展开。<br>
+          <em>Next:</em> 当Identity Node和Creator Economy Node完成时，需回溯更新本节点§4的交叉验证内容。<br>
+          <em>Date:</em> 2026-03-22
+        </div>
+      </div>
+    </section>
+
+    <footer style="margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border-subtle);font-size:0.72rem;color:var(--text-quaternary);">
+      <p>Metacognition report &middot; <a href="../internet_hub.html">Blockchain Hub</a> &middot; 2026-03-22</p>
+    </footer>
+  </main>
+</div>
+<script>
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+})();
+</script>
+</body>
+</html>

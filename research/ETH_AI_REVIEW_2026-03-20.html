@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETH AI Review | 3笔交易深度复盘 | 2026-03-20</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface-2: #1c2333;
+    --border: #30363d;
+    --border-strong: #484f58;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --accent: #f0b429;
+    --green: #3fb950;
+    --red: #f85149;
+    --yellow: #d29922;
+    --blue: #58a6ff;
+    --purple: #bc8cff;
+    --link: #58a6ff;
+    --red-bg: rgba(248,81,73,0.10);
+    --green-bg: rgba(63,185,80,0.10);
+    --yellow-bg: rgba(210,153,34,0.10);
+    --blue-bg: rgba(88,166,255,0.10);
+    --purple-bg: rgba(188,140,255,0.10);
+    --accent-bg: rgba(240,180,41,0.10);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    padding: 20px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  h1 {
+    color: var(--accent);
+    font-size: 1.8em;
+    margin-bottom: 8px;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 10px;
+  }
+  h2 {
+    color: var(--blue);
+    font-size: 1.4em;
+    margin-top: 40px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  h3 {
+    color: var(--text);
+    font-size: 1.15em;
+    margin-top: 24px;
+    margin-bottom: 12px;
+  }
+  h4 { color: var(--text-muted); font-size: 1em; margin-top: 16px; margin-bottom: 8px; }
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 0.95em;
+    margin-bottom: 6px;
+  }
+  p { margin-bottom: 12px; }
+  strong { color: var(--text); }
+  a { color: var(--link); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* === TRADE HEADER === */
+  .trade-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    margin: 32px 0 24px 0;
+    border-left: 4px solid var(--red);
+  }
+  .trade-header .trade-num {
+    font-size: 0.8em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+  .trade-header .trade-title {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .trade-header .trade-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 0.9em;
+    color: var(--text-muted);
+  }
+  .trade-header .trade-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .trade-meta .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    font-weight: 500;
+  }
+  .tag.loss { background: var(--red-bg); color: var(--red); }
+  .tag.win { background: var(--green-bg); color: var(--green); }
+  .tag.caution { background: var(--yellow-bg); color: var(--yellow); }
+
+  /* === ANNOTATION CARD === */
+  .annotation-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 20px 0;
+    position: relative;
+  }
+  .annotation-card .quote-text {
+    font-size: 1.1em;
+    font-style: italic;
+    color: var(--text);
+    padding-left: 16px;
+    border-left: 3px solid var(--accent);
+    margin-bottom: 16px;
+    line-height: 1.8;
+  }
+  .annotation-card .annotation-label {
+    font-size: 0.75em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+  }
+  .annotation-card .annotation-body {
+    font-size: 0.95em;
+    color: var(--text);
+    line-height: 1.7;
+  }
+  .annotation-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  @media (max-width: 640px) {
+    .annotation-row { grid-template-columns: 1fr; }
+  }
+  .annotation-cell {
+    background: var(--bg);
+    border-radius: 6px;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+  }
+  .annotation-cell .cell-label {
+    font-size: 0.75em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+
+  /* === KNOWING-DOING GAP === */
+  .knowing-doing-gap {
+    background: linear-gradient(135deg, var(--red-bg), var(--purple-bg));
+    border: 1px solid var(--red);
+    border-radius: 10px;
+    padding: 24px;
+    margin: 20px 0;
+  }
+  .knowing-doing-gap .gap-title {
+    font-size: 1.1em;
+    font-weight: 700;
+    color: var(--red);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .knowing-doing-gap .gap-columns {
+    display: grid;
+    grid-template-columns: 1fr 40px 1fr;
+    gap: 0;
+    align-items: start;
+    margin: 16px 0;
+  }
+  @media (max-width: 640px) {
+    .knowing-doing-gap .gap-columns {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .gap-arrow { transform: rotate(90deg); }
+  }
+  .gap-side {
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid var(--border);
+  }
+  .gap-side .side-label {
+    font-size: 0.75em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+  .gap-side.knowing .side-label { color: var(--blue); }
+  .gap-side.doing .side-label { color: var(--red); }
+  .gap-side ul {
+    list-style: none;
+    padding: 0;
+  }
+  .gap-side ul li {
+    padding: 4px 0;
+    font-size: 0.9em;
+    line-height: 1.6;
+  }
+  .gap-side.knowing ul li::before {
+    content: "知 ";
+    color: var(--blue);
+    font-weight: 700;
+    font-size: 0.85em;
+    margin-right: 4px;
+  }
+  .gap-side.doing ul li::before {
+    content: "做 ";
+    color: var(--red);
+    font-weight: 700;
+    font-size: 0.85em;
+    margin-right: 4px;
+  }
+  .gap-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    color: var(--yellow);
+    font-weight: 700;
+  }
+  .gap-verdict {
+    margin-top: 12px;
+    padding: 12px 16px;
+    background: var(--bg);
+    border-radius: 6px;
+    border-left: 3px solid var(--purple);
+    font-size: 0.95em;
+    color: var(--text);
+  }
+  .gap-verdict strong { color: var(--purple); }
+
+  /* === PRICE TABLE === */
+  .price-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+    margin: 16px 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .price-table caption {
+    text-align: left;
+    font-size: 0.95em;
+    font-weight: 600;
+    color: var(--blue);
+    padding: 8px 12px;
+    background: var(--surface);
+    border-radius: 8px 8px 0 0;
+    border: 1px solid var(--border);
+    border-bottom: none;
+  }
+  .price-table thead th {
+    background: var(--surface-2);
+    color: var(--accent);
+    font-weight: 600;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 2px solid var(--border-strong);
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .price-table tbody td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+    font-size: 0.92em;
+  }
+  .price-table tbody tr:hover {
+    background: rgba(88,166,255,0.06);
+  }
+  .price-table .negative { color: var(--red); }
+  .price-table .positive { color: var(--green); }
+  .price-table .highlight-row {
+    background: var(--red-bg);
+    font-weight: 600;
+  }
+  .table-container {
+    border-radius: 0 0 8px 8px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin: 0 0 20px 0;
+  }
+
+  /* === VERDICT CARD === */
+  .verdict-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 20px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .verdict-icon {
+    font-size: 2.5em;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .verdict-body {
+    flex: 1;
+  }
+  .verdict-body .verdict-label {
+    font-size: 0.75em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+  .verdict-body .verdict-text {
+    font-size: 1.05em;
+    font-weight: 600;
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+  .verdict-card.fail {
+    border-left: 4px solid var(--red);
+  }
+  .verdict-card.fail .verdict-text { color: var(--red); }
+  .verdict-card.pass {
+    border-left: 4px solid var(--green);
+  }
+  .verdict-card.pass .verdict-text { color: var(--green); }
+  .verdict-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .verdict-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    background: var(--red-bg);
+    color: var(--red);
+    font-weight: 500;
+  }
+
+  /* === INSIGHT BOX === */
+  .insight-box {
+    background: linear-gradient(135deg, var(--purple-bg), var(--blue-bg));
+    border: 1px solid var(--purple);
+    border-radius: 10px;
+    padding: 24px;
+    margin: 24px 0;
+  }
+  .insight-box .insight-title {
+    font-size: 1.1em;
+    font-weight: 700;
+    color: var(--purple);
+    margin-bottom: 12px;
+  }
+  .insight-box .insight-body {
+    font-size: 0.95em;
+    line-height: 1.8;
+  }
+  .insight-box ul {
+    list-style: none;
+    padding: 0;
+  }
+  .insight-box ul li {
+    padding: 6px 0;
+    padding-left: 20px;
+    position: relative;
+  }
+  .insight-box ul li::before {
+    content: ">";
+    position: absolute;
+    left: 0;
+    color: var(--purple);
+    font-weight: 700;
+    font-family: monospace;
+  }
+
+  /* === SUMMARY QUOTE === */
+  .summary-quote {
+    background: linear-gradient(135deg, var(--accent-bg), var(--blue-bg));
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 24px;
+    margin: 24px 0;
+  }
+  .summary-quote .quote-label {
+    font-size: 0.75em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+  .summary-quote .quote-content {
+    font-size: 1.05em;
+    font-weight: 500;
+    line-height: 1.7;
+    color: var(--text);
+  }
+  .summary-quote .quote-content strong {
+    color: var(--accent);
+  }
+
+  /* === CROSS-TRADE SUMMARY === */
+  .cross-trade-summary {
+    background: var(--surface);
+    border: 2px solid var(--accent);
+    border-radius: 12px;
+    padding: 28px;
+    margin: 40px 0;
+    position: relative;
+  }
+  .cross-trade-summary::before {
+    content: "PATTERN";
+    position: absolute;
+    top: -10px;
+    left: 24px;
+    background: var(--accent);
+    color: var(--bg);
+    font-size: 0.7em;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.1em;
+  }
+  .cross-trade-summary .cts-title {
+    font-size: 1.3em;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 16px;
+    margin-top: 4px;
+  }
+  .pattern-timeline {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin: 20px 0;
+    position: relative;
+  }
+  .pattern-timeline::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--border-strong);
+    z-index: 0;
+  }
+  .timeline-node {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+  .timeline-node:not(:last-child) {
+    margin-right: -1px;
+  }
+  .timeline-node .tn-date {
+    font-size: 0.75em;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+  .timeline-node .tn-price {
+    font-size: 1.1em;
+    font-weight: 700;
+    font-family: 'SF Mono', monospace;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .timeline-node .tn-result {
+    font-size: 0.85em;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .tn-result.severe { background: var(--red-bg); color: var(--red); }
+  .timeline-node .tn-emotion {
+    font-size: 0.75em;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-style: italic;
+  }
+  .timeline-connector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    flex-shrink: 0;
+    z-index: 1;
+    color: var(--red);
+    font-size: 1.2em;
+    font-weight: 700;
+  }
+  @media (max-width: 640px) {
+    .pattern-timeline {
+      flex-direction: column;
+      gap: 8px;
+    }
+    .pattern-timeline::after { display: none; }
+    .timeline-connector { width: auto; height: 24px; }
+  }
+
+  /* === ESCALATION METER === */
+  .escalation-meter {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 20px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .escalation-step {
+    flex: 1;
+    padding: 12px 16px;
+    text-align: center;
+    font-size: 0.85em;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .escalation-step:nth-child(1) {
+    background: rgba(210,153,34,0.15);
+    color: var(--yellow);
+  }
+  .escalation-step:nth-child(2) {
+    background: rgba(248,81,73,0.15);
+    color: var(--red);
+  }
+  .escalation-step:nth-child(3) {
+    background: rgba(248,81,73,0.30);
+    color: #ff6b6b;
+  }
+  .escalation-label {
+    font-size: 0.7em;
+    display: block;
+    opacity: 0.7;
+    margin-top: 2px;
+    font-weight: 400;
+  }
+
+  /* === MISC === */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+  }
+  .mono { font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace; }
+  .dim { color: var(--text-muted); }
+  .highlight { color: var(--accent); font-weight: 600; }
+  .red-text { color: var(--red); }
+  .green-text { color: var(--green); }
+  .blue-text { color: var(--blue); }
+  .purple-text { color: var(--purple); }
+
+  /* Footer */
+  .report-footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 0.8em;
+    color: var(--text-muted);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<nav style="position:sticky;top:0;z-index:999;background:rgba(8,9,10,0.95);backdrop-filter:blur(8px);padding:0.5rem 1.5rem;border-bottom:1px solid #23252a;font-family:Inter,-apple-system,system-ui,sans-serif;font-size:0.78rem;display:flex;gap:1rem;align-items:center;"><a href="semiconductor_hub.html" style="color:#f8a848;text-decoration:none;">← Semiconductor Hub 半导体中枢</a><span style="color:#62666d;">·</span><a href="file:///Users/luwenkang/observatory/weekly/2026-W12-v3.html" style="color:#8a8f98;text-decoration:none;">W12 Synthesis</a></nav>
+
+
+<!-- ============================================================
+     REPORT HEADER
+     ============================================================ -->
+<h1>ETH 交易深度复盘</h1>
+<p class="subtitle">3笔ETH失败交易的AI Review | Knowing-Doing Gap 行为模式分析</p>
+<p class="dim" style="font-size:0.85em; margin-bottom:32px;">
+  <span>品种: ETH (ETHU 2x)</span> &nbsp;|&nbsp;
+  <span>时间跨度: 2025-08 ~ 2025-11</span> &nbsp;|&nbsp;
+  <span>总亏损: ~$19K</span> &nbsp;|&nbsp;
+  <span>生成日期: 2026-03-20</span>
+</p>
+
+<!-- ============================================================
+     EXECUTIVE SUMMARY
+     ============================================================ -->
+<div class="summary-quote">
+  <div class="quote-label">Executive Summary</div>
+  <div class="quote-content">
+    3笔ETH交易构成一个<strong>完整的行为退化序列</strong>：从"接近尾声仍建仓"到"日线下跌趋势中做多"到"重大亏损后FOMO回补"。每一笔交易，Luke都<strong>准确地说出了风险，然后做了相反的事</strong>。这不是认知问题，是执行问题。ETH成功模型（BTC 4年周期牛市后期轮动、V反转后二浪横盘建仓）在这3笔中没有一笔被遵守。2x杠杆将行为错误放大为毁灭性结果。
+  </div>
+</div>
+
+
+<!-- ============================================================
+     TRADE 3 (按时间倒序: 最早的交易排第一)
+     ETH 2025-08-13
+     ============================================================ -->
+<hr class="section-divider">
+
+<div class="trade-header">
+  <div class="trade-num">Trade #1 &mdash; 时间序列第一笔</div>
+  <div class="trade-title">ETH $4,756 &mdash; "行情爆炸了，接近尾声"</div>
+  <div class="trade-meta">
+    <span>日期: 2025-08-13</span>
+    <span>入场价: <strong class="mono">$4,756</strong></span>
+    <span>情绪: 信心</span>
+    <span>决策: 建仓</span>
+    <span><span class="tag loss">最大回撤 -63.2%</span></span>
+    <span><span class="tag caution">最大收益 +4.2%</span></span>
+  </div>
+</div>
+
+<!-- Annotation Card -->
+<div class="annotation-card">
+  <div class="annotation-label">Luke 原始记录</div>
+  <div class="quote-text">"行情开始爆炸了，接近尾声"</div>
+
+  <div class="annotation-row">
+    <div class="annotation-cell">
+      <div class="cell-label">Luke 的判断</div>
+      <p style="margin:0; font-size:0.95em;">ETH正在牛市末端的加速阶段。认为行情"爆炸"但同时承认"接近尾声"。情绪状态为<strong>信心</strong>，没有任何焦虑标记。</p>
+    </div>
+    <div class="annotation-cell">
+      <div class="cell-label">AI 注解</div>
+      <p style="margin:0; font-size:0.95em;">这是一个<span class="red-text">自相矛盾的决策</span>。"接近尾声"意味着风险/收益比已经极度不利。ETHU 2x杠杆在顶部区域等于把一个4.2%的潜在收益对赌-63.2%的下行。<strong>买在顶部1/4区间。</strong></p>
+    </div>
+  </div>
+
+  <div class="annotation-row">
+    <div class="annotation-cell">
+      <div class="cell-label">模型匹配度</div>
+      <p style="margin:0; font-size:0.95em;"><span class="red-text" style="font-weight:700;">0% &mdash; 完全不匹配</span><br>
+      ETH成功模型要求V反转后<strong>二浪横盘</strong>建仓。$4,756是一浪冲顶区间，没有任何横盘整理。这是追涨，不是建仓。</p>
+    </div>
+    <div class="annotation-cell">
+      <div class="cell-label">周期定位</div>
+      <p style="margin:0; font-size:0.95em;">BTC 4年周期牛市后期的<strong>亢奋阶段</strong>。ETH轮动确实发生了，但此时已是轮动末端。入场位处于ETH从底部反弹的<strong>最后10%</strong>区间。</p>
+    </div>
+  </div>
+</div>
+
+<!-- Knowing-Doing Gap -->
+<div class="knowing-doing-gap">
+  <div class="gap-title">Knowing-Doing Gap</div>
+  <div class="gap-columns">
+    <div class="gap-side knowing">
+      <div class="side-label">Luke 知道的</div>
+      <ul>
+        <li>"接近尾声" &mdash; 明确知道牛市即将结束</li>
+        <li>ETH成功模型是二浪横盘建仓，不是追涨一浪冲顶</li>
+        <li>2x杠杆在顶部区域的非对称风险</li>
+      </ul>
+    </div>
+    <div class="gap-arrow">&rarr;</div>
+    <div class="gap-side doing">
+      <div class="side-label">Luke 做的</div>
+      <ul>
+        <li>在自己判断的"尾声"位置建仓做多</li>
+        <li>没有等待任何回调或横盘确认</li>
+        <li>使用2x杠杆追涨，最终亏损-63.2%</li>
+      </ul>
+    </div>
+  </div>
+  <div class="gap-verdict">
+    <strong>Gap根因:</strong> "行情爆炸"触发了FOMO情绪回路。大脑的奖励系统被"正在赚钱的人"激活，覆盖了"接近尾声"的理性判断。这是经典的<strong>Hyperbolic Discounting</strong> &mdash; 短期潜在收益(+4.2%)在主观上被放大，远期确定风险(-63.2%)被缩小。ADHD特质加剧了这种即时奖励偏好。
+  </div>
+</div>
+
+<!-- Price Table -->
+<table class="price-table">
+  <caption>后续行情验证 &mdash; 入场价 $4,756</caption>
+  <thead>
+    <tr>
+      <th>时间窗口</th>
+      <th>ETH价格</th>
+      <th>变动幅度</th>
+      <th>ETHU 2x 估算</th>
+      <th>状态</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>入场日</td>
+      <td>$4,756</td>
+      <td class="dim">&mdash;</td>
+      <td class="dim">&mdash;</td>
+      <td>建仓</td>
+    </tr>
+    <tr>
+      <td>1周后</td>
+      <td>~$4,956</td>
+      <td class="positive">+4.2%</td>
+      <td class="positive">+8.4%</td>
+      <td class="dim">最大浮盈区间</td>
+    </tr>
+    <tr>
+      <td>1个月后</td>
+      <td>$3,416</td>
+      <td class="negative">-28.2%</td>
+      <td class="negative">-56.4%</td>
+      <td class="red-text">深度套牢</td>
+    </tr>
+    <tr>
+      <td>3个月后</td>
+      <td>$2,831</td>
+      <td class="negative">-40.5%</td>
+      <td class="negative">-81.0%</td>
+      <td class="red-text">接近归零</td>
+    </tr>
+    <tr class="highlight-row">
+      <td>最大回撤</td>
+      <td>~$1,750</td>
+      <td class="negative">-63.2%</td>
+      <td class="negative">-100%+</td>
+      <td style="color:var(--red); font-weight:700;">毁灭性亏损</td>
+    </tr>
+  </tbody>
+</table>
+<div class="table-container" style="border:none; margin-top:-16px; padding:0 12px 12px; background: var(--surface); border-radius: 0 0 8px 8px;">
+  <p style="font-size:0.8em; color:var(--text-muted); margin:0;">*ETHU 2x为近似估算。实际杠杆ETF因路径依赖和每日重置，在大幅下跌中亏损更严重。</p>
+</div>
+
+<!-- Verdict Card -->
+<div class="verdict-card fail">
+  <div class="verdict-icon">&#10060;</div>
+  <div class="verdict-body">
+    <div class="verdict-label">Verdict</div>
+    <div class="verdict-text">毁灭性交易 &mdash; 在自认的"尾声"追涨，2x杠杆放大至-63.2%回撤</div>
+    <p style="font-size:0.9em; color:var(--text-muted); margin-bottom:8px;">
+      这笔交易违反了ETH成功模型的每一个条件：不是二浪横盘、不是V反转后建仓、入场位在一浪冲顶区间。"行情爆炸"的FOMO完全替代了系统性判断。
+    </p>
+    <div class="verdict-tags">
+      <span class="verdict-tag">FOMO追涨</span>
+      <span class="verdict-tag">周期末端</span>
+      <span class="verdict-tag">模型0%匹配</span>
+      <span class="verdict-tag">杠杆放大</span>
+    </div>
+  </div>
+</div>
+
+<!-- Insight Box -->
+<div class="insight-box">
+  <div class="insight-title">Insight: "接近尾声"为什么没能阻止建仓？</div>
+  <div class="insight-body">
+    <ul>
+      <li><strong>信息不等于行动指令。</strong> Luke获取了正确信息("接近尾声")，但信息没有绑定到一个具体的行为规则（"尾声=禁止新建仓"）。没有规则的信息只是噪声。</li>
+      <li><strong>ADHD的即时奖励偏好。</strong> "行情爆炸"创造了一个高多巴胺的环境。在这种状态下，延迟满足（等待二浪横盘）变得生理性地困难。大脑不是不知道风险，是没有足够的抑制功能来阻止行动。</li>
+      <li><strong>2x杠杆是危险的放大器。</strong> 如果是1x持仓，+4.2%/-63.2%变成+4.2%/-63.2%。但2x使得最大浮盈+8.4%看起来"有意义"，同时把-63.2%变成几乎-100%。杠杆让FOMO的成本不是线性的，是指数级的。</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Summary Quote -->
+<div class="summary-quote">
+  <div class="quote-label">Trade #1 一句话</div>
+  <div class="quote-content">
+    <strong>"我知道要结束了，但爆炸的行情让我觉得还能再赚一波。"</strong> &mdash; 这是每一个追涨交易者内心的独白。区别在于：有止损规则的人亏4%出场，没有的人亏63%。
+  </div>
+</div>
+
+
+<!-- ============================================================
+     TRADE 2
+     ETH 2025-11-11
+     ============================================================ -->
+<hr class="section-divider">
+
+<div class="trade-header">
+  <div class="trade-num">Trade #2 &mdash; 时间序列第二笔</div>
+  <div class="trade-title">ETH $3,415 &mdash; "日线下跌趋势中做多"</div>
+  <div class="trade-meta">
+    <span>日期: 2025-11-11</span>
+    <span>入场价: <strong class="mono">$3,415</strong></span>
+    <span>情绪: 冷静+信心+焦虑</span>
+    <span>决策: 建仓/减仓/对冲/止损/观望</span>
+    <span><span class="tag loss">最大回撤 -48.8%</span></span>
+    <span><span class="tag caution">最大收益 +6.7%</span></span>
+  </div>
+</div>
+
+<!-- Annotation Card -->
+<div class="annotation-card">
+  <div class="annotation-label">Luke 原始记录</div>
+  <div class="quote-text">"在日线下跌趋势中做多，期望小时级别反弹转成日线级别的上涨"</div>
+
+  <div class="annotation-row">
+    <div class="annotation-cell">
+      <div class="cell-label">Luke 的判断</div>
+      <p style="margin:0; font-size:0.95em;">明确标注了<strong>"日线下跌趋势"</strong>。策略是抄底 &mdash; 用小周期反弹博弈大周期反转。情绪同时标记了冷静、信心、焦虑，决策从建仓到止损全有。这种<span class="red-text">多重矛盾状态</span>是认知过载的信号。</p>
+    </div>
+    <div class="annotation-cell">
+      <div class="cell-label">AI 注解</div>
+      <p style="margin:0; font-size:0.95em;">这是<strong>最赤裸的Knowing-Doing Gap</strong>。"日线下跌趋势中做多"这句话本身就是交易禁忌 &mdash; Luke的成功模型是顺势交易，不是逆势抄底。$3,415比Trade #1入场低了$1,341(-28.2%)，看起来"便宜"了很多，但趋势交易者不抄底。</p>
+    </div>
+  </div>
+
+  <div class="annotation-row">
+    <div class="annotation-cell">
+      <div class="cell-label">模型匹配度</div>
+      <p style="margin:0; font-size:0.95em;"><span class="red-text" style="font-weight:700;">0% &mdash; 完全逆模型</span><br>
+      这不只是"不匹配"，是<strong>反向操作</strong>。成功模型是"大周期上升+二浪横盘"，此时大周期已从上升转为下降。在下降通道中做多是对模型的180度违反。</p>
+    </div>
+    <div class="annotation-cell">
+      <div class="cell-label">行为解码</div>
+      <p style="margin:0; font-size:0.95em;">5种决策同时出现（建仓/减仓/对冲/止损/观望）暴露了<strong>决策瘫痪</strong>。不是在执行一个计划，是在同时考虑所有可能。ADHD的工作记忆超载导致无法聚焦在一个清晰的if-then规则上。</p>
+    </div>
+  </div>
+</div>
+
+<!-- Knowing-Doing Gap -->
+<div class="knowing-doing-gap">
+  <div class="gap-title">Knowing-Doing Gap &mdash; 这笔最严重</div>
+  <div class="gap-columns">
+    <div class="gap-side knowing">
+      <div class="side-label">Luke 知道的</div>
+      <ul>
+        <li>"日线下跌趋势" &mdash; 用文字明确描述了趋势方向</li>
+        <li>自己的模型是顺势做多，不是逆势抄底</li>
+        <li>Trade #1已经在$4,756亏损，ETH处于下跌通道</li>
+        <li>同时写了"止损"和"观望"，说明知道应该离场或旁观</li>
+      </ul>
+    </div>
+    <div class="gap-arrow">&rarr;</div>
+    <div class="gap-side doing">
+      <div class="side-label">Luke 做的</div>
+      <ul>
+        <li>在明确的下跌趋势中建仓做多</li>
+        <li>寄希望于小周期反弹扭转大周期</li>
+        <li>用"减仓/对冲/止损"给自己一个安全的幻觉</li>
+        <li>最终承受-48.8%回撤，ETH继续跌至$1,750</li>
+      </ul>
+    </div>
+  </div>
+  <div class="gap-verdict">
+    <strong>Gap根因:</strong> <strong>沉没成本谬误 + 锚定效应</strong>。Trade #1在$4,756建仓后深度套牢。$3,415相比$4,756"便宜了28%"，触发了"抄底摊薄成本"的冲动。大脑锚定在$4,756的入场价上，所有低于这个价格的水平都"看起来便宜"。同时，列出5种决策方案不是谨慎，是<strong>无法做决定</strong> &mdash; ADHD的执行功能障碍让"做一个清晰决定然后执行"变得极其困难。
+  </div>
+</div>
+
+<!-- Price Table -->
+<table class="price-table">
+  <caption>后续行情验证 &mdash; 入场价 $3,415</caption>
+  <thead>
+    <tr>
+      <th>时间窗口</th>
+      <th>ETH价格</th>
+      <th>变动幅度</th>
+      <th>ETHU 2x 估算</th>
+      <th>状态</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>入场日</td>
+      <td>$3,415</td>
+      <td class="dim">&mdash;</td>
+      <td class="dim">&mdash;</td>
+      <td>建仓</td>
+    </tr>
+    <tr>
+      <td>~3天后</td>
+      <td>~$3,644</td>
+      <td class="positive">+6.7%</td>
+      <td class="positive">+13.4%</td>
+      <td class="dim">短暂反弹（最大浮盈）</td>
+    </tr>
+    <tr>
+      <td>2周后</td>
+      <td>$2,831</td>
+      <td class="negative">-17.1%</td>
+      <td class="negative">-34.2%</td>
+      <td class="red-text">反弹失败，加速下跌</td>
+    </tr>
+    <tr>
+      <td>3个月后</td>
+      <td>$2,100</td>
+      <td class="negative">-38.5%</td>
+      <td class="negative">-77.0%</td>
+      <td class="red-text">趋势确认不可逆</td>
+    </tr>
+    <tr class="highlight-row">
+      <td>最大回撤</td>
+      <td>~$1,750</td>
+      <td class="negative">-48.8%</td>
+      <td class="negative">-97.6%</td>
+      <td style="color:var(--red); font-weight:700;">灾难性亏损</td>
+    </tr>
+  </tbody>
+</table>
+<div class="table-container" style="border:none; margin-top:-16px; padding:0 12px 12px; background: var(--surface); border-radius: 0 0 8px 8px;">
+  <p style="font-size:0.8em; color:var(--text-muted); margin:0;">*"小时级别反弹转日线上涨"的假设仅兑现了3天(+6.7%)，之后趋势恢复下行。小周期反弹从未扭转大周期方向。</p>
+</div>
+
+<!-- Verdict Card -->
+<div class="verdict-card fail">
+  <div class="verdict-icon">&#10060;</div>
+  <div class="verdict-body">
+    <div class="verdict-label">Verdict</div>
+    <div class="verdict-text">灾难性交易 &mdash; 自己写下"日线下跌趋势"然后做多，Knowing-Doing Gap的教科书案例</div>
+    <p style="font-size:0.9em; color:var(--text-muted); margin-bottom:8px;">
+      5种决策同时并存不是谨慎，是决策瘫痪。"小周期反弹博大周期反转"是逆势交易者的叙事，不是趋势交易者的策略。这笔交易最危险的地方不是亏损，是它伪装成了一个"有计划的"交易。
+    </p>
+    <div class="verdict-tags">
+      <span class="verdict-tag">逆势做多</span>
+      <span class="verdict-tag">沉没成本</span>
+      <span class="verdict-tag">决策瘫痪</span>
+      <span class="verdict-tag">模型180度违反</span>
+    </div>
+  </div>
+</div>
+
+<!-- Insight Box -->
+<div class="insight-box">
+  <div class="insight-title">Insight: 5种决策同时出现是什么信号？</div>
+  <div class="insight-body">
+    <ul>
+      <li><strong>认知过载的红旗。</strong> 当一个交易者同时在考虑"建仓、减仓、对冲、止损、观望"时，他不是在做计划，他是在<strong>瘫痪</strong>。一个好的交易计划只有一个决策和一个触发条件。</li>
+      <li><strong>情绪标记的矛盾。</strong> "冷静+信心+焦虑"不可能同时为真。更准确的描述是：试图用冷静和信心来压制焦虑。焦虑是唯一真实的情绪 &mdash; 因为大脑知道这是逆势操作。</li>
+      <li><strong>ADHD的工作记忆超载。</strong> ADHD的核心缺陷之一是工作记忆容量有限。当5个选项同时在工作记忆中竞争时，大脑无法排序 &mdash; 结果往往是选择<strong>最刺激的那个</strong>（建仓），而不是最理性的那个（观望或止损）。</li>
+      <li><strong>行为规则的缺失。</strong> 如果存在一条硬性规则 &mdash; "日线下跌趋势 = 禁止做多" &mdash; 5个选项中的"建仓"直接被排除，工作记忆负载从5降到4，然后"减仓"和"对冲"也不适用（没有仓位），最终只剩"观望"。规则不是限制，是<strong>认知卸载工具</strong>。</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Summary Quote -->
+<div class="summary-quote">
+  <div class="quote-label">Trade #2 一句话</div>
+  <div class="quote-content">
+    <strong>"我知道是下跌趋势，但我觉得这里可以反弹。"</strong> &mdash; 趋势交易者说出这句话的那一刻，他已经不是趋势交易者了。他变成了一个逆势猜底的赌徒。
+  </div>
+</div>
+
+
+<!-- ============================================================
+     TRADE 1 (时间序列第三笔)
+     ETH 2025-11-20
+     ============================================================ -->
+<hr class="section-divider">
+
+<div class="trade-header">
+  <div class="trade-num">Trade #3 &mdash; 时间序列第三笔（最后一笔）</div>
+  <div class="trade-title">ETH $2,832 &mdash; "0.618回踩，绝佳再次入场机会"</div>
+  <div class="trade-meta">
+    <span>日期: 2025-11-20</span>
+    <span>入场价: <strong class="mono">$2,832</strong></span>
+    <span>情绪: 信心</span>
+    <span>决策: 建仓</span>
+    <span>形态: 0.618回踩</span>
+    <span><span class="tag loss">最大回撤 -38.2%</span></span>
+    <span><span class="tag caution">最大收益 +21.7%</span></span>
+  </div>
+</div>
+
+<!-- Annotation Card -->
+<div class="annotation-card">
+  <div class="annotation-label">Luke 原始记录</div>
+  <div class="quote-text">"ETH完成了对关键0.618的周线/日线的回踩，这才是绝佳的再次入场机会"</div>
+
+  <div class="annotation-row">
+    <div class="annotation-cell">
+      <div class="cell-label">Luke 的判断</div>
+      <p style="margin:0; font-size:0.95em;">用Fibonacci 0.618回踩作为技术理由，判断这是<strong>"绝佳的再次入场机会"</strong>。情绪标记为纯信心，没有焦虑。"再次入场"暗示之前有过亏损的仓位。此时ETH从高点$4,756已经跌了40%。</p>
+    </div>
+    <div class="annotation-cell">
+      <div class="cell-label">AI 注解</div>
+      <p style="margin:0; font-size:0.95em;">0.618回踩是一个<strong>有效的技术形态</strong> &mdash; 但前提是大周期方向是上升的。在下跌趋势中，0.618不是"支撑"，只是下跌过程中的一个暂停点。"绝佳"这个词暴露了<span class="red-text">过度自信</span> &mdash; 经历$4,756和$3,415两笔亏损后，不应该用"绝佳"来描述任何ETH机会。</p>
+    </div>
+  </div>
+
+  <div class="annotation-row">
+    <div class="annotation-cell">
+      <div class="cell-label">模型匹配度</div>
+      <p style="margin:0; font-size:0.95em;"><span class="yellow" style="font-weight:700; color:var(--yellow);">20% &mdash; 有形态但无周期</span><br>
+      0.618回踩本身是一个合理的形态信号。但ETH成功模型需要<strong>大周期上升</strong>作为前提条件。此时ETH大周期已从上升转为下降，0.618只是熊市中的技术性反弹位，不是牛市中的回调建仓位。</p>
+    </div>
+    <div class="annotation-cell">
+      <div class="cell-label">"再次入场"的含义</div>
+      <p style="margin:0; font-size:0.95em;">这3个字暴露了<strong>补仓心理</strong>。不是一个独立的新交易决策，是对前两笔亏损的心理补偿。"再次"意味着动机不是"这里有机会"，而是<strong>"我需要把钱赚回来"</strong>。这是亏损后最危险的心理状态。</p>
+    </div>
+  </div>
+</div>
+
+<!-- Knowing-Doing Gap -->
+<div class="knowing-doing-gap">
+  <div class="gap-title">Knowing-Doing Gap &mdash; 最精密的自欺</div>
+  <div class="gap-columns">
+    <div class="gap-side knowing">
+      <div class="side-label">Luke 知道的</div>
+      <ul>
+        <li>ETH已从$4,756跌至$2,832（-40%），下跌趋势明确</li>
+        <li>前两笔ETH交易都亏损严重</li>
+        <li>成功模型需要"大周期上升"作为前提，此时不满足</li>
+        <li>趋势交易者不在下跌趋势中寻找"入场机会"</li>
+      </ul>
+    </div>
+    <div class="gap-arrow">&rarr;</div>
+    <div class="gap-side doing">
+      <div class="side-label">Luke 做的</div>
+      <ul>
+        <li>用0.618回踩作为"技术理由"包装了一个补仓行为</li>
+        <li>用"绝佳"描述一个高风险逆势操作</li>
+        <li>第三次在同一个品种的下跌趋势中建仓</li>
+        <li>最终再次承受-38.2%回撤</li>
+      </ul>
+    </div>
+  </div>
+  <div class="gap-verdict">
+    <strong>Gap根因:</strong> 这是3笔中<strong>最危险的一笔</strong>，因为它看起来最"合理"。0.618回踩、周线/日线共振、明确的入场位 &mdash; 所有技术分析要素齐全。但这正是问题所在：<strong>技术分析被用来合理化一个已经做出的情绪决策</strong>。先有了"我要在ETH上把钱赚回来"的冲动，然后找到0.618来佐证。这不是分析导致决策，是决策挑选分析。心理学称之为<strong>Confirmation Bias</strong>（确认偏误）。
+  </div>
+</div>
+
+<!-- Price Table -->
+<table class="price-table">
+  <caption>后续行情验证 &mdash; 入场价 $2,832</caption>
+  <thead>
+    <tr>
+      <th>时间窗口</th>
+      <th>ETH价格</th>
+      <th>变动幅度</th>
+      <th>ETHU 2x 估算</th>
+      <th>状态</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>入场日</td>
+      <td>$2,832</td>
+      <td class="dim">&mdash;</td>
+      <td class="dim">&mdash;</td>
+      <td>建仓</td>
+    </tr>
+    <tr>
+      <td>~2周后</td>
+      <td>~$3,446</td>
+      <td class="positive">+21.7%</td>
+      <td class="positive">+43.4%</td>
+      <td style="color:var(--yellow);">短暂反弹（最大浮盈）</td>
+    </tr>
+    <tr>
+      <td>1周后</td>
+      <td>$2,606</td>
+      <td class="negative">-8.0%</td>
+      <td class="negative">-16.0%</td>
+      <td class="dim">初始下跌</td>
+    </tr>
+    <tr>
+      <td>1个月后</td>
+      <td>$2,512</td>
+      <td class="negative">-11.3%</td>
+      <td class="negative">-22.6%</td>
+      <td class="red-text">持续走低</td>
+    </tr>
+    <tr>
+      <td>3个月后</td>
+      <td>$2,126</td>
+      <td class="negative">-24.9%</td>
+      <td class="negative">-49.8%</td>
+      <td class="red-text">深度亏损</td>
+    </tr>
+    <tr class="highlight-row">
+      <td>最大回撤</td>
+      <td>~$1,750</td>
+      <td class="negative">-38.2%</td>
+      <td class="negative">-76.4%</td>
+      <td style="color:var(--red); font-weight:700;">严重亏损</td>
+    </tr>
+  </tbody>
+</table>
+<div class="table-container" style="border:none; margin-top:-16px; padding:0 12px 12px; background: var(--surface); border-radius: 0 0 8px 8px;">
+  <p style="font-size:0.8em; color:var(--text-muted); margin:0;">*注意：这笔交易有+21.7%的最大浮盈窗口，但0.618反弹终究没能扭转大周期下跌方向。如果有"+15%止盈"规则，这笔交易可以是正收益。</p>
+</div>
+
+<!-- Verdict Card -->
+<div class="verdict-card fail">
+  <div class="verdict-icon">&#10060;</div>
+  <div class="verdict-body">
+    <div class="verdict-label">Verdict</div>
+    <div class="verdict-text">严重亏损 &mdash; 用技术分析包装补仓冲动，确认偏误的精密产物</div>
+    <p style="font-size:0.9em; color:var(--text-muted); margin-bottom:8px;">
+      这是3笔中最有"教学价值"的一笔：它揭示了技术分析可以被用来<strong>服务于</strong>错误决策，而不只是导致错误决策。0.618是真的，回踩是真的，但大周期方向是错的。形态正确 + 周期错误 = 亏损。
+    </p>
+    <div class="verdict-tags">
+      <span class="verdict-tag">确认偏误</span>
+      <span class="verdict-tag">补仓心理</span>
+      <span class="verdict-tag">形态对+周期错</span>
+      <span class="verdict-tag">连续第三笔亏损</span>
+    </div>
+  </div>
+</div>
+
+<!-- Insight Box -->
+<div class="insight-box">
+  <div class="insight-title">Insight: 技术分析什么时候会害人？</div>
+  <div class="insight-body">
+    <ul>
+      <li><strong>当结论先于分析时。</strong> 如果你已经决定要做多，你一定能找到一个支撑位、一个Fibonacci回踩、一个MACD金叉来"证明"这个决定。技术分析的危险不在于它不准，在于它太灵活 &mdash; 你总能找到你想看到的东西。</li>
+      <li><strong>当形态脱离周期时。</strong> 0.618回踩在牛市中是建仓信号，在熊市中只是下跌中继。同一个形态在不同周期语境下含义完全不同。Luke的成功模型明确要求"大周期上升" &mdash; 这个前提在2025年11月已经不成立。</li>
+      <li><strong>"再次入场"的心理陷阱。</strong> 这个措辞暗示了一个潜意识框架：ETH是"应该做"的品种，当前只是在等一个"好时机"再进去。但正确的框架应该是：ETH的大周期已从上升转为下降，它不再是观察池中的品种，无论任何技术形态出现。</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Summary Quote -->
+<div class="summary-quote">
+  <div class="quote-label">Trade #3 一句话</div>
+  <div class="quote-content">
+    <strong>"0.618回踩是真的，但大周期的转向也是真的。"</strong> &mdash; 在错误的周期里找到正确的形态，就像在沉船上找到了一个完美的救生圈 &mdash; 形状是对的，但船还是在沉。
+  </div>
+</div>
+
+
+<!-- ============================================================
+     CROSS-TRADE SUMMARY
+     跨交易总结
+     ============================================================ -->
+<hr class="section-divider">
+
+<div class="cross-trade-summary">
+  <div class="cts-title">跨交易行为模式分析：ETH的3次坠落</div>
+
+  <p style="margin-bottom:20px;">3笔交易不是3个独立事件，它们构成了一个<strong>完整的行为退化序列</strong>。每一笔都让下一笔更容易发生，亏损像滚雪球一样越滚越大。</p>
+
+  <!-- Timeline -->
+  <h3 style="color:var(--accent); font-size:1em; margin-bottom:12px;">行为退化时间线</h3>
+  <div class="pattern-timeline">
+    <div class="timeline-node">
+      <div class="tn-date">2025-08-13</div>
+      <div class="tn-price">$4,756</div>
+      <div class="tn-result severe">-63.2%</div>
+      <div class="tn-emotion">"接近尾声"但追涨</div>
+    </div>
+    <div class="timeline-connector">&rarr;</div>
+    <div class="timeline-node">
+      <div class="tn-date">2025-11-11</div>
+      <div class="tn-price">$3,415</div>
+      <div class="tn-result severe">-48.8%</div>
+      <div class="tn-emotion">"下跌趋势"但做多</div>
+    </div>
+    <div class="timeline-connector">&rarr;</div>
+    <div class="timeline-node">
+      <div class="tn-date">2025-11-20</div>
+      <div class="tn-price">$2,832</div>
+      <div class="tn-result severe">-38.2%</div>
+      <div class="tn-emotion">"绝佳机会"但补仓</div>
+    </div>
+  </div>
+
+  <!-- Escalation Meter -->
+  <h3 style="color:var(--accent); font-size:1em; margin-top:24px; margin-bottom:12px;">行为退化阶梯</h3>
+  <div class="escalation-meter">
+    <div class="escalation-step">
+      FOMO追涨
+      <span class="escalation-label">冲动 > 理性</span>
+    </div>
+    <div class="escalation-step">
+      逆势抄底
+      <span class="escalation-label">沉没成本 > 趋势判断</span>
+    </div>
+    <div class="escalation-step">
+      技术合理化补仓
+      <span class="escalation-label">确认偏误 > 系统纪律</span>
+    </div>
+  </div>
+
+  <!-- Pattern Analysis -->
+  <h3 style="color:var(--accent); font-size:1em; margin-top:28px; margin-bottom:12px;">行为模式解剖</h3>
+
+  <div class="annotation-card" style="margin:12px 0;">
+    <div class="annotation-label">模式 1 &mdash; 自我矛盾的升级</div>
+    <div class="annotation-body">
+      <p><strong>Trade #1:</strong> "接近尾声" vs 建仓 &mdash; <span class="dim">矛盾程度: 中</span>（还在尝试合理化）</p>
+      <p><strong>Trade #2:</strong> "日线下跌趋势" vs 做多 &mdash; <span class="dim">矛盾程度: 极高</span>（放弃了合理化，赤裸矛盾）</p>
+      <p><strong>Trade #3:</strong> "绝佳机会" vs 连续亏损 &mdash; <span class="dim">矛盾程度: 最高</span>（用技术分析重建合理化，比Trade #1更精密）</p>
+      <p style="color:var(--purple); font-weight:600; margin-top:8px;">趋势: 从"知道有风险但试试" &rarr; "知道不对但忍不住" &rarr; "说服自己这次不一样"。这是成瘾行为的经典三阶段。</p>
+    </div>
+  </div>
+
+  <div class="annotation-card" style="margin:12px 0;">
+    <div class="annotation-label">模式 2 &mdash; 锚定价格持续下移</div>
+    <div class="annotation-body">
+      <p>$4,756 &rarr; $3,415(-28%) &rarr; $2,832(-17%) &mdash; 每次入场都比上次低，但<strong>亏损并没有因为"买便宜了"而减少</strong>。</p>
+      <p>这暴露了一个认知错误：<strong>价格下跌不等于变便宜</strong>。在下跌趋势中，更低的价格意味着更大的下行空间，不是更好的风险/收益比。</p>
+      <p style="color:var(--yellow);">3笔入场价格分别处于从顶到底的: 顶部5% / 中间50% / 下方30%。没有一笔买在底部。</p>
+    </div>
+  </div>
+
+  <div class="annotation-card" style="margin:12px 0;">
+    <div class="annotation-label">模式 3 &mdash; 情绪标记的退化</div>
+    <div class="annotation-body">
+      <p><strong>Trade #1: 信心</strong> &mdash; 纯粹的信心，没有任何负面情绪。认知上觉得自己在做对的事。</p>
+      <p><strong>Trade #2: 冷静+信心+焦虑</strong> &mdash; 三种矛盾情绪并存。"冷静"和"信心"试图压制"焦虑"。身体已经在发出警报，大脑在试图关闭警报。</p>
+      <p><strong>Trade #3: 信心</strong> &mdash; 焦虑消失了，重新回到纯信心。这不是因为情况变好了，是因为<strong>大脑放弃了抵抗</strong> &mdash; "这次一定行"的信念重新占据主导。</p>
+      <p style="color:var(--red); font-weight:600; margin-top:8px;">最危险的不是Trade #2的焦虑，而是Trade #3焦虑的消失。焦虑是最后一道防线，它消失意味着大脑已经完全被补仓冲动接管。</p>
+    </div>
+  </div>
+
+  <!-- ADHD Connection -->
+  <div class="insight-box" style="margin-top:24px;">
+    <div class="insight-title">ADHD行为模式: 为什么这3笔交易如此典型？</div>
+    <div class="insight-body">
+      <ul>
+        <li><strong>即时奖励偏好 (Hyperbolic Discounting):</strong> 3笔交易的最大浮盈分别是+4.2%、+6.7%、+21.7% &mdash; 都有短暂的正反馈期。ADHD大脑对"我做对了"的即时信号极度敏感，这些短暂的浮盈强化了"下次还要做"的行为回路。</li>
+        <li><strong>工作记忆超载 (Working Memory Deficit):</strong> Trade #2的5种同时决策是最明显的例子。但整个序列都体现了无法在工作记忆中同时持有"当前机会"和"过去教训"。每一笔交易都像是第一次做 &mdash; 前一笔的亏损教训没有被整合到决策中。</li>
+        <li><strong>情绪调节障碍 (Emotional Dysregulation):</strong> 从信心到焦虑再到信心的波动不是"分析后的情绪变化"，是情绪驱动分析。Trade #3的"绝佳"不是冷静分析后的结论，是"我需要赢一次"的情绪伪装成了技术判断。</li>
+        <li><strong>新奇寻求 (Novelty Seeking):</strong> 每一笔交易都有一个"新理由" &mdash; 行情爆炸、小时级反弹、0.618回踩。ADHD大脑需要新的刺激来维持注意力，这些"新理由"恰好提供了足够的新鲜感来重新激活交易冲动。</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- The Core Lesson -->
+  <div class="knowing-doing-gap" style="margin-top:24px; border-color:var(--accent);">
+    <div class="gap-title" style="color:var(--accent);">3笔交易的核心教训</div>
+    <div class="gap-columns">
+      <div class="gap-side knowing">
+        <div class="side-label">Luke 的实际能力</div>
+        <ul>
+          <li>能准确判断"接近尾声"、"下跌趋势"</li>
+          <li>能识别0.618等技术形态</li>
+          <li>有成功模型（BTC周期+二浪横盘）</li>
+          <li>ETH成功段（+$4K）证明模型有效</li>
+        </ul>
+      </div>
+      <div class="gap-arrow" style="font-size:2em;">&ne;</div>
+      <div class="gap-side doing">
+        <div class="side-label">缺失的执行机制</div>
+        <ul>
+          <li>没有硬性规则把"下跌趋势"绑定到"禁止做多"</li>
+          <li>没有单品种连续亏损的熔断机制</li>
+          <li>没有区分"技术形态信号"和"周期方向前提"的优先级</li>
+          <li>没有ADHD情绪状态的实时检测和干预</li>
+        </ul>
+      </div>
+    </div>
+    <div class="gap-verdict" style="border-left-color:var(--accent);">
+      <strong style="color:var(--accent);">结论:</strong> Luke的分析能力是足够的 &mdash; 3笔交易中每一笔他都说出了关键风险。问题完全在<strong>执行层</strong>：没有把认知转化为硬性规则的机制。对于ADHD交易者来说，"我知道"和"我做到"之间需要一座桥 &mdash; 这座桥不是"下次我会注意"，是一个<strong>自动化的、不需要意志力的规则系统</strong>。
+    </div>
+  </div>
+
+  <!-- Proposed Rules -->
+  <h3 style="color:var(--accent); font-size:1em; margin-top:28px; margin-bottom:12px;">如果有这些规则，3笔交易会怎样？</h3>
+
+  <table class="price-table">
+    <caption>规则回测 &mdash; 3笔ETH交易</caption>
+    <thead>
+      <tr>
+        <th>规则</th>
+        <th>Trade #1</th>
+        <th>Trade #2</th>
+        <th>Trade #3</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="text-col" style="font-family:inherit;">R1: 大周期不上升 = 禁止做多</td>
+        <td style="color:var(--yellow);">可能触发</td>
+        <td class="positive">阻止</td>
+        <td class="positive">阻止</td>
+      </tr>
+      <tr>
+        <td class="text-col" style="font-family:inherit;">R2: 同品种连续2笔亏损 = 30天冷静期</td>
+        <td class="dim">不适用</td>
+        <td class="dim">不适用</td>
+        <td class="positive">阻止（距Trade#2仅9天）</td>
+      </tr>
+      <tr>
+        <td class="text-col" style="font-family:inherit;">R3: 自我描述含"尾声/下跌/逆势" = 禁止建仓</td>
+        <td class="positive">阻止</td>
+        <td class="positive">阻止</td>
+        <td class="dim">不适用</td>
+      </tr>
+      <tr>
+        <td class="text-col" style="font-family:inherit;">R4: 入场后+15%强制止盈部分仓位</td>
+        <td class="dim">未触发</td>
+        <td class="dim">未触发</td>
+        <td class="positive">+21.7%触发，锁定利润</td>
+      </tr>
+      <tr>
+        <td class="text-col" style="font-family:inherit;">R5: 入场后-10%强制止损</td>
+        <td class="positive">亏损限制在-10%</td>
+        <td class="positive">亏损限制在-10%</td>
+        <td class="positive">亏损限制在-10%</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="table-container" style="border:none; margin-top:-16px; padding:0 12px 12px; background: var(--surface); border-radius: 0 0 8px 8px;">
+    <p style="font-size:0.85em; color:var(--text-muted); margin:0;">
+      <strong style="color:var(--green);">如果R1+R3同时存在:</strong> Trade #1和#2被完全阻止，Trade #3可能仍会执行但被R5限制在-10%。<br>
+      <strong style="color:var(--green);">总亏损从~$19K降至~$2K以内。</strong> 规则不需要完美，只需要存在。
+    </p>
+  </div>
+
+</div>
+
+<!-- ============================================================
+     FINAL SUMMARY
+     ============================================================ -->
+
+<div class="summary-quote" style="border-color:var(--red); background: linear-gradient(135deg, var(--red-bg), var(--accent-bg));">
+  <div class="quote-label">Final Verdict &mdash; ETH三笔交易的终极教训</div>
+  <div class="quote-content">
+    <strong>Luke不缺分析能力，缺的是把分析变成不可违反的规则的机制。</strong><br><br>
+    3笔交易中，每一笔他都准确说出了风险："接近尾声"、"日线下跌趋势"、"再次入场"。一个能看到危险的人还是走进了危险，问题不在眼睛，在脚。<br><br>
+    ETH的成功段(+$4K)和失败段(-$19K)对比说明：<strong>同一个人、同一个品种、同一个模型</strong> &mdash; 遵守模型时赚钱，违反模型时亏钱。模型是对的，执行是错的。<br><br>
+    对于ADHD交易者，"下次我会注意"是最无效的改进方案。有效的方案是：<strong>建立外部规则系统，让"不执行"变成default，"执行"需要主动打破规则。</strong>把决策负担从"我要做什么"反转为"我有没有足够的理由违反禁令"。
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="report-footer">
+  <p>ETH AI Review | Generated by Trade Pipeline Cognitive Engine</p>
+  <p>2026-03-20 | 数据来源: Luke交易日志 | 分析方法: Knowing-Doing Gap + ADHD行为模式分析</p>
+</div>
+
+</body>
+</html>

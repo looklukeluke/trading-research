@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>孙宇晨 Justin Sun — 认知代理人报告</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="../blockchain_shared.css">
+  <style>
+    /* === Page-specific overrides (under 80 lines) === */
+    .tron-accent { color: #e74c3c; }
+    .tron-accent-dim { background: rgba(231, 76, 60, 0.12); }
+
+    .developing-world-card {
+      border: 1px solid rgba(231, 76, 60, 0.3);
+      border-left: 3px solid #e74c3c;
+      border-radius: var(--radius-sm);
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      background: var(--bg-surface);
+    }
+    .developing-world-card h4 { color: #e74c3c; margin-top: 0; font-size: 0.95rem; }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+      margin: 1rem 0;
+    }
+    .stat-card {
+      padding: 0.8rem 1rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      text-align: center;
+    }
+    .stat-card .stat-num {
+      font-size: 1.4rem;
+      font-weight: 680;
+      color: var(--accent);
+      display: block;
+    }
+    .stat-card .stat-label {
+      font-size: 0.72rem;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .bias-alert {
+      border: 2px solid #e74c3c;
+      border-radius: var(--radius-sm);
+      padding: 1.25rem;
+      margin: 1.5rem 0;
+      background: rgba(231, 76, 60, 0.05);
+    }
+    .bias-alert h4 {
+      color: #e74c3c;
+      margin-top: 0;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .controversy-tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      background: rgba(244, 67, 54, 0.15);
+      color: var(--tier-low);
+      font-weight: 590;
+      margin-right: 0.3rem;
+    }
+
+    .adoption-tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      background: rgba(76, 175, 80, 0.15);
+      color: var(--tier-high);
+      font-weight: 590;
+      margin-right: 0.3rem;
+    }
+    /* Embedded + Reading mode */
+    body.embedded .sidebar { display: none !important; }
+    body.embedded .notes-sidebar { display: none !important; }
+    body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+    body.embedded .hamburger-btn { display: none !important; }
+    .reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+    .reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+    .reading-mode .hamburger-btn { display: none !important; }
+  </style>
+</head>
+<body>
+<nav style="position:sticky;top:0;z-index:999;background:rgba(8,9,10,0.95);backdrop-filter:blur(8px);padding:0.5rem 1.5rem;border-bottom:1px solid #23252a;font-family:Inter,-apple-system,system-ui,sans-serif;font-size:0.78rem;display:flex;gap:1rem;align-items:center;"><a href="../blockchain_hub.html" style="color:#f8a848;text-decoration:none;">&larr; Blockchain Hub</a><span style="color:#62666d;">&middot;</span><span style="color:#8a8f98;">Agent #14</span><span style="color:#62666d;">&middot;</span><span style="color:#e74c3c;">TRON (TRX)</span></nav>
+
+<!-- Hamburger button (mobile) -->
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Notes sidebar toggle + overlay -->
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes sidebar">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- Sidebar TOC -->
+  <aside class="sidebar" id="sidebar">
+    <a class="back-link" href="../blockchain_hub.html">&larr; Blockchain Hub</a>
+    <h4>目录导航</h4>
+    <nav>
+      <ul>
+        <li><a href="#summary"><span class="toc-num">&#9733;</span>速览摘要</a></li>
+        <li><a href="#why"><span class="toc-num">1</span>选择理由</a></li>
+        <li><a href="#actions"><span class="toc-num">2</span>行动证据</a></li>
+        <li><a href="#judgment"><span class="toc-num">3</span>核心判断</a></li>
+        <li><a href="#bias"><span class="toc-num">4</span>英文偏见修正</a></li>
+        <li><a href="#developing"><span class="toc-num">5</span>发展中国家采用</a></li>
+        <li><a href="#trading"><span class="toc-num">6</span>交易含义</a></li>
+        <li><a href="#risk"><span class="toc-num">7</span>风险信号</a></li>
+        <li><a href="#provenance"><span class="toc-num">8</span>Provenance</a></li>
+      </ul>
+    </nav>
+    <h4 style="margin-top:1rem;">Agent 信息</h4>
+    <nav>
+      <ul>
+        <li><a href="#" style="color:var(--text-quaternary);">Node: N2+N5</a></li>
+        <li><a href="#" style="color:var(--text-quaternary);">Tier: B档 3/5</a></li>
+        <li><a href="#" style="color:var(--text-quaternary);">Region: 中国</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+
+    <!-- Header -->
+    <header class="page-header">
+      <div class="role-badge">FOUNDER</div>
+      <h1>孙宇晨 Justin Sun</h1>
+      <p class="subtitle">Founder, TRON (TRX) &nbsp;|&nbsp; N2 公链 + N5 稳定币 &nbsp;|&nbsp; 2026-03-22<br>
+      <span style="color:var(--text-quaternary);font-size:0.85em;">认知代理人报告 — Cognitive Agent Profile</span></p>
+      <div class="badge-row">
+        <span class="badge">B档 3/5</span>
+        <span class="badge">3.3B累计账户</span>
+        <span class="badge">TRON-USDT标准</span>
+        <span class="badge">SEC诉讼</span>
+        <span class="badge">Region: 中国</span>
+      </div>
+    </header>
+
+    <!-- Top Controls -->
+    <div class="top-controls">
+      <span class="tc-label">&#129504; 元思考批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <!-- Priority Box -->
+    <div class="priority-box" id="summary">
+      <h2>&#9200; 速览摘要 — 60秒理解 Justin Sun / TRON</h2>
+      <ol>
+        <li><strong>发展中世界的隐形巨人</strong>：TRON累计3.3B账户，<mark class="hl-know" data-note="k1">TRON-USDT是发展中国家事实上的支付标准</mark><sup class="nref" data-note="k1">K</sup>。巴西90%加密交易 = TRON-USDT美元储蓄</li>
+        <li><strong>争议人物</strong>：SEC诉讼、BitTorrent/Poloniex收购争议、个人高调营销风格。<span class="controversy-tag">争议</span>西方分析普遍将TRON视为笑话/骗局</li>
+        <li><strong>真实使用数据</strong>：330M活跃地址、$10B+日USDT转账量、尼日利亚$921B年交易量。<span class="adoption-tag">真实采用</span>数据不骗人</li>
+        <li><strong>核心判断</strong>："Users don't care about decentralization, they care about cheap and fast." TRON 0.1美分手续费 + 3秒确认</li>
+        <li><strong>交易含义</strong>：<span class="signal signal-watch">WATCH</span> TRX代币趋势交易空间有限。TRON的价值是作为发展中世界加密采用的指标</li>
+      </ol>
+    </div>
+
+    <!-- Section 1: Why -->
+    <section id="why">
+      <div class="section-header">
+        <h2>1. 选择理由 — Why This Agent</h2>
+      </div>
+      <p>Justin Sun / TRON 的选择理由不在于技术创新或去中心化理想，而在于<strong>真实世界的大规模采用</strong>。当西方加密行业在讨论ZK-Rollups和模块化区块链时，TRON已经悄然成为发展中世界的金融基础设施。</p>
+      <p><strong>节点归属</strong>：N2（公链生态）+ N5（稳定币/支付）。TRON跨越两个价值链节点，因为它既是公链也是稳定币传输层。</p>
+      <p><strong>Tier B档 3/5</strong>：争议性降低了可信度评分，但使用数据提升了信号价值。作为信号源而非投资标的有价值。</p>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <span class="stat-num">3.3B</span>
+          <span class="stat-label">累计账户</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">$10B+</span>
+          <span class="stat-label">日USDT转账</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">0.1&cent;</span>
+          <span class="stat-label">平均手续费</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">3 sec</span>
+          <span class="stat-label">确认时间</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Actions -->
+    <section id="actions">
+      <div class="section-header">
+        <h2>2. 行动证据 — Key Actions</h2>
+      </div>
+      <figure>
+        <table>
+          <thead><tr><th>#</th><th>行动</th><th>影响</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td><strong>1</strong></td><td>TRON-USDT成为发展中世界支付标准</td><td>巴西90%加密交易使用TRON-USDT进行美元储蓄。阿根廷、土耳其、东南亚广泛采用</td><td><span class="verified">&#9989; 已验证</span></td></tr>
+            <tr><td><strong>2</strong></td><td>BitTorrent收购 + Poloniex收购</td><td>BitTorrent去中心化存储叙事未实现。Poloniex 2023年遭$100M+黑客攻击</td><td><span class="partial">&#9888;&#65039; 争议</span></td></tr>
+            <tr><td><strong>3</strong></td><td>SEC诉讼（2023年起）</td><td>涉嫌市场操纵、未注册证券销售。诉讼进行中</td><td><span class="failed">&#10060; 负面</span></td></tr>
+            <tr><td><strong>4</strong></td><td>巴西市场：90%加密 = TRON-USDT美元储蓄</td><td>当地货币贬值驱动，TRON因低费用成为首选通道</td><td><span class="verified">&#9989; 已验证</span></td></tr>
+            <tr><td><strong>5</strong></td><td>尼日利亚：$921B年交易量</td><td>非洲最大加密市场，TRON-USDT是主要汇款/储蓄工具</td><td><span class="verified">&#9989; 已验证</span></td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <details>
+        <summary><strong>BitTorrent/Poloniex收购的教训</strong></summary>
+        <p>Justin Sun的收购策略体现了"快速扩张+争议执行"的模式。BitTorrent的去中心化存储叙事从未实现有意义的产品，Poloniex在2023年遭遇重大安全事件。</p>
+        <p><strong>关键区分</strong>：这些收购的失败不影响TRON链本身的采用数据。TRON的价值在链上，不在Sun的商业帝国。</p>
+      </details>
+
+      <details>
+        <summary><strong>SEC诉讼详情</strong></summary>
+        <p>2023年3月SEC起诉Justin Sun，指控包括：未注册证券销售（TRX/BTT）、市场操纵（wash trading）、名人支付推广未披露。</p>
+        <p><span class="controversy-tag">风险</span>如果SEC胜诉，可能对TRX代币产生直接影响。但TRON网络作为基础设施层的运行不依赖Sun个人。</p>
+      </details>
+    </section>
+
+    <!-- Section 3: Judgment -->
+    <section id="judgment">
+      <div class="section-header">
+        <h2>3. 核心判断 — Core Judgment</h2>
+      </div>
+
+      <blockquote>
+        "Users don't care about decentralization, they care about cheap and fast."
+        <span class="zh">用户不在乎去中心化，他们在乎便宜和快速。</span>
+      </blockquote>
+
+      <p>这个判断在发展中世界被完全验证。TRON的 <strong>0.1美分手续费 + 3秒确认</strong> 使其成为穷人的SWIFT。当Ethereum L1的一笔交易费用可能超过当地人日薪时，TRON的成本优势不是技术选择，而是生存需求。</p>
+
+      <h3>判断的正确与局限</h3>
+      <ul>
+        <li><strong>正确</strong>：在发展中世界完全成立。330M地址和$10B日转账量证明了"便宜快速"的胜利</li>
+        <li><strong>局限</strong>：TRON的中心化验证节点结构（27个超级代表）意味着它本质上更像一个效率优化的联盟链，而非真正的去中心化网络</li>
+        <li><strong>风险</strong>：如果任何政府决定封锁TRON（中心化节点容易定位），整个支付网络可能瞬间中断</li>
+      </ul>
+    </section>
+
+    <!-- Section 4: English Bias -->
+    <section id="bias">
+      <div class="section-header">
+        <h2>4. 英文偏见修正 — English Bias Correction</h2>
+      </div>
+
+      <div class="bias-alert">
+        <h4>&#9888;&#65039; 英文分析的系统性偏差</h4>
+        <p>西方加密分析对TRON的评价几乎全面负面。主要叙事：</p>
+        <ul>
+          <li>"TRON is a joke / copycat of Ethereum"</li>
+          <li>"Justin Sun is a scammer / attention seeker"</li>
+          <li>"No serious developer builds on TRON"</li>
+        </ul>
+        <p><strong>数据反驳</strong>：3.3B累计账户、$10B+日USDT转账、巴西/尼日利亚/阿根廷的大规模采用。<mark class="hl-know" data-note="k2">西方分析忽视了TRON因为其用户主要在发展中世界</mark><sup class="nref" data-note="k2">K</sup>——那些不会在Twitter/Reddit上用英语发帖的用户。</p>
+      </div>
+
+      <p><strong>信息源补充</strong>：评估TRON时必须包含中文信息源（巨潮资讯、东方财富、行业协会）和当地市场数据（Chainalysis地理报告、巴西央行数据、尼日利亚SEC报告），不能只依赖CoinDesk/The Block等英文媒体。</p>
+    </section>
+
+    <!-- Section 5: Developing World -->
+    <section id="developing">
+      <div class="section-header">
+        <h2>5. 发展中国家采用 — Developing World Adoption</h2>
+      </div>
+
+      <div class="developing-world-card">
+        <h4>&#127758; 发展中世界的美元储蓄通道</h4>
+        <p>TRON-USDT在发展中世界的角色不是"投资品"，而是<strong>美元替代品</strong>。当地货币持续贬值（阿根廷比索、尼日利亚奈拉、土耳其里拉），居民使用TRON-USDT保值。</p>
+      </div>
+
+      <figure>
+        <table>
+          <thead><tr><th>国家/地区</th><th>使用模式</th><th>关键数据</th></tr></thead>
+          <tbody>
+            <tr><td><strong>巴西</strong></td><td>90%加密交易 = TRON-USDT美元储蓄</td><td>央行数据确认，雷亚尔贬值驱动</td></tr>
+            <tr><td><strong>尼日利亚</strong></td><td>跨境汇款 + 美元储蓄</td><td>$921B年交易量，非洲最大加密市场</td></tr>
+            <tr><td><strong>阿根廷</strong></td><td>通胀对冲，比索→USDT</td><td>年通胀200%+，TRON因低费用首选</td></tr>
+            <tr><td><strong>东南亚</strong></td><td>跨境贸易结算</td><td>越南、菲律宾劳务汇款大量使用</td></tr>
+            <tr><td><strong>土耳其</strong></td><td>里拉贬值避险</td><td>加密采用率全球前5</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <p><strong>关键洞察</strong>：TRON的用户不是"crypto enthusiasts"，而是<strong>需要保值和转账的普通人</strong>。这是与Ethereum/Solana用户群体本质不同的。</p>
+    </section>
+
+    <!-- Section 6: Trading -->
+    <section id="trading">
+      <div class="section-header">
+        <h2>6. 交易含义 — Trading Implications</h2>
+      </div>
+
+      <p><span class="signal signal-watch">WATCH</span> TRX代币本身的趋势交易空间有限。价格弹性低，波动率较小，不适合趋势跟踪系统。</p>
+
+      <h3>TRX 作为标的的局限</h3>
+      <ul>
+        <li><strong>价格弹性低</strong>：实际使用驱动（非投机），价格相对稳定</li>
+        <li><strong>叙事折价</strong>：西方市场对Sun/TRON的负面认知压制估值</li>
+        <li><strong>SEC风险</strong>：诉讼结果可能导致突发性下跌</li>
+      </ul>
+
+      <h3>TRON 作为指标的价值</h3>
+      <ul>
+        <li><strong>发展中世界采用指标</strong>：TRON链上活动量 = 发展中国家美元需求的代理变量</li>
+        <li><strong>稳定币增长指标</strong>：TRON上USDT供应量变化是稳定币市场的领先信号</li>
+        <li><strong>监管风向标</strong>：SEC对Sun的诉讼结果对整个行业有先例意义</li>
+      </ul>
+    </section>
+
+    <!-- Section 7: Risk -->
+    <section id="risk">
+      <div class="section-header">
+        <h2>7. 风险信号 — Risk Signals</h2>
+      </div>
+
+      <figure>
+        <table>
+          <thead><tr><th>风险</th><th>概率</th><th>影响</th><th>监控信号</th></tr></thead>
+          <tbody>
+            <tr><td>SEC诉讼败诉</td><td>40%</td><td><span class="signal signal-bear">HIGH</span></td><td>法院裁决、和解动态</td></tr>
+            <tr><td>TRON网络中心化攻击</td><td>15%</td><td><span class="signal signal-bear">CRITICAL</span></td><td>27个超级代表的地理分布</td></tr>
+            <tr><td>USDT发行商风险（Tether）</td><td>20%</td><td><span class="signal signal-bear">HIGH</span></td><td>Tether审计/储备报告</td></tr>
+            <tr><td>Solana/Base抢夺支付份额</td><td>30%</td><td><span class="signal signal-watch">MEDIUM</span></td><td>链上USDT供应份额变化</td></tr>
+            <tr><td>发展中国家加密禁令</td><td>20%</td><td><span class="signal signal-bear">HIGH</span></td><td>尼日利亚/巴西监管动态</td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </section>
+
+    <!-- Section 8: Provenance -->
+    <section id="provenance">
+      <div class="section-header">
+        <h2>8. Provenance</h2>
+      </div>
+      <div class="meta-row">
+        <span>Agent #14</span>
+        <span>Node: N2+N5</span>
+        <span>Tier: B档 3/5</span>
+        <span>Region: 中国</span>
+        <span>Created: 2026-03-22</span>
+      </div>
+      <p style="margin-top:1rem;">数据来源：Chainalysis Geography of Cryptocurrency Report, TRON Scan链上数据, SEC诉讼文件, 巴西央行加密报告, 尼日利亚SEC公告。英文偏见修正参考中文行业报告和当地市场数据。</p>
+    </section>
+
+    <footer class="page-footer">
+      <p>Blockchain Research System &mdash; Cognitive Agent #14<br>
+      <a href="../blockchain_hub.html">&larr; Back to Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ========== RIGHT SIDEBAR: Anchored Annotations ========== -->
+  <aside class="notes-sidebar" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn" aria-label="Close notes">&#10005;</button>
+      <h4>&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+
+    <!-- === SUMMARY SECTION === -->
+    <div class="anno meta-note open" data-section="bias" id="m1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">TRON在西方分析中的隐身</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="trap-tag">英文偏见</span>英文加密媒体（CoinDesk, The Block, Bankless）几乎从不正面报道TRON。原因：TRON用户不在英语互联网上。</p>
+        <p>这是一个经典的<strong>观察者偏差</strong>：分析师只看到自己社交圈讨论的链。结果：CoinGecko按市值排前10的链，在英文深度分析中出现频率最低的就是TRON。</p>
+        <p><span class="method-tag">修正方法</span>使用链上数据（TRON Scan）而非社交舆情判断实际采用率。330M活跃地址 &gt; Twitter讨论量。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note open" data-section="developing" id="k1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">知识</span>
+        <span class="mn-title">发展中世界采用信号</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>TRON-USDT作为事实支付标准</strong>的含义：发展中世界的加密采用不是关于"区块链革命"，而是关于<strong>美元获取</strong>。</p>
+        <p>巴西90%加密交易 = TRON-USDT说明：用户选择TRON不是因为信仰孙宇晨，而是因为0.1美分的转账费用比Western Union低100倍。</p>
+        <p><strong>投资含义</strong>：如果你想预测加密在发展中世界的增长轨迹，TRON链上数据是最好的先行指标。不是BTC，不是ETH，而是TRON上的USDT流量。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note open" data-section="bias" id="k2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">知识</span>
+        <span class="mn-title">西方分析忽视TRON的机制</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>忽视机制</strong>：西方加密分析的信息源是Twitter/Discord/英文论坛。TRON用户群体在葡萄牙语、阿拉伯语、豪萨语社区，不在英语互联网上。</p>
+        <p><strong>结果</strong>：Messari/Delphi/Bankless的行业报告中TRON篇幅极少，与其实际市值和使用量严重不匹配。</p>
+        <p><strong>类比</strong>：这就像2015年用硅谷视角分析支付行业而完全忽略微信支付/支付宝。只看英文信息源 = 只看半个世界。</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<!-- JavaScript -->
+<script>
+(function() {
+  // 1. Left sidebar toggle
+  const hamburger = document.getElementById('hamburgerBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+
+  hamburger.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+  });
+
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+  });
+
+  sidebar.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 900) {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+      }
+    });
+  });
+
+  // 2. Note toggle function
+  window.toggleNote = function(head) {
+    head.parentElement.classList.toggle('open');
+    requestAnimationFrame(positionNotes);
+  };
+
+  // 3. Position notes to align with their sections
+  function positionNotes() {
+    const sidebarEl = document.getElementById('notesSidebar');
+    if (!sidebarEl) return;
+
+    const notes = [...sidebarEl.querySelectorAll('.anno')];
+    const scrollY = window.scrollY;
+    const sidebarAbsTop = sidebarEl.getBoundingClientRect().top + scrollY;
+    const headerEl = sidebarEl.querySelector('.notes-sidebar-header');
+    const headerHeight = headerEl ? headerEl.offsetHeight + 12 : 40;
+
+    notes.sort((a, b) => {
+      const secA = document.getElementById(a.dataset.section);
+      const secB = document.getElementById(b.dataset.section);
+      if (!secA || !secB) return 0;
+      return (secA.getBoundingClientRect().top) - (secB.getBoundingClientRect().top);
+    });
+
+    let lastBottom = headerHeight;
+    notes.forEach(note => {
+      if (note.style.display === 'none') return;
+      const section = document.getElementById(note.dataset.section);
+      if (!section) { note.style.display = 'none'; return; }
+
+      const sectionAbsTop = section.getBoundingClientRect().top + scrollY;
+      let targetY = sectionAbsTop - sidebarAbsTop;
+
+      if (targetY < lastBottom + 8) {
+        targetY = lastBottom + 8;
+      }
+
+      note.style.top = targetY + 'px';
+      lastBottom = targetY + note.offsetHeight;
+    });
+
+    sidebarEl.style.minHeight = (lastBottom + 40) + 'px';
+  }
+
+  // 4. Run positioning on load, resize, scroll
+  window.addEventListener('load', () => {
+    positionNotes();
+    document.querySelectorAll('details').forEach(d => {
+      d.addEventListener('toggle', () => setTimeout(positionNotes, 50));
+    });
+  });
+  window.addEventListener('resize', positionNotes);
+  let scrollTimer;
+  window.addEventListener('scroll', () => {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(positionNotes, 100);
+  }, { passive: true });
+
+  // 5. Highlight <-> Note sync
+  document.querySelectorAll('.nref, mark.hl-know').forEach(el => {
+    el.addEventListener('click', e => {
+      e.preventDefault();
+      const noteId = el.dataset.note;
+      const note = document.getElementById(noteId);
+      if (!note) return;
+      note.classList.add('open');
+      requestAnimationFrame(() => {
+        positionNotes();
+        note.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        note.classList.add('flash');
+        setTimeout(() => note.classList.remove('flash'), 1500);
+      });
+    });
+  });
+
+  // 6. Hover: bidirectional
+  document.querySelectorAll('.anno').forEach(note => {
+    note.addEventListener('mouseenter', () => {
+      document.querySelectorAll('[data-note="' + note.id + '"]').forEach(el => el.classList.add('hover'));
+    });
+    note.addEventListener('mouseleave', () => {
+      document.querySelectorAll('[data-note="' + note.id + '"]').forEach(el => el.classList.remove('hover'));
+    });
+    note.addEventListener('dblclick', () => {
+      const section = document.getElementById(note.dataset.section);
+      if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  document.querySelectorAll('[data-note]').forEach(el => {
+    if (el.classList.contains('anno')) return;
+    el.addEventListener('mouseenter', () => {
+      const note = document.getElementById(el.dataset.note);
+      if (note) note.classList.add('hover');
+    });
+    el.addEventListener('mouseleave', () => {
+      const note = document.getElementById(el.dataset.note);
+      if (note) note.classList.remove('hover');
+    });
+  });
+
+  // 7. Top controls
+  const allAnnos = document.querySelectorAll('.anno');
+  const knowNotes = document.querySelectorAll('.anno.know-note');
+  const knowMarks = document.querySelectorAll('mark.hl-know');
+  const knowRefs = document.querySelectorAll('.nref');
+  const metaNotes = document.querySelectorAll('.anno.meta-note');
+
+  document.getElementById('noteCountLabel').textContent = metaNotes.length + ' \u5143\u601d\u8003 + ' + knowNotes.length + ' \u77e5\u8bc6\u6279\u6ce8';
+
+  window.toggleKnowNotes = function() {
+    const btn = document.getElementById('knowToggleBtn');
+    const isActive = btn.classList.toggle('active');
+    btn.textContent = isActive ? '\u663e\u793a' : '\u9690\u85cf';
+    knowNotes.forEach(n => n.style.display = isActive ? '' : 'none');
+    knowMarks.forEach(m => { m.style.background = isActive ? '' : 'transparent'; m.style.borderBottom = isActive ? '' : 'none'; });
+    knowRefs.forEach(r => r.style.display = isActive ? '' : 'none');
+    requestAnimationFrame(positionNotes);
+  };
+
+  window.expandAllNotes = function() {
+    allAnnos.forEach(n => n.classList.add('open'));
+    requestAnimationFrame(positionNotes);
+  };
+
+  window.collapseAllNotes = function() {
+    allAnnos.forEach(n => n.classList.remove('open'));
+    requestAnimationFrame(positionNotes);
+  };
+
+  // 8. Right sidebar toggle (narrow screens)
+  var notesSidebarEl = document.getElementById('notesSidebar');
+  var notesToggleBtn = document.getElementById('notesToggleBtn');
+  var notesOverlayEl = document.getElementById('notesOverlay');
+  var notesCloseBtn = document.getElementById('notesCloseBtn');
+
+  function toggleNotesSidebar() {
+    var willClose = !notesSidebarEl.classList.contains('ns-closed');
+    notesSidebarEl.classList.toggle('ns-closed', willClose);
+    notesToggleBtn.style.display = willClose ? 'flex' : 'none';
+    notesOverlayEl.classList.toggle('open', !willClose);
+    if (!willClose) requestAnimationFrame(positionNotes);
+  }
+
+  if (notesToggleBtn) notesToggleBtn.addEventListener('click', toggleNotesSidebar);
+  if (notesOverlayEl) notesOverlayEl.addEventListener('click', toggleNotesSidebar);
+  if (notesCloseBtn) notesCloseBtn.addEventListener('click', toggleNotesSidebar);
+
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 1200) {
+      notesSidebarEl.classList.remove('ns-closed');
+      notesToggleBtn.style.display = 'none';
+      notesOverlayEl.classList.remove('open');
+    }
+  });
+})();
+</script>
+
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+
+</body>
+</html>

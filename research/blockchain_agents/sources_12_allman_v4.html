@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nathan Allman — 素材策展地图 V4</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  /* Page-specific V4 extensions (~75 lines) */
+  .priority-box { border:1px solid rgba(248,168,72,0.3); border-left:3px solid var(--accent); border-radius:var(--radius-sm); padding:1.25rem 1.5rem; margin-bottom:2rem; background:var(--bg-surface); }
+  .priority-box h2 { color:var(--accent); margin-top:0; font-size:1.1rem; font-weight:590; }
+  .priority-box ol { margin-bottom:0; padding-left:1.2rem; }
+  .priority-box li { margin-bottom:0.6rem; line-height:1.5; }
+  .time-badge { display:inline-block; padding:0.1rem 0.5rem; border-radius:10px; font-size:0.7rem; font-weight:590; margin-right:0.3rem; background:var(--accent); color:var(--bg-base); }
+  .anno { position:absolute; left:1rem; right:1rem; }
+  .anno.meta-note { padding:0.6rem 0.75rem; border-left:2px solid var(--accent); border-radius:0 6px 6px 0; background:rgba(248,168,72,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.meta-note:hover { box-shadow:0 0 0 1px var(--accent); }
+  .anno.know-note { padding:0.6rem 0.75rem; border-left:2px solid var(--knowledge); border-radius:0 6px 6px 0; background:rgba(91,155,213,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.know-note:hover { box-shadow:0 0 0 1px var(--knowledge); }
+  .anno .note-label { display:inline-block; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--bg-base); background:var(--accent); padding:0.1rem 0.4rem; border-radius:3px; margin-bottom:0.3rem; }
+  .anno .note-label.know { background:var(--knowledge); color:white; }
+  .anno .mn-head { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
+  .anno .mn-title { flex:1; font-weight:510; font-size:0.75rem; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .anno .mn-fold { font-size:0.55rem; color:var(--text-quaternary); transition:transform 0.2s; margin-left:auto; }
+  .anno.open .mn-fold { transform:rotate(180deg); }
+  .anno .mn-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+  .anno.open .mn-body { max-height:2000px; }
+  .anno .mn-body p { font-size:0.78rem; margin-bottom:0.3rem; color:var(--text-secondary); }
+  .anno.flash { animation:noteFlash 1.5s ease; }
+  @keyframes noteFlash { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--accent);} }
+  .anno.know-note.flash { animation:noteFlashBlue 1.5s ease; }
+  @keyframes noteFlashBlue { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--knowledge);} }
+  mark.hl-know { background:rgba(91,155,213,0.12); border-bottom:1.5px solid var(--knowledge); padding:0 2px; border-radius:2px; color:inherit; cursor:pointer; transition:background 0.15s; }
+  mark.hl-know:hover { background:rgba(91,155,213,0.28); }
+  .nref { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; font-size:0.48rem; font-weight:700; cursor:pointer; margin-left:1px; vertical-align:super; transition:transform 0.15s; text-decoration:none; background:var(--knowledge); color:white; }
+  .nref:hover { transform:scale(1.25); box-shadow:0 0 6px rgba(91,155,213,0.4); }
+  .top-controls { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; padding:0.35rem 0.7rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); font-size:0.72rem; flex-wrap:wrap; }
+  .top-controls .tc-label { font-weight:590; color:var(--knowledge); }
+  .top-controls button { padding:0.15rem 0.45rem; border-radius:4px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-tertiary); cursor:pointer; font-size:0.68rem; font-family:inherit; transition:all 0.15s; }
+  .top-controls button:hover { border-color:var(--knowledge); color:var(--text-primary); }
+  .top-controls button.active { background:var(--knowledge-dim); color:var(--knowledge); border-color:rgba(91,155,213,0.3); }
+  .top-controls .tc-sep { color:var(--border-default); margin:0 0.15rem; }
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .notes-sidebar { position:relative; width:320px; min-width:320px; padding:1.25rem 1rem; border-left:1px solid var(--border-subtle); background:var(--bg-elevated); }
+  .notes-sidebar-header { position:sticky; top:0; z-index:60; background:var(--bg-elevated); padding-bottom:0.5rem; border-bottom:1px solid var(--border-subtle); margin-bottom:0.75rem; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  .notes-toggle-btn { position:fixed; right:1rem; bottom:1.5rem; z-index:200; width:44px; height:44px; border-radius:50%; border:1px solid var(--border-default); background:var(--bg-surface); color:var(--text-secondary); cursor:pointer; font-size:1.1rem; display:none; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.4); }
+  .notes-close-btn { float:right; background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:1.1rem; padding:0; display:none; }
+  @media (max-width:1200px) { .notes-close-btn { display:block; } .notes-sidebar { position:fixed; right:0; top:0; height:100vh; overflow-y:auto; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.4); z-index:150; } .notes-sidebar.ns-closed { transform:translateX(100%); box-shadow:none; } .notes-toggle-btn { display:flex; } }
+  .notes-overlay-right { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:140; }
+  .notes-overlay-right.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  @media (min-width:1600px) { .main-content { max-width:1000px; } .notes-sidebar { width:360px; min-width:360px; } }
+  .rel-card { border:1px solid var(--border-subtle); border-radius:var(--radius-md); background:var(--bg-elevated); margin-bottom:0.75rem; }
+  .rel-card summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  .rel-card[open] summary { color:var(--accent); }
+  .rel-card .rel-body { padding:0 1rem 1rem; font-size:0.82rem; color:var(--text-secondary); line-height:1.6; }
+  .arc-item { border-left:3px solid var(--accent); padding:0.6rem 1rem; margin-bottom:0.75rem; background:rgba(66,165,245,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+  .arc-item strong { color:var(--text-primary); }
+  .question-box { border:2px solid var(--knowledge); background:rgba(91,155,213,0.05); border-radius:var(--radius-md); padding:1.5rem; text-align:center; margin:2rem 0; }
+  .question-box blockquote { border:none; margin:0; padding:0; }
+  .question-box p { font-size:1rem; font-weight:510; color:var(--text-primary); }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; margin-bottom:1rem; }
+  th { text-transform:uppercase; font-size:0.72rem; font-weight:510; color:var(--text-quaternary); letter-spacing:0.04em; text-align:left; padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-default); }
+  td { padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-subtle); vertical-align:top; color:var(--text-secondary); }
+  tr:hover td { background:var(--bg-elevated); }
+  .url-col { max-width:200px; word-break:break-all; }
+  .zh { display:block; font-size:0.85em; color:var(--text-tertiary); margin-top:0.15em; }
+  .zh-inline { font-size:0.85em; color:var(--text-tertiary); }
+  details { border:1px solid var(--border-subtle); background:var(--bg-elevated); border-radius:var(--radius-sm); padding:0; margin-bottom:0.75rem; }
+  details summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  details[open] summary { color:var(--accent); }
+  details > div, details > p { padding:0 1rem 1rem; font-size:0.82rem; line-height:1.6; color:var(--text-secondary); }
+  body.embedded .sidebar, body.embedded .notes-sidebar, body.embedded .hamburger-btn, body.embedded .notes-toggle-btn { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ========== LEFT SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Nathan Allman<br>素材策展地图 V4</div>
+
+    <h4>Contents</h4>
+    <nav>
+      <ul>
+        <li><a href="#priority"><span class="toc-num">&#9733;</span>如果只有2小时</a></li>
+        <li><a href="#analysts"><span class="toc-num">1</span>最佳分析师</a></li>
+        <li><a href="#longform"><span class="toc-num">2</span>必读长文/书籍</a></li>
+        <li><a href="#podcasts"><span class="toc-num">3</span>播客与视频</a></li>
+        <li><a href="#primary"><span class="toc-num">4</span>一手资料</a></li>
+        <li><a href="#relationships"><span class="toc-num">5</span>关键关系网</a></li>
+        <li><a href="#narratives"><span class="toc-num">6</span>叙事弧</a></li>
+        <li><a href="#gaps"><span class="toc-num">7</span>信息空白</a></li>
+        <li><a href="#quality"><span class="toc-num">8</span>质量评估</a></li>
+      </ul>
+    </nav>
+
+    <h4>Related</h4>
+    <nav>
+      <ul>
+        <li><a href="12_nathan_allman.html">Nathan Allman Profile</a></li>
+        <li><a href="12_nathan_allman_metacognition.html">Metacognition</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+
+    <div class="top-controls">
+      <span class="tc-label">&#128218; 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <header class="page-header">
+      <h1>Nathan Allman — 素材策展地图 V4</h1>
+      <p class="subtitle">Research Date: 2026-03-22 &nbsp;|&nbsp; RWA赛道 · Ondo Finance · 机构研究<br>
+      <span class="zh-inline">RWA代币化 · BlackRock合作 · OUSG/USDY机制</span></p>
+      <div class="badge-row">
+        <span class="badge">RWA</span>
+        <span class="badge">Ondo Finance</span>
+        <span class="badge">TradFi</span>
+        <span class="badge">代币化国债</span>
+      </div>
+    </header>
+
+    <!-- ★ Priority Box -->
+    <div class="priority-box" id="priority">
+      <h2>&#9200; 如果只有2小时 — 推荐阅读路径</h2>
+      <ol>
+        <li><span class="time-badge">45min</span><strong>精读 Ondo Finance Docs</strong> — 理解 <mark class="hl-know" data-note="note-1">OUSG/USDY</mark> 机制设计，这是所有叙事的基础</li>
+        <li><span class="time-badge">30min</span><strong>阅读 McKinsey《Tokenized Real-World Assets》</strong> — $10T TAM 来源，理解 <mark class="hl-know" data-note="note-2">RWA代币化</mark> 叙事根基</li>
+        <li><span class="time-badge">20min</span><strong>查看 RWA.xyz 仪表盘</strong> — 交叉验证 Ondo 市场份额的链上数据</li>
+        <li><span class="time-badge">15min</span><strong>追踪 Nathan Allman Twitter</strong> — 直接观察其关注焦点和互动网络</li>
+        <li><span class="time-badge">10min</span><strong>阅读 BlackRock BUIDL 招募说明书</strong> — 理解与 Ondo 的竞合关系</li>
+      </ol>
+    </div>
+
+    <!-- §1 最佳分析师 -->
+    <section id="analysts">
+      <div class="section-header">
+        <h2>1. 最佳分析师与独立研究<span class="zh">Best Analysts &amp; Independent Research</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>来源</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Messari</td>
+            <td>机构研究</td>
+            <td class="url-col"><a href="https://messari.io/research" target="_blank">messari.io/research</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td>RWA.xyz</td>
+            <td>数据平台</td>
+            <td class="url-col"><a href="https://rwa.xyz" target="_blank">rwa.xyz</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td>Binance Research</td>
+            <td>交易所研究</td>
+            <td class="url-col"><a href="https://www.binance.com/en/research" target="_blank">binance.com/en/research</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+          <tr>
+            <td>Delphi Digital</td>
+            <td>独立研究</td>
+            <td class="url-col"><a href="https://members.delphidigital.io" target="_blank">members.delphidigital.io</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+          <tr>
+            <td>K33 Research</td>
+            <td>北欧研究</td>
+            <td class="url-col"><a href="https://k33.com/research" target="_blank">k33.com/research</a></td>
+            <td>⭐⭐⭐☆☆</td>
+          </tr>
+          <tr>
+            <td>PANews</td>
+            <td>中文媒体</td>
+            <td class="url-col"><a href="https://panewslab.com" target="_blank">panewslab.com</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+          <tr>
+            <td>BlockBeats</td>
+            <td>中文媒体</td>
+            <td class="url-col"><a href="https://www.theblockbeats.info" target="_blank">theblockbeats.info</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+          <tr>
+            <td>Odaily</td>
+            <td>中文快讯</td>
+            <td class="url-col"><a href="https://www.odaily.news" target="_blank">odaily.news</a></td>
+            <td>⭐⭐⭐☆☆</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §2 必读长文/书籍 -->
+    <section id="longform">
+      <div class="section-header">
+        <h2>2. 必读长文与书籍<span class="zh">Must-Read Long-Form &amp; Books</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL/来源</th>
+            <th>重要性</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Ondo Finance Docs</td>
+            <td>官方文档</td>
+            <td class="url-col"><a href="https://docs.ondo.finance" target="_blank">docs.ondo.finance</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td>McKinsey: Tokenized Real-World Assets</td>
+            <td>咨询报告</td>
+            <td class="url-col"><a href="https://www.mckinsey.com/industries/financial-services/our-insights/tokenization-in-real-assets" target="_blank">mckinsey.com</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td>BIS Project Guardian</td>
+            <td>央行报告</td>
+            <td class="url-col"><a href="https://www.bis.org/publ/work1061.htm" target="_blank">bis.org</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+          <tr>
+            <td>BlackRock BUIDL Prospectus</td>
+            <td>基金文件</td>
+            <td class="url-col"><a href="https://www.sec.gov/edgar" target="_blank">SEC EDGAR</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td>"The Future of Finance" - Gillian Tett</td>
+            <td>书籍</td>
+            <td class="url-col">各大书店</td>
+            <td>⭐⭐⭐☆☆</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §3 播客与视频 -->
+    <section id="podcasts">
+      <div class="section-header">
+        <h2>3. 播客与视频<span class="zh">Podcasts &amp; Video</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>平台/URL</th>
+            <th>重要性</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Nathan Allman @ Token2049/Consensus</td>
+            <td>会议演讲</td>
+            <td class="url-col">YouTube 搜索</td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td>Unchained Podcast</td>
+            <td>英文播客</td>
+            <td class="url-col"><a href="https://unchainedcrypto.com" target="_blank">unchainedcrypto.com</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+          <tr>
+            <td>Bankless</td>
+            <td>英文播客</td>
+            <td class="url-col"><a href="https://www.bankless.com" target="_blank">bankless.com</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+          <tr>
+            <td>Real Vision</td>
+            <td>金融视频</td>
+            <td class="url-col"><a href="https://www.realvision.com" target="_blank">realvision.com</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+          <tr>
+            <td>The Block Live</td>
+            <td>新闻视频</td>
+            <td class="url-col"><a href="https://www.theblock.co" target="_blank">theblock.co</a></td>
+            <td>⭐⭐⭐☆☆</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §4 一手资料 -->
+    <section id="primary">
+      <div class="section-header">
+        <h2>4. 一手资料<span class="zh">Primary Sources</span></h2>
+      </div>
+      
+      <details>
+        <summary>Ondo Finance 官方渠道 <span class="zh-inline">Official Channels</span></summary>
+        <div>
+          <p><strong>官网:</strong> <a href="https://ondo.finance" target="_blank">ondo.finance</a> — 产品更新、合作公告、数据披露</p>
+          <p><strong>Blog:</strong> <a href="https://ondo.finance/blog" target="_blank">ondo.finance/blog</a> — 深度文章与市场解读</p>
+          <p><strong>Ondo Foundation:</strong> <a href="https://ondo.foundation" target="_blank">ondo.foundation</a> — 代币经济学、治理提案</p>
+          <p><strong>Nathan Allman Twitter/X:</strong> <a href="https://twitter.com/NathanAllman" target="_blank">@NathanAllman</a> — 直接观察其关注焦点</p>
+        </div>
+      </details>
+      
+      <details>
+        <summary>链上数据与合约 <span class="zh-inline">On-chain Data &amp; Contracts</span></summary>
+        <div>
+          <p><strong>OUSG 合约:</strong> <code>0x...</code> (需从官网获取最新)</p>
+          <p><strong>USDY 合约:</strong> <code>0x...</code> (需从官网获取最新)</p>
+          <p><strong>ONDO Token:</strong> <code>0xfAbA6f8e4a5E8Ab82F62fe7C39859FA577269BE3</code> (Ethereum)</p>
+          <p><strong>区块浏览器:</strong> Etherscan / Arbiscan — 追踪真实 TVL 与持有者分布</p>
+        </div>
+      </details>
+      
+      <details>
+        <summary>监管文件 <span class="zh-inline">Regulatory Filings</span></summary>
+        <div>
+          <p><strong>SEC EDGAR:</strong> <a href="https://www.sec.gov/edgar" target="_blank">sec.gov/edgar</a> — OUSG 等产品的法律结构披露</p>
+          <p>重要提示: <mark class="hl-know" data-note="note-3">OUSG/USDY 的证券属性界定</mark>是核心监管风险点</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- §5 关键关系网 -->
+    <section id="relationships">
+      <div class="section-header">
+        <h2>5. 关键关系网<span class="zh">Key Relationships</span></h2>
+      </div>
+      
+      <details class="rel-card" open>
+        <summary>🤝 机构合作 <span class="zh-inline">Institutional Partnerships</span></summary>
+        <div class="rel-body">
+          <p><strong>BlackRock</strong> — <span style="color:var(--accent)">⭐⭐⭐⭐⭐</span> OUSG 使用 BUIDL 基金，最强背书，也是最大风险（可能自建）</p>
+          <p><strong>Securitize</strong> — <span style="color:var(--accent)">⭐⭐⭐⭐☆</span> 代币化基础设施，Ondo 的发行合作伙伴</p>
+          <p><strong>Franklin Templeton</strong> — <span style="color:var(--accent)">⭐⭐⭐⭐☆</span> 另一家 TradFi 巨头做链上基金，核心竞品</p>
+          <p><strong>Coinbase</strong> — <span style="color:var(--accent)">⭐⭐⭐☆☆</span> 潜在合作，机构入口</p>
+        </div>
+      </details>
+      
+      <details class="rel-card">
+        <summary>⛓️ 链上生态 <span class="zh-inline">On-chain Ecosystem</span></summary>
+        <div class="rel-body">
+          <p><strong>Arbitrum / 以太坊</strong> — <span style="color:var(--accent)">⭐⭐⭐⭐☆</span> Ondo 主要部署的 L1/L2，Gas/性能影响</p>
+          <p><strong>Circle (USDC)</strong> — <span style="color:var(--accent)">⭐⭐⭐☆☆</span> USDY vs USDC 的收益竞争</p>
+          <p><strong>MakerDAO / Spark</strong> — <span style="color:var(--accent)">⭐⭐⭐⭐☆</span> OUSG 作为抵押品的 DeFi 采用度</p>
+        </div>
+      </details>
+      
+      <details class="rel-card">
+        <summary>👤 人物关系 <span class="zh-inline">Key People</span></summary>
+        <div class="rel-body">
+          <p><strong>Nathan Allman 背景</strong> — 前 Goldman Sachs，需追踪其 GS 人脉是否带来机构客户</p>
+          <p><strong>团队成员</strong> — 其他核心成员 LinkedIn，TradFi 背景深度影响机构信任度</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- §6 叙事弧 -->
+    <section id="narratives">
+      <div class="section-header">
+        <h2>6. 关键叙事弧<span class="zh">Key Narrative Arcs</span></h2>
+      </div>
+      
+      <div class="arc-item">
+        <strong>叙事弧 #1: RWA 代币化将开启 $10T 市场</strong><br>
+        麦肯锡报告预测代币化 RWA 市场规模将达 $10 万亿，Ondo 作为先行者占据 <mark class="hl-know" data-note="note-4">60% 市场份额</mark>。这是整个叙事的宏观背景，也是投资者看多 Ondo 的核心逻辑。
+      </div>
+      
+      <div class="arc-item">
+        <strong>叙事弧 #2: BlackRock 背书 = 合规合法性</strong><br>
+        与 BlackRock BUIDL 基金的合作为 Ondo 带来了传统金融的信任背书。这种 "加密原生 + TradFi 合规" 的双重属性是 Ondo 区别于纯 DeFi 项目的主要差异化。
+      </div>
+      
+      <div class="arc-item">
+        <strong>叙事弧 #3: 从 DeFi 到机构采用</strong><br>
+        OUSG/USDY 不仅服务于 DeFi 协议（MakerDAO、Spark），更瞄准 <mark class="hl-know" data-note="note-5"> TradFi 机构客户</mark>。Nathan Allman 的 Goldman Sachs 背景正是这一叙事的关键连接点。
+      </div>
+      
+      <div class="arc-item">
+        <strong>叙事弧 #4: 利率驱动需求增长</strong><br>
+        美联储加息周期使美国国债收益率上升，增强代币化国债的吸引力。OUSG 提供约 5% 的年化收益（随利率浮动），在 <mark class="hl-know" data-note="note-6">高利率环境</mark> 下竞争力显著。
+      </div>
+    </section>
+
+    <!-- §7 信息空白 -->
+    <section id="gaps">
+      <div class="section-header">
+        <h2>7. 信息空白 — What Doesn't Exist<span class="zh">Information Gaps</span></h2>
+      </div>
+      
+      <div class="arc-item" style="border-left-color:var(--knowledge); background:rgba(91,155,213,0.03);">
+        <strong>🔴 高风险空白</strong>
+        <ul style="margin:0.5rem 0 0 1.2rem; font-size:0.85rem;">
+          <li><strong>真实 AUM vs 报道 AUM:</strong> Ondo 宣传"60%市场份额"，但链上数据与宣传是否有 gap？</li>
+          <li><strong>BlackRock 合作深度:</strong> 是独家合作还是可替换供应商？合同条款未知</li>
+          <li><strong>收入/费用结构:</strong> Ondo 如何收费？管理费率？几乎无公开财务信息</li>
+        </ul>
+      </div>
+      
+      <div class="arc-item" style="border-left-color:#f59e0b; background:rgba(245,158,11,0.03);">
+        <strong>🟡 中风险空白</strong>
+        <ul style="margin:0.5rem 0 0 1.2rem; font-size:0.85rem;">
+          <li><strong>Nathan Allman 持股/解锁:</strong> 团队代币解锁时间表，个人抛售历史</li>
+          <li><strong>监管风险细节:</strong> OUSG/USDY 的证券属性界定，SEC 态度变化</li>
+          <li><strong>机构客户名单:</strong> 谁在用 OUSG？除了 DeFi 协议，真实 TradFi 采用？</li>
+          <li><strong>竞争护城河:</strong> 技术壁垒 vs 关系壁垒？BlackRock 是否可能"过河拆桥"？</li>
+        </ul>
+      </div>
+      
+      <div class="arc-item" style="border-left-color:#22c55e; background:rgba(34,197,94,0.03);">
+        <strong>🟢 机会空白</strong>
+        <ul style="margin:0.5rem 0 0 1.2rem; font-size:0.85rem;">
+          <li><strong>中文市场渗透:</strong> USDY 对亚洲用户吸引力，监管灰色地带操作空间</li>
+          <li><strong>新兴市场采用:</strong> 高通胀国家用户对美元稳定收益的需求</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- §8 质量评估 -->
+    <section id="quality">
+      <div class="section-header">
+        <h2>8. 素材质量评估<span class="zh">Source Quality Assessment</span></h2>
+      </div>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>来源类别</th>
+            <th>可信度</th>
+            <th>时效性</th>
+            <th>备注</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Ondo 官方 (Docs/Blog)</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>最一手，但可能存在选择性披露</td>
+          </tr>
+          <tr>
+            <td>SEC EDGAR 文件</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>⭐⭐☆☆</td>
+            <td>监管合规信息，权威但可能滞后</td>
+          </tr>
+          <tr>
+            <td>McKinsey/BIS 报告</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>⭐⭐⭐☆☆</td>
+            <td>宏观叙事支撑，但非针对 Ondo</td>
+          </tr>
+          <tr>
+            <td>链上数据 (Etherscan)</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>实时验证，需交叉多家数据源</td>
+          </tr>
+          <tr>
+            <td>Messari/Delphi 研究</td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>机构级分析，但可能存在利益关联</td>
+          </tr>
+          <tr>
+            <td>中文媒体</td>
+            <td>⭐⭐⭐☆☆</td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>快速但质量参差，需筛选</td>
+          </tr>
+          <tr>
+            <td>Twitter/KOL</td>
+            <td>⭐⭐☆☆</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>信号早但噪音大，需验证</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="question-box">
+      <p>❓ 核心研究问题：BlackRock 会否"过河拆桥"自建 RWA 代币化平台？</p>
+      <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.75rem;">这是评估 Ondo 长期竞争护城河的关键变量 — 如果 BlackRock 决定自主开发，Ondo 的最大优势将被直接削弱。</p>
+    </div>
+
+    <footer style="margin-top:3rem; padding-top:1rem; border-top:1px solid var(--border-subtle); font-size:0.72rem; color:var(--text-quaternary);">
+      <p>Generated: 2026-03-22 &middot; V4 Template &middot; <a href="../blockchain_hub.html">Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ========== RIGHT SIDEBAR (Notes) ========== -->
+  <aside class="notes-sidebar ns-closed" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&times;</button>
+      <h4 style="font-size:0.7rem; font-weight:590; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-quaternary); margin:0;">&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+    
+    <!-- Meta Note 1 -->
+    <div class="anno meta-note" id="meta-note-1" data-section="priority" style="top:80px;">
+      <div class="note-label">META</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">RWA赛道研究优先级框架</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>本研究采用"P0-P2"优先级框架：P0=立即行动（影响核心决策），P1=本周完成（补充关键数据），P2=持续跟踪（长期叙事）。</p>
+        <p>对于 Ondo，BlackRock 合作动态属于 P0，链上 TVL 验证属于 P1，利率变化属于 P2。</p>
+      </div>
+    </div>
+    
+    <!-- Meta Note 2 -->
+    <div class="anno meta-note" id="meta-note-2" data-section="analysts" style="top:280px;">
+      <div class="note-label">META</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">分析师来源三分法</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>将研究来源分为三类：①机构研究（Messari、Binance Research）— 系统性但可能滞后；②独立研究（Delphi、K33）— 深度但付费；③媒体（PANews、BlockBeats）— 快速但需筛选。</p>
+        <p>最佳实践：先用机构研究建立框架，再用独立研究补充深度，最后用媒体追踪实时动态。</p>
+      </div>
+    </div>
+    
+    <!-- Meta Note 3 -->
+    <div class="anno meta-note" id="meta-note-3" data-section="longform" style="top:520px;">
+      <div class="note-label">META</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">长文阅读的"三层提取法"</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>对于 McKinsey/BIS 等长文，采用三层提取：①核心论点（$10T TAM 预测）；②支撑数据（机构名称、具体案例）；③叙事框架（代币化优势：流动性、24/7、可编程性）。</p>
+        <p>BlackRock BUIDL 招募说明书需重点关注：费用结构、托管安排、投资者限制条款。</p>
+      </div>
+    </div>
+    
+    <!-- Meta Note 4 -->
+    <div class="anno meta-note" id="meta-note-4" data-section="relationships" style="top:900px;">
+      <div class="note-label">META</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">关系网分析的三度空间</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>分析 Ondo 关系网时关注三个维度：一度关系（直接合作伙伴：BlackRock、Securitize）；二度关系（竞品：Franklin Templeton、Superstate）；三度关系（基础设施：Arbitrum、Circle）。</p>
+        <p>BlackRock 属于一度关系中的最高优先级，但也存在"合作关系反转"的最大风险。</p>
+      </div>
+    </div>
+    
+    <!-- Meta Note 5 -->
+    <div class="anno meta-note" id="meta-note-5" data-section="narratives" style="top:1200px;">
+      <div class="note-label">META</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">叙事弧验证的"三层证据链"</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>每个叙事弧需要三层验证：①官方声明（官网、博客、演讲）；②第三方背书（机构研究、媒体报道）；③数据验证（链上数据、用户采用）。</p>
+        <p>目前 Ondo 叙事弧 #1（$10T 市场）有 McKinsey 背书但缺链上数据验证；叙事弧 #2（BlackRock 合规）证据链最完整。</p>
+      </div>
+    </div>
+    
+    <!-- Meta Note 6 -->
+    <div class="anno meta-note" id="meta-note-6" data-section="gaps" style="top:1550px;">
+      <div class="note-label">META</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">信息空白的"风险-机会"二分法</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>信息空白分两类：①空白=风险（无法评估的真实 AUM、监管不确定性）；②空白=机会（尚未被满足的市场需求）。</p>
+        <p>对于 Ondo，BlackRock 合作深度属于风险空白（可能崩塌），中文市场渗透属于机会空白（可能扩张）。</p>
+      </div>
+    </div>
+    
+    <!-- Meta Note 7 -->
+    <div class="anno meta-note" id="meta-note-7" data-section="quality" style="top:1900px;">
+      <div class="note-label">META</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">信息来源的"信噪比"评估</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>评估每个来源的信噪比：官方渠道信噪比最高但存在选择性披露；Twitter/KOL 信噪比最低但能捕捉最早信号。</p>
+        <p>最佳组合：70% 官方+机构研究 + 20% 链上数据 + 10% 社交媒体追踪。</p>
+      </div>
+    </div>
+    
+    <!-- Knowledge Note 1 -->
+    <div class="anno know-note" id="note-1" data-section="priority" style="top:200px;">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">OUSG 与 USDY 的关键差异</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>OUSG</strong>（Ondo Short-Term US Government Obligations）：代币化美国短期国债，面向认可投资者（accredited investors），需要 KYC/AML。</p>
+        <p><strong>USDY</strong>（USD Yield）：由 Blockstone Capital 发行，Ondo 提供技术支持，面向更广泛用户群体（包括非美国投资者）。</p>
+        <p>关键区别：OUSG 是直接代币化，USDY 是收益代币（由 RWA 支持但可能有不同监管结构）。</p>
+      </div>
+    </div>
+    
+    <!-- Knowledge Note 2 -->
+    <div class="anno know-note" id="note-2" data-section="priority" style="top:420px;">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">RWA 代币化的核心价值主张</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>流动性:</strong> 传统 RWA（私募股权、房地产）缺乏流动性，代币化可实现部分所有权和二级市场交易。</p>
+        <p><strong>可编程性:</strong> 智能合约可自动分红、投票、条款执行，降低结算成本。</p>
+        <p><strong>准入性:</strong> 降低投资门槛，允许 24/7 交易，扩大投资者范围。</p>
+        <p><strong>透明度:</strong> 链上记录可实时审计，降低欺诈风险。</p>
+      </div>
+    </div>
+    
+    <!-- Knowledge Note 3 -->
+    <div class="anno know-note" id="note-3" data-section="primary" style="top:750px;">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">OUSG/USDY 的证券属性界定</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Howey Test:</strong> 美国 SEC 使用 Howey Test 判断是否为证券（投资合约四要素：金钱投资、共同企业、利润预期、合理预期努力）。</p>
+        <p><strong>Ondo 的合规策略:</strong> OUSG 通过 Reg D（豁免私募）发行，仅面向认可投资者；USDY 可能采用不同结构以覆盖非美国用户。</p>
+        <p><strong>风险:</strong> 如果监管机构重新界定 OUSG 为证券，可能面临注册要求和合规成本。</p>
+      </div>
+    </div>
+    
+    <!-- Knowledge Note 4 -->
+    <div class="anno know-note" id="note-4" data-section="narratives" style="top:1050px;">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">60% 市场份额的来源与质疑</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>来源:</strong> Ondo 官方引用，可能基于代币化国债 TVL 计算（OUSG 占 RWA.xyz 追踪的代币化国债总量）。</p>
+        <p><strong>质疑:</strong> ①统计口径是否包含所有 RWA（不只是国债）？②DeFi 协议存款是否算"真实"采用？③是否排除同一资产的多层代币化？</p>
+        <p><strong>验证方法:</strong> 对比 RWA.xyz 的 OUSG TVL 与其他代币化国债基金（如 Franklin Templeton、Superstate）。</p>
+      </div>
+    </div>
+    
+    <!-- Knowledge Note 5 -->
+    <div class="anno know-note" id="note-5" data-section="narratives" style="top:1280px;">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Nathan Allman 的 Goldman Sachs 背景</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>背景:</strong> Nathan Allman 曾任职于 Goldman Sachs 的 FICC（固收、外汇、大宗商品）部门，负责利率产品。</p>
+        <p><strong>战略价值:</strong> ①GS 网络可能带来机构客户；②理解传统固收市场的运作逻辑；③熟悉合规框架和机构需求。</p>
+        <p><strong>局限:</strong> 纯 TradFi 背景可能在产品设计和开发者关系上存在短板，需观察团队其他成员的 Web3 经验。</p>
+      </div>
+    </div>
+    
+    <!-- Knowledge Note 6 -->
+    <div class="anno know-note" id="note-6" data-section="narratives" style="top:1450px;">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">利率环境与代币化国债吸引力</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>当前状态（2024）:</strong> 美联储基准利率维持在 5.25%-5.5%，美国短期国债收益率约 5%。</p>
+        <p><strong>OUSG 收益结构:</strong> OUSG 收益率跟随底层美国国债收益率，扣除费用后约 4.5%-5%。</p>
+        <p><strong>降息周期风险:</strong> 如果美联储开始降息，国债收益率下降，OUSG 的吸引力可能减弱（相对其他 DeFi 收益率）。</p>
+        <p><strong>对冲策略:</strong> 关注美联储 FOMC 会议纪要和利率点阵图，评估利率路径对 OUSG 需求的影响。</p>
+      </div>
+    </div>
+    
+    <!-- Knowledge Note 7 -->
+    <div class="anno know-note" id="note-7" data-section="relationships" style="top:1650px;">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">BlackRock BUIDL vs Ondo OUSG 竞合分析</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>合作层面:</strong> OUSG 使用 BlackRock 的 BUIDL 基金作为底层资产支持，Ondo 是 BUIDL 的"分销渠道"。</p>
+        <p><strong>竞争层面:</strong> BlackRock 可能通过 BUIDL 直接面向机构客户，绕过 Ondo。</p>
+        <p><strong>Ondo 护城河:</strong> ①DeFi 原生集成（Maverick、Spark 等）；②面向非美国投资者的 USDY；③更灵活的产品迭代。</p>
+        <p><strong>关键问题:</strong> BUIDL 与 Ondo 的合作协议是否排他？合同期限多长？这是评估长期风险的核心。</p>
+      </div>
+    </div>
+    
+    <!-- Knowledge Note 8 -->
+    <div class="anno know-note" id="note-8" data-section="gaps" style="top:1800px;">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">链上 TVL 验证方法论</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>步骤 1:</strong> 从 Ondo Docs 获取 OUSG 合约地址，从 Etherscan 验证。</p>
+        <p><strong>步骤 2:</strong> 查看合约总供应量（totalSupply），对比 Ondo 官方公布的 AUM。</p>
+        <p><strong>步骤 3:</strong> 分析持有者分布（top holders），识别是否集中于少数地址（可能为团队/做市商）。</p>
+        <p><strong>步骤 4:</strong> 追踪历史 TVL 变化，识别大规模赎回或增持信号。</p>
+        <p><strong>工具:</strong> Etherscan、DeBank、Nansen、RWA.xyz。</p>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+// === Sidebar toggle (mobile) ===
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+
+// === Notes sidebar toggle ===
+(function(){
+  var btn=document.getElementById("notesToggleBtn"),ns=document.getElementById("notesSidebar"),ov=document.getElementById("notesOverlay"),cb=document.getElementById("notesCloseBtn");
+  if(!btn||!ns)return;
+  function toggle(){ns.classList.toggle("ns-closed");ov.classList.toggle("open");}
+  btn.onclick=toggle;
+  if(ov)ov.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(cb)cb.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(window.innerWidth>1200)ns.classList.remove("ns-closed");
+  window.addEventListener("resize",function(){if(window.innerWidth>1200)ns.classList.remove("ns-closed");});
+})();
+
+// === Toggle note ===
+function toggleNote(head){
+  var anno=head.closest(".anno");
+  if(anno){anno.classList.toggle("open");positionNotes();}
+}
+
+// === Position notes ===
+function positionNotes(){
+  var ns=document.getElementById("notesSidebar");if(!ns)return;
+  var annos=ns.querySelectorAll(".anno");
+  var lastBottom=80;
+  annos.forEach(function(a){
+    if(a.style.display==="none")return;
+    var sec=a.getAttribute("data-section");
+    var target=sec?document.getElementById(sec):null;
+    var top=target?target.getBoundingClientRect().top+window.scrollY-ns.getBoundingClientRect().top:lastBottom;
+    if(top<lastBottom)top=lastBottom;
+    a.style.top=top+"px";
+    lastBottom=top+a.offsetHeight+8;
+  });
+}
+
+// === Knowledge toggle ===
+function toggleKnowNotes(){
+  var btn=document.getElementById("knowToggleBtn");
+  var knowNotes=document.querySelectorAll(".anno.know-note");
+  var marks=document.querySelectorAll("mark.hl-know");
+  var nrefs=document.querySelectorAll(".nref");
+  var visible=btn.classList.contains("active");
+  knowNotes.forEach(function(n){n.style.display=visible?"none":"";});
+  marks.forEach(function(m){m.style.background=visible?"transparent":"";m.style.borderBottom=visible?"none":"";});
+  nrefs.forEach(function(r){r.style.display=visible?"none":"";});
+  btn.classList.toggle("active");
+  btn.textContent=visible?"显示":"隐藏";
+  positionNotes();
+}
+
+// === Expand / Collapse all ===
+function expandAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.add("open");});positionNotes();}
+function collapseAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.remove("open");});positionNotes();}
+
+// === Note count ===
+(function(){
+  var label=document.getElementById("noteCountLabel");if(!label)return;
+  var meta=document.querySelectorAll(".anno.meta-note").length;
+  var know=document.querySelectorAll(".anno.know-note").length;
+  label.textContent=meta+" META + "+know+" Knowledge";
+})();
+
+// === Highlight → Note sync ===
+document.addEventListener("click",function(e){
+  var mark=e.target.closest("mark.hl-know")||e.target.closest(".nref");
+  if(!mark)return;
+  var noteId=mark.getAttribute("data-note");if(!noteId)return;
+  var anno=document.getElementById(noteId);if(!anno)return;
+  anno.classList.add("open");
+  anno.scrollIntoView({behavior:"smooth",block:"center"});
+  anno.classList.add("flash");
+  setTimeout(function(){anno.classList.remove("flash");},1500);
+  positionNotes();
+});
+
+// === Embedded mode ===
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+  document.addEventListener("click",function(e){
+    var a=e.target.closest("a");if(!a||!a.href)return;
+    try{var url=new URL(a.href,location.href)}catch(err){return}
+    if(url.pathname.startsWith("/trade-pipeline/")||url.pathname.startsWith("/observatory/")){
+      e.preventDefault();
+      window.top.postMessage({type:"dashboard-nav",action:"openResearch",url:url.pathname,title:a.textContent.trim().substring(0,60)},"*");
+    }
+  });
+})();
+
+// Initial positioning
+window.addEventListener("load",function(){positionNotes();});
+window.addEventListener("scroll",function(){positionNotes();});
+</script>
+</body>
+</html>

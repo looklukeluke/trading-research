@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NODE 5: Streaming & Digital Entertainment 流媒体与数字娱乐 — Internet Hub</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../internet_shared.css">
+<style>
+/* Node-specific overrides */
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded main { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+.reading-mode .sidebar { display: none !important; }
+.reading-mode .notes-sidebar { display: none !important; }
+.reading-mode main { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+
+.node-hero {
+    background: linear-gradient(135deg, rgba(233,30,99,0.08) 0%, rgba(156,39,176,0.08) 100%);
+    border: 1px solid rgba(233,30,99,0.2);
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.node-hero h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.node-hero .node-meta {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.node-hero .node-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.trend-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.trend-card h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--accent);
+}
+
+.signal-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.signal-list li {
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.signal-list li:last-child {
+    border-bottom: none;
+}
+
+.signal-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.signal-icon.bull { background: rgba(76,175,80,0.2); color: var(--green); }
+.signal-icon.bear { background: rgba(244,67,54,0.2); color: var(--red); }
+.signal-icon.neutral { background: rgba(255,152,0,0.2); color: #ff9800; }
+
+.relationship-diagram {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-top: 1rem;
+}
+
+.node-connection {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    background: var(--purple-dim);
+    color: var(--purple);
+    text-decoration: none;
+    margin: 0.25rem;
+}
+
+.node-connection:hover {
+    background: var(--accent-dim);
+    color: var(--accent);
+}
+
+table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin: 0.75rem 0;
+}
+
+table.data-table th {
+    background: rgba(233,30,99,0.1);
+    color: var(--accent);
+    padding: 0.6rem 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid var(--accent);
+}
+
+table.data-table td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+}
+
+table.data-table tr:hover td {
+    background: rgba(233,30,99,0.03);
+}
+
+table.data-table .num {
+    font-family: 'Inter', monospace;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+</style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- ===== Left Sidebar ===== -->
+  <div class="sidebar">
+    <a class="back-link" href="../internet_hub.html">&larr; Internet Hub</a>
+
+    <h4>Streaming & Entertainment</h4>
+    <div class="project-meta">
+      流媒体与数字娱乐<br>
+      Node 5 &middot; 全球$960B+市场
+    </div>
+
+    <h4>Navigate</h4>
+    <nav>
+      <ul>
+        <li><a href="#overview">01 Overview 行业概述</a></li>
+        <li><a href="#market-size">02 Market Size 市场规模</a></li>
+        <li><a href="#competition">03 Competition 竞争格局</a></li>
+        <li><a href="#trends">04 Key Trends 关键趋势</a></li>
+        <li><a href="#china">05 China 中国特色</a></li>
+        <li><a href="#signals">06 Signals 投资信号</a></li>
+        <li><a href="#risks">07 Risk Analysis 风险分析</a></li>
+        <li><a href="#relationships">08 Relationships 节点关系</a></li>
+      </ul>
+    </nav>
+
+    <h4>Context 上下文</h4>
+    <nav>
+      <ul>
+        <li><a href="../internet_hub.html">Internet Hub 主导航</a></li>
+        <li><a href="NODE_1_e-commerce.html">NODE 1 电子商务</a></li>
+        <li><a href="NODE_2_search_ai.html">NODE 2 搜索与AI</a></li>
+        <li><a href="NODE_3_cloud_infrastructure.html">NODE 3 云基础设施</a></li>
+        <li><a href="NODE_4_social_networks.html">NODE 4 社交网络</a></li>
+        <li><a href="NODE_6_fintech.html" style="color:var(--accent);">NODE 6 金融科技</a></li>
+        <li><a href="NODE_7_edtech.html">NODE 7 在线教育</a></li>
+        <li><a href="NODE_8_telecoms.html">NODE 8 电信与网络</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- ===== Main Content ===== -->
+  <main>
+
+    <div class="node-hero">
+      <h1>NODE 5: Streaming & Digital Entertainment<span class="zh">流媒体与数字娱乐</span></h1>
+      <div class="node-meta">
+        <span>&#128250; Video/Audio/Gaming</span>
+        <span>&#127918; $960B+ Global Market</span>
+        <span>&#128200; 5 Key Trends</span>
+        <span>&#127758; China: 3 Trillion RMB</span>
+      </div>
+    </div>
+
+    <!-- ═══════════ §1 行业概述 ═══════════ -->
+    <div class="section-header" id="overview">
+      <h2><span class="section-num">01</span>Industry Overview<span class="zh">行业概述 &mdash; 从内容消费到注意力经济</span></h2>
+    </div>
+
+    <div class="advisory-box">
+      <strong>思维链 Thinking Chain：</strong>全球数字化程度加深 &rarr; 用户注意力成为稀缺资源 &rarr; 流媒体/游戏/社交娱乐争夺用户时间 &rarr; 平台护城河从"内容库"转向"算法+生态+互动" &rarr; AI降低内容生产成本，但创意人才价值反而提升。
+      <span class="zh">Global digitalization deepens → User attention becomes scarce resource → Streaming/gaming/social entertainment compete for time → Platform moats shift from "content library" to "algorithm + ecosystem + interactivity" → AI reduces production cost, but creative talent value increases.</span>
+    </div>
+
+    <div class="card" style="border-left: 3px solid var(--accent);">
+      <strong>行业定义 Industry Definition</strong>
+      <div class="card-desc" style="margin-top:0.5rem;">
+        流媒体与数字娱乐涵盖通过互联网传输的视听内容消费，包括：
+        <br>&#128250; <strong>视频流媒体 SVOD</strong>: Netflix/Disney+/腾讯视频等订阅点播
+        <br>&#127911; <strong>音频流媒体 Audio</strong>: Spotify/Apple Music/QQ音乐
+        <br>&#127918; <strong>数字游戏 Gaming</strong>: 主机/PC/移动游戏及云游戏
+        <br>&#128179; <strong>社交娱乐 Social Entertainment</strong>: 直播/短视频/微短剧/虚拟礼物
+        <br><span class="zh-inline">Video streaming (SVOD), audio streaming, digital gaming, and social entertainment (live streaming, short video, micro-drama).</span>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:1rem;">
+      <div class="card">
+        <strong>全球格局 Global Landscape</strong>
+        <div class="card-desc">
+          <ul style="margin:0.5rem 0 0 1.2rem;padding:0;">
+            <li>全球$960B+市场，视频+音频+游戏三分天下</li>
+            <li>北美ARPU最高($15-20/月)，但增速放缓</li>
+            <li>亚太增速最快，中国+印度+东南亚</li>
+            <li>内容战争从"版权采购"转向"自制内容"</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card">
+        <strong>中国格局 China Landscape</strong>
+        <div class="card-desc">
+          <ul style="margin:0.5rem 0 0 1.2rem;padding:0;">
+            <li>总规模约¥3.5万亿(含短视频电商)</li>
+            <li>字节跳动(抖音)主导短视频，爱腾优芒竞争长视频</li>
+            <li>游戏双寡头: 腾讯+网易，版号常态化管控</li>
+            <li>监管是核心变量: 版号/未成年人/内容审查</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ §2 市场规模 ═══════════ -->
+    <div class="section-header" id="market-size">
+      <h2><span class="section-num">02</span>Market Size<span class="zh">市场规模 &mdash; 全球$960B+，中国¥3.5万亿</span></h2>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:600;margin:1rem 0 0.5rem;">全球 Global Market (2024-2025)</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>细分市场 Segment</th>
+          <th>2024规模</th>
+          <th>2025预测</th>
+          <th>CAGR</th>
+          <th>趋势</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>视频流媒体 SVOD</strong></td>
+          <td class="num">$95.3B</td>
+          <td class="num">$108.7B</td>
+          <td class="num">14.1%</td>
+          <td><span style="color:var(--green);">&#9650; 涨价+体育直播</span></td>
+        </tr>
+        <tr>
+          <td><strong>音频流媒体 Audio</strong></td>
+          <td class="num">$39.2B</td>
+          <td class="num">$45.8B</td>
+          <td class="num">16.8%</td>
+          <td><span style="color:var(--green);">&#9650; 播客+有声书</span></td>
+        </tr>
+        <tr>
+          <td><strong>数字游戏 Gaming</strong></td>
+          <td class="num">$187.7B</td>
+          <td class="num">$205.7B</td>
+          <td class="num">9.6%</td>
+          <td><span style="color:var(--green);">&#9650; 移动+云游戏</span></td>
+        </tr>
+        <tr>
+          <td><strong>数字广告 Digital Ads</strong></td>
+          <td class="num">$679B</td>
+          <td class="num">$740B</td>
+          <td class="num">9.0%</td>
+          <td><span style="color:#ff9800;">&#9654; 短视频侵蚀</span></td>
+        </tr>
+        <tr style="background:rgba(233,30,99,0.05);">
+          <td><strong>合计 Total</strong></td>
+          <td class="num"><strong>$1.00T</strong></td>
+          <td class="num"><strong>$1.10T</strong></td>
+          <td class="num">~11%</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="muted small">数据来源: Statista, Newzoo, PwC Global Entertainment & Media Outlook 2024</p>
+
+    <h3 style="font-size:1rem;font-weight:600;margin:1.25rem 0 0.5rem;">中国 China Market (2024)</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>细分市场</th>
+          <th>2024规模</th>
+          <th>同比</th>
+          <th>关键特征</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>短视频 Short Video</strong></td>
+          <td class="num">¥3000B (~$415B含电商)</td>
+          <td class="num" style="color:var(--green);">+15%</td>
+          <td>抖音/快手主导，侵蚀长视频时长</td>
+        </tr>
+        <tr>
+          <td><strong>游戏 Gaming</strong></td>
+          <td class="num">¥303B ($42B)</td>
+          <td class="num" style="color:var(--green);">+5%</td>
+          <td>版号常态化，出海成核心增长</td>
+        </tr>
+        <tr>
+          <td><strong>长视频 Long Video</strong></td>
+          <td class="num">¥110B (~$15B)</td>
+          <td class="num" style="color:var(--red);">-2%</td>
+          <td>存量博弈，会员增长见顶</td>
+        </tr>
+        <tr>
+          <td><strong>在线音乐 Online Music</strong></td>
+          <td class="num">¥18.9B (~$2.6B)</td>
+          <td class="num" style="color:var(--green);">+8%</td>
+          <td>腾讯音乐+网易云双寡头</td>
+        </tr>
+        <tr>
+          <td><strong>微短剧 Micro-Drama</strong></td>
+          <td class="num">¥50.8B ($7B)</td>
+          <td class="num" style="color:var(--green);">+35%</td>
+          <td>野蛮生长，付费模式成熟</td>
+        </tr>
+        <tr style="background:rgba(233,30,99,0.05);">
+          <td><strong>合计(不含短视频电商)</strong></td>
+          <td class="num"><strong>¥482B ($66B)</strong></td>
+          <td></td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="muted small">来源: 中国音数协游戏工委《2024年中国游戏产业报告》、QuestMobile 2024年度报告</p>
+
+    <div class="advisory-box" style="border-left-color:var(--purple);background:rgba(156,39,176,0.05);margin-top:1rem;">
+      <strong style="color:var(--purple);">&#128161; 关键洞察 Key Insight</strong><br>
+      中国短视频(¥3000B)体量远超其他细分，但包含电商GMV。纯内容消费口径下，游戏(¥303B)是第一大细分。长视频(-2%)首次负增长，标志着用户注意力争夺进入新阶段——短视频在"杀死"长视频后，也在重新定义所有内容消费形态。
+      <span class="zh">China short video (¥3000B) dwarfs other segments but includes e-commerce GMV. Gaming is the #1 pure content segment. Long video (-2%) declining for first time — short video is redefining all content consumption.</span>
+    </div>
+
+    <!-- ═══════════ §3 竞争格局 ═══════════ -->
+    <div class="section-header" id="competition">
+      <h2><span class="section-num">03</span>Competitive Landscape<span class="zh">竞争格局 &mdash; 全球与中国双视角</span></h2>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:600;margin:1rem 0 0.5rem;">视频流媒体 Global SVOD Top 5</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>玩家</th>
+          <th>订阅数(2024Q4)</th>
+          <th>市占率</th>
+          <th>核心护城河</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="num">1</td>
+          <td><strong>Netflix</strong></td>
+          <td class="num">2.83亿</td>
+          <td class="num">~23%</td>
+          <td>全球化内容库+算法推荐+自制能力</td>
+        </tr>
+        <tr>
+          <td class="num">2</td>
+          <td><strong>Disney+</strong></td>
+          <td class="num">1.54亿</td>
+          <td class="num">~12%</td>
+          <td>IP宇宙(Marvel/星战)+bundle策略</td>
+        </tr>
+        <tr>
+          <td class="num">3</td>
+          <td><strong>Amazon Prime</strong></td>
+          <td class="num">~1.75亿(视频)</td>
+          <td class="num">~14%</td>
+          <td>电商生态捆绑+体育版权</td>
+        </tr>
+        <tr>
+          <td class="num">4</td>
+          <td><strong>Max (HBO)</strong></td>
+          <td class="num">0.97亿</td>
+          <td class="num">~8%</td>
+          <td>高端内容品质+华纳IP库</td>
+        </tr>
+        <tr>
+          <td class="num">5</td>
+          <td><strong>YouTube Premium</strong></td>
+          <td class="num">1亿+</td>
+          <td class="num">~8%</td>
+          <td>UGC生态+创作者经济</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="font-size:1rem;font-weight:600;margin:1.25rem 0 0.5rem;">音频流媒体 Global Audio Top 3</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>玩家</th>
+          <th>用户规模</th>
+          <th>护城河</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="num">1</td>
+          <td><strong>Spotify</strong></td>
+          <td>6.75亿MAU, 2.63亿付费</td>
+          <td>算法+播客生态+全球化覆盖</td>
+        </tr>
+        <tr>
+          <td class="num">2</td>
+          <td><strong>Apple Music</strong></td>
+          <td>~1亿付费</td>
+          <td>硬件生态捆绑+无损音质</td>
+        </tr>
+        <tr>
+          <td class="num">3</td>
+          <td><strong>YouTube Music</strong></td>
+          <td>~0.8亿付费</td>
+          <td>YouTube流量转化</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="font-size:1rem;font-weight:600;margin:1.25rem 0 0.5rem;">游戏 Gaming Global Top 5 (by Revenue 2024)</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>公司</th>
+          <th>游戏收入</th>
+          <th>核心优势</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="num">1</td>
+          <td><strong>腾讯游戏</strong></td>
+          <td class="num">~$25B</td>
+          <td>微信/QQ流量+投资矩阵(Riot/Supercell)</td>
+        </tr>
+        <tr>
+          <td class="num">2</td>
+          <td><strong>索尼互动娱乐</strong></td>
+          <td class="num">~$18B</td>
+          <td>PS5硬件+独占IP</td>
+        </tr>
+        <tr>
+          <td class="num">3</td>
+          <td><strong>微软Xbox</strong></td>
+          <td class="num">~$16B</td>
+          <td>Game Pass订阅+动视暴雪收购</td>
+        </tr>
+        <tr>
+          <td class="num">4</td>
+          <td><strong>网易游戏</strong></td>
+          <td class="num">~$11B</td>
+          <td>自研能力+日本市场突破</td>
+        </tr>
+        <tr>
+          <td class="num">5</td>
+          <td><strong>米哈游 miHoYo</strong></td>
+          <td class="num">~$4B</td>
+          <td>原神/崩坏IP+全球化运营</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="font-size:1rem;font-weight:600;margin:1.25rem 0 0.5rem;">中国长视频 China Long Video (2024)</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>平台</th>
+          <th>会员数</th>
+          <th>关键动态</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="num">1</td>
+          <td><strong>腾讯视频</strong></td>
+          <td class="num">1.16亿</td>
+          <td>爆款剧集驱动，缩减亏损</td>
+        </tr>
+        <tr>
+          <td class="num">2</td>
+          <td><strong>爱奇艺</strong></td>
+          <td class="num">1.01亿</td>
+          <td>首次全年盈利，降本增效</td>
+        </tr>
+        <tr>
+          <td class="num">3</td>
+          <td><strong>优酷</strong></td>
+          <td class="num">~0.6亿</td>
+          <td>阿里生态整合，内容投入收缩</td>
+        </tr>
+        <tr>
+          <td class="num">4</td>
+          <td><strong>芒果TV</strong></td>
+          <td class="num">~0.6亿</td>
+          <td>综艺优势，国资背景</td>
+        </tr>
+        <tr>
+          <td class="num">5</td>
+          <td><strong>B站</strong></td>
+          <td class="num">0.28亿(大会员)</td>
+          <td>社区粘性，亏损收窄中</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="advisory-box" style="border-left-color:var(--green);background:rgba(76,175,80,0.05);margin-top:1rem;">
+      <strong style="color:var(--green);">&#128200; 格局洞察 Pattern Insight</strong><br>
+      全球: Netflix独大但面临Disney+/Max高端竞争，Apple/Amazon以生态优势参战。中国: 腾讯视频+爱奇艺双雄格局稳固，但抖音正在从"短视频"向"综合娱乐平台"渗透，长短视频边界模糊化。
+      <span class="zh">Global: Netflix dominates but faces Disney+/Max高端 competition. China: Tencent Video + iQIYI duopoly stable, but Douyin is infiltrating from short video to comprehensive entertainment.</span>
+    </div>
+
+    <!-- ═══════════ §4 关键趋势 ═══════════ -->
+    <div class="section-header" id="trends">
+      <h2><span class="section-num">04</span>Key Trends<span class="zh">关键趋势 (2024-2025) &mdash; 五大结构性变化</span></h2>
+    </div>
+
+    <div class="trend-card" style="border-left:3px solid var(--accent);">
+      <h4>Trend 1: 盈利优先 Profitability Over Growth</h4>
+      <p style="margin:0;font-size:0.9rem;color:var(--text-secondary);">"从烧钱换增长转向可持续盈利"</p>
+      <div class="card-desc" style="margin-top:0.5rem;">
+        <ul style="margin:0.5rem 0 0 1.2rem;padding:0;font-size:0.85rem;">
+          <li>Netflix 2024年营业利润率提升至<strong>22%</strong>，证明模式可行性</li>
+          <li>爱奇艺2023年<strong>首次全年盈利</strong>，验证中国长视频盈利可能</li>
+          <li>全球流媒体集体涨价，Disney+/Netflix/HBO Max 2024年平均提价<strong>15-25%</strong></li>
+        </ul>
+      </div>
+      <p class="muted small" style="margin-top:0.5rem;">来源: LatePost《2024，长视频学会赚钱》</p>
+    </div>
+
+    <div class="trend-card" style="border-left:3px solid var(--purple);">
+      <h4>Trend 2: 体育与直播 Sports & Live Events</h4>
+      <p style="margin:0;font-size:0.9rem;color:var(--text-secondary);">"从点播到直播，从影视到体育"</p>
+      <div class="card-desc" style="margin-top:0.5rem;">
+        <ul style="margin:0.5rem 0 0 1.2rem;padding:0;font-size:0.85rem;">
+          <li>Netflix 2025年1月首播<strong>WWE Raw</strong>，首次大规模进入体育直播</li>
+          <li>Amazon NFL Thursday Night Football 观看量持续增长</li>
+          <li>中国: 抖音/快手抢购体育赛事版权(世界杯、亚运会)</li>
+          <li>体育直播成为订阅增长和广告收入的新引擎</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="trend-card" style="border-left:3px solid var(--green);">
+      <h4>Trend 3: 游戏化与互动 Gamification & Interactivity</h4>
+      <p style="margin:0;font-size:0.9rem;color:var(--text-secondary);">"从被动观看到主动参与"</p>
+      <div class="card-desc" style="margin-top:0.5rem;">
+        <ul style="margin:0.5rem 0 0 1.2rem;padding:0;font-size:0.85rem;">
+          <li>Netflix游戏库扩展至<strong>100+款</strong>，虽用户渗透低但战略持续</li>
+          <li>互动剧《黑镜:潘达斯奈基》模式持续探索</li>
+          <li>中国: 芒果TV《乘风2024》投票互动，B站弹幕文化</li>
+          <li>元宇宙/VR方向长期布局，Meta Quest内容生态</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="trend-card" style="border-left:3px solid #ff9800;">
+      <h4>Trend 4: AI驱动内容生产 AI-Generated Content</h4>
+      <p style="margin:0;font-size:0.9rem;color:var(--text-secondary);">"降本增效的新变量"</p>
+      <div class="card-desc" style="margin-top:0.5rem;">
+        <ul style="margin:0.5rem 0 0 1.2rem;padding:0;font-size:0.85rem;">
+          <li>Netflix用AI优化缩略图推荐，提升点击率</li>
+          <li>抖音剪映"图文成片"、腾讯"智影"降低创作门槛</li>
+          <li>争议: 2024好莱坞编剧罢工达成AI使用限制协议</li>
+          <li>Sora/Runway等AI视频工具正在改变预告片和特效制作</li>
+        </ul>
+      </div>
+      <p class="muted small" style="margin-top:0.5rem;">来源: 极客公园《AI视频生成2024:从玩具到工具》</p>
+    </div>
+
+    <div class="trend-card" style="border-left:3px solid var(--red);">
+      <h4>Trend 5: 短视频侵蚀与融合 Short-Form Erosion & Convergence</h4>
+      <p style="margin:0;font-size:0.9rem;color:var(--text-secondary);">"长视频被迫适应注意力经济"</p>
+      <div class="card-desc" style="margin-top:0.5rem;">
+        <ul style="margin:0.5rem 0 0 1.2rem;padding:0;font-size:0.85rem;">
+          <li>TikTok/抖音日均使用时长超<strong>90分钟</strong>，持续挤压长视频</li>
+          <li>YouTube Shorts月活超<strong>20亿</strong>，长短视频融合</li>
+          <li>中国: 爱优腾推出"微短剧"专区，单集1-3分钟，2024市场规模破<strong>500亿</strong></li>
+          <li>Netflix推出"Fast Laughs"类TikTok功能反击</li>
+        </ul>
+      </div>
+      <p class="muted small" style="margin-top:0.5rem;">来源: QuestMobile《2024中国移动互联网年度报告》</p>
+    </div>
+
+    <!-- ═══════════ §5 中国特色 ═══════════ -->
+    <div class="section-header" id="china">
+      <h2><span class="section-num">05</span>China Characteristics<span class="zh">中国特色 &mdash; 监管生态与独特商业模式</span></h2>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:600;margin:1rem 0 0.5rem;">监管环境 Regulatory Environment</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>领域</th>
+          <th>政策</th>
+          <th>影响</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>游戏版号</strong></td>
+          <td>2024年发放1416个版号(国产+进口)，常态化但总量控制</td>
+          <td>供给侧约束，利好头部腾讯/网易</td>
+        </tr>
+        <tr>
+          <td><strong>未成年人保护</strong></td>
+          <td>周五-周日及节假日1小时游戏限制</td>
+          <td>未成年人收入占比降至极低</td>
+        </tr>
+        <tr>
+          <td><strong>内容审查</strong></td>
+          <td>影视剧备案+播出审查双轨制</td>
+          <td>内容成本增加，周期延长</td>
+        </tr>
+        <tr>
+          <td><strong>数据安全</strong></td>
+          <td>算法推荐管理规定、数据出境安全评估</td>
+          <td>出海合规成本上升</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="muted small">来源: 国家新闻出版署2024年游戏审批信息, 36Kr《游戏版号十年》</p>
+
+    <h3 style="font-size:1rem;font-weight:600;margin:1.25rem 0 0.5rem;">独特商业模式 Unique Business Models</h3>
+
+    <div class="grid-2" style="margin-top:0.75rem;">
+      <div class="card" style="border-left:3px solid var(--accent);">
+        <strong>模式一: 免费+广告 Freemium + Ads</strong>
+        <div class="card-desc">
+          中国长视频VIP价格仅为美国1/5-1/3（¥15-25 vs $15-20）
+          <br>广告收入占比显著高于Netflix（爱奇艺~30% vs Netflix <10%）
+        </div>
+      </div>
+      <div class="card" style="border-left:3px solid var(--purple);">
+        <strong>模式二: 生态捆绑 Ecosystem Bundling</strong>
+        <div class="card-desc">
+          腾讯视频+QQ音乐+阅文集团"新文创"生态
+          <br>阿里大文娱整合优酷+大麦+阿里影业
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:0.75rem;">
+      <div class="card" style="border-left:3px solid var(--green);">
+        <strong>模式三: 微短剧 Micro-Drama Explosion</strong>
+        <div class="card-desc">
+          2024年中国微短剧市场规模<strong>508亿</strong>，同比增长35%
+          <br>付费模式: 单集解锁/会员包月，ARPPU可达¥50-100
+          <br>代表: 点众科技、九州文化、抖音"辰星计划"
+        </div>
+        <p class="muted small">来源: LatePost《微短剧2024:从野蛮生长到精耕细作》</p>
+      </div>
+      <div class="card" style="border-left:3px solid #ff9800;">
+        <strong>模式四: 直播打赏+电商 Live Commerce</strong>
+        <div class="card-desc">
+          抖音快手"短剧+直播带货"闭环
+          <br>虚拟礼物打赏: 秀场直播、游戏直播
+          <br>电商带货: 抖音/快手2024GMV超2万亿
+        </div>
+      </div>
+    </div>
+
+    <div class="advisory-box" style="border-left-color:var(--tier-low);background:rgba(244,67,54,0.05);margin-top:1rem;">
+      <strong style="color:var(--tier-low);">&#9888; 中国特殊风险 China-Specific Risks</strong><br>
+      <ul style="margin:0.5rem 0 0 1.2rem;padding:0;font-size:0.85rem;color:var(--text-secondary);">
+        <li>监管不确定性高: 随时可能出台新限制(如2021年"双减"对教育行业的冲击)</li>
+        <li>数据合规: 《数据安全法》《个人信息保护法》执行趋严</li>
+        <li>内容成本: 演员限薪令+税收整顿影响内容制作链条</li>
+        <li>估值折价: 海外投资者对中国互联网平台持谨慎态度</li>
+      </ul>
+    </div>
+
+    <!-- ═══════════ §6 投资信号 ═══════════ -->
+    <div class="section-header" id="signals">
+      <h2><span class="section-num">06</span>Investment Signals<span class="zh">投资信号 &mdash; 关键标的与时机判断</span></h2>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:600;margin:1rem 0 0.5rem;">核心标的 Core Signals</h3>
+    <ul class="signal-list">
+      <li>
+        <span class="signal-icon bull">&#9650;</span>
+        <div>
+          <strong>Netflix (NFLX)</strong> — 全球流媒体龙头
+          <br><span class="muted small">2.83亿订阅户，广告订阅增长快，营业利润率22%+。2025 WWE直播标志体育扩张。目标价$750+。</span>
+        </div>
+      </li>
+      <li>
+        <span class="signal-icon bull">&#9650;</span>
+        <div>
+          <strong>腾讯音乐 (TME)</strong> — 中国音乐资产
+          <br><span class="muted small">在线音乐付费率持续提升，直播业务边际改善。监管最悲观时期已过。</span>
+        </div>
+      </li>
+      <li>
+        <span class="signal-icon bull">&#9650;</span>
+        <div>
+          <strong>网易 (NTES)</strong> — 游戏出海标杆
+          <br><span class="muted small">版号常态化受益者，《燕云十六声》《代号:无限》等待上线。日本市场突破。</span>
+        </div>
+      </li>
+      <li>
+        <span class="signal-icon neutral">&#9654;</span>
+        <div>
+          <strong>Spotify (SPOT)</strong> — 音频流媒体全球第一
+          <br><span class="muted small">6.75亿MAU，播客+有声书扩展边界。毛利率持续改善。</span>
+        </div>
+      </li>
+      <li>
+        <span class="signal-icon neutral">&#9654;</span>
+        <div>
+          <strong>迪士尼 (DIS)</strong> — IP宇宙+流媒体转型
+          <br><span class="muted small">Disney+/Hulu/ESPN+ bundle策略见效，但内容投入压力大。</span>
+        </div>
+      </li>
+      <li>
+        <span class="signal-icon bear">&#9660;</span>
+        <div>
+          <strong>爱奇艺 (IQ)</strong> — 等待盈利验证
+          <br><span class="muted small">首次全年盈利是里程碑，但用户增长停滞，短视频竞争持续压制估值。</span>
+        </div>
+      </li>
+    </ul>
+
+    <h3 style="font-size:1rem;font-weight:600;margin:1.25rem 0 0.5rem;">周期定位 Cycle Positioning</h3>
+    <div class="card" style="border-left:3px solid var(--knowledge);">
+      <div class="card-desc">
+        <table class="data-table" style="margin:0;">
+          <thead>
+            <tr>
+              <th>阶段 Phase</th>
+              <th>特征</th>
+              <th>信号</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>早期 Early</strong></td>
+              <td>用户渗透率低，资本开支高峰</td>
+              <td>NA</td>
+            </tr>
+            <tr>
+              <td><strong>成长期 Growth</strong></td>
+              <td>订阅增长快，竞争激烈</td>
+              <td>Netflix 2019-2021</td>
+            </tr>
+            <tr>
+              <td style="background:rgba(76,175,80,0.1);"><strong>成熟期 Mature</strong></td>
+              <td>盈利优先，整合开始</td>
+              <td style="background:rgba(76,175,80,0.1);">当前(2024-2025)</td>
+            </tr>
+            <tr>
+              <td><strong>转型期 Transition</strong></td>
+              <td>新形态(AI/VR/元宇宙)探索</td>
+              <td>未来5-10年</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="advisory-box" style="border-left-color:var(--accent);background:rgba(233,30,99,0.05);margin-top:1rem;">
+      <strong>交易建议 Trading Thesis</strong><br>
+      <span class="zh">成熟期投资策略: 优选有定价权(NFLX)+出海能力(腾讯/网易)+AI赋能效率提升的标的。避开纯国内长视频(竞争无解+监管风险)。游戏板块: 版号常态化是利好，腾讯/网易享受集中度提升。</span>
+      <br><br>
+      Mature phase strategy: Prefer companies with pricing power (NFLX), overseas expansion capability (Tencent/Netease), and AI efficiency gains. Avoid pure domestic long-video (unsolvable competition + regulatory risk). Gaming: normalized版号 approval is bullish for concentration gains.
+    </div>
+
+    <!-- ═══════════ §7 风险分析 ═══════════ -->
+    <div class="section-header" id="risks">
+      <h2><span class="section-num">07</span>Risk Analysis<span class="zh">风险分析 &mdash; 结构性风险与尾部风险</span></h2>
+    </div>
+
+    <div class="grid-2" style="margin-top:1rem;">
+      <div class="card" style="border-left:3px solid var(--red);">
+        <strong style="color:var(--red);">&#9888; 结构性风险 Structural Risks</strong>
+        <div class="card-desc">
+          <ul style="margin:0.5rem 0 0 1.2rem;padding:0;font-size:0.85rem;">
+            <li><strong>注意力瓶颈</strong>: 用户日均娱乐时间天花板(约6-8小时)，各平台零和竞争</li>
+            <li><strong>技术颠覆</strong>: AI生成内容可能降低内容壁垒，但创意人才价值上升</li>
+            <li><strong>监管收紧</strong>: 全球范围内内容审核、AI监管趋严</li>
+            <li><strong>经济周期</strong>: 消费降级影响娱乐支出，广告收入与宏观高度相关</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card" style="border-left:3px solid #ff9800;">
+        <strong style="color:#ff9800;">&#9888; 尾部风险 Tail Risks</strong>
+        <div class="card-desc">
+          <ul style="margin:0.5rem 0 0 1.2rem;padding:0;font-size:0.85rem;">
+            <li><strong>中国政策黑天鹅</strong>: 类似2021年教培行业的突然监管冲击</li>
+            <li><strong>内容成本泡沫</strong>: 自制内容投入过高导致资产负债表恶化</li>
+            <li><strong>地缘政治</strong>: 中概股退市风险，中美监管摩擦</li>
+            <li><strong>用户流失</strong>: 新娱乐形式(VR/游戏)分流流媒体用户</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:600;margin:1.25rem 0 0.5rem;">风险矩阵 Risk Matrix</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>风险类型</th>
+          <th>概率</th>
+          <th>影响</th>
+          <th>时间窗口</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>中国监管收紧(游戏/内容)</td>
+          <td style="color:#ff9800;">中</td>
+          <td style="color:var(--red);">高</td>
+          <td>持续</td>
+        </tr>
+        <tr>
+          <td>短视频持续侵蚀长视频时长</td>
+          <td style="color:var(--green);">高</td>
+          <td style="color:var(--red);">高</td>
+          <td>已发生</td>
+        </tr>
+        <tr>
+          <td>全球AI监管框架影响内容生产</td>
+          <td style="color:#ff9800;">中</td>
+          <td style="color:#ff9800;">中</td>
+          <td>2025-2027</td>
+        </tr>
+        <tr>
+          <td>宏观经济衰退影响娱乐支出</td>
+          <td style="color:#ff9800;">中</td>
+          <td style="color:#ff9800;">中</td>
+          <td>2025</td>
+        </tr>
+        <tr>
+          <td>内容成本超预期上涨</td>
+          <td style="color:var(--green);">低</td>
+          <td style="color:#ff9800;">中</td>
+          <td>持续</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ═══════════ §8 节点关系 ═══════════ -->
+    <div class="section-header" id="relationships">
+      <h2><span class="section-num">08</span>Node Relationships<span class="zh">节点关系 &mdash; 互联网价值链中的位置</span></h2>
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--accent);">
+      <strong>Streaming & Entertainment 在互联网价值链中</strong>
+      <div class="card-desc" style="margin-top:0.75rem;">
+        <p style="margin:0 0 1rem;font-size:0.9rem;">流媒体与数字娱乐处于<strong>应用层(NODE 4-8)</strong>，依赖基础设施节点，同时与社交网络(NODE 4)、金融科技(NODE 6)深度融合。</p>
+        
+        <div class="relationship-diagram">
+          <div style="margin-bottom:1rem;">
+            <strong style="font-size:0.85rem;color:var(--text-muted);">依赖上游 Dependency (需要...)</strong>
+            <div style="margin-top:0.5rem;">
+              <a href="NODE_3_cloud_infrastructure.html" class="node-connection">NODE 3 云基础设施</a>
+              <span style="margin:0 0.25rem;color:var(--text-muted);">→</span>
+              <span style="font-size:0.8rem;">CDN/流媒体传输/存储</span>
+            </div>
+            <div style="margin-top:0.5rem;">
+              <a href="NODE_8_telecoms.html" class="node-connection">NODE 8 电信网络</a>
+              <span style="margin:0 0.25rem;color:var(--text-muted);">→</span>
+              <span style="font-size:0.8rem;">5G/宽带普及率决定画质上限</span>
+            </div>
+            <div style="margin-top:0.5rem;">
+              <a href="NODE_2_search_ai.html" class="node-connection">NODE 2 搜索与AI</a>
+              <span style="margin:0 0.25rem;color:var(--text-muted);">→</span>
+              <span style="font-size:0.8rem;">推荐算法/AI内容生成</span>
+            </div>
+          </div>
+          
+          <div>
+            <strong style="font-size:0.85rem;color:var(--text-muted);">协同下游 Synergy (相互增强)</strong>
+            <div style="margin-top:0.5rem;">
+              <a href="NODE_4_social_networks.html" class="node-connection">NODE 4 社交网络</a>
+              <span style="margin:0 0.25rem;color:var(--text-muted);">↔</span>
+              <span style="font-size:0.8rem;">分享传播/二创/社区运营(抖音/B站本质是社交)</span>
+            </div>
+            <div style="margin-top:0.5rem;">
+              <a href="NODE_6_fintech.html" class="node-connection">NODE 6 金融科技</a>
+              <span style="margin:0 0.25rem;color:var(--text-muted);">↔</span>
+              <span style="font-size:0.8rem;">直播打赏/虚拟礼物/游戏内购买</span>
+            </div>
+            <div style="margin-top:0.5rem;">
+              <a href="NODE_1_e-commerce.html" class="node-connection">NODE 1 电子商务</a>
+              <span style="margin:0 0.25rem;color:var(--text-muted);">↔</span>
+              <span style="font-size:0.8rem;">直播带货/短剧+电商闭环</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:1rem;">
+      <div class="card">
+        <strong>流量来源 Traffic Sources</strong>
+        <div class="card-desc">
+          流媒体平台的流量来源:
+          <ul style="margin:0.5rem 0 0 1.2rem;padding:0;font-size:0.85rem;">
+            <li><strong>社交分享</strong>: Twitter/微信/微博传播</li>
+            <li><strong>搜索发现</strong>: 内容推荐/SEO</li>
+            <li><strong>直接访问</strong>: App/网站订阅用户回访</li>
+            <li><strong>生态导流</strong>: 手机厂商预装/电商会员捆绑</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card">
+        <strong>变现渠道 Monetization</strong>
+        <div class="card-desc">
+          流媒体平台的变现路径:
+          <ul style="margin:0.5rem 0 0 1.2rem;padding:0;font-size:0.85rem;">
+            <li><strong>订阅收入</strong>: SVOD主流模式(NFLX/DIS)</li>
+            <li><strong>广告收入</strong>: AVOD/TikTok模式</li>
+            <li><strong>虚拟商品</strong>: 游戏皮肤/直播打赏</li>
+            <li><strong>电商带货</strong>: 直播电商/短剧种草</li>
+            <li><strong>IP衍生</strong>: 游戏/影视/周边/主题乐园</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="page-footer">
+      <a href="../internet_hub.html">&larr; Back to Internet Hub 返回主导航</a>
+      <div style="margin-top:0.5rem;">NODE 5: Streaming & Entertainment &middot; Internet Hub V4 &middot; 2026-03-25</div>
+    </div>
+
+  </main>
+
+  <!-- ===== Right Sidebar: Meta-cognitive ===== -->
+  <aside class="notes-sidebar">
+    <h4>Meta-cognitive 元思考</h4>
+
+    <div class="meta-note">
+      <div class="note-label strength">Strength</div>
+      <p>NODE 5覆盖全球与中国双视角，包含5大趋势+4种商业模式+竞争格局全景表格。微短剧(¥508B)作为中国独特现象单独分析，反映了短视频向内容付费的延伸。
+      <span class="zh">NODE 5 covers global+China dual perspectives, includes 5 trends + 4 business models + competitive landscape tables. Micro-drama (¥508B) as China-unique phenomenon.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label chain">Chain</div>
+      <p>Streaming & Entertainment与NODE 4(社交)边界模糊——抖音/B站本质是社交+娱乐融合体。与NODE 6(金融科技)的"直播打赏+虚拟礼物"构成数字娱乐的核心变现闭环。
+      <span class="zh">Streaming overlaps with NODE 4 (Social) — Douyin/Bilibili are social+entertainment hybrids. NODE 6 (Fintech) provides core monetization via live tipping/virtual goods.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label pattern">Key Insight</div>
+      <p>全球流媒体进入"盈利优先"阶段，标志性事件: Netflix 22%营业利润率+爱奇艺首次全年盈利。这意味着烧钱换增长时代结束，现金流和ARPU成为核心指标。
+      <span class="zh">Global streaming entered "profitability over growth" phase — NFLX 22% operating margin + iQIYI first full-year profit.烧钱时代结束.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label risk">Data Transparency</div>
+      <p>中国微短剧市场规模508亿(Yoy+35%)——快速膨胀但数据透明度低，估算口径不一。中国游戏出海收入统计也存在口径差异。抖音/快手GMV数据由公司自报，真实性难验证。
+      <span class="zh">China micro-drama market ¥508B (+35%) — rapidly expanding but low data transparency. Douyin/Kuaishou GMV self-reported.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label suggestion">Next Step</div>
+      <p>NODE 5框架已就位。下一步: 深入研究AI视频生成工具(NODE 4 Trend)对内容生产的颠覆性影响，以及微短剧出海(东南亚/中东)的潜在机会。
+      <span class="zh">NODE 5 framework ready. Next: deep-dive AI video generation impact on content production, and micro-drama overseas expansion potential (SEA/Middle East).</span></p>
+    </div>
+  </aside>
+
+</div>
+
+<!-- Sidebar active state -->
+<script>
+const sections = document.querySelectorAll('.section-header[id]');
+const navLinks = document.querySelectorAll('.sidebar nav ul li a[href^="#"]');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + entry.target.id) link.classList.add('active');
+      });
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+
+<script src="../../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+  });
+})();
+</script>
+<script src="../lib/reading-mode.js"></script>
+</body>
+</html>

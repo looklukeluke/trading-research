@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Node 2 — Metacognition 元思考过程</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  .meta-card { border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:1.1rem 1.3rem; margin-bottom:0.75rem; background:var(--bg-surface); }
+  .meta-card h3 { font-size:0.95rem; font-weight:590; margin-bottom:0.5rem; color:var(--text-primary); }
+  .meta-card p { font-size:0.82rem; color:var(--text-secondary); line-height:1.6; margin-bottom:0.5rem; }
+  .bias-tag { display:inline-block; padding:0.15rem 0.5rem; border-radius:4px; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
+  .bias-confirmed { background:rgba(76,175,80,0.15); color:var(--tier-high); }
+  .bias-warning { background:rgba(255,193,7,0.15); color:var(--tier-medium); }
+  .bias-critical { background:rgba(244,67,54,0.15); color:var(--tier-low); }
+  .confidence-bar { display:flex; align-items:center; gap:0.5rem; margin:0.5rem 0; }
+  .conf-track { flex:1; height:6px; background:var(--border-subtle); border-radius:3px; overflow:hidden; }
+  .conf-fill { height:100%; border-radius:3px; }
+  .conf-label { font-size:0.72rem; font-weight:590; color:var(--text-tertiary); min-width:2.5rem; }
+  .gap-item { border-left:3px solid var(--tier-low); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(244,67,54,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .cross-ref { border-left:3px solid var(--knowledge); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(91,155,213,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .decision-log { font-size:0.78rem; color:var(--text-tertiary); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:0.8rem 1rem; background:var(--bg-elevated); margin-bottom:0.75rem; }
+  body.embedded .sidebar { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+</style>
+</head>
+<body>
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="page-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Node 2<br>Metacognition 元思考</div>
+    <h4>Contents</h4>
+    <nav><ul>
+      <li><a href="#definition">§1 节点定义与边界</a></li>
+      <li><a href="#classification">§2 公司归类逻辑</a></li>
+      <li><a href="#biases">§3 认知偏差</a></li>
+      <li><a href="#crossval">§4 上下游交叉影响</a></li>
+      <li><a href="#gaps">§5 信息缺口</a></li>
+      <li><a href="#quality">§6 质量评估</a></li>
+      <li><a href="#log">§7 决策日志</a></li>
+    </ul></nav>
+    <h4>Related</h4>
+    <nav><ul>
+      <li><a href="NODE_2_L1协议_2026-03-22.html">Node 2 L1协议报告</a></li>
+      <li><a href="../blockchain_hub.html">Blockchain Hub</a></li>
+    </ul></nav>
+  </aside>
+  <main class="main-content">
+    <header class="page-header">
+      <h1>Node 2: L1协议 — Metacognition<span style="display:block;font-size:0.85rem;font-weight:400;color:var(--text-tertiary);margin-top:0.2rem;">元思考过程 — 研究中的认知审计</span></h1>
+      <p style="font-size:0.82rem;color:var(--text-quaternary);">Generated: 2026-03-22 &middot; Blockchain Research Hub &middot; Node 2 of 8</p>
+    </header>
+
+    <!-- §1 节点定义与边界 -->
+    <section id="definition">
+      <div class="meta-card">
+        <h3>&sect;1 节点定义与边界<span class="zh-inline" style="font-weight:400;font-size:0.85rem;color:var(--text-tertiary);margin-left:0.5rem;">Node Definition & Boundaries</span></h3>
+        <p><strong>为什么L1协议作为一个节点？</strong></p>
+        <p>L1协议是区块链技术栈的最底层——提供去中心化信任的基础设施层。没有L1，就没有智能合约、没有DeFi、没有稳定币、没有NFT。所有上层应用都依赖L1的安全性、去中心化和经济模型。L1的边界是清晰的：<strong>直接定义共识机制、区块生产和经济模型的协议层</strong>。</p>
+        <p><strong>为什么这样划分？</strong></p>
+        <p>我将L1协议与其他节点分离，因为：</p>
+        <ul style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6;margin:0.5rem 0;">
+          <li><strong>技术栈位置</strong>：L1是"规则制定者"，L2是"规则执行者"，中间件是"信息传递者"。三层分工明确。</li>
+          <li><strong>估值框架差异</strong>：BTC用货币属性估值，ETH用平台估值，TRON用支付网络估值——三种完全不同的逻辑，却都属于L1。</li>
+          <li><strong>竞争动态</strong>：L1之间存在直接竞争（用户、开发者、TVL争夺），而L1与L2是互补关系。</li>
+        </ul>
+        <p><strong>覆盖的子行业</strong>：</p>
+        <ul style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6;margin:0.5rem 0;">
+          <li><strong>Layer 1区块链</strong>：BTC、ETH、SOL、TRON、AVAX、ADA、COSMOS、SUI、APTOS等</li>
+          <li><strong>共识机制</strong>：PoW（BTC）、PoS（ETH 2.0）、DPoS（TRON）、PoH（SOL）等</li>
+          <li><strong>协议经济模型</strong>：代币经济学、gas机制、通缩/通胀设计</li>
+          <li><strong>跨链协议</strong>：LayerZero、IBC——连接不同L1的桥接层（边缘归属）</li>
+        </ul>
+      </div>
+
+      <div class="meta-card">
+        <h3>排除的子行业<span class="zh-inline" style="font-weight:400;font-size:0.85rem;color:var(--text-tertiary);margin-left:0.5rem;">Excluded Sub-sectors</span></h3>
+        <ul style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6;margin:0;">
+          <li><strong>Layer 2</strong>：Arbitrum、Optimism、Base、ZK Rollups → 归入Node 7 (DeFi)因为与DeFi生态强绑定</li>
+          <li><strong>中间件/预言机</strong>：Chainlink、The Graph → Node 3</li>
+          <li><strong>区块浏览器/数据</strong>：Etherscan、Dune Analytics → 工具层，非协议</li>
+          <li><strong> staking服务/Liquid Staking</strong>：Lido、Rocket Pool → Node 7 (DeFi)</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- §2 关键公司归类逻辑 -->
+    <section id="classification">
+      <div class="meta-card">
+        <h3>&sect;2 关键公司归类逻辑<span class="zh-inline" style="font-weight:400;font-size:0.85rem;color:var(--text-tertiary);margin-left:0.5rem;">Company Classification Logic</span></h3>
+        <p>L1协议节点的归类核心是<strong>协议所有权+代币经济模型控制权</strong>。我将以下实体归入此节点：</p>
+        
+        <div style="margin:1rem 0;">
+          <div style="padding:0.75rem;background:var(--bg-overlay);border-radius:var(--radius-sm);margin-bottom:0.5rem;">
+            <strong style="font-size:0.85rem;color:var(--accent);">BTC → 无公司实体</strong>
+            <p style="font-size:0.82rem;color:var(--text-secondary);margin:0.25rem 0 0;">中本聪创造了BTC协议，但无公司、无CEO、无董事会。归类依据：BTC是最大的L1，其代币经济学（2100万上限、PoW）是整个行业的基准。</p>
+          </div>
+          <div style="padding:0.75rem;background:var(--bg-overlay);border-radius:var(--radius-sm);margin-bottom:0.5rem;">
+            <strong style="font-size:0.85rem;color:var(--accent);">ETH → Ethereum Foundation + Vitalik</strong>
+            <p style="font-size:0.82rem;color:var(--text-secondary);margin:0.25rem 0 0;">非营利组织，但核心开发者有很强影响力。归类依据：ETH是最大的智能合约平台，TVL~$60B，开发者6000+。</p>
+          </div>
+          <div style="padding:0.75rem;background:var(--bg-overlay);border-radius:var(--radius-sm);margin-bottom:0.5rem;">
+            <strong style="font-size:0.85rem;color:var(--accent);">SOL → Solana Foundation + Solana Labs</strong>
+            <p style="font-size:0.82rem;color:var(--text-secondary);margin:0.25rem 0 0;">高TPS高性能链，零售端采用快速增长。归类依据：SOL是ETH最强挑战者，开发者增长最快(+80% YoY)。</p>
+          </div>
+          <div style="padding:0.75rem;background:var(--bg-overlay);border-radius:var(--radius-sm);margin-bottom:0.5rem;">
+            <strong style="font-size:0.85rem;color:var(--accent);">TRON → TRON DAO + Justin Sun</strong>
+            <p style="font-size:0.82rem;color:var(--text-secondary);margin:0.25rem 0 0;">发展中市场支付通道，3.3亿账户，日均USDT转账$10B+。归类依据：TRON在支付领域的实际采用被严重低估。</p>
+          </div>
+          <div style="padding:0.75rem;background:var(--bg-overlay);border-radius:var(--radius-sm);">
+            <strong style="font-size:0.85rem;color:var(--accent);">AVAX/COSMOS/ADA → 各基金会</strong>
+            <p style="font-size:0.82rem;color:var(--text-secondary);margin:0.25rem 0 0;">边缘包含，归类依据：市值排名靠前但在主报告中作为竞争格局参考，未深入分析。</p>
+          </div>
+        </div>
+
+        <p><strong>为什么排除矿机制造商？</strong></p>
+        <p style="font-size:0.82rem;color:var(--text-secondary);">矿机生产商（比特大陆、嘉楠耘智）属于Node 1（挖矿与能源）——矿机是能源转换设备，不是L1协议本身。L1协议定义的是链上规则，不是生产这些规则的硬件。</p>
+      </div>
+    </section>
+
+    <!-- §3 认知偏差 -->
+    <section id="biases">
+      <div class="meta-card">
+        <h3>&sect;3 认知偏差<span class="zh-inline" style="font-weight:400;font-size:0.85rem;color:var(--text-tertiary);margin-left:0.5rem;">Cognitive Biases in Research</span></h3>
+        <p>研究L1协议时，我识别出以下系统性认知偏差：</p>
+
+        <div style="margin:1rem 0;">
+          <div style="display:flex;align-items:flex-start;gap:0.75rem;margin-bottom:1rem;">
+            <span class="bias-tag bias-critical">CRITICAL</span>
+            <div>
+              <strong style="font-size:0.88rem;color:var(--text-primary);">英文来源偏差</strong>
+              <p style="font-size:0.82rem;color:var(--text-secondary);margin:0.25rem 0 0;">英文加密媒体（CoinDesk、CoinTelegraph、The Block）覆盖硅谷项目，忽视发展中市场采用。TRON在尼日利亚$921亿年交易量、巴西90%加密活动是TRON-USDT——这些被西方分析视为笑话，但数据真实存在。</p>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:flex-start;gap:0.75rem;margin-bottom:1rem;">
+            <span class="bias-tag bias-critical">CRITICAL</span>
+            <div>
+              <strong style="font-size:0.88rem;color:var(--text-primary);">技术偏见（TPS崇拜）</strong>
+              <p style="font-size:0.82rem;color:var(--text-secondary);margin:0.25rem 0 0;">分析师用TPS比较L1——但BTC最慢（7 TPS）却最大（$1.2T市值）。TPS是可量化指标，但去中心化程度、安全性、开发者生态无法简单量化，导致"快=好"的隐性偏见。</p>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:flex-start;gap:0.75rem;margin-bottom:1rem;">
+            <span class="bias-tag bias-warning">WARNING</span>
+            <div>
+              <strong style="font-size:0.88rem;color:var(--text-primary);">市值偏差（Market Cap Bias）</strong>
+              <p style="font-size:0.82rem;color:var(--text-secondary);margin:0.25rem 0 0;">BTC$1.2T、ETH$400B vs TRON$12B——市值大的项目获得更多研究和媒体报道。但这不代表市值小的项目不重要：TRON的3.3亿账户可能比某些$50B市值链更有实际影响。</p>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:flex-start;gap:0.75rem;margin-bottom:1rem;">
+            <span class="bias-tag bias-warning">WARNING</span>
+            <div>
+              <strong style="font-size:0.88rem;color:var(--text-primary);">存活者偏差（Survivorship Bias）</strong>
+              <p style="font-size:0.82rem;color:var(--text-secondary);margin:0.25rem 0 0;">我们只研究"活着的"L1（BTC、ETH、SOL）。死掉的L1（EOS、Terra/LUNA、FTM）提供的重要教训被忽视。例如Terra的算法稳定币实验失败是理解稳定币风险的关键。</p>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:flex-start;gap:0.75rem;margin-bottom:1rem;">
+            <span class="bias-tag bias-warning">WARNING</span>
+            <div>
+              <strong style="font-size:0.88rem;color:var(--text-primary);">创始人光环效应</strong>
+              <p style="font-size:0.82rem;color:var(--text-secondary);margin:0.25rem 0 0;">Vitalik的透明度 + 高智商形象 = ETH被高估？Justin Sun的争议 + 营销风格 = TRON被低估？创始人个人形象影响了我对项目的客观评估。这是需要警惕的。</p>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:flex-start;gap:0.75rem;">
+            <span class="bias-tag bias-confirmed">CONFIRMED</span>
+            <div>
+              <strong style="font-size:0.88rem;color:var(--text-primary);">叙事同质化偏见</strong>
+              <p style="font-size:0.82rem;color:var(--text-secondary);margin:0.25rem 0 0;">BTC"数字黄金"叙事、ETH"世界计算机"叙事——这些是行业叙事而非技术事实。叙事影响价格，但叙事本身是动态的、可被操控的。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- §4 与上下游的交叉影响 -->
+    <section id="crossval">
+      <div class="meta-card">
+        <h3>&sect;4 与上下游的交叉影响<span class="zh-inline" style="font-weight:400;font-size:0.85rem;color:var(--text-tertiary);margin-left:0.5rem;">Cross-Node Value Flows</span></h3>
+        
+        <div class="cross-ref">
+          <strong style="color:var(--knowledge);">▲ 上游节点</strong>
+          <p style="margin:0.5rem 0 0;font-size:0.82rem;"><strong>Node 1: 挖矿与能源</strong> — L1协议消耗能源（BTPoW）或锁定资产（PoS质押）。ETH转PoS后电力消耗下降95%+。BTC的PoW消耗决定挖矿成本底线，影响价格支撑。</p>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin:1rem 0;">
+          <div class="cross-ref">
+            <strong style="color:var(--knowledge);">▼ 下游节点</strong>
+            <p style="margin:0.5rem 0 0;font-size:0.82rem;"><strong>Node 3: 中间件与预言机</strong> — Chainlink为L1提供外部数据。L1的可靠性决定中间件需求。</p>
+          </div>
+          <div class="cross-ref">
+            <p style="margin:0.5rem 0 0;font-size:0.82rem;"><strong>Node 4: 交易所与托管</strong> — L1代币在交易所上市流通。托管机构托管L1资产。L1的安全审计结果影响托管合规。</p>
+          </div>
+          <div class="cross-ref">
+            <p style="margin:0.5rem 0 0;font-size:0.82rem;"><strong>Node 5: 稳定币</strong> — USDT/USDC运行在L1上（ETH、TRON、Solana）。稳定币是L1的主要使用场景之一。</p>
+          </div>
+          <div class="cross-ref">
+            <p style="margin:0.5rem 0 0;font-size:0.82rem;"><strong>Node 7: DeFi</strong> — DeFi TVL ~$200B建立在L1/L2之上。L1的安全性、gas费、可编程性直接决定DeFi的成本和安全性。</p>
+          </div>
+        </div>
+
+        <div class="cross-ref">
+          <strong style="color:var(--knowledge);">⇄ 横向影响</strong>
+          <p style="margin:0.5rem 0 0;font-size:0.82rem;"><strong>Node 8: 监管与政策</strong> — L1代币是否被定义为证券？SEC对TRON的执法影响整个支付赛道。BTC ETF获批是L1监管合法化的里程碑。</p>
+        </div>
+
+        <div style="background:var(--bg-overlay);padding:0.85rem 1rem;border-radius:var(--radius-sm);margin-top:1rem;">
+          <p style="font-size:0.82rem;color:var(--text-primary);margin:0;"><strong>价值传导关键洞察：</strong></p>
+          <p style="font-size:0.82rem;color:var(--text-secondary);margin:0.5rem 0 0;">L1是整个区块链价值链的"锚点"。BTC ETF获批→机构资金流入→DeFi TVL增长→稳定币需求增加→交易所交易量上升。这是一个自上而下的价值传导链。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- §5 信息缺口 -->
+    <section id="gaps">
+      <div class="meta-card">
+        <h3>&sect;5 信息缺口<span class="zh-inline" style="font-weight:400;font-size:0.85rem;color:var(--text-tertiary);margin-left:0.5rem;">Information Gaps</span></h3>
+        <p>研究L1协议时，以下关键数据无法获取或无法验证：</p>
+
+        <div class="gap-item">
+          <strong style="color:var(--tier-low);">G1: TRON真实活跃用户</strong>
+          <p style="margin:0.25rem 0 0;">3.3亿累计账户 vs DAU？TRON DAO报告的数据缺乏第三方审计。Bot交易比例？有多少是真实用户？</p>
+        </div>
+
+        <div class="gap-item">
+          <strong style="color:var(--tier-low);">G2: SOL真实用户DAU</strong>
+          <p style="margin:0.25rem 0 0;">SOL日活地址>ETH，但大量是MEV机器人。真实零售用户数无法从链上数据直接获取，需要应用层数据。</p>
+        </div>
+
+        <div class="gap-item">
+          <strong style="color:var(--tier-low);">G3: L1开发者地理分布</strong>
+          <p style="margin:0.25rem 0 0;">Electric Capital报告开发者总数，但无法知道多少开发者在发展中市场为中国、东南亚、非洲项目工作。</p>
+        </div>
+
+        <div class="gap-item">
+          <strong style="color:var(--tier-low);">G4: 跨链TVL的真实归属</strong>
+          <p style="margin:0.25rem 0 0;">DeFiLlama的TVL数据包含跨链协议重复计算。某协议在ETH和SOL同时部署，TVL被计算两次。真实L1净TVL无法精确获取。</p>
+        </div>
+
+        <div class="gap-item">
+          <strong style="color:var(--tier-low);">G5: BTC非流动性供应变化</strong>
+          <p style="margin:0.25rem 0 0;">已知~100万BTC未动，但交易所净流入/流出、机构托管持有量、矿工持币量都是估算值而非精确数据。</p>
+        </div>
+
+        <div class="gap-item">
+          <strong style="color:var(--tier-low);">G6: ETH L2价值捕获模型</strong>
+          <p style="margin:0.25rem 0 0;">ETH L2的利润如何回流L1？Blob费用是否足够？ARB/OP代币通胀对ETH价值的稀释效应有多严重？</p>
+        </div>
+
+        <div class="gap-item">
+          <strong style="color:var(--tier-low);">G7: TRON USDD脱锚历史</strong>
+          <p style="margin:0.25rem 0 0;">TRON曾发行算法稳定币USDD，脱锚后如何恢复？Justin Sun对USDD的支持是否可持续？USDD与USDT的关系？</p>
+        </div>
+
+        <div class="gap-item">
+          <strong style="color:var(--tier-low);">G8: 新L1链的真实去中心化程度</strong>
+          <p style="margin:0.25rem 0 0;">SUI、APTOS、SOL都是高TPS链，但验证者数量、去中心化程度、停机风险缺乏透明报告。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- §6 质量评估 -->
+    <section id="quality">
+      <div class="meta-card">
+        <h3>&sect;6 质量评估<span class="zh-inline" style="font-weight:400;font-size:0.85rem;color:var(--text-tertiary);margin-left:0.5rem;">Quality Assessment</span></h3>
+        <p>本报告在各维度的研究质量评估：</p>
+
+        <div style="margin:1rem 0;">
+          <div style="margin-bottom:1.25rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem;">
+              <span style="font-size:0.85rem;font-weight:590;color:var(--text-primary);">数据可信度 Data Credibility</span>
+              <span style="font-size:0.72rem;color:var(--text-tertiary);">8/10</span>
+            </div>
+            <div class="confidence-bar">
+              <span class="conf-label">Low</span>
+              <div class="conf-track"><div class="conf-fill" style="width:80%;background:var(--tier-high);"></div></div>
+              <span class="conf-label">High</span>
+            </div>
+            <p style="font-size:0.75rem;color:var(--text-tertiary);margin:0.25rem 0 0;">BTC/ETH核心数据来自链上分析和行业报告。TRON数据依赖公司报告，可信度降低。</p>
+          </div>
+
+          <div style="margin-bottom:1.25rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem;">
+              <span style="font-size:0.85rem;font-weight:590;color:var(--text-primary);">来源多样性 Source Diversity</span>
+              <span style="font-size:0.72rem;color:var(--text-tertiary);">6/10</span>
+            </div>
+            <div class="confidence-bar">
+              <span class="conf-label">Low</span>
+              <div class="conf-track"><div class="conf-fill" style="width:60%;background:var(--tier-medium);"></div></div>
+              <span class="conf-label">High</span>
+            </div>
+            <p style="font-size:0.75rem;color:var(--text-tertiary);margin:0.25rem 0 0;">英文来源为主（Messari、DefiLlama、Dune），缺乏中文、中东、非洲本地数据源。</p>
+          </div>
+
+          <div style="margin-bottom:1.25rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem;">
+              <span style="font-size:0.85rem;font-weight:590;color:var(--text-primary);">代理人覆盖 Agent Coverage</span>
+              <span style="font-size:0.72rem;color:var(--text-tertiary);">7/10</span>
+            </div>
+            <div class="confidence-bar">
+              <span class="conf-label">Low</span>
+              <div class="conf-track"><div class="conf-fill" style="width:70%;background:var(--tier-medium-high);"></div></div>
+              <span class="conf-label">High</span>
+            </div>
+            <p style="font-size:0.75rem;color:var(--text-tertiary);margin:0.25rem 0 0;">Vitalik(9/10)、Justin Sun(5/10)、Satoshi(historical)——覆盖三种视角，但缺少机构投资者视角。</p>
+          </div>
+
+          <div style="margin-bottom:1.25rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem;">
+              <span style="font-size:0.85rem;font-weight:590;color:var(--text-primary);">技术深度 Technical Depth</span>
+              <span style="font-size:0.72rem;color:var(--text-tertiary);">7/10</span>
+            </div>
+            <div class="confidence-bar">
+              <span class="conf-label">Low</span>
+              <div class="conf-track"><div class="conf-fill" style="width:70%;background:var(--tier-medium-high);"></div></div>
+              <span class="conf-label">High</span>
+            </div>
+            <p style="font-size:0.75rem;color:var(--text-tertiary);margin:0.25rem 0 0;">共识机制、tokenomics分析到位。但分片、ZK证明、MEV等技术细节深度有限。</p>
+          </div>
+
+          <div style="margin-bottom:1.25rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem;">
+              <span style="font-size:0.85rem;font-weight:590;color:var(--text-primary);">交易逻辑 Trading Logic</span>
+              <span style="font-size:0.72rem;color:var(--text-tertiary);">8/10</span>
+            </div>
+            <div class="confidence-bar">
+              <span class="conf-label">Low</span>
+              <div class="conf-track"><div class="conf-fill" style="width:80%;background:var(--tier-high);"></div></div>
+              <span class="conf-label">High</span>
+            </div>
+            <p style="font-size:0.75rem;color:var(--text-tertiary);margin:0.25rem 0 0;">减半周期、ETF流入、KPI框架清晰。ETH/BTC比值分析有价值。</p>
+          </div>
+
+          <div style="margin-bottom:1.25rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem;">
+              <span style="font-size:0.85rem;font-weight:590;color:var(--text-primary);">去中心化程度 Decentralization</span>
+              <span style="font-size:0.72rem;color:var(--text-tertiary);">5/10</span>
+            </div>
+            <div class="confidence-bar">
+              <span class="conf-label">Low</span>
+              <div class="conf-track"><div class="conf-fill" style="width:50%;background:var(--tier-medium);"></div></div>
+              <span class="conf-label">High</span>
+            </div>
+            <p style="font-size:0.75rem;color:var(--text-tertiary);margin:0.25rem 0 0;">各L1去中心化程度差异极大。BTC PoW最强，TRON 21超级代表极弱。缺乏精确的量化去中心化指标。</p>
+          </div>
+
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem;">
+              <span style="font-size:0.85rem;font-weight:590;color:var(--text-primary);">综合评分 Overall Score</span>
+              <span style="font-size:0.72rem;color:var(--text-tertiary);">7/10</span>
+            </div>
+            <div class="confidence-bar">
+              <span class="conf-label">Low</span>
+              <div class="conf-track"><div class="conf-fill" style="width:70%;background:var(--accent);"></div></div>
+              <span class="conf-label">High</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- §7 决策日志 -->
+    <section id="log">
+      <div class="meta-card">
+        <h3>&sect;7 决策日志<span class="zh-inline" style="font-weight:400;font-size:0.85rem;color:var(--text-tertiary);margin-left:0.5rem;">Decision Log</span></h3>
+        <p>研究过程中的关键决策记录：</p>
+
+        <div class="decision-log">
+          <p style="margin:0 0 0.5rem;"><strong>Decision 1: 选择Vitalik、Justin Sun、Satoshi作为认知代理人</strong></p>
+          <p style="margin:0 0 0.35rem;"><strong>理由</strong>：三人代表三种完全不同的世界观。Vitalik是理想主义者（去中心化优先），Justin Sun是实用主义者（用户不在乎去中心化），Satoshi是历史参照（BTC的原始设计意图）。</p>
+          <p style="margin:0 0 0.35rem;"><strong> альтернатива</strong>：选择"机构投资者"（如Paul Tudor Jones）作为Agent——但他们的公开言论缺乏技术细节。</p>
+          <p style="margin:0;"><strong>结果</strong>：三视角提供了有价值的张力。Vitalik的透明度和Justin Sun的争议形成鲜明对比。</p>
+        </div>
+
+        <div class="decision-log">
+          <p style="margin:0 0 0.5rem;"><strong>Decision 2: 将TRON纳入主报告而非边缘提及</strong></p>
+          <p style="margin:0 0 0.35rem;"><strong>理由</strong>：330M账户和$10B+日均USDT转账是客观事实，不能因为创始人争议就忽视。西方分析的TRON偏见是研究机会而非排除理由。</p>
+          <p style="margin:0 0 0.35rem;"><strong> альтернатива</strong>：只研究BTC、ETH、SOL——最常见的"L1三巨头"叙事。</p>
+          <p style="margin:0;"><strong>结果</strong>：TRON提供了发展中市场视角，发现了"巴西90%加密活动是TRON-USDT"这一关键洞察。</p>
+        </div>
+
+        <div class="decision-log">
+          <p style="margin:0 0 0.5rem;"><strong>Decision 3: 用"生态位"框架替代"赢者通吃"叙事</strong></p>
+          <p style="margin:0 0 0.35rem;"><strong>理由</strong>：分析BTC、ETH、SOL、TRON在同一维度比较（TPS、TVL）会产生误导。BTC是商品，ETH是平台，TRON是支付通道——不能用同一框架估值。</p>
+          <p style="margin:0 0 0.35rem;"><strong> альтернатива</strong>：按照TVL排名或市值排名依次分析——这是大多数加密报告的做法。</p>
+          <p style="margin:0;"><strong>结果</strong>：生态位框架揭示了"L1不是零和博弈"的核心洞察。</p>
+        </div>
+
+        <div class="decision-log">
+          <p style="margin:0 0 0.5rem;"><strong>Decision 4: 不深入分析Terra/LUNA崩溃案例</strong></p>
+          <p style="margin:0 0 0.35rem;"><strong>理由</strong>：Terra是L1协议，但其崩溃更像稳定币（Node 5）和DeFi（Node 7）的问题而非纯粹L1技术问题。时间有限，选择聚焦。</p>
+          <p style="margin:0 0 0.35rem;"><strong> альтернатива</strong>：将Terra作为"L1失败案例"深入分析——但这会模糊节点边界。</p>
+          <p style="margin:0;"><strong>结果</strong>：保持了节点边界的清晰性，但牺牲了"算法稳定币L1"这一新兴类别的覆盖。</p>
+        </div>
+
+        <div class="decision-log">
+          <p style="margin:0 0 0.5rem;"><strong>Decision 5: BTC为主报告核心，ETH为次要</strong></p>
+          <p style="margin:0 0 0.35rem;"><strong>理由</strong>：BTC市值$1.2T + ETF验证 + 减半周期叙事，是最值得深入研究的L1。ETH竞争压力增大，相对确定性降低。</p>
+          <p style="margin:0 0 0.35rem;"><strong> альтернатива</strong>：BTC、ETH、SOL各占1/3篇幅——这是大多数加密报告的均衡做法。</p>
+          <p style="margin:0;"><strong>结果</strong>：BTC叙事完整，ETH竞争分析到位，TRON提供了差异化视角。</p>
+        </div>
+      </div>
+    </section>
+
+    <footer style="margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border-subtle);font-size:0.72rem;color:var(--text-quaternary);">
+      <p>Metacognition report &middot; <a href="NODE_2_L1协议_2026-03-22.html">Node 2 L1 Protocol Report</a> &middot; <a href="../blockchain_hub.html">Blockchain Hub</a> &middot; 2026-03-22</p>
+    </footer>
+  </main>
+</div>
+<script>
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+})();
+</script>
+</body>
+</html>

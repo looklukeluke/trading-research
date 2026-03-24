@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>代工制造节点 — 28轮元思考过程</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <style>
+    :root {
+      --bg-base: #08090a; --bg-elevated: #0f1011; --bg-surface: #141516; --bg-overlay: #191a1b;
+      --border-subtle: #23252a; --border-default: #34343a; --border-strong: #3e3e44;
+      --text-primary: #f7f8f8; --text-secondary: #d0d6e0; --text-tertiary: #8a8f98; --text-quaternary: #62666d;
+      --accent: #f8a848; --accent-dim: rgba(248, 168, 72, 0.12); --accent-hover: rgba(248, 168, 72, 0.08);
+      --knowledge: #5b9bd5; --knowledge-dim: rgba(91, 155, 213, 0.12);
+      --green: #4caf50; --red: #f44336; --orange: #ffa726;
+      --font-sans: 'Inter', 'Inter Variable', -apple-system, system-ui, sans-serif;
+      --font-mono: 'SF Mono', 'Menlo', monospace;
+      --radius-sm: 8px; --radius-md: 12px; --sidebar-width: 240px;
+    }
+    * { box-sizing: border-box; }
+    html { font-family: var(--font-sans); font-feature-settings: 'liga' 1, 'calt' 1; letter-spacing: -0.012em; -webkit-font-smoothing: antialiased; }
+    body { margin: 0; padding: 0; background: var(--bg-base); color: var(--text-primary); font-size: 15px; line-height: 1.65; }
+    .page-wrapper { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { position: sticky; top: 0; height: 100vh; width: var(--sidebar-width); min-width: var(--sidebar-width); overflow-y: auto; padding: 1.25rem 0.75rem; border-right: 1px solid var(--border-subtle); background: var(--bg-elevated); z-index: 100; }
+    .sidebar h4 { margin-bottom: 0.5rem; padding: 0 0.5rem; font-size: 0.7rem; font-weight: 590; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-quaternary); }
+    .sidebar nav ul { list-style: none; padding: 0; margin: 0 0 1rem 0; }
+    .sidebar nav ul li a { display: block; padding: 0.25rem 0.5rem; font-size: 0.78rem; color: var(--text-tertiary); text-decoration: none; border-radius: var(--radius-sm); transition: background 0.12s, color 0.12s; line-height: 1.4; }
+    .sidebar nav ul li a:hover { background: var(--accent-hover); color: var(--text-primary); }
+    .sidebar nav ul li a .toc-num { color: var(--text-quaternary); margin-right: 0.25rem; font-size: 0.65rem; font-weight: 510; }
+
+    /* Main */
+    .main-content { flex: 1; min-width: 0; max-width: 960px; padding: 2.5rem 2.5rem 5rem; }
+
+    /* Header */
+    .page-header { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-default); }
+    .page-header h1 { margin-bottom: 0.3rem; font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 680; letter-spacing: -0.025em; }
+    .page-header .subtitle { color: var(--text-tertiary); margin-bottom: 1rem; font-size: 0.95rem; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .badge { display: inline-block; padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.75rem; font-weight: 510; background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(248, 168, 72, 0.25); }
+    .role-badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; background: rgba(91,155,213,0.12); color: var(--knowledge); }
+
+    /* Sections */
+    .section-header { margin-top: 3.5rem; margin-bottom: 1.25rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border-subtle); }
+    .section-header h2 { font-size: 1.25rem; font-weight: 590; letter-spacing: -0.015em; margin-bottom: 0; }
+    h3 { font-size: 1.1rem; font-weight: 590; margin-top: 1.5rem; }
+    p { color: var(--text-secondary); margin-bottom: 1rem; }
+    strong { color: var(--text-primary); font-weight: 590; }
+    ul, ol { color: var(--text-secondary); padding-left: 1.2rem; }
+    li { margin-bottom: 0.35rem; line-height: 1.6; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Details */
+    details { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.8rem 1rem; margin: 0.8rem 0; background: var(--bg-elevated); }
+    details summary { cursor: pointer; font-weight: 510; font-size: 0.9rem; color: var(--text-primary); }
+    details[open] summary { margin-bottom: 0.6rem; color: var(--accent); }
+
+    /* Priority box */
+    .priority-box { border: 1px solid rgba(248, 168, 72, 0.3); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin-bottom: 2rem; background: var(--bg-surface); }
+    .priority-box h2 { color: var(--accent); margin-top: 0; font-size: 1.1rem; font-weight: 590; }
+
+    /* Arc items */
+    .arc-item { margin-bottom: 1rem; padding: 0.8rem; border-left: 3px solid var(--accent); background: rgba(66, 165, 245, 0.03); border-radius: 0 6px 6px 0; }
+    .arc-item strong { color: var(--accent); }
+
+    /* Question box */
+    .question-box { border: 2px solid var(--knowledge); border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; background: rgba(91, 155, 213, 0.05); }
+    .question-box h4 { color: var(--knowledge); margin-top: 0; }
+
+    /* Tables */
+    figure { margin: 1.25rem 0; overflow-x: auto; }
+    table { font-size: 0.82rem; border-collapse: collapse; width: 100%; }
+    th, td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border-subtle); text-align: left; }
+    th { white-space: nowrap; font-weight: 510; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-quaternary); border-bottom: 1px solid var(--border-default); }
+    td { color: var(--text-secondary); }
+    tr:hover td { background: var(--bg-elevated); }
+
+    /* Blockquote */
+    blockquote { border-left: 3px solid var(--accent); padding: 0.6rem 1.25rem; margin: 1rem 0; font-style: italic; background: var(--bg-surface); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-secondary); }
+
+    /* Signals */
+    .signal { display: inline-block; font-size: 0.75rem; padding: 0.1rem 0.4rem; border-radius: 3px; font-weight: 590; margin-right: 0.3rem; }
+    .signal-bull { background: rgba(76,175,80,0.15); color: var(--green); }
+    .signal-bear { background: rgba(244,67,54,0.15); color: var(--red); }
+    .signal-watch { background: rgba(255,167,38,0.15); color: var(--orange); }
+
+    /* Phase indicator */
+    .phase-tag { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+    .phase-explore { background: rgba(91,155,213,0.12); color: var(--knowledge); }
+    .phase-diagnose { background: rgba(255,167,38,0.12); color: var(--orange); }
+    .phase-build { background: rgba(76,175,80,0.12); color: var(--green); }
+    .phase-verify { background: rgba(244,67,54,0.12); color: var(--red); }
+
+    /* Footer */
+    .page-footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 2px solid var(--border-default); text-align: center; font-size: 0.85rem; color: var(--text-tertiary); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+
+    /* Mobile */
+    .hamburger-btn { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 200; background: var(--bg-surface); color: var(--text-primary); border: none; border-radius: 6px; width: 44px; height: 44px; font-size: 1.4rem; cursor: pointer; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+    @media (max-width: 900px) {
+      .sidebar { position: fixed; left: -320px; top: 0; transition: left 0.3s ease; box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.open { display: block; }
+      .hamburger-btn { display: block; }
+      .main-content { padding: 2rem 1rem 4rem; }
+    }
+    @media (min-width: 1400px) { .main-content { max-width: 1060px; } }
+  
+/* === Embedded mode: inside Dashboard iframe === */
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+body.embedded .hamburger-btn { display: none !important; }
+body.embedded .sidebar-overlay { display: none !important; }
+
+/* === Reading mode: full-width === */
+.reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+.reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+.reading-mode .hamburger-btn { display: none !important; }
+.reading-mode .sidebar-overlay { display: none !important; }
+</style>
+</head>
+<body>
+<nav style="position:sticky;top:0;z-index:999;background:rgba(8,9,10,0.95);backdrop-filter:blur(8px);padding:0.5rem 1.5rem;border-bottom:1px solid #23252a;font-size:0.78rem;display:flex;gap:1rem;align-items:center;">
+  <a href="../semiconductor_hub.html" style="color:#f8a848;text-decoration:none;">&larr; Semiconductor Hub</a>
+  <span style="color:#62666d;">&middot;</span>
+  <a href="NODE_3_%E4%BB%A3%E5%B7%A5%E5%88%B6%E9%80%A0_2026-03-19.html" style="color:#8a8f98;text-decoration:none;">Node 3 代工制造认知节点报告</a>
+</nav>
+
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="page-wrapper">
+
+  <aside class="sidebar" id="sidebar">
+    <h4>思考旅程 Thinking Journey</h4>
+    <nav>
+      <ul>
+        <li><a href="#overview"><span class="toc-num">&#9733;</span>速览结论<br><span class="zh-inline">Key Findings</span></a></li>
+        <li><a href="#phase1"><span class="toc-num">I</span>任务定义<br><span class="zh-inline">Task Definition</span></a></li>
+        <li><a href="#phase2"><span class="toc-num">II</span>三人叙事解码<br><span class="zh-inline">Three Narratives</span></a></li>
+        <li><a href="#phase3"><span class="toc-num">III</span>矛盾与张力<br><span class="zh-inline">Contradictions &amp; Tensions</span></a></li>
+        <li><a href="#phase4"><span class="toc-num">IV</span>最强反面<br><span class="zh-inline">Strongest Bear Case</span></a></li>
+        <li><a href="#phase5"><span class="toc-num">V</span>结构诊断<br><span class="zh-inline">Structure Diagnosis</span></a></li>
+        <li><a href="#phase6"><span class="toc-num">VI</span>成品审视<br><span class="zh-inline">Self-Audit</span></a></li>
+        <li><a href="#phase7"><span class="toc-num">VII</span>验证日历<br><span class="zh-inline">Verification Calendar</span></a></li>
+        <li><a href="#phase8"><span class="toc-num">VIII</span>信号传导链<br><span class="zh-inline">Signal Chains</span></a></li>
+        <li><a href="#phase9"><span class="toc-num">IX</span>综合判断<br><span class="zh-inline">Triangulated Verdict</span></a></li>
+      </ul>
+    </nav>
+    <h4 style="margin-top:1rem;">最终产出</h4>
+    <nav><ul>
+      <li><a href="NODE_3_%E4%BB%A3%E5%B7%A5%E5%88%B6%E9%80%A0_2026-03-19.html" style="color:var(--accent);">代工制造认知节点报告 &rarr;</a></li>
+    </ul></nav>
+  </aside>
+
+  <main class="main-content">
+
+    <header class="page-header">
+      <div class="role-badge">METACOGNITION LOG</div>
+      <h1>代工制造节点 &mdash; 28轮元思考过程</h1>
+      <p class="subtitle">从"TSMC垄断叙事"到"地缘风险定价" &nbsp;|&nbsp; 2026-03-20<br>
+      <span style="color:var(--text-quaternary);font-size:0.85em;">研究笔记 &mdash; 思考过程比结论更有价值</span></p>
+      <div class="badge-row">
+        <span class="badge">28轮元思考</span>
+        <span class="badge">9个Phase</span>
+        <span class="badge">3代理人交叉验证</span>
+        <span class="badge">6条投资信号</span>
+      </div>
+    </header>
+
+
+    <!-- Overview -->
+    <div class="priority-box" id="overview">
+      <h2>&#129504; 28轮元思考的核心结论</h2>
+      <ol>
+        <li><strong>代工节点的真正问题不是"TSMC能不能保持垄断"（95%能），而是"台湾地缘风险如何定价"</strong> &mdash; 这决定了买TSM要不要hedge、什么时候hedge</li>
+        <li><strong>三个代理人的认知层次完全不同</strong> &mdash; Wei运营当下($52-56B capex)，Chang定义历史哲学(60年)，Tan试图从废墟中重建替代方案($10.3B亏损)。不应给等权重</li>
+        <li><strong>最被低估的瓶颈：CoWoS先进封装，不是晶体管</strong> &mdash; 130K wafers/month vs 需求远超产能。Google因此砍TPU产量33%。这是AI硬件供应链真正的chokepoint</li>
+        <li><strong>Morris Chang 94岁的"认知遗产"是最高信号密度来源</strong> &mdash; 预测准确率9/10，无利益约束，60年pattern matching。"Globalization is dead"在2022年说的，三年后全部验证</li>
+        <li><strong>Intel Foundry是"美国能否自主制造先进芯片"的唯一验证点</strong> &mdash; 18A量产但亏损$10.3B+零外部客户。Lip-Bu Tan的VC思维对了（砍Falcon Shores），但制造能力未被验证</li>
+      </ol>
+    </div>
+
+
+    <!-- Phase 1 -->
+    <section id="phase1">
+      <div class="section-header">
+        <span class="phase-tag phase-explore">PHASE I &mdash; EXPLORE</span>
+        <h2>任务定义：TSMC是"不管谁赢都需要"的终极基础设施，但台湾风险如何定价？</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#1 表面任务 vs 真正任务</strong></summary>
+        <p><strong>表面任务</strong>：把Node 3从KPI卡片升级为三栏认知报告，用三个代理人的交叉验证来分析代工制造节点。</p>
+        <p><strong>真正任务</strong>：帮一个趋势交易者回答 <strong>"TSMC是'不管AI赛道谁赢都需要'的终极pick-and-shovel，但台湾海峡的地缘风险怎么定价？"</strong></p>
+        <p>更准确地说：TSM已经是全球第七大市值公司($1.76T)，还能买吗？Intel Foundry巨亏但有美国政府输血，这是价值陷阱还是国运赌注？CoWoS封装瓶颈对整条AI供应链意味着什么？</p>
+        <p>用户的交易系统核心是"选品+周期匹配"。代工节点的特殊性在于：<strong>它不是一个赛道赌注，而是一个基础设施赌注</strong> &mdash; Nvidia赢了要TSMC，AMD赢了要TSMC，Google自研也要TSMC。唯一的风险不是商业竞争，是地缘政治。</p>
+      </details>
+
+      <details>
+        <summary><strong>#2 为什么这个节点的分析框架与Node 1完全不同？</strong></summary>
+        <p>Node 1（GPU/AI芯片设计）的核心问题是"谁赢" &mdash; NVIDIA vs AMD vs 自研。三个代理人在竞争。</p>
+        <p>Node 3（代工制造）的核心问题不是"谁赢"，而是<strong>"这个垄断者的风险如何量化"</strong>。三个代理人不在竞争，他们在从不同角度照亮同一个结构：</p>
+        <ul>
+          <li><strong>Wei</strong> = 运营视角 &mdash; 产能、capex、客户分配、技术路线图</li>
+          <li><strong>Chang</strong> = 历史/哲学视角 &mdash; 为什么代工模式赢了、为什么美国复制不了、为什么全球化已死</li>
+          <li><strong>Tan</strong> = 挑战者视角 &mdash; 美国能否建立替代？Intel Foundry的真实进展</li>
+        </ul>
+        <p><strong>结论</strong>：Node 3的三角验证不是"谁对谁错"，而是"三个维度拼出一张完整的风险地图"。</p>
+      </details>
+
+      <details>
+        <summary><strong>#3 "就是这个" vs "不对"</strong></summary>
+        <p><strong>成功标准</strong>：第一眼能看到"TSMC的垄断有多坚固、地缘风险有多大、CoWoS瓶颈影响什么、Intel替代方案走到哪了"；有验证日历；有信号传导链。</p>
+        <p><strong>失败标准</strong>：只讲TSMC多厉害（cheerleading）；把台湾风险轻描淡写（鸵鸟）；给Intel Foundry太多篇幅把它当成真正的竞争对手（不现实）；堆砌数据不下判断（学术报告）。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 2 -->
+    <section id="phase2">
+      <div class="section-header">
+        <span class="phase-tag phase-explore">PHASE II &mdash; EXPLORE</span>
+        <h2>三人叙事解码：运营帝国、行业哲学、废墟重建</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#4 三个代理人到底讲了什么故事？</strong></summary>
+        <h4>隐藏叙事解码</h4>
+        <figure>
+          <table>
+            <thead><tr><th>Agent</th><th>表面叙事</th><th>隐含叙事</th><th>我漏掉了什么</th></tr></thead>
+            <tbody>
+              <tr><td><strong>C.C. Wei</strong><br>(GIANT)</td><td>AI需求强劲，产能纪律性扩张</td><td>"我掌控所有人的芯片交付时间表"</td><td>"I'm also very nervous"= 他知道$52-56B capex如果AI回调就是灾难</td></tr>
+              <tr><td><strong>Morris Chang</strong><br>(INVESTOR)</td><td>全球化已死，美国onshoring昂贵且徒劳</td><td>"TSMC的护城河是30年制造学习，不是某个工艺节点"</td><td>从"futile"到"my dream lives"= 态度在软化，Arizona可能比他预期的成功</td></tr>
+              <tr><td><strong>Lip-Bu Tan</strong><br>(CONTRARIAN)</td><td>Intel正在浴火重生</td><td>"给我时间，政府不会让Intel倒"</td><td>$10.3B亏损+零外部客户= 18A量产是技术milestone不是商业milestone</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>核心发现</strong>：<strong>Wei和Chang的信息量差了一个维度。</strong>Wei看到的是当下订单（Nvidia占CoWoS 60%、Google因产能砍TPU产量）&mdash; 这是实时数据。Chang看到的是60年的结构性趋势（代工模式为何赢、制造学习为何local、全球化为何已死）&mdash; 这是元判断。Tan看到的是一个还在流血的重建项目 &mdash; 18A量产但离盈利还有2年。</p>
+
+        <h4>跨文件交叉信号</h4>
+        <figure>
+          <table>
+            <thead><tr><th>信号</th><th>来源</th><th>投资含义</th></tr></thead>
+            <tbody>
+              <tr><td>Wei说CoWoS "sold out through 2026"&rarr; Google砍TPU产量33%</td><td>Wei agent + 36Kr</td><td><span class="signal signal-bull">BULL</span> 封装是真瓶颈=TSMC定价权极强</td></tr>
+              <tr><td>Chang说"美国成本是台湾两倍"&rarr; Arizona第一厂已量产4nm</td><td>Chang agent + Wei agent</td><td><span class="signal signal-watch">WATCH</span> 成本高但不是"futile"&mdash;政治意志可以克服经济逻辑</td></tr>
+              <tr><td>Wei的$52-56B capex + "I'm very nervous"</td><td>Wei agent</td><td><span class="signal signal-watch">WATCH</span> CEO自己在担心AI capex周期性&mdash;这是最诚实的信号</td></tr>
+              <tr><td>Tan的18A量产 vs $10.3B亏损 vs 零外部客户</td><td>Tan agent</td><td><span class="signal signal-bear">BEAR</span> 技术达标&ne;商业验证，Intel Foundry还是概念股</td></tr>
+              <tr><td>Nvidia $5B投资Intel&rarr;竞争对手投资代工厂</td><td>Tan agent</td><td><span class="signal signal-watch">WATCH</span> 战略信任票，但也可能是确保第二来源的保险</td></tr>
+              <tr><td>Chang："Intel doesn't know how to be a foundry"</td><td>Chang agent (Acquired)</td><td><span class="signal signal-bear">BEAR</span> 创始人判断：IDM模式天然有利益冲突，Intel永远做不好代工</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details>
+        <summary><strong>#5 信号 vs 噪音：三人信息量的量化差距</strong></summary>
+        <p><strong>高信号</strong>：</p>
+        <ul>
+          <li>Wei的CoWoS产能数据（35K&rarr;130K wafers/month）&mdash; 这是AI硬件供应链最硬的约束</li>
+          <li>Wei的客户分配决策（Nvidia占CoWoS 60%）&mdash; 他字面上决定谁能拿到AI芯片</li>
+          <li>Chang对Intel/Samsung的结构性判断 &mdash; 20年前就预测到了，全部验证</li>
+          <li>Chang的"globalization is dead"&mdash; 2022年说的，2025-2026全部验证</li>
+          <li>Tan的行动：砍Falcon Shores、裁员32%、获得Nvidia $5B &mdash; VC思维的执行力</li>
+        </ul>
+        <p><strong>低信号（可精简）</strong>：</p>
+        <ul>
+          <li>Wei的A16路线图细节 &mdash; 对2026年投资决策不重要（2026底才量产就绪）</li>
+          <li>Tan的Trump争议细节 &mdash; 政治事件不是结构性信号</li>
+          <li>Chang的自传出版日期 &mdash; 认知内容重要，出版形式不重要</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary><strong>#6 代理人权重：不是平等的三角，是金字塔</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>Agent</th><th>可信度</th><th>信息优势</th><th>偏见</th><th>权重</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Wei</strong></td><td>9/10</td><td>极高 &mdash; 直接掌握全球AI芯片订单数据</td><td>CEO天然乐观，不会释放看空信号</td><td><strong>50%</strong></td></tr>
+              <tr><td><strong>Chang</strong></td><td>9/10</td><td>高但递减 &mdash; 退休8年，但60年判断力无可替代</td><td>创始人倾向于强调台湾不可替代性</td><td><strong>35%</strong></td></tr>
+              <tr><td><strong>Tan</strong></td><td>6/10</td><td>中等 &mdash; 只看到Intel的数据，不是行业全貌</td><td>CEO+$400M薪酬挂钩股价=极强乐观偏见</td><td><strong>15%</strong></td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>关键</strong>：Wei+Chang指向同一方向（TSMC垄断不可撼动），给了85%权重。Tan提供的不是"反面论据"，而是"美国替代方案的进度报告"。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 3 -->
+    <section id="phase3">
+      <div class="section-header">
+        <span class="phase-tag phase-diagnose">PHASE III &mdash; DIAGNOSE</span>
+        <h2>矛盾与张力：代工节点的四个核心矛盾</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#7 四个Node 3必须面对的矛盾</strong></summary>
+        <div class="arc-item"><strong>矛盾1：TSMC太重要不能倒 vs 地缘风险无法对冲</strong><br>TSMC代工了全球90%+先进制程芯片。如果台海有事，不是某个公司的问题，是全球经济的问题。但正因为太重要，美国/日本/欧洲都不会"让它发生"&mdash;&mdash;silicon shield论点。<strong>问题：这个shield到底是保护台湾还是保护TSMC？</strong>如果美国认为Arizona已经足够，shield的逻辑就弱化了。</div>
+        <div class="arc-item"><strong>矛盾2：CoWoS瓶颈 vs 扩产周期的时间差</strong><br>Wei正在将CoWoS从35K扩到130K wafers/month，近4倍。但需求可能是500K+。扩产周期18-24个月，需求增长是指数级。<strong>问题：瓶颈是feature还是bug？</strong>如果你是TSMC，瓶颈=定价权。如果你是客户，瓶颈=成本上升+交付延迟。Google已经因此砍了33%的TPU产量目标。</div>
+        <div class="arc-item"><strong>矛盾3：Morris Chang的历史判断 vs AI时代的新变量</strong><br>Chang说"美国onshoring昂贵且徒劳"。但AI改变了变量：(1)国家安全溢价现在远高于2022年；(2)美国政府已投入$25B+ CHIPS Act资金，政治上不能允许失败；(3)TSMC自己在Arizona建超级工厂群，说明Chang的"futile"判断连自己公司都没完全采纳。<strong>Chang可能对成本判断完全正确，但对政治意志的判断偏低估。</strong></div>
+        <div class="arc-item"><strong>矛盾4：Intel Foundry的"国运叙事" vs 商业现实</strong><br>美国政府持有Intel 10%股权 + $8.5B直接资金 + $11B贷款 = 半国有化。Tan正确地将Intel定位为"国家冠军企业"。但$10.3B年亏损 + 零外部客户 = 商业模式尚未验证。<strong>Chang一句话总结了问题的本质："Intel doesn't know how to be a foundry. None of their customers liked Intel."</strong> IDM模式的利益冲突是结构性的，不是某个CEO能解决的。</div>
+      </details>
+
+      <details>
+        <summary><strong>#8 信息空白：我们不知道什么</strong></summary>
+        <ol>
+          <li>台湾海峡真实的军事风险概率（所有公开估计都是猜测，5-10%是共识区间但没有数据支撑）</li>
+          <li>TSMC的Arizona良率 vs 台湾良率的真实差距（"50% more expensive"是成本，良率数据没公开）</li>
+          <li>CoWoS的真实需求总量（130K的目标是基于什么需求预测？客户承诺了多少？）</li>
+          <li>Intel 18A的真实良率（"improving steadily"是定性描述，具体数字没公开）</li>
+          <li>Morris Chang对AI时代TSMC战略的真实想法（自传刻意止步于2018年）</li>
+          <li>Wei的"I'm also very nervous"到底nervous到什么程度（是PR谦虚还是真正担忧）</li>
+        </ol>
+        <p><strong>结论</strong>：<strong>代工节点的信息不对称比GPU节点更严重。</strong>Wei和Chang拥有的信息是任何外部分析师无法获得的。公开信息的最大盲区是"台湾风险的真实概率"和"Arizona的真实制造能力"。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 4 -->
+    <section id="phase4">
+      <div class="section-header">
+        <span class="phase-tag phase-diagnose">PHASE IV &mdash; DIAGNOSE</span>
+        <h2>最强反面：台湾海峡危机 &mdash; 低概率catastrophic impact</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#9 加速 vs 减速</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>加速中（看多TSMC）</th><th>减速中（看空/风险）</th></tr></thead>
+            <tbody>
+              <tr><td>AI capex $602B+/年，TSMC是所有AI芯片的必经之路</td><td>台湾地缘风险=行业最大tail risk</td></tr>
+              <tr><td>代工份额从64%&rarr;70%，垄断在加深</td><td>美国/日本/欧洲都在推onshoring=长期份额稀释</td></tr>
+              <tr><td>N2如期量产，技术领先2+代</td><td>$52-56B capex隐含AI不回调的假设</td></tr>
+              <tr><td>CoWoS sold out through 2026=极强定价权</td><td>CoWoS瓶颈可能推动客户寻找替代封装方案</td></tr>
+              <tr><td>Arizona超级工厂群=地缘风险对冲</td><td>Arizona成本是台湾两倍=长期拖累利润率</td></tr>
+              <tr><td>Wei预测准确率6/7，执行力一流</td><td>Wei是CEO，天然不会释放看空信号</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details open>
+        <summary><strong>#10 最强反面论证：台湾海峡危机</strong></summary>
+        <blockquote>"如果中国对台湾采取军事行动，全球将失去90%的先进芯片供应。这不是半导体行业的危机，是全球经济的危机。"</blockquote>
+        <ol>
+          <li><strong>TSMC生产全球90%以上的先进制程芯片</strong> &mdash; 没有替代来源。Intel Foundry的18A才刚量产，Samsung良率严重落后</li>
+          <li><strong>Arizona即使全速运行也只覆盖TSMC总产能的~5%</strong> &mdash; 6座晶圆厂的最终规划要到2030年代才能完成</li>
+          <li><strong>经济影响：全球GDP损失估计$1-2.5万亿/年</strong> &mdash; 所有电子设备供应中断，远超2021-2022年芯片短缺</li>
+          <li><strong>台海危机不需要真的开战</strong> &mdash; 封锁、军演升级、芯片出口管制就足以导致供应中断恐慌</li>
+          <li><strong>"Silicon shield"假设可能是错的</strong> &mdash; 如果美国认为Arizona+Intel已经提供了"足够的"替代，台湾的战略价值降低</li>
+          <li><strong>保险费问题：没有金融工具可以对冲这个风险</strong> &mdash; 不能买CDS，期权太贵，直接做空会被持续轧空</li>
+        </ol>
+        <p><strong>概率</strong>：5-10%（未来5年内）。<strong>但如果发生，TSM不是-30%，是-80%以上。整个半导体板块-40%+。全球经济衰退。</strong></p>
+        <p>这就是代工节点最独特的风险特征：<strong>commercial risk极低（垄断），但geopolitical tail risk无法定价也无法对冲。</strong></p>
+      </details>
+
+      <details>
+        <summary><strong>#11 对Morris Chang最强观点的反驳</strong></summary>
+        <p>Chang说美国onshoring是"expensive, wasteful, and futile"。但三个反驳：</p>
+        <ul>
+          <li><strong>"Expensive"是对的，但"futile"可能错了。</strong>Arizona第一厂已经在量产4nm。第二厂加速到2027H2。美国产能"fully booked through 2026"。这不是"futile"的表现。</li>
+          <li><strong>国家安全溢价改变了成本方程式。</strong>当芯片变成武器级资源，"贵50%"不是问题&mdash;美国国防预算每年$886B，$165B的TSMC投资只是18%。</li>
+          <li><strong>Chang自己的公司在执行onshoring。</strong>如果onshoring真的"futile"，为什么TSMC投入$165B？因为Wei知道：不投资Arizona = 被关税惩罚 + 失去政治保护。"My dream lives"不是Chang在认同onshoring的效率，而是认同其政治必要性。</li>
+        </ul>
+        <p><strong>修正判断</strong>：Chang对成本判断 <strong style="color:#4caf50;">95%正确</strong>。对"futile"判断 <strong style="color:#ffa726;">50%正确</strong>&mdash;美国建设的芯片制造不会高效，但会足够满足国家安全需求。</p>
+      </details>
+
+      <details>
+        <summary><strong>#12 对Intel Foundry的真实评估</strong></summary>
+        <p>Lip-Bu Tan的execution record令人印象深刻：裁员32%、砍Falcon Shores、获得Nvidia/SoftBank投资、18A量产。但必须诚实面对：</p>
+        <ul>
+          <li><strong>$10.3B年亏损</strong> &mdash; 这不是"投资期亏损"，这是"烧钱速度远超预期"。运营利润率-50%</li>
+          <li><strong>零外部客户</strong> &mdash; 2026年3月，18A已量产3个月，仍无重大外部客户公告。Chang说得对："None of their customers liked Intel"</li>
+          <li><strong>良率"improving steadily"但"still below where I want them"</strong> &mdash; Tan自己的话。行业标准预计2027年才能达到</li>
+          <li><strong>股价涨145%但基本面未改善</strong> &mdash; Motley Fool警告"gotten way ahead of turnaround plans"。市场在为叙事付费，不是为盈利付费</li>
+        </ul>
+        <p><strong>结论</strong>：Intel Foundry在5年内不会成为TSMC的真正竞争对手。它的角色是"美国国家安全的保险单"，不是"TSMC的商业替代品"。<strong>投资Intel Foundry等于投资美国政治意志，不是投资半导体制造能力。</strong></p>
+      </details>
+    </section>
+
+
+    <!-- Phase 5 -->
+    <section id="phase5">
+      <div class="section-header">
+        <span class="phase-tag phase-build">PHASE V &mdash; BUILD</span>
+        <h2>结构诊断：代工节点的特殊性</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#13 代工节点与GPU节点的结构性差异</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>维度</th><th>Node 1 (GPU/AI)</th><th>Node 3 (代工制造)</th></tr></thead>
+            <tbody>
+              <tr><td>核心问题</td><td>"谁赢？"（竞争格局）</td><td>"这个垄断者的风险是什么？"（风险定价）</td></tr>
+              <tr><td>代理人关系</td><td>三人在竞争</td><td>三人从不同角度照亮同一结构</td></tr>
+              <tr><td>最大商业风险</td><td>CUDA护城河侵蚀</td><td>几乎不存在（垄断不可撼动）</td></tr>
+              <tr><td>最大非商业风险</td><td>AI CapEx泡沫(15-20%)</td><td>台湾地缘政治(5-10%但catastrophic)</td></tr>
+              <tr><td>"不管谁赢"属性</td><td>AVGO/TSM/ASML</td><td><strong>TSMC本身就是"不管谁赢"标的</strong></td></tr>
+              <tr><td>信息不对称</td><td>高</td><td>极高（台湾风险概率无公开数据）</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>关键发现</strong>：Node 1的三角验证是"谁的判断更可信"。Node 3的三角验证是"三个维度的风险地图怎么拼"。用同一模板会误导读者。</p>
+      </details>
+
+      <details>
+        <summary><strong>#14 CoWoS瓶颈：被Node 3忽视的最重要信号</strong></summary>
+        <p>所有AI芯片（不管NVIDIA、AMD还是Google自研）都需要TSMC的CoWoS先进封装。这是2026年AI硬件的真正chokepoint：</p>
+        <ul>
+          <li><strong>产能</strong>：2024年底35K wafers/month &rarr; 2026年底目标130K</li>
+          <li><strong>需求</strong>：仅Nvidia一家2026年需要595K wafers（占全球需求60%）</li>
+          <li><strong>结果</strong>：Google因CoWoS限制将2026年TPU产量从400万削减至300万 &mdash; 全球最有钱的公司之一也拿不到足够产能</li>
+          <li><strong>投资含义</strong>：CoWoS瓶颈 = TSMC的定价权在上升。不是"TSMC能不能满足需求"的问题，是"谁能出更高价拿到产能"的问题</li>
+        </ul>
+        <p><strong>Wei的capex分配反映了这个优先级</strong>：$52-56B中10-20%给先进封装，这是TSMC历史上首次将封装提升到与前端制造可比的投资优先级。<strong>"封装即新前端"。</strong></p>
+      </details>
+
+      <details>
+        <summary><strong>#15 Morris Chang的"认知遗产"：为什么他的信号密度最高</strong></summary>
+        <p>Chang的预测准确率是三人中最高的（9/10），但原因不是他更聪明，而是<strong>他没有利益约束</strong>：</p>
+        <ul>
+          <li>Wei是CEO &mdash; 不能公开说"我担心AI是泡沫"（股价会崩）</li>
+          <li>Tan是CEO &mdash; 不能公开说"Intel Foundry可能永远赔钱"（投资者会跑）</li>
+          <li>Chang是退休创始人 &mdash; <strong>可以说任何他认为正确的话</strong></li>
+        </ul>
+        <p>这就是为什么他的"globalization is dead"比任何CEO的指引更有价值。CEO告诉你他们想让你相信的，Chang告诉你他真正相信的。</p>
+        <p><strong>但有一个递减因素</strong>：Chang已退休8年(2018至今)，不再接触内部运营数据。他的优势在结构性判断（"代工模式为什么赢"），不在战术信息（"N2良率是多少"）。对于交易决策，<strong>Wei的短期信号 + Chang的长期框架</strong>是最佳组合。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 6 -->
+    <section id="phase6">
+      <div class="section-header">
+        <span class="phase-tag phase-verify">PHASE VI &mdash; VERIFY</span>
+        <h2>成品审视：诚实的自我诊断</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#16 可信度评分的交叉校验</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>Agent</th><th>报告可信度</th><th>交叉校验可信度</th><th>差异原因</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Wei</strong></td><td>9/10</td><td><strong style="color:#4caf50;">8.5/10</strong></td><td>Wei的AI需求判断可能过于乐观&mdash;"I'm very nervous"暗示他自己也不完全确定$52-56B capex是对的</td></tr>
+              <tr><td><strong>Chang</strong></td><td>9/10</td><td><strong style="color:#4caf50;">8/10</strong></td><td>"Futile"判断被Arizona量产部分否定。他可能低估了政治意志克服经济逻辑的能力</td></tr>
+              <tr><td><strong>Tan</strong></td><td>6/10</td><td><strong style="color:#ffa726;">5/10</strong></td><td>$10.3B亏损+零外部客户的现实比任何叙事都响亮。股价涨145%是market在为hope付费</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>最大口径差异</strong>：Tan的6/10可能还是太高了。他在组织执行上表现出色（裁员、剥离），但代工业务的核心挑战&mdash;良率、外部客户、盈利&mdash;全部未解决。如果2026H2仍无重大外部客户，需降至4/10。</p>
+      </details>
+
+      <details>
+        <summary><strong>#17 Padding识别</strong></summary>
+        <p>Node 3中的padding内容（应精简或删除）：</p>
+        <ul>
+          <li>Wei的A16/SPR架构技术细节 &mdash; 对交易决策不重要（2026年底才量产就绪，跟踪但不影响当前判断）</li>
+          <li>Tan的Trump争议叙事 &mdash; 政治花絮不是结构性信号</li>
+          <li>Tan的Cadence认罪事件 &mdash; 历史噪音</li>
+          <li>Chang自传的出版细节 &mdash; 内容重要，载体不重要</li>
+          <li>Samsung代工的详细分析 &mdash; Samsung在先进代工市场的份额<5%，不值得大篇幅分析</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary><strong>#18 该补什么</strong></summary>
+        <ol>
+          <li><strong>CoWoS瓶颈的独立分析</strong>（不在任何agent报告中充分覆盖）</li>
+          <li><strong>台湾风险的概率框架</strong>（不是猜概率，而是明确"如果发生怎么反应"）</li>
+          <li><strong>TSMC vs Intel Foundry的真实差距量化</strong>（不是PR叙事，而是产能/良率/客户数的硬比较）</li>
+          <li><strong>验证日历</strong>（Phase VII解决）</li>
+          <li><strong>信号传导链</strong>（Phase VIII解决）</li>
+          <li><strong>"不管谁赢"的传导逻辑</strong>（为什么TSMC/ASML是终极基础设施）</li>
+        </ol>
+      </details>
+    </section>
+
+
+    <!-- Phase 7 -->
+    <section id="phase7">
+      <div class="section-header">
+        <span class="phase-tag phase-build">PHASE VII &mdash; BUILD</span>
+        <h2>验证日历：什么时候能验证关键假设？</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#19 Node 3验证日历</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>日期</th><th>事件</th><th>如果成功</th><th>如果失败</th></tr></thead>
+            <tbody>
+              <tr><td><strong>每月10日</strong></td><td>TSMC月度营收公布</td><td>持续增长=AI需求验证</td><td><span class="signal signal-bear">BEAR</span> 月度环比下降=需求拐点</td></tr>
+              <tr><td><strong>2026年4月</strong></td><td>TSMC Q1 2026财报（$34.6-35.8B指引）</td><td>30%增长验证，CoWoS扩产进度</td><td><span class="signal signal-bear">BEAR</span> 下调指引=AI capex回调信号</td></tr>
+              <tr><td><strong>2026年Q3</strong></td><td>Arizona第二厂设备安装开始</td><td>美国产能扩张on track</td><td>延迟=Arizona成本/良率问题严重</td></tr>
+              <tr><td><strong>2026年H2</strong></td><td>Intel Foundry首个重大外部客户公告</td><td><span class="signal signal-watch">WATCH</span> Intel代工叙事从概念变现实</td><td><span class="signal signal-bear">BEAR</span> 18A商业验证失败，Tan可信度降至4/10</td></tr>
+              <tr><td><strong>2026年Q4</strong></td><td>CoWoS月产能达130K目标验证</td><td>封装瓶颈缓解，但可能降低TSMC定价权</td><td>产能不达标=AI硬件供应继续受限</td></tr>
+              <tr><td><strong>2027年H1</strong></td><td>Arizona第二厂（3nm）量产</td><td>TSMC美国产能实质性扩大</td><td>良率低于台湾=Chang的"成本双倍"验证</td></tr>
+              <tr><td><strong>2027年</strong></td><td>Intel 18A良率达行业标准</td><td>Intel Foundry从流血走向可行</td><td>Intel Foundry = 永久烧钱机器</td></tr>
+              <tr><td><strong>持续监控</strong></td><td>台湾海峡军事活动/外交动态</td><td>平静=继续持有</td><td><span class="signal signal-bear">BEAR</span> 升级=立即减仓+hedge</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details>
+        <summary><strong>#20 监控方法论</strong></summary>
+        <p><strong>每月</strong>：TSMC月度营收（每月10日发布）&mdash; 这是整条AI供应链最可靠的领先指标。Wei说AI需求"very robust"，月度数据是验证手段。</p>
+        <p><strong>每季度</strong>：TSMC财报（1/4/7/10月）| Intel财报（Foundry亏损走势 + 外部客户进展）| CoWoS产能扩张更新。</p>
+        <p><strong>事件驱动</strong>：台湾海峡任何军事/外交事件 | Intel Foundry外部客户公告 | Arizona良率数据 | Samsung代工客户流失/获得。</p>
+        <p><strong>关键领先指标</strong>：ASML光刻设备订单 &mdash; 如果TSMC和Intel的订单同时增长，说明全球代工产能在扩张；如果TSMC增+Intel减，说明产能在向TSMC集中。</p>
+      </details>
+
+      <details>
+        <summary><strong>#21 三个交易场景</strong></summary>
+        <div class="arc-item"><strong>场景1：TSMC垄断继续深化（基准场景，概率60%）</strong><br>CoWoS扩产on track，N2客户满载，Arizona进展顺利但成本高。TSM月线上升趋势延续。<br><em>操作：持有/加仓TSM，在月度营收确认后入场</em></div>
+        <div class="arc-item"><strong>场景2：AI Capex回调（概率25%）</strong><br>Hyperscaler削减AI投资&rarr;TSMC产能利用率下降&rarr;股价回调20-30%。Wei的"I'm very nervous"变成现实。<br><em>操作：等待CoWoS产能从sold out变成有空余，这是最明确的需求拐点信号</em></div>
+        <div class="arc-item"><strong>场景3：地缘风险升级（概率5-10%但impact catastrophic）</strong><br>台海军事活动升级&rarr;芯片供应恐慌&rarr;TSM暴跌50%+&rarr;全球半导体板块崩塌。<br><em>操作：无法事前对冲。唯一策略是不要100% all-in TSM，保持仓位分散。如果真的发生，ASML可能是避风港（设备层不直接依赖台湾地缘）</em></div>
+      </details>
+    </section>
+
+
+    <!-- Phase 8 -->
+    <section id="phase8">
+      <div class="section-header">
+        <span class="phase-tag phase-build">PHASE VIII &mdash; BUILD</span>
+        <h2>信号传导链 + "不管谁赢"标的地图</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#22 代工节点的三条传导链</strong></summary>
+        <div class="arc-item"><strong><span class="signal signal-bull">BULL</span> AI继续加速 &rarr; TSMC全面受益链</strong><br>AI CapEx &uarr; &rarr; Nvidia/AMD/Google下单 &rarr; TSMC先进制程满载 &rarr; CoWoS定价权&uarr; &rarr; ASML设备订单&uarr;<br><em style="color:var(--text-tertiary);">信号最先在TSMC月度营收出现（领先1-2月），最后传到ASML（滞后2-3季度）</em></div>
+        <div class="arc-item"><strong><span class="signal signal-bear">BEAR</span> AI CapEx回调 &rarr; 产能过剩链</strong><br>Hyperscaler削减投资 &rarr; TSMC产能利用率&darr; &rarr; CoWoS从sold out变成有余量 &rarr; 定价权下降 &rarr; ASML订单推迟<br><em style="color:var(--text-tertiary);">信号最先在Hyperscaler财报的CapEx指引出现。关键：TSMC月度营收会滞后1-2季度反映</em></div>
+        <div class="arc-item"><strong><span class="signal signal-bear">BEAR</span> 地缘危机链 &mdash; tail risk</strong><br>台湾海峡紧张 &rarr; TSM暴跌 &rarr; 全球芯片供应恐慌 &rarr; 所有Fabless公司（NVDA/AMD/AVGO/QCOM）暴跌 &rarr; 唯一受益者：Intel（美国本土代工）<br><em style="color:var(--text-tertiary);">信号在军事/外交新闻出现。注意：真正的危机中，"有替代"的公司（Intel/Samsung）可能逆势上涨</em></div>
+      </details>
+
+      <details open>
+        <summary><strong>#23 时间差套利</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>事件</th><th>最先反映</th><th>滞后反映</th><th>时间差</th></tr></thead>
+            <tbody>
+              <tr><td>AI芯片需求变化</td><td>TSMC月度营收（每月10日）</td><td>NVDA/AMD季度财报</td><td>1-3个月</td></tr>
+              <tr><td>CoWoS产能扩张</td><td>TSMC capex指引更新</td><td>ASML/设备商订单</td><td>2-3季度</td></tr>
+              <tr><td>Arizona良率数据</td><td>TSMC财报暗示</td><td>Intel竞争评估更新</td><td>1-2季度</td></tr>
+              <tr><td>Intel外部客户</td><td>Intel公告（当天）</td><td>TSMC份额影响</td><td>实际上无影响（量级差1000x）</td></tr>
+              <tr><td>地缘风险升级</td><td>TSM/台股（当天）</td><td>全球半导体ETF（次日-周）</td><td>1-5天</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>最有价值的时间差</strong>：TSMC月度营收是全球AI硬件需求的最早公开指标。每月10日发布，比Nvidia财报（季度）早1-3个月反映趋势变化。<strong>跟着TSMC月度数据走。</strong></p>
+      </details>
+
+      <details open>
+        <summary><strong>#24 "不管谁赢都赚"标的 &mdash; 代工节点视角</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>标的</th><th>NVIDIA赢&rarr;</th><th>AMD赢&rarr;</th><th>自研赢&rarr;</th><th>逻辑</th></tr></thead>
+            <tbody>
+              <tr><td><strong>TSM</strong></td><td>NVIDIA封装&uarr;</td><td>AMD 3nm&uarr;</td><td>Google/AMZN也找TSMC</td><td>所有AI芯片的必经之路</td></tr>
+              <tr><td><strong>ASML</strong></td><td>TSMC扩产需EUV</td><td>TSMC扩产需EUV</td><td>TSMC扩产需EUV</td><td>设备层完全不关心谁的芯片</td></tr>
+              <tr><td><strong>AVGO</strong></td><td>网络需求&uarr;</td><td>网络需求&uarr;</td><td>自研设计收入&uarr;</td><td>交叉点标的（Node 1也确认）</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>核心洞察</strong>：TSMC本身就是"不管谁赢"的终极标的。在Node 1的三条传导链里，TSMC出现在每一条链中。唯一的风险不在商业层面，在地缘政治层面。</p>
+        <p><strong>ASML是比TSMC更纯粹的"不管谁赢"</strong>：即使TSMC出事（台湾危机），全球建替代产能需要更多ASML设备。ASML在地缘危机中反而可能受益（加速扩产需求）。</p>
+      </details>
+
+      <details>
+        <summary><strong>#25 历史案例与认知锚点</strong></summary>
+        <div class="arc-item"><strong>2021-2022芯片短缺</strong> &mdash; 全球汽车产量减少1000万辆，TSM股价翻倍。<strong>教训：当供应受限时，垄断供应者的定价权指数级上升。</strong>CoWoS瓶颈正在重演这个逻辑。</div>
+        <div class="arc-item"><strong>1996年台海危机</strong> &mdash; 中国导弹试射，台股跌20%+，美国派两个航母战斗群。<strong>教训：台海风险不是理论推演，有历史先例。</strong>区别是1996年台湾还不是全球芯片供应的90%。</div>
+        <div class="arc-item"><strong>Intel IDM 2.0失败（2021-2024）</strong> &mdash; Gelsinger投入$150B+的capex计划，最终被迫离职。<strong>教训：有钱不够，制造是learning by doing。</strong>Chang说得对："Learning is local."</div>
+        <div class="arc-item"><strong>Wei的"关税对冲"（2025）</strong> &mdash; 宣布$100B追加美国投资，获得关税豁免。<strong>教训：看CEO做什么，不看说什么。</strong>Wei不是在"投资美国"，是在"购买政治保险"。</div>
+      </details>
+    </section>
+
+
+    <!-- Phase 9 -->
+    <section id="phase9">
+      <div class="section-header">
+        <span class="phase-tag phase-verify">PHASE IX &mdash; VERIFY</span>
+        <h2>综合判断 + 方法论 &mdash; 代工节点的最终裁定</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#26 综合概率评估</strong></summary>
+        <p>Based on all three agents + cross-verification, the triangulation produces:</p>
+        <figure>
+          <table>
+            <thead><tr><th>判断维度</th><th>概率</th></tr></thead>
+            <tbody>
+              <tr><td>TSMC先进制程垄断持续5年+</td><td><strong style="color:#4caf50;">95%</strong> &mdash; 技术领先2+代，信任壁垒30年，转换成本极高</td></tr>
+              <tr><td>CoWoS瓶颈持续到2027年</td><td><strong style="color:#4caf50;">85%</strong> &mdash; 扩产4倍但需求增长更快，AI芯片的物理约束</td></tr>
+              <tr><td>Arizona成本比台湾高50%+</td><td><strong style="color:#4caf50;">90%</strong> &mdash; Chang和行业数据一致，补贴只能部分抵消</td></tr>
+              <tr><td>Intel Foundry 2028年前盈利</td><td><strong style="color:#f44336;">20%</strong> &mdash; $10.3B亏损+零外部客户=至少还需3年</td></tr>
+              <tr><td>台湾地缘危机（5年内）</td><td><strong style="color:#ffa726;">5-10%</strong> &mdash; 低概率但impact catastrophic，无法定价</td></tr>
+              <tr><td>AI CapEx周期性回调</td><td><strong style="color:#ffa726;">25%</strong> &mdash; Wei自己"very nervous"，$52-56B隐含AI不回调假设</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details open>
+        <summary><strong>#27 交易决策矩阵</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>标的</th><th>场景</th><th>进场条件</th><th>风险</th></tr></thead>
+            <tbody>
+              <tr><td><strong>TSM</strong></td><td>"不管谁赢"终极标的</td><td>月线上升趋势+月度营收持续增长确认</td><td><span class="signal signal-bull">BULL</span> 最佳基础设施赌注。但地缘tail risk不可对冲</td></tr>
+              <tr><td><strong>ASML</strong></td><td>"更纯粹的不管谁赢"</td><td>月线趋势+TSMC capex增长确认</td><td><span class="signal signal-bull">BULL</span> 设备层不受地缘风险直接影响，甚至可能因替代建厂受益</td></tr>
+              <tr><td><strong>INTC</strong></td><td>"美国国运赌注"</td><td>外部客户公告（2026H2）+ 良率达标确认</td><td><span class="signal signal-bear">BEAR</span> 叙事远超基本面。$10.3B亏损=市场在为hope付费</td></tr>
+              <tr><td><strong>TSM PUT</strong></td><td>地缘风险hedge</td><td>台海紧张升级时临时买入远期put</td><td><span class="signal signal-watch">WATCH</span> 成本高，持续持有不经济。只在特定事件窗口使用</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details open>
+        <summary><strong>#28 最终方法论 &mdash; 代工节点的6条规则</strong></summary>
+        <div class="question-box">
+          <h4>代工节点的6条投资规则</h4>
+          <p style="text-align:left;"><strong>规则1：TSMC月度营收是全球AI硬件的最早公开信号</strong><br>每月10日发布，比所有Fabless公司的季度财报早1-3个月反映趋势。跟着这个数据走。</p>
+          <p style="text-align:left;"><strong>规则2：CoWoS "sold out" = TSMC定价权的最强证据</strong><br>当CoWoS从sold out变成"有空余"，才是AI需求拐点的第一个信号。在此之前，TSMC的定价权只会越来越强。</p>
+          <p style="text-align:left;"><strong>规则3：听Chang的结构判断，看Wei的执行数据</strong><br>Chang的"globalization is dead"是5年框架。Wei的capex/产能/客户分配是季度框架。两者结合=最完整的代工节点认知。</p>
+          <p style="text-align:left;"><strong>规则4：Intel Foundry不是TSMC的竞争对手，是美国的保险单</strong><br>不要用商业竞争框架分析Intel Foundry。它的价值函数是：P(美国政府持续输血) &times; P(18A/14A良率达标)。两个概率都不确定。</p>
+          <p style="text-align:left;"><strong>规则5：地缘风险不可定价但可以管理</strong><br>不要试图预测台海概率。策略：(1)不要100% all-in TSM；(2)用ASML作为地缘风险的partial hedge；(3)在台海紧张时用远期put做tactical hedge。</p>
+          <p style="text-align:left;"><strong>规则6：设备层（ASML）是地缘中性的终极基础设施</strong><br>不管芯片在台湾造、美国造、还是日本造，都需要ASML的EUV/High-NA EUV。ASML是"不管在哪造都需要"的标的，比TSMC的"不管谁设计都需要"更纯粹。</p>
+        </div>
+      </details>
+
+    </section>
+
+
+    <footer class="page-footer">
+      <p>Foundry Manufacturing Node &mdash; Metacognition Log &nbsp;|&nbsp; 28 Rounds &nbsp;|&nbsp; 2026-03-20 &nbsp;|&nbsp; V4 Design System</p>
+      <p><a href="NODE_3_%E4%BB%A3%E5%B7%A5%E5%88%B6%E9%80%A0_2026-03-19.html">代工制造认知节点报告</a> &nbsp;|&nbsp; <a href="../semiconductor_hub.html">Semiconductor Hub</a></p>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+(function() {
+  const hamburger = document.getElementById('hamburgerBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  hamburger.addEventListener('click', () => { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+  sidebar.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => { if (window.innerWidth <= 900) { sidebar.classList.remove('open'); overlay.classList.remove('open'); } });
+  });
+})();
+</script>
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+</body>
+</html>

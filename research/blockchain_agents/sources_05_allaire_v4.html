@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jeremy Allaire — 素材策展地图 V4</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  /* Page-specific V4 extensions (~75 lines) */
+  .priority-box { border:1px solid rgba(248,168,72,0.3); border-left:3px solid var(--accent); border-radius:var(--radius-sm); padding:1.25rem 1.5rem; margin-bottom:2rem; background:var(--bg-surface); }
+  .priority-box h2 { color:var(--accent); margin-top:0; font-size:1.1rem; font-weight:590; }
+  .priority-box ol { margin-bottom:0; padding-left:1.2rem; }
+  .priority-box li { margin-bottom:0.6rem; line-height:1.5; }
+  .time-badge { display:inline-block; padding:0.1rem 0.5rem; border-radius:10px; font-size:0.7rem; font-weight:590; margin-right:0.3rem; background:var(--accent); color:var(--bg-base); }
+  .anno { position:absolute; left:1rem; right:1rem; }
+  .anno.meta-note { padding:0.6rem 0.75rem; border-left:2px solid var(--accent); border-radius:0 6px 6px 0; background:rgba(248,168,72,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.meta-note:hover { box-shadow:0 0 0 1px var(--accent); }
+  .anno.know-note { padding:0.6rem 0.75rem; border-left:2px solid var(--knowledge); border-radius:0 6px 6px 0; background:rgba(91,155,213,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.know-note:hover { box-shadow:0 0 0 1px var(--knowledge); }
+  .anno .note-label { display:inline-block; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--bg-base); background:var(--accent); padding:0.1rem 0.4rem; border-radius:3px; margin-bottom:0.3rem; }
+  .anno .note-label.know { background:var(--knowledge); color:white; }
+  .anno .mn-head { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
+  .anno .mn-title { flex:1; font-weight:510; font-size:0.75rem; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .anno .mn-fold { font-size:0.55rem; color:var(--text-quaternary); transition:transform 0.2s; margin-left:auto; }
+  .anno.open .mn-fold { transform:rotate(180deg); }
+  .anno .mn-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+  .anno.open .mn-body { max-height:2000px; }
+  .anno .mn-body p { font-size:0.78rem; margin-bottom:0.3rem; color:var(--text-secondary); }
+  .anno.flash { animation:noteFlash 1.5s ease; }
+  @keyframes noteFlash { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--accent);} }
+  .anno.know-note.flash { animation:noteFlashBlue 1.5s ease; }
+  @keyframes noteFlashBlue { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--knowledge);} }
+  mark.hl-know { background:rgba(91,155,213,0.12); border-bottom:1.5px solid var(--knowledge); padding:0 2px; border-radius:2px; color:inherit; cursor:pointer; transition:background 0.15s; }
+  mark.hl-know:hover { background:rgba(91,155,213,0.28); }
+  .nref { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; font-size:0.48rem; font-weight:700; cursor:pointer; margin-left:1px; vertical-align:super; transition:transform 0.15s; text-decoration:none; background:var(--knowledge); color:white; }
+  .nref:hover { transform:scale(1.25); box-shadow:0 0 6px rgba(91,155,213,0.4); }
+  .top-controls { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; padding:0.35rem 0.7rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); font-size:0.72rem; flex-wrap:wrap; }
+  .top-controls .tc-label { font-weight:590; color:var(--knowledge); }
+  .top-controls button { padding:0.15rem 0.45rem; border-radius:4px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-tertiary); cursor:pointer; font-size:0.68rem; font-family:inherit; transition:all 0.15s; }
+  .top-controls button:hover { border-color:var(--knowledge); color:var(--text-primary); }
+  .top-controls button.active { background:var(--knowledge-dim); color:var(--knowledge); border-color:rgba(91,155,213,0.3); }
+  .top-controls .tc-sep { color:var(--border-default); margin:0 0.15rem; }
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .notes-sidebar { position:relative; width:320px; min-width:320px; padding:1.25rem 1rem; border-left:1px solid var(--border-subtle); background:var(--bg-elevated); }
+  .notes-sidebar-header { position:sticky; top:0; z-index:60; background:var(--bg-elevated); padding-bottom:0.5rem; border-bottom:1px solid var(--border-subtle); margin-bottom:0.75rem; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  .notes-toggle-btn { position:fixed; right:1rem; bottom:1.5rem; z-index:200; width:44px; height:44px; border-radius:50%; border:1px solid var(--border-default); background:var(--bg-surface); color:var(--text-secondary); cursor:pointer; font-size:1.1rem; display:none; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.4); }
+  .notes-close-btn { float:right; background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:1.1rem; padding:0; display:none; }
+  @media (max-width:1200px) { .notes-close-btn { display:block; } .notes-sidebar { position:fixed; right:0; top:0; height:100vh; overflow-y:auto; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.4); z-index:150; } .notes-sidebar.ns-closed { transform:translateX(100%); box-shadow:none; } .notes-toggle-btn { display:flex; } }
+  .notes-overlay-right { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:140; }
+  .notes-overlay-right.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  @media (min-width:1600px) { .main-content { max-width:1000px; } .notes-sidebar { width:360px; min-width:360px; } }
+  .rel-card { border:1px solid var(--border-subtle); border-radius:var(--radius-md); background:var(--bg-elevated); margin-bottom:0.75rem; }
+  .rel-card summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  .rel-card[open] summary { color:var(--accent); }
+  .rel-card .rel-body { padding:0 1rem 1rem; font-size:0.82rem; color:var(--text-secondary); line-height:1.6; }
+  .arc-item { border-left:3px solid var(--accent); padding:0.6rem 1rem; margin-bottom:0.75rem; background:rgba(66,165,245,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+  .arc-item strong { color:var(--text-primary); }
+  .question-box { border:2px solid var(--knowledge); background:rgba(91,155,213,0.05); border-radius:var(--radius-md); padding:1.5rem; text-align:center; margin:2rem 0; }
+  .question-box blockquote { border:none; margin:0; padding:0; }
+  .question-box p { font-size:1rem; font-weight:510; color:var(--text-primary); }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; margin-bottom:1rem; }
+  th { text-transform:uppercase; font-size:0.72rem; font-weight:510; color:var(--text-quaternary); letter-spacing:0.04em; text-align:left; padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-default); }
+  td { padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-subtle); vertical-align:top; color:var(--text-secondary); }
+  tr:hover td { background:var(--bg-elevated); }
+  .url-col { max-width:200px; word-break:break-all; }
+  .zh { display:block; font-size:0.85em; color:var(--text-tertiary); margin-top:0.15em; }
+  .zh-inline { font-size:0.85em; color:var(--text-tertiary); }
+  details { border:1px solid var(--border-subtle); background:var(--bg-elevated); border-radius:var(--radius-sm); padding:0; margin-bottom:0.75rem; }
+  details summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  details[open] summary { color:var(--accent); }
+  details > div, details > p { padding:0 1rem 1rem; font-size:0.82rem; line-height:1.6; color:var(--text-secondary); }
+  body.embedded .sidebar, body.embedded .notes-sidebar, body.embedded .hamburger-btn, body.embedded .notes-toggle-btn { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ========== LEFT SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Jeremy Allaire<br>素材策展地图 V4</div>
+
+    <h4>Contents</h4>
+    <nav>
+      <ul>
+        <li><a href="#priority"><span class="toc-num">&#9733;</span>如果只有2小时</a></li>
+        <li><a href="#analysts"><span class="toc-num">1</span>最佳分析师</a></li>
+        <li><a href="#longform"><span class="toc-num">2</span>必读长文/书籍</a></li>
+        <li><a href="#podcasts"><span class="toc-num">3</span>播客与视频</a></li>
+        <li><a href="#primary"><span class="toc-num">4</span>一手资料</a></li>
+        <li><a href="#relationships"><span class="toc-num">5</span>关键关系网</a></li>
+        <li><a href="#narratives"><span class="toc-num">6</span>叙事弧</a></li>
+        <li><a href="#gaps"><span class="toc-num">7</span>信息空白</a></li>
+        <li><a href="#quality"><span class="toc-num">8</span>质量评估</a></li>
+      </ul>
+    </nav>
+
+    <h4>Related</h4>
+    <nav>
+      <ul>
+        <li><a href="05_jeremy_allaire.html">Jeremy Allaire Profile</a></li>
+        <li><a href="05_jeremy_allaire_metacognition.html">Metacognition</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+
+    <div class="top-controls">
+      <span class="tc-label">&#128218; 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <header class="page-header">
+      <h1>Jeremy Allaire — 素材策展地图 V4</h1>
+      <p class="subtitle">Research Date: 2026-03-22 &nbsp;|&nbsp; 分析师: 7 | 书籍/长文: 8 | 播客: 8 | 一手资料: 9<br>
+      <span class="zh-inline">Circle 联合创始人 / USDC 发行方 / 稳定币立法倡导者</span></p>
+      <div class="badge-row">
+        <span class="badge">稳定币</span>
+        <span class="badge">Circle</span>
+        <span class="badge">USDC</span>
+        <span class="badge">GENIUS Act</span>
+        <span class="badge">IPO</span>
+      </div>
+    </header>
+
+    <!-- ★ Priority Box -->
+    <div class="priority-box" id="priority">
+      <h2>&#9200; 如果只有2小时 — 推荐阅读路径</h2>
+      <ol>
+        <li><span class="time-badge">30min</span><strong>Circle IPO Prospectus (S-1)</strong> — SEC EDGAR 必读，理解商业模式核心</li>
+        <li><span class="time-badge">20min</span><strong>GENIUS Act 立法文本</strong> — Congress.gov 原文，稳定币监管走向</li>
+        <li><span class="time-badge">20min</span><strong>USDC 透明度报告</strong> — Circle 官网月度 Grant Thornton 审计</li>
+        <li><span class="time-badge">30min</span><strong>The Block Research 稳定币报告</strong> — 市场份额与流动性实时数据</li>
+        <li><span class="time-badge">20min</span><strong>BIS "Stablecoins: Risks, Regulation"</strong> — 央行视角系统性风险</li>
+      </ol>
+    </div>
+
+    <!-- §1 最佳分析师 -->
+    <section id="analysts">
+      <div class="section-header">
+        <h2>1. 最佳分析师与独立研究<span class="zh">Best Analysts &amp; Independent Research</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Messari</strong></td>
+            <td>加密研究机构</td>
+            <td class="url-col"><a href="https://messari.io/research" target="_blank">messari.io/research</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>稳定币赛道深度报告，定期发布 USDC 生态分析，有专业订阅服务</td>
+          </tr>
+          <tr>
+            <td><strong>The Block Research</strong></td>
+            <td>加密数据研究</td>
+            <td class="url-col"><a href="https://theblock.co/research" target="_blank">theblock.co/research</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>稳定币流动性、市场份额追踪最及时，有 Circle IPO 专题研究</td>
+          </tr>
+          <tr>
+            <td><strong>Castle Island Ventures</strong></td>
+            <td>风投研究博客</td>
+            <td class="url-col"><a href="https://castleisland.vc" target="_blank">castleisland.vc</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>Nic Carter 主导，稳定币/货币加密化思想领袖，常有批判性分析</td>
+          </tr>
+          <tr>
+            <td><strong>Bitwise Asset Management</strong></td>
+            <td>资管机构研究</td>
+            <td class="url-col"><a href="https://bitwiseinvestments.com/research" target="_blank">bitwiseinvestments.com/research</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>稳定币 ETF/指数产品研究，机构视角</td>
+          </tr>
+          <tr>
+            <td><strong>Parker Jay-Pachirat (M31 Capital)</strong></td>
+            <td>独立分析师</td>
+            <td class="url-col"><a href="https://substack.com/@parkerjayp" target="_blank">Substack/Twitter @parkerjayp</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>专注稳定币竞争格局，USDC vs USDT 深度对比</td>
+          </tr>
+          <tr>
+            <td><strong>中文：吴说区块链</strong></td>
+            <td>中文加密媒体</td>
+            <td class="url-col"><a href="https://wublock123.com" target="_blank">wublock123.com</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>国内最及时 Circle/USDC 动态，有监管政策解读</td>
+          </tr>
+          <tr>
+            <td><strong>中文：Odaily 星球日报</strong></td>
+            <td>中文加密媒体</td>
+            <td class="url-col"><a href="https://odaily.news" target="_blank">odaily.news</a></td>
+            <td>⭐⭐⭐☆☆</td>
+            <td>中文市场 Circle IPO、稳定币立法跟踪</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §2 必读长文/书籍 -->
+    <section id="longform">
+      <div class="section-header">
+        <h2>2. 必读长文与书籍<span class="zh">Must-Read Long-Form &amp; Books</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>《The Infinite Machine》</strong><span class="zh-inline"> by Camila Russo</span></td>
+            <td>书籍</td>
+            <td class="url-col">亚马逊/Goodreads</td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>以太坊生态历史，理解 USDC 底层基础设施背景</td>
+          </tr>
+          <tr>
+            <td><strong>《Attack of the 50 Foot Blockchain》</strong><span class="zh-inline"> by David Gerard</span></td>
+            <td>书籍</td>
+            <td class="url-col">亚马逊</td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>批判视角，稳定币风险警示，平衡乐观叙事</td>
+          </tr>
+          <tr>
+            <td><strong>Circle IPO Prospectus (S-1)</strong></td>
+            <td>SEC文件</td>
+            <td class="url-col"><a href="https://sec.gov/Archives/edgar" target="_blank">sec.gov/Archives/edgar</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td><mark class="hl-know" data-note="note-ki-1">重要一手资料</mark>，商业模式、财务数据、风险因素全披露</td>
+          </tr>
+          <tr>
+            <td><strong>"Stablecoins: Risks, Regulation, and Supervision"</strong></td>
+            <td>央行研究报告</td>
+            <td class="url-col"><a href="https://bis.org/publ/work1061.htm" target="_blank">bis.org/publ/work1061.htm</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td><mark class="hl-know" data-note="note-ki-2">国际清算银行稳定币系统性风险分析</mark>，监管视角必读</td>
+          </tr>
+          <tr>
+            <td><strong>"The Future of Money" - BIS</strong></td>
+            <td>央行研究报告</td>
+            <td class="url-col"><a href="https://bis.org/publ/arpdf/ar2023e.htm" target="_blank">bis.org/publ/arpdf/ar2023e.htm</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>央行对私人稳定币 vs CBDC 的官方立场</td>
+          </tr>
+          <tr>
+            <td><strong>Allaire 国会证词合集 (2022-2025)</strong></td>
+            <td>国会记录</td>
+            <td class="url-col"><a href="https://congress.gov" target="_blank">congress.gov</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>监管策略一手披露，GENIUS Act 立法立场</td>
+          </tr>
+          <tr>
+            <td><strong>中文：《数字货币：金融科技与货币重构》</strong></td>
+            <td>中文书籍</td>
+            <td class="url-col">京东/当当</td>
+            <td>⭐⭐⭐☆☆</td>
+            <td>姚前著，中国央行视角理解稳定币监管逻辑</td>
+          </tr>
+          <tr>
+            <td><strong>"Tether's Shadow Banking" - Bloomberg</strong></td>
+            <td>深度报道</td>
+            <td class="url-col"><a href="https://bloomberg.com/news/features/2021-10-07" target="_blank">bloomberg.com/news/features</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td><mark class="hl-know" data-note="note-ki-3">理解 USDT 不透明模式</mark>，反衬 USDC 合规价值</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §3 播客与视频 -->
+    <section id="podcasts">
+      <div class="section-header">
+        <h2>3. 播客与视频<span class="zh">Podcasts &amp; Video</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Unchained (Laura Shin)</strong></td>
+            <td>播客</td>
+            <td class="url-col"><a href="https://unchainedcrypto.com" target="_blank">unchainedcrypto.com</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td><mark class="hl-know" data-note="note-ki-4">Allaire 多次深度访谈</mark>，2024-2025 年有 Circle IPO 专题</td>
+          </tr>
+          <tr>
+            <td><strong>Bankless</strong></td>
+            <td>播客/YouTube</td>
+            <td class="url-col"><a href="https://bankless.com" target="_blank">bankless.com</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td><mark class="hl-know" data-note="note-ki-5">DeFi 视角</mark>，多次讨论 USDC 在可编程金融中的角色</td>
+          </tr>
+          <tr>
+            <td><strong>The Block's "The Scoop"</strong></td>
+            <td>播客</td>
+            <td class="url-col"><a href="https://theblock.co/podcasts" target="_blank">theblock.co/podcasts</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>Frank Chaparro 主持，Circle 高管频繁出镜</td>
+          </tr>
+          <tr>
+            <td><strong>Bloomberg Crypto</strong></td>
+            <td>视频/播客</td>
+            <td class="url-col"><a href="https://bloomberg.com/crypto" target="_blank">bloomberg.com/crypto</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>主流金融视角，Allaire IPO 路演关键访谈</td>
+          </tr>
+          <tr>
+            <td><strong>CNBC "Squawk Box" / "Mad Money"</strong></td>
+            <td>电视节目</td>
+            <td class="url-col"><a href="https://cnbc.com" target="_blank">cnbc.com</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>Allaire 传统金融曝光主渠道，IPO 期间密集出现</td>
+          </tr>
+          <tr>
+            <td><strong>World Economic Forum Davos Sessions</strong></td>
+            <td>视频</td>
+            <td class="url-col"><a href="https://weforum.org" target="_blank">weforum.org</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>Allaire 全球政策舞台，稳定币"公共产品"叙事</td>
+          </tr>
+          <tr>
+            <td><strong>a16z crypto research talks</strong></td>
+            <td>视频/播客</td>
+            <td class="url-col"><a href="https://a16z.com/crypto" target="_blank">a16z.com/crypto</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>理解硅谷风投对稳定币赛道的投资逻辑</td>
+          </tr>
+          <tr>
+            <td><strong>中文：链捕手 ChainCatcher</strong></td>
+            <td>中文播客</td>
+            <td class="url-col"><a href="https://chaincatcher.io" target="_blank">chaincatcher.io</a></td>
+            <td>⭐⭐⭐☆☆</td>
+            <td>偶有稳定币专题，中文市场视角</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §4 一手资料 -->
+    <section id="primary">
+      <div class="section-header">
+        <h2>4. 一手资料<span class="zh">Primary Sources</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Circle Investor Relations</strong></td>
+            <td>官网投资者关系</td>
+            <td class="url-col"><a href="https://investors.circle.com" target="_blank">investors.circle.com</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td><mark class="hl-know" data-note="note-ki-6">核心一手源</mark>：财报、SEC文件、治理信息、储备报告</td>
+          </tr>
+          <tr>
+            <td><strong>SEC EDGAR - Circle Holdings Inc.</strong></td>
+            <td>SEC文件库</td>
+            <td class="url-col"><a href="https://sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001967570" target="_blank">SEC EDGAR Circle</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td><mark class="hl-know" data-note="note-ki-7">10-K, 10-Q, 8-K, S-1 全收录</mark>，法定披露</td>
+          </tr>
+          <tr>
+            <td><strong>USDC Transparency/Attestation Reports</strong></td>
+            <td>审计报告</td>
+            <td class="url-col"><a href="https://circle.com/en/usdc/transparency" target="_blank">circle.com/en/usdc/transparency</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td><mark class="hl-know" data-note="note-ki-8">月度 Grant Thornton 储备证明</mark>，USDC 核心差异化证据</td>
+          </tr>
+          <tr>
+            <td><strong>Centre Consortium (USDC 治理)</strong></td>
+            <td>治理实体</td>
+            <td class="url-col">centre.io (已归档)</td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>USDC 技术标准、智能合约升级历史</td>
+          </tr>
+          <tr>
+            <td><strong>CCTP Documentation</strong></td>
+            <td>技术文档</td>
+            <td class="url-col"><a href="https://developers.circle.com/cctp" target="_blank">developers.circle.com/cctp</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td><mark class="hl-know" data-note="note-ki-9">跨链协议技术细节</mark>，生态扩展路线图</td>
+          </tr>
+          <tr>
+            <td><strong>Congress.gov - GENIUS Act</strong></td>
+            <td>立法文本</td>
+            <td class="url-col"><a href="https://congress.gov/bill/119th-congress/senate-bill/1582" target="_blank">congress.gov S-1582</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>稳定币立法原文，修正案追踪</td>
+          </tr>
+          <tr>
+            <td><strong>Federal Reserve - Stablecoin Reports</strong></td>
+            <td>央行文件</td>
+            <td class="url-col"><a href="https://federalreserve.gov/publications.htm" target="_blank">federalreserve.gov</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>美国央行对稳定币的官方立场，系统性风险警示</td>
+          </tr>
+          <tr>
+            <td><strong>NYDFS - Circle License</strong></td>
+            <td>州监管文件</td>
+            <td class="url-col"><a href="https://dfs.ny.gov" target="_blank">dfs.ny.gov</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>BitLicense 框架下 Circle 的合规状态</td>
+          </tr>
+          <tr>
+            <td><strong>EU MiCA Regulation</strong></td>
+            <td>欧盟法规</td>
+            <td class="url-col"><a href="https://eur-lex.europa.eu" target="_blank">eur-lex.europa.eu</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>Circle 欧盟合规战略的关键法规框架</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §5 关键关系网 -->
+    <section id="relationships">
+      <div class="section-header">
+        <h2>5. 关键关系网<span class="zh">Key Relationships</span></h2>
+      </div>
+
+      <details class="rel-card" open>
+        <summary>🤝 Brian Armstrong (Coinbase CEO) — USDC 联合创始方</summary>
+        <div class="rel-body">
+          <p><strong>关系性质：</strong>Centre Consortium 共同创始人，Coinbase 是 USDC 最大分发渠道</p>
+          <p><strong>重要性：</strong>⭐⭐⭐⭐⭐</p>
+          <p><strong>研究要点：</strong></p>
+          <ul>
+            <li>Coinbase 与 Circle 的收入分成模式（未公开披露）</li>
+            <li>USDC 在 Coinbase 平台上的托管量占比</li>
+            <li>两者在监管游说上的协同策略</li>
+          </ul>
+          <p><strong>中文简述：</strong>Coinbase 是 USDC 生态最关键的分发渠道，Armstrong 与 Allaire 在国会山游说中密切配合。理解两者关系是评估 USDC 市场渗透率的关键。<a href="https://twitter.com/brian_armstrong" target="_blank" class="nref" data-note="note-km-7">K</a></p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>⚖️ Sen. Cynthia Lummis — GENIUS Act 立法盟友</summary>
+        <div class="rel-body">
+          <p><strong>关系性质：</strong>加密友好参议员，GENIUS Act 关键推动者，Allaire 重要政治盟友</p>
+          <p><strong>重要性：</strong>⭐⭐⭐⭐⭐</p>
+          <p><strong>研究要点：</strong></p>
+          <ul>
+            <li>Lummis-Allaire 政策联盟的形成</li>
+            <li>GENIUS Act 修正案方向</li>
+            <li>稳定币立法时间线预测</li>
+          </ul>
+          <p><strong>中文简述：</strong>Lummis 是美国国会中最支持稳定币立法的参议员，其与 Allaire 的关系直接影响 GENIUS Act 的走向。追踪其公开声明和立法草案是预测监管风向的关键。</p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>🔴 Paolo Ardoino (Tether CEO) — 核心竞争对手</summary>
+        <div class="rel-body">
+          <p><strong>关系性质：</strong>USDT 掌门人，稳定币市场竞争格局中的主要对手</p>
+          <p><strong>重要性：</strong>⭐⭐⭐⭐⭐</p>
+          <p><strong>研究要点：</strong></p>
+          <ul>
+            <li>Tether 的合规策略转向</li>
+            <li>USDC vs USDT 市场份额变化</li>
+            <li>Tether 审计透明度改进</li>
+          </ul>
+          <p><strong>中文简述：</strong>理解 Ardoino 的公开表态和 Tether 的战略动向是评估 USDC 护城河宽度的必要条件。USDT 若主动提升透明度，将削弱 USDC 的合规优势。<a href="https://twitter.com/paoloardoino" target="_blank" class="nref" data-note="note-km-8">K</a></p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>📊 Grant Thornton LLP — USDC 审计方</summary>
+        <div class="rel-body">
+          <p><strong>关系性质：</strong>USDC 月度储备证明审计师，审计质量直接影响可信度</p>
+          <p><strong>重要性：</strong>⭐⭐⭐⭐⭐</p>
+          <p><strong>研究要点：</strong></p>
+          <ul>
+            <li>Grant Thornton 审计报告的及时性</li>
+            <li>审计意见类型（保留 vs 无保留）</li>
+            <li>审计范围的变化趋势</li>
+          </ul>
+          <p><strong>中文简述：</strong>Grant Thornton 是 USDC 透明度差异化的关键执行者。审计报告的任何延迟或保留意见都会对 USDC 信心产生重大影响。</p>
+        </div>
+      </details>
+
+    </section>
+
+    <!-- §6 叙事弧 -->
+    <section id="narratives">
+      <div class="section-header">
+        <h2>6. 关键叙事弧<span class="zh">Key Narrative Arcs</span></h2>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧 #1：合规稳定币 vs 不透明稳定币</strong>
+        <p>这是 Jeremy Allaire 核心叙事的底层逻辑。USDC 的定位是「完全合规、完全透明」的美元稳定币，与 USDT 的不透明模式形成对比。这个叙事在监管谈判、媒体报道、机构采用三个维度上持续强化。投资者需要追踪两个关键变量：(1) USDT 审计透明度改进速度，(2) USDC 合规成本是否在可控范围内。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧 #2：GENIUS Act 立法 — 从监管威胁到竞争优势</strong>
+        <p>稳定币立法对 Circle 而言是一把双刃剑。乐观情景：GENIUS Act 落地后，合规门槛将大量竞争对手挡在门外，USDC 的先发优势得以固化。悲观情景：过于严格的监管限制创新空间，CBDC 或其他解决方案获得政策倾斜。Allaire 在国会证词中的措辞变化是追踪这个叙事拐点的关键信号。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧 #3：Circle IPO — 从加密原生到主流金融</strong>
+        <p>Circle 的 IPO 是稳定币发行商进入传统资本市场的里程碑事件。这个叙事展示了加密企业向合规金融机构的转型路径。关键研究问题包括：IPO 定价与估值逻辑、Coinbase 持股比例与利益协同、IPO 后股价表现与 USDC 采用率的相关性。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧 #4：CCTP 跨链协议 — USDC 的网络效应护城河</strong>
+        <p>Circle 的 Cross-Chain Transfer Protocol (CCTP) 是将 USDC 从单一链稳定币扩展为跨链基础设施的战略产品。这个叙事关乎 USDC 的长期竞争壁垒。投资者应关注：CCTP 的链上采用率、与传统跨境支付网络的竞争、技术护城河的可持续性。</p>
+      </div>
+
+    </section>
+
+    <!-- §7 信息空白 -->
+    <section id="gaps">
+      <div class="section-header">
+        <h2>7. 信息空白 — What Doesn't Exist<span class="zh">Information Gaps</span></h2>
+      </div>
+
+      <details open>
+        <summary>🔍 Circle 实际客户构成</summary>
+        <div>
+          <p><strong>风险/影响：</strong>不知道 USDC 持有者是散户、机构、DeFi 协议还是银行的占比</p>
+          <p><strong>弥补建议：</strong>追踪链上数据（Nansen, Arkham），关注财报中"机构客户"披露</p>
+          <p><strong>优先级：</strong>高</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>🔍 USDC 真实使用场景数据</summary>
+        <div>
+          <p><strong>风险/影响：</strong>支付 vs 交易 vs 储蓄 vs DeFi 抵押的比例不明，难以评估 USDC 的实际经济价值</p>
+          <p><strong>弥补建议：</strong>监测 CCTP 跨链流量、主要 DeFi 协议 USDC TVL</p>
+          <p><strong>优先级：</strong>高</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>🔍 储备资产实时细节</summary>
+        <div>
+          <p><strong>风险/影响：</strong>月度审计有滞后，国债具体久期、对手方银行风险不透明</p>
+          <p><strong>弥补建议：</strong>关注美联储逆回购工具使用情况，利率敏感性分析</p>
+          <p><strong>优先级：</strong>中</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>🔍 Coinbase-Circle 收入分成细节</summary>
+        <div>
+          <p><strong>风险/影响：</strong>具体分成比例未公开，影响 Circle 盈利能力评估</p>
+          <p><strong>弥补建议：</strong>从 Coinbase 财报中推算，关注"其他收入"项</p>
+          <p><strong>优先级：</strong>中</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>🔍 GENIUS Act 立法进程的内部情报</summary>
+        <div>
+          <p><strong>风险/影响：</strong>公开信息滞后，修正案方向不明</p>
+          <p><strong>弥补建议：</strong>追踪国会山出版物（Politico Pro, Punchbowl），K Street 游说披露</p>
+          <p><strong>优先级：</strong>高</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>🔍 Tether 的反击策略</summary>
+        <div>
+          <p><strong>风险/影响：</strong>USDT 若主动合规或推出透明度升级，USDC 护城河受冲击</p>
+          <p><strong>弥补建议：</strong>监控 Tether 审计进展、法律诉讼动态</p>
+          <p><strong>优先级：</strong>高</p>
+        </div>
+      </details>
+
+    </section>
+
+    <!-- §8 质量评估 -->
+    <section id="quality">
+      <div class="section-header">
+        <h2>8. 素材质量评估<span class="zh">Source Quality Assessment</span></h2>
+      </div>
+
+      <div class="question-box">
+        <blockquote>
+          <p>❓ 在追踪 Jeremy Allaire / Circle / USDC 时，您最关心的核心问题是什么？</p>
+        </blockquote>
+      </div>
+
+      <div class="arc-item">
+        <strong>核心评估框架</strong>
+        <p>对于 Circle 投资研究，建议采用以下质量分层策略：</p>
+        <ul style="margin-top:0.5rem; padding-left:1.2rem;">
+          <li><strong>一级（必须订阅）：</strong>Circle IR、SEC EDGAR、USDC 透明度报告、Messari Pro</li>
+          <li><strong>二级（定期追踪）：</strong>The Block Research、GENIUS Act 立法追踪、Grant Thornton 月度报告</li>
+          <li><strong>三级（补充视角）：</strong>Castle Island 博客、Unchained/Bankless 播客、中文媒体</li>
+        </ul>
+      </div>
+
+      <div class="arc-item">
+        <strong>数据时效性警告</strong>
+        <p>稳定币市场变化迅速，以下信息源存在时效性风险：</p>
+        <ul style="margin-top:0.5rem; padding-left:1.2rem;">
+          <li>市场份额数据（建议每周更新）</li>
+          <li>GENIUS Act 立法文本（关注修正案动态）</li>
+          <li>Tether 相关报道（Bloomberg 深度调查）</li>
+        </ul>
+      </div>
+
+    </section>
+
+    <footer style="margin-top:3rem; padding-top:1rem; border-top:1px solid var(--border-subtle); font-size:0.72rem; color:var(--text-quaternary);">
+      <p>Generated: 2026-03-22 &middot; V4 Template &middot; <a href="../blockchain_hub.html">Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ========== RIGHT SIDEBAR (Notes) ========== -->
+  <aside class="notes-sidebar ns-closed" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&times;</button>
+      <h4 style="font-size:0.7rem; font-weight:590; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-quaternary); margin:0;">&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+
+    <!-- META ANNOTATIONS -->
+    <div class="anno meta-note" id="note-m1" data-section="priority" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">优先级框架说明</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>本节提供"如果只有2小时"的快速阅读路径。这是 V4 模板的核心价值主张——帮助投资者在信息过载中快速定位高价值内容。</p>
+        <p>推荐时间分配基于：重要性 × 时效性 × 可读性的综合评估。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m2" data-section="analysts" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">分析师来源分类逻辑</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>分析师来源按"机构→独立→中文"三层分类。机构来源（Messari、The Block）提供系统性研究；独立分析师提供批判性视角；中文媒体提供本地化情报。</p>
+        <p>评级采用⭐系统，5⭐为核心必读源。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m3" data-section="longform" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">长文/书籍的批判性阅读</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>长文/书籍提供深度背景，但需注意立场差异：《Attack of the 50 Foot Blockchain》是批判视角，《The Infinite Machine》是中立历史叙事，而 Circle S-1 是利益相关方披露。</p>
+        <p>建议配对阅读：乐观源 + 批判源。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m4" data-section="podcasts" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">播客的时效性管理</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>播客是追踪 Allaire 最新表态的好渠道，但时效性强。建议优先关注 IPO 前后、立法关键节点时期的访谈。</p>
+        <p>播客转录本通常可在各平台获取，便于搜索关键词。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m5" data-section="primary" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">一手资料的验证流程</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>SEC EDGAR 是最权威的一手源，但更新有滞后。建议设置 EDGAR 提醒，同时关注 Circle IR 官网的直接披露。</p>
+        <p>USDC 透明度报告是每月固定时间发布，可提前规划追踪节奏。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m6" data-section="relationships" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">关系网的结构化理解</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>关系网按"合作→监管→竞争"三元框架组织。每个关系卡片包含：关系性质、重要性评级、研究要点。</p>
+        <p>特别注意：竞争对手关系（Tether）的动态对 USDC 叙事影响最大。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m7" data-section="narratives" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">叙事弧的监测方法</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>叙事弧是理解市场如何定价和感知 Circle 的关键。建议对每个叙事弧建立"触发事件清单"和"拐点信号清单"。</p>
+        <p>例如：GENIUS Act 投票日期、USDT 审计报告发布日、Circle 财报发布日。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m8" data-section="gaps" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">信息空白的投资含义</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>信息空白代表研究不确定性，也代表潜在的认知偏差来源。投资者应明确标注自己知识中的空白区域，并在决策时考虑相关风险溢价。</p>
+        <p>本节的目的不是填满空白，而是识别哪些空白最值得花时间填补。</p>
+      </div>
+    </div>
+
+    <!-- KNOWLEDGE ANNOTATIONS -->
+    <div class="anno know-note" id="note-ki-1" data-section="longform" onclick="toggleNote(this)">
+      <span class="note-label know">Knowledge</span>
+      <div class="mn-head">
+        <span class="mn-title">Circle IPO Prospectus (S-1) — 核心一手源</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>这是理解 Circle 商业模式的最权威来源，包含：</p>
+        <p>• 收入结构（铸造/兑换费用、利息收入、机构服务）<br>
+        • 储备资产构成（国债 vs 现金比例）<br>
+        • 风险因素（监管、竞争、信贷）<br>
+        • 与 Coinbase 的关联交易</p>
+        <p>建议从"风险因素"章节开始读，了解管理层认定的核心威胁。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-ki-2" data-section="longform" onclick="toggleNote(this)">
+      <span class="note-label know">Knowledge</span>
+      <div class="mn-head">
+        <span class="mn-title">BIS 稳定币报告 — 央行系统性风险框架</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>BIS (Bank for International Settlements) 是全球央行的"央行"，其稳定币报告代表了国际监管的主流立场。</p>
+        <p>关键结论：</p>
+        <p>• 稳定币存在"挤兑风险"<br>
+        • 储备资产需严格监管<br>
+        • 私人稳定币与 CBDC 应有不同监管框架</p>
+        <p>这直接影响 GENIUS Act 的设计逻辑。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-ki-3" data-section="longform" onclick="toggleNote(this)">
+      <span class="note-label know">Knowledge</span>
+      <div class="mn-head">
+        <span class="mn-title">Bloomberg Tether 调查 — USDT 透明度问题</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>这篇 2021 年的 Bloomberg 深度调查揭示了 Tether 储备构成的不透明问题，包括：</p>
+        <p>• 商业票据占比问题<br>
+        • 与 Bitfinex 的关联交易<br>
+        • 审计师的更换历史</p>
+        <p>这是理解 USDC 合规叙事的背景——USDT 的问题就是 USDC 的机会。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-ki-4" data-section="podcasts" onclick="toggleNote(this)">
+      <span class="note-label know">Knowledge</span>
+      <div class="mn-head">
+        <span class="mn-title">Unchained — Allaire 深度访谈平台</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Laura Shin 的 Unchained 是追踪 Allaire 公开表态的最佳播客渠道。该平台的特点：</p>
+        <p>• 长访谈格式（1-2小时），适合深度讨论<br>
+        • 历史存档完整，便于搜索<br>
+        • Allaire 在 IPO 前后的访谈特别有价值</p>
+        <p>建议订阅并设置关键词提醒。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-ki-5" data-section="podcasts" onclick="toggleNote(this)">
+      <span class="note-label know">Knowledge</span>
+      <div class="mn-head">
+        <span class="mn-title">Bankless — DeFi 原生视角</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Bankless 提供了理解 USDC 在 DeFi 生态中角色的独特视角。关键议题：</p>
+        <p>• USDC 作为 DeFi 主要抵押品<br>
+        • Circle 对 DeFi 监管的态度<br>
+        • USDC 与 DAI 的复杂关系</p>
+        <p>DeFi 采用率是评估 USDC 长期价值的重要指标。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-ki-6" data-section="primary" onclick="toggleNote(this)">
+      <span class="note-label know">Knowledge</span>
+      <div class="mn-head">
+        <span class="mn-title">Circle IR — 财报与法定披露中枢</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Circle Investor Relations 是获取以下信息的第一手渠道：</p>
+        <p>• 10-K/10-Q 财报（年度/季度）<br>
+        • 8-K 重大事件披露<br>
+        • 储备报告更新<br>
+        • 投资者演示材料</p>
+        <p>建议设置 IR 邮件列表订阅，确保第一时间获取披露信息。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-ki-7" data-section="primary" onclick="toggleNote(this)">
+      <span class="note-label know">Knowledge</span>
+      <div class="mn-head">
+        <span class="mn-title">SEC EDGAR Circle — 法定文件库</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>SEC EDGAR 是美国证券交易的官方披露系统。Circle Holdings Inc. 的 CIK 为 0001967570。</p>
+        <p>关键文件类型：</p>
+        <p>• S-1/A (招股说明书修订)<br>
+        • 10-K (年度报告)<br>
+        • 10-Q (季度报告)<br>
+        • 8-K (重大事件)<br>
+        • DEF 14A (代理声明确认)</p>
+        <p>可设置 EDGAR 提醒，关注文件变更。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-ki-8" data-section="primary" onclick="toggleNote(this)">
+      <span class="note-label know">Knowledge</span>
+      <div class="mn-head">
+        <span class="mn-title">USDC 透明度报告 — 月度 Grant Thornton 审计</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>这是 USDC 与 USDT 差异化的核心工具。每月 Grant Thornton 发布：</p>
+        <p>• USDC 流通量证明<br>
+        • 储备资产构成明细<br>
+        • 银行账户余额验证</p>
+        <p>关注点：报告及时性、审计意见类型、储备资产构成变化。任何延迟或保留意见都应视为重大风险信号。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-ki-9" data-section="primary" onclick="toggleNote(this)">
+      <span class="note-label know">Knowledge</span>
+      <div class="mn-head">
+        <span class="mn-title">CCTP — Circle 跨链传输协议</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>CCTP (Cross-Chain Transfer Protocol) 是 Circle 的跨链基础设施，允许 USDC 在不同区块链间直接转移，无需包装资产。</p>
+        <p>战略意义：</p>
+        <p>• 建立 USDC 的网络效应护城河<br>
+        • 降低跨链交易摩擦<br>
+        • 与传统跨境支付竞争</p>
+        <p>追踪：链上 CCTP 交易量、支持的区块链数量、主要集成项目。</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+// === Sidebar toggle (mobile) ===
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+
+// === Notes sidebar toggle ===
+(function(){
+  var btn=document.getElementById("notesToggleBtn"),ns=document.getElementById("notesSidebar"),ov=document.getElementById("notesOverlay"),cb=document.getElementById("notesCloseBtn");
+  if(!btn||!ns)return;
+  function toggle(){ns.classList.toggle("ns-closed");ov.classList.toggle("open");}
+  btn.onclick=toggle;
+  if(ov)ov.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(cb)cb.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(window.innerWidth>1200)ns.classList.remove("ns-closed");
+  window.addEventListener("resize",function(){if(window.innerWidth>1200)ns.classList.remove("ns-closed");});
+})();
+
+// === Toggle note ===
+function toggleNote(head){
+  var anno=head.closest(".anno");
+  if(anno){anno.classList.toggle("open");positionNotes();}
+}
+
+// === Position notes ===
+function positionNotes(){
+  var ns=document.getElementById("notesSidebar");if(!ns)return;
+  var annos=ns.querySelectorAll(".anno");
+  var lastBottom=80;
+  annos.forEach(function(a){
+    if(a.style.display==="none")return;
+    var sec=a.getAttribute("data-section");
+    var target=sec?document.getElementById(sec):null;
+    var top=target?target.getBoundingClientRect().top+window.scrollY-ns.getBoundingClientRect().top:lastBottom;
+    if(top<lastBottom)top=lastBottom;
+    a.style.top=top+"px";
+    lastBottom=top+a.offsetHeight+8;
+  });
+}
+
+// === Knowledge toggle ===
+function toggleKnowNotes(){
+  var btn=document.getElementById("knowToggleBtn");
+  var knowNotes=document.querySelectorAll(".anno.know-note");
+  var marks=document.querySelectorAll("mark.hl-know");
+  var nrefs=document.querySelectorAll(".nref");
+  var visible=btn.classList.contains("active");
+  knowNotes.forEach(function(n){n.style.display=visible?"none":"";});
+  marks.forEach(function(m){m.style.background=visible?"transparent":"";m.style.borderBottom=visible?"none":"";});
+  nrefs.forEach(function(r){r.style.display=visible?"none":"";});
+  btn.classList.toggle("active");
+  btn.textContent=visible?"显示":"隐藏";
+  positionNotes();
+}
+
+// === Expand / Collapse all ===
+function expandAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.add("open");});positionNotes();}
+function collapseAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.remove("open");});positionNotes();}
+
+// === Note count ===
+(function(){
+  var label=document.getElementById("noteCountLabel");if(!label)return;
+  var meta=document.querySelectorAll(".anno.meta-note").length;
+  var know=document.querySelectorAll(".anno.know-note").length;
+  label.textContent=meta+" META + "+know+" Knowledge";
+})();
+
+// === Highlight → Note sync ===
+document.addEventListener("click",function(e){
+  var mark=e.target.closest("mark.hl-know")||e.target.closest(".nref");
+  if(!mark)return;
+  var noteId=mark.getAttribute("data-note");if(!noteId)return;
+  var anno=document.getElementById(noteId);if(!anno)return;
+  anno.classList.add("open");
+  anno.scrollIntoView({behavior:"smooth",block:"center"});
+  anno.classList.add("flash");
+  setTimeout(function(){anno.classList.remove("flash");},1500);
+  positionNotes();
+});
+
+// === Embedded mode ===
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+  document.addEventListener("click",function(e){
+    var a=e.target.closest("a");if(!a||!a.href)return;
+    try{var url=new URL(a.href,location.href)}catch(err){return}
+    if(url.pathname.startsWith("/trade-pipeline/")||url.pathname.startsWith("/observatory/")){
+      e.preventDefault();
+      window.top.postMessage({type:"dashboard-nav",action:"openResearch",url:url.pathname,title:a.textContent.trim().substring(0,60)},"*");
+    }
+  });
+})();
+
+// Initial positioning
+window.addEventListener("load",function(){positionNotes();});
+window.addEventListener("scroll",function(){positionNotes();});
+</script>
+</body>
+</html>

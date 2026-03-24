@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Satoshi Nakamoto — Metacognition 元思考过程</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  .meta-card { border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:1.1rem 1.3rem; margin-bottom:0.75rem; background:var(--bg-surface); }
+  .meta-card h3 { font-size:0.95rem; font-weight:590; margin-bottom:0.5rem; color:var(--text-primary); }
+  .meta-card p { font-size:0.82rem; color:var(--text-secondary); line-height:1.6; margin-bottom:0.5rem; }
+  .bias-tag { display:inline-block; padding:0.15rem 0.5rem; border-radius:4px; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
+  .bias-confirmed { background:rgba(76,175,80,0.15); color:var(--tier-high); }
+  .bias-warning { background:rgba(255,193,7,0.15); color:var(--tier-medium); }
+  .bias-critical { background:rgba(244,67,54,0.15); color:var(--tier-low); }
+  .confidence-bar { display:flex; align-items:center; gap:0.5rem; margin:0.5rem 0; }
+  .conf-track { flex:1; height:6px; background:var(--border-subtle); border-radius:3px; overflow:hidden; }
+  .conf-fill { height:100%; border-radius:3px; }
+  .conf-label { font-size:0.72rem; font-weight:590; color:var(--text-tertiary); min-width:2.5rem; }
+  .gap-item { border-left:3px solid var(--tier-low); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(244,67,54,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .cross-ref { border-left:3px solid var(--knowledge); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(91,155,213,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .decision-log { font-size:0.78rem; color:var(--text-tertiary); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:0.8rem 1rem; background:var(--bg-elevated); margin-bottom:0.75rem; }
+  body.embedded .sidebar { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+</style>
+</head>
+<body>
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="page-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Satoshi Nakamoto<br>Metacognition 元思考</div>
+    <h4>Contents</h4>
+    <nav><ul>
+      <li><a href="#selection">1 Selection 选择理由</a></li>
+      <li><a href="#biases">2 Biases 认知偏差</a></li>
+      <li><a href="#corrections">3 Corrections 纠正</a></li>
+      <li><a href="#gaps">4 Gaps 信息缺口</a></li>
+      <li><a href="#crossval">5 Cross-Validation 交叉验证</a></li>
+      <li><a href="#quality">6 Quality 质量评估</a></li>
+      <li><a href="#log">7 Decision Log 决策日志</a></li>
+    </ul></nav>
+    <h4>Related</h4>
+    <nav><ul>
+      <li><a href="19_satoshi_nakamoto.html">Satoshi Nakamoto Profile</a></li>
+      <li><a href="sources_19_satoshi_v4.html">Sources V4</a></li>
+    </ul></nav>
+  </aside>
+  <main class="main-content">
+    <header class="page-header">
+      <h1>Satoshi Nakamoto — Metacognition<span style="display:block;font-size:0.85rem;font-weight:400;color:var(--text-tertiary);margin-top:0.2rem;">元思考过程 — 研究中的认知审计</span></h1>
+      <p style="font-size:0.82rem;color:var(--text-quaternary);">Generated: 2026-03-22 &middot; Part of Blockchain Research Hub</p>
+    </header>
+
+    <!-- §1 SELECTION -->
+    <div class="meta-card" id="selection">
+      <h3>§1 Selection 选择理由</h3>
+      <p><strong>Why Satoshi Nakamoto belongs in the Cognitive Agent Database</strong></p>
+      <p><strong>为什么中本聪属于认知智能体数据库</strong></p>
+      <p>Satoshi Nakamoto is the most consequential anonymous figure in financial technology history. Despite disappearing in 2010, the design decisions embedded in Bitcoin continue to shape a $2.4T+ industry. This profile requires special handling due to the fundamental paradox: the most important actor in blockchain is also the least identified.</p>
+      <p class="zh">中本聪是金融科技历史上最具影响力的匿名人物。尽管2010年消失，他在比特币中嵌入的设计决策继续影响着一个2.4万亿美元以上的行业。由于这一根本悖论——区块链最重要的参与者同时也是最难识别的——本档案需要特殊处理。</p>
+      <p><strong>Selection Criteria Met:</strong></p>
+      <ul style="font-size:0.82rem;color:var(--text-secondary);">
+        <li>✓ Created first viable cryptocurrency (2008-2009)</li>
+        <li>✓ Design decisions still debated/influential today</li>
+        <li>✓ ~1M BTC unmoved = largest single on-chain position</li>
+        <li>✓ Anonymous identity creates unique research challenges</li>
+        <li>✓ Historical archive value for understanding protocol evolution</li>
+      </ul>
+      <p class="zh">选择标准符合：</p>
+      <ul style="font-size:0.82rem;color:var(--text-secondary);">
+        <li>✓ 创建了首个可行加密货币 (2008-2009)</li>
+        <li>✓ 设计决策至今仍在辩论/产生影响</li>
+        <li>✓ ~100万BTC未移动 = 最大单一链上持仓</li>
+        <li>✓ 匿名身份带来独特研究挑战</li>
+        <li>✓ 历史档案价值：理解协议演变</li>
+      </ul>
+    </div>
+
+    <!-- §2 BIASES -->
+    <div class="meta-card" id="biases">
+      <h3>§2 Biases 认知偏差</h3>
+      <p><strong>Cognitive biases affecting research and analysis</strong></p>
+      <p><strong>影响研究和分析的认知偏差</strong></p>
+      
+      <div style="margin:0.8rem 0;">
+        <span class="bias-tag bias-critical">CRITICAL</span>
+        <strong> Mythologization Bias 神化偏差</strong>
+        <p style="margin-top:0.3rem;">Satoshi is often portrayed as either a genius visionary or a sinister figure. Both extremes distort analysis. Reality: a skilled programmer who solved specific technical problems within 2008 constraints. <span class="zh">中本聪常被描绘成天才远见者或神秘人物。两种极端都扭曲了分析。现实：一位在2008年技术限制下解决特定技术问题的高超程序员。</span></p>
+      </div>
+      
+      <div style="margin:0.8rem 0;">
+        <span class="bias-tag bias-critical">CRITICAL</span>
+        <strong> Identity Attribution Bias 身份归因偏差</strong>
+        <p style="margin-top:0.3rem;">Researchers over-attribute features to presumed identities (Hal Finney, Nick Szabo). Each candidate "explains" different aspects, but no single person fully matches the evidence. <span class="zh">研究者过度将特征归因于假定的身份（哈尔·芬尼、尼克·萨博）。每个候选人都能"解释"不同方面，但没有一个人完全匹配所有证据。</span></p>
+      </div>
+      
+      <div style="margin:0.8rem 0;">
+        <span class="bias-tag bias-warning">WARNING</span>
+        <strong> Survivorship Bias 幸存者偏差</strong>
+        <p style="margin-top:0.3rem;">We study Bitcoin's success, not the 50+ failed predecessors (b-money, HashCash, etc.). Satoshi built on failures; ignoring this overstates Bitcoin's novelty. <span class="zh">我们研究比特币的成功，而非50多个失败的先驱（b-money、HashCash等）。中本聪建立在失败之上；忽视这一点会夸大比特币的创新性。</span></p>
+      </div>
+      
+      <div style="margin:0.8rem 0;">
+        <span class="bias-tag bias-warning">WARNING</span>
+        <strong> Hindsight Bias 后见之明偏差</strong>
+        <p style="margin-top:0.3rem;">"21M cap was obviously brilliant" ignores that supply caps were common in 2008 crypto proposals. The brilliance was combination, not isolation of any single feature. <span class="zh">"2100万上限显而易见是天才之举"忽视了供应上限在2008年加密货币提案中很常见。真正厉害的是组合，而非任何单一功能的孤立。</span></p>
+      </div>
+      
+      <div style="margin:0.8rem 0;">
+        <span class="bias-tag bias-warning">WARNING</span>
+        <strong> Authority Fallacy 权威谬误</strong>
+        <p style="margin-top:0.3rem;">Bitcoin forum posts treated as canonical truth. Satoshi made errors (e.g., timestamp field usage), walked back claims, and didn't always follow his own stated principles. <span class="zh">比特币论坛帖子被视为权威真理。中本聪犯过错误（例如时间戳字段用法），收回过声明，并不总是遵循自己陈述的原则。</span></p>
+      </div>
+      
+      <div style="margin:0.8rem 0;">
+        <span class="bias-tag bias-confirmed">CONFIRMED</span>
+        <strong> Anchoring to Whitepaper 白皮书锚定</strong>
+        <p style="margin-top:0.3rem;">The 9-page whitepaper is over-indexed. Bitcoin evolved significantly post-whitepaper; citing it as sole authority misses 15+ years of emergent properties. <span class="zh">9页白皮书被过度索引。比特币在白皮书之后显著演进；将其作为唯一权威忽略了15年以上涌现属性。</span></p>
+      </div>
+    </div>
+
+    <!-- §3 CORRECTIONS -->
+    <div class="meta-card" id="corrections">
+      <h3>§3 Corrections 纠正</h3>
+      <p><strong>Cognitive corrections applied to standard analysis frameworks</strong></p>
+      <p><strong>应用于标准分析框架的认知纠正</strong></p>
+      
+      <div style="margin:0.6rem 0;padding-left:1rem;border-left:2px solid var(--tier-high);">
+        <strong>Correction 01: Protocol ≠ Person</strong>
+        <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.3rem;">Separate Bitcoin's technical architecture from Satoshi's biography. The protocol has 15+ years of collective development; attributing all innovation to one person is analytically wrong. <span class="zh">将比特币的技术架构与中本聪的生平分开。协议有15年以上的集体发展；将所有创新归因于一个人是分析上的错误。</span></p>
+      </div>
+      
+      <div style="margin:0.6rem 0;padding-left:1rem;border-left:2px solid var(--tier-high);">
+        <strong>Correction 02: Disappearance ≠ Abandonment</strong>
+        <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.3rem;">Satoshi leaving ≠ Bitcoin failing. The exit was actually optimal for decentralization. A living founder creates centralization risk, regulatory target, and single point of failure. <span class="zh">中本聪离开 ≠ 比特币失败。退出实际上是去中心化的最优选择。活着的创始人创造集中化风险、监管目标，和单点故障。</span></p>
+      </div>
+      
+      <div style="margin:0.6rem 0;padding-left:1rem;border-left:2px solid var(--tier-high);">
+        <strong>Correction 03: Electronic Cash → Digital Gold</strong>
+        <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.3rem;">The whitepaper says "electronic cash" but market chose "digital gold." This isn't betrayal—it's emergent behavior from the 21M cap + PoW design. Satoshi designed the cage; market chose the bird. <span class="zh">白皮书说"电子现金"，但市场选择了"数字黄金"。这不是背叛——这是2100万上限+PoW设计的涌现行为。中本聪设计了笼子；市场选择了鸟。</span></p>
+      </div>
+      
+      <div style="margin:0.6rem 0;padding-left:1rem;border-left:2px solid var(--tier-high);">
+        <strong>Correction 04: 1M BTC ≠ Market Manipulation Tool</strong>
+        <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.3rem;">Despite 15 years of unmoved coins, we cannot assume Satoshi controls them. Keys may be lost, person deceased, or intentional cold storage. Treat as orphaned coins until proven otherwise. <span class="zh">尽管15年来币未移动，我们不能假设中本聪控制着它们。私钥可能丢失、人员可能死亡，或故意冷存储。在证明之前，将其视为孤儿币。</span></p>
+      </div>
+      
+      <div style="margin:0.6rem 0;padding-left:1rem;border-left:2px solid var(--tier-high);">
+        <strong>Correction 05: Anonymous = Feature, Not Bug</strong>
+        <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.3rem;">The unknown identity isn't a research gap to be solved—it's a fundamental design feature. Anonymous founder = no legal person to subpoena, no government to ban, no individual to pressure. <span class="zh">匿名身份不是需要解决的研究空白——这是基本的设计特征。匿名创始人 = 无法传唤无法被引渡、无政府可禁止、无人可施压。</span></p>
+      </div>
+    </div>
+
+    <!-- §4 GAPS -->
+    <div class="meta-card" id="gaps">
+      <h3>§4 Information Gaps 信息缺口</h3>
+      <p><strong>Known unknowns affecting analysis confidence</strong></p>
+      <p><strong>影响分析可信度的已知未知</strong></p>
+      
+      <div class="gap-item">
+        <strong>Gap 01: True Identity</strong> — Despite 15+ years of investigation, Hal Finney, Nick Szabo, Dorian Prentice, and others remain unconfirmed. The identity question may be permanently unanswerable. <span class="zh">尽管15年以上调查，哈尔·芬尼、尼克·萨博、多里安·普伦蒂斯等人仍未确认。身份问题可能永远无法回答。</span>
+      </div>
+      
+      <div class="gap-item">
+        <strong>Gap 02: 1M BTC Key Status</strong> — Unknown whether Satoshi (if alive) has access to ~1M early-mined coins. If keys are lost, these are permanently dormant. If accessible, future movement could crash market. <span class="zh">未知中本聪（如果活着）是否可以访问约100万早期挖矿币。如果私钥丢失，这些将永久休眠。如果可访问，未来移动可能冲击市场。</span>
+      </div>
+      
+      <div class="gap-item">
+        <strong>Gap 03: Complete Communication Archive</strong> — Not all emails, forum posts, and private communications are public. Satoshi may have expressed views contradicting the "canonical" narrative. <span class="zh">并非所有邮件、论坛帖子和私人通信都是公开的。中本聪可能表达了与"权威"叙事相矛盾的观点。</span>
+      </div>
+      
+      <div class="gap-item">
+        <strong>Gap 04: Original Motivation Beyond Whitepaper</strong> — Whitepaper states technical goals; actual political/economic motivations are speculative. Cypherpunk ideology? Libertarian experiment? Academic research? Intelligence operation? <span class="zh">白皮书陈述技术目标；实际政治/经济动机是推测性的。密码朋克意识形态？自由主义实验？学术研究？情报行动？</span>
+      </div>
+      
+      <div class="gap-item">
+        <strong>Gap 05: True Technical Predecessors</strong> — Which specific prior works (Adam Back, Wei Dai, Hal Finney, etc.) influenced which specific Bitcoin features? The "building on shoulders of giants" narrative lacks granular attribution. <span class="zh">哪些具体先前工作（亚当·拜克、戴伟、哈尔·芬尼等）影响了哪些具体比特币功能？"站在巨人肩膀上"的叙事缺乏精细归因。</span>
+      </div>
+      
+      <div class="gap-item">
+        <strong>Gap 06: Satoshi's Technical Limitations Awareness</strong> — Did Satoshi know Bitcoin wouldn't scale as "electronic cash"? Was the 1MB block limit a temporary measure? No documented evidence either way. <span class="zh">中本聪是否知道比特币无法作为"电子现金"扩展？1MB区块限制是临时措施吗？两方面都没有记录证据。</span>
+      </div>
+      
+      <div class="gap-item">
+        <strong>Gap 07: Pre-launch Development History</strong> — The whitepaper came out October 2008; genesis block January 2009. What happened in those 3 months? Was there a private beta? How many people were involved in early development? <span class="zh">白皮书2008年10月发布；创世区块2009年1月。那3个月发生了什么？有私人测试版吗？早期开发涉及多少人？</span>
+      </div>
+      
+      <div class="gap-item">
+        <strong>Gap 08: Post-2010 Monitoring Status</strong> — Did Satoshi maintain any private communication channels with early developers (Gavin Andresen, etc.)? Were there backchannel instructions affecting Bitcoin's early development? <span class="zh">中本聪是否与早期开发者（加文·安德烈森等）保持任何私人沟通渠道？是否有影响比特币早期发展的幕后指令？</span>
+      </div>
+    </div>
+
+    <!-- §5 CROSS-VALIDATION -->
+    <div class="meta-card" id="crossval">
+      <h3>§5 Cross-Validation 交叉验证</h3>
+      <p><strong>Triangulation across independent data sources</strong></p>
+      <p><strong>跨独立数据源的三角验证</p>
+      
+      <div class="cross-ref">
+        <strong>Source 01: Whitepaper vs. Source Code</strong> — Cross-reference "Bitcoin: A Peer-to-Peer Electronic Cash System" (2008) against bitcoin-core repository commits. Matches: PoW consensus, Merkle trees, transaction model. Gaps: Whitepaper doesn't mention Merkle root in block header (present in code from v0.1). <span class="zh">交叉比对《比特币：点对点电子现金系统》(2008)与比特币核心仓库提交。匹配：PoW共识、默克尔树、交易模型。差距：白皮书未提及区块头中的默克尔根（代码v0.1中存在）。</span>
+      </div>
+      
+      <div class="cross-ref">
+        <strong>Source 02: Forum Posts vs. On-Chain Data</strong> — Satoshi's bitcointalk.org posts claim certain technical properties. Verify against blockchain data. Example: Posts about "one CPU one vote" vs. mining centralization observable from 2010-2014 chain data. Early centralization contradicted stated ideals. <span class="zh">中本聪在bitcointalk.org的帖子声称某些技术属性。依据区块链数据验证。例：关于"一CPU一票"的帖子 vs. 2010-2014链上可观察的挖矿集中化。早期集中化与声明的理想矛盾。</span>
+      </div>
+      
+      <div class="cross-ref">
+        <strong>Source 03: Academic Cryptography Literature</strong> — Verify Bitcoin's novel contributions against prior work (Back 2002 HashCash, Dai 1998 b-money, Szabo 2005 bit gold). Novel claim: Byzantine Generals solution via PoW + longest chain. All predecessors lacked this specific mechanism. <span class="zh">将比特币的原创贡献与先前工作进行验证（Back 2002 HashCash、Dai 1998 b-money、Szabo 2005 bit gold）。原创声明：通过PoW+最长链解决拜占庭将军问题。所有先驱都缺乏这个特定机制。</span>
+      </div>
+      
+      <div class="cross-ref">
+        <strong>Source 04: St. Louis Fed Research vs. Cypherpunk Archives</strong> — Academic economic analyses of Bitcoin (hard cap as monetary policy) conflict with original cypherpunk mailing list context (privacy tool first, money second). Satoshi's The Times headline suggests political motivation beyond pure economics. <span class="zh">美联储圣路易斯分行的比特币学术经济分析与密码朋克邮件列表档案（隐私工具第一，货币第二）冲突。《泰晤士报》标题暗示超越纯粹经济的政治动机。</span>
+      </div>
+      
+      <div class="cross-ref">
+        <strong>Source 05: Patoshi Pattern vs. Multiple Identity Hypotheses</strong> — Sergio Lerner research on "Patoshi pattern" (1M BTC clustering) cross-validated against community identity theories. If Patoshi = Satoshi, then 1M BTC = one person. But clustering could also indicate coordinated multi-party mining in early days. <span class="zh">塞尔吉奥·勒纳关于"Patoshi模式"（100万BTC聚类）的研究与社区身份理论交叉验证。如果Patoshi = 中本聪，那么100万BTC = 一个人。但聚类也可能表明早期协调多方挖矿。</span>
+      </div>
+      
+      <div class="cross-ref">
+        <strong>Source 06: Timeline of Disappearance vs. Gavin Andresen Communications</strong> — Satoshi's Dec 2010 disappearance coincides with escalating forum debates about Bitcoin's direction. Cross-check: Did Andresen's later "Satoshi left me the keys" narrative create post-hoc justification for the departure? <span class="zh">中本聪2010年12月消失与比特币方向升级的论坛辩论同时发生。交叉检查：安德烈森后来的"中本聪把密钥留给了我"叙事是否为离开创造了事后正当化？</span>
+      </div>
+    </div>
+
+    <!-- §6 QUALITY ASSESSMENT -->
+    <div class="meta-card" id="quality">
+      <h3>§6 Quality 质量评估</h3>
+      <p><strong>Confidence assessment for key data points</strong></p>
+      <p><strong>关键数据点的可信度评估</strong></p>
+      
+      <div style="margin:0.8rem 0;">
+        <div style="display:flex;justify-content:space-between;font-size:0.82rem;color:var(--text-secondary);margin-bottom:0.3rem;">
+          <span>Whitepaper Content <span class="zh">白皮书内容</span></span>
+          <span style="color:var(--tier-high);font-weight:590;">98%</span>
+        </div>
+        <div class="confidence-bar">
+          <span class="conf-label">High</span>
+          <div class="conf-track"><div class="conf-fill" style="width:98%;background:var(--tier-high);"></div></div>
+        </div>
+        <p style="font-size:0.72rem;color:var(--text-quaternary);margin-top:0.2rem;">Public document, multiple verified sources, unchanged since 2008. <span class="zh">公开文件，多个验证来源，自2008年以来未更改。</span></p>
+      </div>
+      
+      <div style="margin:0.8rem 0;">
+        <div style="display:flex;justify-content:space-between;font-size:0.82rem;color:var(--text-secondary);margin-bottom:0.3rem;">
+          <span>Genesis Block Data <span class="zh">创世区块数据</span></span>
+          <span style="color:var(--tier-high);font-weight:590;">100%</span>
+        </div>
+        <div class="confidence-bar">
+          <span class="conf-label">High</span>
+          <div class="conf-track"><div class="conf-fill" style="width:100%;background:var(--tier-high);"></div></div>
+        </div>
+        <p style="font-size:0.72rem;color:var(--text-quaternary);margin-top:0.2rem;">On-chain veriable, timestamp immutable, message contents confirmed. <span class="zh">链上可验证，时间戳不可变，消息内容已确认。</span></p>
+      </div>
+      
+      <div style="margin:0.8rem 0;">
+        <div style="display:flex;justify-content:space-between;font-size:0.82rem;color:var(--text-secondary);margin-bottom:0.3rem;">
+          <span>Forum Posts Authenticity <span class="zh">论坛帖子真实性</span></span>
+          <span style="color:var(--tier-high);font-weight:590;">95%</span>
+        </div>
+        <div class="confidence-bar">
+          <span class="conf-label">High</span>
+          <div class="conf-track"><div class="conf-fill" style="width:95%;background:var(--tier-high);"></div></div>
+        </div>
+        <p style="font-size:0.72rem;color:var(--text-quaternary);margin-top:0.2rem;">Archived at bitcointalk.org, cryptographic signatures verified for some posts. Minor: possible forgeries in later years. <span class="zh">存档于bitcointalk.org，部分帖子密码签名已验证。较小可能：后期可能有伪造。</span></p>
+      </div>
+      
+      <div style="margin:0.8rem 0;">
+        <div style="display:flex;justify-content:space-between;font-size:0.82rem;color:var(--text-secondary);margin-bottom:0.3rem;">
+          <span>~1M BTC Estimate <span class="zh">~100万BTC估计</span></span>
+          <span style="color:var(--tier-medium);font-weight:590;">85%</span>
+        </div>
+        <div class="confidence-bar">
+          <span class="conf-label">Med</span>
+          <div class="conf-track"><div class="conf-fill" style="width:85%;background:var(--tier-medium);"></div></div>
+        </div>
+        <p style="font-size:0.72rem;color:var(--text-quaternary);margin-top:0.2rem;">Based on Lerner Patoshi pattern research. Reasonable consensus but depends on specific mining algorithm assumptions. <span class="zh">基于勒纳Patoshi模式研究。合理共识但取决于特定挖矿算法假设。</span></p>
+      </div>
+      
+      <div style="margin:0.8rem 0;">
+        <div style="display:flex;justify-content:space-between;font-size:0.82rem;color:var(--text-secondary);margin-bottom:0.3rem;">
+          <span>Identity Attribution <span class="zh">身份归因</span></span>
+          <span style="color:var(--tier-low);font-weight:590;">20%</span>
+        </div>
+        <div class="confidence-bar">
+          <span class="conf-label">Low</span>
+          <div class="conf-track"><div class="conf-fill" style="width:20%;background:var(--tier-low);"></div></div>
+        </div>
+        <p style="font-size:0.72rem;color:var(--text-quaternary);margin-top:0.2rem;">No conclusive evidence for any candidate. Hal Finney (deceased 2014), Nick Szabo, Dorian Prentice all remain unproven. <span class="zh">任何候选人都没有结论性证据。哈尔·芬尼（2014年去世）、尼克·萨博、多里安·普伦蒂斯都未证实。</span></p>
+      </div>
+      
+      <div style="margin:0.8rem 0;">
+        <div style="display:flex;justify-content:space-between;font-size:0.82rem;color:var(--text-secondary);margin-bottom:0.3rem;">
+          <span>Design Decision Intentions <span class="zh">设计决策意图</span></span>
+          <span style="color:var(--tier-medium);font-weight:590;">60%</span>
+        </div>
+        <div class="confidence-bar">
+          <span class="conf-label">Med</span>
+          <div class="conf-track"><div class="conf-fill" style="width:60%;background:var(--tier-medium);"></div></div>
+        </div>
+        <p style="font-size:0.72rem;color:var(--text-quaternary);margin-top:0.2rem;">Whitepaper + forum posts provide context but Satoshi never documented complete rationale. Much is inference. <span class="zh">白皮书+论坛帖子提供背景但中本聪从未记录完整理由。很多是推断。</span></p>
+      </div>
+    </div>
+
+    <!-- §7 DECISION LOG -->
+    <div class="meta-card" id="log">
+      <h3>§7 Decision Log 决策日志</h3>
+      <p><strong>Research decisions and their rationale</strong></p>
+      <p><strong>研究决策及其理由</strong></p>
+      
+      <div class="decision-log">
+        <strong>2026-03-22 · Decision 001</strong>
+        <p><strong>Archive vs. Monitor Classification: Historical Archive</strong></p>
+        <p>Rationale: Satoshi disappeared December 2010, 16 years ago. No active communication since. The "agent" no longer exists in any meaningful operational sense. We maintain this profile as a historical reference document, not an active monitoring target. Unlike Hal Finney (deceased, still monitored for estate implications), or Vitalik Buterin (active), Satoshi's profile serves educational and archival purposes only.</p>
+        <p class="zh">理由：中本聪2010年12月消失，16年前。此后无任何活跃交流。"智能体"不再有任何有意义的运营意义。我们将此档案作为历史参考文档维护，而非活跃监控目标。与哈尔·芬尼（已故，仍因遗产影响被监控）或维塔利克·布特林（活跃）不同，中本聪的档案仅服务于教育和档案目的。</p>
+      </div>
+      
+      <div class="decision-log">
+        <strong>2026-03-22 · Decision 002</strong>
+        <p><strong>1M BTC Alert Threshold: Passive Monitoring</strong></p>
+        <p>Rationale: We maintain passive on-chain monitoring for movements from known Satoshi-era addresses. No active intervention capability exists (nor should it). If/when those coins move, the market impact will be observable within hours via exchange data. The only actionable intelligence: confirmation that coins moved, not prevention. This aligns with our role as research database, not law enforcement.</p>
+        <p class="zh">理由：我们对已知中本聪时代地址的移动保持被动链上监控。不存在（也不应该存在）主动干预能力。如果/当这些币移动时，市场影响将在几小时内通过交易所数据可观察。唯一可操作的情报：确认币已移动，而非阻止。这符合我们作为研究数据库而非执法的角色。</p>
+      </div>
+      
+      <div class="decision-log">
+        <strong>2026-03-22 · Decision 003</strong>
+        <p><strong>Identity Speculation Policy: Document, Don't Conclude</strong></p>
+        <p>Rationale: We list identity candidates (Hal Finney, Nick Szabo, Dorian Prentice, etc.) in the profile with their evidence levels. We explicitly avoid concluding "X is Satoshi." The confidence is too low for any claim, and false conclusions could harm living individuals. We treat identity as an open question with documented evidence, not a mystery to be solved.</p>
+        <p class="zh">理由：我们在档案中列出身份候选者（哈尔·芬尼、尼克·萨博、多里安·普伦蒂斯等）及其证据级别。我们明确避免得出"X是中本聪"的结论。任何主张的可信度都太低，错误结论可能伤害在世个人。我们将身份视为有记录证据的开放问题，而非需要解决的谜团。</p>
+      </div>
+      
+      <div class="decision-log">
+        <strong>2026-03-22 · Decision 004</strong>
+        <p><strong>Tier Classification: C-tier (Historical)</strong></p>
+        <p>Rationale: Satoshi receives C-tier (highest historical tier) despite being the most influential figure in blockchain. Tiers measure active operational relevance, not historical importance. An agent who hasn't acted in 16 years, with no known identity, cannot be meaningfully monitored or engaged with. This is not demotion—it's accurate classification. Satoshi's influence is measured by protocol metrics, not agent-specific monitoring.</p>
+        <p class="zh">理由：中本聪尽管是区块链中最有影响力的人物，仍被列为C级（最高历史级）。等级衡量活跃运营相关性，而非历史重要性。一个16年未采取行动、身份未知的主体，无法被有意义地监控或互动。这不是降级——而是准确的分类。中本聪的影响力通过协议指标而非主体特定监控来衡量。</p>
+      </div>
+      
+      <div class="decision-log">
+        <strong>2026-03-22 · Decision 005</strong>
+        <p><strong>Cross-Reference Selection: Emphasis on Technical Verification</strong></p>
+        <p>Rationale: We prioritize cross-validation of technical claims (whitepaper vs. code vs. on-chain data) over identity investigation. Technical verification produces actionable confidence levels; identity investigation produces speculation. Our mandate is quality-adjusted intelligence, not whodunit journalism. The 6 cross-validation sources selected represent verifiable, multi-source, independently checkable claims.</p>
+        <p class="zh">理由：我们优先进行技术声明的交叉验证（白皮书vs代码vs链上数据），而非身份调查。技术验证产生可操作的可信度级别；身份调查产生推测。我们的任务是质量调整的情报，而非侦探新闻。选择的6个交叉验证来源代表可验证、多来源、独立可检查的声明。</p>
+      </div>
+
+    </div>
+
+    <footer style="margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border-subtle);font-size:0.72rem;color:var(--text-quaternary);">
+      <p>Metacognition report &middot; <a href="../blockchain_hub.html">Blockchain Hub</a> &middot; 2026-03-22</p>
+    </footer>
+  </main>
+</div>
+<script>
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+})();
+</script>
+</body>
+</html>

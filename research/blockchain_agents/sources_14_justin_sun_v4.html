@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Justin Sun (孙宇晨) — 素材策展地图 V4</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  /* Page-specific V4 extensions (~75 lines) */
+  .priority-box { border:1px solid rgba(248,168,72,0.3); border-left:3px solid var(--accent); border-radius:var(--radius-sm); padding:1.25rem 1.5rem; margin-bottom:2rem; background:var(--bg-surface); }
+  .priority-box h2 { color:var(--accent); margin-top:0; font-size:1.1rem; font-weight:590; }
+  .priority-box ol { margin-bottom:0; padding-left:1.2rem; }
+  .priority-box li { margin-bottom:0.6rem; line-height:1.5; }
+  .time-badge { display:inline-block; padding:0.1rem 0.5rem; border-radius:10px; font-size:0.7rem; font-weight:590; margin-right:0.3rem; background:var(--accent); color:var(--bg-base); }
+  .anno { position:absolute; left:1rem; right:1rem; }
+  .anno.meta-note { padding:0.6rem 0.75rem; border-left:2px solid var(--accent); border-radius:0 6px 6px 0; background:rgba(248,168,72,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.meta-note:hover { box-shadow:0 0 0 1px var(--accent); }
+  .anno.know-note { padding:0.6rem 0.75rem; border-left:2px solid var(--knowledge); border-radius:0 6px 6px 0; background:rgba(91,155,213,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.know-note:hover { box-shadow:0 0 0 1px var(--knowledge); }
+  .anno .note-label { display:inline-block; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--bg-base); background:var(--accent); padding:0.1rem 0.4rem; border-radius:3px; margin-bottom:0.3rem; }
+  .anno .note-label.know { background:var(--knowledge); color:white; }
+  .anno .mn-head { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
+  .anno .mn-title { flex:1; font-weight:510; font-size:0.75rem; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .anno .mn-fold { font-size:0.55rem; color:var(--text-quaternary); transition:transform 0.2s; margin-left:auto; }
+  .anno.open .mn-fold { transform:rotate(180deg); }
+  .anno .mn-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+  .anno.open .mn-body { max-height:2000px; }
+  .anno .mn-body p { font-size:0.78rem; margin-bottom:0.3rem; color:var(--text-secondary); }
+  .anno.flash { animation:noteFlash 1.5s ease; }
+  @keyframes noteFlash { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--accent);} }
+  .anno.know-note.flash { animation:noteFlashBlue 1.5s ease; }
+  @keyframes noteFlashBlue { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--knowledge);} }
+  mark.hl-know { background:rgba(91,155,213,0.12); border-bottom:1.5px solid var(--knowledge); padding:0 2px; border-radius:2px; color:inherit; cursor:pointer; transition:background 0.15s; }
+  mark.hl-know:hover { background:rgba(91,155,213,0.28); }
+  .nref { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; font-size:0.48rem; font-weight:700; cursor:pointer; margin-left:1px; vertical-align:super; transition:transform 0.15s; text-decoration:none; background:var(--knowledge); color:white; }
+  .nref:hover { transform:scale(1.25); box-shadow:0 0 6px rgba(91,155,213,0.4); }
+  .top-controls { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; padding:0.35rem 0.7rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); font-size:0.72rem; flex-wrap:wrap; }
+  .top-controls .tc-label { font-weight:590; color:var(--knowledge); }
+  .top-controls button { padding:0.15rem 0.45rem; border-radius:4px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-tertiary); cursor:pointer; font-size:0.68rem; font-family:inherit; transition:all 0.15s; }
+  .top-controls button:hover { border-color:var(--knowledge); color:var(--text-primary); }
+  .top-controls button.active { background:var(--knowledge-dim); color:var(--knowledge); border-color:rgba(91,155,213,0.3); }
+  .top-controls .tc-sep { color:var(--border-default); margin:0 0.15rem; }
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .notes-sidebar { position:relative; width:320px; min-width:320px; padding:1.25rem 1rem; border-left:1px solid var(--border-subtle); background:var(--bg-elevated); }
+  .notes-sidebar-header { position:sticky; top:0; z-index:60; background:var(--bg-elevated); padding-bottom:0.5rem; border-bottom:1px solid var(--border-subtle); margin-bottom:0.75rem; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  .notes-toggle-btn { position:fixed; right:1rem; bottom:1.5rem; z-index:200; width:44px; height:44px; border-radius:50%; border:1px solid var(--border-default); background:var(--bg-surface); color:var(--text-secondary); cursor:pointer; font-size:1.1rem; display:none; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.4); }
+  .notes-close-btn { float:right; background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:1.1rem; padding:0; display:none; }
+  @media (max-width:1200px) { .notes-close-btn { display:block; } .notes-sidebar { position:fixed; right:0; top:0; height:100vh; overflow-y:auto; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.4); z-index:150; } .notes-sidebar.ns-closed { transform:translateX(100%); box-shadow:none; } .notes-toggle-btn { display:flex; } }
+  .notes-overlay-right { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:140; }
+  .notes-overlay-right.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  @media (min-width:1600px) { .main-content { max-width:1000px; } .notes-sidebar { width:360px; min-width:360px; } }
+  .rel-card { border:1px solid var(--border-subtle); border-radius:var(--radius-md); background:var(--bg-elevated); margin-bottom:0.75rem; }
+  .rel-card summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  .rel-card[open] summary { color:var(--accent); }
+  .rel-card .rel-body { padding:0 1rem 1rem; font-size:0.82rem; color:var(--text-secondary); line-height:1.6; }
+  .arc-item { border-left:3px solid var(--accent); padding:0.6rem 1rem; margin-bottom:0.75rem; background:rgba(66,165,245,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+  .arc-item strong { color:var(--text-primary); }
+  .question-box { border:2px solid var(--knowledge); background:rgba(91,155,213,0.05); border-radius:var(--radius-md); padding:1.5rem; text-align:center; margin:2rem 0; }
+  .question-box blockquote { border:none; margin:0; padding:0; }
+  .question-box p { font-size:1rem; font-weight:510; color:var(--text-primary); }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; margin-bottom:1rem; }
+  th { text-transform:uppercase; font-size:0.72rem; font-weight:510; color:var(--text-quaternary); letter-spacing:0.04em; text-align:left; padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-default); }
+  td { padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-subtle); vertical-align:top; color:var(--text-secondary); }
+  tr:hover td { background:var(--bg-elevated); }
+  .url-col { max-width:200px; word-break:break-all; }
+  .zh { display:block; font-size:0.85em; color:var(--text-tertiary); margin-top:0.15em; }
+  .zh-inline { font-size:0.85em; color:var(--text-tertiary); }
+  details { border:1px solid var(--border-subtle); background:var(--bg-elevated); border-radius:var(--radius-sm); padding:0; margin-bottom:0.75rem; }
+  details summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  details[open] summary { color:var(--accent); }
+  details > div, details > p { padding:0 1rem 1rem; font-size:0.82rem; line-height:1.6; color:var(--text-secondary); }
+  body.embedded .sidebar, body.embedded .notes-sidebar, body.embedded .hamburger-btn, body.embedded .notes-toggle-btn { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+  .section-header { margin-bottom:1.25rem; padding-bottom:0.75rem; border-bottom:1px solid var(--border-subtle); }
+  .section-header h2 { font-size:1.2rem; font-weight:620; color:var(--text-primary); margin:0; }
+  .importance { color:var(--accent); font-size:0.9em; }
+  .source-link { color:var(--knowledge); text-decoration:none; }
+  .source-link:hover { text-decoration:underline; }
+  .key-insight { background:rgba(248,168,72,0.08); border-left:3px solid var(--accent); padding:0.75rem 1rem; margin:1rem 0; border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; }
+  .key-insight strong { color:var(--accent); }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ========== LEFT SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Justin Sun (孙宇晨)<br>素材策展地图 V4</div>
+
+    <h4>Contents</h4>
+    <nav>
+      <ul>
+        <li><a href="#priority"><span class="toc-num">&#9733;</span>如果只有2小时</a></li>
+        <li><a href="#analysts"><span class="toc-num">1</span>最佳分析师</a></li>
+        <li><a href="#longform"><span class="toc-num">2</span>必读长文/书籍</a></li>
+        <li><a href="#podcasts"><span class="toc-num">3</span>播客与视频</a></li>
+        <li><a href="#primary"><span class="toc-num">4</span>一手资料</a></li>
+        <li><a href="#relationships"><span class="toc-num">5</span>关键关系网</a></li>
+        <li><a href="#narratives"><span class="toc-num">6</span>叙事弧</a></li>
+        <li><a href="#gaps"><span class="toc-num">7</span>信息空白</a></li>
+        <li><a href="#quality"><span class="toc-num">8</span>质量评估</a></li>
+      </ul>
+    </nav>
+
+    <h4>Related</h4>
+    <nav>
+      <ul>
+        <li><a href="14_justin_sun.html">Justin Sun Profile</a></li>
+        <li><a href="14_justin_sun_metacognition.html">Metacognition</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+
+    <div class="top-controls">
+      <span class="tc-label">&#128218; 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <header class="page-header">
+      <h1>Justin Sun (孙宇晨) — 素材策展地图 V4</h1>
+      <p class="subtitle">Research Date: 2026-03-22 &nbsp;|&nbsp; 6 Categories · 35 Sources · High Asymmetry<br>
+      <span class="zh-inline">核心不对称：西方分析严重低估TRON，真实采用数据在发展中世界</span></p>
+      <div class="badge-row">
+        <span class="badge" style="background:var(--accent);color:var(--bg-base);">⚠️ 高风险创始人</span>
+        <span class="badge" style="background:var(--knowledge);color:white;">📊 链上数据优先</span>
+        <span class="badge" style="background:rgba(156,39,176,0.2);color:#ce93d8;">🌍 发展中世界采用</span>
+        <span class="badge" style="background:rgba(244,67,54,0.15);color:#ef9a9a;">⚖️ SEC诉讼进行中</span>
+      </div>
+    </header>
+
+    <!-- ★ Priority Box -->
+    <div class="priority-box" id="priority">
+      <h2>&#9200; 如果只有2小时 — 推荐阅读路径</h2>
+      <ol>
+        <li><span class="time-badge">45min</span><strong>TRON Scan</strong> (tronscan.org) — 查看实时链上数据：330M地址、日$10B转账量、USDT占比</li>
+        <li><span class="time-badge">30min</span><strong>Chainalysis Geography Report</strong> — 巴西、尼日利亚、阿根廷的TRON-USDT采用数据</li>
+        <li><span class="time-badge">20min</span><strong>SEC EDGAR</strong> — 查看诉Justin Sun起诉书 (2023) 的最新进展</li>
+        <li><span class="time-badge">15min</span><strong>吴说区块链</strong> — 中文监管动态、Sun争议事件</li>
+        <li><span class="time-badge">10min</span><strong>Tether透明度报告</strong> — TRON上USDT占总量~50%</li>
+      </ol>
+    </div>
+
+    <!-- §1 最佳分析师 -->
+    <section id="analysts">
+      <div class="section-header">
+        <h2>1. 最佳分析师与独立研究<span class="zh">Best Analysts &amp; Independent Research</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称 / Name</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Chainalysis Geography Report</strong></td>
+            <td>链上数据分析</td>
+            <td class="url-col"><a href="https://chainalysis.com/geography" class="source-link" target="_blank">chainalysis.com/geography</a></td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>唯一系统性覆盖TRON在发展中世界采用的英文来源。巴西、尼日利亚、阿根廷数据不可替代</td>
+          </tr>
+          <tr>
+            <td><strong>TRON Scan (官方浏览器)</strong></td>
+            <td>一手链上数据</td>
+            <td class="url-col"><a href="https://tronscan.org" class="source-link" target="_blank">tronscan.org</a></td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>330M地址、$10B日转账的原始数据源。西方分析师不用，这是你的信息优势</td>
+          </tr>
+          <tr>
+            <td><strong>Messari Pro / TRON专题</strong></td>
+            <td>机构研究</td>
+            <td class="url-col"><a href="https://messari.io" class="source-link" target="_blank">messari.io</a></td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>偶有深度报告，但篇幅与TRON市值不匹配——恰好印证"英文偏见"</td>
+          </tr>
+          <tr>
+            <td><strong>吴说区块链</strong></td>
+            <td>中文独立媒体</td>
+            <td class="url-col"><a href="https://wushuo.com" class="source-link" target="_blank">wushuo.com</a></td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>中文世界最可靠的加密新闻源。Sun的争议动态、监管进展通常首发于此</td>
+          </tr>
+          <tr>
+            <td><strong>Odaily 星球日报</strong></td>
+            <td>中文媒体</td>
+            <td class="url-col"><a href="https://odaily.news" class="source-link" target="_blank">odaily.news</a></td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>对TRON生态项目、收购动态（BitTorrent/Poloniex）跟踪较全</td>
+          </tr>
+          <tr>
+            <td><strong>The Block Research</strong></td>
+            <td>英文机构研究</td>
+            <td class="url-col"><a href="https://theblock.co/research" class="source-link" target="_blank">theblock.co/research</a></td>
+            <td><span class="importance">⭐⭐⭐☆☆</span></td>
+            <td>可用，但TRON覆盖率低。需主动搜索而非依赖推送</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="key-insight">
+        <strong>关键洞察：</strong>最佳"分析师"不是人，是<mark class="hl-know" data-note="note-ksr-1">链上数据本身</mark>。<a href="https://tronscan.org" class="source-link" target="_blank">TRON Scan</a> + <a href="https://chainalysis.com/geography" class="source-link" target="_blank">Chainalysis地理报告</a>的组合，胜过任何英文意见领袖。<a href="#" class="nref" data-note="note-ksr-1">1</a>
+      </div>
+    </section>
+
+    <!-- §2 必读长文/书籍 -->
+    <section id="longform">
+      <div class="section-header">
+        <h2>2. 必读长文与书籍<span class="zh">Must-Read Long-Form &amp; Books</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称 / Name</th>
+            <th>类型</th>
+            <th>URL/来源</th>
+            <th>重要性</th>
+            <th>简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>《TRON白皮书》2017原版 + 2018修订版</strong></td>
+            <td>一手文档</td>
+            <td class="url-col"><a href="https://tron.network/whitepaper" class="source-link" target="_blank">tron.network/whitepaper</a></td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>理解Sun最初愿景vs实际演化的基准。注意"去中心化"承诺与27超级代表现实的落差</td>
+          </tr>
+          <tr>
+            <td><strong>SEC诉Justin Sun起诉书 (2023)</strong></td>
+            <td>监管法律文件</td>
+            <td class="url-col"><a href="https://sec.gov/litigation/complaints" class="source-link" target="_blank">sec.gov/litigation/complaints</a></td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>必读一手资料。指控细节：市场操纵、未注册证券、名人推广未披露。风险评估的硬边界</td>
+          </tr>
+          <tr>
+            <td><strong>"The Rise of TRON" - CoinDesk长文</strong></td>
+            <td>英文特稿</td>
+            <td class="url-col"><a href="https://coindesk.com" class="source-link" target="_blank">coindesk.com</a> (2019-2021)</td>
+            <td><span class="importance">⭐⭐⭐☆☆</span></td>
+            <td>西方媒体少有的深度尝试，但已过时。用于理解"英文叙事"如何形成</td>
+          </tr>
+          <tr>
+            <td><strong>巨潮资讯网 - 波场相关公告</strong></td>
+            <td>中文监管披露</td>
+            <td class="url-col"><a href="https://cninfo.com.cn" class="source-link" target="_blank">cninfo.com.cn</a></td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>若TRON相关实体有A股关联（如早年陪我App），此处有披露。Sun已刻意淡化中国关联</td>
+          </tr>
+          <tr>
+            <td><strong>《加密货币之王》相关章节</strong></td>
+            <td>书籍</td>
+            <td class="url-col">Amazon / 豆瓣</td>
+            <td><span class="importance">⭐⭐⭐☆☆</span></td>
+            <td>若有涉及Sun/TRON的传记类内容，注意出版时效性（2022年前内容可能未覆盖SEC诉讼）</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="key-insight">
+        <strong>关键空白：</strong><mark class="hl-know" data-note="note-ksr-2">无真正独立的Sun/TRON传记或深度调查书籍</mark>。Sun本人高调但受控的媒体形象，加上法律风险，使长期跟踪记者难以深入。<a href="#" class="nref" data-note="note-ksr-2">2</a>
+      </div>
+    </section>
+
+    <!-- §3 播客与视频 -->
+    <section id="podcasts">
+      <div class="section-header">
+        <h2>3. 播客与视频<span class="zh">Podcasts &amp; Video</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称 / Name</th>
+            <th>类型</th>
+            <th>URL/平台</th>
+            <th>重要性</th>
+            <th>简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Justin Sun Twitter/X Space</strong></td>
+            <td>一手直播</td>
+            <td class="url-col"><a href="https://x.com/justinsuntron" class="source-link" target="_blank">x.com/justinsuntron</a></td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>Sun的营销主场。高频、高调、高争议。需反向解读：他说什么不重要，回避什么才重要</td>
+          </tr>
+          <tr>
+            <td><strong>Bankless / TRON相关访谈</strong></td>
+            <td>英文播客</td>
+            <td class="url-col"><a href="https://bankless.com" class="source-link" target="_blank">bankless.com</a></td>
+            <td><span class="importance">⭐⭐⭐☆☆</span></td>
+            <td>极少邀请Sun。若有，通常是辩论性/对抗性访谈，可观察西方社区的质疑框架</td>
+          </tr>
+          <tr>
+            <td><strong>吴说区块链 - 视频解读</strong></td>
+            <td>中文视频</td>
+            <td class="url-col">B站 / YouTube</td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>监管动态、诉讼进展的及时解读，比英文源快6-12小时</td>
+          </tr>
+          <tr>
+            <td><strong>TRON官方YouTube / 中文频道</strong></td>
+            <td>官方宣传</td>
+            <td class="url-col"><a href="https://youtube.com/tronfoundation" class="source-link" target="_blank">youtube.com/tronfoundation</a></td>
+            <td><span class="importance">⭐⭐⭐☆☆</span></td>
+            <td>生态更新、技术发布。注意区分"采用数据"与"营销叙事"</td>
+          </tr>
+          <tr>
+            <td><strong>Consensus/Token2049 现场录像</strong></td>
+            <td>会议视频</td>
+            <td class="url-col">YouTube官方频道</td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>Sun的演讲风格、现场反应、问答环节的回避模式，是"人格风险评估"的原始素材</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="key-insight">
+        <strong>关键洞察：</strong>Sun是<mark class="hl-know" data-note="note-ksr-3">表演型人格</mark>，视频/直播比文字更能捕捉其决策模式的不稳定性信号。<a href="#" class="nref" data-note="note-ksr-3">3</a>
+      </div>
+    </section>
+
+    <!-- §4 一手资料 -->
+    <section id="primary">
+      <div class="section-header">
+        <h2>4. 一手资料<span class="zh">Primary Sources</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称 / Name</th>
+            <th>类型</th>
+            <th>URL/获取方式</th>
+            <th>重要性</th>
+            <th>简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>TRON链上原始数据</strong></td>
+            <td>链上数据</td>
+            <td class="url-col"><a href="https://tronscan.org" class="source-link" target="_blank">tronscan.org</a> / public nodes</td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>330M地址、日活、USDT供应量、合约调用量。自建监控优于第三方</td>
+          </tr>
+          <tr>
+            <td><strong>Tether透明度报告</strong></td>
+            <td>发行商披露</td>
+            <td class="url-col"><a href="https://tether.to/transparency" class="source-link" target="_blank">tether.to/transparency</a></td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>TRON上USDT占Tether总供应量的~50%。储备资产质量 = TRON网络价值的底层风险</td>
+          </tr>
+          <tr>
+            <td><strong>SEC EDGAR数据库 - Sun相关</strong></td>
+            <td>监管文件</td>
+            <td class="url-col"><a href="https://sec.gov/edgar" class="source-link" target="_blank">sec.gov/edgar</a></td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>诉讼进展、和解动态、罚款金额。决定性风险事件的首发地</td>
+          </tr>
+          <tr>
+            <td><strong>巴西央行 - 加密市场报告</strong></td>
+            <td>国家监管数据</td>
+            <td class="url-col"><a href="https://bcb.gov.br" class="source-link" target="_blank">bcb.gov.br</a></td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>90%加密=TRON-USDT的原始出处。葡语，需翻译</td>
+          </tr>
+          <tr>
+            <td><strong>尼日利亚SEC / CBN公告</strong></td>
+            <td>国家监管数据</td>
+            <td class="url-col"><a href="https://sec.gov.ng" class="source-link" target="_blank">sec.gov.ng</a> / <a href="https://cbn.gov.ng" class="source-link" target="_blank">cbn.gov.ng</a></td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>$921B年交易量的监管背景。非洲最大市场的政策风向</td>
+          </tr>
+          <tr>
+            <td><strong>Poloniex黑客事件报告</strong></td>
+            <td>安全事件</td>
+            <td class="url-col"><a href="https://poloniex.com" class="source-link" target="_blank">poloniex.com</a> / 社区追踪</td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>2023年$100M+损失。Sun"收购后管理"能力的测试案例</td>
+          </tr>
+          <tr>
+            <td><strong>BitTorrent协议GitHub / 社区</strong></td>
+            <td>技术社区</td>
+            <td class="url-col"><a href="https://github.com/bittorrent" class="source-link" target="_blank">github.com/bittorrent</a></td>
+            <td><span class="importance">⭐⭐⭐☆☆</span></td>
+            <td>收购后的开发活跃度 = Sun"生态整合"承诺的兑现度</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §5 关键关系网 -->
+    <section id="relationships">
+      <div class="section-header">
+        <h2>5. 关键关系网<span class="zh">Key Relationships</span></h2>
+      </div>
+      
+      <details class="rel-card" open>
+        <summary>🤝 Tether (USDT发行商) — 商业共生 <span class="importance">⭐⭐⭐⭐⭐</span></summary>
+        <div class="rel-body">
+          <p>TRON = USDT最大传输层。Tether的任何监管/储备问题 = TRON系统性风险。TRON上USDT占Tether总供应量的~50%。</p>
+          <p><strong>关键问题：</strong>Sun与Tether的正式商业协议是否存在？推测：Tether不付"上链费"，TRON获得采用数据作为回报。</p>
+        </div>
+      </details>
+      
+      <details class="rel-card">
+        <summary>🐕 Binance (CZ) — 竞争+共生 <span class="importance">⭐⭐⭐⭐☆</span></summary>
+        <div class="rel-body">
+          <p>TRX长期是Binance交易量前10。CZ与Sun的公开互动频率 = 行业地位的风向标。</p>
+          <p><strong>风险关联：</strong>Binance的任何监管问题可能波及TRX。</p>
+        </div>
+      </details>
+      
+      <details class="rel-card">
+        <summary>🏛️ 中国监管层面 — 地缘关系 <span class="importance">⭐⭐⭐⭐☆</span></summary>
+        <div class="rel-body">
+          <p>Sun 2019年后宣称"国际化"，但TRON超级代表地理分布、早期资金来源仍有中国痕迹。信息极度不透明。</p>
+          <p><strong>监控信号：</strong>超级代表的中国IP变化、Sun的中文社交媒体活跃度</p>
+        </div>
+      </details>
+      
+      <details class="rel-card">
+        <summary>⚖️ SEC / Gary Gensler — 法律对抗 <span class="importance">⭐⭐⭐⭐⭐</span></summary>
+        <div class="rel-body">
+          <p>诉讼结果可能定义"创始人个人行为 vs 协议去中心化"的法律边界。全行业先例。</p>
+          <p><strong>信息来源：</strong><a href="https://sec.gov/edgar" class="source-link" target="_blank">SEC EDGAR</a></p>
+        </div>
+      </details>
+      
+      <details class="rel-card">
+        <summary>🌍 发展中国家交易所/OTC商 — 采用网络 <span class="importance">⭐⭐⭐⭐⭐</span></summary>
+        <div class="rel-body">
+          <p>巴西Mercado Bitcoin、尼日利亚Yellow Card等。真实采用的"最后一公里"，无公开信息源。</p>
+          <p><strong>数据缺口：</strong>采用数据 vs 投机/洗钱比例无法区分</p>
+        </div>
+      </details>
+      
+      <details class="rel-card">
+        <summary>💰 a16z / Paradigm等西方VC — 资本关系 <span class="importance">⭐⭐☆☆☆</span></summary>
+        <div class="rel-body">
+          <p><mark class="hl-know" data-note="note-ksr-4">无关系</mark>。TRON从未获得顶级西方VC投资，这是"英文偏见"的<mark class="hl-know" data-note="note-ksr-5">结构原因之一</mark>。<a href="#" class="nref" data-note="note-ksr-4">4</a><a href="#" class="nref" data-note="note-ksr-5">5</a></p>
+        </div>
+      </details>
+
+    </section>
+
+    <!-- §6 叙事弧 -->
+    <section id="narratives">
+      <div class="section-header">
+        <h2>6. 关键叙事弧<span class="zh">Key Narrative Arcs</span></h2>
+      </div>
+      
+      <div class="arc-item">
+        <strong>叙事弧 #1：去中心化承诺 vs 中心化现实</strong>
+        <p>TRON白皮书承诺"去中心化互联网"，但27个超级代表构成严重中心化。Super Representatives地理分布是否真实分散？这是评估协议韧性的核心。</p>
+      </div>
+      
+      <div class="arc-item">
+        <strong>叙事弧 #2：西方偏见 vs 发展中世界采用</strong>
+        <p>西方分析师因"Sun厌恶"和"英文信息源局限"系统性低估TRON。但巴西90%加密交易、尼日利亚$921B年交易量证明<mark class="hl-know" data-note="note-ksr-6">3.3亿账户不会说谎</mark>。<a href="#" class="nref" data-note="note-ksr-6">6</a></p>
+      </div>
+      
+      <div class="arc-item">
+        <strong>叙事弧 #3：创始人风险 vs 基础设施价值</strong>
+        <p>SEC诉讼定义了"创始人个人行为"的法律边界。你的投资任务是区分<mark class="hl-know" data-note="note-ksr-7">"Sun的风险"</mark>（交易噪音）与<mark class="hl-know" data-note="note-ksr-8">"TRON作为基础设施的价值"</mark>（信号）。<a href="#" class="nref" data-note="note-ksr-7">7</a><a href="#" class="nref" data-note="note-ksr-8">8</a></p>
+      </div>
+      
+      <div class="arc-item">
+        <strong>叙事弧 #4：表演型人格的决策信号</strong>
+        <p>Sun高调收购BitTorrent、Poloniex，但Poloniex 2023年被黑损失$100M+。视频/直播中他的回避模式 = 人格风险评估的原始素材。</p>
+      </div>
+
+      <div class="question-box">
+        <blockquote>
+          <p>🤔 核心研究问题：如何在"创始人高风险"与"基础设施高采用"之间找到非对称投资机会？</p>
+        </blockquote>
+      </div>
+
+    </section>
+
+    <!-- §7 信息空白 -->
+    <section id="gaps">
+      <div class="section-header">
+        <h2>7. 信息空白 — What Doesn't Exist<span class="zh">Information Gaps</span></h2>
+      </div>
+      
+      <details class="rel-card" open>
+        <summary>🔍 27个超级代表的真实控制方</summary>
+        <div class="rel-body">
+          <p><strong>风险：</strong>中心化攻击风险评估</p>
+          <p><strong>替代获取方式：</strong>链上节点地理分布分析 + 社区传闻交叉验证</p>
+        </div>
+      </details>
+      
+      <details class="rel-card">
+        <summary>🔍 Sun个人资产/财务状况</summary>
+        <div class="rel-body">
+          <p><strong>风险：</strong>诉讼赔偿能力、项目持续投入能力</p>
+          <p><strong>替代获取方式：</strong>无法获取。只能通过公开收购（如Poloniex）的价格推测</p>
+        </div>
+      </details>
+      
+      <details class="rel-card">
+        <summary>🔍 TRON基金会/生态基金的持仓与支出</summary>
+        <div class="rel-body">
+          <p><strong>风险：</strong>代币抛压风险、开发投入真实性</p>
+          <p><strong>替代获取方式：</strong>链上大额地址标记 + 财报披露（若有）</p>
+        </div>
+      </details>
+      
+      <details class="rel-card">
+        <summary>🔍 发展中国家OTC市场的真实规模</summary>
+        <div class="rel-body">
+          <p><strong>风险：</strong>采用数据 vs 投机/洗钱比例的区分</p>
+          <p><strong>替代获取方式：</strong>当地实地调研、Chainalysis的模型假设</p>
+        </div>
+      </details>
+      
+      <details class="rel-card">
+        <summary>🔍 Sun与Tether的正式商业协议</summary>
+        <div class="rel-body">
+          <p><strong>风险：</strong>USDT在TRON上发行的费用结构、排他条款</p>
+          <p><strong>替代获取方式：</strong>推测：Tether不付"上链费"，TRON获得采用数据作为回报</p>
+        </div>
+      </details>
+      
+      <details class="rel-card">
+        <summary>🔍 中国政府对Sun/TRON的实际态度</summary>
+        <div class="rel-body">
+          <p><strong>风险：</strong>地缘风险、潜在"招安"或打压</p>
+          <p><strong>替代获取方式：</strong>观察超级代表的中国IP变化、Sun的中文社交媒体活跃度</p>
+        </div>
+      </details>
+
+    </section>
+
+    <!-- §8 质量评估 -->
+    <section id="quality">
+      <div class="section-header">
+        <h2>8. 素材质量评估<span class="zh">Source Quality Assessment</span></h2>
+      </div>
+      
+      <div class="arc-item">
+        <strong>⭐⭐⭐⭐⭐ 一手数据源（不可替代）</strong>
+        <p>TRON Scan链上数据、SEC EDGAR法律文件、Tether透明度报告、巴西/尼日利亚央行数据</p>
+      </div>
+      
+      <div class="arc-item">
+        <strong>⭐⭐⭐⭐☆ 高价值英文源</strong>
+        <p>Chainalysis Geography Report（发展中世界采用的唯一系统性英文来源）</p>
+      </div>
+      
+      <div class="arc-item">
+        <strong>⭐⭐⭐⭐☆ 高价值中文源</strong>
+        <p>吴说区块链（监管动态首发）、Odaily星球日报（生态项目跟踪）</p>
+      </div>
+      
+      <div class="arc-item">
+        <strong>⭐⭐⭐☆☆ 中等价值源</strong>
+        <p>Messari/CoinDesk英文分析（覆盖不足但可用）、TRON官方渠道（需甄别营销）</p>
+      </div>
+      
+      <div class="arc-item">
+        <strong>⭐⭐☆☆☆ 低价值/高风险源</strong>
+        <p>Justin Sun个人社媒（营销导向严重）、英文意见领袖（系统性偏见）</p>
+      </div>
+
+      <div class="key-insight">
+        <strong>信息优势构建路径：</strong><br>
+        1. 链上数据（TRON Scan）> 英文媒体（CoinDesk）—— 用数据对抗叙事<br>
+        2. 中文源（吴说、Odaily）+ 当地监管数据（巴西、尼日利亚）> 英文社区讨论 —— 用地理覆盖对抗语言偏见<br>
+        3. SEC法律文件 > Sun的Twitter声明 —— 用监管事实对抗营销表演<br>
+        4. 长期跟踪USDT跨链流动（TRON vs Ethereum vs Solana）—— 用市场份额变化预测竞争格局
+      </div>
+
+    </section>
+
+    <footer style="margin-top:3rem; padding-top:1rem; border-top:1px solid var(--border-subtle); font-size:0.72rem; color:var(--text-quaternary);">
+      <p>Generated: 2026-03-22 &middot; V4 Template &middot; <a href="../blockchain_hub.html">Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ========== RIGHT SIDEBAR (Notes) ========== -->
+  <aside class="notes-sidebar ns-closed" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&times;</button>
+      <h4 style="font-size:0.7rem; font-weight:590; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-quaternary); margin:0;">&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+    
+    <!-- Annotation 1: Meta Note -->
+    <div class="anno meta-note" id="note-m1" data-section="analysts" onclick="toggleNote(this.querySelector('.mn-head'))">
+      <div class="note-label">META</div>
+      <div class="mn-head">
+        <span class="mn-title">英文分析的系统性偏差</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>西方分析师对TRON的分析存在双重偏见：(1) 对Sun个人的厌恶导致的先入为主；(2) 对中文信息源的依赖不足。这不是观点问题，是结构性信息不对称。</p>
+      </div>
+    </div>
+    
+    <!-- Annotation 2: Knowledge Note -->
+    <div class="anno know-note" id="note-ksr-1" data-section="analysts" onclick="toggleNote(this.querySelector('.mn-head'))">
+      <div class="note-label know">K</div>
+      <div class="mn-head">
+        <span class="mn-title">链上数据作为分析师</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>TRON Scan显示330M+地址、日$10B+转账量——这些数据不会因Sun的Twitter声明而改变。在信息噪音极大的环境中，链上数据是稀缺的客观信号源。</p>
+      </div>
+    </div>
+    
+    <!-- Annotation 3: Meta Note -->
+    <div class="anno meta-note" id="note-m2" data-section="longform" onclick="toggleNote(this.querySelector('.mn-head'))">
+      <div class="note-label">META</div>
+      <div class="mn-head">
+        <span class="mn-title">SEC起诉书是一手资料</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>SEC诉Justin Sun起诉书 (2023) 不是"新闻"，是法律证据。指控内容（市场操纵、未注册证券）定义了风险评估的硬边界。任何投资观点都必须与起诉书指控一致或给出反驳。</p>
+      </div>
+    </div>
+    
+    <!-- Annotation 4: Knowledge Note -->
+    <div class="anno know-note" id="note-ksr-2" data-section="longform" onclick="toggleNote(this.querySelector('.mn-head'))">
+      <div class="note-label know">K</div>
+      <div class="mn-head">
+        <span class="mn-title">无独立传记 = 信息控制</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>高调人物没有深度传记是危险信号。要么此人极度注重隐私（Sun不是），要么法律风险使记者不敢深入，要么信息被高度管控。三种可能都指向信息不对称。</p>
+      </div>
+    </div>
+    
+    <!-- Annotation 5: Meta Note -->
+    <div class="anno meta-note" id="note-m3" data-section="podcasts" onclick="toggleNote(this.querySelector('.mn-head'))">
+      <div class="note-label">META</div>
+      <div class="mn-head">
+        <span class="mn-title">表演型人格的信息解读法</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>对于表演型人格，"他说什么"信息量有限，"他回避什么"才是信号。学习识别Sun演讲/直播中的回避模式（话题转换、模糊时间承诺、情绪化防御）。</p>
+      </div>
+    </div>
+    
+    <!-- Annotation 6: Knowledge Note -->
+    <div class="anno know-note" id="note-ksr-3" data-section="podcasts" onclick="toggleNote(this.querySelector('.mn-head'))">
+      <div class="note-label know">K</div>
+      <div class="mn-head">
+        <span class="mn-title">视频比文字更能捕捉决策模式</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>文字可以精心修饰，视频中的微表情、语速变化、回避动作是难以伪装的信号。对于高风险创始人，建议优先使用Consensus/Token2049等公开会议录像进行人格分析。</p>
+      </div>
+    </div>
+    
+    <!-- Annotation 7: Meta Note -->
+    <div class="anno meta-note" id="note-m4" data-section="primary" onclick="toggleNote(this.querySelector('.mn-head'))">
+      <div class="note-label">META</div>
+      <div class="mn-head">
+        <span class="mn-title">USDT- TRON共生关系的风险</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>TRON上50%的USDT供应量是双刃剑：(1) 带来巨大的真实采用数据；(2) 使TRON与Tether形成系统性绑定。任何Tether的监管/储备危机都会直接冲击TRON。</p>
+      </div>
+    </div>
+    
+    <!-- Annotation 8: Knowledge Note -->
+    <div class="anno know-note" id="note-ksr-4" data-section="relationships" onclick="toggleNote(this.querySelector('.mn-head'))">
+      <div class="note-label know">K</div>
+      <div class="mn-head">
+        <span class="mn-title">无西方VC投资 = 结构性偏见</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>a16z/Paradigm等顶级VC不投TRON，这是事实，不是观点。但这不代表TRON没有价值——它意味着西方机构资本暂时无法进入，存在非对称机会窗口。</p>
+      </div>
+    </div>
+    
+    <!-- Annotation 9: Knowledge Note -->
+    <div class="anno know-note" id="note-ksr-5" data-section="relationships" onclick="toggleNote(this.querySelector('.mn-head'))">
+      <div class="note-label know">K</div>
+      <div class="mn-head">
+        <span class="mn-title">"英文偏见"的结构原因</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>西方分析师依赖英文信息源 → 无法获取中文监管动态 → 低估TRON在发展中世界的采用 → 不投资 → 继续依赖英文信息源。这是正反馈循环，解释了为何TRON在英文世界被低估。</p>
+      </div>
+    </div>
+    
+    <!-- Annotation 10: Meta Note -->
+    <div class="anno meta-note" id="note-m5" data-section="narratives" onclick="toggleNote(this.querySelector('.mn-head'))">
+      <div class="note-label">META</div>
+      <div class="mn-head">
+        <span class="mn-title">叙事弧分析框架</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>四个叙事弧代表了四个研究维度：(1) 技术去中心化 vs 政治中心化；(2) 西方叙事 vs 发展中世界现实；(3) 创始人风险 vs 基础设施价值；(4) 营销表演 vs 运营能力。</p>
+      </div>
+    </div>
+    
+    <!-- Annotation 11: Knowledge Note -->
+    <div class="anno know-note" id="note-ksr-6" data-section="narratives" onclick="toggleNote(this.querySelector('.mn-head'))">
+      <div class="note-label know">K</div>
+      <div class="mn-head">
+        <span class="mn-title">3.3亿账户不会说谎</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>无论Sun的公众形象如何，330M地址、巴西90%加密市场、尼日利亚$921B年交易量是客观存在。这些数据代表着真实的需求和使用场景，是投资的底层依据。</p>
+      </div>
+    </div>
+    
+    <!-- Annotation 12: Knowledge Note -->
+    <div class="anno know-note" id="note-ksr-7" data-section="narratives" onclick="toggleNote(this.querySelector('.mn-head'))">
+      <div class="note-label know">K</div>
+      <div class="mn-head">
+        <span class="mn-title">区分"Sun的风险"与"TRON的价值"</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>这是研究的核心任务。Sun的法律问题、市场操纵指控是交易噪音（可能已被定价）；TRON在发展中世界的实际采用是信号（尚未被充分定价）。</p>
+      </div>
+    </div>
+    
+    <!-- Annotation 13: Knowledge Note -->
+    <div class="anno know-note" id="note-ksr-8" data-section="narratives" onclick="toggleNote(this.querySelector('.mn-head'))">
+      <div class="note-label know">K</div>
+      <div class="mn-head">
+        <span class="mn-title">非对称投资框架</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>上行空间：TRON作为USDT最大传输层，受益于稳定币整体增长 + 发展中世界金融需求。上行催化剂：SEC诉讼和解（降低风险溢价）。</p>
+        <p>下行风险：Tether危机、中国监管转向、USDT跨链分流至其他链。</p>
+      </div>
+    </div>
+    
+    <!-- Annotation 14: Meta Note -->
+    <div class="anno meta-note" id="note-m6" data-section="gaps" onclick="toggleNote(this.querySelector('.mn-head'))">
+      <div class="note-label">META</div>
+      <div class="mn-head">
+        <span class="mn-title">信息空白不是障碍，是优势来源</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>6个关键信息空白（超级代表控制方、Sun个人财务、基金会持仓、OTC市场规模、Tether协议、中国政府态度）定义了研究边界。边界内深挖，边界外保持谦逊。</p>
+      </div>
+    </div>
+    
+    <!-- Annotation 15: Meta Note -->
+    <div class="anno meta-note" id="note-m7" data-section="quality" onclick="toggleNote(this.querySelector('.mn-head'))">
+      <div class="note-label">META</div>
+      <div class="mn-head">
+        <span class="mn-title">信息优先级：数据 > 中文源 > 英文源</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>质量评估给出明确的优先级：链上数据（一手、客观）> 中文监管源（地理覆盖）> 英文主流分析（系统性偏差）。遵循这个优先级可以对抗80%的信息噪音。</p>
+      </div>
+    </div>
+    
+    <!-- Annotation 16: Knowledge Note -->
+    <div class="anno know-note" id="note-ksr-9" data-section="quality" onclick="toggleNote(this.querySelector('.mn-head'))">
+      <div class="note-label know">K</div>
+      <div class="mn-head">
+        <span class="mn-title">信息优势构建路径总结</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>1. TRON Scan + Chainalysis > CoinDesk/Messari（用数据对抗叙事）</p>
+        <p>2. 吴说 + 巴西/尼日利亚央行 > 英文社区（用地理覆盖对抗语言偏见）</p>
+        <p>3. SEC EDGAR > Sun Twitter（用监管事实对抗营销表演）</p>
+        <p>4. USDT跨链流动跟踪 > 静态分析（用动态变化预测竞争格局）</p>
+      </div>
+    </div>
+    
+    <!-- Annotation 17: Meta Note -->
+    <div class="anno meta-note" id="note-m8" data-section="priority" onclick="toggleNote(this.querySelector('.mn-head'))">
+      <div class="note-label">META</div>
+      <div class="mn-head">
+        <span class="mn-title">2小时阅读路径的战略逻辑</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>推荐路径的设计遵循"先客观数据、后主观分析"原则：(1) TRON Scan建立事实基础；(2) Chainalysis验证地理采用；(3) SEC EDGAR定义风险边界；(4) 吴说补充中文监管；(5) Tether报告理解底层绑定。</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+// === Sidebar toggle (mobile) ===
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+
+// === Notes sidebar toggle ===
+(function(){
+  var btn=document.getElementById("notesToggleBtn"),ns=document.getElementById("notesSidebar"),ov=document.getElementById("notesOverlay"),cb=document.getElementById("notesCloseBtn");
+  if(!btn||!ns)return;
+  function toggle(){ns.classList.toggle("ns-closed");ov.classList.toggle("open");}
+  btn.onclick=toggle;
+  if(ov)ov.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(cb)cb.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(window.innerWidth>1200)ns.classList.remove("ns-closed");
+  window.addEventListener("resize",function(){if(window.innerWidth>1200)ns.classList.remove("ns-closed");});
+})();
+
+// === Toggle note ===
+function toggleNote(head){
+  var anno=head.closest(".anno");
+  if(anno){anno.classList.toggle("open");positionNotes();}
+}
+
+// === Position notes ===
+function positionNotes(){
+  var ns=document.getElementById("notesSidebar");if(!ns)return;
+  var annos=ns.querySelectorAll(".anno");
+  var lastBottom=80;
+  annos.forEach(function(a){
+    if(a.style.display==="none")return;
+    var sec=a.getAttribute("data-section");
+    var target=sec?document.getElementById(sec):null;
+    var top=target?target.getBoundingClientRect().top+window.scrollY-ns.getBoundingClientRect().top:lastBottom;
+    if(top<lastBottom)top=lastBottom;
+    a.style.top=top+"px";
+    lastBottom=top+a.offsetHeight+8;
+  });
+}
+
+// === Knowledge toggle ===
+function toggleKnowNotes(){
+  var btn=document.getElementById("knowToggleBtn");
+  var knowNotes=document.querySelectorAll(".anno.know-note");
+  var marks=document.querySelectorAll("mark.hl-know");
+  var nrefs=document.querySelectorAll(".nref");
+  var visible=btn.classList.contains("active");
+  knowNotes.forEach(function(n){n.style.display=visible?"none":"";});
+  marks.forEach(function(m){m.style.background=visible?"transparent":"";m.style.borderBottom=visible?"none":"";});
+  nrefs.forEach(function(r){r.style.display=visible?"none":"";});
+  btn.classList.toggle("active");
+  btn.textContent=visible?"显示":"隐藏";
+  positionNotes();
+}
+
+// === Expand / Collapse all ===
+function expandAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.add("open");});positionNotes();}
+function collapseAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.remove("open");});positionNotes();}
+
+// === Note count ===
+(function(){
+  var label=document.getElementById("noteCountLabel");if(!label)return;
+  var meta=document.querySelectorAll(".anno.meta-note").length;
+  var know=document.querySelectorAll(".anno.know-note").length;
+  label.textContent=meta+" META + "+know+" Knowledge";
+})();
+
+// === Highlight → Note sync ===
+document.addEventListener("click",function(e){
+  var mark=e.target.closest("mark.hl-know")||e.target.closest(".nref");
+  if(!mark)return;
+  var noteId=mark.getAttribute("data-note");if(!noteId)return;
+  var anno=document.getElementById(noteId);if(!anno)return;
+  anno.classList.add("open");
+  anno.scrollIntoView({behavior:"smooth",block:"center"});
+  anno.classList.add("flash");
+  setTimeout(function(){anno.classList.remove("flash");},1500);
+  positionNotes();
+});
+
+// === Embedded mode ===
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+  document.addEventListener("click",function(e){
+    var a=e.target.closest("a");if(!a||!a.href)return;
+    try{var url=new URL(a.href,location.href)}catch(err){return}
+    if(url.pathname.startsWith("/trade-pipeline/")||url.pathname.startsWith("/observatory/")){
+      e.preventDefault();
+      window.top.postMessage({type:"dashboard-nav",action:"openResearch",url:url.pathname,title:a.textContent.trim().substring(0,60)},"*");
+    }
+  });
+})();
+
+// Initial positioning
+window.addEventListener("load",function(){positionNotes();});
+window.addEventListener("scroll",function(){positionNotes();});
+</script>
+</body>
+</html>

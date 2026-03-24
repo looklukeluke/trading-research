@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>存储/HBM节点 — 28轮元思考过程</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <style>
+    :root {
+      --bg-base: #08090a; --bg-elevated: #0f1011; --bg-surface: #141516; --bg-overlay: #191a1b;
+      --border-subtle: #23252a; --border-default: #34343a; --border-strong: #3e3e44;
+      --text-primary: #f7f8f8; --text-secondary: #d0d6e0; --text-tertiary: #8a8f98; --text-quaternary: #62666d;
+      --accent: #f8a848; --accent-dim: rgba(248, 168, 72, 0.12); --accent-hover: rgba(248, 168, 72, 0.08);
+      --knowledge: #5b9bd5; --knowledge-dim: rgba(91, 155, 213, 0.12);
+      --green: #4caf50; --red: #f44336; --orange: #ffa726;
+      --font-sans: 'Inter', 'Inter Variable', -apple-system, system-ui, sans-serif;
+      --font-mono: 'SF Mono', 'Menlo', monospace;
+      --radius-sm: 8px; --radius-md: 12px; --sidebar-width: 240px;
+    }
+    * { box-sizing: border-box; }
+    html { font-family: var(--font-sans); font-feature-settings: 'liga' 1, 'calt' 1; letter-spacing: -0.012em; -webkit-font-smoothing: antialiased; }
+    body { margin: 0; padding: 0; background: var(--bg-base); color: var(--text-primary); font-size: 15px; line-height: 1.65; }
+    .page-wrapper { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { position: sticky; top: 0; height: 100vh; width: var(--sidebar-width); min-width: var(--sidebar-width); overflow-y: auto; padding: 1.25rem 0.75rem; border-right: 1px solid var(--border-subtle); background: var(--bg-elevated); z-index: 100; }
+    .sidebar h4 { margin-bottom: 0.5rem; padding: 0 0.5rem; font-size: 0.7rem; font-weight: 590; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-quaternary); }
+    .sidebar nav ul { list-style: none; padding: 0; margin: 0 0 1rem 0; }
+    .sidebar nav ul li a { display: block; padding: 0.25rem 0.5rem; font-size: 0.78rem; color: var(--text-tertiary); text-decoration: none; border-radius: var(--radius-sm); transition: background 0.12s, color 0.12s; line-height: 1.4; }
+    .sidebar nav ul li a:hover { background: var(--accent-hover); color: var(--text-primary); }
+    .sidebar nav ul li a .toc-num { color: var(--text-quaternary); margin-right: 0.25rem; font-size: 0.65rem; font-weight: 510; }
+
+    /* Main */
+    .main-content { flex: 1; min-width: 0; max-width: 960px; padding: 2.5rem 2.5rem 5rem; }
+
+    /* Header */
+    .page-header { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-default); }
+    .page-header h1 { margin-bottom: 0.3rem; font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 680; letter-spacing: -0.025em; }
+    .page-header .subtitle { color: var(--text-tertiary); margin-bottom: 1rem; font-size: 0.95rem; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .badge { display: inline-block; padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.75rem; font-weight: 510; background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(248, 168, 72, 0.25); }
+    .role-badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; background: rgba(91,155,213,0.12); color: var(--knowledge); }
+
+    /* Sections */
+    .section-header { margin-top: 3.5rem; margin-bottom: 1.25rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border-subtle); }
+    .section-header h2 { font-size: 1.25rem; font-weight: 590; letter-spacing: -0.015em; margin-bottom: 0; }
+    h3 { font-size: 1.1rem; font-weight: 590; margin-top: 1.5rem; }
+    p { color: var(--text-secondary); margin-bottom: 1rem; }
+    strong { color: var(--text-primary); font-weight: 590; }
+    ul, ol { color: var(--text-secondary); padding-left: 1.2rem; }
+    li { margin-bottom: 0.35rem; line-height: 1.6; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Details */
+    details { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.8rem 1rem; margin: 0.8rem 0; background: var(--bg-elevated); }
+    details summary { cursor: pointer; font-weight: 510; font-size: 0.9rem; color: var(--text-primary); }
+    details[open] summary { margin-bottom: 0.6rem; color: var(--accent); }
+
+    /* Priority box */
+    .priority-box { border: 1px solid rgba(248, 168, 72, 0.3); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin-bottom: 2rem; background: var(--bg-surface); }
+    .priority-box h2 { color: var(--accent); margin-top: 0; font-size: 1.1rem; font-weight: 590; }
+
+    /* Arc items */
+    .arc-item { margin-bottom: 1rem; padding: 0.8rem; border-left: 3px solid var(--accent); background: rgba(66, 165, 245, 0.03); border-radius: 0 6px 6px 0; }
+    .arc-item strong { color: var(--accent); }
+
+    /* Question box */
+    .question-box { border: 2px solid var(--knowledge); border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; background: rgba(91, 155, 213, 0.05); }
+    .question-box h4 { color: var(--knowledge); margin-top: 0; }
+
+    /* Tables */
+    figure { margin: 1.25rem 0; overflow-x: auto; }
+    table { font-size: 0.82rem; border-collapse: collapse; width: 100%; }
+    th, td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border-subtle); text-align: left; }
+    th { white-space: nowrap; font-weight: 510; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-quaternary); border-bottom: 1px solid var(--border-default); }
+    td { color: var(--text-secondary); }
+    tr:hover td { background: var(--bg-elevated); }
+
+    /* Blockquote */
+    blockquote { border-left: 3px solid var(--accent); padding: 0.6rem 1.25rem; margin: 1rem 0; font-style: italic; background: var(--bg-surface); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-secondary); }
+
+    /* Signals */
+    .signal { display: inline-block; font-size: 0.75rem; padding: 0.1rem 0.4rem; border-radius: 3px; font-weight: 590; margin-right: 0.3rem; }
+    .signal-bull { background: rgba(76,175,80,0.15); color: var(--green); }
+    .signal-bear { background: rgba(244,67,54,0.15); color: var(--red); }
+    .signal-watch { background: rgba(255,167,38,0.15); color: var(--orange); }
+
+    /* Phase indicator */
+    .phase-tag { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+    .phase-explore { background: rgba(91,155,213,0.12); color: var(--knowledge); }
+    .phase-diagnose { background: rgba(255,167,38,0.12); color: var(--orange); }
+    .phase-build { background: rgba(76,175,80,0.12); color: var(--green); }
+    .phase-verify { background: rgba(244,67,54,0.12); color: var(--red); }
+
+    /* Footer */
+    .page-footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 2px solid var(--border-default); text-align: center; font-size: 0.85rem; color: var(--text-tertiary); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+
+    /* Mobile */
+    .hamburger-btn { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 200; background: var(--bg-surface); color: var(--text-primary); border: none; border-radius: 6px; width: 44px; height: 44px; font-size: 1.4rem; cursor: pointer; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+    @media (max-width: 900px) {
+      .sidebar { position: fixed; left: -320px; top: 0; transition: left 0.3s ease; box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.open { display: block; }
+      .hamburger-btn { display: block; }
+      .main-content { padding: 2rem 1rem 4rem; }
+    }
+    @media (min-width: 1400px) { .main-content { max-width: 1060px; } }
+  
+/* === Embedded mode: inside Dashboard iframe === */
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+body.embedded .hamburger-btn { display: none !important; }
+body.embedded .sidebar-overlay { display: none !important; }
+
+/* === Reading mode: full-width === */
+.reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+.reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+.reading-mode .hamburger-btn { display: none !important; }
+.reading-mode .sidebar-overlay { display: none !important; }
+</style>
+</head>
+<body>
+<nav style="position:sticky;top:0;z-index:999;background:rgba(8,9,10,0.95);backdrop-filter:blur(8px);padding:0.5rem 1.5rem;border-bottom:1px solid #23252a;font-size:0.78rem;display:flex;gap:1rem;align-items:center;">
+  <a href="../semiconductor_hub.html" style="color:#f8a848;text-decoration:none;">&larr; Semiconductor Hub</a>
+  <span style="color:#62666d;">&middot;</span>
+  <a href="NODE_4_%E5%AD%98%E5%82%A8_HBM_2026-03-19.html" style="color:#8a8f98;text-decoration:none;">HBM 认知节点报告</a>
+</nav>
+
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="page-wrapper">
+
+  <aside class="sidebar" id="sidebar">
+    <h4>思考旅程 Thinking Journey</h4>
+    <nav>
+      <ul>
+        <li><a href="#overview"><span class="toc-num">&#9733;</span>速览结论<br><span class="zh-inline">Key Findings</span></a></li>
+        <li><a href="#phase1"><span class="toc-num">I</span>任务定义<br><span class="zh-inline">Task Definition</span></a></li>
+        <li><a href="#phase2"><span class="toc-num">II</span>数据解码<br><span class="zh-inline">Data Decoding</span></a></li>
+        <li><a href="#phase3"><span class="toc-num">III</span>矛盾与张力<br><span class="zh-inline">Contradictions &amp; Tensions</span></a></li>
+        <li><a href="#phase4"><span class="toc-num">IV</span>时间与反面<br><span class="zh-inline">Time &amp; Counter-arguments</span></a></li>
+        <li><a href="#phase5"><span class="toc-num">V</span>结构诊断<br><span class="zh-inline">Structure Diagnosis</span></a></li>
+        <li><a href="#phase6"><span class="toc-num">VI</span>成品审视<br><span class="zh-inline">Self-Audit</span></a></li>
+        <li><a href="#phase7"><span class="toc-num">VII</span>验证日历<br><span class="zh-inline">Verification Calendar</span></a></li>
+        <li><a href="#phase8"><span class="toc-num">VIII</span>信号传导<br><span class="zh-inline">Signal Transmission</span></a></li>
+        <li><a href="#phase9"><span class="toc-num">IX</span>最终方法论<br><span class="zh-inline">Final Methodology</span></a></li>
+      </ul>
+    </nav>
+    <h4 style="margin-top:1rem;">最终产出</h4>
+    <nav><ul>
+      <li><a href="NODE_4_%E5%AD%98%E5%82%A8_HBM_2026-03-19.html" style="color:var(--accent);">HBM认知节点报告 &rarr;</a></li>
+    </ul></nav>
+  </aside>
+
+  <main class="main-content">
+
+    <header class="page-header">
+      <div class="role-badge">METACOGNITION LOG</div>
+      <h1>存储/HBM节点 &mdash; 28轮元思考过程</h1>
+      <p class="subtitle">从"供不应求共识"到"周期拐点预警" &nbsp;|&nbsp; 2026-03-20<br>
+      <span style="color:var(--text-quaternary);font-size:0.85em;">研究笔记 &mdash; 思考过程比结论更有价值</span></p>
+      <div class="badge-row">
+        <span class="badge">28轮元思考</span>
+        <span class="badge">9个Phase</span>
+        <span class="badge">2代理人</span>
+        <span class="badge">存储周期分析</span>
+      </div>
+    </header>
+
+
+    <!-- Overview -->
+    <div class="priority-box" id="overview">
+      <h2>&#129504; 28轮元思考的核心结论</h2>
+      <ol>
+        <li><strong>HBM节点的真正问题不是"有没有需求"（三家产能全部预售），而是"supercycle何时结束"</strong> &mdash; 存储行业历史上每次"这次不一样"都以崩盘结尾</li>
+        <li><strong>两位CEO都极度乐观 = echo chamber</strong> &mdash; Kwak说"晶圆短缺到2030"，Mehrotra说"供不应求到2027+"。没有contrarian voice。Node 1元思考说"所有人都同意时最危险"&mdash;&mdash;这正是HBM当前的状态</li>
+        <li><strong>Bear case概率30-40%，远高于GPU节点的15-20%</strong> &mdash; 因为存储有明确的周期历史（2018崩盘、2022-2023崩盘）。三家同时疯狂扩产是经典的周期顶部信号</li>
+        <li><strong>MU是美国大型科技股2026年唯一上涨（+62%）= 极强相对强度</strong> &mdash; 但问题是：这是趋势确认还是最后的疯狂？Forward P/E 11-12x极便宜，但前提是盈利持续爆发</li>
+        <li><strong>最有价值的发现：DRAM合约价是最快的领先指标</strong> &mdash; 月度跟踪DRAM合约价 &rarr; 季度HBM收入确认 &rarr; 股价反映（滞后）。2027H2是关键拐点</li>
+      </ol>
+    </div>
+
+
+    <!-- Phase 1 -->
+    <section id="phase1">
+      <div class="section-header">
+        <span class="phase-tag phase-explore">PHASE I &mdash; EXPLORE</span>
+        <h2>任务定义：表面任务 vs 真正任务</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#1 表面任务 vs 真正任务</strong></summary>
+        <p><strong>表面任务</strong>：升级HBM认知节点报告。</p>
+        <p><strong>真正任务</strong>：帮一个趋势交易者回答 <strong>"MU/SK Hynix/Samsung三家谁是最佳HBM标的，以及supercycle何时可能结束？"</strong></p>
+        <p>更准确地说：MU过去一年涨了350%，SK Hynix涨了345%，我错过了吗？如果没有，谁的risk-reward最好？以及&mdash;&mdash;存储的经典崩盘剧本何时重演？</p>
+        <p>用户的交易系统核心是"选品+周期匹配"。存储是所有半导体节点中<strong>周期性最强</strong>的&mdash;&mdash;选对品种但选错周期位置 = 灾难。</p>
+      </details>
+
+      <details>
+        <summary><strong>#2 代理人偏见结构</strong></summary>
+        <p>两位CEO都是<strong>supply-side speaker</strong>&mdash;&mdash;天然偏多：</p>
+        <ul>
+          <li><strong>Kwak（SK Hynix CEO）</strong>：掌控全球50%+ HBM产能，他说"供不应求"是在为$15.1B M15X投资辩护</li>
+          <li><strong>Mehrotra（Micron CEO）</strong>：刚把CapEx从$18B追加到$25B，他说"供给紧张到2027+"是在为历史最大资本支出辩护</li>
+        </ul>
+        <p><strong>关键缺失</strong>：没有买方（hyperscaler）视角。没有contrarian voice。没有独立的周期分析师。两个卖方CEO说"供不应求"，就像两个房地产开发商说"房价还要涨"&mdash;&mdash;他们可能是对的，但不能只听他们的。</p>
+      </details>
+
+      <details>
+        <summary><strong>#3 "就是这个" vs "不对"</strong></summary>
+        <p><strong>成功标准</strong>：清楚的周期拐点预警指标；三家公司的差异化交易逻辑；可操作的验证日历和领先指标。</p>
+        <p><strong>失败标准</strong>：又一份"HBM供不应求"的共识报告（共识=零信息量）；只有CEO乐观引述没有反面论证（echo chamber放大器）；没有历史周期对比（忽略存储行业最核心的特征）。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 2 -->
+    <section id="phase2">
+      <div class="section-header">
+        <span class="phase-tag phase-explore">PHASE II &mdash; EXPLORE</span>
+        <h2>数据解码：两位CEO的隐含叙事</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#4 两位CEO到底讲了什么故事？</strong></summary>
+        <h4>隐藏叙事解码</h4>
+        <figure>
+          <table>
+            <thead><tr><th>Agent</th><th>表面叙事</th><th>隐含叙事</th><th>我漏掉了什么</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Kwak (SK Hynix)</strong></td><td>"晶圆短缺到2030，HBM是结构性增长"</td><td>"我的$15.1B M15X投资是正确的，请继续买单"</td><td>准备"DRAM价格稳定化措施" = 他自己也担心涨价过快引发反噬</td></tr>
+              <tr><td><strong>Mehrotra (Micron)</strong></td><td>"只能满足50-66%需求，供给紧到2027+"</td><td>"我们在拼命扩产，请允许$25B CapEx"</td><td>CapEx三个月内从$18B&rarr;$20B&rarr;$25B = 需求超出他自己预期，或者是"不扩就被淘汰"的恐惧</td></tr>
+            </tbody>
+          </table>
+        </figure>
+
+        <h4>跨文件交叉信号</h4>
+        <figure>
+          <table>
+            <thead><tr><th>信号</th><th>来源</th><th>投资含义</th></tr></thead>
+            <tbody>
+              <tr><td>SK Hynix营业利润率58%（历史最高）</td><td>Kwak agent</td><td><span class="signal signal-bear">BEAR</span> 均值回归压力巨大&mdash;&mdash;存储利润率从未长期维持50%+</td></tr>
+              <tr><td>Samsung HBM4获NVIDIA"最高评分"认证</td><td>CP2 report</td><td><span class="signal signal-watch">WATCH</span> 格局从SK主导变三足鼎立&rarr;价格竞争加剧</td></tr>
+              <tr><td>1GB HBM消耗3-4x DRAM晶圆</td><td>CP2 report</td><td><span class="signal signal-bull">BULL</span> 传统DRAM/NAND被挤压&rarr;全内存涨价&rarr;整链受益</td></tr>
+              <tr><td>DRAM合约价2025底+170% YoY</td><td>Fortune/TrendForce</td><td><span class="signal signal-bull">BULL</span> 但涨价幅度本身就是周期顶部信号</td></tr>
+              <tr><td>MU Q2 FY2026收入beat 19%，股价次日跌5.8%</td><td>Mehrotra agent</td><td><span class="signal signal-watch">WATCH</span> 市场已开始担忧CapEx过度投资&rarr;"卖事实"</td></tr>
+              <tr><td>Micron首签5年战略客户协议(SCA)</td><td>Mehrotra agent</td><td><span class="signal signal-bull">BULL</span> 存储从周期性商品变为长约战略资产=结构性变革</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details>
+        <summary><strong>#5 信号 vs 噪音</strong></summary>
+        <p><strong>高信号</strong>：三家产能扩产节奏（CapEx数据是真金白银）、HBM4认证进度（决定2026H2份额）、DRAM合约价月度变化（最快领先指标）、MU业绩beat后股价跌（市场情绪转折信号）、5年SCA签约（商业模式结构性变革）。</p>
+        <p><strong>低信号（可精简）</strong>：CEO乐观言论（两个卖方CEO说"供不应求"是expected default）、行业峰会PR（CES/GTC的product announcement是marketing）、分析师目标价（36/37个Strong Buy = 共识太满）、"晶圆短缺到2030"（最鹰派预判但无法验证）。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 3 -->
+    <section id="phase3">
+      <div class="section-header">
+        <span class="phase-tag phase-diagnose">PHASE III &mdash; DIAGNOSE</span>
+        <h2>矛盾与张力：四个HBM节点没面对的矛盾</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#6 四个核心张力</strong></summary>
+        <div class="arc-item"><strong>张力1："供不应求"叙事 vs 三家都在疯狂扩产</strong><br>Kwak: M15X $15.1B，2027满产50K片/月。Mehrotra: CapEx $25B+，Idaho/NY/Singapore同时扩建。Samsung: HBM产能计划+50%。<strong>三家合计扩产速度是历史最快的。</strong>经典存储周期的剧本：供不应求&rarr;疯狂扩产&rarr;2-3年后新产能同时上线&rarr;供给过剩&rarr;价格崩盘。区别只是这次被AI需求延迟了多久。</div>
+        <div class="arc-item"><strong>张力2：两位CEO都极度乐观 vs 没有contrarian声音</strong><br>Node 1元思考的第5条规则："所有人都同意时最危险"。当前HBM节点的状态：两位CEO都说供不应求到2027+，36/37分析师Strong Buy SK Hynix，31位Strong Buy MU。<strong>市场共识太满=任何负面意外的冲击都被放大。</strong>MU史诗级业绩后跌5.8%就是预警信号&mdash;&mdash;市场已在寻找"卖出理由"。</div>
+        <div class="arc-item"><strong>张力3：HBM是"结构性需求" vs 存储行业历史上每次supercycle都以崩盘结尾</strong><br>2016-2018: 加密+手机驱动&rarr;DRAM价格翻倍&rarr;2019年价格暴跌50%+。2020-2021: WFH+5G驱动&rarr;价格飙升&rarr;2022-2023价格崩盘。每次行业都说"这次不同"。<strong>这次AI确实可能不同（每代GPU配套HBM翻倍+推理需求指数增长），但"不同"不意味着"没有周期"，只意味着"周期被延长"。</strong></div>
+        <div class="arc-item"><strong>张力4：MU在美国股市2026年唯一上涨的大科技股 vs 可能是最后的疯狂</strong><br>MU 2026 YTD +62%，过去一年+350%。Forward P/E 11-12x极便宜。但便宜的前提是盈利继续爆发（Q3指引$33.5B = +260% YoY）。<strong>如果增速从+260%降到+30%，Forward P/E瞬间不再便宜。</strong>极强的相对强度可以是趋势确认，也可以是"最后一个灯塔"。</div>
+      </details>
+
+      <details>
+        <summary><strong>#7 信息空白</strong></summary>
+        <ol>
+          <li><strong>2027-2028新产能上线总规模</strong>：三家同时扩产，但没有人给出合计新增晶圆产能的汇总数字。这是判断供需拐点的关键缺失。</li>
+          <li><strong>Hyperscaler真实HBM库存天数</strong>：CEO说"只能满足50-66%需求"，但hyperscaler可能在囤货（就像2021年芯片短缺时的双重下单）。如果库存天数已从30天涨到90天+，"需求"里有多少是真实消耗、多少是库存积累？</li>
+          <li><strong>HBM4良率</strong>：决定2026H2实际产出。三家都声称良率"好于预期"但没有给出数字。TSV 16层堆叠的良率数据是黑箱。</li>
+          <li><strong>存储周期历史对比</strong>：2018崩盘从peak到trough用了12个月，DRAM价格跌50%+。2022-2023崩盘更快。当前周期的时间轴和幅度对比完全缺失。</li>
+          <li><strong>AI CapEx的真实ROI</strong>：$700B+年投入需要产生多少AI应用收入才能justified？如果2027年ROI不达标&rarr;CapEx削减&rarr;HBM需求悬崖。</li>
+        </ol>
+        <p><strong>结论</strong>：<strong>公开信息系统性偏向乐观。两个CEO都在讲"对自己CapEx决策有利的故事"。缺失的是独立的供需平衡表和历史周期对比。</strong></p>
+      </details>
+    </section>
+
+
+    <!-- Phase 4 -->
+    <section id="phase4">
+      <div class="section-header">
+        <span class="phase-tag phase-diagnose">PHASE IV &mdash; DIAGNOSE</span>
+        <h2>时间与反面：如果完全错了</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#8 加速 vs 减速</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>加速中（看多）</th><th>减速中（看空）</th></tr></thead>
+            <tbody>
+              <tr><td>HBM需求+130% YoY (TrendForce)</td><td>三家同时扩产（经典周期顶部信号）</td></tr>
+              <tr><td>三家产能全部预售/签约</td><td>DRAM供给增长恢复到历史均值的时间临近</td></tr>
+              <tr><td>每代GPU配套HBM翻倍（80GB&rarr;192GB&rarr;384GB）</td><td>SK Hynix利润率58%&mdash;&mdash;存储从未长期维持50%+</td></tr>
+              <tr><td>推理需求叠加训练需求</td><td>Samsung HBM4追平&rarr;三足鼎立&rarr;价格竞争</td></tr>
+              <tr><td>Micron首签5年SCA（商业模式变革）</td><td>MU beat 19%后跌5.8%（市场"卖事实"）</td></tr>
+              <tr><td>DRAM合约价+170% YoY</td><td>涨价幅度本身就是均值回归的燃料</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details open>
+        <summary><strong>#9 最强反面论证</strong></summary>
+        <blockquote>"HBM supercycle是存储周期的变种，不是例外。2027-2028新产能集中上线，如果AI需求增速从+130%降到+30%，HBM价格将暴跌50%+，利润率从58%回归20-30%。这是传统存储的经典剧本，只是时间被AI推迟了2年。"</blockquote>
+        <p>展开论证：</p>
+        <ol>
+          <li><strong>供给端</strong>：SK Hynix M15X 2027年中满产（+50K片/月）+ Micron Idaho fab 1提前到2027年中 + Samsung产能+50% &rarr; 2027H2是供给集中上线的窗口</li>
+          <li><strong>需求端</strong>：AI CapEx增速不可能永远+130%。从+130%降到+60%，在绝对值上仍是巨额支出，但在"增速"上就是放缓&mdash;&mdash;存储定价对边际增速极敏感</li>
+          <li><strong>历史模式</strong>：2018年加密崩盘 &rarr; GPU库存积压 &rarr; 存储需求突然消失 &rarr; DRAM价格12个月内跌50%+。当前AI需求结构性更强，但"结构性更强"和"免疫周期"是两回事</li>
+          <li><strong>利润率均值回归</strong>：SK Hynix 58%营业利润率是存储行业历史最高。存储行业长期平均营业利润率20-25%。即使假设"新常态"30-35%，从58%回归也意味着盈利腰斩</li>
+          <li><strong>价格纪律风险</strong>：三足鼎立格局下，任何一家为抢份额降价&rarr;价格战&rarr;全行业利润率崩溃。Samsung历史上多次在追赶时采用"反周期扩产+降价"策略</li>
+        </ol>
+        <p><strong>概率</strong>：30-40%。比GPU节点的15-20%高一倍，因为存储有明确的周期历史模式。<strong>但如果发生，不是-30%是-60%&mdash;&mdash;存储股的下行beta历来是最大的。</strong></p>
+      </details>
+
+      <details>
+        <summary><strong>#10 Bear case为什么比GPU节点更高</strong></summary>
+        <p>GPU节点的bear case是"AI CapEx泡沫"（15-20%概率）。HBM节点的bear case除了继承AI CapEx泡沫风险外，还有<strong>存储行业特有的周期风险</strong>：</p>
+        <ul>
+          <li><strong>GPU没有周期历史</strong>&mdash;&mdash;NVIDIA作为GPU垄断者从未经历过典型的"供过于求"价格崩盘。存储行业过去20年经历了至少4次。</li>
+          <li><strong>GPU有定价权，存储是商品</strong>&mdash;&mdash;NVIDIA毛利率73%因为有CUDA生态锁定。DRAM/HBM本质上是commodity，定价取决于供需平衡，不取决于生态。Micron的5年SCA试图改变这点，但一个合同不能改变行业本质。</li>
+          <li><strong>三家扩产 vs NVIDIA独家</strong>&mdash;&mdash;GPU节点是NVIDIA垄断+AMD追赶，供给端只有一个真正的volume player。HBM节点是三家同时大幅扩产&mdash;&mdash;供给端的竞争烈度完全不同。</li>
+        </ul>
+        <p>所以HBM的bear case概率 = AI CapEx泡沫(15-20%) + 存储周期回归(15-20%) = 30-40%。两个风险可以叠加。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 5 -->
+    <section id="phase5">
+      <div class="section-header">
+        <span class="phase-tag phase-build">PHASE V &mdash; BUILD</span>
+        <h2>结构诊断：当前HBM节点的优劣</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#11 当前Node 4结构的优劣</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>做到了</th><th>没做到</th></tr></thead>
+            <tbody>
+              <tr><td>Phase 0独立思考+Phase 0.5策展搜索</td><td>没有<strong>验证日历</strong>（什么时候能确认/否定supercycle？）</td></tr>
+              <tr><td>两位CEO行动证据详实</td><td>没有<strong>存储周期历史对比</strong>（2018/2022-2023崩盘模式）</td></tr>
+              <tr><td>三角验证表（Kwak vs Mehrotra vs Samsung）</td><td>没有<strong>信号传导链</strong>（HBM信号如何传到MU/SK/Samsung？）</td></tr>
+              <tr><td>HBM4竞赛格局表</td><td>没有<strong>contrarian voice</strong>&mdash;&mdash;两个卖方CEO=echo chamber</td></tr>
+              <tr><td>风险矩阵7行</td><td>没有<strong>bear case概率评估</strong></td></tr>
+              <tr><td>Provenance表完整</td><td>没有<strong>周期拐点指标</strong>（什么数据变化=转折信号？）</td></tr>
+              <tr><td>交易视角三家对比</td><td>利润率均值回归分析完全缺失</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details>
+        <summary><strong>#12 Phase 0诚实标注</strong></summary>
+        <p>Node 4的Phase 0标题是"独立思考（搜索前）"。但实际上，在写Phase 0时已经有CP2完整内容（~310行策展研究）。这不是"独立思考"，是在大量信息基础上的"整理归纳"。</p>
+        <p><strong>诚实标注</strong>：Node 4的Phase 0质量高于Node 1的Phase 0（因为CP2内容更丰富），但独立性更低（因为是基于已有内容的synthesis而非独立推理）。</p>
+        <p>另一个结构性问题：<strong>Node 4只有两个代理人（Kwak + Mehrotra），比Node 1的三个少。</strong>这意味着交叉验证的维度更少，echo chamber风险更高。Samsung缺失一个独立的CEO代理人（Samsung的存储只是其集团业务的~35%，没有一个纯存储视角的CEO发言）。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 6 -->
+    <section id="phase6">
+      <div class="section-header">
+        <span class="phase-tag phase-verify">PHASE VI &mdash; VERIFY</span>
+        <h2>成品审视：诚实的自我诊断</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#13 可信度评分的卖方偏见问题</strong></summary>
+        <p>Kwak可信度写成8.5/10，Mehrotra写成8/10。但这两个评分的基础是：</p>
+        <figure>
+          <table>
+            <thead><tr><th>维度</th><th>Kwak (SK Hynix)</th><th>Mehrotra (Micron)</th></tr></thead>
+            <tbody>
+              <tr><td>预测准确率</td><td><strong style="color:#4caf50;">9/10</strong></td><td><strong style="color:#4caf50;">9/10</strong></td></tr>
+              <tr><td>偏见倾向</td><td><strong style="color:#ffa726;">中等偏乐观</strong></td><td><strong style="color:#ffa726;">中等偏乐观</strong></td></tr>
+              <tr><td>信息优势</td><td><strong style="color:#4caf50;">10/10</strong></td><td><strong style="color:#4caf50;">8/10</strong></td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p>问题：<strong>两人的预测准确率高是因为过去2年处于上升周期。</strong>在supercycle中，卖方CEO说"需求强劲"永远是对的&mdash;&mdash;直到周期转折的那个季度。这和"到目前为止一切正常"的逻辑一样&mdash;&mdash;从高楼跳下的人在落地前的每一秒都是"正确的"。</p>
+        <p><strong>缺失的独立验证</strong>：没有买方分析师、没有hyperscaler CTO、没有存储周期研究机构的独立视角。两个卖方CEO互相验证=circular validation。</p>
+      </details>
+
+      <details>
+        <summary><strong>#14 Padding识别</strong></summary>
+        <p>Node 4中的padding内容：</p>
+        <ul>
+          <li>Kwak的个人背景细节（高丽大学材料工程博士、29年Hynix Man）&mdash; 与投资决策无关</li>
+          <li>CES 2026会见25家客户 &mdash; 是PR行为不是investment signal</li>
+          <li>"Full Stack AI Memory Creator"战略描述 &mdash; 是corporate strategy不是市场信号</li>
+          <li>Mehrotra的SanDisk创始人背景 &mdash; 30年前的创业经历不影响今天的投资判断</li>
+          <li>纽约Megafab的政治细节（Trump政府、国会议员）&mdash; 是政策PR</li>
+        </ul>
+        <p><strong>应保留的核心</strong>：CapEx数据、产能数字、良率声明、订单锁定状态、价格变动、份额变化。其他都是填充。</p>
+      </details>
+
+      <details>
+        <summary><strong>#15 最大遗漏</strong></summary>
+        <ol>
+          <li><strong>存储周期历史对比</strong>：这是Node 4最独特的分析需求。GPU节点不需要，因为NVIDIA没有周期崩盘历史。但存储节点不做周期对比=最大的分析失职。</li>
+          <li><strong>利润率均值回归路径</strong>：SK Hynix 58%利润率&rarr;行业长期均值20-25%。中间的路径是什么？是平滑回归还是"阶梯式下跌"（每次财报miss一次台阶）？</li>
+          <li><strong>HBM库存天数跟踪</strong>：当前缺失。如果hyperscaler从30天库存涨到90天&rarr;说明在囤货&rarr;未来需求可能被透支。这是2021年芯片短缺→2022年崩盘的exact pattern。</li>
+          <li><strong>Samsung的"反周期扩产"历史</strong>：Samsung在2008年和2018年都采用过"别人减产我扩产"的策略，用价格战打死竞争对手。如果2027年HBM价格开始松动，Samsung可能再次采用这个策略。</li>
+        </ol>
+      </details>
+    </section>
+
+
+    <!-- Phase 7 -->
+    <section id="phase7">
+      <div class="section-header">
+        <span class="phase-tag phase-build">PHASE VII &mdash; BUILD</span>
+        <h2>验证日历：什么时候能验证？</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#18 Node 4缺失的核心：什么时候能验证supercycle？</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>日期</th><th>事件</th><th>如果成功</th><th>如果失败</th></tr></thead>
+            <tbody>
+              <tr><td><strong>2026年4月29日</strong></td><td>SK Hynix Q1 2026财报（预期44.8T KRW）</td><td>利润率维持55%+&rarr;supercycle继续</td><td><span class="signal signal-bear">BEAR</span> 利润率开始回落=拐点第一信号</td></tr>
+              <tr><td><strong>2026年6月</strong></td><td>Micron Q3 FY2026财报（$33.5B指引验证）</td><td>+260% YoY兑现&rarr;盈利爆发延续</td><td><span class="signal signal-bear">BEAR</span> 指引miss="peak earnings"确认</td></tr>
+              <tr><td><strong>2026年Q3</strong></td><td>HBM4大规模量产验证（SK Hynix M15X）</td><td>良率达标&rarr;ASP更高&rarr;收入加速</td><td>良率不达标&rarr;2026H2产出不及预期</td></tr>
+              <tr><td><strong>2026年Q4</strong></td><td>Samsung HBM4 NVIDIA份额验证</td><td>Samsung获30%+&rarr;三足鼎立确认</td><td><span class="signal signal-bull">BULL for SK</span> Samsung追赶失败&rarr;SK Hynix维持主导</td></tr>
+              <tr><td><strong>2027年H1</strong></td><td>新产能集中上线窗口</td><td>需求增速仍超产能增速&rarr;供不应求延续</td><td><span class="signal signal-bear">BEAR</span> 供需拐点确认&rarr;经典崩盘剧本启动</td></tr>
+              <tr><td><strong>2027年H2</strong></td><td>关键拐点&mdash;&mdash;三家新fab同时满产</td><td>AI需求增速&gt;产能增速=结构性supercycle</td><td>供过于求=传统存储崩盘重演</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details>
+        <summary><strong>#19 监控方法论</strong></summary>
+        <p><strong>月度（最快领先指标）</strong>：DRAM合约价变化&mdash;&mdash;这是存储行业最灵敏的温度计。TrendForce月度报价追踪。当合约价从"上涨"变"持平"=第一个预警信号。</p>
+        <p><strong>季度</strong>：SK Hynix财报(1/4/7/10月) | Micron财报(3/6/9/12月) | 关注营业利润率趋势和CapEx指引变化 | HBM库存天数（需从hyperscaler财报推算）。</p>
+        <p><strong>事件驱动</strong>：三家CapEx指引变化（上调=加速，下调=预警） | Hyperscaler AI CapEx指引变化 | Samsung是否启动"反周期扩产"策略 | HBM4良率的第三方验证。</p>
+      </details>
+
+      <details>
+        <summary><strong>#20 四个关键交易窗口</strong></summary>
+        <div class="arc-item"><strong>窗口1：MU Q3 FY2026财报（2026年6月）</strong><br>$33.5B指引是"史诗级"数字。Beat&rarr;趋势延续。Miss&rarr;peak earnings确认。DRAM合约价在5月的走势是领先指标。</div>
+        <div class="arc-item"><strong>窗口2：HBM4良率验证（2026年Q3-Q4）</strong><br>三家都声称HBM4良率"好于预期"。实际量产数据将在Q3-Q4显现。如果良率确实高&rarr;ASP更高+产出更多=双重利好。如果良率不达标&rarr;供给更紧但利润率承压。</div>
+        <div class="arc-item"><strong>窗口3：Samsung份额争夺（2026年Q4-2027年Q1）</strong><br>Samsung HBM4获NVIDIA"最高评分"。如果Samsung在Vera Rubin拿到30%+份额&rarr;三足鼎立格局确认&rarr;长期价格竞争加剧。对SK Hynix是份额侵蚀，对Micron是被进一步挤压。</div>
+        <div class="arc-item"><strong>窗口4：2027H2供需拐点（关键观察期）</strong><br>SK Hynix M15X满产 + Micron Idaho fab投产 + Samsung +50%产能。如果此时AI CapEx增速已从+130%降到+40-50%&rarr;供需拐点出现。DRAM合约价月度变化是最快信号。</div>
+      </details>
+
+      <details>
+        <summary><strong>#21 历史周期模式参考</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>周期</th><th>驱动</th><th>Peak</th><th>Trough</th><th>价格跌幅</th><th>持续时间</th></tr></thead>
+            <tbody>
+              <tr><td>2016-2018</td><td>加密+手机</td><td>2018-Q3</td><td>2019-Q3</td><td>DRAM -50%+</td><td>12个月</td></tr>
+              <tr><td>2020-2021</td><td>WFH+5G</td><td>2021-Q4</td><td>2023-Q1</td><td>DRAM -40%+</td><td>15个月</td></tr>
+              <tr><td>2024-202?</td><td>AI/HBM</td><td>???</td><td>???</td><td>???</td><td>???</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>模式</strong>：每次周期从peak到trough约12-15个月。如果当前supercycle的peak在2027H1（新产能上线前最后一个供不应求季度），trough可能在2028H1-2028H2。<strong>但如果AI需求增速持续&gt;产能增速，peak可能被延后到2028-2029。</strong></p>
+      </details>
+    </section>
+
+
+    <!-- Phase 8 -->
+    <section id="phase8">
+      <div class="section-header">
+        <span class="phase-tag phase-build">PHASE VIII &mdash; BUILD</span>
+        <h2>信号传导与标的地图</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#22 三条传导链</strong></summary>
+        <div class="arc-item"><strong><span class="signal signal-bull">BULL</span> HBM需求持续 &rarr; 全内存链受益</strong><br>HBM需求持续 &rarr; MU/SK Hynix盈利持续 &rarr; 1GB HBM消耗3-4x晶圆 &rarr; 传统DRAM供给被挤压 &rarr; DDR5/LPDDR6涨价 &rarr; 整个memory链受益<br><em style="color:var(--text-tertiary);">信号最先在DRAM合约价（月度）出现，最后传到存储设备股（滞后1-2季度）</em></div>
+        <div class="arc-item"><strong><span class="signal signal-bear">BEAR</span> 2027新产能上线 &rarr; 经典存储崩盘</strong><br>三家新fab同时满产 &rarr; HBM供给增速超过需求增速 &rarr; HBM价格下跌 &rarr; 利润率从58%压向30% &rarr; CapEx削减 &rarr; 但产能惯性持续12个月 &rarr; 更深的价格崩盘<br><em style="color:var(--text-tertiary);">信号最先在DRAM合约价走平/下跌出现。从合约价拐头到股价见顶通常有1-2个月的时间差</em></div>
+        <div class="arc-item"><strong><span class="signal signal-watch">WATCH</span> "不管谁赢"受益链</strong><br>TSMC（HBM先进封装CoWoS/MR-MUF）+ ASM International/Lam Research（HBM设备）无论HBM是SK Hynix主导还是三足鼎立，封装和设备需求都在增长<br><em style="color:var(--text-tertiary);">这些公司不承担HBM价格波动风险，但享受HBM产能扩张的确定性</em></div>
+      </details>
+
+      <details open>
+        <summary><strong>#23 时间差套利</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>事件</th><th>最先反映</th><th>滞后反映</th><th>时间差</th></tr></thead>
+            <tbody>
+              <tr><td>DRAM合约价变化</td><td>TrendForce月度报价</td><td>MU/SK Hynix季度财报</td><td>1-2个月</td></tr>
+              <tr><td>HBM4量产验证</td><td>SK Hynix月度产出</td><td>MU/Samsung跟进确认</td><td>1-2季度</td></tr>
+              <tr><td>Hyperscaler CapEx变化</td><td>MSFT/GOOGL/AMZN季度财报</td><td>HBM订单调整</td><td>2-3季度</td></tr>
+              <tr><td>供需拐点信号</td><td>DRAM合约价走平</td><td>存储股见顶</td><td>1-2个月</td></tr>
+              <tr><td>Samsung份额追赶</td><td>Samsung季度HBM出货量</td><td>SK Hynix份额下降</td><td>1-2季度</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>核心时间差</strong>：DRAM合约价是月度数据，但MU/SK Hynix的股价主要由季度财报驱动。当合约价已转跌但下一个季度财报还没发布时&mdash;&mdash;这就是"信息领先期"。反过来也成立：当合约价已加速上涨但股价还没反映时。</p>
+      </details>
+
+      <details open>
+        <summary><strong>#24 "不管谁赢都赚"标的</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>标的</th><th>HBM继续涨 &rarr;</th><th>HBM周期回落 &rarr;</th><th>逻辑</th></tr></thead>
+            <tbody>
+              <tr><td><strong>TSMC (TSM)</strong></td><td>CoWoS封装需求&uarr;</td><td>封装需求有粘性（已建产能）</td><td>HBM封装的唯一大规模供应商</td></tr>
+              <tr><td><strong>ASM International</strong></td><td>HBM设备订单&uarr;</td><td>设备订单滞后下行</td><td>ALD设备=HBM制造的关键步骤</td></tr>
+              <tr><td><strong>Lam Research</strong></td><td>蚀刻设备需求&uarr;</td><td>设备周期滞后</td><td>TSV蚀刻是HBM的core process</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>注意</strong>：与GPU节点不同，HBM的"不管谁赢"标的在bear case下保护较弱。GPU节点的AVGO/TSM在"NVIDIA vs 自研"两个方向都受益。但HBM如果整体周期回落，封装和设备需求也会下降&mdash;&mdash;只是滞后1-2季度。所以HBM的"不管谁赢"更准确地说是"不管SK/MU/Samsung谁的份额多"都受益，但不能免疫周期。</p>
+      </details>
+
+      <details>
+        <summary><strong>#25 历史案例</strong></summary>
+        <div class="arc-item"><strong>2018年加密崩盘 &rarr; GPU库存 &rarr; 存储崩盘</strong><br>加密需求消失 &rarr; GPU库存积压 &rarr; NVIDIA砍单 &rarr; 存储需求骤降 &rarr; DRAM价格12个月内跌50%+。<strong>传导链条清晰：终端需求消失 &rarr; 中间环节库存积压 &rarr; 存储最后受冲击但跌幅最深。</strong></div>
+        <div class="arc-item"><strong>2022-2023存储崩盘</strong><br>WFH需求结束+手机销量下滑 &rarr; DRAM价格15个月内跌40%+ &rarr; SK Hynix季度亏损 &rarr; 行业大幅削减CapEx &rarr; 2024年触底反弹。<strong>从亏损到利润率58%只用了18个月&mdash;&mdash;存储的波动性是所有半导体节点中最大的。</strong></div>
+        <div class="arc-item"><strong>当前AI周期 vs 历史的关键区别</strong><br>历史周期的需求驱动是消费级（手机、PC、加密）&mdash;&mdash;需求弹性高，消费者可以推迟购买。AI周期的需求驱动是企业级CapEx（hyperscaler建数据中心）&mdash;&mdash;一旦规划就有惯性。<strong>这意味着AI周期的peak可能更高、持续更久，但trough的深度取决于CapEx惯性消退的速度。</strong></div>
+      </details>
+    </section>
+
+
+    <!-- Phase 9 -->
+    <section id="phase9">
+      <div class="section-header">
+        <span class="phase-tag phase-verify">PHASE IX &mdash; VERIFY</span>
+        <h2>最终方法论 &mdash; 综合判断与决策矩阵</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#26 Node 4的综合判断</strong></summary>
+        <p>Based on all evidence, the triangulation produces:</p>
+        <figure>
+          <table>
+            <thead><tr><th>判断维度</th><th>概率</th></tr></thead>
+            <tbody>
+              <tr><td>2026年HBM供不应求持续</td><td><strong style="color:#4caf50;">90%</strong> &mdash; 三家产能全部预售，合同已签含价格</td></tr>
+              <tr><td>HBM supercycle延续到2027年</td><td><strong style="color:#4caf50;">70%</strong> &mdash; 取决于AI CapEx增速是否维持+60%以上</td></tr>
+              <tr><td>HBM supercycle延续到2028年+</td><td><strong style="color:#ffa726;">40-50%</strong> &mdash; 新产能上线+需求增速放缓的双重压力</td></tr>
+              <tr><td>SK Hynix利润率维持50%+到2027年</td><td><strong style="color:#ffa726;">55%</strong> &mdash; 三足鼎立+历史均值回归压力</td></tr>
+              <tr><td>2027-2028传统存储崩盘重演</td><td><strong style="color:#f44336;">30-40%</strong> &mdash; 明确的周期历史+三家同时扩产</td></tr>
+              <tr><td>MU Forward P/E 11-12x是"便宜"的</td><td><strong style="color:#ffa726;">取决于盈利增速</strong> &mdash; +260% YoY =极便宜；+30% YoY =不便宜</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details open>
+        <summary><strong>#27 交易决策矩阵</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>标的</th><th>场景</th><th>进场条件</th><th>风险</th></tr></thead>
+            <tbody>
+              <tr><td><strong>MU</strong></td><td>盈利爆发期 + 美国唯一存储</td><td>DRAM合约价持续上涨 + Q3 $33.5B指引验证</td><td><span class="signal signal-bull">BULL</span> Forward P/E 11-12x极具吸引力，CHIPS Act政策加持</td></tr>
+              <tr><td><strong>SK Hynix (000660.KS)</strong></td><td>HBM份额第一 + 技术领先</td><td>月线二浪横盘确认 + ADR上市催化</td><td><span class="signal signal-watch">WATCH</span> 已涨345%，利润率58%面临均值回归</td></tr>
+              <tr><td><strong>Samsung (005930.KS)</strong></td><td>HBM4追赶 + 估值最低</td><td>HBM4 NVIDIA份额确认30%+ + 存储部门利润改善</td><td><span class="signal signal-watch">WATCH</span> 集团结构稀释，存储只占35%收入</td></tr>
+              <tr><td><strong>SHORT Memory</strong></td><td>周期回归</td><td>DRAM合约价连续2月走平/下跌 + CapEx指引下调</td><td><span class="signal signal-bear">BEAR</span> 概率30-40%，但timing极难把握</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>Luke视角的关键判断</strong>：MU的相对强度（美国唯一上涨大科技股+Forward P/E 11-12x）是当前最强的单一信号。但存储是高beta品种&mdash;&mdash;涨的时候最猛，跌的时候最深。<strong>周期匹配比选品更重要。</strong>如果DRAM合约价在Q2-Q3仍在上涨，趋势交易者应该跟趋势走。当DRAM合约价连续2月走平&mdash;&mdash;开始减仓。</p>
+      </details>
+
+      <div class="question-box">
+        <h4>最终方法论 &mdash; 5条规则</h4>
+        <p style="text-align:left;"><strong>规则1：存储有周期&mdash;&mdash;这次的"不同"不是没有周期，是周期被延长</strong><br>AI需求确实改变了存储行业的需求结构，但供给端的扩产逻辑没有改变。三家同时扩产=经典周期信号。不同的是peak可能更高、持续更久&mdash;&mdash;但trough终将到来。</p>
+        <p style="text-align:left;"><strong>规则2：两个CEO都乐观时，找反面证据</strong><br>Kwak和Mehrotra的预测准确率都是9/10&mdash;&mdash;但这是上升周期的准确率。当两个卖方CEO都说"供不应求到2027+"，36/37分析师Strong Buy&mdash;&mdash;唯一有价值的信号是找到他们可能错的地方。</p>
+        <p style="text-align:left;"><strong>规则3：MU是美国唯一上涨大科技&rarr;相对强度信号 vs 最后的疯狂</strong><br>在所有大型科技股都在跌的环境中，MU +62% YTD。这要么是"基本面强到抵抗宏观逆风"（趋势确认），要么是"最后一个灯塔"（最后的疯狂）。区分两者的关键：DRAM合约价趋势和下一个季度的盈利验证。</p>
+        <p style="text-align:left;"><strong>规则4：DRAM合约价是最快的领先指标&mdash;&mdash;月度跟踪</strong><br>TrendForce月度DRAM合约价 &rarr; 1-2个月后反映在存储公司财报 &rarr; 再1-2个月反映在股价。当合约价从"涨"变"平"=第一预警；从"平"变"跌"=确认转折。</p>
+        <p style="text-align:left;"><strong>规则5：2027H2是关键拐点&mdash;&mdash;新产能上线 vs AI需求增速</strong><br>M15X满产 + Idaho fab投产 + Samsung +50%产能，全部在2027年中到2027年底上线。如果此时AI CapEx增速仍&gt;+60%&rarr;supercycle延续。如果增速降到+20-30%&rarr;供过于求&rarr;经典崩盘。这个拐点的判断窗口在2027年Q1-Q2，通过DRAM合约价和hyperscaler CapEx指引提前观察。</p>
+      </div>
+
+    </section>
+
+
+    <footer class="page-footer">
+      <p>存储/HBM Node &mdash; Metacognition Log &nbsp;|&nbsp; 28 Rounds &nbsp;|&nbsp; 2026-03-20 &nbsp;|&nbsp; V4 Design System</p>
+      <p><a href="NODE_4_%E5%AD%98%E5%82%A8_HBM_2026-03-19.html">HBM认知节点报告</a> &nbsp;|&nbsp; <a href="../semiconductor_hub.html">Semiconductor Hub</a> &nbsp;|&nbsp; <a href="NODE_1_GPU_AI_metacognition.html">Node 1 GPU/AI元思考</a></p>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+(function() {
+  const hamburger = document.getElementById('hamburgerBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  hamburger.addEventListener('click', () => { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+  sidebar.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => { if (window.innerWidth <= 900) { sidebar.classList.remove('open'); overlay.classList.remove('open'); } });
+  });
+})();
+</script>
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+</body>
+</html>

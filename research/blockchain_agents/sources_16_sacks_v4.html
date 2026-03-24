@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>David Sacks — 素材策展地图 V4</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  /* Page-specific V4 extensions (~75 lines) */
+  .priority-box { border:1px solid rgba(248,168,72,0.3); border-left:3px solid var(--accent); border-radius:var(--radius-sm); padding:1.25rem 1.5rem; margin-bottom:2rem; background:var(--bg-surface); }
+  .priority-box h2 { color:var(--accent); margin-top:0; font-size:1.1rem; font-weight:590; }
+  .priority-box ol { margin-bottom:0; padding-left:1.2rem; }
+  .priority-box li { margin-bottom:0.6rem; line-height:1.5; }
+  .time-badge { display:inline-block; padding:0.1rem 0.5rem; border-radius:10px; font-size:0.7rem; font-weight:590; margin-right:0.3rem; background:var(--accent); color:var(--bg-base); }
+  .anno { position:absolute; left:1rem; right:1rem; }
+  .anno.meta-note { padding:0.6rem 0.75rem; border-left:2px solid var(--accent); border-radius:0 6px 6px 0; background:rgba(248,168,72,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.meta-note:hover { box-shadow:0 0 0 1px var(--accent); }
+  .anno.know-note { padding:0.6rem 0.75rem; border-left:2px solid var(--knowledge); border-radius:0 6px 6px 0; background:rgba(91,155,213,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.know-note:hover { box-shadow:0 0 0 1px var(--knowledge); }
+  .anno .note-label { display:inline-block; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--bg-base); background:var(--accent); padding:0.1rem 0.4rem; border-radius:3px; margin-bottom:0.3rem; }
+  .anno .note-label.know { background:var(--knowledge); color:white; }
+  .anno .mn-head { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
+  .anno .mn-title { flex:1; font-weight:510; font-size:0.75rem; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .anno .mn-fold { font-size:0.55rem; color:var(--text-quaternary); transition:transform 0.2s; margin-left:auto; }
+  .anno.open .mn-fold { transform:rotate(180deg); }
+  .anno .mn-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+  .anno.open .mn-body { max-height:2000px; }
+  .anno .mn-body p { font-size:0.78rem; margin-bottom:0.3rem; color:var(--text-secondary); }
+  .anno.flash { animation:noteFlash 1.5s ease; }
+  @keyframes noteFlash { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--accent);} }
+  .anno.know-note.flash { animation:noteFlashBlue 1.5s ease; }
+  @keyframes noteFlashBlue { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--knowledge);} }
+  mark.hl-know { background:rgba(91,155,213,0.12); border-bottom:1.5px solid var(--knowledge); padding:0 2px; border-radius:2px; color:inherit; cursor:pointer; transition:background 0.15s; }
+  mark.hl-know:hover { background:rgba(91,155,213,0.28); }
+  .nref { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; font-size:0.48rem; font-weight:700; cursor:pointer; margin-left:1px; vertical-align:super; transition:transform 0.15s; text-decoration:none; background:var(--knowledge); color:white; }
+  .nref:hover { transform:scale(1.25); box-shadow:0 0 6px rgba(91,155,213,0.4); }
+  .top-controls { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; padding:0.35rem 0.7rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); font-size:0.72rem; flex-wrap:wrap; }
+  .top-controls .tc-label { font-weight:590; color:var(--knowledge); }
+  .top-controls button { padding:0.15rem 0.45rem; border-radius:4px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-tertiary); cursor:pointer; font-size:0.68rem; font-family:inherit; transition:all 0.15s; }
+  .top-controls button:hover { border-color:var(--knowledge); color:var(--text-primary); }
+  .top-controls button.active { background:var(--knowledge-dim); color:var(--knowledge); border-color:rgba(91,155,213,0.3); }
+  .top-controls .tc-sep { color:var(--border-default); margin:0 0.15rem; }
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .notes-sidebar { position:relative; width:320px; min-width:320px; padding:1.25rem 1rem; border-left:1px solid var(--border-subtle); background:var(--bg-elevated); }
+  .notes-sidebar-header { position:sticky; top:0; z-index:60; background:var(--bg-elevated); padding-bottom:0.5rem; border-bottom:1px solid var(--border-subtle); margin-bottom:0.75rem; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  .notes-toggle-btn { position:fixed; right:1rem; bottom:1.5rem; z-index:200; width:44px; height:44px; border-radius:50%; border:1px solid var(--border-default); background:var(--bg-surface); color:var(--text-secondary); cursor:pointer; font-size:1.1rem; display:none; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.4); }
+  .notes-close-btn { float:right; background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:1.1rem; padding:0; display:none; }
+  @media (max-width:1200px) { .notes-close-btn { display:block; } .notes-sidebar { position:fixed; right:0; top:0; height:100vh; overflow-y:auto; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.4); z-index:150; } .notes-sidebar.ns-closed { transform:translateX(100%); box-shadow:none; } .notes-toggle-btn { display:flex; } }
+  .notes-overlay-right { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:140; }
+  .notes-overlay-right.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  @media (min-width:1600px) { .main-content { max-width:1000px; } .notes-sidebar { width:360px; min-width:360px; } }
+  .rel-card { border:1px solid var(--border-subtle); border-radius:var(--radius-md); background:var(--bg-elevated); margin-bottom:0.75rem; }
+  .rel-card summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  .rel-card[open] summary { color:var(--accent); }
+  .rel-card .rel-body { padding:0 1rem 1rem; font-size:0.82rem; color:var(--text-secondary); line-height:1.6; }
+  .arc-item { border-left:3px solid var(--accent); padding:0.6rem 1rem; margin-bottom:0.75rem; background:rgba(66,165,245,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+  .arc-item strong { color:var(--text-primary); }
+  .question-box { border:2px solid var(--knowledge); background:rgba(91,155,213,0.05); border-radius:var(--radius-md); padding:1.5rem; text-align:center; margin:2rem 0; }
+  .question-box blockquote { border:none; margin:0; padding:0; }
+  .question-box p { font-size:1rem; font-weight:510; color:var(--text-primary); }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; margin-bottom:1rem; }
+  th { text-transform:uppercase; font-size:0.72rem; font-weight:510; color:var(--text-quaternary); letter-spacing:0.04em; text-align:left; padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-default); }
+  td { padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-subtle); vertical-align:top; color:var(--text-secondary); }
+  tr:hover td { background:var(--bg-elevated); }
+  .url-col { max-width:200px; word-break:break-all; }
+  .zh { display:block; font-size:0.85em; color:var(--text-tertiary); margin-top:0.15em; }
+  .zh-inline { font-size:0.85em; color:var(--text-tertiary); }
+  details { border:1px solid var(--border-subtle); background:var(--bg-elevated); border-radius:var(--radius-sm); padding:0; margin-bottom:0.75rem; }
+  details summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  details[open] summary { color:var(--accent); }
+  details > div, details > p { padding:0 1rem 1rem; font-size:0.82rem; line-height:1.6; color:var(--text-secondary); }
+  body.embedded .sidebar, body.embedded .notes-sidebar, body.embedded .hamburger-btn, body.embedded .notes-toggle-btn { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+  .importance { color:var(--accent); font-weight:590; }
+  .tag { display:inline-block; padding:0.1rem 0.4rem; border-radius:3px; font-size:0.65rem; background:var(--bg-surface); border:1px solid var(--border-subtle); margin:0.1rem; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ========== LEFT SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">David Sacks<br>素材策展地图 V4</div>
+
+    <h4>Contents</h4>
+    <nav>
+      <ul>
+        <li><a href="#priority"><span class="toc-num">&#9733;</span>如果只有2小时</a></li>
+        <li><a href="#analysts"><span class="toc-num">1</span>最佳分析师</a></li>
+        <li><a href="#longform"><span class="toc-num">2</span>必读长文/书籍</a></li>
+        <li><a href="#podcasts"><span class="toc-num">3</span>播客与视频</a></li>
+        <li><a href="#primary"><span class="toc-num">4</span>一手资料</a></li>
+        <li><a href="#relationships"><span class="toc-num">5</span>关键关系网</a></li>
+        <li><a href="#narratives"><span class="toc-num">6</span>叙事弧</a></li>
+        <li><a href="#gaps"><span class="toc-num">7</span>信息空白</a></li>
+        <li><a href="#quality"><span class="toc-num">8</span>质量评估</a></li>
+      </ul>
+    </nav>
+
+    <h4>Related</h4>
+    <nav>
+      <ul>
+        <li><a href="16_david_sacks.html">David Sacks Profile</a></li>
+        <li><a href="16_david_sacks_metacognition.html">Metacognition</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+
+    <div class="top-controls">
+      <span class="tc-label">&#128218; 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <header class="page-header">
+      <h1>David Sacks — 素材策展地图 V4</h1>
+      <p class="subtitle">Research Date: 2026-03-22 &nbsp;|&nbsp; 7 Analysts · 7 Longform · 6 Podcasts · 7 Primary<br>
+      <span class="zh-inline">PayPal Mafia成员 · 白宫AI与加密沙皇 · Craft Ventures创始人</span></p>
+      <div class="badge-row">
+        <span class="tag">PayPal Mafia</span>
+        <span class="tag">White House Crypto Czar</span>
+        <span class="tag">CLARITY Act</span>
+        <span class="tag">All-In Podcast</span>
+      </div>
+    </header>
+
+    <!-- ★ Priority Box -->
+    <div class="priority-box" id="priority">
+      <h2>&#9200; 如果只有2小时 — 推荐阅读路径</h2>
+      <ol>
+        <li><strong>@DavidSacks X账号</strong> — 政策预告与实时alpha <span class="time-badge">T0</span></li>
+        <li><strong>All-In Podcast</strong> — Sacks主场，最原始的政策解读 <span class="time-badge">T0</span></li>
+        <li><strong>吴说区块链</strong> — 中文唯一白宫动态源 <span class="time-badge">T0</span></li>
+        <li><strong>The Diff / Not Boring</strong> — 政策逻辑深度拆解 <span class="time-badge">T1</span></li>
+        <li><strong>Sacks "Case for Stablecoins"</strong> — 政策宣言原文 <span class="time-badge">T1</span></li>
+        <li><strong>CLARITY Act Bill Text</strong> — 核心立法逐条读 <span class="time-badge">T2</span></li>
+      </ol>
+    </div>
+
+    <!-- §1 最佳分析师 -->
+    <section id="analysts">
+      <div class="section-header">
+        <h2>1. 最佳分析师与独立研究<span class="zh">Best Analysts & Independent Research</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>The Diff by Byrne Hobart</strong></td>
+            <td>付费通讯</td>
+            <td class="url-col"><a href="https://www.thediff.co" target="_blank">thediff.co</a></td>
+            <td class="importance">⭐⭐⭐⭐⭐</td>
+            <td>最懂Sacks风格的分析师，<mark class="hl-know" data-note="note-1">PayPal Mafia研究权威</mark>，深度拆解其政策逻辑与VC思维</td>
+          </tr>
+          <tr>
+            <td><strong>Packy McCormick (Not Boring)</strong></td>
+            <td>付费通讯</td>
+            <td class="url-col"><a href="https://www.notboring.co" target="_blank">notboring.co</a></td>
+            <td class="importance">⭐⭐⭐⭐⭐</td>
+            <td>擅长将Sacks的政策发言转化为可交易的投资主题，<mark class="hl-know" data-note="note-2">CLARITY Act跟踪最及时</mark></td>
+          </tr>
+          <tr>
+            <td><strong>Mario Gabriele (The Generalist)</strong></td>
+            <td>付费通讯</td>
+            <td class="url-col"><a href="https://www.readthegeneralist.com" target="_blank">readthegeneralist.com</a></td>
+            <td class="importance">⭐⭐⭐⭐☆</td>
+            <td>加密政策与VC交叉分析，对<mark class="hl-know" data-note="note-3">Craft Ventures portfolio有深度覆盖</mark></td>
+          </tr>
+          <tr>
+            <td><strong>Eli Dourado</strong></td>
+            <td>独立研究员</td>
+            <td class="url-col"><a href="https://elidourado.com/blog" target="_blank">elidourado.com</a></td>
+            <td class="importance">⭐⭐⭐⭐☆</td>
+            <td>技术政策学者，与Sacks同处<mark class="hl-know" data-note="note-4">Thiel-verse</mark>，解读其地缘政治框架最精准</td>
+          </tr>
+          <tr>
+            <td><strong>Doomberg</strong></td>
+            <td>付费通讯</td>
+            <td class="url-col"><a href="https://doomberg.substack.com" target="_blank">doomberg.substack.com</a></td>
+            <td class="importance">⭐⭐⭐⭐☆</td>
+            <td>能源-加密交叉视角，Sacks的"比特币挖矿巩固电网"论点的重要验证源</td>
+          </tr>
+          <tr>
+            <td><strong>吴说区块链 (Colin Wu)</strong></td>
+            <td>中文媒体</td>
+            <td class="url-col"><a href="https://www.wublock123.com" target="_blank">wublock123.com</a></td>
+            <td class="importance">⭐⭐⭐⭐⭐</td>
+            <td><strong>中文唯一</strong>持续跟踪Sacks白宫动态的源，<mark class="hl-know" data-note="note-5">美国监管专题更新最快</mark></td>
+          </tr>
+          <tr>
+            <td><strong>区块律动BlockBeats</strong></td>
+            <td>中文媒体</td>
+            <td class="url-col"><a href="https://www.theblockbeats.info" target="_blank">theblockbeats.info</a></td>
+            <td class="importance">⭐⭐⭐★☆</td>
+            <td>中文CLARITY Act立法进展跟踪，政策解读偏交易导向</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §2 必读长文/书籍 -->
+    <section id="longform">
+      <div class="section-header">
+        <h2>2. 必读长文与书籍<span class="zh">Must-Read Long-Form & Books</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>《The PayPal Wars》Eric Jackson</strong></td>
+            <td>书籍 ISBN: 978-0976191306</td>
+            <td class="importance">⭐⭐⭐⭐⭐</td>
+            <td>Sacks作为COO的PayPal岁月一手记录，理解其<mark class="hl-know" data-note="note-6">"监管套利"思维的原点</mark></td>
+          </tr>
+          <tr>
+            <td><strong>《Zero to One》Peter Thiel</strong></td>
+            <td>书籍 ISBN: 978-0804139298</td>
+            <td class="importance">⭐⭐⭐⭐⭐</td>
+            <td>Sacks的哲学底层：<mark class="hl-know" data-note="note-7">垄断、秘密、技术乐观主义</mark>，所有政策发言的密码本</td>
+          </tr>
+          <tr>
+            <td><strong>Sacks' "The Case for Stablecoins"</strong></td>
+            <td>长文 White House/Substack</td>
+            <td class="importance">⭐⭐⭐⭐⭐</td>
+            <td>2025年3月政策宣言，<mark class="hl-know" data-note="note-8">美元霸权+稳定币的完整框架</mark>，**必存原文**</td>
+          </tr>
+          <tr>
+            <td><strong>Sacks' "Why America Must Lead in AI"</strong></td>
+            <td>长文 White House/Substack</td>
+            <td class="importance">⭐⭐⭐⭐⭐</td>
+            <td>AI政策逻辑，与加密政策形成<mark class="hl-know" data-note="note-9">"技术民族主义"完整拼图</mark></td>
+          </tr>
+          <tr>
+            <td><strong>CLARITY Act Bill Text</strong></td>
+            <td>立法原文 Congress.gov</td>
+            <td class="importance">⭐⭐⭐⭐⭐</td>
+            <td>Sacks推动的核心立法，<mark class="hl-know" data-note="note-10">逐条读才能理解"监管清晰"的真实含义</mark></td>
+          </tr>
+          <tr>
+            <td><strong>《The Network State》Balaji Srinivasan</strong></td>
+            <td>书籍 ISBN: 978-1945902604</td>
+            <td class="importance">⭐⭐⭐⭐☆</td>
+            <td>Sacks的"云政治"同路人，理解其<mark class="hl-know" data-note="note-11">"加密即国家竞争力"</mark>的延伸读物</td>
+          </tr>
+          <tr>
+            <td><strong>Sacks' "The Diversity Myth" (1995)</strong></td>
+            <td>长文 斯坦福校报档案</td>
+            <td class="importance">⭐⭐⭐★☆</td>
+            <td>与Thiel合写的争议文章，理解其"反主流"政治立场的历史根源</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §3 播客与视频 -->
+    <section id="podcasts">
+      <div class="section-header">
+        <h2>3. 播客与视频<span class="zh">Podcasts & Video</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>All-In Podcast</strong></td>
+            <td>播客</td>
+            <td class="url-col"><a href="https://www.allinpodcast.co" target="_blank">allinpodcast.co</a></td>
+            <td class="importance">⭐⭐⭐⭐⭐</td>
+            <td><mark class="hl-know" data-note="note-12">Sacks主场</mark>，每周政策解读最原始、最未过滤的版本</td>
+          </tr>
+          <tr>
+            <td><strong>All-In Summit 视频</strong></td>
+            <td>视频 YouTube/官网</td>
+            <td class="url-col">YouTube</td>
+            <td class="importance">⭐⭐⭐⭐⭐</td>
+            <td>年度现场，Sacks与Thiel/Musk同框，政策风向的"达沃斯时刻"</td>
+          </tr>
+          <tr>
+            <td><strong>Sacks on CNBC/Bloomberg</strong></td>
+            <td>视频 YouTube</td>
+            <td class="url-col">YouTube官方频道</td>
+            <td class="importance">⭐⭐⭐⭐⭐</td>
+            <td>白宫任命后的官方发言，措辞经过校准，反向理解"可公开说的边界"</td>
+          </tr>
+          <tr>
+            <td><strong>Lex Fridman Podcast #422</strong></td>
+            <td>播客</td>
+            <td class="url-col"><a href="https://lexfridman.com" target="_blank">lexfridman.com</a></td>
+            <td class="importance">⭐⭐⭐⭐☆</td>
+            <td>3小时深度，Sacks罕见地系统阐述<mark class="hl-know" data-note="note-13">AI+Crypto的哲学基础</mark></td>
+          </tr>
+          <tr>
+            <td><strong>Bankless Podcast</strong></td>
+            <td>播客</td>
+            <td class="url-col"><a href="https://www.bankless.com" target="_blank">bankless.com</a></td>
+            <td class="importance">⭐⭐⭐⭐☆</td>
+            <td>加密原生视角采访Sacks，观察"政策语言"与"行业黑话"的翻译过程</td>
+          </tr>
+          <tr>
+            <td><strong>金十数据/华尔街见闻 音频</strong></td>
+            <td>中文播客</td>
+            <td class="url-col">各平台</td>
+            <td class="importance">⭐⭐⭐★☆</td>
+            <td><strong>中文唯一</strong>同步Sacks重大发言的音频源，适合盘中跟踪</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §4 一手资料 -->
+    <section id="primary">
+      <div class="section-header">
+        <h2>4. 一手资料<span class="zh">Primary Sources</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>@DavidSacks (X/Twitter)</strong></td>
+            <td>社交媒体</td>
+            <td class="url-col"><a href="https://x.com/DavidSacks" target="_blank">x.com/DavidSacks</a></td>
+            <td class="importance">⭐⭐⭐⭐⭐</td>
+            <td>政策预告、市场评论、与Trump互动，<mark class="hl-know" data-note="note-14">最实时的alpha源</mark></td>
+          </tr>
+          <tr>
+            <td><strong>White House Crypto Czar Office</strong></td>
+            <td>官方渠道</td>
+            <td class="url-col"><a href="https://whitehouse.gov/crypto" target="_blank">whitehouse.gov/crypto</a></td>
+            <td class="importance">⭐⭐⭐⭐⭐</td>
+            <td>行政命令、政策简报、国会证词原文，<mark class="hl-know" data-note="note-15">法律效力最高</mark></td>
+          </tr>
+          <tr>
+            <td><strong>Craft Ventures Portfolio</strong></td>
+            <td>VC披露</td>
+            <td class="url-col"><a href="https://www.craft.co/portfolio" target="_blank">craft.co/portfolio</a></td>
+            <td class="importance">⭐⭐⭐⭐⭐</td>
+            <td>利益冲突的完整地图：Bitwise、MultiCoin、Lightning Labs等持仓</td>
+          </tr>
+          <tr>
+            <td><strong>SEC EDGAR - Sacks相关</strong></td>
+            <td>监管文件</td>
+            <td class="url-col"><a href="https://www.sec.gov/edgar" target="_blank">sec.gov/edgar</a></td>
+            <td class="importance">⭐⭐⭐⭐☆</td>
+            <td>其被投企业的S-1、10-K，理解"政策利好"如何转化为"退出通道"</td>
+          </tr>
+          <tr>
+            <td><strong>Congress.gov - CLARITY Act</strong></td>
+            <td>立法跟踪</td>
+            <td class="url-col"><a href="https://www.congress.gov" target="_blank">congress.gov</a></td>
+            <td class="importance">⭐⭐⭐⭐⭐</td>
+            <td>委员会标记、修正案、投票记录，立法概率的量化基础</td>
+          </tr>
+          <tr>
+            <td><strong>Federal Register</strong></td>
+            <td>官方公报</td>
+            <td class="url-col"><a href="https://www.federalregister.gov" target="_blank">federalregister.gov</a></td>
+            <td class="importance">⭐⭐⭐⭐☆</td>
+            <td>行政命令的最终法律文本，与白宫新闻稿的微妙差异</td>
+          </tr>
+          <tr>
+            <td><strong>OpenSecrets - Sacks Donations</strong></td>
+            <td>政治资金</td>
+            <td class="url-col"><a href="https://www.opensecrets.org" target="_blank">opensecrets.org</a></td>
+            <td class="importance">⭐⭐⭐★☆</td>
+            <td>2024 cycle捐款记录，理解其政治资本的来源与约束</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §5 关键关系网 -->
+    <section id="relationships">
+      <div class="section-header">
+        <h2>5. 关键关系网<span class="zh">Key Relationships</span></h2>
+      </div>
+      
+      <details class="rel-card" open>
+        <summary>&#128274; PayPal Mafia 核心圈</summary>
+        <div class="rel-body">
+          <div class="arc-item">
+            <strong>Peter Thiel</strong> — 导师/盟友 ⭐⭐⭐⭐⭐<br>
+            PayPal Mafia核心，Sacks的哲学来源，Palantir/Anduril的AI-国防逻辑延伸
+          </div>
+          <div class="arc-item">
+            <strong>Elon Musk</strong> — 盟友/竞争者 ⭐⭐⭐⭐⭐<br>
+            DOGE负责人，与Sacks的"政府效率"改革存在协作与张力
+          </div>
+          <div class="arc-item">
+            <strong>Chamath Palihapitiya</strong> — All-In合伙人 ⭐⭐⭐★☆<br>
+            播客搭档，SPAC时代的战友，但政策影响力已边缘化
+          </div>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>&#127973; 白宫权力网络</summary>
+        <div class="rel-body">
+          <div class="arc-item">
+            <strong>JD Vance</strong> — 政治盟友 ⭐⭐⭐⭐⭐<br>
+            副总统，同样来自Thiel-verse，Sacks政策的国会执行者
+          </div>
+          <div class="arc-item">
+            <strong>Paul Atkins (SEC Chair)</strong> — 政策执行者 ⭐⭐⭐⭐⭐<br>
+            Sacks推荐的SEC主席，CLARITY Act的执法端落实人
+          </div>
+          <div class="arc-item">
+            <strong>Hester Peirce (SEC Commissioner)</strong> — 监管盟友 ⭐⭐⭐⭐☆<br>
+            "加密妈妈"，Sacks在SEC内部的长期盟友
+          </div>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>&#36; 加密行业盟友</summary>
+        <div class="rel-body">
+          <div class="arc-item">
+            <strong>Brian Armstrong (Coinbase)</strong> — 行业盟友 ⭐⭐⭐⭐☆<br>
+            合规交易所代表，Sacks"监管清晰"的最大受益者之一
+          </div>
+          <div class="arc-item">
+            <strong>Ted Cruz / Cynthia Lummis</strong> — 国会盟友 ⭐⭐⭐⭐☆<br>
+            参议院加密核心小组，CLARITY Act的共同提案人
+          </div>
+          <div class="arc-item">
+            <strong>Balaji Srinivasan</strong> — 思想盟友 ⭐⭐⭐★☆<br>
+            网络国家理论家，Sacks的"加密民族主义"更激进版本
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- §6 叙事弧 -->
+    <section id="narratives">
+      <div class="section-header">
+        <h2>6. 关键叙事弧<span class="zh">Key Narrative Arcs</span></h2>
+      </div>
+      
+      <div class="arc-item">
+        <strong>叙事弧 1: 从"监管套利者"到"规则制定者"</strong><br>
+        PayPal COO时期，Sacks通过快速扩张规避监管；如今作为Crypto Czar，他将这一逻辑制度化——不是消除监管，而是成为监管者。
+      </div>
+      
+      <div class="arc-item">
+        <strong>叙事弧 2: 美元霸权 + 稳定币 = 新布雷顿森林</strong><br>
+        Sacks的"Case for Stablecoins"实质是：用USDC/USDT替代SWIFT，用区块链替代美联储清算系统，在不挑战美元的前提下重构货币基础设施。
+      </div>
+      
+      <div class="arc-item">
+        <strong>叙事弧 3: 技术民族主义的政策工具化</strong><br>
+        AI与Crypto不是分离的政策领域，而是"美国竞争力"叙事的两面。Sacks正在构建一个连贯的技术民族主义框架，将加密纳入国家安全话语。
+      </div>
+      
+      <div class="arc-item">
+        <strong>叙事弧 4: Thiel-verse的政府渗透</strong><br>
+        从Palantir（政府数据）→ Anduril（国防科技）→ Sacks（加密监管），Thiel系完成了从外部批判到内部接管的关键转变。
+      </div>
+
+      <div class="question-box">
+        <blockquote>
+          <p>&#x2753; 核心研究问题：Sacks推动的CLARITY Act最终是"行业利好"还是"行业驯化"？</p>
+        </blockquote>
+      </div>
+    </section>
+
+    <!-- §7 信息空白 -->
+    <section id="gaps">
+      <div class="section-header">
+        <h2>7. 信息空白 — What Doesn't Exist<span class="zh">Information Gaps</span></h2>
+      </div>
+      
+      <details class="rel-card" open>
+        <summary>&#9888; 高风险/高回报研究方向</summary>
+        <div class="rel-body">
+          <table>
+            <thead>
+              <tr>
+                <th>空白领域</th>
+                <th>风险类型</th>
+                <th>研究建议</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Craft Ventures 未披露持仓</strong></td>
+                <td>利益冲突</td>
+                <td>通过LinkedIn追踪、portfolio公司反向推导</td>
+              </tr>
+              <tr>
+                <td><strong>Sacks-Thiel 私人沟通内容</strong></td>
+                <td>决策黑箱</td>
+                <td>关注Thiel Capital人员流动、共同投资时点</td>
+              </tr>
+              <tr>
+                <td><strong>CLARITY Act 幕后谈判</strong></td>
+                <td>立法进程</td>
+                <td>追踪K Street游说披露、委员会工作人员背景</td>
+              </tr>
+              <tr>
+                <td><strong>Sacks 2024-2025 个人交易</strong></td>
+                <td>内幕交易</td>
+                <td>FOIA请求、伦理审查文件</td>
+              </tr>
+              <tr>
+                <td><strong>Trump 对Sacks的真实信任度</strong></td>
+                <td>政治风险</td>
+                <td>观察内阁会议座位、椭圆形办公室访问频率</td>
+              </tr>
+              <tr>
+                <td><strong>中国政策反应的Sacks评估</strong></td>
+                <td>地缘盲区</td>
+                <td>中文外交部表态、央行数字货币进展</td>
+              </tr>
+              <tr>
+                <td><strong>All-In Podcast 广告商与政策关联</strong></td>
+                <td>利益网络</td>
+                <td>广告客户名单、投资时间线交叉</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+
+    <!-- §8 质量评估 -->
+    <section id="quality">
+      <div class="section-header">
+        <h2>8. 素材质量评估<span class="zh">Source Quality Assessment</span></h2>
+      </div>
+      
+      <div class="arc-item">
+        <strong>&#9989; 高可信度源</strong><br>
+        White House官方渠道、Congress.gov立法原文、SEC EDGAR监管文件 — 法律效力最高，但存在发布时间滞后
+      </div>
+      
+      <div class="arc-item">
+        <strong>&#9888; 中等可信度源</strong><br>
+        The Diff、Not Boring等付费通讯 — 分析深度强，但存在立场预设；All-In Podcast — 原始度高，但存在商业利益干扰
+      </div>
+      
+      <div class="arc-item">
+        <strong>&#10060; 需要交叉验证的源</strong><br>
+        中文媒体编译版本（存在翻译误差和政策解读偏差）、社交媒体发言（措辞经过政治校准）
+      </div>
+      
+      <details class="rel-card">
+        <summary>&#128202; 研究优先级矩阵</summary>
+        <div class="rel-body">
+          <p><strong>T0 (每日):</strong> @DavidSacks X账号 + All-In Podcast + 吴说区块链</p>
+          <p><strong>T1 (每周):</strong> CLARITY Act立法进展 + The Diff/Not Boring通讯</p>
+          <p><strong>T2 (每月):</strong> Craft Ventures portfolio变动 + OpenSecrets更新</p>
+          <p><strong>T3 (季度):</strong> 深度阅读PayPal Wars/Zero to One + 关系网络重新评估</p>
+        </div>
+      </details>
+    </section>
+
+    <footer style="margin-top:3rem; padding-top:1rem; border-top:1px solid var(--border-subtle); font-size:0.72rem; color:var(--text-quaternary);">
+      <p>Generated: 2026-03-22 &middot; V4 Template &middot; <a href="../blockchain_hub.html">Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ========== RIGHT SIDEBAR (Notes) ========== -->
+  <aside class="notes-sidebar ns-closed" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&times;</button>
+      <h4 style="font-size:0.7rem; font-weight:590; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-quaternary); margin:0;">&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+    
+    <!-- Meta Notes -->
+    <div class="anno meta-note" id="note-m1" data-section="analysts" style="top:80px;">
+      <div class="note-label">META</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">分析框架：为什么The Diff最懂Sacks？</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Byrne Hobart本人是PayPal Mafia研究的深度专家，其分析优势在于：</p>
+        <p>1. 理解"监管套利"的实操逻辑（非理论）</p>
+        <p>2. 能够识别Sacks发言中的VC行业暗语</p>
+        <p>3. Thiel-verse内部视角（曾任职于Thiel资本相关生态）</p>
+        <p>建议配合Packy McCormick的"可交易性"视角交叉使用。</p>
+      </div>
+    </div>
+    
+    <div class="anno meta-note" id="note-m2" data-section="longform" style="top:180px;">
+      <div class="note-label">META</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">阅读顺序：《Zero to One》先于Sacks原文</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>很多分析师直接读Sacks的政策文件，但忽略了Thiel的"密码本"作用。</p>
+        <p>建议阅读顺序：</p>
+        <p>1. 《Zero to One》通读（建立框架）</p>
+        <p>2. Sacks "Case for Stablecoins"（验证框架）</p>
+        <p>3. CLARITY Act原文（细节验证）</p>
+        <p>这样你能识别出哪些论点来自Thiel，哪些是Sacks的独立发展。</p>
+      </div>
+    </div>
+    
+    <div class="anno meta-note" id="note-m3" data-section="relationships" style="top:280px;">
+      <div class="note-label">META</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">关系权重：Thiel > Trump</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Sacks与Trump的关系是"工具性"的——Trump需要加密选民，Sacks需要政策权力。</p>
+        <p>但Sacks与Thiel的关系是"哲学性"的——这是理解其长期政策取向的关键。</p>
+        <p>监控重点：Thiel Capital的任何人事变动都可能是Sacks政策方向的领先指标。</p>
+      </div>
+    </div>
+
+    <!-- Knowledge Notes -->
+    <div class="anno know-note" id="note-1" data-section="analysts" style="top:380px;">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">PayPal Mafia研究权威</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>The Diff的Byrne Hobart是极少数真正理解PayPal Mafia内部运作机制的分析师。</p>
+        <p>他识别出Sacks的"COO视角"——不同于Thiel的"创始人视角"或Musk的"工程师视角"，Sacks的核心能力是"系统整合与规模化"。</p>
+        <p>这一视角直接反映在其政策设计上：不是破坏监管，而是将行业纳入可控框架。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-2" data-section="analysts" style="top:520px;">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">CLARITY Act跟踪最及时</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Packy McCormick的Not Boring是少数能够将立法文本转化为投资主题的通讯。</p>
+        <p>他的优势：每周追踪CLARITY Act的委员会标记、修正案辩论，能够在立法概率变化时及时调整投资建议。</p>
+        <p>订阅价值：每篇CLARITY Act相关分析平均提供1-2个可执行的投资机会。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-3" data-section="analysts" style="top:660px;">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Craft Ventures Portfolio深度覆盖</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>The Generalist的Mario Gabriele对Craft Ventures的覆盖是业内最系统的。</p>
+        <p>关键持仓：Bitwise（加密指数基金）、MultiCoin（加密VC）、Lightning Labs（比特币Layer 2）</p>
+        <p>研究价值：理解Sacks的政策立场如何转化为其投资组合的估值变化。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-4" data-section="analysts" style="top:800px;">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Thiel-verse的内部视角</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Eli Dourado是Thiel-verse的核心成员（曾任职于Thiel Capital），他的技术政策分析具有内部人视角。</p>
+        <p>他对Sacks地缘政治框架的解读最为精准：</p>
+        <p>- 美中AI竞争的"零和逻辑"</p>
+        <p>- 加密作为"技术民族主义"工具</p>
+        <p>- 能源-比特币的战略协同</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-5" data-section="analysts" style="top:940px;">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">中文唯一：吴说区块链</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Colin Wu（吴说区块链）是中国唯一持续跟踪Sacks白宫动态的独立媒体。</p>
+        <p>覆盖优势：</p>
+        <p>- 白宫加密政策中文翻译（最快）</p>
+        <p>- Sacks发言的中文语境解读</p>
+        <p>- 美国监管对中国影响的中文分析</p>
+        <p>建议：配合英文原版交叉验证，避免翻译偏差。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-6" data-section="longform" style="top:1080px;">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">"监管套利"思维的原点</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>《The PayPal Wars》中记录了Sacks作为COO的核心策略：</p>
+        <p>- 在监管明确前快速扩张</p>
+        <p>- 用"事实上的合法性"倒逼监管妥协</p>
+        <p>- 构建"监管游说"能力作为护城河</p>
+        <p>这一思维模式直接延续到其Crypto Czar政策设计：CLARITY Act不是"放松监管"，而是"将监管权转移到对行业友好的机构"。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-7" data-section="longform" style="top:1220px;">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">垄断、秘密、技术乐观主义</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>《Zero to One》的三个核心概念构成Sacks政策哲学的底层：</p>
+        <p><strong>垄断：</strong>加密不是竞争性市场，而是"赢者通吃"的协议层</p>
+        <p><strong>秘密：</strong>监管套利本身就是Thiel所说的"secret"</p>
+        <p><strong>技术乐观主义：</strong>区块链能够解决政府失灵，而非仅仅是市场失灵</p>
+        <p>理解这三个概念，才能读懂Sacks发言的"密码"。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-8" data-section="longform" style="top:1360px;">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">美元霸权+稳定币的完整框架</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Sacks的"The Case for Stablecoins"核心论点：</p>
+        <p>1. 美元稳定币是美元霸权的技术延伸（而非威胁）</p>
+        <p>2. USDC/USDT替代SWIFT成为全球清算层</p>
+        <p>3. 监管清晰 = 合规稳定币取代非合规稳定币</p>
+        <p>4. 受益者：Coinbase、BlackRock（贝莱德已布局稳定币）</p>
+        <p>这是2025年最重要的加密政策文件，建议原文逐段阅读。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-9" data-section="longform" style="top:1500px;">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">"技术民族主义"完整拼图</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>"Why America Must Lead in AI" + 稳定币政策 = Sacks的"技术民族主义"框架：</p>
+        <p>- AI = 军事优势（Anduril的国防逻辑）</p>
+        <p>- Crypto = 金融基础设施优势（美元稳定币逻辑）</p>
+        <p>- 两者共同指向：政府与行业的深度融合（非对立）</p>
+        <p>这不是"监管vs创新"，而是"政府作为创新的最大投资者"。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-10" data-section="longform" style="top:1640px;">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">"监管清晰"的真实含义</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>CLARITY Act的"清晰"有两层含义：</p>
+        <p><strong>表层：</strong>明确哪些加密活动合法/非法</p>
+        <p><strong>深层：</strong>将监管权从SEC转移到CFTC，并指定"合格托管机构"名单</p>
+        <p>关键条款：第4条（Token分类）、第7条（CFTC管辖权扩展）、第12条（合格托管机构认证）</p>
+        <p>这是真正影响投资回报的核心文件。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-11" data-section="longform" style="top:1780px;">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">"加密即国家竞争力"</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Balaji的《Network State》与Sacks政策立场的差异：</p>
+        <p>- Balaji：更激进，主张"加密国家"的可行性</p>
+        <p>- Sacks：更务实，主张"加密作为美国国家工具"</p>
+        <p>共同点：都认为传统国家与加密是对立关系，必须选边站</p>
+        <p>研究价值：理解Sacks"国家竞争力"叙事的理论延伸。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-12" data-section="podcasts" style="top:1920px;">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Sacks主场：All-In Podcast</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>All-In Podcast是观察Sacks政策思考最原始的窗口：</p>
+        <p>- <strong>无过滤：</strong>不同于白宫发言，播客中的Sacks更直接</p>
+        <p>- <strong>实时性：</strong>政策发布后24小时内必有解读</p>
+        <p>- <strong>市场反应：</strong>其他All-In成员（Chamath、Jason）的反应提供了市场情绪指标</p>
+        <p>建议：每周录制后次日收听，记录Sacks观点的微妙变化。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-13" data-section="podcasts" style="top:2060px;">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">AI+Crypto的哲学基础</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Lex Fridman Podcast #422是Sacks最系统的哲学阐述：</p>
+        <p>核心论点：</p>
+        <p>1. AI与Crypto都是"信任技术"——降低陌生人协作的交易成本</p>
+        <p>2. 美国必须在这两个领域同时领先，否则将被中俄超越</p>
+        <p>3. "监管清晰"是保持领先的政策工具，而非抑制创新</p>
+        <p>这是理解Sacks"技术民族主义"哲学的最佳来源。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-14" data-section="primary" style="top:2200px;">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">最实时的Alpha源</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>@DavidSacks X账号是所有信息源中延迟最低的：</p>
+        <p>- 政策预告通常早于官方公告</p>
+        <p>- 市场评论提供了"政策-市场联动"的第一手观察</p>
+        <p>- 与Trump的互动揭示政治优先级排序</p>
+        <p>建议：设置关键词提醒，监控频率不低于每日2次。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="note-15" data-section="primary" style="top:2340px;">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">法律效力最高</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Whitehouse.gov/crypto的法律效力层级：</p>
+        <p>1. <strong>行政命令（Executive Order）</strong>：总统签署，具有法律强制力</p>
+        <p>2. <strong>政策简报（Policy Brief）</strong>：执行指南，法律效力次之</p>
+        <p>3. <strong>国会证词（Congressional Testimony）</strong>：Sacks公开发言的官方记录</p>
+        <p>关键：联邦公报（Federal Register）发布的最终文本与白宫新闻稿常有微妙差异，需交叉比对。</p>
+      </div>
+    </div>
+    
+    <div class="anno meta-note" id="note-m4" data-section="quality" style="top:2480px;">
+      <div class="note-label">META</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">研究监控自动化建议</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>基于上述信息源，建议建立自动化监控：</p>
+        <p>1. <strong>X账号</strong>：IFTTT + 关键词过滤（CLARITY、SEC、CFT）</p>
+        <p>2. <strong>Congress.gov</strong>：RSS订阅CLARITY Act相关法案更新</p>
+        <p>3. <strong>The Diff/Not Boring</strong>：邮件提醒 + Archivable版本存档</p>
+        <p>4. <strong>吴说区块链</strong>：微信公众号 + Twitter同步</p>
+        <p>目标：将T0信息源的响应时间压缩到4小时以内。</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+// === Sidebar toggle (mobile) ===
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+
+// === Notes sidebar toggle ===
+(function(){
+  var btn=document.getElementById("notesToggleBtn"),ns=document.getElementById("notesSidebar"),ov=document.getElementById("notesOverlay"),cb=document.getElementById("notesCloseBtn");
+  if(!btn||!ns)return;
+  function toggle(){ns.classList.toggle("ns-closed");ov.classList.toggle("open");}
+  btn.onclick=toggle;
+  if(ov)ov.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(cb)cb.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(window.innerWidth>1200)ns.classList.remove("ns-closed");
+  window.addEventListener("resize",function(){if(window.innerWidth>1200)ns.classList.remove("ns-closed");});
+})();
+
+// === Toggle note ===
+function toggleNote(head){
+  var anno=head.closest(".anno");
+  if(anno){anno.classList.toggle("open");positionNotes();}
+}
+
+// === Position notes ===
+function positionNotes(){
+  var ns=document.getElementById("notesSidebar");if(!ns)return;
+  var annos=ns.querySelectorAll(".anno");
+  var lastBottom=80;
+  annos.forEach(function(a){
+    if(a.style.display==="none")return;
+    var sec=a.getAttribute("data-section");
+    var target=sec?document.getElementById(sec):null;
+    var top=target?target.getBoundingClientRect().top+window.scrollY-ns.getBoundingClientRect().top:lastBottom;
+    if(top<lastBottom)top=lastBottom;
+    a.style.top=top+"px";
+    lastBottom=top+a.offsetHeight+8;
+  });
+}
+
+// === Knowledge toggle ===
+function toggleKnowNotes(){
+  var btn=document.getElementById("knowToggleBtn");
+  var knowNotes=document.querySelectorAll(".anno.know-note");
+  var marks=document.querySelectorAll("mark.hl-know");
+  var nrefs=document.querySelectorAll(".nref");
+  var visible=btn.classList.contains("active");
+  knowNotes.forEach(function(n){n.style.display=visible?"none":"";});
+  marks.forEach(function(m){m.style.background=visible?"transparent":"";m.style.borderBottom=visible?"none":"";});
+  nrefs.forEach(function(r){r.style.display=visible?"none":"";});
+  btn.classList.toggle("active");
+  btn.textContent=visible?"显示":"隐藏";
+  positionNotes();
+}
+
+// === Expand / Collapse all ===
+function expandAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.add("open");});positionNotes();}
+function collapseAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.remove("open");});positionNotes();}
+
+// === Note count ===
+(function(){
+  var label=document.getElementById("noteCountLabel");if(!label)return;
+  var meta=document.querySelectorAll(".anno.meta-note").length;
+  var know=document.querySelectorAll(".anno.know-note").length;
+  label.textContent=meta+" META + "+know+" Knowledge";
+})();
+
+// === Highlight → Note sync ===
+document.addEventListener("click",function(e){
+  var mark=e.target.closest("mark.hl-know")||e.target.closest(".nref");
+  if(!mark)return;
+  var noteId=mark.getAttribute("data-note");if(!noteId)return;
+  var anno=document.getElementById(noteId);if(!anno)return;
+  anno.classList.add("open");
+  anno.scrollIntoView({behavior:"smooth",block:"center"});
+  anno.classList.add("flash");
+  setTimeout(function(){anno.classList.remove("flash");},1500);
+  positionNotes();
+});
+
+// === Embedded mode ===
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+  document.addEventListener("click",function(e){
+    var a=e.target.closest("a");if(!a||!a.href)return;
+    try{var url=new URL(a.href,location.href)}catch(err){return}
+    if(url.pathname.startsWith("/trade-pipeline/")||url.pathname.startsWith("/observatory/")){
+      e.preventDefault();
+      window.top.postMessage({type:"dashboard-nav",action:"openResearch",url:url.pathname,title:a.textContent.trim().substring(0,60)},"*");
+    }
+  });
+})();
+
+// Initial positioning
+window.addEventListener("load",function(){positionNotes();});
+window.addEventListener("scroll",function(){positionNotes();});
+</script>
+</body>
+</html>

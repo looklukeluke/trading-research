@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fred Thiel — 素材策展地图 V4</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  /* Page-specific V4 extensions (~75 lines) */
+  .priority-box { border:1px solid rgba(248,168,72,0.3); border-left:3px solid var(--accent); border-radius:var(--radius-sm); padding:1.25rem 1.5rem; margin-bottom:2rem; background:var(--bg-surface); }
+  .priority-box h2 { color:var(--accent); margin-top:0; font-size:1.1rem; font-weight:590; }
+  .priority-box ol { margin-bottom:0; padding-left:1.2rem; }
+  .priority-box li { margin-bottom:0.6rem; line-height:1.5; }
+  .time-badge { display:inline-block; padding:0.1rem 0.5rem; border-radius:10px; font-size:0.7rem; font-weight:590; margin-right:0.3rem; background:var(--accent); color:var(--bg-base); }
+  .anno { position:absolute; left:1rem; right:1rem; }
+  .anno.meta-note { padding:0.6rem 0.75rem; border-left:2px solid var(--accent); border-radius:0 6px 6px 0; background:rgba(248,168,72,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.meta-note:hover { box-shadow:0 0 0 1px var(--accent); }
+  .anno.know-note { padding:0.6rem 0.75rem; border-left:2px solid var(--knowledge); border-radius:0 6px 6px 0; background:rgba(91,155,213,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.know-note:hover { box-shadow:0 0 0 1px var(--knowledge); }
+  .anno .note-label { display:inline-block; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--bg-base); background:var(--accent); padding:0.1rem 0.4rem; border-radius:3px; margin-bottom:0.3rem; }
+  .anno .note-label.know { background:var(--knowledge); color:white; }
+  .anno .mn-head { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
+  .anno .mn-title { flex:1; font-weight:510; font-size:0.75rem; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .anno .mn-fold { font-size:0.55rem; color:var(--text-quaternary); transition:transform 0.2s; margin-left:auto; }
+  .anno.open .mn-fold { transform:rotate(180deg); }
+  .anno .mn-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+  .anno.open .mn-body { max-height:2000px; }
+  .anno .mn-body p { font-size:0.78rem; margin-bottom:0.3rem; color:var(--text-secondary); }
+  .anno.flash { animation:noteFlash 1.5s ease; }
+  @keyframes noteFlash { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--accent);} }
+  .anno.know-note.flash { animation:noteFlashBlue 1.5s ease; }
+  @keyframes noteFlashBlue { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--knowledge);} }
+  mark.hl-know { background:rgba(91,155,213,0.12); border-bottom:1.5px solid var(--knowledge); padding:0 2px; border-radius:2px; color:inherit; cursor:pointer; transition:background 0.15s; }
+  mark.hl-know:hover { background:rgba(91,155,213,0.28); }
+  .nref { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; font-size:0.48rem; font-weight:700; cursor:pointer; margin-left:1px; vertical-align:super; transition:transform 0.15s; text-decoration:none; background:var(--knowledge); color:white; }
+  .nref:hover { transform:scale(1.25); box-shadow:0 0 6px rgba(91,155,213,0.4); }
+  .top-controls { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; padding:0.35rem 0.7rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); font-size:0.72rem; flex-wrap:wrap; }
+  .top-controls .tc-label { font-weight:590; color:var(--knowledge); }
+  .top-controls button { padding:0.15rem 0.45rem; border-radius:4px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-tertiary); cursor:pointer; font-size:0.68rem; font-family:inherit; transition:all 0.15s; }
+  .top-controls button:hover { border-color:var(--knowledge); color:var(--text-primary); }
+  .top-controls button.active { background:var(--knowledge-dim); color:var(--knowledge); border-color:rgba(91,155,213,0.3); }
+  .top-controls .tc-sep { color:var(--border-default); margin:0 0.15rem; }
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .notes-sidebar { position:relative; width:320px; min-width:320px; padding:1.25rem 1rem; border-left:1px solid var(--border-subtle); background:var(--bg-elevated); }
+  .notes-sidebar-header { position:sticky; top:0; z-index:60; background:var(--bg-elevated); padding-bottom:0.5rem; border-bottom:1px solid var(--border-subtle); margin-bottom:0.75rem; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  .notes-toggle-btn { position:fixed; right:1rem; bottom:1.5rem; z-index:200; width:44px; height:44px; border-radius:50%; border:1px solid var(--border-default); background:var(--bg-surface); color:var(--text-secondary); cursor:pointer; font-size:1.1rem; display:none; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.4); }
+  .notes-close-btn { float:right; background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:1.1rem; padding:0; display:none; }
+  @media (max-width:1200px) { .notes-close-btn { display:block; } .notes-sidebar { position:fixed; right:0; top:0; height:100vh; overflow-y:auto; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.4); z-index:150; } .notes-sidebar.ns-closed { transform:translateX(100%); box-shadow:none; } .notes-toggle-btn { display:flex; } }
+  .notes-overlay-right { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:140; }
+  .notes-overlay-right.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  @media (min-width:1600px) { .main-content { max-width:1000px; } .notes-sidebar { width:360px; min-width:360px; } }
+  .rel-card { border:1px solid var(--border-subtle); border-radius:var(--radius-md); background:var(--bg-elevated); margin-bottom:0.75rem; }
+  .rel-card summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  .rel-card[open] summary { color:var(--accent); }
+  .rel-card .rel-body { padding:0 1rem 1rem; font-size:0.82rem; color:var(--text-secondary); line-height:1.6; }
+  .arc-item { border-left:3px solid var(--accent); padding:0.6rem 1rem; margin-bottom:0.75rem; background:rgba(66,165,245,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+  .arc-item strong { color:var(--text-primary); }
+  .question-box { border:2px solid var(--knowledge); background:rgba(91,155,213,0.05); border-radius:var(--radius-md); padding:1.5rem; text-align:center; margin:2rem 0; }
+  .question-box blockquote { border:none; margin:0; padding:0; }
+  .question-box p { font-size:1rem; font-weight:510; color:var(--text-primary); }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; margin-bottom:1rem; }
+  th { text-transform:uppercase; font-size:0.72rem; font-weight:510; color:var(--text-quaternary); letter-spacing:0.04em; text-align:left; padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-default); }
+  td { padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-subtle); vertical-align:top; color:var(--text-secondary); }
+  tr:hover td { background:var(--bg-elevated); }
+  .url-col { max-width:200px; word-break:break-all; }
+  .zh { display:block; font-size:0.85em; color:var(--text-tertiary); margin-top:0.15em; }
+  .zh-inline { font-size:0.85em; color:var(--text-tertiary); }
+  details { border:1px solid var(--border-subtle); background:var(--bg-elevated); border-radius:var(--radius-sm); padding:0; margin-bottom:0.75rem; }
+  details summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  details[open] summary { color:var(--accent); }
+  details > div, details > p { padding:0 1rem 1rem; font-size:0.82rem; line-height:1.6; color:var(--text-secondary); }
+  body.embedded .sidebar, body.embedded .notes-sidebar, body.embedded .hamburger-btn, body.embedded .notes-toggle-btn { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+  .gap-item { border-left:3px solid var(--warning); padding:0.6rem 1rem; margin-bottom:0.75rem; background:rgba(255,183,77,0.04); border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+  .gap-item strong { color:var(--warning); }
+  .quality-bar { height:8px; background:var(--border-subtle); border-radius:4px; overflow:hidden; margin-top:0.3rem; }
+  .quality-fill { height:100%; border-radius:4px; transition:width 0.3s; }
+  .quality-high { background:var(--success); }
+  .quality-medium { background:var(--knowledge); }
+  .quality-low { background:var(--accent); }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ========== LEFT SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Fred Thiel<br>素材策展地图 V4</div>
+
+    <h4>Contents</h4>
+    <nav>
+      <ul>
+        <li><a href="#priority"><span class="toc-num">&#9733;</span>如果只有2小时</a></li>
+        <li><a href="#analysts"><span class="toc-num">1</span>最佳分析师</a></li>
+        <li><a href="#longform"><span class="toc-num">2</span>必读长文/书籍</a></li>
+        <li><a href="#podcasts"><span class="toc-num">3</span>播客与视频</a></li>
+        <li><a href="#primary"><span class="toc-num">4</span>一手资料</a></li>
+        <li><a href="#relationships"><span class="toc-num">5</span>关键关系网</a></li>
+        <li><a href="#narratives"><span class="toc-num">6</span>叙事弧</a></li>
+        <li><a href="#gaps"><span class="toc-num">7</span>信息空白</a></li>
+        <li><a href="#quality"><span class="toc-num">8</span>质量评估</a></li>
+      </ul>
+    </nav>
+
+    <h4>Related</h4>
+    <nav>
+      <ul>
+        <li><a href="11_fred_thiel.html">Fred Thiel Profile</a></li>
+        <li><a href="11_fred_thiel_metacognition.html">Metacognition</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+
+    <div class="top-controls">
+      <span class="tc-label">&#128218; 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <header class="page-header">
+      <h1>Fred Thiel — 素材策展地图 V4</h1>
+      <p class="subtitle">Research Date: 2026-03-22 &nbsp;|&nbsp; 19 sources · 5 categories · 7 info gaps<br>
+      <span class="zh-inline">Fred Thiel/Marathon Digital 投资研究素材策展</span></p>
+      <div class="badge-row">
+        <span class="badge" style="background:rgba(248,168,72,0.15);color:var(--accent);padding:0.2rem 0.6rem;border-radius:12px;font-size:0.7rem;">NASDAQ: MARA</span>
+        <span class="badge" style="background:rgba(91,155,213,0.15);color:var(--knowledge);padding:0.2rem 0.6rem;border-radius:12px;font-size:0.7rem;">Bitcoin Mining</span>
+        <span class="badge" style="background:rgba(76,175,80,0.15);color:var(--success);padding:0.2rem 0.6rem;border-radius:12px;font-size:0.7rem;">AI/HPC转型</span>
+      </div>
+    </header>
+
+    <!-- ★ Priority Box -->
+    <div class="priority-box" id="priority">
+      <h2>&#9200; 如果只有2小时 — 推荐阅读路径</h2>
+      <ol>
+        <li><span class="time-badge">60min</span><strong>MARA SEC Filings (10-K, 10-Q)</strong> — ir.marathondh.com · 核心一手资料：电力合同细节、稀释历史、BTC持仓变化 <a href="https://sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001726560" target="_blank" class="nref" style="display:inline-flex;width:12px;height:12px;font-size:0.4rem;">&#8599;</a></li>
+        <li><span class="time-badge">30min</span><strong>TheMinerMag</strong> — theminermag.com · 报告中明确引用的核心信源，专注挖矿行业数据 <a href="https://theminerMag.com" target="_blank" class="nref" style="display:inline-flex;width:12px;height:12px;font-size:0.4rem;">&#8599;</a></li>
+        <li><span class="time-badge">20min</span><strong>Marathon Digital Earnings Calls</strong> — ir.marathondh.com · Thiel亲自阐述策略，AI转型进展 <a href="https://ir.marathondh.com" target="_blank" class="nref" style="display:inline-flex;width:12px;height:12px;font-size:0.4rem;">&#8599;</a></li>
+        <li><span class="time-badge">10min</span><strong>MARA 月度算力更新</strong> — marathondh.com/news · EH/s增长、矿机订单、设施上线数据 <a href="https://marathondh.com/news" target="_blank" class="nref" style="display:inline-flex;width:12px;height:12px;font-size:0.4rem;">&#8599;</a></li>
+      </ol>
+    </div>
+
+    <!-- §1 最佳分析师 -->
+    <section id="analysts">
+      <div class="section-header">
+        <h2>1. 最佳分析师与独立研究<span class="zh">Best Analysts & Independent Research</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>TheMinerMag</strong></td>
+            <td>矿业数据/行业分析</td>
+            <td class="url-col"><a href="https://theminerMag.com" target="_blank">theminerMag.com</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong>CoinShares Mining Reports</strong></td>
+            <td>机构研究</td>
+            <td class="url-col"><a href="https://coinshares.com/research" target="_blank">coinshares.com/research</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong>Marathon Digital IR页面</strong></td>
+            <td>公司投资者关系</td>
+            <td class="url-col"><a href="https://ir.marathondh.com" target="_blank">ir.marathondh.com</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong>Glassnode / Coin Metrics</strong></td>
+            <td>链上数据</td>
+            <td class="url-col"><a href="https://glassnode.com" target="_blank">glassnode.com</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+          <tr>
+            <td><strong>JPMorgan / B. Riley Mining Research</strong></td>
+            <td>投行研究</td>
+            <td class="url-col"><span class="zh-inline">需机构渠道</span></td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §2 必读长文/书籍 -->
+    <section id="longform">
+      <div class="section-header">
+        <h2>2. 必读长文与书籍<span class="zh">Must-Read Long-Form & Books</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL/来源</th>
+            <th>重要性</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>"The Blocksize War" - Jonathan Bier</strong></td>
+            <td>书籍</td>
+            <td class="url-col"><span class="zh-inline">Amazon/独立出版</span></td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+          <tr>
+            <td><strong>MARA 10-K/10-Q SEC filings</strong></td>
+            <td>监管文件</td>
+            <td class="url-col"><a href="https://sec.gov" target="_blank">sec.gov/edgar</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong>Bitfarms/RIOT/CORZ 竞品对比研究</strong></td>
+            <td>长文</td>
+            <td class="url-col"><span class="zh-inline">TheMinerMag, Seeking Alpha</span></td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+          <tr>
+            <td><strong>"Bitcoin Mining: A Global Analysis" - CCAF</strong></td>
+            <td>学术报告</td>
+            <td class="url-col"><a href="https://ccaf.io/cbnsi" target="_blank">ccaf.io/cbnsi</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §3 播客与视频 -->
+    <section id="podcasts">
+      <div class="section-header">
+        <h2>3. 播客与视频<span class="zh">Podcasts & Video</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL/平台</th>
+            <th>重要性</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Marathon Digital Earnings Calls</strong></td>
+            <td>季度电话会</td>
+            <td class="url-col"><a href="https://ir.marathondh.com" target="_blank">ir.marathondh.com</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong>"What Bitcoin Did" - Peter McCormack</strong></td>
+            <td>播客</td>
+            <td class="url-col"><a href="https://whatbitcoindid.com" target="_blank">whatbitcoindid.com</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+          <tr>
+            <td><strong>"The Mining Pod" - Braiins/Slush Pool</strong></td>
+            <td>播客</td>
+            <td class="url-col"><a href="https://braiins.com/blog" target="_blank">braiins.com/blog</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+          <tr>
+            <td><strong>CNBC/Mad Money 采访</strong></td>
+            <td>视频</td>
+            <td class="url-col"><a href="https://cnbc.com" target="_blank">cnbc.com</a>, YouTube</td>
+            <td>⭐⭐⭐☆☆</td>
+          </tr>
+          <tr>
+            <td><strong>Bitcoin Conference</strong></td>
+            <td>演讲</td>
+            <td class="url-col"><span class="zh-inline">YouTube/Bitcoin Magazine</span></td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §4 一手资料 -->
+    <section id="primary">
+      <div class="section-header">
+        <h2>4. 一手资料<span class="zh">Primary Sources</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>MARA SEC Filings (10-K, 10-Q, 8-K)</strong></td>
+            <td>监管披露</td>
+            <td class="url-col"><a href="https://sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001726560" target="_blank">sec.gov/edgar</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong>Fred Thiel Twitter/X @fgthiel</strong></td>
+            <td>社交媒体</td>
+            <td class="url-col"><a href="https://x.com/fgthiel" target="_blank">x.com/fgthiel</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+          <tr>
+            <td><strong>MARA 月度算力更新</strong></td>
+            <td>公司博客</td>
+            <td class="url-col"><a href="https://marathondh.com/news" target="_blank">marathondh.com/news</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong>能源/电力监管文件 (ERCOT, etc.)</strong></td>
+            <td>政府文件</td>
+            <td class="url-col"><a href="https://ercot.com" target="_blank">ercot.com</a>, 各州PUC</td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §5 关键关系网 -->
+    <section id="relationships">
+      <div class="section-header">
+        <h2>5. 关键关系网<span class="zh">Key Relationships</span></h2>
+      </div>
+      
+      <details class="rel-card" open>
+        <summary>Michael Saylor / MicroStrategy — 策略模仿/竞争</summary>
+        <div class="rel-body">
+          <p>Thiel的HODL策略直接效仿Saylor。对比两者：<mark class="hl-know" data-note="note-saylor">MSTR纯金融杠杆</mark> vs MARA运营杠杆+能源叙事。</p>
+          <p><strong>关键差异：</strong></p>
+          <ul>
+            <li>MSTR：通过可转换债券加杠杆购买BTC</li>
+            <li>MARA：通过挖矿产生BTC，同时转型AI/HPC</li>
+          </ul>
+          <p><strong>监控要点：</strong>两者估值倍数、机构持仓变化、比特币价格相关性</p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>德州电网 (ERCOT) — 核心基础设施</summary>
+        <div class="rel-body">
+          <p>MARA主要矿场所在地，电力成本优势来源。ERCOT价格波动直接影响MARA边际成本。</p>
+          <p><strong>风险点：</strong></p>
+          <ul>
+            <li>ERCOT电价波动可能导致意外成本</li>
+            <li>德州能源监管政策变化</li>
+            <li>极端天气事件影响</li>
+          </ul>
+          <p><strong>验证方法：</strong>追踪ERCOT实时市场数据、MARA 10-K中电力成本披露</p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>比特大陆 (Bitmain) / 神马矿机 — 设备供应商</summary>
+        <div class="rel-body">
+          <p>矿机供应链，S19/XP系列采购合同，影响算力扩张节奏。</p>
+          <p><strong>关键问题：</strong></p>
+          <ul>
+            <li>矿机交付时间表</li>
+            <li>价格与性能比</li>
+            <li>中国供应链地缘政治风险</li>
+          </ul>
+          <p><strong>替代供应商：</strong>MicroBT (神马)、Canaan、Ebang</p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>AI/HPC潜在客户 — 转型关键 <span class="time-badge" style="background:var(--warning);font-size:0.6rem;">⚠️ 信息空白</span></summary>
+        <div class="rel-body">
+          <p><strong>核心叙事验证点：</strong>Thiel的AI转型叙事缺乏实际客户确认。</p>
+          <p><strong>需追踪：</strong></p>
+          <ul>
+            <li>hyperscaler (Microsoft, Amazon, CoreWeave) 是否签约</li>
+            <li>MARA财报"Other Revenue"变化</li>
+            <li>行业会议上的潜在合作公告</li>
+            <li>LinkedIn招聘（AI基础设施工程师）</li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>Foundry USA / 矿池 — 运营合作</summary>
+        <div class="rel-body">
+          <p>MARA算力主要接入矿池，影响奖励稳定性。</p>
+          <p><strong>矿池市场份额：</strong>Foundry USA、AntPool、F2Pool</p>
+          <p><strong>风险点：</strong>矿池费用变化、算力集中度风险</p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>Michael Burry / 空头 — 对立面</summary>
+        <div class="rel-body">
+          <p>2024年有报道称Burry做空MARA，理解看空逻辑：<mark class="hl-know" data-note="note-burry">高稀释、AI叙事泡沫</mark>。</p>
+          <p><strong>看空论点：</strong></p>
+          <ul>
+            <li>持续股权稀释对股东价值的影响</li>
+            <li>AI转型缺乏实质收入验证</li>
+            <li>比特币挖矿业务的周期性风险</li>
+          </ul>
+        </div>
+      </details>
+
+    </section>
+
+    <!-- §6 叙事弧 -->
+    <section id="narratives">
+      <div class="section-header">
+        <h2>6. 关键叙事弧<span class="zh">Key Narrative Arcs</span></h2>
+      </div>
+      
+      <div class="arc-item">
+        <strong>叙事弧1: 纯挖矿 → 能源基础设施公司 (2021-2023)</strong>
+        <p>Thiel早期叙事强调MARA作为"能源套利者"的定位：通过廉价电力挖矿，将能源转换为数字黄金。核心论点是MARA的电力成本优势（德州 Wind/Solar）与Saylor的"比特币作为国债"叙事形成差异化。</p>
+        <p><strong>信号来源：</strong>2021-2022年财报电话会议、Bitcoin Conference演讲</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧2: HODL策略升级 — "我们是比特币鲸鱼" (2022-2024)</strong>
+        <p>随着BTC价格下跌，MARA从"挖矿公司"重新定位为"<mark class="hl-know" data-note="note-hodl">BTC HODL公司</mark>"。Thiel开始模仿Saylor的叙事，强调MARA持有的BTC作为战略资产。这与MicroStrategy形成"比特币企业联盟"。</p>
+        <p><strong>验证指标：</strong>BTC持仓量变化、减记风险、会计处理方式</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧3: AI/HPC转型 — 叙事大转弯 (2024-) <span class="time-badge" style="background:var(--warning);font-size:0.6rem;">⚠️ 争议</span></strong>
+        <p>2024年Thiel宣布MARA将转型为AI基础设施提供商，声称利用闲置算力为AI公司提供HPC服务。这是一个重大叙事转变，但也引发质疑：</p>
+        <ul>
+          <li>缺乏实际客户确认</li>
+          <li>与纯AI基础设施公司（CoreWeave等）的竞争力存疑</li>
+          <li>可能用于支撑估值/股价</li>
+        </ul>
+        <p><strong>核心问题：</strong>这是真正的战略转型，还是叙事管理？</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧4: 去中国化 / 地缘政治叙事</strong>
+        <p>MARA强调其"干净"的供应链（美国境内运营），暗示与中国矿企（如Bitmain）的距离。这一叙事在美国监管环境下具有政治正确性。</p>
+        <p><strong>风险：</strong>实际供应链仍依赖中国制造的芯片和设备</p>
+      </div>
+
+    </section>
+
+    <!-- §7 信息空白 -->
+    <section id="gaps">
+      <div class="section-header">
+        <h2>7. 信息空白 — What Doesn't Exist<span class="zh">Information Gaps</span></h2>
+      </div>
+      
+      <div class="question-box">
+        <blockquote>
+          <p>&#129309; <strong>核心研究问题：</strong>MARA的AI/HPC转型叙事是否落地？</p>
+        </blockquote>
+      </div>
+
+      <div class="gap-item">
+        <strong>Gap 1: AI/HPC实际收入</strong> — 核心叙事验证点
+        <p><strong>风险/机会：</strong>如果AI收入真实且规模化，MARA估值可能重估；如果为空头叙事，股价可能暴跌。</p>
+        <p><strong>验证方法：</strong>追踪MARA财报"Other Revenue"或单独披露；搜索 hyperscaler 新闻稿</p>
+      </div>
+
+      <div class="gap-item">
+        <strong>Gap 2: 真实电力成本 ($/MWh)</strong> — 矿企利润决定性因素
+        <p><strong>风险/机会：</strong>MARA声称的"最便宜电力"是否属实？低成本=高护城河。</p>
+        <p><strong>验证方法：</strong>德州PUC文件、MARA 10-K中"Cost of revenues"细分</p>
+      </div>
+
+      <div class="gap-item">
+        <strong>Gap 3: BTC持仓的会计处理细节</strong> — 减值风险、杠杆计算
+        <p><strong>风险/机会：</strong>BTC作为无形资产还是公允价值计量？方式不同导致EPS差异巨大。</p>
+        <p><strong>验证方法：</strong>10-K Note 2 "Summary of Significant Accounting Policies"</p>
+      </div>
+
+      <div class="gap-item">
+        <strong>Gap 4: 管理层股票出售/质押</strong> — 内部人信心信号
+        <p><strong>风险/机会：</strong>Thiel等高管是否持续买入或卖出？与Saylor的"不出售"承诺对比。</p>
+        <p><strong>验证方法：</strong>SEC Form 4披露</p>
+      </div>
+
+      <div class="gap-item">
+        <strong>Gap 5: 与AI公司的实际合同谈判</strong> — 估值重估触发器
+        <p><strong>风险/机会：</strong>任何大型AI公司（如CoreWeave、Amazon、Microsoft）的合作协议公告将显著影响估值。</p>
+        <p><strong>验证方法：</strong>行业会议、LinkedIn招聘（AI基础设施工程师）、供应商关系</p>
+      </div>
+
+      <div class="gap-item">
+        <strong>Gap 6: 中国矿机供应链风险</strong> — 地缘政治、设备获取
+        <p><strong>风险/机会：</strong>美国可能将Bitmain等列入实体清单，影响MARA设备采购。</p>
+        <p><strong>验证方法：</strong>比特大陆财报、美国商务部实体清单动态</p>
+      </div>
+
+      <div class="gap-item">
+        <strong>Gap 7: 吴说区块链等中文信源</strong> — 报告中提及但未展开
+        <p><strong>风险/机会：</strong>中文加密社区可能有MARA相关的一手信息或独家报道。</p>
+        <p><strong>验证方法：</strong>主动追踪 wublock123.com，中国视角的矿业动态</p>
+      </div>
+
+    </section>
+
+    <!-- §8 质量评估 -->
+    <section id="quality">
+      <div class="section-header">
+        <h2>8. 素材质量评估<span class="zh">Source Quality Assessment</span></h2>
+      </div>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>信源类型</th>
+            <th>可信度</th>
+            <th>更新频率</th>
+            <th>综合评级</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>MARA SEC Filings</td>
+            <td>
+              <div class="quality-bar"><div class="quality-fill quality-high" style="width:100%"></div></div>
+            </td>
+            <td>季度</td>
+            <td><span style="color:var(--success)">★★★★★</span></td>
+          </tr>
+          <tr>
+            <td>TheMinerMag</td>
+            <td>
+              <div class="quality-bar"><div class="quality-fill quality-high" style="width:95%"></div></div>
+            </td>
+            <td>持续</td>
+            <td><span style="color:var(--success)">★★★★★</span></td>
+          </tr>
+          <tr>
+            <td>CoinShares Research</td>
+            <td>
+              <div class="quality-bar"><div class="quality-fill quality-high" style="width:90%"></div></div>
+            </td>
+            <td>季度</td>
+            <td><span style="color:var(--success)">★★★★★</span></td>
+          </tr>
+          <tr>
+            <td>Glassnode/CoinMetrics</td>
+            <td>
+              <div class="quality-bar"><div class="quality-fill quality-medium" style="width:85%"></div></div>
+            </td>
+            <td>每日</td>
+            <td><span style="color:var(--knowledge)">★★★★☆</span></td>
+          </tr>
+          <tr>
+            <td>Earnings Calls</td>
+            <td>
+              <div class="quality-bar"><div class="quality-fill quality-medium" style="width:80%"></div></div>
+            </td>
+            <td>季度</td>
+            <td><span style="color:var(--knowledge)">★★★★☆</span></td>
+          </tr>
+          <tr>
+            <td>Twitter/X (Fred Thiel)</td>
+            <td>
+              <div class="quality-bar"><div class="quality-fill quality-medium" style="width:70%"></div></div>
+            </td>
+            <td>不定</td>
+            <td><span style="color:var(--knowledge)">★★★☆☆</span></td>
+          </tr>
+          <tr>
+            <td>投行研究报告</td>
+            <td>
+              <div class="quality-bar"><div class="quality-fill quality-medium" style="width:75%"></div></div>
+            </td>
+            <td>不定</td>
+            <td><span style="color:var(--knowledge)">★★★★☆</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <details>
+        <summary>评估标准说明</summary>
+        <div>
+          <p><strong>可信度评估维度：</strong></p>
+          <ul>
+            <li><strong>一手性：</strong>是否直接来自公司或监管机构</li>
+            <li><strong>可验证性：</strong>数据是否可交叉验证</li>
+            <li><strong>利益相关性：</strong>是否存在利益冲突</li>
+            <li><strong>历史准确性：</strong>过往预测/数据的准确性</li>
+          </ul>
+          <p><strong>注意事项：</strong></p>
+          <ul>
+            <li>公司披露可能存在选择性披露</li>
+            <li>行业分析可能存在偏见</li>
+            <li>社交媒体信息需交叉验证</li>
+          </ul>
+        </div>
+      </details>
+
+    </section>
+
+    <footer style="margin-top:3rem; padding-top:1rem; border-top:1px solid var(--border-subtle); font-size:0.72rem; color:var(--text-quaternary);">
+      <p>Generated: 2026-03-22 &middot; V4 Template &middot; <a href="../blockchain_hub.html">Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ========== RIGHT SIDEBAR (Notes) ========== -->
+  <aside class="notes-sidebar ns-closed" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&times;</button>
+      <h4 style="font-size:0.7rem; font-weight:590; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-quaternary); margin:0;">&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+    
+    <!-- Meta Notes -->
+    <div class="anno meta-note" id="note-meta-1" data-section="analysts" style="top:80px;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">TheMinerMag 优先级说明</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>TheMinerMag是本报告中明确引用的核心信源。其独特价值在于：专注矿业垂直领域、数据覆盖全面（算力、电力成本、矿企财务）、且有中文版覆盖中国矿业动态。建议设为首要监控信源。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-meta-2" data-section="longform" style="top:200px;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">SEC Filings 阅读重点</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>阅读MARA 10-K/10-Q时的优先顺序：</p>
+        <p>1. Risk Factors — 管理层识别的风险</p>
+        <p>2. Notes to Financial Statements — 会计政策、BTC计量方式</p>
+        <p>3. Legal Proceedings — 潜在诉讼风险</p>
+        <p>4. Operating Results — 电力成本分析</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-meta-3" data-section="primary" style="top:350px;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">ERCOT 数据监控策略</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>ERCOT官网提供实时电力价格数据。建议设置价格警报（>$100/MWh为异常）。MARA的主要矿场位于德州Wind/Solar资源丰富区域，关注价格波动对边际成本的影响。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-meta-4" data-section="relationships" style="top:480px;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Saylor vs Thiel 对比框架</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>对比MSTR和MARA时，关注：</p>
+        <p>• 杠杆结构：MSTR可转债 vs MARA股权+债务</p>
+        <p>• 收入模型：MSTR无经营收入 vs MARA有挖矿收入</p>
+        <p>• 叙事演进：两者都在动态调整故事</p>
+        <p>• 机构持仓：哪些基金同时持有两者？</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-meta-5" data-section="narratives" style="top:620px;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">叙事演变追踪方法</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>追踪Thiel叙事演变：</p>
+        <p>1. 收集Bitcoin Conference历年演讲视频</p>
+        <p>2. 对比Q1 vs Q4 Earnings Call的主题</p>
+        <p>3. 关注SEC披露中的"Business Strategy"段落变化</p>
+        <p>4. 识别叙事与股价/估值的相关性</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-meta-6" data-section="gaps" style="top:780px;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">信息空白验证优先级</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Gap 1 (AI/HPC收入) 应设为最高优先级，因为这直接决定投资论点是否成立。其他Gap作为辅助验证。</p>
+        <p>验证节奏建议：财报发布后48小时内深度分析"Other Revenue"科目。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-meta-7" data-section="quality" style="top:920px;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">质量评估的局限性</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>本评估基于一般标准。具体项目可能因市场环境、数据可得性而调整。投行报告虽可能存在利益冲突，但仍提供有用的估值参考。</p>
+        <p>最佳实践：多源交叉验证，不依赖单一信源。</p>
+      </div>
+    </div>
+
+    <!-- Knowledge Notes -->
+    <div class="anno know-note" id="note-saylor" data-section="relationships" style="top:1100px;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">MSTR金融杠杆机制</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>MicroStrategy通过可转换优先债券加杠杆购买BTC。这种模式的特点：</p>
+        <p>• 不直接参与挖矿运营</p>
+        <p>• 杠杆比例可通过债券条款调节</p>
+        <p>• 股价与BTC价格高度相关（放大效应）</p>
+        <p>• 债券持有人承担BTC下行风险</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-burry" data-section="relationships" style="top:1250px;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">Michael Burry做空逻辑</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Burry的做空论点可能包括：</p>
+        <p>1. 股权稀释：持续发行新股购买BTC/设备，摊薄现有股东</p>
+        <p>2. 叙事泡沫：AI转型缺乏实质支撑，难以实现</p>
+        <p>3. 周期性风险：BTC减半周期对挖矿利润的压缩</p>
+        <p>4. 估值过高：EV/EBITDA比率显著高于同行</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-hodl" data-section="narratives" style="top:1420px;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">BTC HODL策略会计处理</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>MARA的BTC持仓会计方式影响报表：</p>
+        <p>• 按成本法：BTC作为无形资产，减值直接进入损益表</p>
+        <p>• 按公允价值：增值计入其他综合收益，不影响EPS</p>
+        <p>• 关键问题：MARA选择哪种方式？在哪个会计准则下？</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-ai" data-section="gaps" style="top:1600px;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">AI/HPC转型可行性分析</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>AI基础设施的关键要求：</p>
+        <p>• 低延迟网络连接</p>
+        <p>• 稳定电力供应</p>
+        <p>• 靠近数据中心</p>
+        <p>MARA的优势：德州土地+电力成本低</p>
+        <p>MARA的劣势：缺乏与hyperscaler的合作关系、GPU基础设施</p>
+        <p>结论：概念可行，但执行风险高。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-power" data-section="primary" style="top:1780px;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">ERCOT电力市场结构</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>德州电力市场特点：</p>
+        <p>• 独立电网，不受联邦监管</p>
+        <p>• 电力批发价格波动大</p>
+        <p>• 可再生能源占比高（Wind/Solar）</p>
+        <p>• 峰谷价差显著，挖矿可在低价时运行</p>
+        <p>MARA可能签订PPA（购电协议）锁定长期低价</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-supply" data-section="relationships" style="top:1960px;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">矿机供应链地缘风险</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>主要矿机制造商分布：</p>
+        <p>• Bitmain（中国）— 市场份额最大</p>
+        <p>• MicroBT/神马（中国）— 竞争者</p>
+        <p>• Canaan、Ebang（中国）— 较小份额</p>
+        <p>• 英特尔/其他 — 非主流</p>
+        <p>风险：美国可能扩大实体清单，影响设备采购。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-dilution" data-section="narratives" style="top:2140px;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">股权稀释历史与影响</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>MARA历史上多次大规模增发：</p>
+        <p>• 2020-2021：为购买BTC多次增发</p>
+        <p>• 2022-2023：矿机采购融资</p>
+        <p>• 2024：AI基础设施融资</p>
+        <p>影响：流通股数持续增加，EPS摊薄。需追踪稀释率趋势。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-ccaf" data-section="longform" style="top:2320px;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">CCAF全球矿业报告价值</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>剑桥大学替代金融中心(CCAF)的全球挖矿研究：</p>
+        <p>• 提供标准化能源消耗数据</p>
+        <p>• 可再生能源占比估算</p>
+        <p>• 区域分布分析</p>
+        <p>• 用于验证Thiel的"清洁能源"叙事</p>
+        <p>发布频率：年度/季度</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-wuya" data-section="gaps" style="top:2500px;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">吴说区块链信息价值</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>吴说区块链(wublock123.com)特点：</p>
+        <p>• 覆盖中国矿业动态一手信息</p>
+        <p>• 监管政策解读（中文）</p>
+        <p>• Bitmain等中国企业动向</p>
+        <p>• 英文媒体未覆盖的角度</p>
+        <p>建议：使用翻译工具追踪，获取差异化信息优势。</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+// === Sidebar toggle (mobile) ===
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+
+// === Notes sidebar toggle ===
+(function(){
+  var btn=document.getElementById("notesToggleBtn"),ns=document.getElementById("notesSidebar"),ov=document.getElementById("notesOverlay"),cb=document.getElementById("notesCloseBtn");
+  if(!btn||!ns)return;
+  function toggle(){ns.classList.toggle("ns-closed");ov.classList.toggle("open");}
+  btn.onclick=toggle;
+  if(ov)ov.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(cb)cb.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(window.innerWidth>1200)ns.classList.remove("ns-closed");
+  window.addEventListener("resize",function(){if(window.innerWidth>1200)ns.classList.remove("ns-closed");});
+})();
+
+// === Toggle note ===
+function toggleNote(head){
+  var anno=head.closest(".anno");
+  if(anno){anno.classList.toggle("open");positionNotes();}
+}
+
+// === Position notes ===
+function positionNotes(){
+  var ns=document.getElementById("notesSidebar");if(!ns)return;
+  var annos=ns.querySelectorAll(".anno");
+  var lastBottom=80;
+  annos.forEach(function(a){
+    if(a.style.display==="none")return;
+    var sec=a.getAttribute("data-section");
+    var target=sec?document.getElementById(sec):null;
+    var top=target?target.getBoundingClientRect().top+window.scrollY-ns.getBoundingClientRect().top:lastBottom;
+    if(top<lastBottom)top=lastBottom;
+    a.style.top=top+"px";
+    lastBottom=top+a.offsetHeight+8;
+  });
+}
+
+// === Knowledge toggle ===
+function toggleKnowNotes(){
+  var btn=document.getElementById("knowToggleBtn");
+  var knowNotes=document.querySelectorAll(".anno.know-note");
+  var marks=document.querySelectorAll("mark.hl-know");
+  var nrefs=document.querySelectorAll(".nref");
+  var visible=btn.classList.contains("active");
+  knowNotes.forEach(function(n){n.style.display=visible?"none":"";});
+  marks.forEach(function(m){m.style.background=visible?"transparent":"";m.style.borderBottom=visible?"none":"";});
+  nrefs.forEach(function(r){r.style.display=visible?"none":"";});
+  btn.classList.toggle("active");
+  btn.textContent=visible?"显示":"隐藏";
+  positionNotes();
+}
+
+// === Expand / Collapse all ===
+function expandAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.add("open");});positionNotes();}
+function collapseAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.remove("open");});positionNotes();}
+
+// === Note count ===
+(function(){
+  var label=document.getElementById("noteCountLabel");if(!label)return;
+  var meta=document.querySelectorAll(".anno.meta-note").length;
+  var know=document.querySelectorAll(".anno.know-note").length;
+  label.textContent=meta+" META + "+know+" Knowledge";
+})();
+
+// === Highlight → Note sync ===
+document.addEventListener("click",function(e){
+  var mark=e.target.closest("mark.hl-know")||e.target.closest(".nref");
+  if(!mark)return;
+  var noteId=mark.getAttribute("data-note");if(!noteId)return;
+  var anno=document.getElementById(noteId);if(!anno)return;
+  anno.classList.add("open");
+  anno.scrollIntoView({behavior:"smooth",block:"center"});
+  anno.classList.add("flash");
+  setTimeout(function(){anno.classList.remove("flash");},1500);
+  positionNotes();
+});
+
+// === Embedded mode ===
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+  document.addEventListener("click",function(e){
+    var a=e.target.closest("a");if(!a||!a.href)return;
+    try{var url=new URL(a.href,location.href)}catch(err){return}
+    if(url.pathname.startsWith("/trade-pipeline/")||url.pathname.startsWith("/observatory/")){
+      e.preventDefault();
+      window.top.postMessage({type:"dashboard-nav",action:"openResearch",url:url.pathname,title:a.textContent.trim().substring(0,60)},"*");
+    }
+  });
+})();
+
+// Initial positioning
+window.addEventListener("load",function(){positionNotes();});
+window.addEventListener("scroll",function(){positionNotes();});
+</script>
+</body>
+</html>

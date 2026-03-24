@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RWA代币化 — Metacognition 元思考过程</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  .meta-card { border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:1.1rem 1.3rem; margin-bottom:0.75rem; background:var(--bg-surface); }
+  .meta-card h3 { font-size:0.95rem; font-weight:590; margin-bottom:0.5rem; color:var(--text-primary); }
+  .meta-card p { font-size:0.82rem; color:var(--text-secondary); line-height:1.6; margin-bottom:0.5rem; }
+  .bias-tag { display:inline-block; padding:0.15rem 0.5rem; border-radius:4px; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
+  .bias-confirmed { background:rgba(76,175,80,0.15); color:var(--tier-high); }
+  .bias-warning { background:rgba(255,193,7,0.15); color:var(--tier-medium); }
+  .bias-critical { background:rgba(244,67,54,0.15); color:var(--tier-low); }
+  .confidence-bar { display:flex; align-items:center; gap:0.5rem; margin:0.5rem 0; }
+  .conf-track { flex:1; height:6px; background:var(--border-subtle); border-radius:3px; overflow:hidden; }
+  .conf-fill { height:100%; border-radius:3px; }
+  .conf-label { font-size:0.72rem; font-weight:590; color:var(--text-tertiary); min-width:2.5rem; }
+  .gap-item { border-left:3px solid var(--tier-low); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(244,67,54,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .cross-ref { border-left:3px solid var(--knowledge); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(91,155,213,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .decision-log { font-size:0.78rem; color:var(--text-tertiary); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:0.8rem 1rem; background:var(--bg-elevated); margin-bottom:0.75rem; }
+  .section-intro { font-size:0.82rem; color:var(--text-secondary); margin-bottom:1rem; padding-bottom:0.75rem; border-bottom:1px dashed var(--border-subtle); }
+  .tag-row { display:flex; flex-wrap:wrap; gap:0.4rem; margin:0.5rem 0; }
+  body.embedded .sidebar { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+</style>
+</head>
+<body>
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="page-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">RWA代币化<br>Metacognition 元思考</div>
+    <h4>Contents</h4>
+    <nav><ul>
+      <li><a href="#definition">§1 节点定义与边界</a></li>
+      <li><a href="#companies">§2 关键公司归类逻辑</a></li>
+      <li><a href="#biases">§3 认知偏差</a></li>
+      <li><a href="#crossval">§4 与上下游的交叉影响</a></li>
+      <li><a href="#gaps">§5 信息缺口</a></li>
+      <li><a href="#quality">§6 质量评估</a></li>
+      <li><a href="#log">§7 决策日志</a></li>
+    </ul></nav>
+    <h4>Related</h4>
+    <nav><ul>
+      <li><a href="NODE_6_RWA代币化_2026-03-22.html">RWA代币化 Node</a></li>
+      <li><a href="NODE_5_稳定币与支付_2026-03-21.html">Node 5: 稳定币</a></li>
+      <li><a href="NODE_7_DeFi应用层_2026-03-21.html">Node 7: DeFi</a></li>
+    </ul></nav>
+  </aside>
+  <main class="main-content">
+    <header class="page-header">
+      <h1>RWA代币化 — Metacognition<span style="display:block;font-size:0.85rem;font-weight:400;color:var(--text-tertiary);margin-top:0.2rem;">元思考过程 — 研究中的认知审计</span></h1>
+      <p style="font-size:0.82rem;color:var(--text-quaternary);">Node 6 of 8 &middot; Blockchain Value Chain &middot; 2026-03-22</p>
+    </header>
+
+    <!-- §1 节点定义与边界 -->
+    <div class="meta-card" id="definition">
+      <h3>&sect;1 节点定义与边界 <span class="zh-inline">Node Definition & Boundaries</span></h3>
+      <p class="section-intro">为什么将RWA代币化划分为独立节点？它的边界在哪里？与其他节点的区分标准是什么？</p>
+      
+      <p><strong>节点定义</strong>: RWA代币化（Real World Assets Tokenization）指将传统资产（国债、股权、房地产、私募基金、私募信贷、商品等）通过区块链技术进行数字化表示，实现7/24交易、即时结算、碎片化持有和可编程合规。</p>
+      
+      <p><strong>覆盖子行业</strong>:</p>
+      <div class="tag-row">
+        <span class="badge badge-gold">代币化国债/固收</span>
+        <span class="badge badge-cyan">代币化股权</span>
+        <span class="badge badge-gray">私募信贷代币化</span>
+        <span class="badge badge-gray">房地产代币化</span>
+        <span class="badge badge-gray">商品代币化</span>
+        <span class="badge badge-gray">代币化基金(PE/VC)</span>
+      </div>
+      
+      <p><strong>与相邻节点的区分标准</strong>:</p>
+      <ul style="font-size:0.82rem;color:var(--text-secondary);margin-left:1.2rem;margin-bottom:0.5rem;">
+        <li><strong>vs 稳定币(Node 5)</strong>: 稳定币是"货币的代币化"，锚定美元等法币；RWA代币化是"资产的代币化"，底层资产更广泛。关键区别：稳定币是支付工具，RWA代币化是投资/收益工具。</li>
+        <li><strong>vs DeFi应用(Node 7)</strong>: DeFi是纯链上原生协议；RWA代币化连接链上与链下（真实资产）。关键区别：DeFi无链下依赖，RWA代币化需要法律框架和托管基础设施。</li>
+        <li><strong>vs 中间件/预言机(Node 3)</strong>: 预言机是RWA代币化的必要基础设施，但本身不是"代币化"活动。预言机提供价格喂价和资产验证，但代币化本身发生在资产发行和托管层。</li>
+      </ul>
+      
+      <div class="tag-row">
+        <span class="bias-tag bias-confirmed">&#10003; 定义确认</span>
+        <span class="bias-tag bias-confirmed">&#10003; 边界清晰</span>
+      </div>
+    </div>
+
+    <!-- §2 关键公司归类逻辑 -->
+    <div class="meta-card" id="companies">
+      <h3>&sect;2 关键公司归类逻辑 <span class="zh-inline">Company Classification Logic</span></h3>
+      <p class="section-intro">哪些公司归入RWA代币化节点？归类标准是什么？</p>
+      
+      <h4 style="font-size:0.85rem;font-weight:590;color:var(--text-primary);margin:1rem 0 0.5rem;">核心归类标准</h4>
+      <ul style="font-size:0.82rem;color:var(--text-secondary);margin-left:1.2rem;margin-bottom:0.5rem;">
+        <li><strong>主业测试</strong>: 公司>50%收入来自RWA代币化相关活动</li>
+        <li><strong>功能测试</strong>: 从事资产发行、代币化基础设施、合规托管、交易撮合等核心代币化功能</li>
+        <li><strong>用户测试</strong>: 主要服务于机构或合格投资者，而非散户投机者</li>
+      </ul>
+      
+      <h4 style="font-size:0.85rem;font-weight:590;color:var(--text-primary);margin:1rem 0 0.5rem;">归类公司清单</h4>
+      <table style="width:100%;font-size:0.78rem;border-collapse:collapse;margin:0.5rem 0;">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border-subtle);">
+            <th style="text-align:left;padding:0.4rem 0;color:var(--text-tertiary);">公司</th>
+            <th style="text-align:left;padding:0.4rem 0;color:var(--text-tertiary);">类型</th>
+            <th style="text-align:left;padding:0.4rem 0;color:var(--text-tertiary);">核心业务</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border-subtle);">
+            <td style="padding:0.4rem 0;">Securitize</td>
+            <td style="padding:0.4rem 0;color:var(--accent);">基础设施</td>
+            <td style="padding:0.4rem 0;">代币化发行+ATS交易+合规托管</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border-subtle);">
+            <td style="padding:0.4rem 0;">Ondo Finance</td>
+            <td style="padding:0.4rem 0;color:var(--accent);">发行人</td>
+            <td style="padding:0.4rem 0;">OUSG/USDY代币化产品</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border-subtle);">
+            <td style="padding:0.4rem 0;">BlackRock (BUIDL)</td>
+            <td style="padding:0.4rem 0;color:var(--knowledge);">传统机构</td>
+            <td style="padding:0.4rem 0;">代币化国债基金(~$500M)</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border-subtle);">
+            <td style="padding:0.4rem 0;">Centrifuge</td>
+            <td style="padding:0.4rem 0;color:var(--accent);">DeFi+RWA</td>
+            <td style="padding:0.4rem 0;">私募信贷代币化+DeFi集成</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border-subtle);">
+            <td style="padding:0.4rem 0;">Franklin Templeton</td>
+            <td style="padding:0.4rem 0;color:var(--knowledge);">传统机构</td>
+            <td style="padding:0.4rem 0;">BENJI代币化货币基金</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border-subtle);">
+            <td style="padding:0.4rem 0;">Maple Finance</td>
+            <td style="padding:0.4rem 0;color:var(--accent);">DeFi+RWA</td>
+            <td style="padding:0.4rem 0;">机构借贷代币化</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <h4 style="font-size:0.85rem;font-weight:590;color:var(--text-primary);margin:1rem 0 0.5rem;">排除逻辑</h4>
+      <ul style="font-size:0.82rem;color:var(--text-secondary);margin-left:1.2rem;margin-bottom:0.5rem;">
+        <li><strong>排除纯稳定币公司</strong>: 如Tether、Circle归入Node 5（稳定币与支付）</li>
+        <li><strong>排除纯DeFi协议</strong>: 如Uniswap、Aave归入Node 7（DeFi应用层）</li>
+        <li><strong>排除托管/银行</strong>: 如Fireblocks虽服务RWA客户，但其主业是托管技术，归入Node 4（交易所与托管）</li>
+      </ul>
+      
+      <div class="tag-row">
+        <span class="bias-tag bias-warning">&#9888; 边界模糊</span>
+        <span class="bias-tag bias-warning">&#9888; 分类主观</span>
+      </div>
+    </div>
+
+    <!-- §3 认知偏差 -->
+    <div class="meta-card" id="biases">
+      <h3>&sect;3 认知偏差 <span class="zh-inline">Cognitive Biases</span></h3>
+      <p class="section-intro">研究RWA代币化节点时的系统性认知偏差</p>
+      
+      <h4 style="font-size:0.85rem;font-weight:590;color:var(--text-primary);margin:1rem 0 0.5rem;">英文/西方中心偏差 <span class="zh-inline" style="font-weight:400;color:var(--text-tertiary);">English/Western Bias</span></h4>
+      <p><strong>偏差描述</strong>: RWA代币化的主要信息来源是英文媒体(Coindesk, The Block, Bloomberg)、美国公司公告和西方监管文件。可能系统性低估亚洲RWA发展（新加坡Project Guardian、香港Project Ensemble）和中国RWA探索（数字人民币、供应链金融代币化）。</p>
+      <p><strong>具体表现</strong>: 本报告的代理人均来自美国(Ondo/Securitize)。亚洲RWA进展（如新加坡代币化债券试验）被归类为"次要信息"而非"核心信息"。</p>
+      <div class="tag-row">
+        <span class="bias-tag bias-critical">&#9888; CRITICAL 关键偏差</span>
+      </div>
+      
+      <h4 style="font-size:0.85rem;font-weight:590;color:var(--text-primary);margin:1rem 0 0.5rem;">市值/流动性偏差 <span class="zh-inline" style="font-weight:400;color:var(--text-tertiary);">Market Cap / Liquidity Bias</span></h4>
+      <p><strong>偏差描述</strong>: 可交易标的（如ONDO代币）获得不成比例的关注，因为数据容易获取（CoinGecko、DEX交易量）。但真正代表RWA代币化规模的是不可交易的机构级产品（如BUIDL基金$500M AUM、KKR代币化LP份额）。</p>
+      <p><strong>具体表现</strong>: 报告过度强调ONDO代币交易机会，而低估了机构级RWA产品的实际规模。$500M BUIDL > $15B代币化资产总量的3%，但讨论篇幅不成比例。</p>
+      <div class="tag-row">
+        <span class="bias-tag bias-warning">&#9888; WARNING 中等偏差</span>
+      </div>
+      
+      <h4 style="font-size:0.85rem;font-weight:590;color:var(--text-primary);margin:1rem 0 0.5rem;">信仰者偏差 <span class="zh-inline" style="font-weight:400;color:var(--text-tertiary);">Believer Bias</span></h4>
+      <p><strong>偏差描述</strong>: 选择RWA信仰者作为代理人（Nathan Allman和Carlos Domingo都是RWA坚定支持者），自动排除了"TradFi怀疑者"视角。缺少对"代币化是否真的必要"的深度质疑。</p>
+      <p><strong>具体表现</strong>: 核心问题"如果T+1/T+0结算已经足够好，RWA代币化的增量价值是什么？"几乎没有得到回答。对传统金融清算系统(DTCC, Euroclear, CLS)数十年基础设施投资的评估不足。</p>
+      <div class="tag-row">
+        <span class="bias-tag bias-critical">&#9888; CRITICAL 关键偏差</span>
+      </div>
+      
+      <h4 style="font-size:0.85rem;font-weight:590;color:var(--text-primary);margin:1rem 0 0.5rem;">监管乐观偏差 <span class="zh-inline" style="font-weight:400;color:var(--text-tertiary);">Regulatory Optimism Bias</span></h4>
+      <p><strong>偏差描述</strong>: 对新加坡/香港沙盒的解读过于乐观，暗示"监管创新=全球监管放行"。忽视了监管碎片化的根本问题：跨司法管辖区统一框架可能需要10-20年。</p>
+      <p><strong>具体表现</strong>: "亚洲沙盒领先"的表述可能误导读者认为亚洲RWA已大规模商业化，而实际上新加坡Project Guardian仍在"受监管沙盒"阶段，HK代币化债券仅$100M规模。</p>
+      <div class="tag-row">
+        <span class="bias-tag bias-warning">&#9888; WARNING 中等偏差</span>
+      </div>
+      
+      <h4 style="font-size:0.85rem;font-weight:590;color:var(--text-primary);margin:1rem 0 0.5rem;">技术可行偏差 <span class="zh-inline" style="font-weight:400;color:var(--text-tertiary);">Technical Feasibility Bias</span></h4>
+      <p><strong>偏差描述</strong>: 假设智能合约可以可靠地处理真实资产的法律复杂性，但低估了链下法律框架与链上代码之间的摩擦。真实资产代币化涉及复杂的法律结构（SPV、信托、法律所有权）。</p>
+      <p><strong>具体表现</strong>: 报告提到"即时结算"作为代币化优势，但没有充分讨论真实资产结算的法律确认时间（registrar update, legal title transfer）。</p>
+      <div class="tag-row">
+        <span class="bias-tag bias-warning">&#9888; WARNING 中等偏差</span>
+      </div>
+    </div>
+
+    <!-- §4 与上下游的交叉影响 -->
+    <div class="meta-card" id="crossval">
+      <h3>&sect;4 与上下游的交叉影响 <span class="zh-inline">Cross-node Value Chain Impact</span></h3>
+      <p class="section-intro">RWA代币化与其他区块链价值链节点的价值传导关系</p>
+      
+      <div class="cross-ref">
+        <strong style="color:var(--knowledge);">&#8593; 上游依赖 — Node 5: 稳定币与支付</strong><br>
+        <strong>关系类型</strong>: 稳定币是RWA代币化的"货币基础设施"<br>
+        <strong>传导机制</strong>: 
+        <ul style="margin:0.3rem 0 0.3rem 1rem;font-size:0.8rem;">
+          <li>USDY（Ondo收益稳定币）直接使用稳定币基础设施</li>
+          <li>RWA代币化资产收益通常以稳定币分发</li>
+          <li>OUSG代币化国债持有者可能将其作为DeFi抵押品，需要稳定币借贷市场</li>
+        </ul>
+        <strong>影响方向</strong>: 稳定币规模↑ → RWA代币化可用场景↑
+      </div>
+      
+      <div class="cross-ref">
+        <strong style="color:var(--knowledge);">&#8593; 上游依赖 — Node 3: 中间件与预言机</strong><br>
+        <strong>关系类型</strong>: 预言机是RWA资产验证和价格发现的核心基础设施<br>
+        <strong>传导机制</strong>: 
+        <ul style="margin:0.3rem 0 0.3rem 1rem;font-size:0.8rem;">
+          <li>代币化资产的净值计算需要实时价格喂价</li>
+          <li>私募资产（非公开价格）需要Chainlink等预言机提供估价</li>
+          <li>房地产、艺术品等非标准化资产的估值依赖预言机喂价</li>
+        </ul>
+        <strong>影响方向</strong>: 预言机准确性↑ → 代币化资产类别↑
+      </div>
+      
+      <div class="cross-ref">
+        <strong style="color:var(--knowledge);">&#8595; 下游影响 — Node 7: DeFi应用层</strong><br>
+        <strong>关系类型</strong>: 代币化资产是DeFi的下一阶段"真实收益"来源<br>
+        <strong>传导机制</strong>: 
+        <ul style="margin:0.3rem 0 0.3rem 1rem;font-size:0.8rem;">
+          <li>RWA代币化国债作为DeFi低风险抵押品（OUSG在MakerDAO中已实现）</li>
+          <li>代币化私募信贷为DeFi提供"机构级"收益来源</li>
+          <li>代币化资产的可组合性：7/24交易+DeFi收益聚合</li>
+        </ul>
+        <strong>影响方向</strong>: RWA代币化规模↑ → DeFi真实收益↑ → DeFi TVL潜在增长
+      </div>
+      
+      <div class="cross-ref">
+        <strong style="color:var(--knowledge);">&#8596; 横向协同 — Node 8: 监管与政策</strong><br>
+        <strong>关系类型</strong>: RWA代币化是监管最敏感的价值链节点<br>
+        <strong>传导机制</strong>: 
+        <ul style="margin:0.3rem 0 0.3rem 1rem;font-size:0.8rem;">
+          <li>RWA代币化直接涉及证券法（代币化证券=证券）</li>
+          <li>SEC对代币化证券的定性决定RWA在美国的生死</li>
+          <li>不同司法管辖区(MAS, HKMA, FINMA)的RWA政策差异创造地理套利机会</li>
+        </ul>
+        <strong>影响方向</strong>: 监管明确性↑ → RWA代币化规模↑（双向强化）
+      </div>
+      
+      <div class="tag-row">
+        <span class="bias-tag bias-confirmed">&#10003; 交叉引用完成</span>
+      </div>
+    </div>
+
+    <!-- §5 信息缺口 -->
+    <div class="meta-card" id="gaps">
+      <h3>&sect;5 信息缺口 <span class="zh-inline">Information Gaps</span></h3>
+      <p class="section-intro">研究RWA代币化节点时的关键数据缺口</p>
+      
+      <div class="gap-item">
+        <strong>GAP-1: RWA代币化年度交易量</strong><br>
+        <span class="zh-inline">Annual Trading Volume of Tokenized RWAs</span><br>
+        <strong>缺口描述</strong>: rwa.xyz提供代币化资产"总量"（~$15B），但没有可靠的交易量/换手率数据。无法判断这些资产是"长期持有"还是"活跃交易"。<br>
+        <strong>为什么重要</strong>: 如果$15B主要是长期持有而非交易，代币化的"流动性优势"叙事可能被夸大。<br>
+        <strong>估计难度</strong>: <span style="color:var(--tier-medium);">High</span> — 需要访问ATS交易数据或公司内部数据
+      </div>
+      
+      <div class="gap-item">
+        <strong>GAP-2: SEC代币化证券框架时间表</strong><br>
+        <span class="zh-inline">SEC Tokenized Securities Framework Timeline</span><br>
+        <strong>缺口描述</strong>: 没有任何公开信息表明SEC何时（或是否）会发布明确的代币化证券监管框架。现有项目依赖Reg D/Reg S豁免，属于"灰色地带"运营。<br>
+        <strong>为什么重要</strong>: SEC监管框架是RWA在美国大规模商业化的前提条件，也是全球监管协调的关键变量。<br>
+        <strong>估计难度</strong>: <span style="color:var(--tier-low);">Very High</span> — 政治决策不可预测
+      </div>
+      
+      <div class="gap-item">
+        <strong>GAP-3: 机构采用率数据</strong><br>
+        <span class="zh-inline">Institutional Adoption Rate Data</span><br>
+        <strong>缺口描述</strong>: 没有可靠的"多少机构正在评估/试点/全面采用RWA代币化"的公开数据。BUIDL $500M AUM是公开数据，但"潜在需求池"无法量化。<br>
+        <strong>为什么重要</strong>: 判断RWA代币化是"早期采用"还是"跨越鸿沟"需要采用率数据。<br>
+        <strong>估计难度</strong>: <span style="color:var(--tier-medium);">High</span> — 机构内部决策不公开
+      </div>
+      
+      <div class="gap-item">
+        <strong>GAP-4: 代币化资产与DeFi集成深度</strong><br>
+        <span class="zh-inline">RWA-DeFi Integration Depth</span><br>
+        <strong>缺口描述</strong>: 缺乏关于"多少代币化资产被用作DeFi抵押品"的结构化数据。MakerDAO接受OUSG是已知案例，但其他集成情况不透明。<br>
+        <strong>为什么重要</strong>: 代币化资产作为DeFi抵押品是"链上-链下连通性"的关键指标。<br>
+        <strong>估计难度</strong>: <span style="color:var(--tier-medium);">Medium</span> — 需要链上分析+项目方披露
+      </div>
+      
+      <div class="gap-item">
+        <strong>GAP-5: 跨司法管辖区代币化资产分布</strong><br>
+        <span class="zh-inline">Cross-jurisdiction Distribution of Tokenized Assets</span><br>
+        <strong>缺口描述</strong>: 没有可靠的分类数据说明$15B代币化资产在不同司法管辖区的分布（美国/欧洲/亚洲各占多少）。<br>
+        <strong>为什么重要</strong>: 监管区域分布影响RWA代币化的"地理风险"和"增长潜力"。<br>
+        <strong>估计难度</strong>: <span style="color:var(--tier-high);">Medium-High</span> — 需要多来源交叉验证
+      </div>
+      
+      <div class="gap-item">
+        <strong>GAP-6: 代币化失败案例数据</strong><br>
+        <span class="zh-inline">Tokenization Failure Case Data</span><br>
+        <strong>缺口描述</strong>: 行业内缺乏对"失败/放弃的代币化项目"的系统性记录。存在严重的幸存者偏差——我们只看到成功案例，看不到失败案例。<br>
+        <strong>为什么重要</strong>: 理解为什么某些代币化项目失败可以帮助评估RWA的真实可行性和风险。<br>
+        <strong>估计难度</strong>: <span style="color:var(--tier-low);">Very High</span> — 失败项目通常不公开信息
+      </div>
+      
+      <div class="gap-item">
+        <strong>GAP-7: 代币化 vs 传统金融效率对比数据</strong><br>
+        <span class="zh-inline">Tokenization vs TradFi Efficiency Comparative Data</span><br>
+        <strong>缺口描述</strong>: 没有可靠的"代币化结算 vs T+1/T+0传统结算"的成本/效率对比研究。代币化倡导者声称效率提升，但缺乏实证数据支持。<br>
+        <strong>为什么重要</strong>: 这是RWA代币化核心价值主张的基石，需要量化验证。<br>
+        <strong>估计难度</strong>: <span style="color:var(--tier-medium);">High</span> — 需要行业研究或内部数据
+      </div>
+      
+      <div class="tag-row">
+        <span class="bias-tag bias-critical">&#9888; 7个信息缺口</span>
+      </div>
+    </div>
+
+    <!-- §6 质量评估 -->
+    <div class="meta-card" id="quality">
+      <h3>&sect;6 质量评估 <span class="zh-inline">Quality Assessment</span></h3>
+      <p class="section-intro">RWA代币化节点研究各维度的置信度评估</p>
+      
+      <h4 style="font-size:0.85rem;font-weight:590;color:var(--text-primary);margin:1rem 0 0.5rem;">数据可验证性 <span class="zh-inline" style="font-weight:400;color:var(--text-tertiary);">Data Verifiability</span></h4>
+      <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:0.5rem;">评估信息来源的可靠性和交叉验证程度</p>
+      <div class="confidence-bar">
+        <span class="conf-label">5/10</span>
+        <div class="conf-track"><div class="conf-fill" style="width:50%;background:var(--tier-medium);"></div></div>
+        <span style="font-size:0.72rem;color:var(--tier-medium);">Medium</span>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text-tertiary);">rwa.xyz和公司官方IR提供基础数据，但行业报告质量参差不齐。$15B代币化资产总量缺乏独立审计验证。SEC/Reg D豁免发行不要求公开披露。</p>
+      
+      <h4 style="font-size:0.85rem;font-weight:590;color:var(--text-primary);margin:1rem 0 0.5rem;">市场结构清晰度 <span class="zh-inline" style="font-weight:400;color:var(--text-tertiary);">Market Structure Clarity</span></h4>
+      <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:0.5rem;">竞争格局、价值链环节、关键玩家的清晰程度</p>
+      <div class="confidence-bar">
+        <span class="conf-label">6/10</span>
+        <div class="conf-track"><div class="conf-fill" style="width:60%;background:var(--tier-medium-high);"></div></div>
+        <span style="font-size:0.72rem;color:var(--tier-medium-high);">Medium-High</span>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text-tertiary);">主要玩家(Seccuritize, Ondo, BlackRock)轮廓清晰，但市场结构快速变化。美国 vs 亚洲监管差异创造复杂的竞争环境。New entrants(传统银行)正在加入。</p>
+      
+      <h4 style="font-size:0.85rem;font-weight:590;color:var(--text-primary);margin:1rem 0 0.5rem;">代理选择质量 <span class="zh-inline" style="font-weight:400;color:var(--text-tertiary);">Agent Selection Quality</span></h4>
+      <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:0.5rem;">选择的认知代理人是否具有代表性和可信度</p>
+      <div class="confidence-bar">
+        <span class="conf-label">5/10</span>
+        <div class="conf-track"><div class="conf-fill" style="width:50%;background:var(--tier-medium);"></div></div>
+        <span style="font-size:0.72rem;color:var(--tier-medium);">Medium</span>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text-tertiary);">Allman和Domingo都是RWA领域的关键玩家，但两位都是"信仰者"——缺少怀疑者视角。都是美国背景，亚洲代表性不足。CEO可信度评分3/5存在利益偏差。</p>
+      
+      <h4 style="font-size:0.85rem;font-weight:590;color:var(--text-primary);margin:1rem 0 0.5rem;">预测可靠性 <span class="zh-inline" style="font-weight:400;color:var(--text-tertiary);">Prediction Reliability</span></h4>
+      <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:0.5rem;">市场规模预测和时间表判断的可靠性</p>
+      <div class="confidence-bar">
+        <span class="conf-label">3/10</span>
+        <div class="conf-track"><div class="conf-fill" style="width:30%;background:var(--tier-low);"></div></div>
+        <span style="font-size:0.72rem;color:var(--tier-low);">Low</span>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text-tertiary);">$1T vs $10T by 2030的预测差异暴露了巨大的不确定性。代币化市场规模高度依赖监管时间表——这是最难预测的政治决策。$15B vs $300T渗透率(0.005%)的"巨大空间"论点需要质疑。</p>
+      
+      <h4 style="font-size:0.85rem;font-weight:590;color:var(--text-primary);margin:1rem 0 0.5rem;">交易可操作性 <span class="zh-inline" style="font-weight:400;color:var(--text-tertiary);">Trading Actionability</span></h4>
+      <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:0.5rem;">研究结论对实际交易的指导价值</p>
+      <div class="confidence-bar">
+        <span class="conf-label">4/10</span>
+        <div class="conf-track"><div class="conf-fill" style="width:40%;background:var(--tier-medium);"></div></div>
+        <span style="font-size:0.72rem;color:var(--tier-medium);">Medium-Low</span>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text-tertiary);">ONDO是唯一可交易的RWA标的，但高波动叙事驱动。机构级RWA产品不可交易。RWA叙事适合主题配置而非趋势交易。当前规模($15B)不足以产生持续交易机会。</p>
+      
+      <h4 style="font-size:0.85rem;font-weight:590;color:var(--text-primary);margin:1rem 0 0.5rem;">整体研究质量 <span class="zh-inline" style="font-weight:400;color:var(--text-tertiary);">Overall Research Quality</span></h4>
+      <div class="confidence-bar">
+        <span class="conf-label">5/10</span>
+        <div class="conf-track"><div class="conf-fill" style="width:50%;background:var(--tier-medium);"></div></div>
+        <span style="font-size:0.72rem;color:var(--tier-medium);">Medium</span>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text-tertiary);">RWA是"方向正确但时间表不确定"的叙事。研究覆盖了主要玩家和监管动态，但对怀疑者视角、失败案例、传统金融替代方案的评估不足。适合作为长期主题参考，不适合短期交易依据。</p>
+    </div>
+
+    <!-- §7 决策日志 -->
+    <div class="meta-card" id="log">
+      <h3>&sect;7 决策日志 <span class="zh-inline">Decision Log</span></h3>
+      <p class="section-intro">研究RWA代币化节点时的关键研究决策及理由</p>
+      
+      <div class="decision-log">
+        <strong>DEC-1: 选择Nathan Allman和Carlos Domingo作为认知代理人</strong><br>
+        <strong>日期</strong>: 2026-03-22<br>
+        <strong>决策</strong>: 选择两位RWA领域最具代表性的CEO作为"专家视角"代理人<br>
+        <strong>理由</strong>: Ondo(60%代币化股权份额)和Securitize($4.6B AUM+BlackRock合作)是RWA市场领导者。CEO言论代表公司战略方向。<br>
+        <strong>替代选项</strong>: 可以选择传统金融机构RWA负责人(如BlackRock数字资产主管)或学术研究者<br>
+        <strong>已知偏差</strong>: <span style="color:var(--tier-medium);">两位都是RWA信仰者，存在确认偏差风险</span>
+      </div>
+      
+      <div class="decision-log">
+        <strong>DEC-2: 将RWA代币化作为独立节点而非稳定币子集</strong><br>
+        <strong>日期</strong>: 2026-03-22<br>
+        <strong>决策</strong>: 建立独立的Node 6(RWA代币化)，而非将代币化资产归入Node 5(稳定币)<br>
+        <strong>理由</strong>: 
+        <ul style="margin:0.3rem 0 0.3rem 1rem;font-size:0.78rem;">
+          <li>RWA代币化资产类别远超"货币类"（包含股权、房地产、私募基金等）</li>
+          <li>RWA代币化涉及更复杂的监管框架（证券法 vs 货币转移法）</li>
+          <li>RWA代币化有独立的"发行-托管-交易"价值链</li>
+        </ul>
+        <strong>替代选项</strong>: 将RWA代币化作为Node 5稳定币的"扩展用例"归类<br>
+        <strong>已知风险</strong>: <span style="color:var(--tier-medium);">稳定币（如USDC）实际上是最大的"代币化资产"——本分类可能低估了稳定币的重要性</span>
+      </div>
+      
+      <div class="decision-log">
+        <strong>DEC-3: 主要使用定性分析而非定量模型</strong><br>
+        <strong>日期</strong>: 2026-03-22<br>
+        <strong>决策</strong>: 依赖定性评估（代理言论、监管进展、产品落地）而非量化模型（市场规模预测、收益率计算）<br>
+        <strong>理由</strong>: 
+        <ul style="margin:0.3rem 0 0.3rem 1rem;font-size:0.78rem;">
+          <li>RWA代币化仍处于极早期（$15B vs $300T = 0.005%渗透率），历史数据不足以建立可靠模型</li>
+          <li>监管时间表是最大的不确定性变量，无法量化</li>
+          <li>行业缺乏标准化的数据报告框架</li>
+        </ul>
+        <strong>替代选项</strong>: 建立基于监管采用率假设的蒙特卡洛模拟<br>
+        <strong>已知风险</strong>: <span style="color:var(--tier-low);">定性分析更容易受认知偏差影响，且难以被他人复现验证</span>
+      </div>
+      
+      <div class="decision-log">
+        <strong>DEC-4: 强调亚洲监管沙盒但归类为"次要信息"</strong><br>
+        <strong>日期</strong>: 2026-03-22<br>
+        <strong>决策</strong>: 将新加坡Project Guardian和香港Project Ensemble作为"背景信息"而非"核心发现"呈现<br>
+        <strong>理由</strong>: 
+        <ul style="margin:0.3rem 0 0.3rem 1rem;font-size:0.78rem;">
+          <li>亚洲沙盒规模极小（HK代币化债券仅$100M）vs 商业化仍有距离</li>
+          <li>主要可交易标的(ONDO)来自美国公司</li>
+          <li>英文信息来源中亚洲RWA信息披露不完整</li>
+        </ul>
+        <strong>替代选项</strong>: 将亚洲RWA作为独立章节深度覆盖<br>
+        <strong>已知偏差</strong>: <span style="color:var(--tier-medium);">英文媒体偏向导致亚洲RWA信息系统性低估</span>
+      </div>
+      
+      <div class="decision-log">
+        <strong>DEC-5: 将ONDO代币列为"唯一可交易RWA标的"并给出"叙事驱动"定性</strong><br>
+        <strong>日期</strong>: 2026-03-22<br>
+        <strong>决策</strong>: 明确指出ONDO是散户唯一可接触RWA叙事的方式，但警告其高波动性<br>
+        <strong>理由</strong>: 
+        <ul style="margin:0.3rem 0 0.3rem 1rem;font-size:0.78rem;">
+          <li>机构级RWA产品（OUSG/USDY/BUIDL）有投资门槛（$100K+）和赎回限制</li>
+          <li>ONDO代币提供散户对RWA叙事的敞口</li>
+          <li>代币价格高度依赖叙事而非基本面（公司收入/利润不可公开获取）</li>
+        </ul>
+        <strong>替代选项</strong>: 排除交易建议，仅提供宏观RWA分析<br>
+        <strong>已知风险</strong>: <span style="color:var(--tier-medium);">ONDO代币 ≠ RWA代币化市场规模。代币市值受加密市场整体情绪影响极大。</span>
+      </div>
+      
+      <div class="tag-row">
+        <span class="bias-tag bias-confirmed">&#10003; 5个关键决策已记录</span>
+      </div>
+    </div>
+
+    <footer style="margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border-subtle);font-size:0.72rem;color:var(--text-quaternary);">
+      <p>Metacognition report &middot; Node 6: RWA代币化 &middot; <a href="../blockchain_hub.html">Blockchain Hub</a> &middot; 2026-03-22</p>
+    </footer>
+  </main>
+</div>
+<script>
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+})();
+</script>
+</body>
+</html>

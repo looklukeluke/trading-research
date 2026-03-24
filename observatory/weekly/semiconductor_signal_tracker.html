@@ -1,0 +1,2415 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>半导体产业信号追踪器 — Semiconductor Signal Tracker</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="../../research/semiconductor_shared.css">
+  <style>
+/* === Embedded mode: when inside Dashboard iframe === */
+body.embedded .sidebar { display: none; }
+body.embedded .notes-sidebar { display: none; }
+body.embedded .main-content { max-width: none !important; width: 100%; padding: 1.5rem 1.5rem 3rem; }
+body.embedded .hamburger-btn { display: none; }
+
+/* === Signal Cards (Latest Signals panel) === */
+.signal-panel { border: 1px solid var(--border-default); border-radius: var(--radius-md); margin-bottom: 2rem; overflow: hidden; }
+.signal-panel-header { background: var(--bg-overlay); padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; }
+.signal-panel-title { font-size: 0.85rem; font-weight: 590; color: var(--accent); }
+.signal-panel-date { font-size: 0.68rem; color: var(--text-quaternary); }
+.signal-card { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-subtle); display: grid; grid-template-columns: 4px 1fr auto; gap: 0.75rem; align-items: start; }
+.signal-card:last-child { border-bottom: none; }
+.signal-dot { width: 4px; border-radius: 2px; min-height: 3rem; margin-top: 0.2rem; }
+.signal-dot.bull { background: var(--tier-high); }
+.signal-dot.bear { background: var(--tier-low); }
+.signal-dot.watch { background: var(--tier-medium); }
+.signal-data { font-size: 0.88rem; font-weight: 590; color: var(--text-primary); margin-bottom: 0.25rem; }
+.signal-impact { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; }
+.signal-action { font-size: 0.78rem; color: var(--accent); font-weight: 510; margin-top: 0.35rem; }
+.signal-action a { color: var(--accent); }
+.signal-meta { font-size: 0.65rem; color: var(--text-quaternary); text-align: right; white-space: nowrap; }
+
+/* === Node Variable Cards === */
+.node-card { border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem; margin: 1rem 0; background: var(--bg-elevated); border-left: 3px solid var(--accent); }
+.node-card h3 { margin-top: 0; font-size: 1rem; font-weight: 590; color: var(--accent); }
+.node-core { font-size: 0.88rem; font-weight: 590; color: var(--text-primary); margin-bottom: 0.5rem; }
+
+/* === Tier Cards (Portfolio) === */
+.tier-card { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 1rem 1.25rem; margin: 0.75rem 0; background: var(--bg-surface); }
+.tier-1 { border-left: 3px solid var(--tier-high); }
+.tier-2 { border-left: 3px solid var(--tier-medium); }
+.tier-3 { border-left: 3px solid var(--tier-low); }
+
+/* === Action badges in tables === */
+.action-badge { display: inline-block; font-size: 0.68rem; padding: 0.1rem 0.4rem; border-radius: 3px; font-weight: 510; }
+.action-hold { background: rgba(76,175,80,0.12); color: var(--tier-high); }
+.action-reduce { background: rgba(255,193,7,0.12); color: var(--tier-medium); }
+.action-avoid { background: rgba(244,67,54,0.12); color: var(--tier-low); }
+.action-add { background: rgba(91,155,213,0.12); color: var(--knowledge); }
+
+/* === Ticker links === */
+.ticker { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 510; color: var(--text-tertiary); }
+.ticker a { color: var(--accent); text-decoration: none; }
+.ticker a:hover { text-decoration: underline; }
+
+/* === Role Badge === */
+.role-badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; background: rgba(76,175,80,0.12); color: var(--tier-high); }
+
+/* === Signal Badges === */
+.signal { display: inline-block; font-size: 0.68rem; padding: 0.1rem 0.4rem; border-radius: 3px; font-weight: 590; margin-right: 0.3rem; }
+.signal-bull { background: rgba(76,175,80,0.15); color: var(--tier-high); }
+.signal-bear { background: rgba(244,67,54,0.15); color: var(--tier-low); }
+.signal-watch { background: rgba(255,193,7,0.15); color: var(--tier-medium); }
+
+/* === Confidence colors === */
+.conf-high { color: var(--tier-high); font-weight: 590; }
+.conf-mid { color: var(--tier-medium); font-weight: 590; }
+.conf-low { color: var(--tier-low); font-weight: 590; }
+
+/* === Arc items === */
+.arc-item { margin-bottom: 1rem; padding: 0.8rem; border-left: 3px solid var(--accent); background: rgba(66, 165, 245, 0.03); border-radius: 0 6px 6px 0; }
+.arc-item strong { color: var(--accent); }
+.arc-item.bull { border-left-color: var(--tier-high); background: rgba(76,175,80,0.03); }
+.arc-item.bull strong { color: var(--tier-high); }
+.arc-item.bear { border-left-color: var(--tier-low); background: rgba(244,67,54,0.03); }
+.arc-item.bear strong { color: var(--tier-low); }
+.arc-item.watch { border-left-color: var(--tier-medium); background: rgba(255,193,7,0.03); }
+.arc-item.watch strong { color: var(--tier-medium); }
+
+/* === OBS-VIZ Chart Frame === */
+.obs-chart-frame { background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); overflow: hidden; margin: 1.5rem 0; }
+.obs-chart-frame-header { padding: 0.6rem 1rem; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; }
+.obs-chart-frame-title { font-size: 0.9rem; font-weight: 590; color: var(--accent); }
+.obs-chart-frame-badge { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.1rem 0.45rem; border-radius: 3px; background: var(--accent-dim); color: var(--accent); }
+.obs-chart-frame-body { padding: 0; }
+.obs-chart-annotation { padding: 0.6rem 1rem; background: var(--bg-surface); border-top: 1px solid var(--border-subtle); font-size: 0.78rem; color: var(--text-secondary); line-height: 1.55; }
+.obs-chart-annotation strong { color: var(--accent); }
+
+/* === Decision Matrix === */
+.decision-matrix { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.78rem; }
+.decision-matrix th { background: var(--bg-surface); color: var(--text-quaternary); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--border-default); text-align: left; }
+.decision-matrix td { padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--border-subtle); color: var(--text-secondary); vertical-align: top; }
+.decision-matrix .ticker-col { font-family: var(--font-mono); font-size: 0.72rem; color: var(--accent); white-space: nowrap; }
+.decision-matrix .if-true { color: var(--tier-high); }
+.decision-matrix .if-false { color: var(--tier-low); }
+
+/* === Data Context Annotation === */
+.data-ctx { display: inline-block; font-size: 0.68rem; color: var(--text-quaternary); background: var(--bg-surface); padding: 0.1rem 0.4rem; border-radius: 3px; border-left: 2px solid var(--knowledge); margin-left: 0.3rem; line-height: 1.4; }
+
+/* === Scenario Tree === */
+.scenario-tree { padding: 1.25rem; }
+.scenario-tree svg text { font-family: 'Inter', sans-serif; }
+
+/* === Knowledge note — inherit from shared.css, only override nref to match V4 === */
+.nref { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 50%; font-size: 0.48rem; font-weight: 700; cursor: pointer; margin-left: 1px; vertical-align: super; transition: transform 0.15s; text-decoration: none; background: var(--knowledge); color: white; }
+.nref:hover { transform: scale(1.25); box-shadow: 0 0 6px rgba(91,155,213,0.4); }
+
+/* === Industry Framework === */
+.framework-box { border: 1px solid rgba(91,155,213,0.3); border-left: 3px solid var(--knowledge); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin-bottom: 2rem; background: rgba(91,155,213,0.03); }
+.framework-box h3 { color: var(--knowledge); margin-top: 0; font-size: 1rem; }
+.framework-layer { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid var(--border-subtle); }
+.framework-layer:last-child { border-bottom: none; }
+.framework-layer-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex-shrink: 0; }
+.framework-layer-text { font-size: 0.85rem; color: var(--text-secondary); }
+.framework-layer-text strong { color: var(--text-primary); }
+.framework-layer-text .zh { font-size: 0.78rem; }
+
+/* === Signal Pyramid === */
+.signal-pyramid { display: flex; flex-direction: column; align-items: center; gap: 0; margin: 1.5rem 0; }
+.pyramid-level { text-align: center; padding: 0.6rem 0; border-radius: 4px; font-size: 0.78rem; font-weight: 590; color: var(--text-primary); }
+.pyramid-l1 { width: 40%; background: rgba(244,67,54,0.2); border: 1px solid var(--tier-low); }
+.pyramid-l2 { width: 60%; background: rgba(255,193,7,0.15); border: 1px solid var(--tier-medium); border-top: none; }
+.pyramid-l3 { width: 80%; background: rgba(76,175,80,0.1); border: 1px solid var(--tier-high); border-top: none; }
+.pyramid-label { font-size: 0.65rem; color: var(--text-quaternary); margin-top: 0.15rem; }
+
+/* === Node Label === */
+.node-label { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.04em; margin-bottom: 0.5rem; background: var(--accent-dim); color: var(--accent); }
+
+/* === Question Box === */
+.question-box { border: 2px solid var(--knowledge); border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; background: rgba(91, 155, 213, 0.05); }
+.question-box h4 { color: var(--knowledge); margin-top: 0; }
+
+/* === Agent Briefing Cards (§IX) === */
+.agent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 0.75rem; margin: 1rem 0; }
+.ab-card { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.75rem 1rem; background: var(--bg-surface); display: grid; grid-template-columns: 4px 1fr auto; gap: 0.6rem; align-items: start; }
+.ab-card.demand-side { border-color: rgba(91,155,213,0.4); background: rgba(91,155,213,0.03); }
+.ab-name { font-size: 0.82rem; font-weight: 590; color: var(--text-primary); }
+.ab-co { font-size: 0.68rem; color: var(--text-tertiary); margin-left: 0.3rem; }
+.ab-stance { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.45; margin-top: 0.15rem; }
+.ab-action { font-size: 0.7rem; color: var(--text-tertiary); margin-top: 0.1rem; }
+.ab-action strong { color: var(--accent); font-weight: 510; }
+.ab-warn { font-size: 0.65rem; color: var(--tier-low); margin-top: 0.1rem; }
+.ab-cred { display: inline-block; font-size: 0.58rem; font-weight: 700; padding: 0.08rem 0.35rem; border-radius: 3px; margin-left: 0.25rem; vertical-align: middle; }
+.cred-t1 { background: rgba(76,175,80,0.12); color: var(--tier-high); }
+.cred-t2 { background: rgba(255,193,7,0.12); color: var(--tier-medium); }
+.cred-t3 { background: rgba(248,168,72,0.12); color: var(--accent); }
+.cred-t4 { background: rgba(98,102,109,0.12); color: var(--text-quaternary); }
+.stance-summary { display: flex; gap: 1.25rem; padding: 0.65rem 1rem; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: var(--radius-sm); margin-bottom: 1.25rem; font-size: 0.82rem; flex-wrap: wrap; align-items: center; }
+.stance-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 0.2rem; vertical-align: middle; }
+/* === Prediction Dashboard (§X) === */
+.pred-quarter-header { font-size: 0.82rem; font-weight: 590; color: var(--accent); padding: 0.45rem 0.85rem; background: var(--bg-overlay); border-radius: var(--radius-sm) var(--radius-sm) 0 0; border: 1px solid var(--border-subtle); border-bottom: none; margin-top: 1.5rem; }
+.pred-status { display: inline-block; font-size: 0.6rem; padding: 0.08rem 0.35rem; border-radius: 3px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; }
+.pred-pending { background: rgba(255,193,7,0.12); color: var(--tier-medium); }
+.pred-verified { background: rgba(76,175,80,0.12); color: var(--tier-high); }
+.pred-failed { background: rgba(244,67,54,0.12); color: var(--tier-low); }
+.pred-critical td { background: rgba(248,168,72,0.04); border-left: 2px solid var(--accent); }
+.lb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.6rem; margin: 1rem 0; }
+.lb-card { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.6rem; background: var(--bg-surface); text-align: center; }
+.lb-name { font-size: 0.72rem; font-weight: 590; color: var(--text-primary); }
+.lb-score { font-size: 1.25rem; font-weight: 700; color: var(--text-quaternary); margin: 0.2rem 0; }
+.lb-detail { font-size: 0.6rem; color: var(--text-quaternary); }
+
+/* Reading Mode */
+#readingModeBtn { position: fixed; top: 1rem; right: 1rem; z-index: 9999; width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--border-default, #34343a); background: var(--bg-surface, #141516); color: var(--text-secondary, #d0d6e0); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.7; transition: opacity 0.2s; }
+#readingModeBtn:hover { opacity: 1; }
+.reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+.reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+.reading-mode .hamburger-btn { display: none !important; }
+.reading-mode .sidebar-overlay { display: none !important; }
+  </style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes sidebar">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ═══════════ LEFT SIDEBAR ═══════════ -->
+  <aside class="sidebar" id="sidebar">
+    <a class="back-link" href="2026-W12-v3.html">&#8592; W12 Synthesis</a>
+    <h4>信号追踪 Signal Tracker</h4>
+    <nav><ul>
+      <li><a href="#latest-signals"><span class="toc-num">&#9733;</span>实时信号<br><span class="zh-inline">Latest Signals</span></a></li>
+      <li><a href="#baseline"><span class="toc-num">&#9733;</span>基线判断<br><span class="zh-inline">Baseline Probabilities</span></a></li>
+      <li><a href="#monthly"><span class="toc-num">I</span>月度追踪<br><span class="zh-inline">Monthly Signals</span></a></li>
+      <li><a href="#quarterly"><span class="toc-num">II</span>季度追踪<br><span class="zh-inline">Quarterly Signals</span></a></li>
+      <li><a href="#annual"><span class="toc-num">III</span>年度追踪<br><span class="zh-inline">Annual Signals</span></a></li>
+      <li><a href="#milestones"><span class="toc-num">IV</span>2026里程碑<br><span class="zh-inline">Key Milestones</span></a></li>
+      <li><a href="#nodes"><span class="toc-num">V</span>八节点变量<br><span class="zh-inline">Node Variables</span></a></li>
+      <li><a href="#signal-tiers"><span class="toc-num">VI</span>信号分级<br><span class="zh-inline">Signal Tiers</span></a></li>
+      <li><a href="#china-semi" style="color:var(--tier-low);"><span class="toc-num">VII</span>中国生态<br><span class="zh-inline">China Semiconductor</span></a></li>
+      <li><a href="#tracking"><span class="toc-num">VIII</span>追踪清单<br><span class="zh-inline">Tracking List</span></a></li>
+      <li><a href="#agent-briefing" style="color:var(--knowledge);"><span class="toc-num">IX</span>代理人简报<br><span class="zh-inline">Agent Briefing ★</span></a></li>
+      <li><a href="#predictions" style="color:var(--knowledge);"><span class="toc-num">X</span>预测验证<br><span class="zh-inline">Prediction Dashboard ★</span></a></li>
+      <li><a href="#portfolio"><span class="toc-num">XI</span>投资组合<br><span class="zh-inline">Portfolio Framework</span></a></li>
+    </ul></nav>
+    <h4>链接 Links</h4>
+    <nav><ul>
+      <li><a href="/research/semiconductor_hub.html">&#8594; Semiconductor Hub</a></li>
+      <li><a href="2026-W12-v3.html">&#8594; W12 Synthesis</a></li>
+      <li><a href="/">&#8594; Trading Dashboard</a></li>
+    </ul></nav>
+  </aside>
+
+  <!-- ═══════════ MAIN CONTENT ═══════════ -->
+  <main class="main-content">
+
+    <!-- PAGE HEADER -->
+    <header class="page-header">
+      <div class="role-badge">SIGNAL TRACKER</div>
+      <h1>半导体产业信号追踪器<span class="zh">Semiconductor Industry Signal Tracker</span></h1>
+      <p class="subtitle">从认知积累到前瞻追踪 &mdash; 什么值得追踪、如何追踪、如何调整判断和投资 &nbsp;|&nbsp; 2026-03-21</p>
+      <div class="badge-row">
+        <span class="badge">8节点</span>
+        <span class="badge">20代理人</span>
+        <span class="badge">4层频率</span>
+        <span class="badge">3级信号</span>
+        <span class="badge">实时更新</span>
+      </div>
+    </header>
+
+    <div class="top-controls">
+      <span class="tc-label">&#129504; 注解控制</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+
+    <!-- ══════════ ★ LATEST SIGNALS ══════════ -->
+    <div class="section-header" id="latest-signals">
+      <h2>&sect;&#9733; 实时信号面板<span class="zh">Latest Signals Panel</span></h2>
+    </div>
+
+    <div class="signal-panel">
+      <div class="signal-panel-header">
+        <span class="signal-panel-title">&#128225; Latest Signals &mdash; 实时追踪</span>
+        <span class="signal-panel-date">Last updated: 2026-03-21</span>
+      </div>
+
+      <!-- Signal 1: TSMC -->
+      <div class="signal-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div class="signal-data">TSMC 2月营收 NT$286.1B (+39.3% YoY) <small class="data-ctx">2024年2月 NT$205.5B → 2025年 NT$286.1B。连续6月YoY&gt;30%是2020年以来最长增速周期</small></div>
+          <div class="signal-impact">先进制程持续强劲，AI芯片出货量验证。N3/N5收入占比约70%，CoWoS利用率>90%。连续第6个月超30% YoY增长 &mdash; 需求加速而非减速。</div>
+          <div class="signal-action">&#8594; 维持TSM/NVDA多头立场 &nbsp;|&nbsp; <span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">TSM</a>, <a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">NVDA</a></span></div>
+        </div>
+        <div class="signal-meta">TSMC IR<br>2026-03-10</div>
+      </div>
+
+      <!-- Signal 2: DRAM -->
+      <div class="signal-card">
+        <div class="signal-dot watch"></div>
+        <div>
+          <div class="signal-data">DRAM合约价 Q1&rarr;Q2 预计+3-5% (增速放缓 from +15%)</div>
+          <div class="signal-impact">HBM仍涨但传统DRAM增速减缓，关注Q3转向。HBM4价格坚挺但DDR5合约议价能力减弱 &mdash; 周期分化信号。</div>
+          <div class="signal-action">&#8594; MU持有但设置-10%止损线 &nbsp;|&nbsp; <span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">MU</a></span></div>
+        </div>
+        <div class="signal-meta">TrendForce<br>2026-03-15</div>
+      </div>
+
+      <!-- Signal 3: China Export -->
+      <div class="signal-card">
+        <div class="signal-dot bear"></div>
+        <div>
+          <div class="signal-data">中国出口管制升级 &mdash; H20受限、3家新增实体清单 (3/18)</div>
+          <div class="signal-impact">NVDA中国数据中心收入短期承压，但替代需求可能转向。H20是NVDA对华合规产品，受限意味着中国市场几乎完全关闭。短期$2-3B年化收入风险。</div>
+          <div class="signal-action">&#8594; NVDA短期回避新建仓，等Q1 FY27财报确认影响 &nbsp;|&nbsp; <span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">NVDA</a></span></div>
+        </div>
+        <div class="signal-meta">BIS/Reuters<br>2026-03-18</div>
+      </div>
+
+      <!-- Signal 4: GTC -->
+      <div class="signal-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div class="signal-data">NVIDIA GTC 2026 &mdash; $1T订单可见性确认 + Vera Rubin NVL144 <small class="data-ctx">$1T = LOI(意向书)非合同。科技行业LOI转化率40-60%，实际可能$500-600B</small></div>
+          <div class="signal-impact">年度cadence持续，系统级交付能力验证。NVL144 = 144 GPU per rack，单机架训练能力再翻倍。GB300的Feynman继任路线图清晰。</div>
+          <div class="signal-action">&#8594; 如果NVDA月线回踩$110-120支撑，考虑建仓 &nbsp;|&nbsp; <span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">NVDA</a></span></div>
+        </div>
+        <div class="signal-meta">GTC Keynote<br>2026-03-16</div>
+      </div>
+
+      <!-- Signal 5: AMD -->
+      <div class="signal-card">
+        <div class="signal-dot watch"></div>
+        <div>
+          <div class="signal-data">AMD Q4指引保守 &mdash; 股价暴跌17%，MI400 Q3待验证</div>
+          <div class="signal-impact">CUDA护城河暂时巩固，但MI400是下一个催化剂。数据中心GPU份额仍~5%，ROCm 7.x覆盖率提升但ecosystem stickiness不足。</div>
+          <div class="signal-action">&#8594; AMD等MI400出货确认后再评估 &nbsp;|&nbsp; <span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">AMD</a></span></div>
+        </div>
+        <div class="signal-meta">AMD IR<br>2026-02-04</div>
+      </div>
+    </div>
+
+
+    <!-- ══════════ INDUSTRY FRAMEWORK ══════════ -->
+    <div class="framework-box" id="framework-intro">
+      <h3>📐 半导体投资框架入门 Semiconductor Investment Framework <span class="zh">(互联网人视角 — for software/internet professionals)</span></h3>
+      <p style="font-size:0.82rem;color:var(--text-tertiary);margin-bottom:1rem;">理解半导体供应链的4层结构，是读懂本页所有信号的前提。<span class="zh">Understanding the 4-layer supply chain is prerequisite to reading all signals on this page.</span></p>
+
+      <div class="framework-layer">
+        <div class="framework-layer-num" style="background:rgba(255,193,7,0.15);color:var(--tier-medium);">1</div>
+        <div class="framework-layer-text">
+          <strong>设备层 Equipment</strong> — ASML, AMAT — 给工厂造机器 = "卖铲子的人"
+          <span class="zh">They make the machines that make the chips. Like selling shovels in a gold rush. ASML is the ONLY EUV lithography supplier on Earth.</span>
+        </div>
+      </div>
+      <div class="framework-layer">
+        <div class="framework-layer-num" style="background:rgba(76,175,80,0.15);color:var(--tier-high);">2</div>
+        <div class="framework-layer-text">
+          <strong>制造层 Foundry</strong> — TSMC (垄断) — 按设计图造芯片 = "工厂"
+          <span class="zh">TSMC manufactures chips for EVERYONE (NVIDIA, AMD, Apple, Google). They are the only factory capable of making cutting-edge (&lt;5nm) chips. This is why "TSMC always wins" regardless of who designs the chip.</span>
+        </div>
+      </div>
+      <div class="framework-layer">
+        <div class="framework-layer-num" style="background:rgba(248,168,72,0.15);color:var(--accent);">3</div>
+        <div class="framework-layer-text">
+          <strong>设计层 Design</strong> — NVDA, AMD, AVGO — 画设计图 = "建筑师"
+          <span class="zh">They design chips but don't make them. NVIDIA designs GPUs, AMD designs competing GPUs, Broadcom designs custom ASICs for Google/Amazon. The "CUDA moat" debate is about whether NVIDIA's software lock-in protects their design dominance.</span>
+        </div>
+      </div>
+      <div class="framework-layer">
+        <div class="framework-layer-num" style="background:rgba(244,67,54,0.15);color:var(--tier-low);">4</div>
+        <div class="framework-layer-text">
+          <strong>需求层 Demand</strong> — MSFT, GOOG, META, AMZN — 买芯片用 = "业主"
+          <span class="zh">They BUY chips and deploy AI. Their CapEx decisions ($602B in 2026) drive the entire chain. If they stop spending, everything collapses. <strong style="color:var(--tier-low);">This layer has 0% coverage in our research — the biggest blind spot.</strong></span>
+        </div>
+      </div>
+
+      <blockquote style="margin-top:1rem;">
+        <strong>核心投资逻辑 Core Logic:</strong> 不管谁的设计赢（NVIDIA还是AMD还是Google自研），都需要TSMC制造 + ASML的机器。这就是Tier 1 "基础设施永远赢" 的核心理由。
+        <span class="zh">Regardless of who wins the design war, TSMC manufactures ALL of them, and ASML provides ALL the machines. This is why Tier 1 = "infrastructure always wins."</span>
+      </blockquote>
+    </div>
+
+    <!-- ══════════ ★ BASELINE PROBABILITIES ══════════ -->
+    <div class="section-header" id="baseline">
+      <h2>&sect;&#9733; 基线判断概率表<span class="zh">Baseline Probability Table</span></h2>
+    </div>
+
+    <div class="priority-box">
+      <h2 style="margin-top:0;">&#127919; 7个基线判断 &mdash; 来自7节点报告交叉验证</h2>
+      <p>每个概率基于多代理人共识度和硬数据支撑。概率是活的工具，不是一次性判断。</p>
+      <figure>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Claim 判断</th>
+              <th>Cross-validation 交叉验证</th>
+              <th style="text-align:center;">Confidence 置信度</th>
+              <th>Last Adjusted 上次调整</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1</strong></td>
+              <td><strong>AI计算需求真实且持续增长</strong></td>
+              <td>三代理人共识 + CapEx真金白银$602B<small class="data-ctx">2023年$200B→2026年$602B，3年翻3倍</small> + TSMC月度验证</td>
+              <td style="text-align:center;"><span class="conf-high">95%</span></td>
+              <td>2026-03-16 (GTC)</td>
+            </tr>
+            <tr>
+              <td><strong>2</strong></td>
+              <td><strong>NVIDIA 2-3年维持主导</strong></td>
+              <td>CUDA生态 + 年度cadence + $1T订单 + NVL144系统级交付</td>
+              <td style="text-align:center;"><span class="conf-high">70%</span></td>
+              <td>2026-03-16 (GTC)</td>
+            </tr>
+            <tr>
+              <td><strong>3</strong></td>
+              <td><strong>CUDA护城河5年+</strong></td>
+              <td>OpenAI/Google/Meta建逃生通道 + Groq $20B + torch.compile()解耦</td>
+              <td style="text-align:center;"><span class="conf-low">35%</span></td>
+              <td>2026-03-19 (Node 1)</td>
+            </tr>
+            <tr>
+              <td><strong>4</strong></td>
+              <td><strong>GPU毛利率压缩到55-65%</strong></td>
+              <td>AMD竞争 + ASIC替代 + OpenAI折扣 + AVGO 44.6%增速</td>
+              <td style="text-align:center;"><span class="conf-mid">75%</span></td>
+              <td>2026-03-19 (Node 5)</td>
+            </tr>
+            <tr>
+              <td><strong>5</strong></td>
+              <td><strong>HBM supercycle到2027</strong></td>
+              <td>三家产能预售 + DRAM +170% + HBM4验证中</td>
+              <td style="text-align:center;"><span class="conf-high">80%</span></td>
+              <td>2026-03-15 (TrendForce)</td>
+            </tr>
+            <tr>
+              <td><strong>6</strong></td>
+              <td><strong>AI CapEx泡沫</strong></td>
+              <td>Hyperscaler举债$1,080B + P/S接近2000年 + 收入转化待验证</td>
+              <td style="text-align:center;"><span class="conf-low">15-20%</span> <span class="signal signal-bear">CATASTROPHIC</span> <sup><a href="#prob-reconcile" style="color:var(--knowledge);font-size:0.65rem;text-decoration:none;">†见场景树</a></sup></td>
+              <td>2026-02-04 (AMD Q4)</td>
+            </tr>
+            <tr>
+              <td><strong>7</strong></td>
+              <td><strong>中国半导体自给率2027达50%</strong><mark class="hl-know" data-note="k13">大基金</mark></td>
+              <td>SMIC 7nm有限量产(Mate 70验证) + 但EUV=0、良率不透明、人才缺口2-2.5万<small class="data-ctx">当前自给率~30%(IC Insights)，政府目标70%但无独立验证</small></td>
+              <td style="text-align:center;"><span class="conf-low">25-35%</span> <span class="signal signal-watch">WATCH</span></td>
+              <td>2026-03-21 (新增)</td>
+            </tr>
+          </tbody>
+        </table>
+      </figure>
+      <blockquote>概率每季度review，Level 1信号出现时立即调整&plusmn;10-20%。每个里程碑事件发生后回到此表更新相关概率。</blockquote>
+    </div>
+
+    <!-- OBS-VIZ: Confidence Bar Chart -->
+    <div class="obs-chart-frame">
+      <div class="obs-chart-frame-header">
+        <span class="obs-chart-frame-title">Baseline Confidence Spectrum 基线置信度谱</span>
+        <span class="obs-chart-frame-badge">INTERACTIVE</span>
+      </div>
+      <div class="obs-chart-frame-body">
+        <div id="chart-confidence" style="height:300px;"></div>
+      </div>
+      <div class="obs-chart-annotation">
+        <strong>How to read 看法:</strong> 每根条 = 一个核心判断。悬停查看：<strong>If True → 投资行动</strong> 和 <strong>If False → 风险应对</strong>。条越长=越确信。绿=看涨共识，红=风险/看空，橙=观察中。<br><strong>注：</strong>"AI CapEx泡沫"显示17.5%为基线范围15-20%的区间中点。
+      </div>
+    </div>
+
+    <!-- Decision Matrix: So What -->
+    <details open style="border-color:rgba(248,168,72,0.3);background:var(--bg-surface);">
+      <summary><strong>📊 Decision Matrix 决策矩阵 — 每个判断意味着什么？</strong></summary>
+      <figure style="margin-top:0.5rem;">
+        <table class="decision-matrix">
+          <thead>
+            <tr><th>Claim 判断</th><th>If True → 行动</th><th>If False → 行动</th><th>Tickers</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>AI需求真实 95%</strong></td>
+              <td class="if-true">继续持有全板块。CapEx验证需求，增速>30%是安全线</td>
+              <td class="if-false">全板块减仓50%+。意味着2000年电信泡沫重演</td>
+              <td class="ticker-col">TSM NVDA AVGO MU</td>
+            </tr>
+            <tr>
+              <td><strong>NVDA主导 70%</strong></td>
+              <td class="if-true">NVDA仍是核心持仓，PE 25x有支撑</td>
+              <td class="if-false">AMD/AVGO受益于份额转移。NVDA从垄断→竞争市场</td>
+              <td class="ticker-col">NVDA AMD AVGO</td>
+            </tr>
+            <tr>
+              <td><strong>CUDA 5年+ 35%</strong><br><small class="data-ctx">2023年~80% → 2026年35%，2年内腰斩</small></td>
+              <td class="if-true">NVDA长期垄断，高PE长期有效</td>
+              <td class="if-false">GPU变成commodity，毛利降到50%以下。AMD/AVGO/自研芯片瓜分市场</td>
+              <td class="ticker-col">NVDA AMD AVGO ARM</td>
+            </tr>
+            <tr>
+              <td><strong>毛利压缩到55-65% 75%</strong><br><small class="data-ctx">当前73%，Intel~45%, AMD~50%。降到55%=利润减少25%</small></td>
+              <td class="if-true">NVDA利润下降但仍盈利。估值从"奢侈品"变"正常芯片公司"</td>
+              <td class="if-false">NVDA维持70%+毛利=垄断定价权未被侵蚀。极度bullish</td>
+              <td class="ticker-col">NVDA</td>
+            </tr>
+            <tr>
+              <td><strong>HBM到2027 80%</strong><br><small class="data-ctx">上轮DRAM supercycle(2017加密矿机)持续18个月后暴跌60%。当前已24个月</small></td>
+              <td class="if-true">MU/SK Hynix继续受益。HBM4验证是下一个催化剂</td>
+              <td class="if-false">DRAM连跌3月→存储股暴跌。MU止损执行</td>
+              <td class="ticker-col">MU 000660.KS</td>
+            </tr>
+            <tr>
+              <td><strong>泡沫 15-20%</strong><br><small class="data-ctx">2000年电信泡沫：CapEx也3年翻3倍。当前$602B vs 2023年$200B = 同样3倍</small></td>
+              <td class="if-true">需求悬崖。清仓Tier 2/3，只保留AVGO/ASML（基础设施永远赢）</td>
+              <td class="if-false">安全继续投资。$602B CapEx转化为真实收入</td>
+              <td class="ticker-col">ALL SEMI</td>
+            </tr>
+          </tbody>
+        </table>
+      </figure>
+    </details>
+
+    <!-- AI CapEx Scenario Tree -->
+    <div class="obs-chart-frame">
+      <div class="obs-chart-frame-header">
+        <span class="obs-chart-frame-title">AI CapEx Scenario Tree AI投入场景分叉</span>
+        <span class="obs-chart-frame-badge">CONCEPT</span>
+      </div>
+      <div class="obs-chart-frame-body scenario-tree">
+        <svg viewBox="0 0 880 340" xmlns="http://www.w3.org/2000/svg">
+          <!-- Root -->
+          <rect x="10" y="140" width="150" height="50" rx="8" fill="#141516" stroke="#f8a848" stroke-width="2"/>
+          <text x="85" y="160" fill="#f8a848" font-size="11" font-weight="680" text-anchor="middle">$602B AI CapEx</text>
+          <text x="85" y="177" fill="#8a8f98" font-size="9" text-anchor="middle">(2026年)</text>
+
+          <!-- Branch 1: Real demand 85% -->
+          <line x1="160" y1="155" x2="210" y2="90" stroke="#4caf50" stroke-width="2"/>
+          <rect x="210" y="65" width="140" height="50" rx="6" fill="#141516" stroke="#4caf50" stroke-width="1.5"/>
+          <text x="280" y="83" fill="#4caf50" font-size="10" font-weight="590" text-anchor="middle">85% 需求真实</text>
+          <text x="280" y="100" fill="#8a8f98" font-size="8" text-anchor="middle">Real demand → 持续投资</text>
+
+          <!-- Sub-branch 1a: ROI positive 70% -->
+          <line x1="350" y1="80" x2="400" y2="35" stroke="#4caf50" stroke-width="1.5"/>
+          <rect x="400" y="10" width="160" height="50" rx="6" fill="#141516" stroke="#4caf50" stroke-width="1"/>
+          <text x="480" y="28" fill="#4caf50" font-size="9" font-weight="590" text-anchor="middle">70% ROI正向</text>
+          <text x="480" y="42" fill="#8a8f98" font-size="8" text-anchor="middle">Copilot/Claude Enterprise盈利</text>
+          <line x1="560" y1="35" x2="600" y2="35" stroke="#4caf50" stroke-width="1" marker-end="url(#arrowG)"/>
+          <rect x="600" y="12" width="180" height="45" rx="6" fill="rgba(76,175,80,0.08)" stroke="#4caf50" stroke-width="1"/>
+          <text x="690" y="30" fill="#4caf50" font-size="9" font-weight="590" text-anchor="middle">健康增长 Healthy Growth</text>
+          <text x="690" y="45" fill="#4caf50" font-size="8" text-anchor="middle">TSM AVGO ASML 长期持有</text>
+
+          <!-- Sub-branch 1b: ROI disappointing 30% -->
+          <line x1="350" y1="95" x2="400" y2="120" stroke="#ffc107" stroke-width="1.5"/>
+          <rect x="400" y="70" width="160" height="50" rx="6" fill="#141516" stroke="#ffc107" stroke-width="1"/>
+          <text x="480" y="88" fill="#ffc107" font-size="9" font-weight="590" text-anchor="middle">30% ROI不达预期</text>
+          <text x="480" y="102" fill="#8a8f98" font-size="8" text-anchor="middle">AI应用变现慢</text>
+
+          <!-- Sub-sub 1b-i: Cash reserves -->
+          <line x1="560" y1="90" x2="600" y2="80" stroke="#ffc107" stroke-width="1"/>
+          <rect x="600" y="60" width="180" height="40" rx="5" fill="#141516" stroke="#ffc107" stroke-width="1"/>
+          <text x="690" y="77" fill="#ffc107" font-size="8" font-weight="590" text-anchor="middle">大公司有现金(MSFT $75B+)</text>
+          <text x="690" y="92" fill="#8a8f98" font-size="7" text-anchor="middle">缩减CapEx但不崩 → NVDA PE下修20%</text>
+
+          <!-- Sub-sub 1b-ii: Tight cash -->
+          <line x1="560" y1="105" x2="600" y2="120" stroke="#f44336" stroke-width="1"/>
+          <rect x="600" y="105" width="180" height="45" rx="5" fill="rgba(244,67,54,0.05)" stroke="#f44336" stroke-width="1"/>
+          <text x="690" y="120" fill="#f44336" font-size="8" font-weight="590" text-anchor="middle">资金链紧张</text>
+          <text x="690" y="133" fill="#f44336" font-size="7" text-anchor="middle">裁员+削减AI → 2028衰退风险</text>
+          <text x="690" y="145" fill="#62666d" font-size="7" text-anchor="middle">全板块Bear，只留AVGO/ASML</text>
+
+          <!-- Branch 2: Bubble 15% -->
+          <line x1="160" y1="175" x2="210" y2="230" stroke="#f44336" stroke-width="2"/>
+          <rect x="210" y="205" width="140" height="50" rx="6" fill="#141516" stroke="#f44336" stroke-width="1.5"/>
+          <text x="280" y="225" fill="#f44336" font-size="10" font-weight="590" text-anchor="middle">15% 泡沫</text>
+          <text x="280" y="240" fill="#8a8f98" font-size="8" text-anchor="middle">Bubble → CapEx悬崖</text>
+
+          <line x1="350" y1="230" x2="400" y2="230" stroke="#f44336" stroke-width="1.5"/>
+          <rect x="400" y="205" width="160" height="50" rx="6" fill="#141516" stroke="#f44336" stroke-width="1"/>
+          <text x="480" y="223" fill="#f44336" font-size="9" font-weight="590" text-anchor="middle">2+家Hyperscaler</text>
+          <text x="480" y="238" fill="#f44336" font-size="8" text-anchor="middle">削减CapEx >20%</text>
+
+          <line x1="560" y1="230" x2="600" y2="230" stroke="#f44336" stroke-width="1" marker-end="url(#arrowR)"/>
+          <rect x="600" y="208" width="180" height="45" rx="6" fill="rgba(244,67,54,0.08)" stroke="#f44336" stroke-width="1.5"/>
+          <text x="690" y="226" fill="#f44336" font-size="9" font-weight="700" text-anchor="middle">需求悬崖 Demand Cliff</text>
+          <text x="690" y="241" fill="#f44336" font-size="8" text-anchor="middle">清仓，只保留AVGO/ASML</text>
+
+          <!-- 2028 question -->
+          <rect x="210" y="275" width="570" height="45" rx="8" fill="rgba(91,155,213,0.05)" stroke="#5b9bd5" stroke-width="1" stroke-dasharray="6"/>
+          <text x="495" y="293" fill="#5b9bd5" font-size="10" font-weight="590" text-anchor="middle">2028 AI末日会实现吗？ Will 2028 AI Apocalypse happen?</text>
+          <text x="495" y="310" fill="#8a8f98" font-size="8" text-anchor="middle">关键监测指标: Copilot企业采用率 + AI应用收入/CapEx比率(当前~5%，需>15%证明健康) + Hyperscaler CapEx指引</text>
+
+          <defs>
+            <marker id="arrowG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#4caf50"/></marker>
+            <marker id="arrowR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#f44336"/></marker>
+          </defs>
+        </svg>
+      </div>
+      <div class="obs-chart-annotation" id="prob-reconcile">
+        <strong>Key Insight:</strong> $602B CapEx不是"是否泡沫"的二元问题。85%概率需求真实，但真实需求≠持续增长。关键分叉在ROI验证——如果AI应用收入/CapEx比率在2027年底仍低于15%，即使需求真实，资金链也可能紧张。<br>
+        <strong>†概率层次说明 Probability Layers:</strong> 基线表"泡沫"15-20% = 泡沫<em>存在</em>的概率（CapEx过度投入）。但泡沫存在 ≠ 灾难性崩盘。从场景树路径：15%泡沫入口 &times; ~40%现金紧张条件概率 &asymp; <strong>5-8%</strong>到达"2028 AI末日"终点。两个数字不矛盾——15-20%是入口概率，5-8%是最坏路径的联合概率。
+      </div>
+    </div>
+
+
+    <!-- ══════════ I MONTHLY SIGNALS ══════════ -->
+    <div class="section-header" id="monthly">
+      <h2>&sect;I 月度追踪信号<span class="zh">Monthly Signals</span></h2>
+    </div>
+
+    <p>四个月度信号覆盖：出货量（TSMC）、定价（DRAM）、竞争（GPU ASP）、政策（出口管制）。这是最快的预警层。</p>
+
+    <figure>
+      <table>
+        <thead>
+          <tr>
+            <th>Signal 信号</th>
+            <th>Source 来源</th>
+            <th>Frequency 频率</th>
+            <th>Judgment Impact 判断影响</th>
+            <th>Action 投资动作</th>
+            <th>Tickers 关联品种</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>TSMC月度营收</strong></td>
+            <td>TSMC IR（每月10日）</td>
+            <td><span class="signal signal-bull">MONTHLY</span></td>
+            <td>连续3月增速放缓 &rarr; CapEx拐点预警</td>
+            <td><span class="action-badge action-hold">HOLD</span> YoY&gt;30%维持多头；&lt;20% &rarr; 减仓预警 <small class="data-ctx">阈值：YoY&gt;30%=安全, 20-30%=观察, &lt;20%=预警。当前39.3%</small></td>
+            <td><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">TSM</a>, <a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">NVDA</a></span></td>
+          </tr>
+          <tr>
+            <td><strong>DRAM合约价</strong></td>
+            <td>TrendForce / DRAMeXchange</td>
+            <td><span class="signal signal-bull">MONTHLY</span></td>
+            <td>合约价转跌 &rarr; 存储周期拐点</td>
+            <td><span class="action-badge action-hold">HOLD</span> 涨价持续 &rarr; MU持有；连跌3月 &rarr; 止损</td>
+            <td><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">MU</a>, 000660.KS</span></td>
+          </tr>
+          <tr>
+            <td><strong>GPU/AI芯片ASP</strong></td>
+            <td>Mercury Research</td>
+            <td><span class="signal signal-watch">MONTHLY/Q</span></td>
+            <td>ASP跌>10% &rarr; CUDA护城河侵蚀</td>
+            <td><span class="action-badge action-reduce">WATCH</span> ASP稳定 &rarr; NVDA安全；下跌 &rarr; 毛利率压缩确认</td>
+            <td><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">NVDA</a>, <a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">AMD</a></span></td>
+          </tr>
+          <tr>
+            <td><strong>中国出口管制</strong></td>
+            <td>BIS / 商务部</td>
+            <td><span class="signal signal-bear">AD-HOC</span></td>
+            <td>每次新规 = NVDA中国收入重估</td>
+            <td><span class="action-badge action-avoid">AVOID</span> 新规出台48h内不建仓NVDA</td>
+            <td><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">NVDA</a></span></td>
+          </tr>
+          <tr>
+            <td><strong>SMIC季度营收</strong></td>
+            <td>SMIC IR</td>
+            <td><span class="signal signal-watch">QUARTERLY</span></td>
+            <td>营收增速>20% + 产能利用率>80% = 国产替代加速</td>
+            <td><span class="action-badge action-reduce">WATCH</span> SMIC增速持续 &rarr; ASML中国收入下调预期</td>
+            <td><span class="ticker">0981.HK</span></td>
+          </tr>
+          <tr>
+            <td><strong>华为Ascend出货</strong></td>
+            <td>TrendForce / 供应链</td>
+            <td><span class="signal signal-watch">QUARTERLY</span></td>
+            <td>Ascend 910C年出货>50万颗 = 中国AI芯片脱钩信号</td>
+            <td><span class="action-badge action-reduce">WATCH</span> 出货放量 &rarr; NVDA中国份额永久性流失确认</td>
+            <td><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">NVDA</a></span></td>
+          </tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <details>
+      <summary><strong>如何读TSMC月度数据 <span class="zh-inline">How to Read TSMC Monthly</span></strong></summary>
+      <p><strong>关注YoY增速而非绝对值。</strong>AI占TSMC收入约50%，当总营收YoY增速从40%降到20%以下，说明AI芯片出货增速在减速。注意：季节性因素（Q1通常最弱）需要用同比而非环比消除。</p>
+      <p>数据来源：<a href="https://investor.tsmc.com" target="_blank">investor.tsmc.com</a> &mdash; Monthly Revenue页面，每月10日更新。</p>
+    </details>
+
+
+    <!-- ══════════ II QUARTERLY SIGNALS ══════════ -->
+    <div class="section-header" id="quarterly">
+      <h2>&sect;II 季度追踪信号<span class="zh">Quarterly Signals</span></h2>
+    </div>
+
+    <p>七个季度信号覆盖整条供应链：设计（NVDA/AMD） &rarr; 代工（TSMC） &rarr; 设备（ASML） &rarr; 存储（Hynix/Micron） &rarr; 基础设施（AVGO） &rarr; 买家（Hyperscalers）。每个财报季是一次"全链条体检"。</p>
+
+    <figure>
+      <table>
+        <thead>
+          <tr>
+            <th>Signal 信号</th>
+            <th>Source 来源</th>
+            <th>When 时间</th>
+            <th>Judgment Impact 判断影响</th>
+            <th>Action 投资动作</th>
+            <th>Tickers 关联品种</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>NVIDIA财报</strong></td>
+            <td>NVDA IR</td>
+            <td>2/5/8/11月</td>
+            <td><span class="signal signal-bull">CORE</span> $1T订单验证 &mdash; 数据中心收入增速、指引、毛利率</td>
+            <td><span class="action-badge action-hold">HOLD</span> Beat &rarr; 维持；Miss>10% = L1信号</td>
+            <td><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">NVDA</a></span></td>
+          </tr>
+          <tr>
+            <td><strong>AMD财报</strong></td>
+            <td>AMD IR</td>
+            <td>Quarterly</td>
+            <td><span class="signal signal-watch">WATCH</span> MI400出货 = CUDA侵蚀直接测量</td>
+            <td><span class="action-badge action-add">EVAL</span> 数据中心GPU份额>10% &rarr; 评估建仓</td>
+            <td><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">AMD</a></span></td>
+          </tr>
+          <tr>
+            <td><strong>Broadcom财报</strong></td>
+            <td>AVGO IR</td>
+            <td>Quarterly</td>
+            <td><span class="signal signal-watch">WATCH</span> ASIC设计服务收入 = 自研趋势代理</td>
+            <td><span class="action-badge action-hold">HOLD</span> AI收入增速>40% &rarr; Tier 1确认</td>
+            <td><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">AVGO</a></span></td>
+          </tr>
+          <tr>
+            <td><strong>Hyperscaler CapEx</strong></td>
+            <td>MSFT/GOOGL/META/AMZN</td>
+            <td>Quarterly</td>
+            <td><span class="signal signal-bear">KEY</span> $602B是否持续？连续两季下调 = 泡沫预警</td>
+            <td><span class="action-badge action-avoid">ALERT</span> 两家削减>20% &rarr; 全板块减仓</td>
+            <td><span class="ticker">MSFT, GOOGL, META, AMZN</span></td>
+          </tr>
+          <tr>
+            <td><strong>ASML订单额</strong></td>
+            <td>ASML IR</td>
+            <td>Quarterly</td>
+            <td><span class="signal signal-bull">LEAD</span> 2-3年后产能领先指标</td>
+            <td><span class="action-badge action-hold">HOLD</span> Backlog>&#8364;35B &rarr; 安全</td>
+            <td><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">ASML</a></span></td>
+          </tr>
+          <tr>
+            <td><strong>SK Hynix / Micron</strong></td>
+            <td>各IR</td>
+            <td>Quarterly</td>
+            <td><span class="signal signal-bull">HBM</span> HBM出货量+价格+产能利用率</td>
+            <td><span class="action-badge action-hold">HOLD</span> HBM价格坚挺 &rarr; MU持有</td>
+            <td><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">MU</a>, 000660.KS</span></td>
+          </tr>
+          <tr>
+            <td><strong>TSMC季报</strong></td>
+            <td>TSM IR</td>
+            <td>Quarterly</td>
+            <td><span class="signal signal-bull">CORE</span> CoWoS利用率+先进制程占比</td>
+            <td><span class="action-badge action-hold">HOLD</span> 利用率>90% = 供不应求信号</td>
+            <td><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">TSM</a></span></td>
+          </tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <details>
+      <summary><strong>季报阅读优先级 <span class="zh-inline">Earnings Reading Priority</span></strong></summary>
+      <ol>
+        <li><strong>NVIDIA</strong>（核心验证） &rarr; 先看指引和毛利率，再看数据中心收入拆分</li>
+        <li><strong>Hyperscaler CapEx</strong>（需求验证） &rarr; 只看CapEx数字和management commentary on AI spend</li>
+        <li><strong>TSMC</strong>（供应验证） &rarr; CoWoS利用率和先进制程revenue mix</li>
+        <li><strong>AMD / AVGO</strong>（竞争验证） &rarr; MI系列出货和ASIC AI收入</li>
+        <li><strong>ASML / Memory</strong>（长期验证） &rarr; 订单趋势和HBM pricing</li>
+      </ol>
+    </details>
+
+
+    <!-- ══════════ III ANNUAL SIGNALS ══════════ -->
+    <div class="section-header" id="annual">
+      <h2>&sect;III 年度追踪信号<span class="zh">Annual / Semi-annual Signals</span></h2>
+    </div>
+
+    <p>结构性信号变化缓慢但影响深远。每6-12个月做一次深度评估。关注"方向变化"而非"绝对值"。</p>
+
+    <figure>
+      <table>
+        <thead>
+          <tr>
+            <th>Signal 信号</th>
+            <th>Source 来源</th>
+            <th>When 时间</th>
+            <th>Judgment Impact 判断影响</th>
+            <th>Action 投资动作</th>
+            <th>Tickers 关联品种</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>NVIDIA GTC</strong></td>
+            <td>GTC Keynote</td>
+            <td>每年3月</td>
+            <td>架构路线图 &mdash; 年度cadence验证、性能跃升幅度</td>
+            <td><span class="action-badge action-hold">HOLD</span> Cadence验证 &rarr; 维持多头</td>
+            <td><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">NVDA</a></span></td>
+          </tr>
+          <tr>
+            <td><strong>AMD Analyst Day</strong></td>
+            <td>AMD IR</td>
+            <td>每年11月</td>
+            <td>MI路线图 &mdash; ROCm进展、客户traction、性能gap</td>
+            <td><span class="action-badge action-add">EVAL</span> MI500路线图清晰 &rarr; 升级评估</td>
+            <td><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">AMD</a></span></td>
+          </tr>
+          <tr>
+            <td><strong>RISC-V全球份额</strong></td>
+            <td>年度评估</td>
+            <td>年度</td>
+            <td>数据中心penetration突破5% = ARM替代预警</td>
+            <td><span class="action-badge action-reduce">WATCH</span> >5% &rarr; ARM PE重估</td>
+            <td><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">ARM</a></span></td>
+          </tr>
+          <tr>
+            <td><strong>Intel Foundry客户</strong></td>
+            <td>Intel IR</td>
+            <td>半年度</td>
+            <td>18A客户签约数量 &mdash; 影响TSMC垄断判断</td>
+            <td><span class="action-badge action-add">EVAL</span> Tier 1客户 &rarr; TSM溢价下调</td>
+            <td><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">TSM</a>, INTC</span></td>
+          </tr>
+          <tr>
+            <td><strong>台湾地缘评估</strong></td>
+            <td>综合评估</td>
+            <td>年度 + Ad-hoc</td>
+            <td>军事演习频率、制裁升级、TSMC海外扩产进度</td>
+            <td><span class="action-badge action-avoid">ALERT</span> 超过演习级别 &rarr; 半导体清仓</td>
+            <td><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">TSM</a>, ALL SEMI</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <details>
+      <summary><strong>结构性信号评估方法 <span class="zh-inline">Structural Signal Method</span></strong></summary>
+      <p>结构性信号不看"绝对值"而看"方向变化"。例如：RISC-V在数据中心从0.5%到1%不重要，但从1%到5%的加速曲线很重要 &mdash; 这意味着ARM的PE倍数基础在动摇。</p>
+      <p>每6个月对6个基线判断做一次全面交叉验证，用最新的结构性信号更新概率。</p>
+    </details>
+
+
+    <!-- ══════════ IV 2026 MILESTONES ══════════ -->
+    <div class="section-header" id="milestones">
+      <h2>&sect;IV 2026关键里程碑日历<span class="zh">Key Milestones Calendar</span></h2>
+    </div>
+
+    <p>9个关键事件，每个都有Bull/Bear两面。这些是"判断节点" &mdash; 每个事件发生后，至少一个基线概率需要更新。</p>
+
+    <figure>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Event</th>
+            <th>Bull Case</th>
+            <th>Bear Case</th>
+            <th>Action if Bull</th>
+            <th>Action if Bear</th>
+            <th>Tickers</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>2026年5月</strong></td>
+            <td>NVIDIA Q1 FY27财报<br><span style="font-size:0.72rem;color:var(--text-quaternary);">$78B指引</span></td>
+            <td><span class="signal signal-bull">BULL</span> Beat &rarr; $1T叙事站住</td>
+            <td><span class="signal signal-bear">BEAR</span> Miss>10% &rarr; 增长叙事动摇</td>
+            <td><span class="action-badge action-hold">HOLD</span> 维持Tier 1-2仓位</td>
+            <td><span class="action-badge action-avoid">REDUCE</span> Tier 2-3减仓</td>
+            <td><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">NVDA</a>, TSM, AVGO</span></td>
+          </tr>
+          <tr>
+            <td><strong>2026 Q3</strong></td>
+            <td>AMD MI400出货</td>
+            <td><span class="signal signal-bull">BULL</span> 按时+性能达标 &rarr; CUDA侵蚀加速</td>
+            <td><span class="signal signal-bear">BEAR</span> 延迟/不达标 &rarr; NVDA垄断巩固</td>
+            <td><span class="action-badge action-add">ADD</span> AMD建仓评估</td>
+            <td><span class="action-badge action-hold">HOLD</span> NVDA多头确认</td>
+            <td><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">AMD</a>, <a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">NVDA</a></span></td>
+          </tr>
+          <tr>
+            <td><strong>2026 Q3</strong></td>
+            <td>Vera Rubin大规模出货</td>
+            <td><span class="signal signal-bull">BULL</span> 按时 &rarr; 年度cadence验证</td>
+            <td><span class="signal signal-bear">BEAR</span> 延迟 &rarr; 竞争追赶窗口</td>
+            <td><span class="action-badge action-hold">HOLD</span> NVDA维持</td>
+            <td><span class="action-badge action-reduce">WATCH</span> 关注AMD/AVGO</td>
+            <td><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">NVDA</a>, TSM</span></td>
+          </tr>
+          <tr>
+            <td><strong>2026 H2</strong></td>
+            <td>OpenAI自研芯片进展</td>
+            <td><span class="signal signal-bull">BULL</span> 失败/延迟 &rarr; NVDA锁定</td>
+            <td><span class="signal signal-bear">BEAR</span> 成功流片 &rarr; 客户叛逃</td>
+            <td><span class="action-badge action-hold">HOLD</span> NVDA安全</td>
+            <td><span class="action-badge action-add">ADD</span> AVGO受益评估</td>
+            <td><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">NVDA</a>, <a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">AVGO</a></span></td>
+          </tr>
+          <tr>
+            <td><strong>2026 H2</strong></td>
+            <td>Samsung HBM4量产验证</td>
+            <td><span class="signal signal-bull">BULL</span> 良率达标 &rarr; 供应充足</td>
+            <td><span class="signal signal-bear">BEAR</span> 良率低迷 &rarr; SK/MU独大</td>
+            <td><span class="action-badge action-hold">HOLD</span> HBM supercycle确认</td>
+            <td><span class="action-badge action-hold">HOLD</span> MU受益集中</td>
+            <td><span class="ticker">005930.KS, 000660.KS, <a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">MU</a></span></td>
+          </tr>
+          <tr>
+            <td><strong>2026 Q4</strong></td>
+            <td>Micron Idaho新厂投产</td>
+            <td><span class="signal signal-bull">BULL</span> 按时 &rarr; 美国本土HBM</td>
+            <td><span class="signal signal-bear">BEAR</span> 延迟 &rarr; 产能集中亚洲</td>
+            <td><span class="action-badge action-add">ADD</span> MU地缘溢价</td>
+            <td><span class="action-badge action-reduce">WATCH</span> 地缘风险不变</td>
+            <td><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">MU</a></span></td>
+          </tr>
+          <tr>
+            <td><strong>2027</strong></td>
+            <td>$1T订单终极验证</td>
+            <td><span class="signal signal-bull">BULL</span> 交付达标 &rarr; re-rate</td>
+            <td><span class="signal signal-bear">BEAR</span> LOI转化低 &rarr; 估值下修</td>
+            <td><span class="action-badge action-add">ADD</span> NVDA加仓</td>
+            <td><span class="action-badge action-avoid">SELL</span> NVDA出清</td>
+            <td><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">NVDA</a></span></td>
+          </tr>
+          <tr>
+            <td><strong>2027 H2</strong></td>
+            <td>HBM产能集中上线</td>
+            <td><span class="signal signal-bull">BULL</span> 需求吸收 &rarr; 延续2028+</td>
+            <td><span class="signal signal-bear">BEAR</span> 供过于求 &rarr; 价格暴跌</td>
+            <td><span class="action-badge action-hold">HOLD</span> 存储股维持</td>
+            <td><span class="action-badge action-avoid">SELL</span> 存储股减仓</td>
+            <td><span class="ticker">000660.KS, <a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">MU</a>, 005930.KS</span></td>
+          </tr>
+          <tr>
+            <td><strong>2028</strong></td>
+            <td>Feynman架构（NVDA下下代）</td>
+            <td><span class="signal signal-bull">BULL</span> 如期 &rarr; cadence持续</td>
+            <td><span class="signal signal-bear">BEAR</span> 性能放缓 &rarr; 追平窗口</td>
+            <td><span class="action-badge action-hold">HOLD</span> 长期持有确认</td>
+            <td><span class="action-badge action-reduce">WATCH</span> 竞争加剧评估</td>
+            <td><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">NVDA</a>, AMD, AVGO</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <details>
+      <summary><strong>里程碑使用方法 <span class="zh-inline">How to Use Milestones</span></strong></summary>
+      <p>每个里程碑事件发生后，回到<a href="#baseline">基线判断表</a>更新相关概率。例如：NVIDIA Q1 beat>$78B &rarr; "需求真实" 95%&rarr;97%，"$1T可信"(衍生指标) 60%&rarr;70%。Miss>10% &rarr; "$1T可信"(衍生指标) 60%&rarr;40%。</p>
+      <p>不要等所有里程碑都过了再做判断。<strong>每个里程碑都是一次增量更新机会。</strong></p>
+    </details>
+
+    <!-- Milestone Ticker Impact Matrix -->
+    <details open style="border-color:rgba(248,168,72,0.3);background:var(--bg-surface);">
+      <summary><strong>📈 Milestone → Ticker Impact 里程碑→个股影响矩阵</strong></summary>
+      <figure style="margin-top:0.5rem;">
+        <table class="decision-matrix">
+          <thead>
+            <tr><th>Event 事件</th><th>Bull → 谁涨</th><th>Bear → 谁跌</th><th>对冲 Hedge</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>NVDA Q1 FY27</strong><br>(2026.5)</td>
+              <td class="if-true">Beat $78B → NVDA +10-15%<br>TSM AVGO 联动上涨</td>
+              <td class="if-false">Miss >10% → NVDA -15-20%<br>全板块下跌5-10%</td>
+              <td>AVGO/ASML相对抗跌<br>("不选边"标的)</td>
+            </tr>
+            <tr>
+              <td><strong>AMD MI400出货</strong><br>(2026 Q3)</td>
+              <td class="if-true">性能达标 → AMD +20-30%<br>NVDA毛利率预期下调</td>
+              <td class="if-false">延迟/不达标 → AMD -10%<br>NVDA垄断确认 +5%</td>
+              <td>TSM不受影响<br>(两家都用TSM造)</td>
+            </tr>
+            <tr>
+              <td><strong>OpenAI自研芯片</strong><br>(2026 H2)</td>
+              <td class="if-true">失败 → NVDA客户锁定<br>自研不可行叙事强化</td>
+              <td class="if-false">成功流片 → AVGO受益(ASIC设计)<br>NVDA -5-8%(客户逃离信号)</td>
+              <td>TSM永远受益<br>(自研也要TSM造)</td>
+            </tr>
+            <tr>
+              <td><strong>$1T验证</strong><br>(2027)</td>
+              <td class="if-true">交付达标 → NVDA re-rate<br>估值从P/E 25x → 30x</td>
+              <td class="if-false">LOI转化率低 → NVDA -20-30%<br>所有GPU相关股下跌</td>
+              <td>ASML订单已锁定<br>不受短期需求波动影响</td>
+            </tr>
+            <tr>
+              <td><strong>HBM产能上线</strong><br>(2027 H2)</td>
+              <td class="if-true">需求吸收 → MU +15%<br>supercycle延续</td>
+              <td class="if-false">供过于求 → MU -25-30%<br>DRAM价格暴跌</td>
+              <td>AVGO/ASML不受<br>存储周期影响</td>
+            </tr>
+          </tbody>
+        </table>
+      </figure>
+    </details>
+
+
+    <!-- ══════════ V NODE VARIABLES ══════════ -->
+    <div class="section-header" id="nodes">
+      <h2>&sect;V 八节点追踪变量<span class="zh">Node Variables</span></h2>
+    </div>
+
+    <p>8个节点（含中国生态+AI Lab需求侧），每个都有独立的追踪框架。每个节点的"最可能改变判断的事件"是需要Level 1反应的触发器。</p>
+
+    <!-- Node 1: GPU/AI -->
+    <div class="node-card">
+      <span class="node-label">NODE 1</span>
+      <h3>GPU/AI芯片设计 &mdash; CUDA护城河侵蚀速度<span class="zh">GPU/AI Chip Design &mdash; CUDA Moat Erosion Rate</span></h3>
+      <p class="node-core">核心追踪：CUDA生态的不可替代性正在以什么速度衰减？这决定NVDA是"长期垄断"还是"周期性龙头"。</p>
+      <h4>量化指标 <span class="zh-inline">Quantitative Metrics</span></h4>
+      <ul>
+        <li><strong>AMD数据中心GPU份额</strong> &mdash; Mercury Research季度数据。当前~5%，突破10% = 侵蚀加速</li>
+        <li><strong>ROCm/Triton覆盖率</strong> &mdash; 主流ML框架（PyTorch/JAX）对非NVIDIA硬件的支持百分比</li>
+        <li><strong>NVDA毛利率</strong> &mdash; 当前73%。每跌1% = ~$1B年利润。55-65%是压缩目标区</li>
+      </ul>
+      <h4>定性信号 <span class="zh-inline">Qualitative Signals</span></h4>
+      <ul>
+        <li>Hyperscaler公开评价AMD MI400的production-readiness</li>
+        <li>Jensen言行一致性 &mdash; 嘴上说"自研不合理"同时收购Groq是Level 2信号</li>
+        <li>前沿AI公司（OpenAI/Anthropic/Google）公开的硬件选择声明</li>
+      </ul>
+      <h4>关键来源 <span class="zh-inline">Key Sources</span></h4>
+      <ul>
+        <li>NVIDIA GTC（3月）/ AMD Analyst Day（11月）/ Hot Chips（8月）</li>
+        <li>SemiAnalysis (Dylan Patel) &mdash; GPU benchmarks和架构分析</li>
+      </ul>
+      <h4>情景动作 <span class="zh-inline">Scenario Actions</span></h4>
+      <p><span class="signal signal-bear">GAME-CHANGER</span> <strong>AMD MI400+ROCm 8.0通过3家+验证</strong> &rarr; CUDA 70%&rarr;50%。<span class="action-badge action-add">ACTION</span> 评估AMD建仓 + NVDA设止损</p>
+      <p><span class="signal signal-bear">GAME-CHANGER</span> <strong>OpenAI自研芯片替代30%+</strong> &rarr; CUDA 5年 35%&rarr;15%。<span class="action-badge action-avoid">ACTION</span> NVDA减仓 + AVGO加仓</p>
+    </div>
+
+    <!-- Node 2: Lithography -->
+    <div class="node-card">
+      <span class="node-label">NODE 2</span>
+      <h3>光刻设备 &mdash; EUV需求饱和判断<span class="zh">Lithography Equipment &mdash; EUV Demand Saturation</span></h3>
+      <p class="node-core">核心追踪：ASML的EUV垄断是否会因为需求饱和或High-NA延迟而松动？</p>
+      <h4>量化指标 <span class="zh-inline">Quantitative Metrics</span></h4>
+      <ul>
+        <li><strong>ASML季度订单额</strong> &mdash; 当前backlog ~&#8364;40B。连续两季下降 = 需求饱和预警</li>
+        <li><strong>High-NA EUV采用率</strong> &mdash; 首批客户（TSMC/Intel/Samsung）的产能爬坡速度</li>
+        <li><strong>中国SMEE DUV进展</strong> &mdash; 28nm自产进度，影响ASML中国营收（~15%）</li>
+      </ul>
+      <h4>定性信号 <span class="zh-inline">Qualitative Signals</span></h4>
+      <ul>
+        <li>TSMC/Samsung对High-NA adoption的timeline commentary</li>
+        <li>任何non-EUV先进制程突破（如multi-patterning进展）</li>
+      </ul>
+      <h4>情景动作 <span class="zh-inline">Scenario Actions</span></h4>
+      <p><span class="signal signal-bear">GAME-CHANGER</span> <strong>High-NA良率问题导致2nm延迟6月+</strong> &rarr; ASML短期承压。<span class="action-badge action-reduce">ACTION</span> ASML设止损但不清仓（垄断不变）</p>
+      <p><span class="signal signal-watch">GAME-CHANGER</span> <strong>SMEE 14nm DUV突破</strong> &rarr; 中国营收风险。<span class="action-badge action-reduce">ACTION</span> 关注ASML中国收入占比变化</p>
+    </div>
+
+    <!-- Node 3: Foundry -->
+    <div class="node-card">
+      <span class="node-label">NODE 3</span>
+      <h3>晶圆代工 &mdash; TSMC垄断+地缘风险<span class="zh">Foundry Manufacturing &mdash; TSMC Monopoly + Geopolitical Risk</span></h3>
+      <p class="node-core">核心追踪：TSMC在先进制程的垄断地位是否可持续？地缘风险有多大？</p>
+      <h4>量化指标 <span class="zh-inline">Quantitative Metrics</span></h4>
+      <ul>
+        <li><strong>先进制程收入占比</strong> &mdash; 3nm/5nm占总收入比。当前~70%，持续上升 = 垄断加深</li>
+        <li><strong>CoWoS封装产能利用率</strong> &mdash; AI芯片当前瓶颈。利用率>90% = 供不应求</li>
+        <li><strong>Arizona工厂产量</strong> &mdash; 美国本土产能进度，影响地缘风险评估</li>
+      </ul>
+      <h4>情景动作 <span class="zh-inline">Scenario Actions</span></h4>
+      <p><span class="signal signal-bear">GAME-CHANGER</span> <strong>台海军事紧张升级</strong> &rarr; 全板块尾部风险。<span class="action-badge action-avoid">ACTION</span> 半导体全面清仓评估</p>
+      <p><span class="signal signal-watch">GAME-CHANGER</span> <strong>Intel 18A获得Tier 1客户</strong> &rarr; 垄断松动。<span class="action-badge action-reduce">ACTION</span> TSM溢价下调5-10%</p>
+    </div>
+
+    <!-- Node 4: HBM -->
+    <div class="node-card">
+      <span class="node-label">NODE 4</span>
+      <h3>高带宽存储 &mdash; HBM Supercycle拐点<span class="zh">Memory / HBM &mdash; Supercycle Inflection Point</span></h3>
+      <p class="node-core">核心追踪：HBM supercycle能持续到什么时候？拐点信号是什么？</p>
+      <h4>量化指标 <span class="zh-inline">Quantitative Metrics</span></h4>
+      <ul>
+        <li><strong>DRAM合约价月度变化</strong> &mdash; TrendForce数据。连跌3月 = 周期拐点</li>
+        <li><strong>HBM库存天数</strong> &mdash; SK Hynix/Micron报告。库存上升 = 供需翻转</li>
+        <li><strong>三家CapEx总额</strong> &mdash; SK Hynix+Micron+Samsung。增速放缓 = 投资周期见顶</li>
+      </ul>
+      <h4>情景动作 <span class="zh-inline">Scenario Actions</span></h4>
+      <p><span class="signal signal-bear">GAME-CHANGER</span> <strong>DRAM合约价连续3月下跌>10%</strong> &rarr; HBM 80%&rarr;55%。<span class="action-badge action-avoid">ACTION</span> MU执行止损</p>
+      <p><span class="signal signal-bear">GAME-CHANGER</span> <strong>两家存储厂同时下调CapEx</strong> &rarr; 存储周期确认见顶。<span class="action-badge action-avoid">ACTION</span> 存储板块减仓</p>
+    </div>
+
+    <!-- Node 5: Custom Silicon -->
+    <div class="node-card">
+      <span class="node-label">NODE 5</span>
+      <h3>自研芯片/ASIC &mdash; Broadcom ASIC增速<span class="zh">Custom Silicon / ASIC &mdash; Broadcom Growth Rate</span></h3>
+      <p class="node-core">核心追踪：自研芯片趋势对NVIDIA GPU的替代速度。Broadcom是最佳代理指标。</p>
+      <h4>量化指标 <span class="zh-inline">Quantitative Metrics</span></h4>
+      <ul>
+        <li><strong>AVGO AI相关收入</strong> &mdash; 季度数据。增速>40% = 自研加速（当前44.6%）</li>
+        <li><strong>Google TPU / AWS Trainium出货</strong> &mdash; 云厂自用芯片的规模化进度</li>
+        <li><strong>Meta TeraFab进展</strong> &mdash; 自研MTIA芯片工厂是最大的自研赌注</li>
+      </ul>
+      <h4>情景动作 <span class="zh-inline">Scenario Actions</span></h4>
+      <p><span class="signal signal-bear">GAME-CHANGER</span> <strong>3家+自研占AI compute>30%</strong> &rarr; NVDA天花板下调。<span class="action-badge action-add">ACTION</span> AVGO加仓 + NVDA重估</p>
+      <p><span class="signal signal-bull">GAME-CHANGER</span> <strong>自研项目大规模取消</strong> &rarr; NVDA主导 70%&rarr;85%。<span class="action-badge action-add">ACTION</span> NVDA加仓</p>
+    </div>
+
+    <!-- Node 6: EDA/IP -->
+    <div class="node-card">
+      <span class="node-label">NODE 6</span>
+      <h3>EDA/IP &mdash; ARM PE可持续性<span class="zh">EDA / IP Licensing &mdash; ARM Valuation Sustainability</span></h3>
+      <p class="node-core">核心追踪：ARM 169x PE是否能被royalty增长支撑？RISC-V是长期威胁还是噪音？ <small class="data-ctx">ARM PE 169x vs 半导体行业中位数25x，NVDA峰值~70x。需royalty增速&gt;25% YoY持续5年才能justify</small></p>
+      <h4>量化指标 <span class="zh-inline">Quantitative Metrics</span></h4>
+      <ul>
+        <li><strong>ARM royalty收入增速</strong> &mdash; 季度数据。需要维持20%+增速才能支撑PE</li>
+        <li><strong>RISC-V数据中心份额</strong> &mdash; 当前<1%。突破5% = ARM替代预警</li>
+        <li><strong>Synopsys.ai / Cadence.ai采用率</strong> &mdash; AI-driven EDA工具对传统flow的替代速度</li>
+      </ul>
+      <h4>情景动作 <span class="zh-inline">Scenario Actions</span></h4>
+      <p><span class="signal signal-bear">GAME-CHANGER</span> <strong>RISC-V获得Tier 1云厂adoption</strong> &rarr; ARM PE动摇。<span class="action-badge action-avoid">ACTION</span> ARM不建仓 / 如持有则止损</p>
+      <p><span class="signal signal-bear">GAME-CHANGER</span> <strong>Qualcomm vs ARM败诉</strong> &rarr; 授权模式风险。<span class="action-badge action-avoid">ACTION</span> ARM估值重估</p>
+    </div>
+
+
+    <!-- Node 7: China Semiconductor -->
+    <div class="node-card" style="border-left-color:var(--tier-low);">
+      <span class="node-label" style="background:rgba(244,67,54,0.12);color:var(--tier-low);">NODE 7 · NEW</span>
+      <h3>中国半导体生态 &mdash; 自给替代进度<span class="zh">China Semiconductor Ecosystem &mdash; Self-sufficiency Progress</span></h3>
+      <p class="node-core">核心追踪：中国半导体在出口管制下的自给替代速度。这决定"脱钩"是渐进还是突然，影响NVDA/ASML中国收入的永久性损失幅度。<mark class="hl-know" data-note="k11">SMIC如何绕过EUV？</mark></p>
+      <h4>量化指标 <span class="zh-inline">Quantitative Metrics</span></h4>
+      <ul>
+        <li><strong>SMIC季度营收+产能利用率</strong> &mdash; 2025年营收~$8.5B。利用率>80% = 内需消化。关注14nm/28nm占比变化</li>
+        <li><strong>中国半导体进口额</strong> &mdash; 海关总署月度数据。进口持续下降 = 国产替代加速信号</li>
+        <li><strong>华为Ascend出货量</strong> &mdash; TrendForce估计。910C年出货达50万颗 = AI芯片脱钩临界点</li>
+        <li><strong>CXMT/YMTC产能爬坡</strong> &mdash; 长鑫DDR5、长存232L NAND量产进度。影响MU/SK Hynix中国份额</li>
+      </ul>
+      <h4>定性信号 <span class="zh-inline">Qualitative Signals</span></h4>
+      <ul>
+        <li>SMEE光刻机从28nm→14nm DUV的突破时间表</li>
+        <li>中国AI公司（百度/字节/阿里）公开的硬件选择：Ascend vs 走私/囤积的A100/H100</li>
+        <li>大基金三期投向：设备>设计 = 长期自主信号；设计>设备 = 短期堵漏</li>
+      </ul>
+      <h4>关键来源 <span class="zh-inline">Key Sources</span></h4>
+      <ul>
+        <li>SMIC财报 (季度) / 海关总署进出口数据 (月度)</li>
+        <li>TrendForce中国半导体追踪 / IC Insights年度报告</li>
+        <li>Chris Miller (Chip War作者) &mdash; 出口管制有效性评估</li>
+      </ul>
+      <h4>情景动作 <span class="zh-inline">Scenario Actions</span></h4>
+      <p><span class="signal signal-bear">GAME-CHANGER</span> <strong>SMIC量产5nm(多重曝光)</strong> &rarr; 中国自给率跳升。<span class="action-badge action-avoid">ACTION</span> ASML/AMAT中国收入预期清零</p>
+      <p><span class="signal signal-watch">GAME-CHANGER</span> <strong>Ascend 910C训练千亿参数模型成功</strong> &rarr; AI芯片脱钩加速。<span class="action-badge action-reduce">ACTION</span> NVDA中国收入从"受限"改为"永久丧失"</p>
+      <p><span class="signal signal-bull">GAME-CHANGER</span> <strong>中国芯片自给率停滞在30%</strong> &rarr; 出口管制有效。<span class="action-badge action-add">ACTION</span> 西方设备商（ASML/AMAT）长期估值上调</p>
+    </div>
+
+
+    <!-- NODE 8: AI Lab / Demand Side -->
+    <div class="node-card" style="border-left-color:var(--knowledge);">
+      <span class="node-label" style="background:rgba(91,155,213,0.12);color:var(--knowledge);">NODE 8 · AI Lab/需求侧 · NEW</span>
+      <h3 style="color:var(--knowledge);">AI实验室/需求侧 — CapEx回报验证<span class="zh">AI Labs / Demand Side — CapEx ROI Validation</span></h3>
+      <p class="node-core">核心追踪：$602B AI CapEx的买家们是否看到回报？20代理人中5个需求侧(Altman/Nadella/Pichai/Hassabis/Musk)提供买方视角。</p>
+      <h4>量化指标 <span class="zh-inline">Quantitative Metrics</span></h4>
+      <ul>
+        <li><strong>Hyperscaler AI收入/CapEx比</strong> &mdash; MSFT Azure AI / GOOG Cloud AI / AMZN Bedrock收入增速 vs CapEx增速。比值持续下降=泡沫预警</li>
+        <li><strong>OpenAI ARR</strong> &mdash; 当前~$5B+ ARR。突破$10B=需求验证；停滞$5B=泡沫预警</li>
+        <li><strong>企业AI部署率</strong> &mdash; Fortune 500 AI production deployment(非PoC)比例。Gartner/IDC季度数据</li>
+        <li><strong>自研芯片进展</strong> &mdash; OpenAI-Broadcom交付(Q3 2026E), Project Maia(2027E), xAI Terafab(TBD)</li>
+      </ul>
+      <h4>定性信号 <span class="zh-inline">Qualitative Signals</span></h4>
+      <ul>
+        <li>Altman/Nadella/Pichai对AI收入转化的措辞变化 &mdash; 从"incredible momentum"到"discipline"=减速信号</li>
+        <li>任何Hyperscaler公开下调CapEx指引 = Level 1 BEAR信号</li>
+        <li>OpenAI S-1/IPO披露的compute economics（可能2026 H2）</li>
+        <li>TPU vs GPU训练cost parity &mdash; Hassabis/Pichai的架构选择是CUDA侵蚀的最佳实时指标</li>
+      </ul>
+      <h4>情景动作 <span class="zh-inline">Scenario Actions</span></h4>
+      <p><span class="signal signal-bear">GAME-CHANGER</span> <strong>2家+Hyperscaler下调2027 CapEx指引&gt;15%</strong> &rarr; "AI泡沫"概率 15-20%&rarr;35-45%。<span class="action-badge action-avoid">ACTION</span> Tier 2/3全面清仓，保留AVGO/ASML</p>
+      <p><span class="signal signal-bull">GAME-CHANGER</span> <strong>OpenAI S-1显示inference毛利率&gt;60%</strong> &rarr; "需求真实"概率 95%&rarr;98%。<span class="action-badge action-add">ACTION</span> Tier 1加仓</p>
+      <p><span class="signal signal-watch">WATCH</span> <strong>3家+自研芯片量产成功(Broadcom/Maia/Trainium)</strong> &rarr; CUDA erosion加速。<span class="action-badge action-reduce">ACTION</span> NVDA从Tier2降至Tier3</p>
+    </div>
+
+    <!-- ══════════ VI SIGNAL TIERS ══════════ -->
+    <div class="section-header" id="signal-tiers">
+      <h2>&sect;VI 信号分级与调整框架<span class="zh">Signal Tiers &amp; Adjustment Framework</span></h2>
+    </div>
+
+    <p>不是所有信号都需要立即反应。三个级别决定反应速度和调整幅度。</p>
+
+    <div style="background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-md);overflow:hidden;margin:1.5rem 0;padding:1.5rem;">
+      <div class="signal-pyramid">
+        <div class="pyramid-level pyramid-l1">
+          <strong>LEVEL 1 &mdash; 立即行动 24-48h</strong>
+          <div class="pyramid-label">NVDA miss>10% &middot; CapEx削减>20% &middot; 台海事件 &middot; DRAM暴跌>15%</div>
+          <div class="pyramid-label" style="color:var(--tier-low);">概率调整 &plusmn;10-20%</div>
+        </div>
+        <div class="pyramid-level pyramid-l2">
+          <strong>LEVEL 2 &mdash; 一周评估</strong>
+          <div class="pyramid-label">MI400验证 &middot; ASML订单异常 &middot; $10B+并购 &middot; CEO言行不一</div>
+          <div class="pyramid-label" style="color:var(--tier-medium);">连续2个同方向 &rarr; 调整 &plusmn;5-10%</div>
+        </div>
+        <div class="pyramid-level pyramid-l3">
+          <strong>LEVEL 3 &mdash; 季度评估</strong>
+          <div class="pyramid-label">份额变化 &middot; 路线图更新 &middot; 地缘评估 &middot; RISC-V进展</div>
+          <div class="pyramid-label" style="color:var(--tier-high);">每季度全面交叉验证</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Level 1 &mdash; 立即行动 <span class="zh-inline">Immediate Action (24-48h)</span></h3>
+    <div class="arc-item bear"><strong><span class="signal signal-bear">L1</span> NVIDIA季报大幅miss (>10%)</strong><br>影响：$1T叙事动摇。动作：重新评估"需求真实"和"NVDA主导"。<span class="action-badge action-avoid">Tier 2/3减仓</span></div>
+    <div class="arc-item bear"><strong><span class="signal signal-bear">L1</span> Hyperscaler削减CapEx (>20%)</strong><br>影响：AI泡沫概率15-20%&rarr;30-40%。动作：全板块减仓，<span class="action-badge action-hold">保留AVGO/ASML</span></div>
+    <div class="arc-item bear"><strong><span class="signal signal-bear">L1</span> 台海军事事件</strong><br>影响：TSMC产能尾部风险。动作：超过演习级别 &rarr; <span class="action-badge action-avoid">半导体清仓</span></div>
+    <div class="arc-item bear"><strong><span class="signal signal-bear">L1</span> DRAM月度暴跌 (>15%)</strong><br>影响：HBM supercycle拐点。动作：<span class="action-badge action-avoid">存储股止损</span> + HBM 80%&rarr;60%</div>
+
+    <h3>Level 2 &mdash; 一周内评估 <span class="zh-inline">Evaluate Within 1 Week</span></h3>
+    <div class="arc-item watch"><strong><span class="signal signal-watch">L2</span> AMD MI400客户验证</strong><br>影响：CUDA侵蚀测量。正面 = <span class="action-badge action-add">AMD评估建仓</span> + NVDA定价压力</div>
+    <div class="arc-item watch"><strong><span class="signal signal-watch">L2</span> ASML订单额异常变化</strong><br>影响：长期产能指标。大幅下降 = <span class="action-badge action-reduce">ASML减仓评估</span></div>
+    <div class="arc-item watch"><strong><span class="signal signal-watch">L2</span> $10B+行业并购</strong><br>影响：竞争格局重塑。如NVIDIA收购Groq = <span class="action-badge action-reduce">CUDA信心下调</span></div>
+    <div class="arc-item watch"><strong><span class="signal signal-watch">L2</span> CEO言行不一信号</strong><br>影响：定性可信度调整。Jensen说"自研不合理"但买Groq = <span class="action-badge action-reduce">CUDA 5年概率下调</span></div>
+
+    <h3>Level 3 &mdash; 季度评估 <span class="zh-inline">Quarterly Review</span></h3>
+    <ul>
+      <li>各节点市场份额变化 &mdash; AMD/AVGO/ARM/TSMC在各自领域的份额趋势</li>
+      <li>技术路线图更新 &mdash; 新架构发布、制程进展、封装技术突破</li>
+      <li>地缘政治评估 &mdash; 出口管制、补贴执行、外交关系变化</li>
+      <li>RISC-V生态进展 &mdash; 新客户、新工具链、数据中心penetration</li>
+    </ul>
+
+    <div class="question-box">
+      <h4>调整规则 <span class="zh-inline">Adjustment Rules</span></h4>
+      <ul>
+        <li><strong>Level 1信号</strong> &rarr; 立即重新评估相关概率（&plusmn;10-20%）。不需要等更多数据确认。</li>
+        <li><strong>连续2个Level 2同方向</strong> &rarr; 调整基线（&plusmn;5-10%）。单个Level 2不足以改变基线。</li>
+        <li><strong>每季度全面交叉验证</strong> &rarr; 8节点 &times; 关键指标。这是"系统性体检"而非"单点反应"。</li>
+      </ul>
+    </div>
+
+    <h3>具体调整示例 <span class="zh-inline">Adjustment Examples</span></h3>
+    <p style="font-size:0.78rem;color:var(--text-tertiary);margin-bottom:0.5rem;"><strong>注 Note:</strong> 下表中"$1T可信"不是独立基线判断，而是<strong>衍生指标</strong>——综合反映 #1 AI需求真实(95%) 和 #2 NVDA主导(70%) 的联合置信度。"$1T credibility" is a derived metric, not an independent baseline claim — it reflects the joint confidence of Claim #1 (demand real) and #2 (NVDA dominance).</p>
+    <figure>
+      <table>
+        <thead>
+          <tr><th>If...</th><th>Then Adjust...</th><th>Action 动作</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="signal signal-bull">BULL</span> NVIDIA Q1 beat $78B</td>
+            <td>"需求真实" <span class="conf-high">95%&rarr;97%</span>，"$1T可信"(衍生) <span class="conf-high">60%&rarr;70%</span></td>
+            <td><span class="action-badge action-hold">HOLD</span> 维持所有半导体仓位</td>
+          </tr>
+          <tr>
+            <td><span class="signal signal-bear">BEAR</span> NVIDIA Q1 miss>10%</td>
+            <td>"$1T可信"(衍生) <span class="conf-low">60%&rarr;40%</span></td>
+            <td><span class="action-badge action-avoid">REDUCE</span> Tier 2/3减仓50%</td>
+          </tr>
+          <tr>
+            <td><span class="signal signal-watch">WATCH</span> AMD MI400通过验证</td>
+            <td>"CUDA 2-3年" <span class="conf-mid">70%&rarr;60%</span>，"毛利率压缩" <span class="conf-mid">75%&rarr;85%</span></td>
+            <td><span class="action-badge action-add">ADD</span> AMD评估建仓</td>
+          </tr>
+          <tr>
+            <td><span class="signal signal-bear">BEAR</span> DRAM连跌3月</td>
+            <td>"HBM supercycle" <span class="conf-low">80%&rarr;60%</span></td>
+            <td><span class="action-badge action-avoid">SELL</span> MU执行止损</td>
+          </tr>
+          <tr>
+            <td><span class="signal signal-bear">BEAR</span> 两家Hyperscaler削减CapEx</td>
+            <td>"AI泡沫" <span class="conf-low">15-20%&rarr;30-40%</span></td>
+            <td><span class="action-badge action-avoid">REDUCE</span> 只保AVGO/ASML</td>
+          </tr>
+        </tbody>
+      </table>
+    </figure>
+
+
+    <!-- ══════════ VII CHINA SEMICONDUCTOR ══════════ -->
+    <div class="section-header" id="china-semi">
+      <h2>&sect;VII 中国半导体生态<span class="zh">China Semiconductor Ecosystem</span></h2>
+    </div>
+
+    <div class="priority-box" style="border-color:rgba(244,67,54,0.3);border-left-color:var(--tier-low);">
+      <h2 style="margin-top:0;color:var(--tier-low);">&#9888; 结构性盲区警告</h2>
+      <p>当前20个认知代理中15个西方供给侧+5个需求侧，但<strong>中国半导体生态覆盖率仍=0%</strong>。以下内容基于Chris Miller(Chip War作者)、TrendForce、IC Insights等公开来源策展，<strong>不是一手认知代理产出</strong>。数据透明度极低 &mdash; SMIC不公布良率，华为不公布芯片出货量，政府不公布大基金实际拨付。所有数字均为行业估计值。</p>
+    </div>
+
+    <h3>关键玩家 <span class="zh-inline">Key Players</span></h3>
+    <figure>
+      <table class="decision-matrix">
+        <thead>
+          <tr><th>Company 公司</th><th>Role 角色</th><th>Benchmark 对标</th><th>Progress 进展</th><th>Signal</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="ticker-col">SMIC<br><span style="font-size:0.6rem;color:var(--text-quaternary);">0981.HK / 688981.SH</span></td>
+            <td>代工 Foundry</td>
+            <td>TSMC</td>
+            <td>7nm有限量产(Huawei Mate 70验证)，但产能<5k wafer/月 vs TSMC 3nm 10万+。<mark class="hl-know" data-note="k11">无EUV，靠多重曝光</mark>，良率不透明</td>
+            <td><span class="signal signal-watch">WATCH</span></td>
+          </tr>
+          <tr>
+            <td class="ticker-col">华为海思<br><span style="font-size:0.6rem;color:var(--text-quaternary);">HiSilicon (非上市)</span></td>
+            <td>设计 Fabless</td>
+            <td>NVIDIA</td>
+            <td><mark class="hl-know" data-note="k12">Ascend 910C</mark>: 训练性能~H100的60-70%，推理接近。DeepSeek R1在Ascend上训练成功是里程碑。2025年出货估计20-30万颗</td>
+            <td><span class="signal signal-bull">BULL</span><span style="font-size:0.6rem;color:var(--text-quaternary);margin-left:0.2rem;">(国内)</span></td>
+          </tr>
+          <tr>
+            <td class="ticker-col">YMTC 长存</td>
+            <td>NAND</td>
+            <td>Samsung</td>
+            <td>232层NAND已量产，技术代差~1-2代。被美国制裁后专注国内客户。手机/服务器SSD国产替代加速</td>
+            <td><span class="signal signal-watch">WATCH</span></td>
+          </tr>
+          <tr>
+            <td class="ticker-col">CXMT 长鑫</td>
+            <td>DRAM</td>
+            <td>SK Hynix</td>
+            <td>DDR5有限量产，HBM=0。DRAM代差~2-3代。产能<3万片/月 vs SK Hynix ~30万。中低端手机/PC DRAM国产替代</td>
+            <td><span class="signal signal-watch">WATCH</span></td>
+          </tr>
+          <tr>
+            <td class="ticker-col">SMEE 上微</td>
+            <td>光刻 Litho</td>
+            <td>ASML</td>
+            <td>28nm DUV交付中(SSA800/20)。14nm DUV研发中，EUV=未立项。与ASML代差>10年。是中国半导体最薄弱环节</td>
+            <td><span class="signal signal-bear">BEAR</span><span style="font-size:0.6rem;color:var(--text-quaternary);margin-left:0.2rem;">(差距最大)</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <h3>三个核心问题 <span class="zh-inline">Three Key Questions</span></h3>
+
+    <div class="arc-item bear">
+      <strong>Q1: 出口管制有效吗？</strong>
+      <p>短答：<strong>短期有效，长期催化替代。</strong> Chris Miller评估："出口管制让中国先进制程延迟3-5年，但同时加速了成熟制程的自给和AI芯片的国产替代。"NVIDIA中国份额从95%→50%是管制直接结果。但华为Ascend出货从0→20万颗也是管制催化的。<small class="data-ctx">NVIDIA 2023年中国数据中心收入~$10B → 2026年估计$2-3B</small></p>
+    </div>
+    <div class="arc-item watch">
+      <strong>Q2: 中国能造出先进AI芯片吗？</strong>
+      <p>短答：<strong>能，但产能受限。</strong> SMIC用多重曝光造出7nm(Kirin 9010)证明技术可行，但没有EUV意味着：(1)良率低→成本高 (2)产能受限→无法大规模出货 (3)5nm以下极难。关键分水岭是SMEE何时交付14nm DUV &mdash; 这决定中国能否脱离"ASML依赖"进入自主循环。<mark class="hl-know" data-note="k11">多重曝光如何绕过EUV？</mark></p>
+    </div>
+    <div class="arc-item watch">
+      <strong>Q3: 投资影响是什么？</strong>
+      <p>短答：<strong>双向影响，时间分化。</strong></p>
+      <ul style="font-size:0.88rem;">
+        <li><strong>短期(1-2年)</strong>: 出口管制有效 → ASML/AMAT中国收入已大幅下降(ASML中国从49%→~15%)，最大冲击已过</li>
+        <li><strong>中期(3-5年)</strong>: 中国成熟制程自给 → 28nm以上不再需要进口设备 → 全球产能过剩压制价格</li>
+        <li><strong>长期(5-10年)</strong>: 如果SMEE突破14nm → 中国半导体"内循环"成立 → 全球供应链永久分裂为"中国链"和"非中国链"</li>
+      </ul>
+    </div>
+
+    <h3><mark class="hl-know" data-note="k13">大基金</mark>投向追踪 <span class="zh-inline">National Fund Tracking</span></h3>
+    <figure>
+      <table class="decision-matrix">
+        <thead>
+          <tr><th>Fund 基金</th><th>规模</th><th>重点投向</th><th>信号意义</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>大基金一期</strong> (2014)</td>
+            <td>&yen;1,387亿</td>
+            <td>制造(SMIC 65%)、设计(紫光)</td>
+            <td>补短板思维，结果：SMIC从28nm→14nm</td>
+          </tr>
+          <tr>
+            <td><strong>大基金二期</strong> (2019)</td>
+            <td>&yen;2,041亿</td>
+            <td>设备(SMEE/北方华创) + 材料</td>
+            <td>转向自主设备，应对管制升级</td>
+          </tr>
+          <tr>
+            <td><strong>大基金三期</strong> (2024)</td>
+            <td>&yen;3,440亿</td>
+            <td>先进封装 + AI芯片 + EDA</td>
+            <td>史上最大，信号：封装是绕过光刻限制的替代路径</td>
+          </tr>
+        </tbody>
+      </table>
+    </figure>
+
+
+    <!-- ══════════ VIII TRACKING LIST ══════════ -->
+    <div class="section-header" id="tracking">
+      <h2>&sect;VIII 追踪清单<span class="zh">Tracking List</span></h2>
+    </div>
+
+    <h3>必须追踪的大会 <span class="zh-inline">Key Conferences</span></h3>
+    <figure>
+      <table>
+        <thead>
+          <tr><th>Conference</th><th>When</th><th>Why</th><th>Track</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>NVIDIA GTC</strong></td>
+            <td>3月</td>
+            <td>年度架构发布、生态战略、客户案例</td>
+            <td>新架构性能、CUDA生态扩展、订单更新</td>
+          </tr>
+          <tr>
+            <td><strong>CES</strong></td>
+            <td>1月</td>
+            <td>消费+边缘AI趋势，AMD/Intel/Qualcomm发布</td>
+            <td>边缘AI芯片竞争、PC AI渗透率</td>
+          </tr>
+          <tr>
+            <td><strong>AMD Analyst Day</strong></td>
+            <td>11月</td>
+            <td>MI系列路线图、ROCm进展、数据中心战略</td>
+            <td>MI400/500 timeline、客户traction、份额目标</td>
+          </tr>
+          <tr>
+            <td><strong>TSMC Technology Symposium</strong></td>
+            <td>6月</td>
+            <td>制程路线图、封装技术、客户合作</td>
+            <td>2nm/1.4nm进度、CoWoS产能扩张计划</td>
+          </tr>
+          <tr>
+            <td><strong>Hot Chips</strong></td>
+            <td>8月</td>
+            <td>最前沿芯片架构论文，学术+工业界</td>
+            <td>自研芯片架构（TPU/Trainium/MTIA）、新兴架构</td>
+          </tr>
+          <tr>
+            <td><strong>IEDM</strong></td>
+            <td>12月</td>
+            <td>半导体器件与制程最前沿研究</td>
+            <td>下一代制程突破、存储技术演进</td>
+          </tr>
+          <tr>
+            <td><strong>RISC-V Summit</strong></td>
+            <td>12月</td>
+            <td>RISC-V生态年度盘点</td>
+            <td>数据中心adoption、新厂商/产品、工具链成熟度</td>
+          </tr>
+          <tr>
+            <td><strong>SEMICON West</strong></td>
+            <td>7月</td>
+            <td>半导体设备和材料行业最大展会</td>
+            <td>ASML/Applied Materials/LAM设备订单趋势</td>
+          </tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <h3>必须追踪的来源 <span class="zh-inline">Key Sources</span></h3>
+    <figure>
+      <table>
+        <thead>
+          <tr><th>Source</th><th>Frequency</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Stratechery</strong> (Ben Thompson)</td>
+            <td>Weekly</td>
+            <td>平台战略视角 &mdash; 芯片竞争放在更大的平台经济学框架中</td>
+          </tr>
+          <tr>
+            <td><strong>SemiAnalysis</strong> (Dylan Patel)</td>
+            <td>Weekly</td>
+            <td>最深入的芯片技术+经济学 &mdash; GPU benchmark、ASIC经济学、供应链情报</td>
+          </tr>
+          <tr>
+            <td><strong>Acquired</strong> (podcast)</td>
+            <td>Bi-weekly</td>
+            <td>深度公司历史和战略 &mdash; NVIDIA/TSMC/ARM半导体专题</td>
+          </tr>
+          <tr>
+            <td><strong>TrendForce</strong></td>
+            <td>Monthly</td>
+            <td>DRAM/NAND合约价 &mdash; 存储周期最权威数据源</td>
+          </tr>
+          <tr>
+            <td><strong>Dylan Patel</strong> (@dyaborin)</td>
+            <td>Ad-hoc</td>
+            <td>芯片行业内部信息 &mdash; 经常比卖方研报早1-2周发现趋势</td>
+          </tr>
+          <tr>
+            <td><strong>Patrick Moorhead</strong> (Moor Insights)</td>
+            <td>Ad-hoc</td>
+            <td>行业高管访谈 &mdash; AMD/Intel/Qualcomm关系深厚</td>
+          </tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <h3>法律/监管追踪 <span class="zh-inline">Legal &amp; Regulatory</span></h3>
+    <figure>
+      <table>
+        <thead>
+          <tr><th>Case</th><th>Status</th><th>Impact</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Qualcomm vs ARM</strong></td>
+            <td><span class="signal signal-watch">ONGOING</span></td>
+            <td>ARM授权模式可能被迫变更 &rarr; 影响ARM商业模式和估值基础</td>
+          </tr>
+          <tr>
+            <td><strong>FTC vs NVIDIA</strong></td>
+            <td><span class="signal signal-watch">MONITORING</span></td>
+            <td>反垄断审查可能限制NVIDIA收购和捆绑策略</td>
+          </tr>
+          <tr>
+            <td><strong>CHIPS Act执行</strong></td>
+            <td><span class="signal signal-bull">IN PROGRESS</span></td>
+            <td>$52B补贴分配影响Intel/TSMC/Samsung在美产能扩张速度</td>
+          </tr>
+          <tr>
+            <td><strong>中国出口管制</strong></td>
+            <td><span class="signal signal-bear">ESCALATING</span></td>
+            <td>每次收紧 = NVDA中国收入下调 + 中国自研加速</td>
+          </tr>
+          <tr>
+            <td><strong>EU Chips Act</strong></td>
+            <td><span class="signal signal-bull">IN PROGRESS</span></td>
+            <td>&#8364;43B补贴分配，影响欧洲半导体产能（主要利好ASML和设备商）</td>
+          </tr>
+        </tbody>
+      </table>
+    </figure>
+
+
+    <!-- ══════════ IX COGNITIVE AGENT BRIEFING ══════════ -->
+    <div class="section-header" id="agent-briefing">
+      <h2>&sect;IX 20人认知代理人情报简报<span class="zh">Cognitive Agent Intelligence Briefing</span></h2>
+    </div>
+
+    <p>20位代理人最新立场一览。每人2-3行：当前判断 + 最近关键行动 + 可信度层级。<strong>人工策展，非AI生成。</strong>遵守反增殖原则 &mdash; 系统展示信息，Luke做判断。</p>
+
+    <div class="stance-summary">
+      <span style="font-weight:590;color:var(--accent);">AI CapEx 立场:</span>
+      <span><span class="stance-dot" style="background:var(--tier-high);"></span> 16 bullish</span>
+      <span><span class="stance-dot" style="background:var(--tier-medium);"></span> 3 neutral</span>
+      <span><span class="stance-dot" style="background:var(--tier-low);"></span> 1 bearish</span>
+      <span style="font-size:0.72rem;color:var(--text-quaternary);margin-left:auto;">需求侧: 5/20 agents</span>
+    </div>
+
+    <!-- TIER 1: Highest Credibility -->
+    <h3><span class="ab-cred cred-t1">TIER 1</span> 最高可信度 — 决策权+执行记录 <span class="zh-inline">Highest Credibility</span></h3>
+    <div class="agent-grid">
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div><span class="ab-name">Jensen Huang</span><span class="ab-co">NVIDIA CEO</span> <span class="node-label">NODE 1</span> <span class="ab-cred cred-t1">5/5</span></div>
+          <div class="ab-stance">$1T订单可见性确认。"Demand is insatiable." Vera Rubin + NVL144系统级路线图。</div>
+          <div class="ab-action"><strong>2026-03:</strong> GTC keynote + 收购Groq $20B (inference ASIC)</div>
+          <div class="ab-warn">⚠ 自我矛盾: 买Groq=承认非GPU推理有价值，与"CUDA不可替代"矛盾</div>
+        </div>
+        <div class="signal-meta"><a href="../../trade-pipeline/output/reports/cognitive_agents_2026-03-20/sources_01_jensen_huang_v4.html">V4→</a></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div><span class="ab-name">C.C. Wei 魏哲家</span><span class="ab-co">TSMC CEO</span> <span class="node-label">NODE 3</span> <span class="ab-cred cred-t1">4/5</span></div>
+          <div class="ab-stance">"Demand surprises us on the upside every quarter." CoWoS→130K/月仍不够。Arizona量产确认。</div>
+          <div class="ab-action"><strong>2026-01:</strong> Q4 earnings确认先进制程占比>70%</div>
+        </div>
+        <div class="signal-meta"><a href="../../trade-pipeline/output/reports/cognitive_agents_2026-03-20/sources_07_cc_wei_v4.html">V4→</a></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div><span class="ab-name">Morris Chang 张忠谋</span><span class="ab-co">TSMC创始人</span> <span class="node-label">NODE 3</span> <span class="ab-cred cred-t1">5/5</span></div>
+          <div class="ab-stance">"台湾是危险的地方"——最直言不讳的地缘风险警告。AI需求real但估值不评论。</div>
+          <div class="ab-action"><strong>2025:</strong> 自传出版，首次公开TSMC早期竞争内幕</div>
+        </div>
+        <div class="signal-meta"><a href="../../trade-pipeline/output/reports/cognitive_agents_2026-03-20/sources_08_morris_chang_v4.html">V4→</a></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div><span class="ab-name">Hock Tan 陈福阳</span><span class="ab-co">Broadcom CEO</span> <span class="node-label">NODE 1</span> <span class="ab-cred cred-t1">4/5</span></div>
+          <div class="ab-stance">AI定制芯片收入+44.6%。"3个以上Hyperscaler客户。" 两条链交叉点。</div>
+          <div class="ab-action"><strong>2026-03:</strong> Q1 FY26 AI revenue guidance上调</div>
+        </div>
+        <div class="signal-meta"><a href="../../trade-pipeline/output/reports/cognitive_agents_2026-03-20/sources_03_hock_tan_v4.html">V4→</a></div>
+      </div>
+      <div class="ab-card demand-side">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div><span class="ab-name">Satya Nadella</span><span class="ab-co">Microsoft CEO</span> <span class="node-label" style="background:rgba(91,155,213,0.12);color:var(--knowledge);">NODE 7 DEMAND</span> <span class="ab-cred cred-t1">4/5</span></div>
+          <div class="ab-stance">Azure AI CapEx创纪录。Copilot企业采用加速。"AI is the most transformative technology."</div>
+          <div class="ab-action"><strong>2026-02:</strong> Azure AI CapEx指引上调; Project Maia芯片内测</div>
+        </div>
+        <div class="signal-meta"><a href="../../trade-pipeline/output/reports/cognitive_agents_2026-03-20/sources_18_nadella_v4.html">V4→</a></div>
+      </div>
+      <div class="ab-card demand-side">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div><span class="ab-name">Sam Altman</span><span class="ab-co">OpenAI CEO</span> <span class="node-label" style="background:rgba(91,155,213,0.12);color:var(--knowledge);">NODE 7 DEMAND</span> <span class="ab-cred cred-t1">4/5</span></div>
+          <div class="ab-stance">$100B LOI签署。"We need all the compute we can get." 但Broadcom自研芯片是Plan B。</div>
+          <div class="ab-action"><strong>2026-01:</strong> Broadcom芯片延期→Q3 2026; 凭替代威胁拿到NVIDIA 30%折扣</div>
+          <div class="ab-warn">⚠ LOI≠合同: CFO Kress确认"still at LOI"。60%可信度</div>
+        </div>
+        <div class="signal-meta"><a href="../../trade-pipeline/output/reports/cognitive_agents_2026-03-20/sources_17_altman_v4.html">V4→</a></div>
+      </div>
+    </div>
+
+    <!-- TIER 2: Directionally Reliable -->
+    <h3><span class="ab-cred cred-t2">TIER 2</span> 方向可信 — 数字打7折 <span class="zh-inline">Directionally Reliable (30% discount on numbers)</span></h3>
+    <div class="agent-grid">
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div><span class="ab-name">Lisa Su</span><span class="ab-co">AMD CEO</span> <span class="node-label">NODE 1</span> <span class="ab-cred cred-t2">4/5</span></div>
+          <div class="ab-stance">"Insatiable AI chip demand." MI350路线图推进。数据中心份额目标10%。</div>
+          <div class="ab-action"><strong>2026-02:</strong> Q4 earnings, MI300X放量确认, MI350路线图</div>
+        </div>
+        <div class="signal-meta"><a href="../../trade-pipeline/output/reports/cognitive_agents_2026-03-20/sources_02_lisa_su_v4.html">V4→</a></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div><span class="ab-name">Christophe Fouquet</span><span class="ab-co">ASML CEO</span> <span class="node-label">NODE 2</span> <span class="ab-cred cred-t2">4/5</span></div>
+          <div class="ab-stance">€40B订单积压=2-3年可见性。High-NA EUV出货加速。"Demand is strong across all segments."</div>
+          <div class="ab-action"><strong>2026-01:</strong> Q4 earnings, 订单积压确认</div>
+        </div>
+        <div class="signal-meta"><a href="../../trade-pipeline/output/reports/cognitive_agents_2026-03-20/sources_04_fouquet_v4.html">V4→</a></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div><span class="ab-name">Sanjay Mehrotra</span><span class="ab-co">Micron CEO</span> <span class="node-label">NODE 4</span> <span class="ab-cred cred-t2">3/5</span></div>
+          <div class="ab-stance">HBM供不应求。"AI is driving unprecedented memory demand." HBM4路线图推进。</div>
+          <div class="ab-action"><strong>2026-03:</strong> Q2 FY26 earnings, HBM收入占比首次公布</div>
+        </div>
+        <div class="signal-meta"><a href="../../trade-pipeline/output/reports/cognitive_agents_2026-03-20/sources_11_mehrotra_v4.html">V4→</a></div>
+      </div>
+      <div class="ab-card demand-side">
+        <div class="signal-dot watch"></div>
+        <div>
+          <div><span class="ab-name">Sundar Pichai</span><span class="ab-co">Google CEO</span> <span class="node-label" style="background:rgba(91,155,213,0.12);color:var(--knowledge);">NODE 8 AI LAB</span> <span class="ab-cred cred-t2">4/5</span></div>
+          <div class="ab-stance">TPU 10年积累，CUDA最大威胁。Google Cloud AI增速>40%。Meta TPU交易(数十亿$)。</div>
+          <div class="ab-action"><strong>2026-02:</strong> TPU v6e部署扩大; 向外部客户销售TPU（战略转型）</div>
+        </div>
+        <div class="signal-meta"><a href="../../trade-pipeline/output/reports/cognitive_agents_2026-03-20/sources_19_pichai_v4.html">V4→</a></div>
+      </div>
+      <div class="ab-card demand-side">
+        <div class="signal-dot watch"></div>
+        <div>
+          <div><span class="ab-name">Demis Hassabis</span><span class="ab-co">DeepMind CEO</span> <span class="node-label" style="background:rgba(91,155,213,0.12);color:var(--knowledge);">NODE 8 AI LAB</span> <span class="ab-cred cred-t2">4/5</span></div>
+          <div class="ab-stance">AlphaFold 3在TPU独家训练。Gemini 3主要用TPU。实际证明CUDA非必需。</div>
+          <div class="ab-action"><strong>2025-12:</strong> Nobel Prize (AlphaFold)确认AI+科学路线的可行性</div>
+        </div>
+        <div class="signal-meta"><a href="../../trade-pipeline/output/reports/cognitive_agents_2026-03-20/sources_20_hassabis_v4.html">V4→</a></div>
+      </div>
+      <div class="ab-card demand-side">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div><span class="ab-name">Elon Musk</span><span class="ab-co">Tesla/xAI CEO</span> <span class="node-label" style="background:rgba(91,155,213,0.12);color:var(--knowledge);">NODE 7 DEMAND</span> <span class="ab-cred cred-t4">2/5</span></div>
+          <div class="ab-stance">最大物理GPU买家($25B+)。Memphis 100K H100集群。Grok 3训练中。Terafab规划。</div>
+          <div class="ab-action"><strong>2025:</strong> Memphis数据中心上线; $25B+ GPU采购真金白银</div>
+          <div class="ab-warn">⚠ 时间线×2-3: Terafab、FSD、Optimus均严重延期历史</div>
+        </div>
+        <div class="signal-meta"><a href="../../trade-pipeline/output/reports/cognitive_agents_2026-03-20/sources_12_musk_v4.html">V4→</a></div>
+      </div>
+    </div>
+
+    <!-- TIER 3: Cross-validation Required -->
+    <h3><span class="ab-cred cred-t3">TIER 3</span> 需交叉验证 — 洞察有价值但需独立确认 <span class="zh-inline">Cross-validation Required</span></h3>
+    <div class="agent-grid">
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div><span class="ab-name">Jim Keller</span><span class="ab-co">Tenstorrent CTO</span> <span class="node-label">NODE 6</span> <span class="ab-cred cred-t3">4/5</span></div>
+          <div class="ab-stance">RISC-V + Tenstorrent ASIC = GPU替代路径。"CUDA is not unbeatable." 架构级洞察最强。</div>
+          <div class="ab-action"><strong>2025:</strong> Tenstorrent获Samsung投资; Wormhole芯片出货</div>
+        </div>
+        <div class="signal-meta"><a href="../../trade-pipeline/output/reports/cognitive_agents_2026-03-20/sources_14_keller_v4.html">V4→</a></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div><span class="ab-name">Lip-Bu Tan 陈立武</span><span class="ab-co">Intel CEO / Cadence</span> <span class="node-label">NODE 6</span> <span class="ab-cred cred-t3">4/5</span></div>
+          <div class="ab-stance">EDA双寡头+Intel重组双重视角。Intel 18A进展是关键验证点。</div>
+          <div class="ab-action"><strong>2025:</strong> 就任Intel CEO; 宣布大规模重组+代工战略</div>
+        </div>
+        <div class="signal-meta"><a href="../../trade-pipeline/output/reports/cognitive_agents_2026-03-20/sources_09_lip_bu_tan_v4.html">V4→</a></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div><span class="ab-name">Sassine Ghazi</span><span class="ab-co">Synopsys CEO</span> <span class="node-label">NODE 6</span> <span class="ab-cred cred-t3">3/5</span></div>
+          <div class="ab-stance">"芯片复杂度指数增长=EDA需求指数增长。" Ansys $350B收购+NVIDIA $20B投资。</div>
+          <div class="ab-action"><strong>2026-01:</strong> NVIDIA $20B投资Synopsys; AgentEngineer L4发布</div>
+        </div>
+        <div class="signal-meta"><a href="../../trade-pipeline/output/reports/cognitive_agents_2026-03-20/sources_15_ghazi_v4.html">V4→</a></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot watch"></div>
+        <div>
+          <div><span class="ab-name">Rene Haas</span><span class="ab-co">ARM CEO</span> <span class="node-label">NODE 6</span> <span class="ab-cred cred-t3">3/5</span></div>
+          <div class="ab-stance">"ARM是AI时代计算标准。" 数据中心版税+100% YoY。但PE 169x+RISC-V双重风险。</div>
+          <div class="ab-action"><strong>2026-02:</strong> Q3 FY26 earnings, 数据中心版税爆发</div>
+          <div class="ab-warn">⚠ RISC-V盲点: 公开讨论不足，25%全球份额实际威胁</div>
+        </div>
+        <div class="signal-meta"><a href="../../trade-pipeline/output/reports/cognitive_agents_2026-03-20/sources_16_haas_v4.html">V4→</a></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div><span class="ab-name">Gary Dickerson</span><span class="ab-co">AMAT CEO</span> <span class="node-label">NODE 2</span> <span class="ab-cred cred-t3">3/5</span></div>
+          <div class="ab-stance">先进封装设备领先。CoWoS产能不足=设备商受益。封装是被低估的投资机会。</div>
+          <div class="ab-action"><strong>2026-02:</strong> Q1 FY26 earnings, 封装设备订单加速</div>
+        </div>
+        <div class="signal-meta"><a href="../../trade-pipeline/output/reports/cognitive_agents_2026-03-20/sources_05_dickerson_v4.html">V4→</a></div>
+      </div>
+    </div>
+
+    <!-- TIER 4: Reference / Directional Only -->
+    <h3><span class="ab-cred cred-t4">TIER 4</span> 参考/方向性 — 只信方向不信数字 <span class="zh-inline">Reference / Directional Only</span></h3>
+    <div class="agent-grid">
+      <div class="ab-card">
+        <div class="signal-dot watch"></div>
+        <div>
+          <div><span class="ab-name">Chris Miller</span><span class="ab-co">Chip War作者</span> <span class="node-label" style="background:rgba(171,71,188,0.12);color:#ab47bc;">REFERENCE</span> <span class="ab-cred cred-t4">4/5</span></div>
+          <div class="ab-stance">历史学家视角：出口管制有效性、供应链集中风险。非操作者，无实时商业信号。</div>
+          <div class="ab-action"><strong>持续:</strong> 出口管制效果分析; 台湾风险框架</div>
+        </div>
+        <div class="signal-meta"><a href="../../trade-pipeline/output/reports/cognitive_agents_2026-03-20/sources_06_miller_v4.html">V4→</a></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div><span class="ab-name">Kwak Noh Jung 郭鲁正</span><span class="ab-co">SK hynix CEO</span> <span class="node-label">NODE 4</span> <span class="ab-cred cred-t4">3/5</span></div>
+          <div class="ab-stance">HBM供需最前线。"Supply cannot meet demand through 2026." HBM4路线图推进。</div>
+          <div class="ab-action"><strong>2026-01:</strong> CES展示HBM4; NVIDIA独家供应商地位确认</div>
+        </div>
+        <div class="signal-meta"><a href="../../trade-pipeline/output/reports/cognitive_agents_2026-03-20/sources_10_kwak_v4.html">V4→</a></div>
+      </div>
+      <div class="ab-card">
+        <div class="signal-dot bull"></div>
+        <div>
+          <div><span class="ab-name">Johny Srouji</span><span class="ab-co">Apple SVP</span> <span class="node-label">NODE 5</span> <span class="ab-cred cred-t4">3/5</span></div>
+          <div class="ab-stance">Apple Silicon自研=最成功的去x86案例。M4 Ultra路线图推进。极少公开发言。</div>
+          <div class="ab-action"><strong>2025:</strong> M4 Max/Ultra量产; 内部AI芯片团队扩张传闻</div>
+        </div>
+        <div class="signal-meta"><a href="../../trade-pipeline/output/reports/cognitive_agents_2026-03-20/sources_13_srouji_v4.html">V4→</a></div>
+      </div>
+    </div>
+
+
+    <!-- ══════════ X PREDICTION VERIFICATION ══════════ -->
+    <div class="section-header" id="predictions">
+      <h2>&sect;X 预测验证仪表盘<span class="zh">Prediction Verification Dashboard</span></h2>
+    </div>
+
+    <p>从20位代理人的V4素材地图中策展 Top 45 个投资相关可追踪预测，按验证窗口分组。每个验证事件可能触发<a href="#baseline">基线概率</a>调整。<strong>追踪从 Q2 2026 开始。</strong></p>
+
+    <h3>代理人准确率排行 <span class="zh-inline">Agent Accuracy Leaderboard (tracking starts Q2 2026)</span></h3>
+    <div class="lb-grid">
+      <div class="lb-card"><div class="lb-name">Wei</div><div class="lb-score">--</div><div class="lb-detail">T1 · 0/17 verified</div></div>
+      <div class="lb-card"><div class="lb-name">Chang</div><div class="lb-score">--</div><div class="lb-detail">T1 · 0/9 verified</div></div>
+      <div class="lb-card"><div class="lb-name">Jensen</div><div class="lb-score">--</div><div class="lb-detail">T1 · 0/17 verified</div></div>
+      <div class="lb-card"><div class="lb-name">Altman</div><div class="lb-score">--</div><div class="lb-detail">T1 · 0/12 verified</div></div>
+      <div class="lb-card"><div class="lb-name">Nadella</div><div class="lb-score">--</div><div class="lb-detail">T1 · 0/10 verified</div></div>
+      <div class="lb-card"><div class="lb-name">Fouquet</div><div class="lb-score">--</div><div class="lb-detail">T2 · 0/14 verified</div></div>
+      <div class="lb-card"><div class="lb-name">Pichai</div><div class="lb-score">--</div><div class="lb-detail">T2 · 0/11 verified</div></div>
+      <div class="lb-card"><div class="lb-name">Musk</div><div class="lb-score">--</div><div class="lb-detail">T4 · 0/15 verified</div></div>
+    </div>
+    <p style="font-size:0.72rem;color:var(--text-quaternary);">注：准确率追踪从2026 Q2开始。当前所有预测均为PENDING状态。首批验证窗口：2026年5月(NVDA Q1 FY27)。</p>
+
+    <!-- Q2 2026 -->
+    <div class="pred-quarter-header">Q2 2026 (Apr-Jun) — 12 predictions verifiable</div>
+    <figure>
+      <table class="decision-matrix">
+        <thead><tr><th>Agent</th><th>Claim 预测</th><th>Source</th><th>Window</th><th>Status</th><th>If Verified → Adjust</th></tr></thead>
+        <tbody>
+          <tr class="pred-critical"><td>Jensen</td><td>NVIDIA Q1 FY27 revenue &gt;$43B (数据中心)</td><td>GTC 2026</td><td>May 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>"需求真实" 95%→97%</td></tr>
+          <tr class="pred-critical"><td>Jensen</td><td>Vera Rubin samples shipping H2 2026</td><td>GTC 2026</td><td>Jun 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>"NVDA主导2-3年" 70%→75%</td></tr>
+          <tr><td>Lisa Su</td><td>MI350 production validation完成</td><td>CES 2026</td><td>Q2 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>"CUDA 5年+" 35%→30%</td></tr>
+          <tr class="pred-critical"><td>Altman</td><td>OpenAI-Broadcom自研芯片延期至Q3</td><td>内部消息</td><td>Q2 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>自研芯片进度评估</td></tr>
+          <tr><td>Nadella</td><td>Azure AI CapEx Q3 FY26 &gt; Q2 FY26</td><td>Earnings</td><td>Apr 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>"需求真实" +2%</td></tr>
+          <tr><td>Wei</td><td>TSMC Q1 2026月均营收 &gt; NT$240B</td><td>月度公报</td><td>Apr 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>"需求真实" +1%</td></tr>
+          <tr><td>Fouquet</td><td>ASML Q1 2026订单&gt;€4B (含High-NA)</td><td>Earnings</td><td>Apr 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>"HBM超级周期" 80%±</td></tr>
+          <tr><td>Mehrotra</td><td>Micron HBM收入占比 &gt;25%</td><td>Q2 FY26</td><td>Jun 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>"HBM超级周期" 80%→85%</td></tr>
+          <tr><td>Hock Tan</td><td>Broadcom AI收入增速维持&gt;40% YoY</td><td>Q2 FY26</td><td>Jun 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>AVGO Tier 1地位确认</td></tr>
+          <tr><td>Pichai</td><td>Google Cloud AI收入run-rate &gt;$12B</td><td>Q1 2026</td><td>Apr 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>TPU商业化进度</td></tr>
+          <tr><td>Hassabis</td><td>Gemini 3发布（主要TPU训练）</td><td>Google内部</td><td>Q2 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>"CUDA不可替代" 15%→12%</td></tr>
+          <tr><td>Musk</td><td>xAI Memphis集群扩展至200K GPU</td><td>X/Twitter</td><td>Q2 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>GPU物理需求验证</td></tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <!-- Q3 2026 -->
+    <div class="pred-quarter-header">Q3 2026 (Jul-Sep) — 10 predictions verifiable</div>
+    <figure>
+      <table class="decision-matrix">
+        <thead><tr><th>Agent</th><th>Claim 预测</th><th>Source</th><th>Window</th><th>Status</th><th>If Verified → Adjust</th></tr></thead>
+        <tbody>
+          <tr class="pred-critical"><td>Jensen</td><td>Vera Rubin正式出货</td><td>GTC 2026</td><td>H2 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>"NVDA主导" 70%→80%</td></tr>
+          <tr class="pred-critical"><td>Altman</td><td>OpenAI-Broadcom芯片Q3交付</td><td>内部消息</td><td>Q3 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>"CUDA侵蚀" 加速信号</td></tr>
+          <tr class="pred-critical"><td>Jensen</td><td>Groq 3 LPU出货（收购后首个产品）</td><td>GTC 2026</td><td>Q3 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>非GPU推理市场验证</td></tr>
+          <tr><td>Nadella</td><td>Copilot企业版DAU &gt;10M</td><td>Ignite推测</td><td>Q3 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>AI应用ROI验证</td></tr>
+          <tr><td>Wei</td><td>TSMC Arizona N4量产(首批客户出货)</td><td>Arizona公告</td><td>H2 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>地缘分散风险降低</td></tr>
+          <tr><td>Haas</td><td>ARM数据中心份额达25%</td><td>Q4 FY26E</td><td>Q3 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>ARM估值验证(PE169x)</td></tr>
+          <tr><td>Kwak</td><td>HBM4样片向NVIDIA送测</td><td>投资者日</td><td>Q3 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>"HBM超级周期" 时间线</td></tr>
+          <tr><td>Pichai</td><td>TPU v7发布(推测)</td><td>Google内部</td><td>Q3-Q4 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>"CUDA不可替代" 进一步下调</td></tr>
+          <tr><td>Musk</td><td>Grok 3公开发布(对标GPT-5)</td><td>X/Twitter</td><td>Q3 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>xAI GPU需求持续性</td></tr>
+          <tr><td>Ghazi</td><td>Synopsys-Ansys整合首个联合产品</td><td>公司公告</td><td>Q3 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>$350B收购协同效应</td></tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <!-- Q4 2026 -->
+    <div class="pred-quarter-header">Q4 2026 (Oct-Dec) — 8 predictions verifiable</div>
+    <figure>
+      <table class="decision-matrix">
+        <thead><tr><th>Agent</th><th>Claim 预测</th><th>Source</th><th>Window</th><th>Status</th><th>If Verified → Adjust</th></tr></thead>
+        <tbody>
+          <tr class="pred-critical"><td>Jensen</td><td>NVIDIA FY27全年revenue &gt;$200B</td><td>年度指引</td><td>Q4 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>"$1T订单" 60%→75%</td></tr>
+          <tr><td>Altman</td><td>OpenAI IPO/S-1提交（推测2026 H2）</td><td>传闻</td><td>H2 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>Compute economics首次公开</td></tr>
+          <tr><td>Nadella</td><td>Microsoft Ignite: AI infrastructure路线图更新</td><td>Microsoft</td><td>Nov 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>2027 CapEx方向</td></tr>
+          <tr><td>Lisa Su</td><td>MI400发布(与Blackwell Ultra竞争)</td><td>路线图</td><td>Q4 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>"CUDA 5年+" 35%→25%</td></tr>
+          <tr><td>Lip-Bu Tan</td><td>Intel 18A首批客户芯片tape-out</td><td>Intel路线图</td><td>Q4 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>代工竞争格局变化</td></tr>
+          <tr><td>Fouquet</td><td>High-NA EUV第二台交付(TSMC或Intel)</td><td>ASML</td><td>Q4 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>2nm节点时间线</td></tr>
+          <tr><td>Chang</td><td>TSMC海外产能占比达15%+</td><td>分析师</td><td>End 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>地缘分散化进度</td></tr>
+          <tr><td>Keller</td><td>Tenstorrent获得Tier-1客户（推测）</td><td>行业传闻</td><td>H2 2026</td><td><span class="pred-status pred-pending">PENDING</span></td><td>RISC-V+ASIC竞争力</td></tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <!-- 2027+ Long Horizon -->
+    <div class="pred-quarter-header">2027+ — 长期预测 Long-horizon</div>
+    <figure>
+      <table class="decision-matrix">
+        <thead><tr><th>Agent</th><th>Claim 预测</th><th>Source</th><th>Window</th><th>Status</th><th>If Verified → Adjust</th></tr></thead>
+        <tbody>
+          <tr class="pred-critical"><td>Jensen</td><td>$1T订单转化为实际合同(&gt;$600B)</td><td>GTC 2026</td><td>End 2027</td><td><span class="pred-status pred-pending">PENDING</span></td><td>"$1T订单" 60%→90%</td></tr>
+          <tr><td>Jensen</td><td>NVIDIA数据中心年化收入$200B+</td><td>GTC 2026</td><td>FY28</td><td><span class="pred-status pred-pending">PENDING</span></td><td>估值模型重估</td></tr>
+          <tr><td>Pichai</td><td>TPU云收入超$20B ARR</td><td>推测</td><td>2027</td><td><span class="pred-status pred-pending">PENDING</span></td><td>"CUDA不可替代" 15%→8%</td></tr>
+          <tr><td>Lisa Su</td><td>AMD DC GPU份额达10%</td><td>路线图</td><td>2027</td><td><span class="pred-status pred-pending">PENDING</span></td><td>"NVDA主导" 70%→60%</td></tr>
+          <tr><td>Haas</td><td>ARM数据中心份额50%</td><td>投资者日</td><td>2027-2028</td><td><span class="pred-status pred-pending">PENDING</span></td><td>目标过于激进(实际21%)</td></tr>
+          <tr><td>Wei</td><td>TSMC CoWoS产能满足90%+需求</td><td>分析师</td><td>End 2027</td><td><span class="pred-status pred-pending">PENDING</span></td><td>封装瓶颈缓解时间线</td></tr>
+          <tr><td>Musk</td><td>Terafab运营(百万GPU级)</td><td>X/Twitter</td><td>2027-2028</td><td><span class="pred-status pred-pending">PENDING</span></td><td>方向正确但时间线×2-3</td></tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <!-- Verification Rules -->
+    <div class="question-box" style="margin-top:1.5rem;">
+      <h4>验证→调整规则 <span class="zh-inline">Verification → Adjustment Rules</span></h4>
+      <ul>
+        <li><strong>Critical prediction verified ✓</strong> → 立即更新对应<a href="#baseline">基线概率</a>（标记在"If Verified"列）</li>
+        <li><strong>Agent连续2个预测失败 ✗✗</strong> → 该代理人可信度降一级（T1→T2, T2→T3）</li>
+        <li><strong>Demand-side与Supply-side预测矛盾</strong> → 触发专题评估，不自动调整（反增殖原则）</li>
+        <li><strong>每季度末</strong> → 全面复核所有PENDING预测，更新准确率排行</li>
+      </ul>
+    </div>
+
+
+    <!-- ══════════ XI PORTFOLIO ══════════ -->
+    <div class="section-header" id="portfolio">
+      <h2>&sect;XI 投资组合调整框架<span class="zh">Portfolio Adjustment Framework</span></h2>
+    </div>
+
+    <p>三个Tier反映不同的风险收益特征。Tier 1是"基础设施永远赢" &mdash; 不管GPU还是ASIC赢，它们都受益。Tier 3是高赔率但高风险的方向性赌注。</p>
+
+    <h3>Tier 1: 高置信度 &mdash; 基础设施永远赢 <span class="zh-inline">Infrastructure Always Wins</span></h3>
+
+    <div class="tier-card tier-1">
+      <strong><span class="signal signal-bull">TIER 1</span> AVGO (Broadcom) &mdash; 两条链交叉点</strong>
+      <p>Jensen对了 &rarr; 网络需求增加。Jensen错了 &rarr; 自研ASIC设计收入增加。<strong>不管谁赢，Broadcom都赚。</strong> AI收入增速44.6%，3个以上Hyperscaler客户。</p>
+      <p><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">&#8594; Dashboard: AVGO</a></span></p>
+    </div>
+
+    <div class="tier-card tier-1">
+      <strong><span class="signal signal-bull">TIER 1</span> TSM (TSMC) &mdash; 所有芯片都经过TSMC</strong>
+      <p>不管是NVIDIA GPU、AMD MI、Google TPU、还是自研ASIC &mdash; 先进制程全在TSMC。CoWoS封装是当前AI芯片产能瓶颈。地缘风险是唯一的尾部风险。</p>
+      <p><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">&#8594; Dashboard: TSM</a></span></p>
+    </div>
+
+    <div class="tier-card tier-1">
+      <strong><span class="signal signal-bull">TIER 1</span> ASML &mdash; EUV垄断</strong>
+      <p>全球唯一EUV光刻机供应商。不管哪家芯片公司赢，先进制程都需要ASML的机器。Backlog ~&#8364;40B提供2-3年收入可见性。</p>
+      <p><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">&#8594; Dashboard: ASML</a></span></p>
+    </div>
+
+    <h3>Tier 2: 方向性赌注 <span class="zh-inline">Directional Bets</span></h3>
+
+    <div class="tier-card tier-2">
+      <strong><span class="signal signal-watch">TIER 2</span> NVDA (NVIDIA) &mdash; Forward P/E 25x需要验证</strong>
+      <p>AI需求最直接受益者。$1T订单验证 &rarr; 上行空间。风险：CUDA侵蚀 + 毛利率压缩 + 估值已反映增长。需要每季度通过财报验证。</p>
+      <p><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">&#8594; Dashboard: NVDA</a></span></p>
+    </div>
+
+    <div class="tier-card tier-2">
+      <strong><span class="signal signal-watch">TIER 2</span> MU (Micron) &mdash; HBM supercycle但存储周期风险</strong>
+      <p>HBM需求爆发的直接受益者。Idaho新厂2026 Q4投产。风险：存储行业周期性极强，DRAM价格转跌 &rarr; 利润暴跌。</p>
+      <p><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">&#8594; Dashboard: MU</a></span></p>
+    </div>
+
+    <h3>Tier 3: 高赔率博弈 <span class="zh-inline">High Payoff Plays</span></h3>
+
+    <div class="tier-card tier-3">
+      <strong><span class="signal signal-bear">TIER 3</span> AMD &mdash; 55%跌幅后MI400验证=反弹</strong>
+      <p>MI400是验证点。出货+性能达标+客户采纳 &rarr; 深度超卖反弹。但ROCm软件生态仍然是关键瓶颈。失败 &rarr; 继续边缘化。</p>
+      <p><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">&#8594; Dashboard: AMD</a></span></p>
+    </div>
+
+    <div class="tier-card tier-3">
+      <strong><span class="signal signal-bear">TIER 3</span> ARM &mdash; 169x PE脆弱</strong>
+      <p>AI推理推动ARM服务器渗透率 + royalty增速维持20%+ &rarr; PE有支撑。但RISC-V威胁 + Qualcomm诉讼 + 估值泡沫三重风险。</p>
+      <p><span class="ticker"><a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">&#8594; Dashboard: ARM</a></span></p>
+    </div>
+
+    <div class="question-box">
+      <h4>调仓规则 <span class="zh-inline">Rebalancing Rules</span></h4>
+      <ol>
+        <li><strong>Bull信号累积（3+）</strong> &rarr; 增加Tier 1权重，考虑加入Tier 2。例如：TSMC月度营收加速 + NVIDIA beat + HBM价格坚挺 = 三重确认。</li>
+        <li><strong>Bear Level 1出现</strong> &rarr; 减少Tier 2/3仓位，保留Tier 1。"不管谁赢"特性提供下行保护。</li>
+        <li><strong>泡沫预警（2+家Hyperscaler削减CapEx）</strong> &rarr; 全面减仓，只保留AVGO/ASML。</li>
+        <li><strong>Black Swan（台海事件）</strong> &rarr; 清仓半导体，等局势稳定后重估。TSMC是所有芯片的single point of failure。</li>
+      </ol>
+    </div>
+
+    <details>
+      <summary><strong>关于择时 <span class="zh-inline">A Note on Timing</span></strong></summary>
+      <p>这个框架告诉你<strong>该买谁</strong>和<strong>什么条件下调整</strong>，但不告诉你<strong>今天买还是明天买</strong>。择时需要结合技术分析（周期匹配）和用户自己的交易系统。</p>
+      <p>框架的价值是：当信号出现时，你已经知道该怎么反应，不需要临时决策。<strong>Signal Tracker是决策前的准备，不是决策本身。</strong></p>
+    </details>
+
+
+    <!-- ══════════ FOOTER ══════════ -->
+    <footer class="page-footer">
+      <p style="margin-bottom:0.5rem;">
+        <a href="file:///Users/luwenkang/trade-pipeline/output/reports/semiconductor_hub.html">Semiconductor Hub</a> &nbsp;&middot;&nbsp;
+        <a href="2026-W12-v3.html">W12 Weekly Synthesis</a> &nbsp;&middot;&nbsp;
+        <a href="file:///Users/luwenkang/trading-dashboard/trading-dashboard/index.html">Trading Dashboard</a>
+      </p>
+      <p style="margin-bottom:0.5rem;">
+        <a href="../../trade-pipeline/output/reports/nodes/NODE_1_GPU_AI%E8%8A%AF%E7%89%87%E8%AE%BE%E8%AE%A1_2026-03-19.html">Node 1: GPU/AI</a> &nbsp;&middot;&nbsp;
+        <a href="../../trade-pipeline/output/reports/nodes/NODE_2_%E5%85%89%E5%88%BB%E8%AE%BE%E5%A4%87_2026-03-19.html">Node 2: Lithography</a> &nbsp;&middot;&nbsp;
+        <a href="../../trade-pipeline/output/reports/nodes/NODE_3_%E4%BB%A3%E5%B7%A5%E5%88%B6%E9%80%A0_2026-03-19.html">Node 3: Foundry</a>
+      </p>
+      <p style="margin-bottom:0.5rem;">
+        <a href="../../trade-pipeline/output/reports/nodes/NODE_4_%E5%AD%98%E5%82%A8_HBM_2026-03-19.html">Node 4: HBM</a> &nbsp;&middot;&nbsp;
+        <a href="../../trade-pipeline/output/reports/nodes/NODE_5_%E5%AE%9A%E5%88%B6%E8%8A%AF%E7%89%87_ASIC_2026-03-19.html">Node 5: Custom Silicon</a> &nbsp;&middot;&nbsp;
+        <a href="../../trade-pipeline/output/reports/nodes/NODE_6_EDA_IP%E6%8E%88%E6%9D%83_2026-03-19.html">Node 6: EDA/IP</a>
+      </p>
+      <p style="margin-bottom:0.5rem;">
+        <a href="../../trade-pipeline/output/reports/nodes/NODE_7_%E9%9C%80%E6%B1%82%E4%BE%A7_Demand_2026-03-21.html">Node 7: Demand</a> &nbsp;&middot;&nbsp;
+        <a href="../../trade-pipeline/output/reports/nodes/NODE_8_AI_Lab_%E6%A8%A1%E5%9E%8B%E5%B1%82_2026-03-21.html">Node 8: AI Lab</a>
+      </p>
+      <p style="font-size:0.75rem;color:var(--text-quaternary);margin-top:1rem;">
+        Semiconductor Signal Tracker v2.0 (V4 Design) &nbsp;|&nbsp; Generated 2026-03-21 &nbsp;|&nbsp; 8 Nodes &times; 20 Agents &times; 4 Layers &times; 3 Tiers
+      </p>
+    </footer>
+
+  </main>
+
+  <!-- ═══════════ RIGHT NOTES SIDEBAR ═══════════ -->
+  <aside class="notes-sidebar" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&#10005;</button>
+      <h4>&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+
+    <!-- META 1: Strength -->
+    <div class="anno meta-note" data-section="latest-signals" id="m1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Strength: 6-Node Integration</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Unique integration depth:</strong> This is the only tracking system that synthesizes 8 supply chain nodes (GPU design, lithography, foundry, HBM, custom silicon, EDA/IP, demand side, AI lab) with 20 cognitive agents into a single forward-looking signal framework. Each signal is cross-referenced against multiple nodes rather than tracked in isolation. When TSMC monthly revenue spikes, this tracker connects it to Node 1 (GPU demand), Node 3 (foundry utilization), and Node 4 (HBM packaging demand) simultaneously.</p>
+        <p><strong>From research to action:</strong> The V1 tracker had signals and probabilities but no explicit action mapping. V2 closes the loop: every signal now has a specific investment action (HOLD/ADD/REDUCE/SELL) and ticker links to the Trading Dashboard. The chain is: Signal detected &rarr; Probability updated &rarr; Tier action triggered &rarr; Dashboard execution. This is the difference between &ldquo;interesting information&rdquo; and &ldquo;actionable intelligence.&rdquo;</p>
+        <p><strong>Temporal layering:</strong> The 4-layer frequency structure (monthly/quarterly/semi-annual/annual) prevents two failure modes: (1) overreacting to noise (monthly data fluctuations) and (2) missing structural shifts (annual technology transitions). Each layer has different adjustment rules &mdash; L1 signals get immediate &plusmn;10-20% probability updates, while L3 signals accumulate into quarterly reviews. This mirrors how professional macro funds structure their signal processing: fast signals for tactical, slow signals for strategic.</p>
+      </div>
+    </div>
+
+    <!-- META 2: Risk -->
+    <div class="anno meta-note" data-section="baseline" id="m2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Risk: Supply-side Echo Chamber</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Systematic bias update (2026-03-21):</strong> Original 16 agents were all supply-side. Agents #17-20 (Altman, Nadella, Pichai, Hassabis) plus Musk (#12, cross-listed) now add demand-side coverage. Ratio improved to 15 supply : 5 demand. But depth asymmetry remains &mdash; supply-side has 3+ specialized source files per agent vs demand-side just established. Treat supply-side-only consensus with continued +5-10% uncertainty band on bearish scenarios.</p>
+        <p><strong>What this means concretely:</strong> When Jensen says &ldquo;demand is insatiable&rdquo; and TSMC confirms &ldquo;we cannot build CoWoS fast enough,&rdquo; this looks like independent confirmation. But it is actually two sides of the same coin &mdash; the seller saying &ldquo;everyone wants to buy&rdquo; and the manufacturer saying &ldquo;we cannot make enough.&rdquo; Neither tells you whether the end-user (the company deploying AI in production) is actually seeing ROI. The demand-side question &mdash; &ldquo;Is $602B in CapEx generating proportional revenue for the buyers?&rdquo; &mdash; remains unanswered.</p>
+        <p><strong>Probability implication:</strong> The &ldquo;AI CapEx bubble&rdquo; probability (15-20%) may be systematically underestimated because our entire cognitive agent network has an incentive to believe the spend is rational. A demand-side agent (e.g., a CTO of a Fortune 500 company trying to deploy AI) might rate this risk at 25-35%. Until demand-side agents are added, treat all probabilities with a +5-10% uncertainty band on bearish scenarios.</p>
+      </div>
+    </div>
+
+    <!-- META 3: Automation Gap -->
+    <div class="anno meta-note" data-section="monthly" id="m3">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Automation Gap</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Semi-automatable signals:</strong> Monthly quantitative data (TSMC revenue, DRAM contract prices, GPU ASP) can be semi-automatically scraped. TSMC publishes monthly revenue in a consistent format on investor.tsmc.com. TrendForce publishes contract price reports. Mercury Research publishes GPU market share. A simple Python pipeline could fetch these on the 10th of each month and update the Latest Signals panel automatically.</p>
+        <p><strong>Human-judgment-only signals:</strong> But the most valuable signals are qualitative and resist automation. Jensen&rsquo;s tone shift at GTC (&ldquo;we used to say unprecedented demand, now he says sustainable demand &mdash; is that confidence or hedging?&rdquo;). Lisa Su&rsquo;s body language when discussing MI400 timeline. The gap between what a CEO says in the earnings call vs. what they do in the next quarter. These require human pattern-matching against years of accumulated context about each person&rsquo;s communication style.</p>
+        <p><strong>Current state: fully manual.</strong> As of March 2026, every signal in this tracker is manually updated. There is no automated data pipeline, no alert system, no dashboard integration. The risk: signals are missed or delayed because updating requires remembering to check 6+ sources on specific dates. The recommended first step is not full automation but a simple calendar reminder system: TSMC revenue day (10th), TrendForce report (mid-month), earnings dates (flagged 1 week ahead). Even this minimal discipline would significantly reduce missed signals.</p>
+      </div>
+    </div>
+
+    <!-- META 4: ADHD Warning -->
+    <div class="anno meta-note" data-section="signal-tiers" id="m4">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">ADHD Warning: Tracking != Trading</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="trap-tag">TRAP</span> <strong>Action substitution risk.</strong> Building a comprehensive signal tracking system is deeply satisfying work &mdash; categorizing signals, designing probability frameworks, creating tier structures. It activates the same &ldquo;productivity&rdquo; circuits as actual trading research. But tracking signals and executing trades are fundamentally different activities. The P0 sell-side research episode (5 days of research, zero trades executed) is the template for how this can go wrong.</p>
+        <p><strong>The honest question:</strong> In the 3 weeks since the 20 cognitive agent reports were completed, how many actual trades were executed based on their insights? If the answer is zero, then Signal Tracker is functioning as an elaborate procrastination device &mdash; creating the feeling of &ldquo;working on trading&rdquo; without the discomfort of making actual buy/sell decisions under uncertainty.</p>
+        <p><strong>Antidote: outcome tracking.</strong> This tracker&rsquo;s value can only be validated by tracking a specific metric: &ldquo;Signal detected &rarr; Action recommended &rarr; Trade executed &rarr; P&amp;L outcome.&rdquo; If after 3 months, the Signal &rarr; Trade conversion rate is below 20%, the system is providing intellectual stimulation rather than trading edge. At that point, the honest response is to simplify radically: reduce to 3 signals (TSMC monthly, NVDA quarterly, DRAM price) and force a trade decision on each one.</p>
+      </div>
+    </div>
+
+    <!-- META 5: Chain Break -->
+    <div class="anno meta-note" data-section="portfolio" id="m5">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Chain Break: Signal-to-Dashboard</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>The intended chain:</strong> Signal Tracker (detect) &rarr; Judgment (evaluate probability) &rarr; Action (decide tier adjustment) &rarr; Trading Dashboard (execute) &rarr; Review (measure outcome). This is a clean five-step loop that, in theory, converts research insight into trading P&amp;L. Each step feeds the next: detection triggers evaluation, evaluation triggers action, action triggers execution.</p>
+        <p><strong>Where it breaks:</strong> The chain currently breaks between Action and Dashboard. The Signal Tracker recommends &ldquo;HOLD NVDA&rdquo; or &ldquo;evaluate AMD for entry,&rdquo; but the Trading Dashboard does not read the Signal Tracker&rsquo;s output. There is no automated handoff. The Dashboard shows price charts and technical indicators, but it does not display &ldquo;Signal Tracker says: 3 bull signals accumulated, consider increasing Tier 1 weight.&rdquo; This means the trader must manually carry the Signal Tracker&rsquo;s recommendation to the Dashboard &mdash; a step that is easily forgotten or deprioritized.</p>
+        <p><strong>Potential fix:</strong> The simplest bridge would be a &ldquo;Signal Summary&rdquo; widget on the Trading Dashboard homepage that displays: (1) current signal count by direction (bull/bear/watch), (2) most recent L1/L2 signal, (3) current portfolio tier recommendations. This widget could read from a JSON file that the Signal Tracker exports on each update. The technology is trivial; the discipline of actually updating the JSON is the real bottleneck. This is why the Update Discipline note (m6) matters as much as the technical architecture.</p>
+      </div>
+    </div>
+
+    <!-- META 6: Update Discipline -->
+    <div class="anno meta-note" data-section="tracking" id="m6">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Update Discipline</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Recommended cadence:</strong> Every month on the 10th (TSMC revenue release day), do a complete signal scan. This is the natural anchor because TSMC revenue is the single most important leading indicator. The scan should take 30-60 minutes: check TSMC number, check DRAM prices, check any ad-hoc news (export controls, M&amp;A, product launches), update the Latest Signals panel, update any affected baseline probabilities.</p>
+        <p><strong>Quarterly deep review:</strong> During each earnings season (February, May, August, November), do a full baseline probability review. This is when all 7 quarterly signals fire simultaneously. Block 2-3 hours after NVIDIA reports (the most important single earnings) to: update all 6 baseline probabilities, review tier allocations, check milestone calendar for upcoming catalysts, update the right sidebar notes if any meta-assessments have changed.</p>
+        <p><strong>L1 emergency protocol:</strong> When a Level 1 signal fires (NVDA miss >10%, CapEx cut >20%, Taiwan crisis, DRAM crash >15%), evaluate within 24 hours. Do not wait for the monthly scan. L1 signals are rare (1-2 per year) but each one can move probabilities by 10-20 percentage points. The update should be: (1) update affected baseline probability, (2) check tier allocation implications, (3) record the signal and your assessment in the Latest Signals panel, (4) communicate any trade decision to the Trading Dashboard.</p>
+        <p><strong>Decay risk:</strong> The biggest threat to this tracker is not inaccuracy but abandonment. A signal tracker that is updated for 2 months and then forgotten is worse than no tracker at all &mdash; because stale probabilities create false confidence. If you find yourself skipping 2+ monthly scans in a row, it is better to archive this page and rely on 3 simple alerts (TSMC monthly, NVDA quarterly, DRAM monthly) than to maintain a comprehensive-but-stale tracker.</p>
+      </div>
+    </div>
+
+    <!-- META 7: China Antidote -->
+    <div class="anno meta-note" data-section="china-semi" id="m7">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Echo Chamber 的解药</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>为什么必须加中国视角：</strong>20个代理人中15个西方供给侧+5个需求侧(Altman/Nadella/Pichai/Hassabis/Musk)，但中国覆盖仍为0。当Jensen说"demand is insatiable"而TSMC确认"CoWoS产能不足"，需求侧代理人(Altman/Nadella)确认CapEx加速 &mdash; 但仍缺少中国说"我已经有替代了"的视角。</p>
+        <p><strong>结构性偏差：</strong>所有bearish概率可能被系统性低估5-10%。特别是"AI CapEx泡沫"(15-20%)和"CUDA护城河5年+"(35%) &mdash; 如果加入中国AI公司在Ascend上成功训练的证据，CUDA的不可替代性会进一步下降。</p>
+        <p><strong>数据质量悖论：</strong>中国半导体数据最不透明的地方恰恰是最重要的地方 &mdash; SMIC良率、华为出货量、大基金实际拨付。这意味着我们在最需要精确判断的维度上信息最少。承认这个事实比用不可靠数据填充更诚实。</p>
+      </div>
+    </div>
+
+    <!-- META 8: Data Quality -->
+    <div class="anno meta-note" data-section="china-semi" id="m8">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">数据质量警告</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="trap-tag">TRAP</span> <strong>中国半导体数据的三层不透明：</strong></p>
+        <p><strong>Layer 1 — 公司层：</strong>SMIC财报只披露收入和产能利用率，不披露按制程节点的良率和出货。华为海思完全不公开Ascend出货数据。所有"出货量"数字来自TrendForce/供应链估计，误差带可能±30%。</p>
+        <p><strong>Layer 2 — 政策层：</strong>大基金一期/二期已暴露严重腐败(多名高管被查)。三期¥3,440亿的实际拨付节奏和投向无法独立验证。"政府目标70%自给率"是政治口号还是工程路线图？</p>
+        <p><strong>Layer 3 — 叙事层：</strong>西方分析师倾向高估管制效果("China can't do it")，中国媒体倾向高估自主进展("技术突破")。真相在中间，但中间在哪里没人知道。</p>
+        <p><strong>操作建议：</strong>对中国相关概率，使用宽置信区间(±15%而非±5%)。宁可承认不确定，不要假装精确。</p>
+      </div>
+    </div>
+
+    <!-- ═══ KNOWLEDGE NOTES ═══ -->
+    <hr class="notes-divider">
+
+    <div class="anno know-note" data-section="baseline" id="k1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">CUDA是什么？</span>
+        <span class="mn-fold">▾</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>类比：CUDA之于GPU = iOS之于iPhone。</strong> CUDA是NVIDIA的GPU编程框架。过去15年，全球90%的AI研究代码都基于CUDA编写。开发者已经习惯CUDA，切换成本极高——就像从iOS转Android要重写所有App。</p>
+        <p><strong>为什么置信度从80%降到35%：</strong>2024年Claude和Gemini在Google TPU上训练成功，证明前沿AI模型可以完全绕过CUDA。PyTorch 2.0的torch.compile()开始创建硬件无关的编译层——相当于"写一次代码，自动适配所有芯片"。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="nodes" id="k2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">HBM是什么？</span>
+        <span class="mn-fold">▾</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>类比：HBM之于GPU = RAM之于CPU，但堆在旁边。</strong> High Bandwidth Memory(高带宽内存)是堆叠在GPU芯片旁边的超快内存。AI训练需要同时处理海量数据，普通内存速度不够，HBM速度是普通DRAM的10倍。</p>
+        <p><strong>为什么是supercycle：</strong>每块AI GPU需要6-8颗HBM。NVIDIA一年卖数百万块GPU → 数千万颗HBM需求。SK Hynix和Micron的产能全被预订到2027年。上一轮DRAM supercycle是2017年加密矿机热潮，持续18个月后DRAM价格暴跌60%。当前HBM已持续~24个月——超过上轮周期长度。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="nodes" id="k3">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">CoWoS封装是什么？</span>
+        <span class="mn-fold">▾</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>类比：CoWoS = 把GPU和HBM用胶水粘在一起的技术。</strong> Chip-on-Wafer-on-Substrate是TSMC独家的先进封装技术。它把GPU芯片和HBM芯片并排放在同一块硅基板上，用微小的金属线连接。这是AI芯片的物理瓶颈——TSMC的CoWoS产能直接限制了全球AI GPU的产量。</p>
+        <p><strong>数字感受：</strong>2024年CoWoS月产能约8万片 → 2026年目标20万片。但需求可能超过30万片。即使TSMC拼命扩产，供给缺口仍然存在——这就是为什么NVIDIA把CoWoS称为"最紧缺的资源"。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="baseline" id="k4">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">为什么TSMC是垄断？</span>
+        <span class="mn-fold">▾</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>简单回答：地球上只有TSMC能做最先进的芯片。</strong>制造5nm以下芯片需要EUV光刻机(ASML独供) + 数百道工序的良率控制 + 数千亿美元的持续投资。Samsung尝试了10年，良率仍然不合格。Intel曾经领先，但2016年后落后整整2代。</p>
+        <p><strong>投资含义：</strong>不管NVIDIA、AMD、Google谁赢，芯片都要在TSMC制造。TSM是"不选边的基础设施"。唯一风险是台海地缘政治——这是尾部风险（概率低但影响极大）。TSMC正在Arizona建厂缓解这个风险，但产能要到2028年才有意义。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="annual" id="k5">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">EUV光刻是什么？</span>
+        <span class="mn-fold">▾</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>类比：EUV光刻 = 用极细的光束在芯片上"刻字"。</strong>Extreme Ultraviolet Lithography使用13.5nm波长的极紫外光，在芯片上刻出比病毒还小的电路图案。每台EUV光刻机重150吨、价格$3.5亿、需要3架747飞机运输。</p>
+        <p><strong>ASML垄断：</strong>ASML是地球上唯一能制造EUV光刻机的公司。没有竞争对手，没有替代品。任何想制造先进芯片的公司(TSMC/Samsung/Intel)都必须排队买ASML的机器。Backlog(未交付订单)约€40B，提供2-3年收入可见性。这就是为什么ASML是"最稳固的垄断"。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="baseline" id="k6">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">$1T订单 = LOI不是合同</span>
+        <span class="mn-fold">▾</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Jensen说"$1T订单可见性"到底什么意思？</strong>LOI = Letter of Intent(意向书)，是客户表示"我有意愿在未来几年买这么多芯片"的非约束性承诺。它不是合同——客户可以随时取消或减少。Colette Kress(NVDA CFO)承认OpenAI的$100B LOI "still at LOI stage"。</p>
+        <p><strong>历史对比：</strong>LOI转化为实际合同的比率在不同行业差异很大：航空业~70-80%，科技行业~40-60%。如果按50%转化率算，$1T订单可能实际只有$500-600B——这仍然是巨大的，但比Jensen的叙事少了40%。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="portfolio" id="k7">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">毛利率73%意味什么？</span>
+        <span class="mn-fold">▾</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>NVDA毛利率73% = 芯片行业历史最高水平。</strong>对比：Intel毛利率~45%，AMD~50%，苹果~46%，高通~56%。NVDA能维持73%是因为CUDA生态锁定+供不应求+没有真正竞争者。</p>
+        <p><strong>如果降到55%：</strong>收入不变的情况下，净利润减少约25%。$78B季度收入 × 73%毛利 = $57B毛利。降到55% = $43B毛利，少了$14B/季度。对股价的影响：PE倍数可能从25x → 20x（因为增长确定性降低），叠加利润下降 → 股价可能下跌30-40%。这就是为什么"毛利率压缩到55-65%"这个75%概率判断如此重要。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="baseline" id="k8">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">$602B AI CapEx规模感</span>
+        <span class="mn-fold">▾</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>$602B有多大？</strong>等于挪威一年GDP。等于全球每人花$75在AI基础设施上。MSFT/GOOG/AMZN/META四家2026年AI CapEx合计约$300B(占总额一半)，每家每天投入约$2亿。</p>
+        <p><strong>历史对比：</strong>2023年AI CapEx约$200B → 2024年~$350B → 2026年$602B = 3年翻3倍。2000年电信泡沫时期，电信CapEx也是3年翻3倍($100B→$300B)，然后暴跌70%。当前最关键的差异：Hyperscaler们现金充裕(MSFT $75B+, GOOG $100B+, META $50B+)，且AI收入已经在增长(不像2000年电信收入几乎为零)。但相似之处令人不安。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="nodes" id="k9">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">ROCm = AMD的CUDA</span>
+        <span class="mn-fold">▾</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>类比：ROCm之于CUDA = Android之于iOS。</strong>ROCm是AMD的GPU编程框架，理论上功能对标CUDA。问题在于生态——CUDA有15年的代码积累，ROCm只有5年，且兼容性和调试工具远不如CUDA成熟。</p>
+        <p><strong>为什么MI400很关键：</strong>AMD MI400是第一款在硬件性能上可能匹配NVIDIA H200的芯片。但即使硬件够强，如果ROCm软件体验差（代码跑不通、调试困难），客户仍然不会切换。这就是"35% CUDA护城河"判断的核心：硬件在追赶，但软件生态差距可能缩小也可能长期存在。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="annual" id="k10">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">RISC-V威胁</span>
+        <span class="mn-fold">▾</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>类比：RISC-V之于ARM = Linux之于Windows。</strong>RISC-V是开源芯片架构——任何公司都可以免费使用，不需要向ARM交授权费。ARM每颗芯片收取1-2%版税，RISC-V收取0%。</p>
+        <p><strong>为什么是存亡级威胁：</strong>ARM的169x PE完全建立在"每颗移动/服务器芯片都付ARM版税"的预期上。如果RISC-V在数据中心份额超过5%，ARM的版税增速会被打断，169x PE将失去支撑。想想Linux用了20年从"玩具"变成服务器市场90%份额——RISC-V可能走同样的路，只是速度可能更快或更慢。当前RISC-V在数据中心份额<1%，但正在加速。</p>
+      </div>
+    </div>
+
+    <!-- KNOW k11: SMIC multi-patterning -->
+    <div class="anno know-note" data-section="china-semi" id="k11">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">SMIC 7nm是怎么做到的？</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>多重曝光(Multi-patterning)</strong>：正常7nm用ASML的EUV光刻机一次曝光搞定。SMIC没有EUV，用老一代DUV(深紫外)光刻机对同一片晶圆曝光多次(4-7次)来达到更小的线宽。</p>
+        <p><strong>类比：</strong>EUV=高清相机拍一张清晰照片。DUV多重曝光=用低清相机拍5-7张，后期叠合成一张高清 &mdash; 能做到，但慢、贵、废品率高。</p>
+        <p><strong>代价：</strong>(1)良率低 &mdash; 每次曝光都有对齐误差累积，估计良率50-60%(TSMC EUV良率>90%) (2)产能极低 &mdash; 曝光次数多=生产速度慢，月产<5,000片 vs TSMC 3nm>10万片 (3)成本高 &mdash; 单颗芯片成本可能是TSMC的2-3倍</p>
+        <p><strong>为什么重要：</strong>这证明中国在技术上能造出7nm芯片，但产能和成本限制意味着无法大规模替代进口。真正的分水岭是<strong>SMEE何时交付14nm DUV</strong> &mdash; 那将使中国在成熟制程上彻底摆脱ASML依赖。</p>
+      </div>
+    </div>
+
+    <!-- KNOW k12: Ascend 910C -->
+    <div class="anno know-note" data-section="china-semi" id="k12">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">Ascend 910C vs H100</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Ascend 910C</strong>是华为海思的AI训练芯片，SMIC 7nm制造。对标NVIDIA H100。</p>
+        <p><strong>性能对比(行业估计)：</strong></p>
+        <ul style="font-size:0.78rem;margin-bottom:0.3rem;">
+          <li>FP16训练：~400 TFLOPS vs H100 ~990 TFLOPS (约40-45%)</li>
+          <li>INT8推理：接近H100的70-80%（推理对算力要求低，Ascend优势场景）</li>
+          <li>HBM带宽：HBM2e ~1.5TB/s vs H100 HBM3 3.35TB/s（存储带宽是最大瓶颈）</li>
+        </ul>
+        <p><strong>DeepSeek验证：</strong>2025年DeepSeek R1在Ascend集群上训练成功，这是第一个证明"非NVIDIA硬件能训练前沿模型"的公开案例。意义 &gt; 数字本身。</p>
+        <p><strong>局限：</strong>软件生态(CANN)远不如CUDA成熟，开发者适配成本高。大规模集群(>1000卡)稳定性未验证。价格约H100的50-60%但受制裁供应不稳。</p>
+      </div>
+    </div>
+
+    <!-- KNOW k13: 大基金 -->
+    <div class="anno know-note" data-section="china-semi" id="k13">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">大基金一二三期</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>国家集成电路产业投资基金</strong>，中国政府推动半导体自主的核心财政工具。三期合计超&yen;6,800亿（~$950B）。</p>
+        <p><strong>一期(2014, ¥1,387亿)：</strong>重点投制造(SMIC拿了65%+)和设计(紫光)。结果：SMIC从28nm→14nm量产。但紫光债务危机暴露了"撒钱"策略的局限。</p>
+        <p><strong>二期(2019, ¥2,041亿)：</strong>转向设备和材料 &mdash; SMEE(光刻)、北方华创(刻蚀/薄膜)、沪硅(硅片)。应对升级的出口管制。</p>
+        <p><strong>三期(2024, ¥3,440亿)：</strong>史上最大。重点：先进封装(绕过光刻限制的替代路径) + AI芯片 + EDA工具。信号：政府认为封装可能比光刻更快突破瓶颈。</p>
+        <p><strong>腐败问题：</strong>一期/二期多名高管落马（丁文武等），实际拨付效率和投向偏离严重。三期加强了审计但独立验证仍缺失。投资者应将"大基金三期¥3,440亿"打五折估计实际有效投入。</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+(function() {
+  // 1. Left sidebar toggle
+  var hamburger = document.getElementById('hamburgerBtn');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('sidebarOverlay');
+  hamburger.addEventListener('click', function() { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', function() { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+  sidebar.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() { if (window.innerWidth <= 900) { sidebar.classList.remove('open'); overlay.classList.remove('open'); } });
+  });
+
+  // 2. Note toggle
+  window.toggleNote = function(head) { head.parentElement.classList.toggle('open'); requestAnimationFrame(positionNotes); };
+
+  // 3. Position notes alongside their target sections
+  function positionNotes() {
+    var sidebarEl = document.getElementById('notesSidebar');
+    if (!sidebarEl) return;
+    var notes = Array.from(sidebarEl.querySelectorAll('.anno'));
+    var scrollY = window.scrollY;
+    var sidebarAbsTop = sidebarEl.getBoundingClientRect().top + scrollY;
+    var headerEl = sidebarEl.querySelector('.notes-sidebar-header');
+    var headerHeight = headerEl ? headerEl.offsetHeight + 12 : 40;
+    notes.sort(function(a, b) {
+      var secA = document.getElementById(a.dataset.section);
+      var secB = document.getElementById(b.dataset.section);
+      if (!secA || !secB) return 0;
+      return secA.getBoundingClientRect().top - secB.getBoundingClientRect().top;
+    });
+    var lastBottom = headerHeight;
+    notes.forEach(function(note) {
+      if (note.style.display === 'none') return;
+      var section = document.getElementById(note.dataset.section);
+      if (!section) { note.style.display = 'none'; return; }
+      var sectionAbsTop = section.getBoundingClientRect().top + scrollY;
+      var targetY = sectionAbsTop - sidebarAbsTop;
+      if (targetY < lastBottom + 8) targetY = lastBottom + 8;
+      note.style.top = targetY + 'px';
+      lastBottom = targetY + note.offsetHeight;
+    });
+    sidebarEl.style.minHeight = (lastBottom + 40) + 'px';
+  }
+
+  // 4. Run positioning on load, details toggle, resize, scroll
+  window.addEventListener('load', function() {
+    positionNotes();
+    document.querySelectorAll('details').forEach(function(d) { d.addEventListener('toggle', function() { setTimeout(positionNotes, 50); }); });
+  });
+  window.addEventListener('resize', positionNotes);
+  var scrollTimer;
+  window.addEventListener('scroll', function() { clearTimeout(scrollTimer); scrollTimer = setTimeout(positionNotes, 100); }, { passive: true });
+
+  // 5. Highlight <-> Note sync
+  document.querySelectorAll('.nref, mark.hl-know').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      e.preventDefault();
+      var noteId = el.dataset.note;
+      var note = document.getElementById(noteId);
+      if (!note) return;
+      note.classList.add('open');
+      requestAnimationFrame(function() {
+        positionNotes();
+        note.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        note.classList.add('flash');
+        setTimeout(function() { note.classList.remove('flash'); }, 1500);
+      });
+    });
+  });
+
+  // 6. Hover bidirectional
+  document.querySelectorAll('.anno').forEach(function(note) {
+    note.addEventListener('mouseenter', function() { document.querySelectorAll('[data-note="' + note.id + '"]').forEach(function(el) { el.classList.add('hover'); }); });
+    note.addEventListener('mouseleave', function() { document.querySelectorAll('[data-note="' + note.id + '"]').forEach(function(el) { el.classList.remove('hover'); }); });
+    note.addEventListener('dblclick', function() { var section = document.getElementById(note.dataset.section); if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  });
+  document.querySelectorAll('[data-note]').forEach(function(el) {
+    if (el.classList.contains('anno')) return;
+    el.addEventListener('mouseenter', function() { var note = document.getElementById(el.dataset.note); if (note) note.classList.add('hover'); });
+    el.addEventListener('mouseleave', function() { var note = document.getElementById(el.dataset.note); if (note) note.classList.remove('hover'); });
+  });
+
+  // 7. Top controls: toggle knowledge notes, expand/collapse
+  var allAnnos = document.querySelectorAll('.anno');
+  var knowNotes = document.querySelectorAll('.anno.know-note');
+  var knowMarks = document.querySelectorAll('mark.hl-know');
+  var knowRefs = document.querySelectorAll('.nref');
+  var metaNotes = document.querySelectorAll('.anno.meta-note');
+  document.getElementById('noteCountLabel').textContent = metaNotes.length + ' 元思考注解';
+  window.toggleKnowNotes = function() {
+    var btn = document.getElementById('knowToggleBtn');
+    var isActive = btn.classList.toggle('active');
+    btn.textContent = isActive ? '显示' : '隐藏';
+    knowNotes.forEach(function(n) { n.style.display = isActive ? '' : 'none'; });
+    knowMarks.forEach(function(m) { m.style.background = isActive ? '' : 'transparent'; m.style.borderBottom = isActive ? '' : 'none'; });
+    knowRefs.forEach(function(r) { r.style.display = isActive ? '' : 'none'; });
+    requestAnimationFrame(positionNotes);
+  };
+  window.expandAllNotes = function() { allAnnos.forEach(function(n) { n.classList.add('open'); }); requestAnimationFrame(positionNotes); };
+  window.collapseAllNotes = function() { allAnnos.forEach(function(n) { n.classList.remove('open'); }); requestAnimationFrame(positionNotes); };
+
+  // 8. Right sidebar toggle (narrow screens)
+  var notesSidebarEl = document.getElementById('notesSidebar');
+  var notesToggleBtn = document.getElementById('notesToggleBtn');
+  var notesOverlayEl = document.getElementById('notesOverlay');
+  var notesCloseBtn = document.getElementById('notesCloseBtn');
+  function toggleNotesSidebar() {
+    var willClose = !notesSidebarEl.classList.contains('ns-closed');
+    notesSidebarEl.classList.toggle('ns-closed', willClose);
+    notesToggleBtn.style.display = willClose ? 'flex' : 'none';
+    notesOverlayEl.classList.toggle('open', !willClose);
+    if (!willClose) requestAnimationFrame(positionNotes);
+  }
+  if (notesToggleBtn) notesToggleBtn.addEventListener('click', toggleNotesSidebar);
+  if (notesOverlayEl) notesOverlayEl.addEventListener('click', toggleNotesSidebar);
+  if (notesCloseBtn) notesCloseBtn.addEventListener('click', toggleNotesSidebar);
+
+  // 9. Resize handler + ensure sidebar state on load
+  if (window.innerWidth > 1200) {
+    notesSidebarEl.classList.remove('ns-closed');
+    notesToggleBtn.style.display = 'none';
+  } else {
+    notesSidebarEl.classList.add('ns-closed');
+    notesToggleBtn.style.display = 'flex';
+  }
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 1200) { notesSidebarEl.classList.remove('ns-closed'); notesToggleBtn.style.display = 'none'; notesOverlayEl.classList.remove('open'); }
+  });
+
+  // 10. Default: expand all annotations on load
+  expandAllNotes();
+
+  // 11. Active TOC highlighting
+  var navLinks = document.querySelectorAll('.sidebar nav ul li a[href^="#"]');
+  var tocObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        navLinks.forEach(function(link) { link.classList.remove('active'); if (link.getAttribute('href') === '#' + entry.target.id) link.classList.add('active'); });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  document.querySelectorAll('[id="latest-signals"], [id="baseline"], [id="monthly"], [id="quarterly"], [id="annual"], [id="milestones"], [id="nodes"], [id="signal-tiers"], [id="china-semi"], [id="tracking"], [id="portfolio"]').forEach(function(s) { tocObserver.observe(s); });
+})();
+</script>
+<script src="ctx-injector.js"></script>
+<!-- OBS-VIZ: Plotly.js + Chart Initialization -->
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<script src="../lib/obs-viz.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Confidence Bar — 6 claims matching the baseline table exactly
+  OBS.initConfidenceBar('chart-confidence',
+    [
+      'AI计算需求真实且持续增长\nAI compute demand is real',
+      'HBM supercycle到2027',
+      'GPU毛利率压缩到55-65%\nMargin compression',
+      'NVIDIA 2-3年维持主导\n2-3yr dominance',
+      'CUDA护城河5年+\n5yr+ moat',
+      '中国自给率2027达50%\nChina 50% self-sufficiency',
+      'AI CapEx泡沫风险\nBubble risk'
+    ],
+    [95, 80, 75, 70, 35, 30, 17.5],
+    ['#4caf50', '#4caf50', '#ffc107', '#4caf50', '#f44336', '#ffc107', '#f44336'],
+    {
+      height: 360,
+      signals: ['BULL', 'BULL', 'WATCH', 'BULL', 'BEAR', 'WATCH', 'CATASTROPHIC'],
+      tickers: ['NVDA TSM AVGO', 'SK MU', 'NVDA AMD', 'NVDA', 'AMD AVGO', 'SMIC 0981.HK', 'ALL SEMI'],
+      hoverExtra: [
+        '2024年初~60% → 2026年95%，CapEx $602B验证',
+        '上轮DRAM cycle(2017矿机)持续18个月后暴跌。当前已24个月',
+        '当前73%，降到55%=利润减少25%。Intel~45%, AMD~50%',
+        '数据中心GPU份额>95%，但AMD MI400是下一变量',
+        '2023年~80% → 2026年35%，TPU/ROCm持续侵蚀',
+        '当前~30%(IC Insights)。7nm有限量产但EUV=0。数据不透明，置信区间±15%',
+        '图表显示区间中点17.5%（基线范围15-20%）。2000年电信泡沫也是CapEx 3年翻3倍'
+      ]
+    }
+  );
+});
+</script>
+<script src="../lib/reading-mode.js"></script>
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && !url.pathname.startsWith('http')) { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Node 6: EDA/IP授权 — 28轮元思考过程</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <style>
+    :root {
+      --bg-base: #08090a; --bg-elevated: #0f1011; --bg-surface: #141516; --bg-overlay: #191a1b;
+      --border-subtle: #23252a; --border-default: #34343a; --border-strong: #3e3e44;
+      --text-primary: #f7f8f8; --text-secondary: #d0d6e0; --text-tertiary: #8a8f98; --text-quaternary: #62666d;
+      --accent: #f8a848; --accent-dim: rgba(248, 168, 72, 0.12); --accent-hover: rgba(248, 168, 72, 0.08);
+      --knowledge: #5b9bd5; --knowledge-dim: rgba(91, 155, 213, 0.12);
+      --green: #4caf50; --red: #f44336; --orange: #ffa726;
+      --font-sans: 'Inter', 'Inter Variable', -apple-system, system-ui, sans-serif;
+      --font-mono: 'SF Mono', 'Menlo', monospace;
+      --radius-sm: 8px; --radius-md: 12px; --sidebar-width: 240px;
+    }
+    * { box-sizing: border-box; }
+    html { font-family: var(--font-sans); font-feature-settings: 'liga' 1, 'calt' 1; letter-spacing: -0.012em; -webkit-font-smoothing: antialiased; }
+    body { margin: 0; padding: 0; background: var(--bg-base); color: var(--text-primary); font-size: 15px; line-height: 1.65; }
+    .page-wrapper { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { position: sticky; top: 0; height: 100vh; width: var(--sidebar-width); min-width: var(--sidebar-width); overflow-y: auto; padding: 1.25rem 0.75rem; border-right: 1px solid var(--border-subtle); background: var(--bg-elevated); z-index: 100; }
+    .sidebar h4 { margin-bottom: 0.5rem; padding: 0 0.5rem; font-size: 0.7rem; font-weight: 590; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-quaternary); }
+    .sidebar nav ul { list-style: none; padding: 0; margin: 0 0 1rem 0; }
+    .sidebar nav ul li a { display: block; padding: 0.25rem 0.5rem; font-size: 0.78rem; color: var(--text-tertiary); text-decoration: none; border-radius: var(--radius-sm); transition: background 0.12s, color 0.12s; line-height: 1.4; }
+    .sidebar nav ul li a:hover { background: var(--accent-hover); color: var(--text-primary); }
+    .sidebar nav ul li a .toc-num { color: var(--text-quaternary); margin-right: 0.25rem; font-size: 0.65rem; font-weight: 510; }
+
+    /* Main */
+    .main-content { flex: 1; min-width: 0; max-width: 960px; padding: 2.5rem 2.5rem 5rem; }
+
+    /* Header */
+    .page-header { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-default); }
+    .page-header h1 { margin-bottom: 0.3rem; font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 680; letter-spacing: -0.025em; }
+    .page-header .subtitle { color: var(--text-tertiary); margin-bottom: 1rem; font-size: 0.95rem; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .badge { display: inline-block; padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.75rem; font-weight: 510; background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(248, 168, 72, 0.25); }
+    .role-badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; background: rgba(91,155,213,0.12); color: var(--knowledge); }
+
+    /* Sections */
+    .section-header { margin-top: 3.5rem; margin-bottom: 1.25rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border-subtle); }
+    .section-header h2 { font-size: 1.25rem; font-weight: 590; letter-spacing: -0.015em; margin-bottom: 0; }
+    h3 { font-size: 1.1rem; font-weight: 590; margin-top: 1.5rem; }
+    p { color: var(--text-secondary); margin-bottom: 1rem; }
+    strong { color: var(--text-primary); font-weight: 590; }
+    ul, ol { color: var(--text-secondary); padding-left: 1.2rem; }
+    li { margin-bottom: 0.35rem; line-height: 1.6; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Details */
+    details { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.8rem 1rem; margin: 0.8rem 0; background: var(--bg-elevated); }
+    details summary { cursor: pointer; font-weight: 510; font-size: 0.9rem; color: var(--text-primary); }
+    details[open] summary { margin-bottom: 0.6rem; color: var(--accent); }
+
+    /* Priority box */
+    .priority-box { border: 1px solid rgba(248, 168, 72, 0.3); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin-bottom: 2rem; background: var(--bg-surface); }
+    .priority-box h2 { color: var(--accent); margin-top: 0; font-size: 1.1rem; font-weight: 590; }
+
+    /* Arc items */
+    .arc-item { margin-bottom: 1rem; padding: 0.8rem; border-left: 3px solid var(--accent); background: rgba(66, 165, 245, 0.03); border-radius: 0 6px 6px 0; }
+    .arc-item strong { color: var(--accent); }
+
+    /* Question box */
+    .question-box { border: 2px solid var(--knowledge); border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; background: rgba(91, 155, 213, 0.05); }
+    .question-box h4 { color: var(--knowledge); margin-top: 0; }
+
+    /* Tables */
+    figure { margin: 1.25rem 0; overflow-x: auto; }
+    table { font-size: 0.82rem; border-collapse: collapse; width: 100%; }
+    th, td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border-subtle); text-align: left; }
+    th { white-space: nowrap; font-weight: 510; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-quaternary); border-bottom: 1px solid var(--border-default); }
+    td { color: var(--text-secondary); }
+    tr:hover td { background: var(--bg-elevated); }
+
+    /* Blockquote */
+    blockquote { border-left: 3px solid var(--accent); padding: 0.6rem 1.25rem; margin: 1rem 0; font-style: italic; background: var(--bg-surface); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-secondary); }
+
+    /* Signals */
+    .signal { display: inline-block; font-size: 0.75rem; padding: 0.1rem 0.4rem; border-radius: 3px; font-weight: 590; margin-right: 0.3rem; }
+    .signal-bull { background: rgba(76,175,80,0.15); color: var(--green); }
+    .signal-bear { background: rgba(244,67,54,0.15); color: var(--red); }
+    .signal-watch { background: rgba(255,167,38,0.15); color: var(--orange); }
+
+    /* Phase indicator */
+    .phase-tag { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+    .phase-explore { background: rgba(91,155,213,0.12); color: var(--knowledge); }
+    .phase-diagnose { background: rgba(255,167,38,0.12); color: var(--orange); }
+    .phase-build { background: rgba(76,175,80,0.12); color: var(--green); }
+    .phase-verify { background: rgba(244,67,54,0.12); color: var(--red); }
+
+    /* Footer */
+    .page-footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 2px solid var(--border-default); text-align: center; font-size: 0.85rem; color: var(--text-tertiary); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+
+    /* Mobile */
+    .hamburger-btn { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 200; background: var(--bg-surface); color: var(--text-primary); border: none; border-radius: 6px; width: 44px; height: 44px; font-size: 1.4rem; cursor: pointer; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+    @media (max-width: 900px) {
+      .sidebar { position: fixed; left: -320px; top: 0; transition: left 0.3s ease; box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.open { display: block; }
+      .hamburger-btn { display: block; }
+      .main-content { padding: 2rem 1rem 4rem; }
+    }
+    @media (min-width: 1400px) { .main-content { max-width: 1060px; } }
+  
+/* === Embedded mode: inside Dashboard iframe === */
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+body.embedded .hamburger-btn { display: none !important; }
+body.embedded .sidebar-overlay { display: none !important; }
+
+/* === Reading mode: full-width === */
+.reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+.reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+.reading-mode .hamburger-btn { display: none !important; }
+.reading-mode .sidebar-overlay { display: none !important; }
+</style>
+</head>
+<body>
+<nav style="position:sticky;top:0;z-index:999;background:rgba(8,9,10,0.95);backdrop-filter:blur(8px);padding:0.5rem 1.5rem;border-bottom:1px solid #23252a;font-size:0.78rem;display:flex;gap:1rem;align-items:center;">
+  <a href="../semiconductor_hub.html" style="color:#f8a848;text-decoration:none;">&larr; Semiconductor Hub</a>
+  <span style="color:#62666d;">&middot;</span>
+  <a href="NODE_6_EDA_IP授权_2026-03-19.html" style="color:#8a8f98;text-decoration:none;">Node 6 认知节点报告</a>
+  <span style="color:#62666d;">&middot;</span>
+  <a href="../cognitive_agents_2026-03-20/01_jensen_huang_metacognition.html" style="color:#8a8f98;text-decoration:none;">Jensen 元思考</a>
+</nav>
+
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="page-wrapper">
+
+  <aside class="sidebar" id="sidebar">
+    <h4>思考旅程</h4>
+    <nav>
+      <ul>
+        <li><a href="#overview"><span class="toc-num">&#9733;</span>速览结论</a></li>
+        <li><a href="#phase1"><span class="toc-num">I</span>任务定义</a></li>
+        <li><a href="#phase2"><span class="toc-num">II</span>素材解码</a></li>
+        <li><a href="#phase3"><span class="toc-num">III</span>矛盾与张力</a></li>
+        <li><a href="#phase4"><span class="toc-num">IV</span>时间与反面</a></li>
+        <li><a href="#phase5"><span class="toc-num">V</span>报告设计</a></li>
+        <li><a href="#phase6"><span class="toc-num">VI</span>成品审视</a></li>
+        <li><a href="#phase7"><span class="toc-num">VII</span>季度验证</a></li>
+        <li><a href="#phase8"><span class="toc-num">VIII</span>信号传导</a></li>
+        <li><a href="#phase9"><span class="toc-num">IX</span>交叉验证</a></li>
+      </ul>
+    </nav>
+    <h4 style="margin-top:1rem;">最终产出</h4>
+    <nav><ul>
+      <li><a href="NODE_6_EDA_IP授权_2026-03-19.html" style="color:var(--accent);">认知节点报告 &rarr;</a></li>
+    </ul></nav>
+    <h4 style="margin-top:1rem;">供应链节点</h4>
+    <nav><ul>
+      <li><a href="NODE_1_GPU_AI_metacognition.html">Node 1: GPU/AI芯片</a></li>
+      <li><a href="NODE_5_定制芯片_ASIC_metacognition.html">Node 5: 定制芯片/ASIC</a></li>
+    </ul></nav>
+  </aside>
+
+  <main class="main-content">
+
+    <header class="page-header">
+      <div class="role-badge">METACOGNITION LOG</div>
+      <h1>Node 6: EDA/IP授权 — 28轮元思考过程</h1>
+      <p class="subtitle">从"EDA双寡头不可破"到"ARM PE 169x能不能信" &nbsp;|&nbsp; 2026-03-20<br>
+      <span style="color:var(--text-quaternary);font-size:0.85em;">研究笔记 — 思考过程比结论更有价值</span></p>
+      <div class="badge-row">
+        <span class="badge">28轮元思考</span>
+        <span class="badge">9个Phase</span>
+        <span class="badge">6个claims交叉验证</span>
+        <span class="badge">SNPS/CDNS/ARM/RISC-V</span>
+      </div>
+    </header>
+
+    <!-- Overview -->
+    <div class="priority-box" id="overview">
+      <h2>&#129504; 28轮元思考的核心结论</h2>
+      <ol>
+        <li><strong>EDA是半导体链中确定性最高的"卖铲人"</strong>。无论谁设计芯片、用什么架构(ARM/RISC-V/x86)、在哪里制造(TSMC/Samsung/Intel)——都必须使用EDA工具。SNPS/CDNS双寡头控制70%+市场，切换成本$50-100M，80-85%经常性收入</li>
+        <li><strong>EDA和ARM是完全不同的投资论文，不应混为一谈</strong>。EDA(SNPS/CDNS)是确定性9/10的"收费站"；ARM是确定性7/10的高beta架构赌注。ARM PE 169x容不下任何失速，而RISC-V 25%全球份额且加速渗透高性能领域</li>
+        <li><strong>Ghazi(Synopsys)的信号比Haas(ARM)更可靠</strong>。Ghazi的行动(Ansys $350B收购+NVIDIA $20B投资+AgentEngineer L4)与言论高度一致，可信度8/10。Haas对RISC-V威胁公开讨论不足，这个盲点是最需要独立验证的</li>
+        <li><strong>最有价值的投资方法论</strong>：AI-driven EDA(DSO.ai/AgentEngineer)可能改变工具经济模型——从卖license到卖agent-hour。这是EDA双寡头面临的唯一真正结构性变化</li>
+      </ol>
+    </div>
+
+
+    <!-- Phase 1 -->
+    <section id="phase1">
+      <div class="section-header">
+        <span class="phase-tag phase-explore">PHASE I &mdash; EXPLORE</span>
+        <h2>任务定义：EDA节点的真正问题</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#1 表面任务 vs 真正任务</strong></summary>
+        <p><strong>表面任务</strong>：分析EDA/IP授权节点——Synopsys、Cadence、ARM、RISC-V。</p>
+        <p><strong>真正任务</strong>：为趋势交易者回答两个问题——(1) <strong>SNPS/CDNS是不是"永远的卖铲人"？</strong> (2) <strong>ARM PE 169x是不是疯了？</strong></p>
+        <p>EDA需求的确定性极高——不需要花太多时间论证。真正的分析焦点是：ARM的估值合理性和RISC-V的威胁真实性。</p>
+      </details>
+
+      <details>
+        <summary><strong>#2 为什么EDA是"操作系统"而非"工具"</strong></summary>
+        <p>关键认知：EDA不是CAD软件那种"画图工具"。它是芯片设计的<strong>操作系统</strong>——物理规则验证(DRC/LVS)、时序分析(STA)、功耗优化(PPA)、制程规则文件(PDK)。</p>
+        <ul>
+          <li><strong>如果SNPS/CDNS明天消失</strong>：所有先进芯片设计停止。不是"变慢"，是"停止"</li>
+          <li><strong>切换成本$50-100M</strong>：不只是软件迁移，是工程团队3-5年积累的工作流、脚本、验证方法论</li>
+          <li><strong>先进制程独占</strong>：每个新制程节点(N3/N2/A16)需要EDA工具2-3年的定制开发，SNPS/CDNS是唯一有能力做这件事的</li>
+        </ul>
+        <p>这个认知框架决定了：EDA估值的争论不是"需求会不会下降"，而是"增速能不能支撑当前PE"。</p>
+      </details>
+
+      <details>
+        <summary><strong>#3 代理人选择的元思考——为什么是Ghazi和Haas</strong></summary>
+        <p><strong>Ghazi(Synopsys CEO)</strong>：EDA行业最大玩家的掌门人，主导了$350B Ansys收购和NVIDIA $20B投资。他代表"EDA双寡头永远赢"的论文。</p>
+        <p><strong>Haas(ARM CEO)</strong>：IP授权模式的标杆，但面临RISC-V颠覆。他代表"架构收费站能否持久"的检验。</p>
+        <p><strong>缺失的代理人</strong>：</p>
+        <ul>
+          <li><strong>Lip-Bu Tan(Cadence前CEO→Intel CEO)</strong>：EDA双寡头的另一半视角。但他现在在Intel，视角已偏移</li>
+          <li><strong>Jim Keller(Tenstorrent/RISC-V)</strong>：已在Node 5作为代理人分析。RISC-V对ARM的威胁通过Haas的盲点反向体现</li>
+          <li><strong>Sassine Ghazi的竞争对手视角</strong>：Cadence没有单独的代理人，但双寡头结构意味着CDNS分析可以从SNPS镜像推导</li>
+        </ul>
+      </details>
+    </section>
+
+
+    <!-- Phase 2 -->
+    <section id="phase2">
+      <div class="section-header">
+        <span class="phase-tag phase-explore">PHASE II &mdash; EXPLORE</span>
+        <h2>素材解码：双寡头和架构战争</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#4 核心数据矩阵</strong></summary>
+        <h4>跨来源交叉信号</h4>
+        <figure>
+          <table>
+            <thead><tr><th>信号</th><th>来源</th><th>投资含义</th></tr></thead>
+            <tbody>
+              <tr><td>SNPS FY2026E $96.1B(含Ansys $29B)</td><td>Synopsys IR</td><td><span class="signal signal-bull">BULL</span> TAM扩展到$310B，有机增长~8%</td></tr>
+              <tr><td>NVIDIA $20B投资Synopsys @$414.79</td><td>CNBC/Synopsys PR</td><td><span class="signal signal-bull">BULL</span> AI算力领导者深度绑定EDA领导者</td></tr>
+              <tr><td>ARM数据中心版税YoY +100%</td><td>ARM IR</td><td><span class="signal signal-bull">BULL</span> 架构从手机扩展到数据中心已验证</td></tr>
+              <tr><td>ARM PE 169x Forward</td><td>Bloomberg</td><td><span class="signal signal-bear">BEAR</span> 定价完美执行——任何失速=PE压缩风暴</td></tr>
+              <tr><td>RISC-V 25%全球份额(~200亿核心)</td><td>SemiAnalysis/多来源</td><td><span class="signal signal-watch">WATCH</span> 低端已证明，高性能(Ascalon)待验证</td></tr>
+              <tr><td>AgentEngineer L4发布(Synopsys)</td><td>Converge 2026</td><td><span class="signal signal-watch">WATCH</span> AI-driven EDA可能改变工具经济模型</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details>
+        <summary><strong>#5 Ansys $350B收购——EDA行业最大赌注</strong></summary>
+        <p>Ghazi主导的Ansys收购是EDA历史上最大交易。核心逻辑：</p>
+        <ul>
+          <li><strong>"硅到系统"范式</strong>：不再只做芯片内部EDA，扩展到电磁学、热学、机械仿真——覆盖整个产品设计</li>
+          <li><strong>TAM扩展</strong>：从EDA单一市场($10B+)扩展到工程仿真整体($310B)</li>
+          <li><strong>首批Multiphysics Fusion产品已发布(2026-03)</strong>：整合速度超预期</li>
+          <li><strong>风险</strong>：$350B是天价、文化整合需2-3年、协同效应可能延迟</li>
+        </ul>
+        <p><strong>关键判断</strong>：Ansys整合成功 → SNPS从"EDA公司"变为"工程平台公司"，估值逻辑完全改变。整合失败 → 回到纯EDA竞争，$350B成为包袱。2026年5月Q2财报是第一个完整季度验证。</p>
+      </details>
+
+      <details>
+        <summary><strong>#6 ARM的"架构收费站"模型深度解剖</strong></summary>
+        <p>ARM的商业模式是半导体行业最优雅的"收费站"：</p>
+        <ul>
+          <li><strong>许可费(upfront)</strong>：每个新设计签约$10-50M+。CSS(更完整的子系统)费用更高</li>
+          <li><strong>版税(royalty)</strong>：每颗芯片出货收取1-5%。Armv9版税是v8的2倍，CSS再2倍</li>
+          <li><strong>系统性提价路径</strong>：v8→v9(2x)→CSS(再2x)——每一代都在提价</li>
+          <li><strong>定价权的基础</strong>：99%智能手机+所有Apple Silicon+AWS Graviton+NVIDIA Grace都是ARM</li>
+        </ul>
+        <p>但ARM的脆弱性在于：<strong>定价权建立在"没有替代品"之上</strong>。RISC-V就是那个替代品。当RISC-V在高性能领域被证明可行时(Tenstorrent Ascalon对标ARM Neoverse V3)，ARM的提价能力就面临天花板。</p>
+      </details>
+
+      <details>
+        <summary><strong>#7 RISC-V——噪音还是真实威胁？</strong></summary>
+        <p>这是Node 6最关键的分析判断。数据说：</p>
+        <ul>
+          <li><strong>看多RISC-V</strong>：25%全球份额(~200亿核心) | Qualcomm收购Ventana Micro进入高性能 | 中国全力推进RISC-V替代ARM | Tenstorrent Ascalon首次在规格上匹配ARM Neoverse V3 | 零许可费</li>
+          <li><strong>看空RISC-V</strong>：25%份额几乎全在嵌入式/IoT | 数据中心零规模部署 | 生态碎片化 | 高性能还需2-3年验证 | ARM的软件生态6M+开发者不可能快速复制</li>
+        </ul>
+        <p><strong>我的判断</strong>：RISC-V对ARM的威胁是<strong>方向确定但时间不确定</strong>。2-3年内(投资时间框架)影响有限。5-10年可能改变ARM的定价权天花板。关键监控指标：RISC-V数据中心部署数量。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 3 -->
+    <section id="phase3">
+      <div class="section-header">
+        <span class="phase-tag phase-diagnose">PHASE III &mdash; DIAGNOSE</span>
+        <h2>矛盾与张力：垄断的裂缝</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#8 四个核心张力</strong></summary>
+        <div class="arc-item"><strong>张力1：EDA"不可替代" vs AI-driven EDA可能改变游戏规则</strong> &mdash; SNPS/CDNS双寡头看似不可动摇(70%+份额、$50-100M切换成本)。但AgentEngineer L4实现2-5x生产力提升——如果AI将EDA从"卖license"变为"卖agent-hour"，<strong>工具经济模型本身可能被颠覆</strong>。讽刺的是，颠覆者可能正是双寡头自己。</div>
+        <div class="arc-item"><strong>张力2：ARM PE 169x vs RISC-V 25%份额</strong> &mdash; ARM数据中心版税+100% YoY是真实的、令人印象深刻的。但PE 169x意味着市场已经定价了"完美执行+零竞争威胁"。<strong>当RISC-V在高性能领域的第一个规模部署出现时，ARM的PE会经历什么？</strong>不需要RISC-V"替代"ARM——只需要证明"可以替代"就够了。</div>
+        <div class="arc-item"><strong>张力3：Haas的"无处不在"叙事 vs SoftBank的控制欲</strong> &mdash; Haas将ARM定位为"中立的IP许可商"——所有人的朋友。但SoftBank(75%+控制权)的Project Izanagi要用ARM IP设计自己的AI芯片。<strong>当你的大股东变成你客户的竞争对手，"中立性"还能维持吗？</strong></div>
+        <div class="arc-item"><strong>张力4：Ghazi的"$310B TAM" vs 实际有机增长~8%</strong> &mdash; Ansys收购将TAM从$10B+扩展到$310B——纸面上很壮观。但有机增长只有~8%。<strong>TAM扩展 ≠ 收入扩展</strong>。$350B收购代价的真正回报需要5-10年才能评估。</div>
+      </details>
+
+      <details>
+        <summary><strong>#9 信息空白——我们不知道什么</strong></summary>
+        <ol>
+          <li><strong>EDA切换的真实成本</strong>——$50-100M是行业说法，但没有独立验证。实际可能更高(好消息)或技术进步正在降低(坏消息)</li>
+          <li><strong>AI-driven EDA对定价的影响</strong>——AgentEngineer让效率提升2-5x，但SNPS是否会因此降价？还是以"更高价值"维持价格？</li>
+          <li><strong>RISC-V数据中心真实部署计划</strong>——Qualcomm/Ventana、Tenstorrent/Ascalon的具体部署时间表不透明</li>
+          <li><strong>SoftBank Izanagi芯片的详细规格和时间表</strong>——对ARM中立性的最大威胁，但信息极少</li>
+          <li><strong>Ansys整合的真实进度</strong>——首批产品发布了，但工程团队整合和文化融合状态不可观察</li>
+        </ol>
+        <p><strong>结论</strong>：EDA双寡头的确定性来自结构(垄断+切换成本)而非信息透明度。ARM的不确定性主要来自RISC-V和SoftBank两个外部变量。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 4 -->
+    <section id="phase4">
+      <div class="section-header">
+        <span class="phase-tag phase-diagnose">PHASE IV &mdash; DIAGNOSE</span>
+        <h2>时间与反面：如果双寡头被打破？</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#10 什么在加速/减速？</strong></summary>
+        <p><strong>加速中(看多EDA)</strong>：芯片复杂度每代10x | AI芯片设计启动数激增 | 多芯片封装需要全新EDA验证 | Ansys整合扩大TAM</p>
+        <p><strong>减速中(看空EDA/ARM)</strong>：ARM有机增长22%但PE 169x透支预期 | RISC-V向高性能渗透 | 中国EDA替代加速 | SoftBank可能破坏ARM中立性</p>
+      </details>
+
+      <details open>
+        <summary><strong>#11 最强反面论证——EDA双寡头的"慢性病"</strong></summary>
+        <blockquote>EDA双寡头不会被竞争者打败，而会被<strong>自己的AI工具</strong>改变。</blockquote>
+        <ol>
+          <li><strong>AI-driven EDA降低人力需求</strong>：AgentEngineer让设计周期从4-6个月压缩到1-2个月。如果客户用更少的license完成更多设计，EDA收入增速可能放缓</li>
+          <li><strong>开源EDA工具在改善</strong>：OpenROAD/Yosys等开源EDA工具质量在提升。虽然远不能替代SNPS/CDNS做先进制程，但在成熟制程(28nm+)已经可用</li>
+          <li><strong>中国EDA替代</strong>：出口管制下中国被迫发展本土EDA。华大九天等公司短期无法挑战双寡头，但10年时间尺度不确定</li>
+          <li><strong>ARM的反面更简单</strong>：RISC-V证明可以在数据中心工作 → ARM定价权天花板出现 → PE从169x压缩到80-100x → 股价腰斩但ARM业务本身仍然健康</li>
+        </ol>
+        <p><strong>概率</strong>：EDA双寡头被打破(5年内) = 5%。ARM PE大幅压缩(3年内) = 35%。</p>
+      </details>
+
+      <details>
+        <summary><strong>#12 Qualcomm诉讼——被低估的近期催化剂</strong></summary>
+        <p>Qualcomm反诉ARM的审判定于2026年3月。这不只是法律事件——它是ARM定价权的<strong>压力测试</strong>。</p>
+        <ul>
+          <li><strong>ARM败诉(已发生一次)</strong>：信号ARM的许可条款不是"神圣不可侵犯的"。其他客户可能要求重新谈判</li>
+          <li><strong>Qualcomm反诉胜出</strong>：ARM可能被要求赔偿数十亿+修改许可条款。PE 169x在这种结果下不可持续</li>
+          <li><strong>和解</strong>：最可能结果，但和解条款可能暴露ARM的定价权弱于市场预期</li>
+        </ul>
+        <p>无论结果如何，这场诉讼都在提醒市场：<strong>ARM的"收费站"不是无敌的</strong>。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 5 -->
+    <section id="phase5">
+      <div class="section-header">
+        <span class="phase-tag phase-build">PHASE V &mdash; BUILD</span>
+        <h2>报告结构设计</h2>
+      </div>
+
+      <details>
+        <summary><strong>#13 报告结构与认知架构</strong></summary>
+        <p>核心原则：EDA节点报告必须清晰区分<strong>两个完全不同的投资论文</strong>——EDA工具(SNPS/CDNS)和IP授权(ARM/RISC-V)。</p>
+        <ol>
+          <li>元思考摘要——EDA确定性9/10 vs ARM确定性7/10</li>
+          <li>Phase 0独立思考——EDA"操作系统"定位、切换成本、双寡头结构</li>
+          <li>Phase 0.5策展——SNPS IR/ARM IR/RISC-V数据/AgentEngineer</li>
+          <li>Phase 1代理人——Ghazi(8/10)和Haas(7/10)，标注可信度差异</li>
+          <li>Phase 2综合——三角验证重点是ARM的估值合理性和RISC-V威胁</li>
+          <li>KPI仪表盘——SNPS $96.1B FY26E、ARM PE 169x等</li>
+          <li>信号传导——Bull/Bear/泡沫三条链，强调"EDA无论谁赢都赚"</li>
+        </ol>
+      </details>
+
+      <details>
+        <summary><strong>#14 代理人可信度差异的处理</strong></summary>
+        <p><strong>Ghazi 8/10 vs Haas 7/10</strong>——分差不大但含义重大。</p>
+        <p>Ghazi的8/10来自：7/9预测已验证、Ansys收购+NVIDIA投资行动证据强、言行一致度高。扣分是：CEO推销倾向(Ansys整合风险被轻描淡写)。</p>
+        <p>Haas的7/10来自：Armv9提价已验证、数据中心版税爆发有数据。扣分是：(1) 50%数据中心份额预测过于激进(实际21%)；(2) 对RISC-V威胁公开讨论不足——<strong>这不是"乐观"，是"盲点"</strong>。</p>
+        <p>在报告中，Haas的RISC-V盲点被标注为"最需要独立验证的信号"。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 6 -->
+    <section id="phase6">
+      <div class="section-header">
+        <span class="phase-tag phase-verify">PHASE VI &mdash; VERIFY</span>
+        <h2>成品审视：诚实的自我诊断</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#15 做到了什么/没做到什么</strong></summary>
+        <p><strong>做到了</strong>：清晰区分EDA和ARM两个投资论文。Ghazi/Haas可信度差异标注。RISC-V威胁不回避。"无论谁赢EDA都赢"的结论有充分证据支撑。信号传导链三条覆盖主要场景。</p>
+        <p><strong>没做到</strong>：Cadence(CDNS)分析深度不足——没有独立代理人，只能从SNPS镜像推导。Lip-Bu Tan(Cadence前CEO→Intel)的视角完全缺失。AI-driven EDA对定价模型影响的分析偏粗。RISC-V数据中心部署的具体时间表评估不够精确。</p>
+      </details>
+
+      <details open>
+        <summary><strong>#16 ARM PE 169x——最需要质疑的数字</strong></summary>
+        <p>报告中ARM PE 169x被多次引用。但需要验证这个数字的含义：</p>
+        <ul>
+          <li><strong>这是Forward P/E</strong>——基于分析师对未来12个月EPS的预测。如果ARM继续25%+增长，PE会快速下降到100-120x</li>
+          <li><strong>PE 169x在科技股中不算最离谱</strong>——2024年的NVDA也曾70-80x Forward PE。关键是增速能否支撑</li>
+          <li><strong>但ARM不是NVIDIA</strong>：NVIDIA有GPU独占性+CUDA生态。ARM面临RISC-V这个明确的免费替代品</li>
+        </ul>
+        <p><strong>修正</strong>：报告中的ARM估值讨论增加"如果增速从22%放缓到15%，PE合理区间是80-100x"的情景分析。</p>
+      </details>
+
+      <details>
+        <summary><strong>#17 "垄断幻觉"检查</strong></summary>
+        <p>报告有一个潜在偏见：<strong>对EDA双寡头过于乐观</strong>。需要检查：</p>
+        <ul>
+          <li><strong>双寡头历史不等于未来</strong>：EDA市场40年历史中经历过多次洗牌(Mentor被Siemens收购、Magma消失)。当前双寡头格局不是"永恒的"</li>
+          <li><strong>AI可能改变游戏</strong>：如果AgentEngineer真的实现5x效率提升，客户需要的license数量可能下降。SNPS可能被自己的AI工具侵蚀传统收入</li>
+          <li><strong>中国长期威胁</strong>：2025年5月SNPS曾被迫撤回指引(中国出口管制)。中国EDA替代是5-10年威胁，但方向确定</li>
+        </ul>
+        <p><strong>结论</strong>：EDA双寡头的确定性在2-3年投资时间框架内极高(9/10)。但5-10年时间框架需要降级到7/10。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 7 -->
+    <section id="phase7">
+      <div class="section-header">
+        <span class="phase-tag phase-build">PHASE VII &mdash; BUILD</span>
+        <h2>季度验证日历</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#18-#19 预测追踪器</strong></summary>
+        <p>EDA投资的节奏与GPU不同——<strong>非周期性、可预测性高</strong>。关键验证点更少但每个都很重要。</p>
+        <figure>
+          <table>
+            <thead><tr><th>季度</th><th>最关键事件</th><th>如果成功</th><th>如果失败</th></tr></thead>
+            <tbody>
+              <tr><td><strong>2026年3月</strong></td><td>Qualcomm反诉ARM审判</td><td>ARM定价权获法律保护</td><td><span class="signal signal-bear">BEAR</span> ARM许可体系受结构性挑战</td></tr>
+              <tr><td><strong>2026年5月</strong></td><td>SNPS Q2 FY2026(Ansys首个完整季度)</td><td>Ansys协同效应初步验证</td><td>整合困难 → $350B代价重评</td></tr>
+              <tr><td><strong>2026年5月</strong></td><td>ARM Q4 FY2026(全年数据)</td><td>22%增长兑现 → PE 169x暂时合理</td><td><span class="signal signal-bear">BEAR</span> 增速放缓 = PE压缩风暴</td></tr>
+              <tr><td><strong>2026 H2</strong></td><td>RISC-V数据中心首批部署</td><td><span class="signal signal-bear">BEAR</span> ARM定价权长期被侵蚀</td><td>RISC-V仅限嵌入式 → ARM安全</td></tr>
+              <tr><td><strong>2027</strong></td><td>SoftBank Izanagi芯片计划进展</td><td><span class="signal signal-bear">BEAR</span> ARM中立性受损</td><td>Izanagi搁置 → ARM独立运营</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details>
+        <summary><strong>#20 四个交易机会</strong></summary>
+        <div class="arc-item"><strong>机会1</strong>：SNPS Q2财报(Ansys整合验证)。如果有机增长维持8%+且Ansys协同开始显现 → SNPS的"工程平台"重估。链条：SNPS→CDNS(双寡头跟随)→EDA ETF</div>
+        <div class="arc-item"><strong>机会2</strong>：ARM Q4全年数据。22%+增长 → PE暂时合理。增速放缓到18%以下 → PE压缩20-30%。这是高beta方向性交易。</div>
+        <div class="arc-item"><strong>机会3</strong>：RISC-V数据中心部署新闻。任何Tier-1云厂商宣布RISC-V数据中心规模部署 → ARM短期承压。但EDA(SNPS/CDNS)不受影响——RISC-V也需要EDA。</div>
+        <div class="arc-item"><strong>机会4</strong>：SNPS vs ARM相对价值交易。如果你看多EDA但看空ARM定价权 → Long SNPS / Short ARM。隔离行业beta，纯赌"确定性溢价"。</div>
+      </details>
+
+      <details>
+        <summary><strong>#21 监控方法论</strong></summary>
+        <p><strong>每季度</strong>：SNPS/CDNS财报(有机增长率+指引) | ARM财报(版税增速+v9占比+数据中心份额) | RISC-V行业新闻</p>
+        <p><strong>事件驱动</strong>：Qualcomm判决(2026-03) | SoftBank Izanagi更新 | RISC-V数据中心部署公告 | 中国出口管制政策变化</p>
+        <p><strong>慢变量(年度)</strong>：EDA定价模式变化(license→agent-hour?) | RISC-V高性能验证进度 | 中国EDA替代进度</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 8 -->
+    <section id="phase8">
+      <div class="section-header">
+        <span class="phase-tag phase-build">PHASE VIII &mdash; BUILD</span>
+        <h2>信号传导与标的地图</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#22 三条传导链</strong></summary>
+        <div class="arc-item"><strong><span class="signal signal-bull">BULL</span> 链1：AI芯片设计爆发 → EDA/IP全链受益</strong><br>NVDA/AMD/GOOGL设计启动增加 → SNPS/CDNS工具收入增加 → ARM版税增加 → TSM制造订单增加<br><em>信号最先在SNPS/CDNS设计启动数据出现(领先制造6-12个月)，最后传到TSM/ASML</em></div>
+        <div class="arc-item"><strong><span class="signal signal-bear">BEAR</span> 链2：RISC-V替代ARM → IP授权模式动摇</strong><br>RISC-V数据中心部署增加 → ARM新签许可减少 → 版税增速放缓 → PE压缩<br><em>信号最先在ARM中国收入增速出现(当前仅7.5%)。关键：<strong>SNPS/CDNS在两条链都受益——无论用ARM还是RISC-V都需要EDA</strong></em></div>
+        <div class="arc-item"><strong><span class="signal signal-watch">WATCH</span> 链3：AI CapEx崩塌 → 设计启动骤降</strong><br>Hyperscaler CapEx削减 → 芯片设计项目取消 → EDA工具续约放缓 → ARM版税下降<br><em>但EDA订阅制(2-3年合同)提供缓冲——影响滞后12-18个月。ARM版税先受冲击</em></div>
+      </details>
+
+      <details open>
+        <summary><strong>#23 时间差套利</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>事件</th><th>最先反映</th><th>滞后反映</th><th>时间差</th></tr></thead>
+            <tbody>
+              <tr><td>新AI芯片设计启动</td><td>SNPS/CDNS设计启动数据</td><td>TSM制造订单</td><td>6-12个月</td></tr>
+              <tr><td>ARM v9/CSS采用加速</td><td>ARM许可签约数据</td><td>ARM版税收入体现</td><td>2-3个季度</td></tr>
+              <tr><td>Ansys协同释放</td><td>SNPS Multiphysics客户数</td><td>SNPS收入加速</td><td>2-4个季度</td></tr>
+              <tr><td>RISC-V高性能突破</td><td>Tenstorrent/Qualcomm部署</td><td>ARM版税增速放缓</td><td>1-2年</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p>当SNPS设计启动数据加速但ARM版税还没反映——EDA确认了需求但ARM尚未受益，这可能是ARM的上涨前窗口。反过来，当RISC-V开始数据中心部署但ARM版税还没受损——这可能是减仓ARM的时间窗口。</p>
+      </details>
+
+      <details>
+        <summary><strong>#24 "不管谁赢都赚"标的</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>标的</th><th>AI芯片爆发→</th><th>RISC-V替代ARM→</th><th>逻辑</th></tr></thead>
+            <tbody>
+              <tr><td><strong>SNPS</strong></td><td>更多设计启动=更多工具收入</td><td>RISC-V也需要EDA</td><td>真正的"卖铲人"</td></tr>
+              <tr><td><strong>CDNS</strong></td><td>同上</td><td>同上</td><td>双寡头另一半</td></tr>
+              <tr><td><strong>ARM</strong></td><td>版税增加</td><td>定价权下降</td><td>赢一半、输一半</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>结论</strong>：SNPS/CDNS是EDA/IP授权节点中<strong>真正的"无论谁赢都赚"选项</strong>。ARM只在AI芯片爆发且RISC-V不威胁时才全赢——这是一个条件更多的赌注。</p>
+      </details>
+
+      <details>
+        <summary><strong>#25 历史案例</strong></summary>
+        <div class="arc-item"><strong>NVIDIA $20B投资Synopsys (2025.12)</strong>：AI算力领导者用真金白银背书EDA领导者。信号：EDA在AI时代的价值被最懂AI的人认可。<strong>当Jensen买SNPS时，你应该认真看SNPS</strong>。</div>
+        <div class="arc-item"><strong>Qualcomm诉ARM败诉 (2024-2025)</strong>：ARM试图保护定价权但法庭不支持。Qualcomm用自研+RISC-V(收购Ventana)作为谈判筹码。<strong>替代品的存在本身就是武器——定价权已在松动</strong>。</div>
+        <div class="arc-item"><strong>中国EDA出口管制反复 (2025.5)</strong>：SNPS被迫撤回指引(EPS从$15.11下调至$12.76)，7月撤销后恢复。<strong>地缘政治风险是EDA双寡头面临的不可控变量——不是竞争风险，是政策风险</strong>。</div>
+      </details>
+    </section>
+
+
+    <!-- Phase 9 -->
+    <section id="phase9">
+      <div class="section-header">
+        <span class="phase-tag phase-verify">PHASE IX &mdash; VERIFY</span>
+        <h2>交叉验证网络 — 最终方法论</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#26 两个代理人如何交叉验证？</strong></summary>
+        <p><strong>共识区域(高置信度)</strong>：Ghazi和Haas都认为EDA需求与芯片复杂度正相关、AI既是客户又是工具(正反馈循环)、ARM在数据中心崛起(版税+100% YoY)。<strong>EDA需求确定性在两人之间不需要交叉验证——他们完全一致</strong>。</p>
+        <p><strong>分歧区域(需要跟踪)</strong>：Ghazi认为双寡头不可打破，Haas对RISC-V公开讨论不足。<strong>这两个"盲点"恰好需要从外部(Keller/Node 5代理人)交叉验证</strong>。</p>
+        <blockquote>类比：两个收费站老板都说"这条路永远有车"——他们对需求的判断是可信的。但Haas没看到旁边正在修的免费公路(RISC-V)，而Ghazi没想到AI可能让车变少(AI-driven EDA减少license需求)。</blockquote>
+      </details>
+
+      <details open>
+        <summary><strong>#27 6个Claims的交叉验证结果</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>Claim</th><th>交叉验证</th><th>综合可信度</th></tr></thead>
+            <tbody>
+              <tr><td>"EDA需求与芯片复杂度正相关"</td><td>双代理共识 + SNPS/CDNS收入数据 + 制程路线图验证</td><td><strong style="color:#4caf50;">95%</strong></td></tr>
+              <tr><td>"SNPS/CDNS双寡头地位3-5年"</td><td>切换成本极高 + 80%+经常性收入 + 先进制程独占</td><td><strong style="color:#4caf50;">90%</strong></td></tr>
+              <tr><td>"ARM数据中心持续增长"</td><td>Graviton5/Cobalt/Axion全采用 + NVIDIA Vera Rubin + 版税数据</td><td><strong style="color:#4caf50;">85%</strong></td></tr>
+              <tr><td>"Ansys整合成功释放协同"</td><td>首批产品提前发布 + 但$350B是天价 + 文化整合需2-3年</td><td><strong style="color:#ffa726;">60%</strong></td></tr>
+              <tr><td>"ARM PE 169x可持续"</td><td>需要持续22%+增长 + RISC-V不实质威胁 + SoftBank不干预</td><td><strong style="color:#f44336;">35%</strong></td></tr>
+              <tr><td>"RISC-V 5年内替代ARM数据中心"</td><td>25%全球份额但主要在嵌入式 + Ascalon首次对标但未规模验证</td><td><strong style="color:#ffa726;">25%</strong> <span style="color:var(--text-quaternary);">(方向确定)</span></td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <div class="question-box">
+        <h4>最终方法论 — 4条规则</h4>
+        <p style="text-align:left;"><strong>规则1：区分EDA和ARM——不是同一个投资</strong><br>EDA(SNPS/CDNS)是确定性9/10的"操作系统"。ARM是确定性7/10的高beta赌注。把它们混在一起讨论会导致错误的风险评估。</p>
+        <p style="text-align:left;"><strong>规则2：用SNPS设计启动数据作为行业领先指标</strong><br>EDA设计启动领先芯片制造6-12个月。当SNPS报告设计启动加速时，TSM/ASML的订单还没有体现——这是时间差窗口。</p>
+        <p style="text-align:left;"><strong>规则3：ARM交易看RISC-V数据中心部署</strong><br>ARM的PE 169x是"完美定价"。任何RISC-V在数据中心的规模部署新闻都是ARM PE压缩的触发器。不需要RISC-V真正替代ARM——只需要证明"可以替代"。</p>
+        <p style="text-align:left;"><strong>规则4："无论谁赢EDA都赢"是Node 6最强的投资论文</strong><br>ARM vs RISC-V、NVIDIA vs 自研、x86 vs ARM——无论哪边赢，芯片设计都需要EDA工具。SNPS/CDNS是半导体链中"无论谁赢都赚"属性最强的标的。</p>
+      </div>
+
+    </section>
+
+
+    <footer class="page-footer">
+      <p>Node 6: EDA/IP授权 Metacognition Log &nbsp;|&nbsp; 28 Rounds &nbsp;|&nbsp; 2026-03-20 &nbsp;|&nbsp; V4 Design System</p>
+      <p><a href="NODE_6_EDA_IP授权_2026-03-19.html">认知节点报告</a> &nbsp;|&nbsp; <a href="NODE_5_定制芯片_ASIC_metacognition.html">Node 5 元思考</a> &nbsp;|&nbsp; <a href="../semiconductor_hub.html">Semiconductor Hub</a></p>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+(function() {
+  const hamburger = document.getElementById('hamburgerBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  hamburger.addEventListener('click', () => { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+  sidebar.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => { if (window.innerWidth <= 900) { sidebar.classList.remove('open'); overlay.classList.remove('open'); } });
+  });
+})();
+</script>
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+</body>
+</html>

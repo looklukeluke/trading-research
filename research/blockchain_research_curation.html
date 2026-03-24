@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Research Source Curation + Gap Analysis 区块链信息源策展与缺口分析</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="blockchain_shared.css">
+<style>
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded main { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+.reading-mode .sidebar { display: none !important; }
+.reading-mode .notes-sidebar { display: none !important; }
+.reading-mode main { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+
+/* Source quality badge */
+.quality-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.65rem;
+  font-weight: 600;
+}
+.quality-a { background: rgba(76,175,80,0.15); color: #4caf50; border: 1px solid rgba(76,175,80,0.3); }
+.quality-b { background: rgba(91,155,213,0.15); color: #5b9bd5; border: 1px solid rgba(91,155,213,0.3); }
+.quality-c { background: rgba(248,168,72,0.15); color: var(--accent); border: 1px solid rgba(248,168,72,0.3); }
+.quality-d { background: rgba(244,67,54,0.1); color: var(--tier-low); border: 1px solid rgba(244,67,54,0.25); }
+
+/* Language badge */
+.lang-badge {
+  display: inline-block;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.55rem;
+  font-weight: 600;
+  margin-left: 0.3rem;
+}
+.lang-en { background: rgba(255,255,255,0.1); color: #aaa; }
+.lang-zh { background: rgba(244,67,54,0.15); color: var(--red); }
+.lang-multi { background: rgba(171,71,188,0.15); color: #ab47bc; }
+
+/* Gap analysis table */
+.gap-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+}
+.gap-table th {
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  background: var(--bg-elevated);
+  border-bottom: 2px solid var(--border);
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.gap-table td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: top;
+}
+.gap-table tr:hover { background: rgba(255,255,255,0.02); }
+.severity-high { color: var(--tier-low); font-weight: 600; }
+.severity-medium { color: var(--accent); font-weight: 600; }
+.severity-low { color: var(--text-secondary); }
+
+/* Source card enhancements */
+.source-card {
+  padding: 0.85rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+.source-card:hover { border-color: var(--border); }
+.source-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.4rem;
+}
+.source-card-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+.source-card-desc {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  margin-bottom: 0.4rem;
+}
+.source-card-meta {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+.source-url {
+  font-family: monospace;
+  font-size: 0.7rem;
+  color: var(--knowledge);
+  word-break: break-all;
+}
+
+/* Coverage matrix */
+.coverage-matrix {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.coverage-item {
+  padding: 1rem;
+  background: var(--bg-elevated);
+  border-radius: 8px;
+  border-left: 3px solid var(--accent);
+}
+.coverage-item h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+.coverage-item p {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Recommendation tier */
+.rec-tier {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.tier-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+.tier-1 { background: rgba(76,175,80,0.2); color: #4caf50; }
+.tier-2 { background: rgba(91,155,213,0.2); color: #5b9bd5; }
+.tier-3 { background: rgba(248,168,72,0.2); color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- ===== Left Sidebar ===== -->
+  <div class="sidebar">
+    <a class="back-link" href="blockchain_hub.html">&larr; Blockchain Hub</a>
+
+    <h4>Research Sources</h4>
+    <div class="project-meta">
+      信息源策展<br>
+      行业级数据覆盖 &middot; 缺口分析
+    </div>
+
+    <h4>Navigate</h4>
+    <nav>
+      <ul>
+        <li><a href="#overview">Overview 总览</a></li>
+        <li><a href="#onchain">On-chain Analytics 链上分析</a></li>
+        <li><a href="#macro">Macro Strategy 宏观策略</a></li>
+        <li><a href="#media">Industry Media 行业媒体</a></li>
+        <li><a href="#chinese">Chinese Sources 中文来源</a></li>
+        <li><a href="#academic">Academic Research 学术研究</a></li>
+        <li><a href="#regulatory">Regulatory 监管来源</a></li>
+        <li><a href="#gap-analysis" style="color:var(--accent);">Gap Analysis 缺口分析</a></li>
+        <li><a href="#framework">Quality Framework 质量框架</a></li>
+        <li><a href="#reading-order">Reading Order 阅读顺序</a></li>
+      </ul>
+    </nav>
+
+    <h4>Context 上下文</h4>
+    <nav>
+      <ul>
+        <li><a href="blockchain_hub.html">Blockchain Hub</a></li>
+        <li><a href="blockchain_industry_metacognition.html">元思考 Metacognition</a></li>
+        <li><a href="blockchain_western_narrative_verification.html">西方叙事验证</a></li>
+        <li><a href="blockchain_asia_data_curation.html">亚洲数据策展</a></li>
+        <li><a href="INDUSTRY_V3_FINAL_BTCETH_Blockchain_2026-03-21.html">V3 Final Report</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- ===== Main Content ===== -->
+  <main>
+
+    <h1>Research Source Curation + Gap Analysis<span class="zh">区块链信息源策展与缺口分析</span></h1>
+    <div class="subtitle">Industry-wide information landscape &middot; 6 categories &middot; 25+ data sources &middot; 2026-03-21</div>
+
+    <!-- Advisory -->
+    <div class="advisory-box">
+      <strong>Methodology 方法论：</strong>本页面对区块链行业研究的信息源进行系统性策展，按照「数据质量×地理覆盖×时效性」三维框架评估。与22个认知代理人的素材地图互补，但聚焦行业级而非个人级来源。
+      <span class="zh">This page provides systematic curation of blockchain research sources, evaluated through a "data quality × geographic coverage × timeliness" framework.</span>
+    </div>
+
+    <div class="advisory-box" style="border-left-color: var(--tier-low); background: rgba(244,67,54,0.03); margin-top:0.75rem;">
+      <strong style="color:var(--tier-low);">&#9888; Critical Gap 关键缺口</strong><br>
+      <strong>西方数据源系统性低估亚洲/新兴市场。</strong>TRON 3.3亿账户、尼日利亚$921亿交易量、巴西90%稳定币储蓄活动，在英文主流来源中几乎不见踪影。本分析旨在识别并填补这些结构性盲区。
+      <span class="zh">Western sources systematically underestimate Asia/emerging markets. TRON 330M accounts, Nigeria $92.1B volume, Brazil's 90% stablecoin savings — almost invisible in English-language mainstream sources.</span>
+    </div>
+
+    <!-- ═══════════ §1 Overview ═══════════ -->
+    <div class="section-header" id="overview">
+      <h2><span class="section-num">01</span>Overview<span class="zh">总览 &mdash; 六类信息源生态</span></h2>
+    </div>
+
+    <div class="coverage-matrix">
+      <div class="coverage-item">
+        <h4>1. On-chain Analytics 链上分析</h4>
+        <p>Glassnode, Dune, CryptoQuant, Nansen, Arkham — 提供链上原始数据，是量化分析的基石。但：历史数据需付费，免费版仅看表面。</p>
+      </div>
+      <div class="coverage-item">
+        <h4>2. Macro Strategy 宏观策略</h4>
+        <p>Lyn Alden, Nic Carter, PlanB, Ren & Macro — 连接加密与全球宏观。稀缺但高质量，比特币减半周期框架的核心来源。</p>
+      </div>
+      <div class="coverage-item">
+        <h4>3. Industry Media 行业媒体</h4>
+        <p>The Block, CoinDesk, Decrypt, Blockworks — 时效性强但深度不足。常被公关材料主导，需要交叉验证。</p>
+      </div>
+      <div class="coverage-item">
+        <h4>4. Chinese Sources 中文来源</h4>
+        <p>PANews, 吴说, 链捕手, 火星财经 — 亚洲/新兴市场一手信息源。英文媒体系统性缺失这些地区的深度报道。</p>
+      </div>
+      <div class="coverage-item">
+        <h4>5. Academic Research 学术研究</h4>
+        <p>arXiv, SSRN, 高校区块链实验室 — 提供理论框架，但研究周期长，与市场脱节。适合验证长期假设。</p>
+      </div>
+      <div class="coverage-item">
+        <h4>6. Regulatory 监管来源</h4>
+        <p>SEC, CFTC, ESMA, MAS, SFC — 政策信号的风向标。监管沙盒、创新中心、执法行动都是重要数据点。</p>
+      </div>
+    </div>
+
+    <div class="stats-strip" style="margin-top:1.5rem;">
+      <div class="stat-item"><span class="stat-value">25+</span> <span class="stat-label">Data Sources</span></div>
+      <div class="stat-item"><span class="stat-value">6</span> <span class="stat-label">Categories</span></div>
+      <div class="stat-item"><span class="stat-value">4</span> <span class="stat-label">Gap Severity Levels</span></div>
+      <div class="stat-item"><span class="stat-value">3</span> <span class="stat-label">Geographic Regions</span></div>
+    </div>
+
+    <!-- ═══════════ §2 On-chain Analytics ═══════════ -->
+    <div class="section-header" id="onchain">
+      <h2><span class="section-num">02</span>On-chain Analytics<span class="zh">链上分析平台</span></h2>
+    </div>
+
+    <div class="card" style="border-left: 3px solid var(--accent);">
+      <div class="source-card-header">
+        <span class="source-card-title">Glassnode</span>
+        <span class="quality-badge quality-a">Quality A</span>
+      </div>
+      <div class="source-card-desc">
+        行业最权威的链上分析平台。提供BTC/ETH持币地址数、矿工持仓、交易所净流量、MVRV比率、NUPL情绪指标等核心数据。<strong>难度</strong>：付费订阅($29-$799/月)，免费版仅提供基础指标。数据延迟约24小时。
+        <span class="zh-inline">Industry's most authoritative on-chain analytics platform. Key metrics: holder addresses, miner position, exchange flows, MVRV ratio, NUPL sentiment.</span>
+      </div>
+      <div class="source-card-meta">
+        <span class="lang-badge lang-en">EN</span>
+        <span>URL: glassnode.com</span>
+        <span>| 更新频率: 日更(部分实时)</span>
+        <span>| 覆盖: BTC/ETH/主流L1</span>
+      </div>
+      <div class="source-card-meta" style="margin-top:0.4rem; color:var(--accent);">
+        <strong>关键指标推荐：</strong>MVRV比率(市场估值)| NUPL(净未实现利润/损失)| 交易所余额趋势| 长期持有者持仓变化
+      </div>
+    </div>
+
+    <div class="card" style="border-left: 3px solid var(--accent);">
+      <div class="source-card-header">
+        <span class="source-card-title">Dune Analytics</span>
+        <span class="quality-badge quality-a">Quality A</span>
+      </div>
+      <div class="source-card-desc">
+        开放的链上数据平台，用户可创建自定义仪表盘。支持Ethereum、Solana、Polygon等14+链的查询。社区贡献超过50,000个公开仪表盘。<strong>优势</strong>：免费、开源、社区驱动。<strong>劣势</strong>：数据质量参差不齐，需要筛选验证。
+        <span class="zh-inline">Open on-chain data platform with custom dashboards. Supports 14+ chains. Free and community-driven.</span>
+      </div>
+      <div class="source-card-meta">
+        <span class="lang-badge lang-en">EN</span>
+        <span>URL: dune.com</span>
+        <span>| 更新频率: 实时(链同步)</span>
+        <span>| 覆盖: 14+ 区块链</span>
+      </div>
+      <div class="source-card-meta" style="margin-top:0.4rem; color:var(--accent);">
+        <strong>推荐仪表盘：</strong>@hildobby(交易所流量)| @治理(DeFi TVL)| @公证人(稳定币供应)| @eliasimos(BTC ETF持仓)
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="source-card-header">
+          <span class="source-card-title">CryptoQuant</span>
+          <span class="quality-badge quality-b">Quality B+</span>
+        </div>
+        <div class="source-card-desc">
+          提供交易所流量、矿工储备、稳定币链上活动等数据。<strong>优势</strong>：亚洲市场覆盖较好，对TRON/BSC链有一定支持。<strong>劣势</strong>：界面较Glassnode粗糙，指标定义不够透明。
+          <span class="zh-inline">Exchange flows, miner reserves, stablecoin on-chain activity. Better Asia coverage than competitors.</span>
+        </div>
+        <div class="source-card-meta">
+          <span class="lang-badge lang-en">EN</span>
+          <span>URL: cryptoquant.com</span>
+          <span>| 覆盖: BTC/ETH + 稳定币</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="source-card-header">
+          <span class="source-card-title">Nansen</span>
+          <span class="quality-badge quality-b">Quality B+</span>
+        </div>
+        <div class="source-card-desc">
+          专注「聪明钱」追踪。标签化钱包地址（交易所、机构、项目方、鲸鱼），追踪smart money流向。<strong>优势</strong>：合约交互数据+钱包标签。<strong>劣势</strong>：极度昂贵($35K+/年)，仅适合机构。
+          <span class="zh-inline">Smart money tracking. Wallet labeling (exchanges, institutions, whales). Contract interaction data.</span>
+        </div>
+        <div class="source-card-meta">
+          <span class="lang-badge lang-en">EN</span>
+          <span>URL: nansen.ai</span>
+          <span>| 覆盖: ETH/DeFi/NFT</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:1rem;">
+      <div class="card">
+        <div class="source-card-header">
+          <span class="source-card-title">Arkham Intel</span>
+          <span class="quality-badge quality-c">Quality B-</span>
+        </div>
+        <div class="source-card-desc">
+          Binance支持的链上分析平台，提供地址身份标签。争议性较强（隐私问题），但提供部分免费数据。<strong>注意</strong>：数据准确性存疑，谨慎用于投资决策。
+          <span class="zh-inline">Binance-backed on-chain analysis. Address identity labeling. Controversial (privacy). Free tier available.</span>
+        </div>
+        <div class="source-card-meta">
+          <span class="lang-badge lang-en">EN</span>
+          <span>URL: arkhamintelligence.com</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="source-card-header">
+          <span class="source-card-title">DeFi Llama</span>
+          <span class="quality-badge quality-b">Quality B+</span>
+        </div>
+        <div class="source-card-desc">
+          DeFi TVL（总锁仓量）追踪的权威来源。覆盖200+协议，按链、按类型细分。<strong>优势</strong>：免费、实时、社区维护。<strong>劣势</strong>：仅TVL单一维度，无法反映真实使用情况。
+          <span class="zh-inline">Authority on DeFi TVL tracking. Covers 200+ protocols. Free and real-time.</span>
+        </div>
+        <div class="source-card-meta">
+          <span class="lang-badge lang-en">EN</span>
+          <span>URL: defillama.com</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1rem; border-left-color: var(--red);">
+      <div class="source-card-header">
+        <span class="source-card-title">&#127463;&#127479; 亚洲专有链上数据源 (缺口)</span>
+        <span class="quality-badge quality-d">Quality Gap</span>
+      </div>
+      <div class="source-card-desc">
+        <strong>关键缺口</strong>：TRON链几乎没有英文链上分析覆盖。TRONSCAN是官方浏览器，但数据分析能力有限。波场生态（稳定币转账、DeFi活动）的真实规模被严重低估。中文社区有一些工具，但缺乏系统性整合。
+        <span class="zh-inline">Critical gap: TRON chain has almost no English-language on-chain coverage. TRONSCAN is the official browser but limited analytics. TRON ecosystem scale severely underestimated.</span>
+      </div>
+      <div class="source-card-meta">
+        <span class="lang-badge lang-zh">ZH</span>
+        <span>TRONSCAN: tronscan.org</span>
+        <span>| 建议补充: 中文加密数据社区</span>
+      </div>
+    </div>
+
+    <!-- ═══════════ §3 Macro Strategy ═══════════ -->
+    <div class="section-header" id="macro">
+      <h2><span class="section-num">03</span>Macro Strategy<span class="zh">宏观策略分析师</span></h2>
+    </div>
+
+    <div class="card" style="border-left: 3px solid #4caf50;">
+      <div class="source-card-header">
+        <span class="source-card-title">Lyn Alden</span>
+        <span class="quality-badge quality-a">Quality A <span class="zh-inline" style="font-weight:400;color:var(--text-secondary);">· REFERENCE</span></span>
+      </div>
+      <div class="source-card-desc">
+        独立宏观分析师，MIT工程学位背景。核心框架：BTC减半周期+美元信用周期+全球宏观联动。<strong>关键贡献</strong>：2020-2024周期预测模型，BTC与纳斯达克相关性强度分析。<strong>写作风格</strong>：数据密集，逻辑严密，适合深入研究。不做短期价格预测。
+        <span class="zh-inline">Independent macro analyst. Core framework: BTC halving cycle + USD credit cycle + global macro linkages. Key: 2020-2024 cycle prediction model.</span>
+      </div>
+      <div class="source-card-meta">
+        <span class="lang-badge lang-en">EN</span>
+        <span>lynaldensloan.com | Twitter: @LynAlden</span>
+        <span>| 频率: 月度深度报告</span>
+      </div>
+      <div class="source-card-meta" style="margin-top:0.4rem; color:var(--accent);">
+        <strong>必读报告：</strong>Bitcoin's Fair Value Model | Dollar Credit Cycles | BTC vs Gold Reserve Assets
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="source-card-header">
+        <span class="source-card-title">Nic Carter</span>
+        <span class="quality-badge quality-a">Quality A</span>
+      </div>
+      <div class="source-card-desc">
+        Castle Island Ventures合伙人，CoinMetrics联合创始人。专注BTC作为货币资产的长期叙事。<strong>关键贡献</strong>：「BTC作为清算层」理论、矿工经济分析、ETF资金流追踪。<strong>数据来源</strong>：CoinMetrics（高质量链上数据，是他参与创建的公司）。
+        <span class="zh-inline">Castle Island Ventures. Co-founded CoinMetrics. Focus: BTC as monetary asset. "BTC as settlement layer" theory.</span>
+      </div>
+      <div class="source-card-meta">
+        <span class="lang-badge lang-en">EN</span>
+        <span>Twitter: @nic__carter</span>
+        <span>| 频率: 不定期深度分析</span>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="source-card-header">
+          <span class="source-card-title">PlanB</span>
+          <span class="quality-badge quality-b">Quality B+</span>
+        </div>
+        <div class="source-card-desc">
+          匿名分析师，S2F（Stock-to-Flow）模型创建者。<strong>关键贡献</strong>：S2F跨资产模型（BTC稀缺性与价格关系），减半周期量化框架。<strong>争议</strong>：S2F模型在2021年后预测失效，但框架仍有参考价值。
+          <span class="zh-inline">Anonymous analyst. Created S2F (Stock-to-Flow) model. Halving cycle quantification framework.</span>
+        </div>
+        <div class="source-card-meta">
+          <span class="lang-badge lang-en">EN</span>
+          <span>Twitter: @100trillionUSD</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="source-card-header">
+          <span class="source-card-title">Ren & Macro (Su Zhu)</span>
+          <span class="quality-badge quality-c">Quality B-</span>
+        </div>
+        <div class="source-card-desc">
+          三箭资本创始人（已破产）。<strong>框架</strong>：「超级周期」理论：BTC不跟随传统市场周期，而是有独立的超长时间框架。<strong>风险</strong>：其实际投资记录显示理论与实践脱节（Zhu因三箭破产被追债）。
+          <span class="zh-inline">Three Arrows Capital founder (bankrupt). "Supercycle" theory: BTC has independent time frame from traditional markets. Risk: theory vs practice gap.</span>
+        </div>
+        <div class="source-card-meta">
+          <span class="lang-badge lang-en">EN</span>
+          <span>Twitter: @zhusu</span>
+          <span>| 背景: 新加坡</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1rem;">
+      <div class="source-card-header">
+        <span class="source-card-title">&#127463;&#127479; &#127464;&#127475; 亚洲宏观来源 (缺口)</span>
+        <span class="quality-badge quality-d">Quality Gap</span>
+      </div>
+      <div class="source-card-desc">
+        <strong>关键缺口</strong>：亚洲（尤其中国、韩国、日本）几乎没有任何英文可获取的加密宏观分析师。e-CNY对全球稳定币格局的影响几乎没有系统性英文分析。亚洲加息/降息周期与BTC相关性的本地解读严重缺失。
+        <span class="zh-inline">Critical gap: No English-language crypto macro analysts from Asia. e-CNY impact on global stablecoin landscape has no systematic English analysis.</span>
+      </div>
+      <div class="source-card-meta">
+        <span class="lang-badge lang-zh">ZH</span>
+        <span>建议策展中文宏观分析师观点</span>
+      </div>
+    </div>
+
+    <!-- ═══════════ §4 Industry Media ═══════════ -->
+    <div class="section-header" id="media">
+      <h2><span class="section-num">04</span>Industry Media<span class="zh">行业媒体</span></h2>
+    </div>
+
+    <div class="grid-2">
+      <div class="card" style="border-left: 3px solid var(--accent);">
+        <div class="source-card-header">
+          <span class="source-card-title">The Block</span>
+          <span class="quality-badge quality-a">Quality A-</span>
+        </div>
+        <div class="source-card-desc">
+          行业最全面的数据驱动媒体。提供融资新闻、DeFi数据、监管追踪、每日/周报告。<strong>优势</strong>：数据可视化好，覆盖全面。<strong>劣势</strong>：编辑独立性存疑（曾接受FTX广告），需交叉验证。
+          <span class="zh-inline">Most comprehensive data-driven industry media. Financing news, DeFi data, regulatory tracking, daily/weekly reports.</span>
+        </div>
+        <div class="source-card-meta">
+          <span class="lang-badge lang-en">EN</span>
+          <span>URL: theblock.co</span>
+          <span>| Pro订阅: $599/年</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="source-card-header">
+          <span class="source-card-title">CoinDesk</span>
+          <span class="quality-badge quality-b">Quality B+</span>
+        </div>
+        <div class="source-card-desc">
+          行业最老牌媒体，2024年被Paradigm收购。<strong>优势</strong>：历史数据积累丰富，行业事件第一手报道。<strong>劣势</strong>：被机构收购后有政治化倾向，编辑独立性下降。
+          <span class="zh-inline">Oldest industry media (acquired by Paradigm 2024). Rich historical data. First-hand event coverage.</span>
+        </div>
+        <div class="source-card-meta">
+          <span class="lang-badge lang-en">EN</span>
+          <span>URL: coindesk.com</span>
+          <span>| 月活: 5000万+</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:1rem;">
+      <div class="card">
+        <div class="source-card-header">
+          <span class="source-card-title">Blockworks</span>
+          <span class="quality-badge quality-b">Quality B+</span>
+        </div>
+        <div class="source-card-desc">
+          专注机构级深度报道。与The Block竞争，数据覆盖较新。<strong>优势</strong>：机构采用、ETF、监管内容深度好。<strong>劣势</strong>：对DeFi/零售市场覆盖较弱。
+          <span class="zh-inline">Institutional-focused deep reporting. Competes with The Block. Strong on ETF/regulatory content.</span>
+        </div>
+        <div class="source-card-meta">
+          <span class="lang-badge lang-en">EN</span>
+          <span>URL: blockworks.co</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="source-card-header">
+          <span class="source-card-title">Decrypt</span>
+          <span class="quality-badge quality-b">Quality B</span>
+        </div>
+        <div class="source-card-desc">
+          侧重技术层面的媒体，技术解释文章质量高。<strong>优势</strong>：协议升级、技术细节解读深入。<strong>劣势</strong>：宏观/交易策略分析较弱。
+          <span class="zh-inline">Tech-focused media. High-quality technical explainers. Weaker on macro/trading strategy.</span>
+        </div>
+        <div class="source-card-meta">
+          <span class="lang-badge lang-en">EN</span>
+          <span>URL: decrypt.co</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1rem;">
+      <div class="source-card-header">
+        <span class="source-card-title">&#128269; 媒体可信度评估框架</span>
+      </div>
+      <div class="source-card-desc">
+        <strong>三层验证法</strong>：<br>
+        <strong>1. 消息来源标注</strong>：是否注明「据知情人士」vs「官方声明」vs「链上数据」？<br>
+        <strong>2. 利益冲突披露</strong>：是否披露广告商、投资者与报道对象的关系？<br>
+        <strong>3. 多源交叉验证</strong>：同一事件至少2-3个独立来源确认后，才视为可信。
+        <span class="zh-inline">Three-layer verification: source attribution, conflict disclosure, multi-source cross-validation.</span>
+      </div>
+    </div>
+
+    <!-- ═══════════ §5 Chinese Sources ═══════════ -->
+    <div class="section-header" id="chinese">
+      <h2><span class="section-num">05</span>Chinese Sources<span class="zh">中文来源 &mdash; 亚洲/新兴市场关键信息源</span></h2>
+    </div>
+
+    <div class="advisory-box" style="border-left-color: var(--red); background: rgba(244,67,54,0.03);">
+      <strong style="color:var(--red);">&#9888; 结构性偏见警告</strong><br>
+      英文区块链媒体系统性忽略亚洲/新兴市场。TRON（孙宇晨）、Tether（USDT在新兴市场的主导地位）、亚洲矿企（嘉楠/亿邦/比特微）几乎不出现在英文主流报道中。中文来源填补这一空白，但需要翻译成本和信源验证。
+      <span class="zh">English blockchain media systematically ignores Asia/EM. Chinese sources fill this gap but require translation costs and verification.</span>
+    </div>
+
+    <div class="grid-2">
+      <div class="card" style="border-left: 3px solid var(--red);">
+        <div class="source-card-header">
+          <span class="source-card-title">PANews 潘侃</span>
+          <span class="quality-badge quality-b">Quality B+ <span class="zh-inline" style="font-weight:400;color:var(--text-secondary);">· 中文</span></span>
+        </div>
+        <div class="source-card-desc">
+          专注区块链行业深度报道，国内影响力前三的区块链媒体。<strong>优势</strong>：一线从业者访谈、项目方动态、融资信息、监管解读。<strong>劣势</strong>：部分内容受项目方赞助影响，需甄别。
+          <span class="zh-inline">Top-3 blockchain media in China. In-depth industry coverage. First-line operator interviews.</span>
+        </div>
+        <div class="source-card-meta">
+          <span class="lang-badge lang-zh">ZH</span>
+          <span>URL: panewslab.com</span>
+          <span>| 微博: @PANews</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="source-card-header">
+          <span class="source-card-title">吴说区块链</span>
+          <span class="quality-badge quality-b">Quality B+ <span class="zh-inline" style="font-weight:400;color:var(--text-secondary);">· 中文</span></span>
+        </div>
+        <div class="source-card-desc">
+          专注矿业、矿业公司财报、监管政策。<strong>优势</strong>：矿企一手信息来源（比特大陆、嘉楠、亿邦），矿场电价数据。<strong>劣势</strong>：偏重矿业，其他领域覆盖有限。
+          <span class="zh-inline">Focus: mining industry, mining company financials, regulatory policy. First-hand mining source.</span>
+        </div>
+        <div class="source-card-meta">
+          <span class="lang-badge lang-zh">ZH</span>
+          <span>公众号: 吴说区块链</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:1rem;">
+      <div class="card">
+        <div class="source-card-header">
+          <span class="source-card-title">链捕手 ChainCatcher</span>
+          <span class="quality-badge quality-b">Quality B <span class="zh-inline" style="font-weight:400;color:var(--text-secondary);">· 中文</span></span>
+        </div>
+        <div class="source-card-desc">
+          深度行业分析，关注Web3项目方和投资机构。<strong>优势</strong>：项目方创始人访谈、Token经济模型分析。<strong>劣势</strong>：时效性稍弱，侧重深度而非速度。
+          <span class="zh-inline">In-depth industry analysis. Project founder interviews, token economics analysis.</span>
+        </div>
+        <div class="source-card-meta">
+          <span class="lang-badge lang-zh">ZH</span>
+          <span>URL: chaincatcher.com</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="source-card-header">
+          <span class="source-card-title">火星财经</span>
+          <span class="quality-badge quality-b">Quality B- <span class="zh-inline" style="font-weight:400;color:var(--text-secondary);">· 中文</span></span>
+        </div>
+        <div class="source-card-desc">
+          综合性区块链媒体，覆盖快、范围广。<strong>优势</strong>：行业事件第一时间报道。<strong>劣势</strong>：深度不足，部分内容有软文性质。
+          <span class="zh-inline">Comprehensive blockchain media. Fast coverage, broad scope. Depth insufficient.</span>
+        </div>
+        <div class="source-card-meta">
+          <span class="lang-badge lang-zh">ZH</span>
+          <span>URL: huoxing24.com</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1rem;">
+      <div class="source-card-header">
+        <span class="source-card-title">&#127471;&#127477; 韩国/日本/东南亚专有来源 (缺口)</span>
+        <span class="quality-badge quality-d">Quality Gap</span>
+      </div>
+      <div class="source-card-desc">
+        <strong>韩国</strong>：CoinDesk Korea（已被CoinDesk收购整合）| Decenter | IT Chosun区块链专栏 — 关注Upbit/Dunamu监管、STO市场。<br>
+        <strong>日本</strong>：CoinPost | 暗号資産取引業協会 — 关注FSA监管、合规稳定币(JPYC)。<br>
+        <strong>东南亚</strong>：CoinLive | The Block Asia（新兴）— 关注新加坡VASP牌照、泰国STO框架。
+        <span class="zh-inline">Korea: CoinDesk Korea, Decenter, IT Chosun. Japan: CoinPost, JVCEA. Southeast Asia: CoinLive, The Block Asia.</span>
+      </div>
+      <div class="source-card-meta">
+        <span class="lang-badge lang-multi">MULTI</span>
+        <span>需补充策展</span>
+      </div>
+    </div>
+
+    <!-- ═══════════ §6 Academic Research ═══════════ -->
+    <div class="section-header" id="academic">
+      <h2><span class="section-num">06</span>Academic Research<span class="zh">学术研究</span></h2>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="source-card-header">
+          <span class="source-card-title">arXiv: Cryptography and Security</span>
+          <span class="quality-badge quality-b">Quality B+</span>
+        </div>
+        <div class="source-card-desc">
+          区块链安全、零知识证明、共识机制研究的顶级预印本平台。<strong>关键论文</strong>：ZK-SNARKs进展、L2扩容方案、跨链桥安全分析。<strong>局限性</strong>：纯学术，与市场实践有时间差。
+          <span class="zh-inline">Top preprint platform for blockchain security, ZK proofs, consensus mechanisms. Gap: academic-market time lag.</span>
+        </div>
+        <div class="source-card-meta">
+          <span class="lang-badge lang-en">EN</span>
+          <span>URL: arxiv.org (cs.CR, cs.DC)</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="source-card-header">
+          <span class="source-card-title">Messari Research</span>
+          <span class="quality-badge quality-b">Quality B+</span>
+        </div>
+        <div class="source-card-desc">
+          专注加密资产研究的付费平台，学术性与实用性结合较好。<strong>优势</strong>：资产报告（Bitcoin、DeFi）、宏观框架、定量分析。<strong>劣势</strong>：订阅昂贵($150+/月)，美国中心视角。
+          <span class="zh-inline">Paid platform for crypto asset research. Good balance of academic and practical. Expensive, US-centric.</span>
+        </div>
+        <div class="source-card-meta">
+          <span class="lang-badge lang-en">EN</span>
+          <span>URL: messari.io</span>
+          <span>| Pro: $299/月</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1rem;">
+      <div class="source-card-header">
+        <span class="source-card-title">&#127757; 高校区块链实验室 (策展列表)</span>
+        <span class="quality-badge quality-c">Quality C</span>
+      </div>
+      <div class="source-card-desc">
+        <strong>MIT DCI</strong> (Digital Currency Initiative)：BTC协议研究领先。<br>
+        <strong>Stanford Blockchain Research Center</strong>：零知识证明、安全多方计算。<br>
+        <strong>Berkman Klein Center</strong> (Harvard)：区块链治理、社会影响。<br>
+        <strong>ETH Zurich</strong>：LUKSO合作，Token标准研究。<br>
+        <strong>清华/北大/中科院</strong>：中文区块链学术研究（需直接访问中国数据库）。
+        <span class="zh-inline">MIT DCI, Stanford Blockchain Research, Berkman Klein, ETH Zurich. Chinese university labs need direct access.</span>
+      </div>
+    </div>
+
+    <!-- ═══════════ §7 Regulatory Sources ═══════════ -->
+    <div class="section-header" id="regulatory">
+      <h2><span class="section-num">07</span>Regulatory Sources<span class="zh">监管来源</span></h2>
+    </div>
+
+    <div class="grid-3">
+      <div class="card" style="border-left: 3px solid var(--accent);">
+        <div class="source-card-header">
+          <span class="source-card-title">SEC/CFTC (美国)</span>
+          <span class="quality-badge quality-a">Quality A</span>
+        </div>
+        <div class="source-card-desc">
+          <strong>SEC</strong>：豪威测试(Howey Test)适用范围判定、ETF审批、执法行动。<br>
+          <strong>CFTC</strong>：衍生品市场监管、BitMEX/Coinbase诉讼。<br>
+          <strong>追踪</strong>：SEC主席Gary Gensler声明、委员Hester Peirce异议（代理人均已覆盖）。
+        </div>
+        <div class="source-card-meta">
+          <span class="lang-badge lang-en">EN</span>
+          <span>sec.gov | cftc.gov</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="source-card-header">
+          <span class="source-card-title">ESMA (欧盟/MiCA)</span>
+          <span class="quality-badge quality-a">Quality A</span>
+        </div>
+        <div class="source-card-desc">
+          <strong>MiCA</strong>：全球最完整加密监管框架，2024年全面生效。<br>
+          <strong>追踪</strong>：ESMA指南发布、成员国实施进度、稳定币MEP限制。
+        </div>
+        <div class="source-card-meta">
+          <span class="lang-badge lang-multi">EN+EU</span>
+          <span>esma.europa.eu</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="source-card-header">
+          <span class="source-card-title">MAS (新加坡)</span>
+          <span class="quality-badge quality-b">Quality B+</span>
+        </div>
+        <div class="source-card-desc">
+          <strong>PSA</strong>：2020年支付服务法，提供VASP牌照框架。<br>
+          <strong>Ubin项目</strong>：新加坡央行数字货币实验，与JPMorgan/星展银行合作。
+        </div>
+        <div class="source-card-meta">
+          <span class="lang-badge lang-multi">EN</span>
+          <span>mas.gov.sg</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:1rem;">
+      <div class="card">
+        <div class="source-card-header">
+          <span class="source-card-title">SFC (香港)</span>
+          <span class="quality-badge quality-b">Quality B+</span>
+        </div>
+        <div class="source-card-desc">
+          2023年虚拟资产框架发布，发牌制度启动。<strong>重点</strong>：HashKey、OSL持牌运营，ETF批准。<strong>趋势</strong>：香港作为中国加密「窗口」的实验。
+        </div>
+        <div class="source-card-meta">
+          <span class="lang-badge lang-multi">EN+ZH</span>
+          <span>sfc.hk</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="source-card-header">
+          <span class="source-card-title">FSA (日本)</span>
+          <span class="quality-badge quality-b">Quality B+</span>
+        </div>
+        <div class="source-card-desc">
+          <strong>JVCEA</strong>：日本加密交换所自治组织。<br>
+          <strong>STO框架</strong>：修订证券法，允许特定代币化证券。<br>
+          <strong>稳定币</strong>：JGBH、JPYC等合规日元稳定币。
+        </div>
+        <div class="source-card-meta">
+          <span class="lang-badge lang-multi">JP+EN</span>
+          <span>fsa.go.jp</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1rem; border-left-color: var(--red);">
+      <div class="source-card-header">
+        <span class="source-card-title">&#127474;&#127500; 中国监管追踪 (缺口)</span>
+        <span class="quality-badge quality-d">Quality Gap</span>
+      </div>
+      <div class="source-card-desc">
+        <strong>公开来源极度有限</strong>：中国人民银行、网信办声明通过官方渠道获取，但缺乏一手解读。<strong>灰色活动</strong>：OTC交易、DeFi参与、矿机交易在禁止令下的真实规模无法量化。<strong>建议</strong>：依赖中文来源（PANews/吴说）+ 链上异常信号（需替换为实时数据）。
+        <span class="zh-inline">Public sources extremely limited. Grey activity scale unquantifiable. Recommend: Chinese sources + on-chain anomaly signals.</span>
+      </div>
+      <div class="source-card-meta">
+        <span class="lang-badge lang-zh">ZH</span>
+        <span>pbc.gov.cn | cac.gov.cn</span>
+      </div>
+    </div>
+
+    <!-- ═══════════ §8 Gap Analysis ═══════════ -->
+    <div class="section-header" id="gap-analysis">
+      <h2><span class="section-num">08</span>Gap Analysis<span class="zh">缺口分析 &mdash; 四级严重程度</span></h2>
+    </div>
+
+    <div class="advisory-box">
+      <strong>评估框架</strong>：缺口严重程度 = 数据可得性(0-5) × 战略重要性(0-5) × 时间敏感性(0-5)，满分125。
+      <span class="zh-inline">Gap severity = Data availability (0-5) × Strategic importance (0-5) × Time sensitivity (0-5).</span>
+    </div>
+
+    <table class="gap-table">
+      <thead>
+        <tr>
+          <th>缺口领域</th>
+          <th>严重程度</th>
+          <th>影响</th>
+          <th>现有替代方案</th>
+          <th>修复建议</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>TRON链数据覆盖</strong></td>
+          <td><span class="severity-high">Critical 高</span></td>
+          <td>TRON 3.3亿账户、USDT流通量$64B+，被英文来源系统性忽略</td>
+          <td>TRONSCAN（仅浏览器，无分析）</td>
+          <td>建立TRON专属数据管道，标签化USDT主要持有者</td>
+        </tr>
+        <tr>
+          <td><strong>新兴市场稳定币使用</strong></td>
+          <td><span class="severity-high">Critical 高</span></td>
+          <td>巴西90%是稳定币储蓄（非投机），尼日利亚$921亿交易量 — 改变了对市场结构的认知</td>
+          <td>Chainalysis/ELLIPTIC（昂贵）</td>
+          <td>与本地交易所建立数据合作，追踪P2P平台交易量</td>
+        </tr>
+        <tr>
+          <td><strong>中国矿企动态</strong></td>
+          <td><span class="severity-high">Critical 高</span></td>
+          <td>矿机95%中国制造，类似ASML的卡脖子风险，无系统性英文追踪</td>
+          <td>吴说区块链（中文，需翻译）</td>
+          <td>建立中文矿企新闻监测系统，追踪比特大陆/嘉楠/亿邦</td>
+        </tr>
+        <tr>
+          <td><strong>亚洲DeFi生态</strong></td>
+          <td><span class="severity-medium">High 中高</span></td>
+          <td>PancakeSwap（BSC最大DEX）、TRON DeFi、Conflux合规链无英文深度分析</td>
+          <td>Dune仪表盘（仅TVL，无质量评估）</td>
+          <td>补充NODE 7专属代理人：PancakeSwap创始人</td>
+        </tr>
+        <tr>
+          <td><strong>e-CNY国际扩张</strong></td>
+          <td><span class="severity-medium">High 中高</span></td>
+          <td>35亿笔交易/$2.4T流通，对全球稳定币格局的战略影响无系统性英文分析</td>
+          <td>PBoC官方报告（不透明）</td>
+          <td>追踪e-CNY跨境试点城市（深圳/苏州/海口/深圳）</td>
+        </tr>
+        <tr>
+          <td><strong>MiCA实施细节</span></strong></td>
+          <td><span class="severity-medium">High 中高</span></td>
+          <td>欧盟最完整监管框架，但ESMA指南发布节奏快，英文来源翻译有延迟</td>
+          <td>The Block/CoinDesk追踪（延迟1-2周）</td>
+          <td>建立#22 MiCA专属代理人</td>
+        </tr>
+        <tr>
+          <td><strong>韩国STO市场</strong></td>
+          <td><span class="severity-low">Medium 中</span></td>
+          <td>Upbit 80%韩国市场份额，Dunamu/Song Chi-Hyung无英文深度分析</td>
+          <td>有限：CoinDesk Korea（已整合）</td>
+          <td>补充NODE 4韩国交易所代理人</td>
+        </tr>
+        <tr>
+          <td><strong>矿池运营数据</strong></td>
+          <td><span class="severity-low">Medium 中</span></td>
+          <td>F2Pool/AntPool/BTC.com算力分布无实时英文追踪</td>
+          <td>BTC.com浏览器（有限分析）</td>
+          <td>追踪矿池公开披露+中文来源</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ═══════════ §9 Quality Framework ═══════════ -->
+    <div class="section-header" id="framework">
+      <h2><span class="section-num">09</span>Quality Assessment Framework<span class="zh">质量评估框架</span></h2>
+    </div>
+
+    <div class="card" style="border-left: 3px solid var(--accent);">
+      <h4 style="margin:0 0 1rem 0;">来源质量三维度评估</h4>
+      
+      <div class="rec-tier">
+        <div class="tier-icon tier-1">1</div>
+        <div>
+          <strong>数据质量 Data Quality</strong><br>
+          <span style="font-size:0.8rem;color:var(--text-secondary);">
+            原始数据 vs 推算数据 vs 估算数据<br>
+            样本覆盖率 / 方法论透明度 / 可重复验证性
+          </span>
+        </div>
+      </div>
+      
+      <div class="rec-tier">
+        <div class="tier-icon tier-2">2</div>
+        <div>
+          <strong>地理覆盖 Geographic Coverage</strong><br>
+          <span style="font-size:0.8rem;color:var(--text-secondary);">
+            美国/欧洲 vs 亚洲 vs 新兴市场<br>
+            英文 vs 本地语言来源比例
+          </span>
+        </div>
+      </div>
+      
+      <div class="rec-tier">
+        <div class="tier-icon tier-3">3</div>
+        <div>
+          <strong>时效性与节奏 Timeliness & Rhythm</strong><br>
+          <span style="font-size:0.8rem;color:var(--text-secondary);">
+            实时 vs 日更 vs 周更 vs 月度报告<br>
+            市场周期匹配度
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-top:1rem;">
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2.5rem;font-weight:700;color:#4caf50;">A</div>
+        <div style="font-weight:600;margin:0.5rem 0;">Gold Standard</div>
+        <div style="font-size:0.8rem;color:var(--text-secondary);">原始链上数据<br>全球覆盖<br>实时或日更</div>
+        <div style="margin-top:0.75rem;font-size:0.75rem;">Glassnode, Dune, Lyn Alden</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2.5rem;font-weight:700;color:#5b9bd5;">B</div>
+        <div style="font-weight:600;margin:0.5rem 0;">Reliable</div>
+        <div style="font-size:0.8rem;color:var(--text-secondary);">分析数据<br>区域覆盖<br>周更或月更</div>
+        <div style="margin-top:0.75rem;font-size:0.75rem;">Messari, Nansen, PANews</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2.5rem;font-weight:700;color:var(--accent);">C</div>
+        <div style="font-weight:600;margin:0.5rem 0;">Supplementary</div>
+        <div style="font-size:0.8rem;color:var(--text-secondary);">聚合/二手数据<br>有限覆盖<br>需交叉验证</div>
+        <div style="margin-top:0.75rem;font-size:0.75rem;">行业媒体, 学术论文</div>
+      </div>
+    </div>
+
+    <!-- ═══════════ §10 Reading Order ═══════════ -->
+    <div class="section-header" id="reading-order">
+      <h2><span class="section-num">10</span>Recommended Reading Order<span class="zh">推荐阅读顺序 &mdash; 研究效率优化</span></h2>
+    </div>
+
+    <div class="card" style="border-left: 3px solid #4caf50;">
+      <h4 style="margin:0 0 1rem 0;">&#128214; 日/周常研究流程 (Daily/Weekly Research Workflow)</h4>
+      
+      <div style="display:grid;grid-template-columns:auto 1fr auto;gap:0.75rem 1rem;align-items:start;font-size:0.85rem;">
+        <div style="font-weight:600;color:var(--text-muted);">T+0 早晨</div>
+        <div>查看The Block/CoinDesk头条 + Glassnode上周链上摘要</div>
+        <div style="color:var(--knowledge);font-size:0.75rem;">~15分钟</div>
+        
+        <div style="font-weight:600;color:var(--text-muted);">T+1 上午</div>
+        <div>追踪DeFi Llama TVL + Dune热门仪表盘 + 稳定币流通量变化</div>
+        <div style="color:var(--knowledge);font-size:0.75rem;">~20分钟</div>
+        
+        <div style="font-weight:600;color:var(--text-muted);">T+2 午后</div>
+        <div>阅读Lyn Alden/Nic Carter最新观点 + 宏观日历（Fed讲话/CPI/非农）</div>
+        <div style="color:var(--knowledge);font-size:0.75rem;">~30分钟</div>
+        
+        <div style="font-weight:600;color:var(--text-muted);">T+3 傍晚</div>
+        <div>中文来源策展（PANews/吴说） + 中文→英文翻译摘要 <span class="lang-badge lang-zh">ZH</span></div>
+        <div style="color:var(--knowledge);font-size:0.75rem;">~20分钟</div>
+        
+        <div style="font-weight:600;color:var(--text-muted);">周度</div>
+        <div>监管追踪更新（SEC/CFTC/MiCA/香港SFC）+ 缺口领域深度研究</div>
+        <div style="color:var(--knowledge);font-size:0.75rem;">~2小时</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1rem;">
+      <h4 style="margin:0 0 0.75rem 0;">&#127919; 信息源优先级矩阵</h4>
+      <table class="gap-table" style="margin-top:0;">
+        <thead>
+          <tr>
+            <th>研究目标</th>
+            <th>第一优先</th>
+            <th>第二优先</th>
+            <th>补充</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>链上趋势量化</td>
+            <td>Glassnode + Dune</td>
+            <td>CryptoQuant</td>
+            <td>DeFi Llama</td>
+          </tr>
+          <tr>
+            <td>宏观周期定位</td>
+            <td>Lyn Alden + Nic Carter</td>
+            <td>PlanB S2F</td>
+            <td>Fed讲话日历</td>
+          </tr>
+          <tr>
+            <td>行业事件追踪</td>
+            <td>The Block + Blockworks</td>
+            <td>CoinDesk</td>
+            <td>Decrypt</td>
+          </tr>
+          <tr>
+            <td>亚洲/新兴市场</td>
+            <td>PANews + 吴说 <span class="lang-badge lang-zh">ZH</span></td>
+            <td>CoinDesk Asia</td>
+            <td>本地交易所公告</td>
+          </tr>
+          <tr>
+            <td>监管政策预判</td>
+            <td>SEC/CFTC官方 + Hester Peirce</td>
+            <td>The Block Policy</td>
+            <td>ESMA/MiCA追踪</td>
+          </tr>
+          <tr>
+            <td>技术/协议深度</td>
+            <td>arXiv + Decrypt</td>
+            <td>Vitalik博客</td>
+            <td>协议官方文档</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer -->
+    <div class="page-footer">
+      <a href="blockchain_hub.html">&larr; Back to Blockchain Hub</a>
+      <div style="margin-top:0.5rem;">Research Source Curation · Part of Cognitive Observatory V3 · 2026-03-21</div>
+    </div>
+
+  </main>
+
+  <!-- ===== Right Sidebar: Meta-cognitive ===== -->
+  <aside class="notes-sidebar">
+    <h4>Meta-cognitive 元思考</h4>
+
+    <div class="meta-note">
+      <div class="note-label pattern">Key Insight</div>
+      <p>西方数据源的结构性盲区不是「信息不足」，而是「视角偏见」。TRON在发展中市场的真实规模、矿机硬件的地缘风险、稳定币在新兴市场的储蓄功能——这些在英文主流框架里几乎不存在。不是找不到数据，而是没人问正确的问题。<span class="zh">The structural blind spots in Western sources aren't "insufficient info" but "perspective bias".</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label strength">Coverage Strength</div>
+      <p>美国/西方市场数据覆盖完整：链上分析(Glassnode/Dune)、宏观策略(Lyn Alden/Nic Carter)、行业媒体(The Block/CoinDesk)形成完整闭环。ETF资金流、DeFi TVL、监管动态均有可靠来源。<span class="zh">US/West coverage complete: on-chain analytics + macro strategy + industry media闭环.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label risk">Critical Gaps</div>
+      <p>三个最高优先级缺口：(1)TRON链数据 — USDT$64B+流通量几乎无分析覆盖；(2)新兴市场稳定币使用 — 巴西/尼日利亚改变市场结构认知；(3)中国矿企动态 — 矿机95%中国制造是地缘风险盲点。<span class="zh">Three critical gaps: TRON data, EM stablecoin usage, Chinese mining dynamics.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label suggestion">Next Step</div>
+      <p>本策展页面应每季度更新一次（配合减半周期调整频率）。下一步：在区块链Hub框架内，为每个NODE创建专属数据策展卡片，逐步填补上述8个缺口。<span class="zh">This page should update quarterly. Next: create per-NODE data curation cards to fill the 8 gaps.</span></p>
+    </div>
+  </aside>
+
+</div>
+
+<!-- Sidebar active state -->
+<script>
+const sections = document.querySelectorAll('.section-header[id]');
+const navLinks = document.querySelectorAll('.sidebar nav ul li a[href^="#"]');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + entry.target.id) link.classList.add('active');
+      });
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+
+<script src="../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../lib/reading-mode.js"></script>
+</body>
+</html>

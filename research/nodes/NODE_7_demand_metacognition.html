@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>需求侧/超大规模节点 — 24轮元思考过程</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <style>
+    :root {
+      --bg-base: #08090a; --bg-elevated: #0f1011; --bg-surface: #141516; --bg-overlay: #191a1b;
+      --border-subtle: #23252a; --border-default: #34343a; --border-strong: #3e3e44;
+      --text-primary: #f7f8f8; --text-secondary: #d0d6e0; --text-tertiary: #8a8f98; --text-quaternary: #62666d;
+      --accent: #f8a848; --accent-dim: rgba(248, 168, 72, 0.12); --accent-hover: rgba(248, 168, 72, 0.08);
+      --knowledge: #5b9bd5; --knowledge-dim: rgba(91, 155, 213, 0.12);
+      --green: #4caf50; --red: #f44336; --orange: #ffa726;
+      --font-sans: 'Inter', 'Inter Variable', -apple-system, system-ui, sans-serif;
+      --font-mono: 'SF Mono', 'Menlo', monospace;
+      --radius-sm: 8px; --radius-md: 12px; --sidebar-width: 240px;
+    }
+    * { box-sizing: border-box; }
+    html { font-family: var(--font-sans); font-feature-settings: 'liga' 1, 'calt' 1; letter-spacing: -0.012em; -webkit-font-smoothing: antialiased; }
+    body { margin: 0; padding: 0; background: var(--bg-base); color: var(--text-primary); font-size: 15px; line-height: 1.65; }
+    .page-wrapper { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { position: sticky; top: 0; height: 100vh; width: var(--sidebar-width); min-width: var(--sidebar-width); overflow-y: auto; padding: 1.25rem 0.75rem; border-right: 1px solid var(--border-subtle); background: var(--bg-elevated); z-index: 100; }
+    .sidebar h4 { margin-bottom: 0.5rem; padding: 0 0.5rem; font-size: 0.7rem; font-weight: 590; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-quaternary); }
+    .sidebar nav ul { list-style: none; padding: 0; margin: 0 0 1rem 0; }
+    .sidebar nav ul li a { display: block; padding: 0.25rem 0.5rem; font-size: 0.78rem; color: var(--text-tertiary); text-decoration: none; border-radius: var(--radius-sm); transition: background 0.12s, color 0.12s; line-height: 1.4; }
+    .sidebar nav ul li a:hover { background: var(--accent-hover); color: var(--text-primary); }
+    .sidebar nav ul li a .toc-num { color: var(--text-quaternary); margin-right: 0.25rem; font-size: 0.65rem; font-weight: 510; }
+
+    /* Main */
+    .main-content { flex: 1; min-width: 0; max-width: 960px; padding: 2.5rem 2.5rem 5rem; }
+
+    /* Header */
+    .page-header { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-default); }
+    .page-header h1 { margin-bottom: 0.3rem; font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 680; letter-spacing: -0.025em; }
+    .page-header .subtitle { color: var(--text-tertiary); margin-bottom: 1rem; font-size: 0.95rem; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .badge { display: inline-block; padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.75rem; font-weight: 510; background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(248, 168, 72, 0.25); }
+    .role-badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; background: rgba(91,155,213,0.12); color: var(--knowledge); }
+
+    /* Sections */
+    .section-header { margin-top: 3.5rem; margin-bottom: 1.25rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border-subtle); }
+    .section-header h2 { font-size: 1.25rem; font-weight: 590; letter-spacing: -0.015em; margin-bottom: 0; }
+    h3 { font-size: 1.1rem; font-weight: 590; margin-top: 1.5rem; }
+    p { color: var(--text-secondary); margin-bottom: 1rem; }
+    strong { color: var(--text-primary); font-weight: 590; }
+    ul, ol { color: var(--text-secondary); padding-left: 1.2rem; }
+    li { margin-bottom: 0.35rem; line-height: 1.6; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Details */
+    details { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.8rem 1rem; margin: 0.8rem 0; background: var(--bg-elevated); }
+    details summary { cursor: pointer; font-weight: 510; font-size: 0.9rem; color: var(--text-primary); }
+    details[open] summary { margin-bottom: 0.6rem; color: var(--accent); }
+
+    /* Priority box */
+    .priority-box { border: 1px solid rgba(248, 168, 72, 0.3); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin-bottom: 2rem; background: var(--bg-surface); }
+    .priority-box h2 { color: var(--accent); margin-top: 0; font-size: 1.1rem; font-weight: 590; }
+
+    /* Arc items */
+    .arc-item { margin-bottom: 1rem; padding: 0.8rem; border-left: 3px solid var(--accent); background: rgba(66, 165, 245, 0.03); border-radius: 0 6px 6px 0; }
+    .arc-item strong { color: var(--accent); }
+
+    /* Question box */
+    .question-box { border: 2px solid var(--knowledge); border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; background: rgba(91, 155, 213, 0.05); }
+    .question-box h4 { color: var(--knowledge); margin-top: 0; }
+
+    /* Tables */
+    figure { margin: 1.25rem 0; overflow-x: auto; }
+    table { font-size: 0.82rem; border-collapse: collapse; width: 100%; }
+    th, td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border-subtle); text-align: left; }
+    th { white-space: nowrap; font-weight: 510; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-quaternary); border-bottom: 1px solid var(--border-default); }
+    td { color: var(--text-secondary); }
+    tr:hover td { background: var(--bg-elevated); }
+
+    /* Blockquote */
+    blockquote { border-left: 3px solid var(--accent); padding: 0.6rem 1.25rem; margin: 1rem 0; font-style: italic; background: var(--bg-surface); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-secondary); }
+
+    /* Signals */
+    .signal { display: inline-block; font-size: 0.75rem; padding: 0.1rem 0.4rem; border-radius: 3px; font-weight: 590; margin-right: 0.3rem; }
+    .signal-bull { background: rgba(76,175,80,0.15); color: var(--green); }
+    .signal-bear { background: rgba(244,67,54,0.15); color: var(--red); }
+    .signal-watch { background: rgba(255,167,38,0.15); color: var(--orange); }
+
+    /* Phase indicator */
+    .phase-tag { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+    .phase-explore { background: rgba(91,155,213,0.12); color: var(--knowledge); }
+    .phase-diagnose { background: rgba(255,167,38,0.12); color: var(--orange); }
+    .phase-build { background: rgba(76,175,80,0.12); color: var(--green); }
+    .phase-verify { background: rgba(244,67,54,0.12); color: var(--red); }
+
+    /* Footer */
+    .page-footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 2px solid var(--border-default); text-align: center; font-size: 0.85rem; color: var(--text-tertiary); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+
+    /* Mobile */
+    .hamburger-btn { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 200; background: var(--bg-surface); color: var(--text-primary); border: none; border-radius: 6px; width: 44px; height: 44px; font-size: 1.4rem; cursor: pointer; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+    @media (max-width: 900px) {
+      .sidebar { position: fixed; left: -320px; top: 0; transition: left 0.3s ease; box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.open { display: block; }
+      .hamburger-btn { display: block; }
+      .main-content { padding: 2rem 1rem 4rem; }
+    }
+    @media (min-width: 1400px) { .main-content { max-width: 1060px; } }
+
+/* === Embedded mode: inside Dashboard iframe === */
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+body.embedded .hamburger-btn { display: none !important; }
+body.embedded .sidebar-overlay { display: none !important; }
+
+/* === Reading mode: full-width === */
+.reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+.reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+.reading-mode .hamburger-btn { display: none !important; }
+.reading-mode .sidebar-overlay { display: none !important; }
+</style>
+</head>
+<body>
+<nav style="position:sticky;top:0;z-index:999;background:rgba(8,9,10,0.95);backdrop-filter:blur(8px);padding:0.5rem 1.5rem;border-bottom:1px solid #23252a;font-size:0.78rem;display:flex;gap:1rem;align-items:center;">
+  <a href="../semiconductor_hub.html" style="color:#f8a848;text-decoration:none;">&larr; Semiconductor Hub</a>
+  <span style="color:#62666d;">&middot;</span>
+  <a href="NODE_7_%E9%9C%80%E6%B1%82%E4%BE%A7_Demand_2026-03-21.html" style="color:#8a8f98;text-decoration:none;">Node 7 需求侧认知节点报告</a>
+</nav>
+
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="page-wrapper">
+
+  <aside class="sidebar" id="sidebar">
+    <h4>思考旅程 Thinking Journey</h4>
+    <nav>
+      <ul>
+        <li><a href="#overview"><span class="toc-num">&#9733;</span>速览结论<br><span class="zh-inline">Key Findings</span></a></li>
+        <li><a href="#phase1"><span class="toc-num">I</span>任务定义<br><span class="zh-inline">Task Definition</span></a></li>
+        <li><a href="#phase2"><span class="toc-num">II</span>数据解码<br><span class="zh-inline">Data Decoding</span></a></li>
+        <li><a href="#phase3"><span class="toc-num">III</span>矛盾与张力<br><span class="zh-inline">Contradictions &amp; Tensions</span></a></li>
+        <li><a href="#phase4"><span class="toc-num">IV</span>时间与反面<br><span class="zh-inline">Time &amp; Counter-arguments</span></a></li>
+        <li><a href="#phase5"><span class="toc-num">V</span>结构诊断<br><span class="zh-inline">Structure Diagnosis</span></a></li>
+        <li><a href="#phase6"><span class="toc-num">VI</span>成品审视<br><span class="zh-inline">Self-Audit</span></a></li>
+        <li><a href="#phase7"><span class="toc-num">VII</span>验证日历<br><span class="zh-inline">Verification Calendar</span></a></li>
+        <li><a href="#phase8"><span class="toc-num">VIII</span>信号传导<br><span class="zh-inline">Signal Transmission</span></a></li>
+        <li><a href="#phase9"><span class="toc-num">IX</span>最终方法论<br><span class="zh-inline">Final Methodology</span></a></li>
+      </ul>
+    </nav>
+    <h4 style="margin-top:1rem;">最终产出</h4>
+    <nav><ul>
+      <li><a href="NODE_7_%E9%9C%80%E6%B1%82%E4%BE%A7_Demand_2026-03-21.html" style="color:var(--accent);">需求侧认知节点报告 &rarr;</a></li>
+    </ul></nav>
+  </aside>
+
+  <main class="main-content">
+
+    <header class="page-header">
+      <div class="role-badge">METACOGNITION LOG</div>
+      <h1>需求侧/超大规模节点 &mdash; 24轮元思考过程</h1>
+      <p class="subtitle">从"买家确认需求"到"LOI不是合同，CEO承诺不是CapEx" &nbsp;|&nbsp; 2026-03-21<br>
+      <span style="color:var(--text-quaternary);font-size:0.85em;">研究笔记 &mdash; 思考过程比结论更有价值</span></p>
+      <div class="badge-row">
+        <span class="badge">24轮元思考</span>
+        <span class="badge">9个Phase</span>
+        <span class="badge">3+4代理人交叉验证</span>
+        <span class="badge">6条投资信号</span>
+      </div>
+    </header>
+
+
+    <!-- Overview -->
+    <div class="priority-box" id="overview">
+      <h2>&#129504; 24轮元思考的核心结论</h2>
+      <ol>
+        <li><strong>需求侧的真正问题不是"需求是否真实"（95%确认），而是"2028年后是否可持续"</strong> &mdash; $250B CapEx vs $50-80B AI应用收入 = 3-5x gap。历史先例：1998-2001光纤泡沫有相同的CapEx/收入比</li>
+        <li><strong>三位代理人都是买家，但他们有动机表现承诺</strong> &mdash; CEO公开宣布CapEx后再缩减是"职业自杀"。Altman的$100B LOI、Nadella的$80B指引、Musk的Terafab公告都有不可逆的叙事锁定效应</li>
+        <li><strong>最被低估的信号：Altman的Broadcom芯片延期（Q1&rarr;Q3 2026）</strong> &mdash; 自研芯片比预期更难 = NVIDIA依赖性短期反而加强。但长期方向不变：所有买家都在建"逃生通道"</li>
+        <li><strong>中国需求侧（#24 DeepSeek, #25 ByteDance, #26 Alibaba, #28 Tencent）是供应链"隐形鲸鱼"</strong> &mdash; 他们的GPU采购规模与西方hyperscaler可比，但出口管制迫使他们走自研路线，加速了全球替代生态的发育</li>
+        <li><strong>Node 7页面最大的缺陷：只看了三个美国买家</strong> &mdash; 全球AI需求有40%来自中国、中东和东南亚。这些需求流不经过Altman/Nadella/Musk但同样驱动NVIDIA收入</li>
+      </ol>
+    </div>
+
+
+    <!-- Phase 1 -->
+    <section id="phase1">
+      <div class="section-header">
+        <span class="phase-tag phase-explore">PHASE I &mdash; EXPLORE</span>
+        <h2>任务定义：表面任务 vs 真正任务</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#1 表面任务 vs 真正任务</strong></summary>
+        <p><strong>表面任务</strong>：从买方视角验证半导体供应链的需求端是否真实。</p>
+        <p><strong>真正任务</strong>：帮交易者回答 <strong>"$1T AI基建叙事到底有多少是真金白银、多少是LOI吹泡？如果泡沫破裂，最早的信号从哪里来？"</strong></p>
+        <p>Nodes 1-6的16位代理人（Jensen、Lisa Su、Morris Chang等）全部是卖家。他们说"需求无限"是在自卖自夸。本节点的核心价值是<strong>买家验证</strong>：当花钱的人也说"需要更多"，这比卖家说的可信10倍。但买家也有动机&mdash;&mdash;他们公开承诺后不能反悔。</p>
+      </details>
+
+      <details>
+        <summary><strong>#2 代理人选择的认知弧线</strong></summary>
+        <p><strong>初始本能</strong>：选最大的三个GPU买家&mdash;&mdash;Microsoft、Google、Amazon。标准hyperscaler三角验证。</p>
+        <p><strong>反思后调整</strong>：Google/Amazon是买家兼卖家（TPU、Trainium），他们的"买更多GPU"叙事被自家产品的竞争立场污染。更纯粹的"买家"是：</p>
+        <ul>
+          <li><strong>Musk/xAI</strong>：100%买NVIDIA，零自研芯片。最纯的GPU买方信号</li>
+          <li><strong>Altman/OpenAI</strong>：最大LOI + 正在做Broadcom自研 = 买方转型窗口最佳观测点</li>
+          <li><strong>Nadella/Microsoft</strong>：最透明的CapEx数据（上市公司季报审计） + 49% OpenAI = 两个需求流汇聚点</li>
+        </ul>
+        <p><strong>遗憾</strong>：没有直接覆盖中国需求侧（DeepSeek、字节跳动、阿里、腾讯）。他们的GPU消费量可比西方hyperscaler，但出口管制创造了一个完全不同的需求动态。</p>
+      </details>
+
+      <details>
+        <summary><strong>#3 "就是这个" vs "不对"</strong></summary>
+        <p><strong>成功标准</strong>：第一眼看到"需求真实度概率"+"LOI转化率评估"+"最早的泡沫信号在哪里"。</p>
+        <p><strong>失败标准</strong>：三位CEO的公开言论堆砌（公关稿翻译）；"需求是真的"但不给概率和条件（和事佬）；忽略中国需求（美国中心偏差）。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 2 -->
+    <section id="phase2">
+      <div class="section-header">
+        <span class="phase-tag phase-explore">PHASE II &mdash; EXPLORE</span>
+        <h2>数据解码：三位买家的隐含叙事</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#4 三位买家到底讲了什么故事？</strong></summary>
+        <h4>隐藏叙事解码</h4>
+        <figure>
+          <table>
+            <thead><tr><th>Agent</th><th>表面叙事</th><th>隐含叙事</th><th>我漏掉了什么</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Musk</strong></td><td>AI需要无限算力</td><td>"我比Altman花更多钱在GPU上"</td><td>Terafab时间线不可靠(x2-3) + 政治动机驱动非经济采购</td></tr>
+              <tr><td><strong>Altman</strong></td><td>下一代模型质变需数量级更多基建</td><td>"给我优先供货+折扣"</td><td>$100B LOI是谈判筹码不是采购计划；30%折扣 = NVIDIA定价权已侵蚀</td></tr>
+              <tr><td><strong>Nadella</strong></td><td>供给受限非需求受限</td><td>"Azure必须是AI的AWS"</td><td>$80B CapEx中AI比例(~60%)没被独立审计确认；Copilot 5M seats ≠ 5M daily active</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>核心发现：买家承诺偏差(Commitment Bias)</strong>。三位CEO公开宣布了巨额CapEx后，缩减 = 承认战略失误 = 股价崩盘 = 职业生涯终结。他们被自己的公告锁住了。Ben Thompson说得对：<em>"CapEx commitments are sunk cost once announced &mdash; pulling back publicly is career suicide for a CEO."</em></p>
+
+        <h4>跨节点交叉信号</h4>
+        <figure>
+          <table>
+            <thead><tr><th>信号</th><th>来源</th><th>投资含义</th></tr></thead>
+            <tbody>
+              <tr><td>Altman $100B LOI但Broadcom芯片延期Q1&rarr;Q3</td><td>Altman agent</td><td><span class="signal signal-bull">BULL</span> 自研更难 = NVIDIA短期受益</td></tr>
+              <tr><td>Nadella $80B CapEx + Azure AI 60% YoY</td><td>Nadella agent</td><td><span class="signal signal-bull">BULL</span> 最可验证的需求数据点</td></tr>
+              <tr><td>Musk $25B GPU + Terafab + Grok-3</td><td>Musk agent</td><td><span class="signal signal-watch">WATCH</span> 花销真实，但时间线需x2-3折扣</td></tr>
+              <tr><td>三人都在投资NVIDIA替代（Broadcom/Maia/--）</td><td>Cross-agent</td><td><span class="signal signal-bear">BEAR</span> 方向一致：减少NVIDIA依赖</td></tr>
+              <tr><td>$250B CapEx vs $50-80B AI应用收入</td><td>Morgan Stanley/GS</td><td><span class="signal signal-watch">WATCH</span> 3-5x gap是1998光纤泡沫水平</td></tr>
+              <tr><td>OpenAI仅凭威胁转TPU获30%折扣</td><td>Altman agent + Node 8 cross-ref</td><td><span class="signal signal-bear">BEAR</span> 替代品的存在本身就是武器</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details>
+        <summary><strong>#5 中国需求侧的盲区</strong></summary>
+        <p>Node 7只覆盖了三个美国买家。但全球AI计算需求的分布是：</p>
+        <ul>
+          <li><strong>美国hyperscaler</strong>: ~55-60%（MSFT/GOOG/AMZN/META + OpenAI/xAI）</li>
+          <li><strong>中国科技巨头</strong>: ~25-30%（ByteDance/Alibaba/Tencent + DeepSeek/Baidu）</li>
+          <li><strong>其他</strong>: ~10-15%（中东主权基金、日韩、欧洲）</li>
+        </ul>
+        <p>中国需求侧的独特动态：出口管制迫使H20替代H100，但总购买量不减。DeepSeek用"穷人方法"（更少GPU、更高效架构）取得突破 &rarr; 这同时证明"不需要那么多NVIDIA GPU也能做前沿AI"和"对计算的需求仍然无限"。<strong>这两个信号互相矛盾，Node 7没有面对。</strong></p>
+      </details>
+    </section>
+
+
+    <!-- Phase 3 -->
+    <section id="phase3">
+      <div class="section-header">
+        <span class="phase-tag phase-diagnose">PHASE III &mdash; DIAGNOSE</span>
+        <h2>矛盾与张力：Node 7没面对的四个矛盾</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#6 四个Node 7没面对的矛盾</strong></summary>
+        <div class="arc-item"><strong>矛盾1：买家说"需求无限"但他们不是中立证人</strong><br>Node 7的核心前提是"买家确认 = 需求真实"。但Altman说"需要更多GPU"时，他在向投资者证明$300B估值合理；Nadella说"供给受限"时，他在为$80B CapEx辩护。<strong>买家和卖家的动机方向一致：都需要"需求无限"叙事成立。</strong>真正的独立验证应来自最终用户（企业AI采购决策者），不是中间商。</div>
+        <div class="arc-item"><strong>矛盾2：$100B LOI被当作$100B CapEx引用</strong><br>Altman的LOI是意向书，不是采购合同。Node 1的Jensen评分LOI可信度60%。但Node 7在三角验证表中把它和Nadella的审计CapEx并列，暗示同等硬度。LOI&rarr;合同转化率可能只有40-60%。$100B的60% = $60B &mdash; 这仍然巨大，但叙事冲击力完全不同。</div>
+        <div class="arc-item"><strong>矛盾3：三个代理人的时间线可信度差1000x</strong><br>Nadella的$80B来自上市公司季报（审计师签字），可信度90%+。Altman的$100B LOI来自媒体报道，可信度60%。Musk的Terafab来自Twitter公告，可信度30%（历史x2-3延迟）。但三角验证表给了三人类似的权重。</div>
+        <div class="arc-item"><strong>矛盾4：所有人同意"需求无限" = 拥挤多头</strong><br>卖家（Jensen）、买家（Altman/Nadella/Musk）、分析师（MS/GS）、投资者全部在同一侧。没有人公开做空AI CapEx。历史规律：所有人都同意的方向最后总会反转，争论的只是时间。Node 7缺少"Devil's Advocate"视角。</div>
+      </details>
+
+      <details>
+        <summary><strong>#7 信息空白</strong></summary>
+        <ol>
+          <li>$100B LOI中已签约合同比例（没人公开过）</li>
+          <li>Copilot日活跃使用率 vs 购买座位数（5M seats可能只有500K daily active）</li>
+          <li>xAI Memphis集群实际利用率（100K GPU中训练效率如何？idle比例？）</li>
+          <li>中国hyperscaler的实际GPU消费量（出口管制后的灰色渠道规模）</li>
+          <li>AI应用端真正的企业采购意愿 vs CEO推动的"自上而下部署"</li>
+        </ol>
+        <p><strong>结论</strong>：<strong>需求侧信息也系统性偏向乐观。买家和卖家都在讲"AI是不可阻挡的大趋势"&mdash;&mdash;因为他们的估值/股价/职业都依赖这个叙事。</strong></p>
+      </details>
+    </section>
+
+
+    <!-- Phase 4 -->
+    <section id="phase4">
+      <div class="section-header">
+        <span class="phase-tag phase-diagnose">PHASE IV &mdash; DIAGNOSE</span>
+        <h2>时间与反面：加速 vs 减速</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#8 加速 vs 减速</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>加速中（看多）</th><th>减速中（看空）</th></tr></thead>
+            <tbody>
+              <tr><td>Hyperscaler CapEx $250B+/年，+36% YoY</td><td>CapEx/AI收入比 3-5x（光纤泡沫水平）</td></tr>
+              <tr><td>Altman ARR $15B，3x QoQ增长</td><td>Broadcom自研芯片延期（自研比预期更难）</td></tr>
+              <tr><td>Nadella Azure AI 60%+ YoY</td><td>Copilot adoption breadth &ne; depth</td></tr>
+              <tr><td>Musk $25B实际GPU采购（可验证）</td><td>Musk注意力分散6家公司</td></tr>
+              <tr><td>所有买家承诺不可逆（叙事锁定）</td><td>所有人同意 = 拥挤多头 = 最危险时刻</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details open>
+        <summary><strong>#9 最强反面论证：CapEx悬崖场景</strong></summary>
+        <blockquote>"The hyperscaler AI race is the largest infrastructure buildout since the transcontinental railroad. The question is not whether it will be built &mdash; it's whether the ROI will materialize before the capital is exhausted." &mdash; Ben Thompson, Stratechery</blockquote>
+        <ol>
+          <li><strong>$250B CapEx vs $50-80B AI应用收入</strong>：3-5x gap。历史上这个比例只在1998-2001光纤泡沫期出现过</li>
+          <li><strong>ROI gap的时间窗口</strong>：如果2027年底AI应用收入仍不能达到$200B+，董事会压力将迫使CapEx缩减</li>
+          <li><strong>Copilot是关键验证点</strong>：如果企业AI最大的部署（5M seats）不能证明30-40%生产力提升是真实的、可持续的，整个"AI创造价值"叙事崩塌</li>
+          <li><strong>CEO承诺锁定的反面</strong>：当反转终于来临，因为CEO们已经把自己绑在了"all-in AI"上，缩减速度会比正常周期更快更猛（恐慌性缩减 vs 有序调整）</li>
+          <li><strong>概率：15-20%</strong>。但如果发生，半导体全链暴跌50-70%，不是-10%的调整</li>
+        </ol>
+      </details>
+
+      <details>
+        <summary><strong>#10 Altman $100B LOI vs Nadella Project Maia vs Musk Terafab：自研竞赛的真实进度</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>自研项目</th><th>进度</th><th>规模化时间</th><th>NVIDIA影响</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Altman/Broadcom "Bespoke"</strong></td><td>延期至Q3 2026</td><td>2028-2029E</td><td>-10-15% OpenAI GPU需求</td></tr>
+              <tr><td><strong>Nadella/Project Maia</strong></td><td>Maia 100内部部署中</td><td>2027-2028E (Maia 200)</td><td>-5-10% Azure GPU需求</td></tr>
+              <tr><td><strong>Musk/Terafab</strong></td><td>公告阶段，无芯片计划</td><td>N/A</td><td>0%（纯GPU消费者）</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>结论</strong>：自研芯片是真实趋势但进度远慢于叙事。所有项目都需3-5年才能有意义地减少NVIDIA依赖。这给了NVIDIA一个<strong>"confirmed runway"</strong>到2028-2029。之后？不确定性急剧上升。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 5 -->
+    <section id="phase5">
+      <div class="section-header">
+        <span class="phase-tag phase-build">PHASE V &mdash; BUILD</span>
+        <h2>结构诊断：当前Node 7的优劣</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#11 当前Node 7结构的优劣</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>做到了</th><th>没做到</th></tr></thead>
+            <tbody>
+              <tr><td>Phase 0&rarr;2完整结构</td><td>没有<strong>中国需求侧</strong>覆盖（40%全球需求缺失）</td></tr>
+              <tr><td>三角验证表清晰</td><td>LOI和审计CapEx的<strong>硬度差异</strong>没有标注</td></tr>
+              <tr><td>买家承诺偏差预警</td><td>没有<strong>最终用户验证</strong>（企业AI采购意愿数据）</td></tr>
+              <tr><td>Musk时间线折扣</td><td>没有<strong>Copilot daily active</strong> vs seats的区分</td></tr>
+              <tr><td>CapEx/收入gap量化</td><td>没有<strong>泡沫场景的具体传导链</strong></td></tr>
+              <tr><td>信号传导链</td><td>没有<strong>中东/东南亚主权AI需求</strong></td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details>
+        <summary><strong>#12 买家视角 vs 卖家视角的系统性盲区</strong></summary>
+        <p>Node 1（卖家视角）的盲区是"夸大自己的护城河"。Node 7（买家视角）的盲区是"夸大自己的需求合理性"。</p>
+        <p><strong>两个节点合在一起的盲区</strong>：缺少"最终消费者"视角。GPU从NVIDIA卖给Hyperscaler，Hyperscaler卖AI服务给企业。<strong>企业是否愿意付足够的钱用AI来justify整条链？</strong>这个问题Altman/Nadella/Musk都回避了，因为答案还不清楚。</p>
+        <p>Copilot是最好的观测窗口。如果5M seats中daily active &lt; 1M，那"AI创造价值"叙事的根基就很脆弱。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 6 -->
+    <section id="phase6">
+      <div class="section-header">
+        <span class="phase-tag phase-verify">PHASE VI &mdash; VERIFY</span>
+        <h2>成品审视：诚实的自我诊断</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#13 可信度评分的口径问题</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>Agent</th><th>报告评分</th><th>实际分解</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Musk</strong></td><td>2/5</td><td>花费真实性 5/5 &times; 时间线可信度 1/5 = 平均3/5。报告评2/5偏低（因为被他的Twitter习惯拖累了实际花销的可信度）</td></tr>
+              <tr><td><strong>Altman</strong></td><td>4/5</td><td>ARR数据 5/5 &times; LOI可信度 3/5 &times; 自研时间线 2/5 = 平均3.3/5。报告评4/5偏高</td></tr>
+              <tr><td><strong>Nadella</strong></td><td>4/5</td><td>CapEx数据 5/5 &times; AI比例 3/5 &times; Copilot ROI 3/5 = 平均3.7/5。这个评分最准确</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>Musk被低估了</strong>。他的$25B GPU花费是可审计的，比Altman的LOI更"硬"。问题不是他的花销可信度（很高），而是他的未来承诺可信度（很低）。报告把两者混在一起了。</p>
+      </details>
+
+      <details>
+        <summary><strong>#14 Padding识别</strong></summary>
+        <ul>
+          <li>Musk xAI估值$80B &mdash; 与需求侧分析关系弱（估值不是需求信号）</li>
+          <li>OpenAI非营利&rarr;营利重组 &mdash; 公司治理变化，不是GPU需求信号</li>
+          <li>Phase 0中对"供给约束"的讨论 &mdash; 这是Node 1-6的领域，Node 7应聚焦需求</li>
+          <li>Nadella 49% OpenAI stake &mdash; 作为投资关系有趣，但对需求量化没有帮助</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary><strong>#15 该补什么</strong></summary>
+        <ol>
+          <li>中国需求侧简要覆盖（#24 DeepSeek效率突破 + #25 ByteDance规模 + #26 Alibaba云 + #28 Tencent）</li>
+          <li>LOI vs 合同硬度标注系统（在三角验证表中用颜色区分）</li>
+          <li>Copilot daily active vs seats数据（如果可获取）</li>
+          <li>泡沫场景具体传导链</li>
+          <li>Musk可信度重新校准（花销 vs 承诺分开评）</li>
+        </ol>
+      </details>
+    </section>
+
+
+    <!-- Phase 7 -->
+    <section id="phase7">
+      <div class="section-header">
+        <span class="phase-tag phase-build">PHASE VII &mdash; BUILD</span>
+        <h2>验证日历：什么时候能验证？</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#18 需求侧验证日历</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>日期</th><th>事件</th><th>如果成功</th><th>如果失败</th></tr></thead>
+            <tbody>
+              <tr><td><strong>2026年4月</strong></td><td>Microsoft Q3 FY26财报（Azure AI CapEx数据）</td><td>$80B轨道确认 = 需求叙事最强验证</td><td><span class="signal signal-bear">BEAR</span> 指引下调 = 整条供应链最早警报</td></tr>
+              <tr><td><strong>2026年Q3</strong></td><td>OpenAI Broadcom "Bespoke"芯片交付</td><td>自研开始 = NVIDIA长期份额侵蚀确认</td><td>再次延期 = NVIDIA runway延长至2029+</td></tr>
+              <tr><td><strong>2026年H2</strong></td><td>Copilot企业续约率首批数据</td><td>70%+续约 = AI应用价值真实</td><td><span class="signal signal-bear">BEAR</span> &lt;50%续约 = ROI叙事崩塌第一裂缝</td></tr>
+              <tr><td><strong>2026年Q4</strong></td><td>OpenAI ARR里程碑（$20B+目标）</td><td>AI应用货币化加速</td><td>增速放缓 = $100B CapEx不可justify</td></tr>
+              <tr><td><strong>2027年Q1</strong></td><td>Hyperscaler FY27 CapEx指引（四家汇总）</td><td>$350B+ = 继续加速</td><td><span class="signal signal-bear">BEAR</span> &lt;$300B = CapEx悬崖第一信号</td></tr>
+              <tr><td><strong>2027年H2</strong></td><td>AI应用收入 vs CapEx gap评估</td><td>Gap缩小到2x以下</td><td>Gap维持3x+ = 泡沫论证据加强</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details>
+        <summary><strong>#19 监控方法论</strong></summary>
+        <p><strong>每月</strong>：TSMC月度营收（10日发布）&mdash;&mdash;需求端GPU消费的最快领先指标。如果TSMC月度数据持续beat &rarr; 需求真实；miss &rarr; 买家在缩减。</p>
+        <p><strong>每季度</strong>：Microsoft/Google/Amazon CapEx指引 | OpenAI ARR/用户增长 | xAI集群扩张公告（以行动而非公告为准）。</p>
+        <p><strong>事件驱动</strong>：Copilot续约率 | Broadcom芯片交付 | 任何hyperscaler宣布"CapEx效率化"（euphemism for缩减）| Man Group等对冲基金做空AI的持仓变化。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 8 -->
+    <section id="phase8">
+      <div class="section-header">
+        <span class="phase-tag phase-build">PHASE VIII &mdash; BUILD</span>
+        <h2>信号传导与标的地图</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#20 需求侧三条传导链</strong></summary>
+        <div class="arc-item"><strong><span class="signal signal-bull">BULL</span> 需求确认 &rarr; 供应链全线受益</strong><br>Nadella CapEx beat &rarr; NVDA (最直接) &rarr; AVGO (网络) &rarr; TSM (代工) &rarr; ASML (设备)<br><em style="color:var(--text-tertiary);">Microsoft CapEx指引是最早的信号源。每季度财报后24小时内传导完成</em></div>
+        <div class="arc-item"><strong><span class="signal signal-bear">BEAR</span> 自研加速 &rarr; NVIDIA份额侵蚀</strong><br>Altman Broadcom交付 &rarr; AVGO收入&uarr; &rarr; NVDA定价权&darr; &rarr; AMD受益(替代需求)<br><em style="color:var(--text-tertiary);">Broadcom是自研链最大受益者。AVGO在"NVIDIA赢"和"自研赢"两条链都受益</em></div>
+        <div class="arc-item"><strong><span class="signal signal-watch">WATCH</span> CapEx悬崖 &rarr; 全链暴跌</strong><br>Copilot续约率&darr; &rarr; Microsoft CapEx指引下调 &rarr; NVDA/AVGO/TSM/ASML全线-20-50%<br><em style="color:var(--text-tertiary);">Copilot续约率是最早的微观信号。宏观信号是连续两季度CapEx miss</em></div>
+      </details>
+
+      <details open>
+        <summary><strong>#21 时间差套利</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>事件</th><th>最先反映</th><th>滞后反映</th><th>时间差</th></tr></thead>
+            <tbody>
+              <tr><td>Microsoft CapEx beat</td><td>NVDA股价(当天)</td><td>ASML设备订单(滞后)</td><td>2-3季度</td></tr>
+              <tr><td>OpenAI ARR加速</td><td>需求叙事(即时)</td><td>TSMC产能扩张</td><td>3-6月</td></tr>
+              <tr><td>Copilot续约率低</td><td>MSFT股价(财报日)</td><td>NVDA(间接传导)</td><td>1-2季度</td></tr>
+              <tr><td>中国替代芯片进展</td><td>当地供应商(即时)</td><td>NVDA H20收入&darr;</td><td>2-4季度</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details open>
+        <summary><strong>#22 "不管需求升降都赚"标的</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>标的</th><th>需求加速&rarr;</th><th>自研加速&rarr;</th><th>逻辑</th></tr></thead>
+            <tbody>
+              <tr><td><strong>AVGO</strong></td><td>网络/互连需求&uarr;</td><td>自研芯片设计收入&uarr;</td><td>同Node 1结论：两条链交叉点</td></tr>
+              <tr><td><strong>TSM</strong></td><td>NVIDIA订单&uarr;</td><td>自研芯片也需TSMC制造</td><td>所有芯片经过TSMC</td></tr>
+              <tr><td><strong>ARM</strong></td><td>IP授权需求&uarr;</td><td>自研芯片也用ARM IP</td><td>ISA层面中立受益者</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>需求侧元思考确认Node 1结论</strong>：AVGO/TSM/ARM是"基础设施永远赢"选项。需求侧分析新增的洞察是：<strong>监控Microsoft CapEx指引是判断"需求升降"的最快方法</strong>，比等NVIDIA财报快1-2个月。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 9 -->
+    <section id="phase9">
+      <div class="section-header">
+        <span class="phase-tag phase-verify">PHASE IX &mdash; VERIFY</span>
+        <h2>最终方法论 &mdash; 综合判断与决策矩阵</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#23 Node 7的综合判断</strong></summary>
+        <p>Based on demand-side evidence from all agents, the triangulation produces:</p>
+        <figure>
+          <table>
+            <thead><tr><th>判断维度</th><th>概率</th></tr></thead>
+            <tbody>
+              <tr><td>需求真实度（2026-2027）</td><td><strong style="color:#4caf50;">95%</strong> &mdash; 三代理人+审计数据全部确认</td></tr>
+              <tr><td>需求可持续性（2028+）</td><td><strong style="color:#ffa726;">55-65%</strong> &mdash; 取决于AI应用ROI，CapEx/收入gap是关键</td></tr>
+              <tr><td>LOI&rarr;合同转化率</td><td><strong style="color:#ffa726;">60%</strong> &mdash; $100B LOI最终可能只有$60B实际花销</td></tr>
+              <tr><td>NVIDIA近期依赖（2-3年）</td><td><strong style="color:#4caf50;">85%</strong> &mdash; 自研芯片都在3-5年才有规模</td></tr>
+              <tr><td>CapEx悬崖（泡沫场景）</td><td><strong style="color:#f44336;">15-20%</strong> &mdash; 低概率但catastrophic</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details open>
+        <summary><strong>#24 需求侧对交易决策的修正</strong></summary>
+        <p>Node 7的需求侧分析对Node 1的交易决策做了以下修正：</p>
+        <figure>
+          <table>
+            <thead><tr><th>Node 1结论</th><th>Node 7修正</th><th>修正原因</th></tr></thead>
+            <tbody>
+              <tr><td>NVDA short-term bull</td><td><strong>确认</strong>，增强</td><td>买家验证需求 + 自研延期 = 2-3年runway confirmed</td></tr>
+              <tr><td>CUDA 5年+护城河35%</td><td><strong>上调至40-45%</strong></td><td>自研芯片比预期更难（Broadcom延期），但方向不变</td></tr>
+              <tr><td>AI CapEx泡沫15-20%</td><td><strong>维持</strong></td><td>买家数据也显示3-5x CapEx/收入gap</td></tr>
+              <tr><td>AVGO是交叉点</td><td><strong>强化</strong></td><td>自研链加速 = Broadcom设计收入更确定</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <div class="question-box">
+        <h4>最终方法论 &mdash; 需求侧5条规则</h4>
+        <p style="text-align:left;"><strong>规则1：买家验证 > 卖家预测</strong><br>Nadella的审计CapEx比Jensen的$1T订单更可信。但买家也有动机&mdash;&mdash;需要对两方都打折。</p>
+        <p style="text-align:left;"><strong>规则2：LOI &ne; 合同 &ne; 实际花费</strong><br>$100B LOI &times; 60%转化率 = $60B。这仍然巨大，但叙事不同。</p>
+        <p style="text-align:left;"><strong>规则3：Microsoft CapEx是最快的需求指标</strong><br>比NVIDIA财报早1-2个月。比TSMC月度数据多1-2个月背景（CapEx指引是前瞻，TSMC是滞后）。</p>
+        <p style="text-align:left;"><strong>规则4：Copilot续约率是最早的微观崩塌信号</strong><br>如果企业不续约Copilot &rarr; AI应用ROI不成立 &rarr; CapEx最终不可持续。</p>
+        <p style="text-align:left;"><strong>规则5：当所有人都看多时，准备好反向脚本</strong><br>买家卖家分析师投资者全部同向 = 有史以来最拥挤的多头。保留15-20%的泡沫场景意识。</p>
+      </div>
+
+    </section>
+
+
+    <footer class="page-footer">
+      <p>Demand / Hyperscaler Node &mdash; Metacognition Log &nbsp;|&nbsp; 24 Rounds &nbsp;|&nbsp; 2026-03-21 &nbsp;|&nbsp; V4 Design System</p>
+      <p><a href="NODE_7_%E9%9C%80%E6%B1%82%E4%BE%A7_Demand_2026-03-21.html">需求侧认知节点报告</a> &nbsp;|&nbsp; <a href="../semiconductor_hub.html">Semiconductor Hub</a> &nbsp;|&nbsp; <a href="NODE_1_GPU_AI_metacognition.html">Node 1 元思考</a></p>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+(function() {
+  const hamburger = document.getElementById('hamburgerBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  hamburger.addEventListener('click', () => { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+  sidebar.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => { if (window.innerWidth <= 900) { sidebar.classList.remove('open'); overlay.classList.remove('open'); } });
+  });
+})();
+</script>
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+</body>
+</html>

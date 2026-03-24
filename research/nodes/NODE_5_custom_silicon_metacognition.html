@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>终端自研芯片节点 — 28轮元思考过程</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <style>
+    :root {
+      --bg-base: #08090a; --bg-elevated: #0f1011; --bg-surface: #141516; --bg-overlay: #191a1b;
+      --border-subtle: #23252a; --border-default: #34343a; --border-strong: #3e3e44;
+      --text-primary: #f7f8f8; --text-secondary: #d0d6e0; --text-tertiary: #8a8f98; --text-quaternary: #62666d;
+      --accent: #f8a848; --accent-dim: rgba(248, 168, 72, 0.12); --accent-hover: rgba(248, 168, 72, 0.08);
+      --knowledge: #5b9bd5; --knowledge-dim: rgba(91, 155, 213, 0.12);
+      --green: #4caf50; --red: #f44336; --orange: #ffa726;
+      --font-sans: 'Inter', 'Inter Variable', -apple-system, system-ui, sans-serif;
+      --font-mono: 'SF Mono', 'Menlo', monospace;
+      --radius-sm: 8px; --radius-md: 12px; --sidebar-width: 240px;
+    }
+    * { box-sizing: border-box; }
+    html { font-family: var(--font-sans); font-feature-settings: 'liga' 1, 'calt' 1; letter-spacing: -0.012em; -webkit-font-smoothing: antialiased; }
+    body { margin: 0; padding: 0; background: var(--bg-base); color: var(--text-primary); font-size: 15px; line-height: 1.65; }
+    .page-wrapper { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { position: sticky; top: 0; height: 100vh; width: var(--sidebar-width); min-width: var(--sidebar-width); overflow-y: auto; padding: 1.25rem 0.75rem; border-right: 1px solid var(--border-subtle); background: var(--bg-elevated); z-index: 100; }
+    .sidebar h4 { margin-bottom: 0.5rem; padding: 0 0.5rem; font-size: 0.7rem; font-weight: 590; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-quaternary); }
+    .sidebar nav ul { list-style: none; padding: 0; margin: 0 0 1rem 0; }
+    .sidebar nav ul li a { display: block; padding: 0.25rem 0.5rem; font-size: 0.78rem; color: var(--text-tertiary); text-decoration: none; border-radius: var(--radius-sm); transition: background 0.12s, color 0.12s; line-height: 1.4; }
+    .sidebar nav ul li a:hover { background: var(--accent-hover); color: var(--text-primary); }
+    .sidebar nav ul li a .toc-num { color: var(--text-quaternary); margin-right: 0.25rem; font-size: 0.65rem; font-weight: 510; }
+
+    /* Main */
+    .main-content { flex: 1; min-width: 0; max-width: 960px; padding: 2.5rem 2.5rem 5rem; }
+
+    /* Header */
+    .page-header { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-default); }
+    .page-header h1 { margin-bottom: 0.3rem; font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 680; letter-spacing: -0.025em; }
+    .page-header .subtitle { color: var(--text-tertiary); margin-bottom: 1rem; font-size: 0.95rem; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .badge { display: inline-block; padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.75rem; font-weight: 510; background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(248, 168, 72, 0.25); }
+    .role-badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; background: rgba(91,155,213,0.12); color: var(--knowledge); }
+
+    /* Sections */
+    .section-header { margin-top: 3.5rem; margin-bottom: 1.25rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border-subtle); }
+    .section-header h2 { font-size: 1.25rem; font-weight: 590; letter-spacing: -0.015em; margin-bottom: 0; }
+    h3 { font-size: 1.1rem; font-weight: 590; margin-top: 1.5rem; }
+    p { color: var(--text-secondary); margin-bottom: 1rem; }
+    strong { color: var(--text-primary); font-weight: 590; }
+    ul, ol { color: var(--text-secondary); padding-left: 1.2rem; }
+    li { margin-bottom: 0.35rem; line-height: 1.6; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Details */
+    details { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.8rem 1rem; margin: 0.8rem 0; background: var(--bg-elevated); }
+    details summary { cursor: pointer; font-weight: 510; font-size: 0.9rem; color: var(--text-primary); }
+    details[open] summary { margin-bottom: 0.6rem; color: var(--accent); }
+
+    /* Priority box */
+    .priority-box { border: 1px solid rgba(248, 168, 72, 0.3); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin-bottom: 2rem; background: var(--bg-surface); }
+    .priority-box h2 { color: var(--accent); margin-top: 0; font-size: 1.1rem; font-weight: 590; }
+
+    /* Arc items */
+    .arc-item { margin-bottom: 1rem; padding: 0.8rem; border-left: 3px solid var(--accent); background: rgba(66, 165, 245, 0.03); border-radius: 0 6px 6px 0; }
+    .arc-item strong { color: var(--accent); }
+
+    /* Question box */
+    .question-box { border: 2px solid var(--knowledge); border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; background: rgba(91, 155, 213, 0.05); }
+    .question-box h4 { color: var(--knowledge); margin-top: 0; }
+
+    /* Tables */
+    figure { margin: 1.25rem 0; overflow-x: auto; }
+    table { font-size: 0.82rem; border-collapse: collapse; width: 100%; }
+    th, td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border-subtle); text-align: left; }
+    th { white-space: nowrap; font-weight: 510; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-quaternary); border-bottom: 1px solid var(--border-default); }
+    td { color: var(--text-secondary); }
+    tr:hover td { background: var(--bg-elevated); }
+
+    /* Blockquote */
+    blockquote { border-left: 3px solid var(--accent); padding: 0.6rem 1.25rem; margin: 1rem 0; font-style: italic; background: var(--bg-surface); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-secondary); }
+
+    /* Signals */
+    .signal { display: inline-block; font-size: 0.75rem; padding: 0.1rem 0.4rem; border-radius: 3px; font-weight: 590; margin-right: 0.3rem; }
+    .signal-bull { background: rgba(76,175,80,0.15); color: var(--green); }
+    .signal-bear { background: rgba(244,67,54,0.15); color: var(--red); }
+    .signal-watch { background: rgba(255,167,38,0.15); color: var(--orange); }
+
+    /* Phase indicator */
+    .phase-tag { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+    .phase-explore { background: rgba(91,155,213,0.12); color: var(--knowledge); }
+    .phase-diagnose { background: rgba(255,167,38,0.12); color: var(--orange); }
+    .phase-build { background: rgba(76,175,80,0.12); color: var(--green); }
+    .phase-verify { background: rgba(244,67,54,0.12); color: var(--red); }
+
+    /* Footer */
+    .page-footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 2px solid var(--border-default); text-align: center; font-size: 0.85rem; color: var(--text-tertiary); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+
+    /* Mobile */
+    .hamburger-btn { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 200; background: var(--bg-surface); color: var(--text-primary); border: none; border-radius: 6px; width: 44px; height: 44px; font-size: 1.4rem; cursor: pointer; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+    @media (max-width: 900px) {
+      .sidebar { position: fixed; left: -320px; top: 0; transition: left 0.3s ease; box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.open { display: block; }
+      .hamburger-btn { display: block; }
+      .main-content { padding: 2rem 1rem 4rem; }
+    }
+    @media (min-width: 1400px) { .main-content { max-width: 1060px; } }
+  
+/* === Embedded mode: inside Dashboard iframe === */
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+body.embedded .hamburger-btn { display: none !important; }
+body.embedded .sidebar-overlay { display: none !important; }
+
+/* === Reading mode: full-width === */
+.reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+.reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+.reading-mode .hamburger-btn { display: none !important; }
+.reading-mode .sidebar-overlay { display: none !important; }
+</style>
+</head>
+<body>
+<nav style="position:sticky;top:0;z-index:999;background:rgba(8,9,10,0.95);backdrop-filter:blur(8px);padding:0.5rem 1.5rem;border-bottom:1px solid #23252a;font-size:0.78rem;display:flex;gap:1rem;align-items:center;">
+  <a href="../semiconductor_hub.html" style="color:#f8a848;text-decoration:none;">&larr; Semiconductor Hub</a>
+  <span style="color:#62666d;">&middot;</span>
+  <a href="NODE_5_%E5%AE%9A%E5%88%B6%E8%8A%AF%E7%89%87_ASIC_2026-03-19.html" style="color:#8a8f98;text-decoration:none;">Custom Silicon / ASIC 认知节点报告</a>
+</nav>
+
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="page-wrapper">
+
+  <aside class="sidebar" id="sidebar">
+    <h4>思考旅程 Thinking Journey</h4>
+    <nav>
+      <ul>
+        <li><a href="#overview"><span class="toc-num">&#9733;</span>速览结论<br><span class="zh-inline">Key Findings</span></a></li>
+        <li><a href="#phase1"><span class="toc-num">I</span>任务定义<br><span class="zh-inline">Task Definition</span></a></li>
+        <li><a href="#phase2"><span class="toc-num">II</span>三人叙事<br><span class="zh-inline">Three Narratives</span></a></li>
+        <li><a href="#phase3"><span class="toc-num">III</span>矛盾与张力<br><span class="zh-inline">Contradictions &amp; Tensions</span></a></li>
+        <li><a href="#phase4"><span class="toc-num">IV</span>最强反面<br><span class="zh-inline">Strongest Bear Case</span></a></li>
+        <li><a href="#phase5"><span class="toc-num">V</span>结构诊断<br><span class="zh-inline">Structure Diagnosis</span></a></li>
+        <li><a href="#phase6"><span class="toc-num">VI</span>成品审视<br><span class="zh-inline">Self-Audit</span></a></li>
+        <li><a href="#phase7"><span class="toc-num">VII</span>验证日历<br><span class="zh-inline">Verification Calendar</span></a></li>
+        <li><a href="#phase8"><span class="toc-num">VIII</span>信号传导<br><span class="zh-inline">Signal Transmission</span></a></li>
+        <li><a href="#phase9"><span class="toc-num">IX</span>最终方法论<br><span class="zh-inline">Final Methodology</span></a></li>
+      </ul>
+    </nav>
+    <h4 style="margin-top:1rem;">最终产出</h4>
+    <nav><ul>
+      <li><a href="NODE_5_%E5%AE%9A%E5%88%B6%E8%8A%AF%E7%89%87_ASIC_2026-03-19.html" style="color:var(--accent);">Custom Silicon 认知节点报告 &rarr;</a></li>
+    </ul></nav>
+  </aside>
+
+  <main class="main-content">
+
+    <header class="page-header">
+      <div class="role-badge">METACOGNITION LOG</div>
+      <h1>终端自研芯片节点 &mdash; 28轮元思考过程</h1>
+      <p class="subtitle">从"每家都在自研"到"Broadcom是隐形赢家" &nbsp;|&nbsp; 2026-03-20<br>
+      <span style="color:var(--text-quaternary);font-size:0.85em;">研究笔记 &mdash; 思考过程比结论更有价值</span></p>
+      <div class="badge-row">
+        <span class="badge">28轮元思考</span>
+        <span class="badge">9个Phase</span>
+        <span class="badge">3代理人交叉验证</span>
+        <span class="badge">5条投资信号</span>
+      </div>
+    </header>
+
+
+    <!-- Overview -->
+    <div class="priority-box" id="overview">
+      <h2>&#129504; 28轮元思考的核心结论</h2>
+      <ol>
+        <li><strong>自研芯片的真正受益者不是自研者本身，而是Broadcom（设计服务~80%）和TSMC（代工）</strong> &mdash; "卖铲子给淘金者"是Node 5最清晰的投资逻辑</li>
+        <li><strong>三个代理人代表三条路径，但只有Srouji（Apple）有100%交付记录</strong> &mdash; Musk 30个预测仅4个准确，Keller还在从零到一。权重不应相等</li>
+        <li><strong>最反直觉的发现：每家自研公司仍在大量购买NVIDIA GPU</strong> &mdash; 自研是supplement不是replace。xAI同时花$18B买GPU又花$20B建TeraFab，说明自研和外购是并行轨道</li>
+        <li><strong>AVGO是Node 1和Node 5的结构性交叉点</strong> &mdash; Jensen对了&rarr;网络收入&uarr;；自研加速&rarr;ASIC设计收入&uarr;。ASIC增速44.6% vs GPU 16.1%让AVGO的第二条腿越跑越快</li>
+        <li><strong>最大风险：自研是永远"即将到来的威胁"，但NVIDIA系统级优势让替代成本永远偏高</strong> &mdash; 10年来自研一直在"加速"，但NVIDIA收入也在加速</li>
+      </ol>
+    </div>
+
+
+    <!-- Phase 1 -->
+    <section id="phase1">
+      <div class="section-header">
+        <span class="phase-tag phase-explore">PHASE I &mdash; EXPLORE</span>
+        <h2>任务定义：自研趋势对NVDA估值的影响 + AVGO作为受益者</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#1 表面任务 vs 真正任务</strong></summary>
+        <p><strong>表面任务</strong>：分析终端自研芯片趋势，展示Musk/Srouji/Keller三人认知。</p>
+        <p><strong>真正任务</strong>：帮一个趋势交易者回答 <strong>"自研芯片浪潮对我持有/关注的NVDA、AVGO、TSM意味着什么？该加仓、减仓、还是换标的？"</strong></p>
+        <p>更准确地说：自研芯片年年说"要替代NVIDIA"，但NVDA年年涨。这次不一样了吗？如果不一样，谁是真正的赢家？</p>
+        <p>用户的交易系统核心是"选品+周期匹配"。Node 5的任务不是百科全书式罗列谁在做芯片，而是<strong>找到自研趋势中的"卖铲子"标的</strong>。</p>
+      </details>
+
+      <details>
+        <summary><strong>#2 V3报告的关键发现</strong></summary>
+        <p>V3报告中Node 5的核心判断已经很清晰：<strong>"自研芯片的赢家是Broadcom（设计服务~80%）和TSMC（代工），不是自研者本身。"</strong></p>
+        <p>三个代理人的任务不是推翻这个结论，而是<strong>用一手认知证据验证或修正它</strong>。如果三人的行动证据都指向"自研加速但仍需Broadcom+TSMC"，这个结论就从"假设"升级为"高置信度判断"。</p>
+      </details>
+
+      <details>
+        <summary><strong>#3 成功标准 vs 失败标准</strong></summary>
+        <p><strong>成功标准</strong>：第一眼就能看到"自研趋势下该买谁、为什么、什么时候验证"；有信号传导链（自研加速&rarr;AVGO收入&uarr;）；有验证日历（Baltra、TeraFab、MI400时间节点）。</p>
+        <p><strong>失败标准</strong>：堆砌三人芯片路线图但没有投资逻辑（技术报告）；把Musk的激进时间线当真（fan fiction）；展示自研趋势但不回答"所以买谁"（和事佬）。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 2 -->
+    <section id="phase2">
+      <div class="section-header">
+        <span class="phase-tag phase-explore">PHASE II &mdash; EXPLORE</span>
+        <h2>三人叙事：赌垂直整合 vs 证明"先做对再做大" vs 卖IP替代方案</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#4 三个代理人到底讲了什么故事？</strong></summary>
+        <h4>隐藏叙事解码</h4>
+        <figure>
+          <table>
+            <thead><tr><th>Agent</th><th>表面叙事</th><th>隐含叙事</th><th>我漏掉了什么</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Musk (GIANT)</strong></td><td>自研芯片+自建fab=终极垂直整合</td><td>"我想控制整条链"</td><td>30个预测仅4个准确；Dojo失败后宣称"所有路径收敛到AI6"是narrative重写</td></tr>
+              <tr><td><strong>Srouji (INVESTOR)</strong></td><td>产品驱动芯片设计，渐进吞噬</td><td>"我们只做有把握的事"</td><td>Baltra是Apple首次进入数据中心&mdash;&mdash;过往记录无法外推到新领域</td></tr>
+              <tr><td><strong>Keller (CONTRARIAN)</strong></td><td>开源+小芯片+IP授权&rarr;颠覆NVIDIA</td><td>"行业利润堆叠可以被打破"</td><td>$150M合同 vs NVIDIA $215B收入=差距1430x。愿景正确&ne;商业成功</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>核心发现</strong>：三人代表三条完全不同的自研路径 &mdash; <strong>Musk赌规模暴力（花$38B同时买GPU+建fab）</strong>，<strong>Srouji赌精密执行（16年零延迟交付记录）</strong>，<strong>Keller赌生态颠覆（RISC-V+开源替代专有架构）</strong>。但他们有一个共同点：<strong>全部都需要TSMC/Samsung的代工能力。</strong></p>
+
+        <h4>跨文件交叉信号</h4>
+        <figure>
+          <table>
+            <thead><tr><th>信号</th><th>来源</th><th>投资含义</th></tr></thead>
+            <tbody>
+              <tr><td>xAI花$18B买555K GPU，同时$20B建TeraFab</td><td>Musk agent</td><td><span class="signal signal-bull">BULL</span> 自研和外购并行=GPU需求不因自研而下降</td></tr>
+              <tr><td>Apple Baltra芯片与Broadcom合作开发</td><td>Srouji agent</td><td><span class="signal signal-bull">BULL</span> AVGO是自研浪潮的直接受益者</td></tr>
+              <tr><td>Musk说"We're not about to replace Nvidia"</td><td>Musk agent</td><td><span class="signal signal-bull">BULL</span> 最激进的自研者也承认不是替代关系</td></tr>
+              <tr><td>ASIC增速44.6% vs GPU增速16.1%</td><td>V3 report</td><td><span class="signal signal-watch">WATCH</span> 结构性份额转移在加速，但绝对规模差距仍大</td></tr>
+              <tr><td>Keller的Ascalon匹配ARM性能+$150M合同</td><td>Keller agent</td><td><span class="signal signal-watch">WATCH</span> RISC-V技术达标但商业化还在早期</td></tr>
+              <tr><td>Samsung $16.5B Tesla芯片协议</td><td>Musk agent</td><td><span class="signal signal-watch">WATCH</span> 代工端多元化&mdash;&mdash;Samsung受益，但Tesla fab经验=零</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details>
+        <summary><strong>#5 Musk叙事的深层解构</strong></summary>
+        <p>Musk是三人中最复杂的认知节点。他同时做着自相矛盾的事：</p>
+        <ul>
+          <li><strong>嘴上</strong>：建TeraFab"不再依赖别人"</li>
+          <li><strong>手上</strong>：$18B买NVIDIA GPU + 继续订购NVIDIA芯片</li>
+          <li><strong>钱上</strong>：$16.5B给Samsung代工 + $20B自建fab</li>
+        </ul>
+        <p>这不是矛盾，是<strong>"最大化optionality"策略</strong>。Musk不是在选一条路，是在同时铺三条路然后看哪条先通。</p>
+        <p>但对投资者来说关键问题是：<strong>TeraFab成功概率多少？</strong> Tesla零半导体制造经验、需要首次增发融资（自2020年来首次）、2nm制程门槛极高。Electrek的批评很到位："Tesla's TeraFab ambitions ignore its total lack of semiconductor experience."</p>
+        <blockquote>"Musk的时间线预测准确率约28%（4/14）。技术方向通常正确，但时间线需乘以2-3倍。"</blockquote>
+      </details>
+
+      <details>
+        <summary><strong>#6 Srouji叙事：唯一有100%交付记录的代理人</strong></summary>
+        <p>Srouji的数据是三人中最干净的：<strong>12/12以上产品按时交付，连续16年零重大延迟。</strong></p>
+        <p>路线图清晰且可验证：A4(2010)&rarr;M1(2020)&rarr;M5(2025)&rarr;C1调制解调器(2025)&rarr;Baltra服务器芯片(2026-2027)。</p>
+        <p>核心框架："颠覆性产品不能用传统芯片来打造"（Disruptive products cannot be built from legacy chips）。这不是空话 &mdash; Apple每次自研都让前供应商股价暴跌：</p>
+        <ul>
+          <li>2017年弃Imagination Technologies GPU &rarr; 股价当日-70%</li>
+          <li>2020年弃Intel x86 &rarr; Intel持续下跌至今</li>
+          <li>2025年C1调制解调器 &rarr; Qualcomm预测2027年100%被替代</li>
+        </ul>
+        <p><strong>唯一的未知数</strong>：Baltra是Apple首次进入数据中心芯片领域。过往消费电子的成功能否外推到服务器？这与Broadcom合作开发 &mdash; 又一次证明<strong>自研者需要AVGO</strong>。</p>
+      </details>
+
+      <details>
+        <summary><strong>#7 Keller叙事：批评者+IP授权的第三条路</strong></summary>
+        <p>Keller的独特价值不在于Tenstorrent本身（$3.2B估值 vs NVIDIA $3.2T），而在于他<strong>同时在Apple、AMD、Tesla、Intel都做过芯片</strong>的一手经验。他的判断基于五个场景的亲身参与。</p>
+        <p>核心论点：<strong>"Whatever Nvidia does, we'll do the opposite."</strong></p>
+        <figure>
+          <table>
+            <thead><tr><th>NVIDIA方案</th><th>Keller替代方案</th><th>成本差异</th></tr></thead>
+            <tbody>
+              <tr><td>大芯片（光罩面积&uarr;）</td><td>小芯片（chiplet）</td><td>良率成本-60%</td></tr>
+              <tr><td>HBM（$200/chip）</td><td>GDDR6（$20/chip）</td><td>-90%</td></tr>
+              <tr><td>NVLink（专有互连）</td><td>Ethernet（标准互连）</td><td>-80%</td></tr>
+              <tr><td>CUDA（闭源生态）</td><td>开源软件栈</td><td>-100%授权费</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p>这些数字解释了为什么Keller回应Sam Altman的$7T说"我可以用不到$1T做到" &mdash; 他认为行业每一层的利润堆叠让最终成本膨胀了7-10x。</p>
+        <p><strong>关键限制</strong>：Keller每家公司都待2-3年。他是"架构天才"不是"商业化执行者"。Tenstorrent是他第一次完整商业化考验。RISC-V 25%全球份额听起来惊人，但几乎全在嵌入式，数据中心份额&lt;1%。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 3 -->
+    <section id="phase3">
+      <div class="section-header">
+        <span class="phase-tag phase-diagnose">PHASE III &mdash; DIAGNOSE</span>
+        <h2>矛盾与张力：自研公司都还在买NVIDIA</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#8 四个Node 5的核心矛盾</strong></summary>
+        <div class="arc-item"><strong>矛盾1：自研者都还在大量买NVIDIA GPU</strong><br>xAI: 555,000 GPU ($18B)。Apple: Private Cloud Compute先用M5过渡。Google TPU 7代了仍然买NVIDIA给某些workload。<strong>自研是"增加选项"不是"替代供应商"。</strong>这对NVDA的看空叙事是最大反驳。</div>
+        <div class="arc-item"><strong>矛盾2：Musk的30个预测只有4个准确 vs 他真金白银投$38B</strong><br>如果只看言论，Musk可信度3/10。但如果看资金流向（$18B GPU + $16.5B Samsung + $20B TeraFab），他是全球在芯片上投资最多的个人。<strong>该信他的话还是他的钱？</strong>答案：信钱（方向），不信嘴（时间线）。</div>
+        <div class="arc-item"><strong>矛盾3：ASIC增速44.6% vs NVIDIA收入也在加速</strong><br>自研叙事常用ASIC增速对比GPU增速来论证"替代"。但这是base effect &mdash; ASIC从小基数高增速，GPU从$100B+基数仍保持增长。<strong>蛋糕在变大，ASIC切的比例在增加，但GPU的绝对蛋糕也在增加。</strong>这不是零和博弈。</div>
+        <div class="arc-item"><strong>矛盾4：Apple最成功的自研者，偏偏对NVIDIA威胁最小</strong><br>Srouji 100%交付率、A4到M5完美路径。但Apple的自研芯片全在消费电子/edge，不在数据中心训练。Baltra才是第一次进数据中心，而且还是和Broadcom合作。<strong>"最有证据的成功案例"恰好不威胁NVIDIA的核心市场。</strong></div>
+      </details>
+
+      <details>
+        <summary><strong>#9 信息空白</strong></summary>
+        <ol>
+          <li>Broadcom自研芯片设计收入中Google TPU占多少比例（是否过度集中？）</li>
+          <li>Tesla TeraFab的融资来源和时间表（需要增发多少？稀释比例？）</li>
+          <li>Apple Baltra的性能目标 vs NVIDIA H200/B200 的具体对比</li>
+          <li>自研芯片的总拥有成本（TCO）vs NVIDIA GPU的TCO &mdash; 没有独立第三方比较</li>
+          <li>Google/Meta/Amazon内部对自研 vs 外购的资源分配比例变化趋势</li>
+        </ol>
+        <p><strong>结论</strong>：<strong>公开信息系统性偏向"自研是威胁"叙事。但资金流向（每家都继续买NVIDIA）讲了相反的故事。</strong></p>
+      </details>
+
+      <details>
+        <summary><strong>#10 代理人可信度权重不应相等</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>维度</th><th>Musk</th><th>Srouji</th><th>Keller</th></tr></thead>
+            <tbody>
+              <tr><td>预测准确率</td><td><strong style="color:#f44336;">4/14 (28%)</strong></td><td><strong style="color:#4caf50;">12/12 (100%)</strong></td><td><strong style="color:#4caf50;">7/10 (70%)</strong></td></tr>
+              <tr><td>资本掌控</td><td>$38B芯片投资</td><td>Apple芯片预算（未公开，估$10B+/年）</td><td>$3.2B公司估值</td></tr>
+              <tr><td>交付记录</td><td>HW3成功；Dojo失败</td><td>16年零延迟</td><td>A4/Zen/HW3全部成功（离开后）</td></tr>
+              <tr><td>偏见类型</td><td>极度乐观+时间线压缩</td><td>保守偏见（under-promise, over-deliver）</td><td>工程完美主义（低估生态锁定）</td></tr>
+              <tr><td>综合可信度</td><td><strong style="color:#ffa726;">6/10</strong></td><td><strong style="color:#4caf50;">9/10</strong></td><td><strong style="color:#4caf50;">8/10</strong></td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>结论</strong>：当三人意见冲突时，<strong>Srouji的判断权重应为3x Musk</strong>。Keller的技术判断可信但商业判断打折。Musk的资金流向可信但言论打折。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 4 -->
+    <section id="phase4">
+      <div class="section-header">
+        <span class="phase-tag phase-diagnose">PHASE IV &mdash; DIAGNOSE</span>
+        <h2>最强反面：自研是永远"即将到来的威胁"</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#11 加速 vs 减速</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>自研加速中（看空NVDA）</th><th>自研减速中（看多NVDA）</th></tr></thead>
+            <tbody>
+              <tr><td>ASIC增速44.6% vs GPU 16.1%</td><td>每家自研者仍在大量买GPU</td></tr>
+              <tr><td>Apple/Google/Meta/Amazon/Tesla全在自研</td><td>Dojo失败=自研风险的活教材</td></tr>
+              <tr><td>Broadcom ASIC收入$12.2B (+45% YoY)</td><td>NVIDIA系统级优势(CUDA+NVLink+软件)无法复制</td></tr>
+              <tr><td>RISC-V全球25%份额</td><td>RISC-V在数据中心份额&lt;1%</td></tr>
+              <tr><td>TeraFab $20B + Samsung $16.5B</td><td>Tesla零半导体制造经验</td></tr>
+              <tr><td>Apple C1成功替代Qualcomm</td><td>Apple的自研在edge不在datacenter</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details open>
+        <summary><strong>#12 最强反面论证：自研是永远的"下一年"</strong></summary>
+        <blockquote>"自研芯片将替代NVIDIA" &mdash; 这句话每年都说，每年NVIDIA的收入都在创新高。</blockquote>
+        <ol>
+          <li><strong>时间线记录</strong>：Google TPU始于2015，Amazon Trainium始于2018，Tesla Dojo始于2021（已失败）。10年过去了，NVIDIA的数据中心收入从$5B涨到$115B+</li>
+          <li><strong>系统级优势无法单点突破</strong>：自研芯片能做到硅片性能匹配NVIDIA，但CUDA+NVLink+cuDNN+TensorRT+NGC容器生态+数万开发者支持=系统级护城河。替代成本不是"做一颗芯片"的成本，是"重建整个生态"的成本</li>
+          <li><strong>自研的隐性成本</strong>：Apple自研芯片团队数千人、Srouji领导16年持续投入。Tesla从2016年建团队到HW3量产花了3年、Dojo投入数十亿后失败。<strong>自研的ROI被严重高估 &mdash; 成功案例只展示收益，不展示前期投入和失败项目</strong></li>
+          <li><strong>Keller的反驳为什么不成立</strong>：他说"利润堆叠可以消除"，但NVIDIA的利润=研发再投入的源泉。73%毛利率支撑每年$12B+研发，形成"高利润&rarr;高研发&rarr;高性能&rarr;高需求&rarr;高利润"的飞轮。打破利润堆叠=打破飞轮=需要另一个飞轮替代</li>
+          <li><strong>Jensen的战略反应速度</strong>：$20B收购Groq证明NVIDIA不是静态靶子。竞争者在追赶CUDA，Jensen在加码推理、物理AI、软件平台。<strong>追赶者永远在追赶一个也在移动的目标</strong></li>
+        </ol>
+        <p><strong>概率评估</strong>：自研在未来5年内真正替代（而非补充）NVIDIA在数据中心的主导地位 &mdash; <strong style="color:#f44336;">10-15%</strong>。</p>
+        <p>但自研继续高速增长并成为NVIDIA的结构性利润压缩力量 &mdash; <strong style="color:#ffa726;">70-80%</strong>。</p>
+        <p><strong>投资含义</strong>：自研不是买入AMD/SHORT NVDA的理由。自研是买入AVGO/TSM的理由。</p>
+      </details>
+
+      <details>
+        <summary><strong>#13 Musk的TeraFab：最激进也最不可预测</strong></summary>
+        <p>TeraFab的5个关键风险：</p>
+        <ul>
+          <li><strong>零经验</strong>：Tesla从未运营过半导体工厂。芯片设计&ne;芯片制造。差距类似于"会开车"和"会造发动机"</li>
+          <li><strong>资金需求</strong>：$20-25B需要Tesla首次增发融资（自2020年来首次），股东稀释不可避免</li>
+          <li><strong>2nm制程</strong>：只有TSMC在3nm有量产经验，Samsung在2nm还在摸索。Tesla从零开始做2nm？</li>
+          <li><strong>人才</strong>：Dojo团队解散时约20名工程师流失至DensityAI。Pete Bannon离职。建fab需要完全不同的人才</li>
+          <li><strong>时间线</strong>：Musk说3月21日"启动" &mdash; 但"启动"可能意味着任何事，从"开始选址"到"开始设计"</li>
+        </ul>
+        <p><strong>对比</strong>：Intel花了$20B+和3年建Arizona fab（已有60年制造经验），仍然延迟。Samsung Austin fab多次良率问题。<strong>Tesla从零开始的TeraFab在2030年前量产2nm芯片的概率 &mdash; &lt;20%。</strong></p>
+      </details>
+
+      <details>
+        <summary><strong>#14 但不要因此低估Musk的方向判断</strong></summary>
+        <p>历史模式：Musk在每个领域都做"疯狂的赌注"，时间线永远延迟，但最终方向通常正确：</p>
+        <ul>
+          <li>SpaceX可回收火箭：2015年说"明年量产"，2018年才稳定。但现在是全球唯一</li>
+          <li>Tesla FSD芯片：2016年组团队，2019年HW3量产。3年延迟但证明汽车公司可以自研芯片</li>
+          <li>Starlink：被嘲笑为不可能，现在是最大卫星互联网运营商</li>
+        </ul>
+        <p><strong>结论</strong>：TeraFab的时间线不可信，但"终端公司需要掌控芯片供应链"这个方向判断可能是对的。关键不是"TeraFab 2028年能不能量产"，而是"5-10年后Tesla是否有自己的芯片制造能力"。答案大概率是yes &mdash; 只不过可能不是通过TeraFab，而是通过收购或深度合作。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase 5 -->
+    <section id="phase5">
+      <div class="section-header">
+        <span class="phase-tag phase-build">PHASE V &mdash; BUILD</span>
+        <h2>结构诊断：Node 5页面的优劣</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#15 当前分析结构的优劣</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>做到了</th><th>没做到</th></tr></thead>
+            <tbody>
+              <tr><td>三条自研路径清晰（规模/精密/生态）</td><td>没有<strong>验证日历</strong>（Baltra/TeraFab什么时候能验证？）</td></tr>
+              <tr><td>V3"AVGO是隐形赢家"已确认</td><td>没有<strong>信号传导链</strong>（自研加速如何传导到AVGO/TSM/NVDA？）</td></tr>
+              <tr><td>Musk言行不一分析到位</td><td>没有<strong>AVGO两条腿交叉分析</strong>（网络 vs 自研设计）</td></tr>
+              <tr><td>可信度评估有数据支撑</td><td>没有<strong>"自研替代 vs 自研补充"的量化判断</strong></td></tr>
+              <tr><td>三人认知框架差异清晰</td><td>没有<strong>综合判断</strong> &mdash; 只有"两边都有道理"</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details>
+        <summary><strong>#16 最大的结构性遗漏：AVGO的双链交叉点</strong></summary>
+        <p>Node 1的元思考已经发现"AVGO是不管谁赢都赚的标的"。Node 5应该把这个逻辑具体化：</p>
+        <div class="arc-item"><strong>AVGO第一条腿：网络（受益于GPU扩张）</strong><br>NVIDIA卖更多GPU &rarr; 数据中心需要更多网络交换/互连 &rarr; AVGO Tomahawk/Jericho系列出货&uarr;</div>
+        <div class="arc-item"><strong>AVGO第二条腿：ASIC设计服务（受益于自研加速）</strong><br>Google/Meta/Apple/ByteDance自研芯片 &rarr; 需要AVGO的设计服务 &rarr; AVGO ASIC收入$12.2B (+45% YoY)<br><em style="color:var(--text-tertiary);">Broadcom在自研ASIC设计服务市场占~80%份额。Apple Baltra、Google TPU v6、Meta MTIA都经过Broadcom</em></div>
+        <p><strong>交叉点意义</strong>：NVDA成功 &rarr; 第一条腿加速。NVDA被自研侵蚀 &rarr; 第二条腿加速。<strong>这是"不管谁赢都赚"的结构性原因</strong>，不是巧合。</p>
+      </details>
+
+      <details>
+        <summary><strong>#17 Keller的位置需要重新定义</strong></summary>
+        <p>在Node 1中Keller作为CONTRARIAN批评NVIDIA定价。在Node 5中他有不同的角色：</p>
+        <p>Keller是<strong>"第三条路"的代言人</strong> &mdash; 不自研（像Musk/Srouji），也不买NVIDIA，而是<strong>卖设计IP让别人自研</strong>。这是ARM模式的RISC-V版本。</p>
+        <p>如果Keller对了（开源+小芯片取代专有大芯片），受益的不只是Tenstorrent，而是<strong>整个"设计工具"层</strong>：EDA(SNPS/CDNS)、IP授权(ARM/Tenstorrent)、设计服务(AVGO)。</p>
+        <p><strong>即使Keller的具体公司不成功，他的方向判断如果正确，AVGO/SNPS/CDNS仍然是受益者。</strong></p>
+      </details>
+    </section>
+
+
+    <!-- Phase 6 -->
+    <section id="phase6">
+      <div class="section-header">
+        <span class="phase-tag phase-verify">PHASE VI &mdash; VERIFY</span>
+        <h2>成品审视：诚实的自我诊断</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#18 可信度评分的交叉验证</strong></summary>
+        <p>三个代理人的关键claims交叉验证：</p>
+        <figure>
+          <table>
+            <thead><tr><th>Claim</th><th>来源</th><th>可信度</th><th>为什么</th></tr></thead>
+            <tbody>
+              <tr><td>"自研芯片是不可逆趋势"</td><td>三人共识</td><td><strong style="color:#4caf50;">95%</strong></td><td>资金流向+10年趋势+地缘政治驱动</td></tr>
+              <tr><td>"自研是补充不是替代NVIDIA"</td><td>Musk言论+资金流向</td><td><strong style="color:#4caf50;">80%</strong></td><td>2-3年内。但5年后比例可能变化</td></tr>
+              <tr><td>"Broadcom是自研隐形赢家"</td><td>V3 + Srouji(Baltra)</td><td><strong style="color:#4caf50;">85%</strong></td><td>~80%设计服务份额+Apple/Google/Meta客户</td></tr>
+              <tr><td>"TeraFab 2028年量产2nm"</td><td>Musk</td><td><strong style="color:#f44336;">15%</strong></td><td>零经验+需增发+2nm门槛+Musk时间线记录</td></tr>
+              <tr><td>"Baltra 2027年量产"</td><td>Srouji</td><td><strong style="color:#4caf50;">75%</strong></td><td>Apple 16年交付记录+Broadcom合作+TSMC代工</td></tr>
+              <tr><td>"RISC-V替代ARM在数据中心"</td><td>Keller</td><td><strong style="color:#ffa726;">30%</strong></td><td>5年内。嵌入式可以，数据中心生态差距太大</td></tr>
+              <tr><td>"AI6将是最好的AI芯片"</td><td>Musk</td><td><strong style="color:#ffa726;">25%</strong></td><td>单客户优势逻辑成立，但"最好"过于绝对</td></tr>
+              <tr><td>"利润堆叠可以消除"</td><td>Keller</td><td><strong style="color:#ffa726;">40%</strong></td><td>方向对但速度慢。NVIDIA的飞轮=再投入机器</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details>
+        <summary><strong>#19 Padding识别</strong></summary>
+        <p>Node 5分析中的padding内容：</p>
+        <ul>
+          <li>Musk的Optimus Gen 3量产细节 &mdash; 与芯片投资逻辑关系弱</li>
+          <li>Keller在P.A. Semi和Intel的完整职业历史 &mdash; 只需保留"在五家公司做过芯片"的结论</li>
+          <li>Apple C1调制解调器替代Qualcomm的细节 &mdash; 与数据中心自研ASIC关系弱</li>
+          <li>RISC-V 25%全球份额 &mdash; 几乎全在嵌入式，与投资决策无关</li>
+          <li>Tenstorrent与Razer的消费级AI加速器 &mdash; 与自研芯片趋势关系很弱</li>
+        </ul>
+        <p><strong>保留标准</strong>：每条信息必须能回答"这对买AVGO/TSM/NVDA的决策有什么影响？"如果不能，删除或压缩。</p>
+      </details>
+
+      <details>
+        <summary><strong>#20 该补什么</strong></summary>
+        <ol>
+          <li>验证日历（Phase VII解决）&mdash; Baltra、TeraFab、MI400、AI5/AI6时间节点</li>
+          <li>信号传导链（Phase VIII解决）&mdash; 自研加速如何传导到AVGO/TSM/NVDA</li>
+          <li>AVGO双链交叉分析（Phase VIII解决）&mdash; 网络 vs 设计服务</li>
+          <li>综合判断（Phase IX解决）&mdash; "自研是补充"结论下的交易逻辑</li>
+          <li>Musk可信度口径说明 &mdash; 区分"方向可信度"和"时间线可信度"</li>
+        </ol>
+      </details>
+    </section>
+
+
+    <!-- Phase 7 -->
+    <section id="phase7">
+      <div class="section-header">
+        <span class="phase-tag phase-build">PHASE VII &mdash; BUILD</span>
+        <h2>验证日历：Baltra / TeraFab / MI400</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#21 Node 5验证日历</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>日期</th><th>事件</th><th>如果成功</th><th>如果失败</th></tr></thead>
+            <tbody>
+              <tr><td><strong>2026年3月21日</strong></td><td>Tesla TeraFab"启动"</td><td>Musk方向判断加分（但"启动"定义模糊）</td><td><span class="signal signal-watch">WATCH</span> 再一次延迟=Musk时间线信用归零</td></tr>
+              <tr><td><strong>2026年Q2</strong></td><td>Broadcom Q2财报（AI/ASIC收入）</td><td><span class="signal signal-bull">BULL</span> ASIC设计收入&gt;$14B=自研加速确认</td><td>ASIC增速放缓=自研不如预期</td></tr>
+              <tr><td><strong>2026年Q3</strong></td><td>AMD MI400/Helios出货</td><td>CUDA护城河侵蚀加速</td><td>AMD被证伪，NVIDIA巩固</td></tr>
+              <tr><td><strong>2026年H2</strong></td><td>Apple Baltra服务器芯片进展</td><td><span class="signal signal-bull">BULL</span> AVGO设计收入确认+Apple数据中心自研验证</td><td>Apple退缩=消费巨头进军数据中心不可行</td></tr>
+              <tr><td><strong>2026年12月</strong></td><td>Tesla AI6 tape out（Musk目标）</td><td>统一架构路线验证</td><td><span class="signal signal-watch">WATCH</span> 大概率延迟（Musk时间线记录）</td></tr>
+              <tr><td><strong>2027年H1</strong></td><td>Tesla AI5量产（已延迟至2027年中）</td><td>Tesla证明非半导体公司可量产先进芯片</td><td>再次延迟=TeraFab愿景更不可信</td></tr>
+              <tr><td><strong>2027年H2</strong></td><td>Apple Baltra量产</td><td><span class="signal signal-bull">BULL</span> 自研进入数据中心的标志性事件</td><td>Apple回归NVIDIA=自研有天花板</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details>
+        <summary><strong>#22 监控方法论</strong></summary>
+        <p><strong>每月</strong>：TSMC月度营收（每月10日）&mdash; 自研芯片也需要TSMC代工，产能分配变化是领先指标。</p>
+        <p><strong>每季度</strong>：Broadcom财报（ASIC设计收入增速）| Apple供应商变动 | Tesla财报（芯片相关CapEx和时间线更新）。</p>
+        <p><strong>事件驱动</strong>：TeraFab融资公告 | Baltra tape out | AI5/AI6量产确认 | Tenstorrent大客户签约 | Samsung 2nm良率报告。</p>
+        <p><strong>关键领先指标</strong>：Broadcom每季度的AI/ASIC收入是自研趋势最直接的温度计。如果连续两季度增速&gt;40%，自研加速确认；如果降至&lt;25%，自研可能遇到瓶颈。</p>
+      </details>
+
+      <details>
+        <summary><strong>#23 四个交易机会</strong></summary>
+        <div class="arc-item"><strong>机会1：AVGO "自研加速"主题（持续性）</strong><br>ASIC设计收入$12.2B+45% YoY。链条：自研公司增加&rarr;AVGO设计服务收入&uarr;&rarr;月线趋势延续。<strong>这是Node 5的最核心交易标的。</strong></div>
+        <div class="arc-item"><strong>机会2：Baltra验证赌注（2026年H2-2027年）</strong><br>Apple进入数据中心=自研天花板被打破的信号。如果成功&rarr;AVGO设计服务+TSMC代工双重受益。</div>
+        <div class="arc-item"><strong>机会3：TeraFab融资事件（2026年Q2-Q3）</strong><br>Tesla增发融资=短期TSLA股价压力，但长期自研芯片方向确认。对NVDA影响有限（Musk自己说"not replacing NVIDIA"）。</div>
+        <div class="arc-item"><strong>机会4：TSMC产能争夺（慢变量）</strong><br>Apple vs NVIDIA争夺TSMC 2nm产能。如果Apple拿到更多&rarr;NVIDIA受限&rarr;AMD/AVGO间接受益。AppleInsider已报道"NVIDIA is squeezing out Apple for TSMC foundry capacity"。</div>
+      </details>
+    </section>
+
+
+    <!-- Phase 8 -->
+    <section id="phase8">
+      <div class="section-header">
+        <span class="phase-tag phase-build">PHASE VIII &mdash; BUILD</span>
+        <h2>信号传导与AVGO双链交叉点</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#24 三条传导链</strong></summary>
+        <div class="arc-item"><strong><span class="signal signal-bull">BULL</span> 自研加速 &rarr; "卖铲子"链</strong><br>自研公司增加 &rarr; AVGO(设计服务80%) &rarr; TSM(代工) &rarr; SNPS/CDNS(EDA) &rarr; ARM(IP授权)<br><em style="color:var(--text-tertiary);">信号最先在Broadcom AI/ASIC季度收入出现。AVGO是整条链的晴雨表</em></div>
+        <div class="arc-item"><strong><span class="signal signal-bull">BULL</span> 自研+GPU共存 &rarr; 双增长链</strong><br>自研补充GPU &rarr; AVGO网络收入&uarr;(数据中心网络需求不降) + AVGO设计收入&uarr;(自研项目增加)<br><em style="color:var(--text-tertiary);">关键：AVGO两条腿同时受益。这是Node 1和Node 5的结构性交叉点</em></div>
+        <div class="arc-item"><strong><span class="signal signal-bear">BEAR</span> 自研真的替代GPU &rarr; NVIDIA利润压缩链</strong><br>ASIC份额超过临界点 &rarr; NVDA定价权下降 &rarr; 毛利率从73%压缩 &rarr; NVDA估值重估<br><em style="color:var(--text-tertiary);">概率10-15%在5年内。但即使发生，AVGO/TSM仍然受益（自研也需要他们）</em></div>
+      </details>
+
+      <details open>
+        <summary><strong>#25 AVGO双链交叉分析（Node 5核心发现）</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>场景</th><th>AVGO网络收入</th><th>AVGO ASIC设计收入</th><th>净效果</th></tr></thead>
+            <tbody>
+              <tr><td><strong>NVIDIA继续主导</strong></td><td>&uarr;&uarr; GPU扩张=更多网络需求</td><td>&uarr; 自研缓慢但持续</td><td><span class="signal signal-bull">BULL</span> 双腿都增长</td></tr>
+              <tr><td><strong>自研加速+GPU共存</strong></td><td>&uarr; 数据中心总需求仍增</td><td>&uarr;&uarr; 更多公司自研</td><td><span class="signal signal-bull">BULL</span> 第二条腿加速</td></tr>
+              <tr><td><strong>自研大规模替代GPU</strong></td><td>&darr; GPU减少=网络需求变化</td><td>&uarr;&uarr;&uarr; ASIC爆发</td><td><span class="signal signal-bull">BULL</span> 第二条腿爆发补偿</td></tr>
+              <tr><td><strong>AI CapEx泡沫破裂</strong></td><td>&darr;&darr; 全线下跌</td><td>&darr;&darr; 全线下跌</td><td><span class="signal signal-bear">BEAR</span> 系统性风险</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>结论</strong>：在4个场景中，AVGO在3个场景都是正面。唯一的负面是"AI CapEx泡沫破裂"（概率15-20%）。<strong>AVGO是Node 5分析中风险回报比最优的标的。</strong></p>
+      </details>
+
+      <details open>
+        <summary><strong>#26 时间差套利</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>事件</th><th>最先反映</th><th>滞后反映</th><th>时间差</th></tr></thead>
+            <tbody>
+              <tr><td>Baltra tape out</td><td>AVGO设计服务收入&uarr;</td><td>TSMC产能分配变化</td><td>1-2季度</td></tr>
+              <tr><td>TeraFab融资</td><td>TSLA股价波动(当天)</td><td>Samsung代工收入&uarr;</td><td>6-12月</td></tr>
+              <tr><td>Broadcom ASIC收入beat</td><td>AVGO股价(当天)</td><td>NVDA估值重估预期</td><td>1-2季度</td></tr>
+              <tr><td>AI5/AI6量产确认</td><td>TSMC月度营收信号</td><td>Samsung代工收入</td><td>1-2季度</td></tr>
+              <tr><td>Apple进入数据中心</td><td>AVGO/TSM受益(提前)</td><td>NVDA定价压力(滞后)</td><td>3-6月</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p>当Broadcom季度财报显示ASIC设计收入加速，但TSMC的自研相关产能收入还没反映 &mdash; 这就是时间差窗口。</p>
+      </details>
+
+      <details>
+        <summary><strong>#27 历史案例</strong></summary>
+        <div class="arc-item"><strong>Google TPU (2015至今)</strong> &mdash; 7代TPU，Anthropic/Claude在上面训练。证明自研可行但Google仍然同时买NVIDIA。<strong>自研和外购长期共存。</strong></div>
+        <div class="arc-item"><strong>Apple Intel&rarr;M1 (2020)</strong> &mdash; Srouji团队2年完成全线迁移。Intel损失$10B+年收入。<strong>当Apple决定自研，被替代者毫无还手之力。但这只在消费电子验证过，不在数据中心。</strong></div>
+        <div class="arc-item"><strong>Tesla Dojo (2021-2025)</strong> &mdash; $数十亿投入后关闭。<strong>自研失败的成本极高，大多数尝试不会成功。幸存者偏差让自研看起来比实际成功率高。</strong></div>
+        <div class="arc-item"><strong>Amazon Graviton/Trainium</strong> &mdash; AWS自研ARM芯片+AI训练芯片。但AWS仍然是NVIDIA最大渠道之一。<strong>即使最有资源的云厂商，自研也是补充策略。</strong></div>
+      </details>
+    </section>
+
+
+    <!-- Phase 9 -->
+    <section id="phase9">
+      <div class="section-header">
+        <span class="phase-tag phase-verify">PHASE IX &mdash; VERIFY</span>
+        <h2>最终方法论 &mdash; 综合判断与决策矩阵</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#28 Node 5的综合判断（在报告中不敢说的）</strong></summary>
+        <p>Based on all evidence, the triangulation produces:</p>
+        <figure>
+          <table>
+            <thead><tr><th>判断维度</th><th>概率</th></tr></thead>
+            <tbody>
+              <tr><td>自研是不可逆趋势</td><td><strong style="color:#4caf50;">95%</strong> &mdash; 三代理人共识+资金流向+10年加速趋势</td></tr>
+              <tr><td>自研2-3年内"补充"而非"替代"NVIDIA</td><td><strong style="color:#4caf50;">80%</strong> &mdash; xAI仍买$18B GPU+Apple用M5过渡+所有公司双线并行</td></tr>
+              <tr><td>自研5年后显著压缩NVIDIA利润率</td><td><strong style="color:#ffa726;">55-65%</strong> &mdash; ASIC份额持续增长+竞争选项增加=定价权下降</td></tr>
+              <tr><td>Broadcom ASIC设计收入持续40%+增速</td><td><strong style="color:#4caf50;">70%</strong> &mdash; ~80%市场份额+Apple/Google/Meta/ByteDance客户管线</td></tr>
+              <tr><td>Baltra 2027年量产</td><td><strong style="color:#4caf50;">75%</strong> &mdash; Srouji 16年交付记录+Broadcom+TSMC支持</td></tr>
+              <tr><td>TeraFab 2028年前量产2nm</td><td><strong style="color:#f44336;">15%</strong> &mdash; 零经验+资金不确定+2nm门槛</td></tr>
+              <tr><td>RISC-V 5年内在数据中心取得5%+份额</td><td><strong style="color:#ffa726;">25%</strong> &mdash; 技术达标但生态差距巨大</td></tr>
+              <tr><td>AI CapEx泡沫破裂</td><td><strong style="color:#f44336;">15-20%</strong> &mdash; 低概率但catastrophic（全节点暴跌）</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details open>
+        <summary><strong>#28b 交易决策矩阵</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>标的</th><th>Node 5视角</th><th>进场条件</th><th>信号</th></tr></thead>
+            <tbody>
+              <tr><td><strong>AVGO</strong></td><td>"不管谁赢都赚"的双链交叉点</td><td>月线上升趋势回踩+ASIC季度收入验证</td><td><span class="signal signal-bull">BULL</span> 最佳标的</td></tr>
+              <tr><td><strong>TSM</strong></td><td>所有芯片（自研+GPU）都需TSMC</td><td>月线支撑+月度营收趋势</td><td><span class="signal signal-bull">BULL</span> 基础设施层</td></tr>
+              <tr><td><strong>NVDA</strong></td><td>自研是压力但2-3年内不致命</td><td>$78B Q1验证+Vera Rubin出货</td><td><span class="signal signal-watch">WATCH</span> 短期安全但长期利润率压缩</td></tr>
+              <tr><td><strong>SNPS/CDNS</strong></td><td>自研越多越需要EDA工具</td><td>行业增速确认+估值回到合理区</td><td><span class="signal signal-watch">WATCH</span> 间接受益但估值已高</td></tr>
+              <tr><td><strong>TSLA</strong></td><td>芯片自研方向对但时间线不可信</td><td>不因芯片逻辑交易TSLA</td><td><span class="signal signal-watch">WATCH</span> 芯片是故事不是估值驱动</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <div class="question-box">
+        <h4>最终方法论 &mdash; 5条规则</h4>
+        <p style="text-align:left;"><strong>规则1：自研趋势下买"卖铲子的人"</strong><br>自研公司成功率不确定，但Broadcom(设计)和TSMC(代工)在所有场景都受益。</p>
+        <p style="text-align:left;"><strong>规则2：信钱不信嘴</strong><br>Musk言论可信度28%，但$38B资金流向=方向判断可信。Srouji几乎不说话但12/12交付=最可信。</p>
+        <p style="text-align:left;"><strong>规则3：AVGO是Node 1和Node 5的结构性交叉点</strong><br>GPU扩张&rarr;网络收入。自研加速&rarr;设计收入。两条腿同时受益。</p>
+        <p style="text-align:left;"><strong>规则4：区分"方向"和"时间线"</strong><br>自研方向95%确定。但TeraFab 2028量产仅15%。用方向做选品，用时间线做等待。</p>
+        <p style="text-align:left;"><strong>规则5：Broadcom ASIC季度收入是自研趋势的温度计</strong><br>40%+增速=加速确认。&lt;25%=减速信号。每季度财报是最直接的监控指标。</p>
+      </div>
+
+    </section>
+
+
+    <footer class="page-footer">
+      <p>Custom Silicon / ASIC Node &mdash; Metacognition Log &nbsp;|&nbsp; 28 Rounds &nbsp;|&nbsp; 2026-03-20 &nbsp;|&nbsp; V4 Design System</p>
+      <p><a href="NODE_5_%E5%AE%9A%E5%88%B6%E8%8A%AF%E7%89%87_ASIC_2026-03-19.html">Custom Silicon 认知节点报告</a> &nbsp;|&nbsp; <a href="../semiconductor_hub.html">Semiconductor Hub</a> &nbsp;|&nbsp; <a href="NODE_1_GPU_AI_metacognition.html">Node 1 GPU/AI 元思考</a></p>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+(function() {
+  const hamburger = document.getElementById('hamburgerBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  hamburger.addEventListener('click', () => { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+  sidebar.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => { if (window.innerWidth <= 900) { sidebar.classList.remove('open'); overlay.classList.remove('open'); } });
+  });
+})();
+</script>
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+</body>
+</html>

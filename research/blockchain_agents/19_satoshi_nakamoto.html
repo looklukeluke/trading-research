@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>中本聪 Satoshi Nakamoto — Cognitive Agent Profile</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="../blockchain_shared.css">
+  <style>
+    /* === C-tier Agent Profile Overrides === */
+    .page-wrapper { display: flex; min-height: 100vh; }
+    .main-content { flex: 1; min-width: 0; max-width: 900px; padding: 2.5rem 2.5rem 5rem; }
+    .page-header { margin-bottom: 2rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border-default); }
+    .page-header h1 { margin-bottom: 0.3rem; }
+    .page-header .subtitle { color: var(--text-tertiary); margin-bottom: 0.75rem; font-size: 0.88rem; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.5rem; font-size: 0.82rem; color: var(--text-tertiary); }
+    .meta-row span { padding: 0.15rem 0.5rem; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 4px; font-size: 0.75rem; }
+    blockquote { border-left: 3px solid var(--accent); padding: 0.6rem 1.25rem; margin: 1rem 0; font-style: italic; background: var(--bg-surface); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-secondary); }
+    blockquote .zh { font-style: normal; margin-top: 0.4em; padding-top: 0.4em; border-top: 1px dashed var(--border-subtle); }
+    .credibility-meter { display: flex; align-items: center; gap: 0.75rem; margin: 0.75rem 0; }
+    .meter-bar { flex: 1; height: 8px; background: var(--border-subtle); border-radius: 4px; overflow: hidden; }
+    .meter-fill { height: 100%; border-radius: 4px; }
+    .meter-label { font-size: 1.2rem; font-weight: 680; min-width: 3rem; }
+    .top-nav { position: sticky; top: 0; z-index: 999; background: rgba(8,9,10,0.95); backdrop-filter: blur(8px); padding: 0.5rem 1.5rem; border-bottom: 1px solid var(--border-subtle); font-size: 0.78rem; display: flex; gap: 1rem; align-items: center; }
+    .top-nav a { text-decoration: none; }
+    .hamburger-btn { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 200; background: var(--bg-surface); color: var(--text-primary); border: none; border-radius: 6px; width: 44px; height: 44px; font-size: 1.4rem; cursor: pointer; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+    @media (max-width: 900px) {
+      .sidebar { position: fixed; left: -280px; top: 0; transition: left 0.3s ease; box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.open { display: block; }
+      .hamburger-btn { display: block; }
+      .main-content { padding: 2rem 1rem 4rem; }
+    }
+    @media (max-width: 1200px) { .notes-sidebar { display: none; } }
+    p { color: var(--text-secondary); margin-bottom: 1rem; }
+    ul, ol { color: var(--text-secondary); padding-left: 1.2rem; }
+    li { margin-bottom: 0.35rem; line-height: 1.6; }
+    strong { color: var(--text-primary); font-weight: 590; }
+    body.embedded .sidebar { display: none !important; }
+    body.embedded .notes-sidebar { display: none !important; }
+    body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+    .reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+    .reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+  </style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <a href="../blockchain_hub.html" style="color:var(--accent);">&larr; Blockchain Hub</a>
+  <span style="color:var(--text-quaternary);">&middot;</span>
+  <span style="color:var(--text-tertiary);">Agent #19 &middot; C-tier (historical)</span>
+</nav>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="page-wrapper">
+
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <h4>Profile</h4>
+    <nav>
+      <ul>
+        <li><a href="#summary">Overview</a></li>
+        <li><a href="#key-facts">Key Facts</a></li>
+        <li><a href="#actions">Action Evidence</a></li>
+        <li><a href="#judgment">Judgment</a></li>
+        <li><a href="#credibility">Credibility</a></li>
+      </ul>
+    </nav>
+    <div class="project-meta">
+      Node: N2 L1<br>
+      Tier: C档 5/5 (historical)<br>
+      Region: Unknown<br>
+      Updated: 2026-03-22
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <div class="page-header">
+      <h1>中本聪 Satoshi Nakamoto</h1>
+      <div class="subtitle">Creator, Bitcoin — Historical Archive</div>
+      <div class="badge-row">
+        <span class="badge badge-gold">N2 L1</span>
+        <span class="badge badge-purple">C-tier 5/5 (historical)</span>
+        <span class="badge badge-gray">Identity Unknown</span>
+      </div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="section-header" id="summary">
+      <h2><span class="section-num">01</span> Overview<span class="zh">概要</span></h2>
+    </div>
+
+    <div class="advisory-box">
+      <strong>Historical archive only.</strong> Satoshi Nakamoto disappeared from public communication in 2010. This profile exists as a reference document for the foundational design decisions that shape the entire blockchain ecosystem. No active monitoring required.
+    </div>
+
+    <p>Satoshi Nakamoto is the pseudonymous creator of Bitcoin, having published the whitepaper in October 2008 and launched the genesis block on January 3, 2009. Satoshi's identity remains unknown. An estimated <strong>~1 million BTC</strong> ($90B+ at current prices) in early-mined coins have never been moved, representing the largest single holding in Bitcoin history. Satoshi disappeared from all public forums in December 2010.</p>
+
+    <!-- KEY FACTS -->
+    <div class="section-header" id="key-facts">
+      <h2><span class="section-num">02</span> Key Facts<span class="zh">关键事实</span></h2>
+    </div>
+
+    <div class="stats-strip">
+      <div class="stat-item"><span class="stat-value">~1M BTC</span><span class="stat-label">Unmoved coins (~$90B+)</span></div>
+      <div class="stat-item"><span class="stat-value">2008</span><span class="stat-label">Whitepaper published</span></div>
+      <div class="stat-item"><span class="stat-value">2009-01-03</span><span class="stat-label">Genesis block</span></div>
+      <div class="stat-item"><span class="stat-value">2010-12</span><span class="stat-label">Disappeared</span></div>
+    </div>
+
+    <ul>
+      <li><strong>Whitepaper:</strong> "Bitcoin: A Peer-to-Peer Electronic Cash System" (2008). 9 pages that launched a $2T+ industry.</li>
+      <li><strong>Genesis block message:</strong> "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks" — embedding a political statement about financial system failures.</li>
+      <li><strong>21M supply cap:</strong> Hard-coded scarcity. This single design decision created the "digital gold" narrative.</li>
+      <li><strong>Proof of Work:</strong> Chose energy-intensive consensus. Still debated whether this was optimal or a compromise for 2008 technology constraints.</li>
+      <li><strong>Identity:</strong> Despite extensive investigation (Hal Finney, Nick Szabo, Craig Wright claims), true identity remains unconfirmed.</li>
+    </ul>
+
+    <!-- ACTION EVIDENCE -->
+    <div class="section-header" id="actions">
+      <h2><span class="section-num">03</span> Action Evidence<span class="zh">行动证据</span></h2>
+    </div>
+
+    <div class="card">
+      <a>Bitcoin Whitepaper &amp; Implementation</a>
+      <div class="card-desc">Designed and implemented the complete Bitcoin system: consensus mechanism, transaction model, scripting language, network protocol. The original codebase was functional and secure enough to run for 16+ years with zero critical exploits of the core protocol.</div>
+      <div class="card-meta">2008-2010 &middot; Protocol design</div>
+    </div>
+
+    <div class="card">
+      <a>The Disappearance</a>
+      <div class="card-desc">Voluntarily left the project and all public communication in December 2010. Never moved the ~1M BTC. This act of stepping away — abandoning both control and enormous wealth — is itself the most remarkable action evidence. It created true decentralization by eliminating the founder's influence.</div>
+      <div class="card-meta">December 2010 &middot; Voluntary exit</div>
+    </div>
+
+    <details style="margin:1rem 0;">
+      <summary style="font-size:0.85rem;font-weight:510;color:var(--text-tertiary);cursor:pointer;">白皮书核心创新 — 技术解析</summary>
+      <div style="padding:0.75rem 0;font-size:0.82rem;color:var(--text-secondary);line-height:1.65;">
+        <p><strong>1. 双花问题解决</strong>: 通过工作量证明(PoW)+最长链规则，首次在无信任第三方的情况下解决数字货币双花问题。</p>
+        <p><strong>2. 分布式时间戳服务器</strong>: 区块链本质是一个去中心化的时间戳系统——每个区块证明某些交易在某个时间点存在。</p>
+        <p><strong>3. 激励机制设计</strong>: 矿工奖励(区块奖励+手续费)保证了"诚实挖矿比攻击更有利"——博弈论最优策略。</p>
+        <p><strong>4. 减半机制</strong>: 每21万块减半，总量2100万枚上限。这是一个预编程的货币政策——人类历史上第一个不可篡改的货币发行规则。</p>
+      </div>
+    </details>
+
+    <!-- JUDGMENT -->
+    <div class="section-header" id="judgment">
+      <h2><span class="section-num">04</span> Judgment<span class="zh">判断</span></h2>
+    </div>
+
+    <blockquote>
+      "A purely peer-to-peer version of electronic cash would allow online payments to be sent directly from one party to another without going through a financial institution."
+      <span class="zh">"一个纯粹的点对点电子现金系统，可以让在线支付直接从一方发送到另一方，无需通过金融机构。"</span>
+    </blockquote>
+
+    <p>The fundamental irony of Bitcoin: it was designed as <strong>"electronic cash"</strong> but evolved into <strong>"digital gold."</strong> BTC is rarely used for payments; it is primarily a store of value and speculative asset. Was this a betrayal of Satoshi's vision, or the natural evolution of the design? The 21M supply cap and PoW consensus arguably made "digital gold" inevitable — scarcity plus energy cost equals store of value, not medium of exchange.</p>
+
+    <figure style="margin:1.5rem 0;">
+      <table>
+        <thead><tr><th>设计决策</th><th>替代方案</th><th>Satoshi的选择</th><th>历史验证</th></tr></thead>
+        <tbody>
+          <tr><td>共识机制</td><td>PoS/BFT</td><td>PoW</td><td>✓ 15年安全运行</td></tr>
+          <tr><td>区块大小</td><td>动态调整</td><td>1MB固定</td><td>✗ 引发扩容战争</td></tr>
+          <tr><td>脚本语言</td><td>图灵完备</td><td>有限脚本</td><td>✓ 安全但功能受限</td></tr>
+          <tr><td>总量上限</td><td>通胀模型</td><td>2100万硬顶</td><td>✓ "数字黄金"叙事基础</td></tr>
+          <tr><td>匿名性</td><td>完全匿名</td><td>伪匿名</td><td>✗ 链上分析可追踪</td></tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <!-- CREDIBILITY -->
+    <div class="section-header" id="credibility">
+      <h2><span class="section-num">05</span> Data Credibility<span class="zh">数据可信度</span></h2>
+    </div>
+
+    <div class="credibility-meter">
+      <span class="meter-label" style="color: var(--tier-high);">5/5</span>
+      <div class="meter-bar"><div class="meter-fill" style="width:100%; background: var(--tier-high);"></div></div>
+    </div>
+
+    <p><strong>Highest (for what exists).</strong> Whitepaper is public. All forum posts archived (bitcointalk.org). Genesis block is on-chain. The ~1M BTC estimate comes from blockchain analysis (Sergio Demian Lerner's "Patoshi pattern" research). What we know is extremely well-documented — the gap is identity, not data.</p>
+
+    <div class="page-footer">
+      <p>Blockchain Cognitive Agent Profile &middot; C-tier (historical) &middot; Generated 2026-03-22<br>
+      <a href="../blockchain_hub.html">Back to Blockchain Hub</a></p>
+    </div>
+  </main>
+
+  <aside class="notes-sidebar">
+    <h4>Meta-cognitive Notes</h4>
+
+    <div class="meta-note">
+      <div class="note-label pattern">Question</div>
+      <p><strong>The 1M BTC Question — Largest Diamond Hands in History</strong></p>
+      <p>~1 million BTC have sat unmoved since 2009-2010. At current prices, this is worth $90B+. Through every cycle — the 2013 bubble, the 2017 mania, the 2021 peak — these coins never moved. Either Satoshi is dead, has lost the keys, or has the most extraordinary conviction (or indifference to wealth) in financial history.</p>
+      <p class="zh">约100万枚BTC自2009-2010年以来从未移动。按当前价格超过900亿美元。历经每一轮周期——2013泡沫、2017狂热、2021巅峰——这些币从未动过。中本聪要么已故、丢失了私钥，要么拥有金融史上最非凡的信念。</p>
+      <p style="margin-top:0.5rem; font-size:0.75rem; color:var(--text-quaternary);">If these coins ever move, it would be the single most impactful on-chain event in Bitcoin history. Every exchange and OTC desk monitors these addresses.</p>
+    </div>
+    <div class="anno meta-note" data-section="overview" id="m2">
+      <div class="mn-head" onclick="this.parentElement.classList.toggle('open')">
+        <span class="note-label">META</span>
+        <span class="mn-title">数字黄金 vs 电子现金</span>
+      </div>
+      <div class="mn-body">
+        <p>Satoshi的白皮书标题是"A Peer-to-Peer Electronic Cash System"——电子现金。但BTC演变成了"数字黄金"——价值存储。这是背叛还是进化？BTC社区2017年的分裂(BTC vs BCH)本质上就是这个问题的战争。BCH(吴忌寒支持)试图回归"电子现金"，BTC选择了"数字黄金"。市场的选择($1.2T vs $8B)给出了答案。</p>
+      </div>
+    </div>
+    <div class="anno meta-note" data-section="overview" id="m3">
+      <div class="mn-head" onclick="this.parentElement.classList.toggle('open')">
+        <span class="note-label">META</span>
+        <span class="mn-title">匿名创始人的战略价值</span>
+      </div>
+      <div class="mn-body">
+        <p>Satoshi的匿名性是BTC的核心资产之一。如果创始人已知：(1)可被政府逮捕/施压 (2)可能因个人言论影响市场 (3)可能动用100万BTC。匿名=不可逮捕+不可施压+无单点故障。这使BTC成为人类历史上第一个真正"无领导者"的货币系统。</p>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const sidebar = document.getElementById('sidebar');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+  if (hamburgerBtn) {
+    hamburgerBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      sidebarOverlay.classList.toggle('open');
+    });
+  }
+  if (sidebarOverlay) {
+    sidebarOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('open');
+    });
+  }
+  const sections = document.querySelectorAll('.section-header');
+  const navLinks = document.querySelectorAll('.sidebar nav a');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        const id = entry.target.id;
+        const link = document.querySelector(`.sidebar nav a[href="#${id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -60% 0px' });
+  sections.forEach(s => observer.observe(s));
+});
+</script>
+
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+
+</body>
+</html>

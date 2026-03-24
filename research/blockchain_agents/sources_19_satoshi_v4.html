@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Satoshi Nakamoto — 素材策展地图 V4</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  /* Page-specific V4 extensions (~75 lines) */
+  .priority-box { border:1px solid rgba(248,168,72,0.3); border-left:3px solid var(--accent); border-radius:var(--radius-sm); padding:1.25rem 1.5rem; margin-bottom:2rem; background:var(--bg-surface); }
+  .priority-box h2 { color:var(--accent); margin-top:0; font-size:1.1rem; font-weight:590; }
+  .priority-box ol { margin-bottom:0; padding-left:1.2rem; }
+  .priority-box li { margin-bottom:0.6rem; line-height:1.5; }
+  .time-badge { display:inline-block; padding:0.1rem 0.5rem; border-radius:10px; font-size:0.7rem; font-weight:590; margin-right:0.3rem; background:var(--accent); color:var(--bg-base); }
+  .anno { position:absolute; left:1rem; right:1rem; }
+  .anno.meta-note { padding:0.6rem 0.75rem; border-left:2px solid var(--accent); border-radius:0 6px 6px 0; background:rgba(248,168,72,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.meta-note:hover { box-shadow:0 0 0 1px var(--accent); }
+  .anno.know-note { padding:0.6rem 0.75rem; border-left:2px solid var(--knowledge); border-radius:0 6px 6px 0; background:rgba(91,155,213,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.know-note:hover { box-shadow:0 0 0 1px var(--knowledge); }
+  .anno .note-label { display:inline-block; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--bg-base); background:var(--accent); padding:0.1rem 0.4rem; border-radius:3px; margin-bottom:0.3rem; }
+  .anno .note-label.know { background:var(--knowledge); color:white; }
+  .anno .mn-head { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
+  .anno .mn-title { flex:1; font-weight:510; font-size:0.75rem; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .anno .mn-fold { font-size:0.55rem; color:var(--text-quaternary); transition:transform 0.2s; margin-left:auto; }
+  .anno.open .mn-fold { transform:rotate(180deg); }
+  .anno .mn-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+  .anno.open .mn-body { max-height:2000px; }
+  .anno .mn-body p { font-size:0.78rem; margin-bottom:0.3rem; color:var(--text-secondary); }
+  .anno.flash { animation:noteFlash 1.5s ease; }
+  @keyframes noteFlash { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--accent);} }
+  .anno.know-note.flash { animation:noteFlashBlue 1.5s ease; }
+  @keyframes noteFlashBlue { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--knowledge);} }
+  mark.hl-know { background:rgba(91,155,213,0.12); border-bottom:1.5px solid var(--knowledge); padding:0 2px; border-radius:2px; color:inherit; cursor:pointer; transition:background 0.15s; }
+  mark.hl-know:hover { background:rgba(91,155,213,0.28); }
+  .nref { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; font-size:0.48rem; font-weight:700; cursor:pointer; margin-left:1px; vertical-align:super; transition:transform 0.15s; text-decoration:none; background:var(--knowledge); color:white; }
+  .nref:hover { transform:scale(1.25); box-shadow:0 0 6px rgba(91,155,213,0.4); }
+  .top-controls { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; padding:0.35rem 0.7rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); font-size:0.72rem; flex-wrap:wrap; }
+  .top-controls .tc-label { font-weight:590; color:var(--knowledge); }
+  .top-controls button { padding:0.15rem 0.45rem; border-radius:4px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-tertiary); cursor:pointer; font-size:0.68rem; font-family:inherit; transition:all 0.15s; }
+  .top-controls button:hover { border-color:var(--knowledge); color:var(--text-primary); }
+  .top-controls button.active { background:var(--knowledge-dim); color:var(--knowledge); border-color:rgba(91,155,213,0.3); }
+  .top-controls .tc-sep { color:var(--border-default); margin:0 0.15rem; }
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .notes-sidebar { position:relative; width:320px; min-width:320px; padding:1.25rem 1rem; border-left:1px solid var(--border-subtle); background:var(--bg-elevated); }
+  .notes-sidebar-header { position:sticky; top:0; z-index:60; background:var(--bg-elevated); padding-bottom:0.5rem; border-bottom:1px solid var(--border-subtle); margin-bottom:0.75rem; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  .notes-toggle-btn { position:fixed; right:1rem; bottom:1.5rem; z-index:200; width:44px; height:44px; border-radius:50%; border:1px solid var(--border-default); background:var(--bg-surface); color:var(--text-secondary); cursor:pointer; font-size:1.1rem; display:none; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.4); }
+  .notes-close-btn { float:right; background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:1.1rem; padding:0; display:none; }
+  @media (max-width:1200px) { .notes-close-btn { display:block; } .notes-sidebar { position:fixed; right:0; top:0; height:100vh; overflow-y:auto; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.4); z-index:150; } .notes-sidebar.ns-closed { transform:translateX(100%); box-shadow:none; } .notes-toggle-btn { display:flex; } }
+  .notes-overlay-right { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:140; }
+  .notes-overlay-right.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  @media (min-width:1600px) { .main-content { max-width:1000px; } .notes-sidebar { width:360px; min-width:360px; } }
+  .rel-card { border:1px solid var(--border-subtle); border-radius:var(--radius-md); background:var(--bg-elevated); margin-bottom:0.75rem; }
+  .rel-card summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  .rel-card[open] summary { color:var(--accent); }
+  .rel-card .rel-body { padding:0 1rem 1rem; font-size:0.82rem; color:var(--text-secondary); line-height:1.6; }
+  .arc-item { border-left:3px solid var(--accent); padding:0.6rem 1rem; margin-bottom:0.75rem; background:rgba(66,165,245,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+  .arc-item strong { color:var(--text-primary); }
+  .question-box { border:2px solid var(--knowledge); background:rgba(91,155,213,0.05); border-radius:var(--radius-md); padding:1.5rem; text-align:center; margin:2rem 0; }
+  .question-box blockquote { border:none; margin:0; padding:0; }
+  .question-box p { font-size:1rem; font-weight:510; color:var(--text-primary); }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; margin-bottom:1rem; }
+  th { text-transform:uppercase; font-size:0.72rem; font-weight:510; color:var(--text-quaternary); letter-spacing:0.04em; text-align:left; padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-default); }
+  td { padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-subtle); vertical-align:top; color:var(--text-secondary); }
+  tr:hover td { background:var(--bg-elevated); }
+  .url-col { max-width:200px; word-break:break-all; }
+  .zh { display:block; font-size:0.85em; color:var(--text-tertiary); margin-top:0.15em; }
+  .zh-inline { font-size:0.85em; color:var(--text-tertiary); }
+  details { border:1px solid var(--border-subtle); background:var(--bg-elevated); border-radius:var(--radius-sm); padding:0; margin-bottom:0.75rem; }
+  details summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  details[open] summary { color:var(--accent); }
+  details > div, details > p { padding:0 1rem 1rem; font-size:0.82rem; line-height:1.6; color:var(--text-secondary); }
+  body.embedded .sidebar, body.embedded .notes-sidebar, body.embedded .hamburger-btn, body.embedded .notes-toggle-btn { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+  .importance { color:var(--accent); font-weight:590; }
+  .source-tag { display:inline-block; padding:0.1rem 0.35rem; border-radius:3px; font-size:0.65rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); margin-right:0.3rem; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ========== LEFT SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Satoshi Nakamoto<br>素材策展地图 V4</div>
+
+    <h4>Contents</h4>
+    <nav>
+      <ul>
+        <li><a href="#priority"><span class="toc-num">&#9733;</span>如果只有2小时</a></li>
+        <li><a href="#analysts"><span class="toc-num">1</span>最佳分析师</a></li>
+        <li><a href="#longform"><span class="toc-num">2</span>必读长文/书籍</a></li>
+        <li><a href="#podcasts"><span class="toc-num">3</span>播客与视频</a></li>
+        <li><a href="#primary"><span class="toc-num">4</span>一手资料</a></li>
+        <li><a href="#relationships"><span class="toc-num">5</span>关键关系网</a></li>
+        <li><a href="#narratives"><span class="toc-num">6</span>叙事弧</a></li>
+        <li><a href="#gaps"><span class="toc-num">7</span>信息空白</a></li>
+        <li><a href="#quality"><span class="toc-num">8</span>质量评估</a></li>
+      </ul>
+    </nav>
+
+    <h4>Related</h4>
+    <nav>
+      <ul>
+        <li><a href="19_satoshi_nakamoto.html">Satoshi Nakamoto Profile</a></li>
+        <li><a href="19_satoshi_metacognition.html">Metacognition</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+
+    <div class="top-controls">
+      <span class="tc-label">&#128218; 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <header class="page-header">
+      <h1>Satoshi Nakamoto — 素材策展地图 V4</h1>
+      <p class="subtitle">Research Date: 2026-03-22 &nbsp;|&nbsp; 18 Sources · 6 Categories · 5 Key Relationships<br>
+      <span class="zh-inline">中本聪 — 比特币创始人 · 史上最大未解身份之谜</span></p>
+      <div class="badge-row">
+        <span class="badge bg-orange">&#9679; 最高优先级</span>
+        <span class="badge bg-blue">&#9679; 身份谜题</span>
+        <span class="badge bg-green">&#9679; 一手资料丰富</span>
+      </div>
+    </header>
+
+    <!-- ★ Priority Box -->
+    <div class="priority-box" id="priority">
+      <h2>&#9200; 如果只有2小时 — 推荐阅读路径</h2>
+      <ol>
+        <li><span class="time-badge">30min</span><strong>Bitcoin Whitepaper</strong> — 先读原版白皮书，理解Satoshi的设计意图</li>
+        <li><span class="time-badge">45min</span><strong>The Book of Satoshi</strong> — 通读Satoshi所有公开言论，掌握其思想演变</li>
+        <li><span class="time-badge">30min</span><strong>Sergio Lerner (Patoshi)</strong> — 了解链上分析如何揭示Satoshi的挖矿行为模式</li>
+        <li><span class="time-badge">15min</span><strong>What Bitcoin Did Podcast</strong> — 听早期参与者的回忆，从人的维度理解历史</li>
+      </ol>
+    </div>
+
+    <!-- §1 最佳分析师 -->
+    <section id="analysts">
+      <div class="section-header">
+        <h2>1. 最佳分析师与独立研究<span class="zh">Best Analysts &amp; Independent Research</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Name / 名称</th>
+            <th>Type / 类型</th>
+            <th>URL</th>
+            <th>Importance / 重要性</th>
+            <th>Summary / 简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Sergio Demian Lerner</td>
+            <td><span class="source-tag">Analyst</span></td>
+            <td class="url-col"><a href="https://bitslog.com/" target="_blank">bitslog.com ↗</a></td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>"Patoshi模式"发现者，通过分析挖矿模式识别出Satoshi约100万BTC的持仓，是Satoshi持仓研究最权威的来源</td>
+          </tr>
+          <tr>
+            <td>Chainalysis</td>
+            <td><span class="source-tag">Company</span></td>
+            <td class="url-col"><a href="https://www.chainalysis.com/" target="_blank">chainalysis.com ↗</a></td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>专业链上分析公司，持续监控Satoshi相关地址的活动，是执法部门的重要参考</td>
+          </tr>
+          <tr>
+            <td>OXT Research</td>
+            <td><span class="source-tag">Research</span></td>
+            <td class="url-col"><a href="https://oxt.me/" target="_blank">oxt.me ↗</a></td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>开源链上分析工具，Satoshi早期挖矿可视化研究，数据透明可信</td>
+          </tr>
+          <tr>
+            <td>Bitslog Blog</td>
+            <td><span class="source-tag">Blog</span></td>
+            <td class="url-col"><a href="https://bitslog.wordpress.com/" target="_blank">wordpress ↗</a></td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>Lerner的持续研究更新，包括2013-2014年的系列文章，深度技术分析</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §2 必读长文/书籍 -->
+    <section id="longform">
+      <div class="section-header">
+        <h2>2. 必读长文与书籍<span class="zh">Must-Read Long-Form &amp; Books</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Title / 标题</th>
+            <th>Type / 类型</th>
+            <th>URL</th>
+            <th>Importance / 重要性</th>
+            <th>Summary / 简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Digital Gold / 《数字黄金》</td>
+            <td><span class="source-tag">Book</span></td>
+            <td class="url-col"><a href="https://www.amazon.com/Digital-Gold-Bitcoin-Millionaires-Reinvent/dp/006236250X" target="_blank">Amazon ↗</a></td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>Nathaniel Popper著，最权威的比特币历史叙事，详述Satoshi时代背景</td>
+          </tr>
+          <tr>
+            <td>The Book of Satoshi / 《中本聪之书》</td>
+            <td><span class="source-tag">Book</span></td>
+            <td class="url-col"><a href="https://www.bookofsatoshi.com/" target="_blank">bookofsatoshi.com ↗</a></td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>Phil Champagne编，收录Satoshi所有公开邮件和论坛帖子，一手资料合集</td>
+          </tr>
+          <tr>
+            <td>The Cypherpunks / 《密码朋克》</td>
+            <td><span class="source-tag">Book</span></td>
+            <td class="url-col">—</td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>理解Satoshi思想背景必读，包括Tim May、Eric Hughes等先驱的密码朋克运动</td>
+          </tr>
+          <tr>
+            <td>Mastering Bitcoin / 《精通比特币》</td>
+            <td><span class="source-tag">Book</span></td>
+            <td class="url-col"><a href="https://github.com/bitcoinbook/bitcoinbook" target="_blank">GitHub ↗</a></td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>Andreas Antonopoulos著，技术层面理解Satoshi设计决策的最佳指南</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §3 播客与视频 -->
+    <section id="podcasts">
+      <div class="section-header">
+        <h2>3. 播客与视频<span class="zh">Podcasts &amp; Video</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Name / 名称</th>
+            <th>Type / 类型</th>
+            <th>URL</th>
+            <th>Importance / 重要性</th>
+            <th>Summary / 简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>What Bitcoin Did</td>
+            <td><span class="source-tag">Podcast</span></td>
+            <td class="url-col"><a href="https://www.whatbitcoindid.com/" target="_blank">whatbitcoindid.com ↗</a></td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>Peter McCormack的多期节目，深度访谈了解Satoshi时代的人，第一手口述历史</td>
+          </tr>
+          <tr>
+            <td>Stephan Livera Podcast</td>
+            <td><span class="source-tag">Podcast</span></td>
+            <td class="url-col"><a href="https://stephanlivera.com/" target="_blank">stephanlivera.com ↗</a></td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>多次讨论Satoshi设计哲学和遗产，从经济学角度解读比特币</td>
+          </tr>
+          <tr>
+            <td>Nakamoto Institute (YouTube)</td>
+            <td><span class="source-tag">Video</span></td>
+            <td class="url-col"><a href="https://www.youtube.com/@NakamotoInstitute" target="_blank">YouTube ↗</a></td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>相关学术演讲和历史资料，保存Satoshi思想遗产</td>
+          </tr>
+          <tr>
+            <td>律动BlockBeats</td>
+            <td><span class="source-tag">CN Media</span></td>
+            <td class="url-col"><a href="https://www.theblockbeats.info/" target="_blank">theblockbeats.info ↗</a></td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>中国头部加密媒体，有Satoshi历史专题，中文世界的重要参考</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §4 一手资料 -->
+    <section id="primary">
+      <div class="section-header">
+        <h2>4. 一手资料<span class="zh">Primary Sources</span></h2>
+      </div>
+      
+      <details>
+        <summary>Bitcoin Whitepaper (2008) — 创世白皮书</summary>
+        <div>
+          <p><strong>The Cryptography Mailing List, October 31, 2008</strong></p>
+          <p>Satoshi Nakamoto宣布比特币诞生的9页论文，引用了B-money (Wei Dai) 和 Hashcash (Adam Back) 的工作，提出了一个点对点的电子现金系统。<mark class="hl-know" data-note="note-primary-1">这是理解Satoshi设计意图的最权威起点。</mark></p>
+          <p>URL: <a href="https://bitcoin.org/bitcoin.pdf" target="_blank">bitcoin.org/bitcoin.pdf ↗</a></p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Satoshi Nakamoto Institute — 档案库</summary>
+        <div>
+          <p>最完整的Satoshi公开言论档案库，由Pierre Rachet创建并维护。包含：</p>
+          <ul>
+            <li>所有Bitcointalk论坛帖子 (2009-2010)</li>
+            <li>所有Cryptography邮件列表通信</li>
+            <li>P2P Foundation帖子</li>
+            <li>SourceForge代码提交记录</li>
+          </ul>
+          <p>URL: <a href="https://satoshi.nakamotoinstitute.org/" target="_blank">satoshi.nakamotoinstitute.org ↗</a><mark class="hl-know" data-note="note-primary-2"> 这是研究Satoshi言行不可替代的权威来源。</mark></p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Genesis Block — 创世区块</summary>
+        <div>
+          <p>2009年1月3日挖出的第一个区块，包含《泰晤士报》的标题："Chancellor on brink of second bailout for banks"（财政大臣正处于第二轮银行纾困的边缘）。</p>
+          <p><mark class="hl-know" data-note="note-primary-3">这是比特币与现实世界连接的第一次时间戳，不可篡改的历史证据。</mark></p>
+          <p>Block Hash: 000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Bitcointalk.org — 早期论坛存档</summary>
+        <div>
+          <p>Satoshi亲自创建并发帖的论坛，2009-2010年活动记录。Satoshi在该论坛的ID是 "satoshi"，于2009年11月22日注册。</p>
+          <p>URL: <a href="https://bitcointalk.org/index.php?topic=5.0" target="_blank">bitcointalk.org ↗</a></p>
+        </div>
+      </details>
+
+      <details>
+        <summary>SourceForge / GitHub 早期代码</summary>
+        <div>
+          <p>原始代码提交记录，Satoshi作为维护者的技术轨迹。可以看到从0.1.0版本到0.3.24 (2011年4月) 的所有提交。</p>
+          <p>URL: <a href="https://github.com/bitcoin/bitcoin" target="_blank">GitHub ↗</a></p>
+        </div>
+      </details>
+    </section>
+
+    <!-- §5 关键关系网 -->
+    <section id="relationships">
+      <div class="section-header">
+        <h2>5. 关键关系网<span class="zh">Key Relationships</span></h2>
+      </div>
+
+      <details class="rel-card" open>
+        <summary>Hal Finney — 最密切的合作者 / Closest Collaborator</summary>
+        <div class="rel-body">
+          <p><strong>关系强度：⭐⭐⭐⭐⭐</strong></p>
+          <p>密码学家、开发商，2009年1月12日收到Satoshi发送的第一笔比特币交易。2014年因渐冻症去世。</p>
+          <p><mark class="hl-know" data-note="note-rel-1">Hal Finney曾被长期怀疑是Satoshi本人，但他本人多次否认，死后家人也证实他并非中本聪。</mark></p>
+          <p>关键贡献：参与比特币代码审查、帮助Satoshi处理早期技术问题、构建了RPOW系统。</p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>Gavin Andresen — 指定的继任者 / Designated Successor</summary>
+        <div class="rel-body">
+          <p><strong>关系强度：⭐⭐⭐⭐⭐</strong></p>
+          <p>Satoshi于2010年将代码库维护权限移交给Gavin。2010-2011年间是唯一与Satoshi有直接邮件往来的人。</p>
+          <p><mark class="hl-know" data-note="note-rel-2">Gavin后来成为比特币社区的重要声音，但在2016年因支持比特币XT分叉而与Core团队分道扬镳。</mark></p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>Nick Szabo — 思想先驱 / Intellectual Precursor</summary>
+        <div class="rel-body">
+          <p><strong>关系强度：⭐⭐⭐⭐☆</strong></p>
+          <p>"智能合约"概念提出者，Bit Gold设计者（1998年）。Satoshi在白皮书中引用了他的工作。</p>
+          <p><mark class="hl-know" data-note="note-rel-3">Nick Szabo是Satoshi身份的主要猜测对象之一，但缺乏直接证据。</mark></p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>Wei Dai — 理论奠基 / Theoretical Foundation</summary>
+        <div class="rel-body">
+          <p><strong>关系强度：⭐⭐⭐⭐☆</strong></p>
+          <p>B-money提出者（1998年），Satoshi在白皮书参考文献中提及。两人有过邮件往来。</p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>Adam Back — 技术桥梁 / Technical Bridge</summary>
+        <div class="rel-body">
+          <p><strong>关系强度：⭐⭐⭐⭐☆</strong></p>
+          <p>Hashcash发明者（1997年），比特币工作量证明的基础。2015年创立Blockstream。</p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>Craig Wright — 争议人物 / Controversial Figure</summary>
+        <div class="rel-body">
+          <p><strong>关系强度：⭐⭐☆☆☆</strong></p>
+          <p>澳大利亚计算机学家，自2016年起自称Satoshi。引发众多法律诉讼，但主流学界和社区普遍不接受其声称。</p>
+          <p><mark class="hl-know" data-note="note-rel-4">Wright的案例说明了一个关键问题：在密码学世界，证明身份需要的是密钥而非法律文件。</mark></p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>Dorian Nakamoto — 错误指认 / Mistaken Identity</summary>
+        <div class="rel-body">
+          <p><strong>关系强度：⭐⭐☆☆☆</strong></p>
+          <p>2014年Newsweek的错误报道将其指认为Satoshi，实际是完全无关的日裔美国人工程师。</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- §6 叙事弧 -->
+    <section id="narratives">
+      <div class="section-header">
+        <h2>6. 关键叙事弧<span class="zh">Key Narrative Arcs</span></h2>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧 #1: 从密码朋克到比特币</strong>
+        <p>理解Satoshi必须理解其思想谱系：David Chaum的盲签名 → Wei Dai的B-money → Nick Szabo的Bit Gold → Adam Back的Hashcash → Bitcoin。这一脉络展示了Satoshi如何在前人基础上实现了关键突破。</p>
+        <p><mark class="hl-know" data-note="note-arc-1">关键洞察：Satoshi不是凭空创造，而是"站在巨人肩膀上"的系统性整合。</mark></p>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧 #2: 消失的艺术家</strong>
+        <p>Satoshi于2010年12月12日在Bitcointalk发布最后一个技术帖子后逐渐淡出。2011年4月最后一次代码提交后完全消失。这种"优雅退出"是历史上最完美的公关——留下一个永远无法被攻击的匿名者。</p>
+        <p><mark class="hl-know" data-note="note-arc-2">时间线：2010年12月(最后公开论坛发言) → 2011年4月(最后代码提交) → 2014年( Dorian新闻周刊事件) → 至今(仍未现身)</mark></p>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧 #3: 匿名即战略资产</strong>
+        <p>Satoshi选择匿名的动机：防止政府打压、避免成为"单点故障"、让比特币去中心化属性不受创始人个人影响。这与中世纪隐士数学家（如发现群论的伽罗瓦）有异曲同工之妙。</p>
+        <p><mark class="hl-know" data-note="note-arc-3">战略悖论：越是匿名，越显得重要；越是不露面，越多人追寻。这种"稀缺性注意力"成为比特币神话的核心。</mark></p>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧 #4: 100万BTC的沉默</strong>
+        <p>根据链上分析，Satoshi在2009年挖出约100万BTC，至今未动。这笔财富在2021年峰值时价值超过600亿美元，但从未转移。</p>
+        <p><mark class="hl-know" data-note="note-arc-4">这成为证明Satoshi身份的唯一"验钞机"：如果有人能移动这些币，那几乎可以肯定是中本聪本人。</mark></p>
+      </div>
+
+      <div class="question-box">
+        <blockquote>
+          <p>❓ 如果Satoshi重返江湖，他/她会对比特币的现状说什么？</p>
+        </blockquote>
+      </div>
+    </section>
+
+    <!-- §7 信息空白 -->
+    <section id="gaps">
+      <div class="section-header">
+        <h2>7. 信息空白 — What Doesn't Exist<span class="zh">Information Gaps</span></h2>
+      </div>
+
+      <details>
+        <summary>真实身份 — Ultimate Unknown</summary>
+        <div>
+          <p><strong>重要性：⭐⭐⭐⭐⭐</strong></p>
+          <p>姓名、国籍、年龄、是否在世、单人或团队——全部未知。这不是信息缺失，而是<b>刻意隐瞒</b>。</p>
+          <p><mark class="hl-know" data-note="note-gap-1">语言学分析：Satoshi使用英式拼写（"colour"）但有美式表达习惯，时区分析指向欧洲或东亚，这些线索反而增加了谜团。</mark></p>
+        </div>
+      </details>
+
+      <details>
+        <summary>早期挖矿私钥 — The 1M BTC Question</summary>
+        <div>
+          <p><strong>重要性：⭐⭐⭐⭐⭐</strong></p>
+          <p>~100万BTC的控制权归属，是证明身份的唯一确凿方式。Satoshi从未动用过这些币。</p>
+          <p><mark class="hl-know" data-note="note-gap-2">战略沉默：不动用这些币，恰恰证明Satoshi可能已去世，或选择了永久退出。</mark></p>
+        </div>
+      </details>
+
+      <details>
+        <summary>动机与背景 — Motivation</summary>
+        <div>
+          <p><strong>重要性：⭐⭐⭐⭐☆</strong></p>
+          <p>为何创造比特币？个人经历？密码朋克运动中的具体角色？这些问题只能通过间接证据推测。</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>技术来源整合 — Technical Lineage</summary>
+        <div>
+          <p><strong>重要性：⭐⭐⭐⭐☆</strong></p>
+          <p>具体如何整合Hashcash、B-money、时间戳等前作？白皮书9页背后的思考过程如何？</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>2010年后去向 — Post-2010 Activities</summary>
+        <div>
+          <p><strong>重要性：⭐⭐⭐⭐☆</strong></p>
+          <p>是否关注比特币发展？是否持有其他加密资产？是否从事其他项目？完全未知。</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>中文世界零记录 — No Chinese Records</summary>
+        <div>
+          <p><strong>重要性：⭐⭐☆☆☆</strong></p>
+          <p>Satoshi从未与中国社区直接互动，中文信息全部为二手翻译。这反映了2009-2010年比特币的极小众性质。</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- §8 质量评估 -->
+    <section id="quality">
+      <div class="section-header">
+        <h2>8. 素材质量评估<span class="zh">Source Quality Assessment</span></h2>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>类别 / Category</th>
+            <th>质量评级 / Quality</th>
+            <th>说明 / Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>一手资料 (Primary Sources)</td>
+            <td><span class="importance">★★★★★ 极高</span></td>
+            <td>Bitcoin白皮书、Satoshi Nakamoto Institute档案、GitHub代码——都是第一手、完整、可验证的</td>
+          </tr>
+          <tr>
+            <td>链上分析 (On-chain Analysis)</td>
+            <td><span class="importance">★★★★☆ 高</span></td>
+            <td>Sergio Lerner的Patoshi研究方法论透明，但结论仍有部分推测成分</td>
+          </tr>
+          <tr>
+            <td>书籍/长文 (Books/Long-form)</td>
+            <td><span class="importance">★★★★☆ 高</span></td>
+            <td>"Digital Gold"和"Book of Satoshi"都是权威作品，但叙事类书籍存在作者偏见</td>
+          </tr>
+          <tr>
+            <td>媒体采访 (Media Interviews)</td>
+            <td><span class="importance">★★★☆☆ 中</span></td>
+            <td>What Bitcoin Did等播客提供口述历史，但回忆录性质的内容需交叉验证</td>
+          </tr>
+          <tr>
+            <td>身份猜测 (Identity Speculation)</td>
+            <td><span class="importance">★★☆☆☆ 低</span></td>
+            <td>Craig Wright事件警示：任何声称都能被质疑，唯有链上行动可验证</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="question-box">
+        <blockquote>
+          <p>❓ 核心判断准则：如果一个人声称是中本聪，能否移动那100万BTC？</p>
+        </blockquote>
+      </div>
+    </section>
+
+    <footer style="margin-top:3rem; padding-top:1rem; border-top:1px solid var(--border-subtle); font-size:0.72rem; color:var(--text-quaternary);">
+      <p>Generated: 2026-03-22 &middot; V4 Template &middot; <a href="../blockchain_hub.html">Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ========== RIGHT SIDEBAR (Notes) ========== -->
+  <aside class="notes-sidebar ns-closed" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&times;</button>
+      <h4 style="font-size:0.7rem; font-weight:590; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-quaternary); margin:0;">&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+
+    <!-- Meta Notes -->
+    <div class="anno meta-note" id="note-meta-1" data-section="priority">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">优先级悖论</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>「如果只有2小时」这个设计看似实用，实则揭示了一个悖论：Satoshi研究的深度与时间投入呈指数关系，而非线性。</p>
+        <p>2小时只能触及皮毛，2周才能理解轮廓，2年才能真正内化其思想遗产。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-meta-2" data-section="analysts">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">分析师等级划分</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Lerner vs Chainalysis 的区别：前者是独立研究者，后者是商业公司。前者公开方法论，后者保密数据源。</p>
+        <p>对于Satoshi研究而言，Chainalysis的数据虽权威，但他们的结论通常不会公开分享。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-meta-3" data-section="longform">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">书籍的时间窗口</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>"Digital Gold"出版于2015年，"The Book of Satoshi"出版于2014年。这些书籍记录的是2015年之前的比特币史。</p>
+        <p>2021年之后的比特币生态巨变（DeFi, NFT, 机构采用）需要更新的资料来补充。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-meta-4" data-section="podcasts">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">口述历史的陷阱</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>What Bitcoin Did的价值在于口述历史，但参与者的记忆会随时间扭曲。</p>
+        <p>2019年的采访 vs 2009年当时的事实，中间可能有10年的重构偏差。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-meta-5" data-section="primary">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">一手资料的不可篡改性</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>白皮书、创世区块、GitHub提交记录——这些是真正"防篡改"的历史记录。</p>
+        <p>任何人都可以声称自己是中本聪，但没有人可以伪造2009年的代码提交时间戳。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-meta-6" data-section="relationships">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">关系网络的筛选逻辑</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>为什么Hal Finney放在第一位？因为他是唯一有真实姓名、真实故事、真实死亡记录的"疑似Satoshi"。</p>
+        <p>这本身就说明：真正的Satoshi连死亡都可以保持匿名。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-meta-7" data-section="narratives">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">叙事弧的方法论</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>叙事弧不是"故事"，而是分析框架。每个弧都代表一种研究视角：</p>
+        <p>1=思想史 2=传播学 3=战略分析 4=链上证据</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-meta-8" data-section="gaps">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">空白即资产</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Satoshi身份的空白不是"缺失"，而是比特币系统的战略资产。</p>
+        <p>匿名=不可逮捕+不可施压+无单点故障。这是Satoshi设计的一部分。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-meta-9" data-section="quality">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">质量评估的元问题</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>最高质量的一手资料 + 最低质量的"身份猜测" = 这个领域的信息不对称极端化。</p>
+        <p>结论：相信链上分析 > 相信任何人的声称。</p>
+      </div>
+    </div>
+
+    <!-- Knowledge Notes -->
+    <div class="anno know-note" id="note-primary-1" data-section="primary">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">白皮书的核心贡献</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Satoshi解决的不是"数字货币"的技术问题，而是"双花"的博弈论问题。</p>
+        <p>工作量证明 + 时间戳服务器 = 去中心化共识。这是前人没有解决的关键突破。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-primary-2" data-section="primary">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">Satoshi Nakamoto Institute的价值</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>该档案库由Pierre Rachet维护，他花费数年时间从各种论坛存档中收集Satoshi的发言。</p>
+        <p>没有他，很多早期资料可能已经丢失。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-primary-3" data-section="primary">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">创世区块的政治隐喻</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>嵌入《泰晤士报》标题不是随机选择，而是一个精确的政治声明：比特币是对传统金融系统的批判。</p>
+        <p>这是区块链的"创世纪故事"，无法被修改或删除。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-rel-1" data-section="relationships">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">Hal Finney的技术贡献</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Finney的RPOW（可重用工作量证明）系统是比特币的直接前身。他是最早理解Satoshi设计意图的人之一。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-rel-2" data-section="relationships">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">Gavin Andresen的后续</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Gavin在2020年宣布不再参与比特币开发，专注于他的比特币基金会工作。他的退出反映了比特币治理的复杂性。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-rel-3" data-section="relationships">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">Nick Szabo的理论贡献</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Szabo的"高度可信的计算"概念和Bit Gold设计，与比特币有惊人的相似性。他可能是最重要的思想来源之一。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-rel-4" data-section="relationships">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">Craig Wright的法律战</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Wright对多名比特币开发者发起诉讼，试图通过法律手段迫使他们承认他是中本聪。这些诉讼大多以败诉或撤诉告终。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-arc-1" data-section="narratives">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">密码朋克的历史脉络</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>密码朋克运动的核心信念：密码学是保护个人自由的关键武器。Satoshi继承了这种精神，但选择了不同的实现路径。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-arc-2" data-section="narratives">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">消失的时间线细节</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Satoshi最后发送的邮件给Gavin Andresen是在2011年4月26日，内容是关于比特币版本0.3.11的一个小bug修复建议。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-arc-3" data-section="narratives">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">匿名的战略价值</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>在比特币之前，没有发明家选择完全匿名并成功。这开创了一个先例：让思想超越发明家本身。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-arc-4" data-section="narratives">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">100万BTC的链上证据</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Lerner的Patoshi分析显示，这些币被以特定的nonce模式挖掘，与其他早期矿工的行为模式完全不同。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-gap-1" data-section="gaps">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">语言分析的局限性</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>语言学分析只能说明"写作风格"，不能证明"真实身份"。Satoshi完全可能故意混淆这些线索。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-gap-2" data-section="gaps">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">沉默的解读</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>不动用100万BTC可以有多种解读：已去世、密钥丢失、或故意保持沉默以免影响市场。无论哪种，都增加了神秘感。</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+// === Sidebar toggle (mobile) ===
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+
+// === Notes sidebar toggle ===
+(function(){
+  var btn=document.getElementById("notesToggleBtn"),ns=document.getElementById("notesSidebar"),ov=document.getElementById("notesOverlay"),cb=document.getElementById("notesCloseBtn");
+  if(!btn||!ns)return;
+  function toggle(){ns.classList.toggle("ns-closed");ov.classList.toggle("open");}
+  btn.onclick=toggle;
+  if(ov)ov.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(cb)cb.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(window.innerWidth>1200)ns.classList.remove("ns-closed");
+  window.addEventListener("resize",function(){if(window.innerWidth>1200)ns.classList.remove("ns-closed");});
+})();
+
+// === Toggle note ===
+function toggleNote(head){
+  var anno=head.closest(".anno");
+  if(anno){anno.classList.toggle("open");positionNotes();}
+}
+
+// === Position notes ===
+function positionNotes(){
+  var ns=document.getElementById("notesSidebar");if(!ns)return;
+  var annos=ns.querySelectorAll(".anno");
+  var lastBottom=80;
+  annos.forEach(function(a){
+    if(a.style.display==="none")return;
+    var sec=a.getAttribute("data-section");
+    var target=sec?document.getElementById(sec):null;
+    var top=target?target.getBoundingClientRect().top+window.scrollY-ns.getBoundingClientRect().top:lastBottom;
+    if(top<lastBottom)top=lastBottom;
+    a.style.top=top+"px";
+    lastBottom=top+a.offsetHeight+8;
+  });
+}
+
+// === Knowledge toggle ===
+function toggleKnowNotes(){
+  var btn=document.getElementById("knowToggleBtn");
+  var knowNotes=document.querySelectorAll(".anno.know-note");
+  var marks=document.querySelectorAll("mark.hl-know");
+  var nrefs=document.querySelectorAll(".nref");
+  var visible=btn.classList.contains("active");
+  knowNotes.forEach(function(n){n.style.display=visible?"none":"";});
+  marks.forEach(function(m){m.style.background=visible?"transparent":"";m.style.borderBottom=visible?"none":"";});
+  nrefs.forEach(function(r){r.style.display=visible?"none":"";});
+  btn.classList.toggle("active");
+  btn.textContent=visible?"显示":"隐藏";
+  positionNotes();
+}
+
+// === Expand / Collapse all ===
+function expandAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.add("open");});positionNotes();}
+function collapseAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.remove("open");});positionNotes();}
+
+// === Note count ===
+(function(){
+  var label=document.getElementById("noteCountLabel");if(!label)return;
+  var meta=document.querySelectorAll(".anno.meta-note").length;
+  var know=document.querySelectorAll(".anno.know-note").length;
+  label.textContent=meta+" META + "+know+" Knowledge";
+})();
+
+// === Highlight → Note sync ===
+document.addEventListener("click",function(e){
+  var mark=e.target.closest("mark.hl-know")||e.target.closest(".nref");
+  if(!mark)return;
+  var noteId=mark.getAttribute("data-note");if(!noteId)return;
+  var anno=document.getElementById(noteId);if(!anno)return;
+  anno.classList.add("open");
+  anno.scrollIntoView({behavior:"smooth",block:"center"});
+  anno.classList.add("flash");
+  setTimeout(function(){anno.classList.remove("flash");},1500);
+  positionNotes();
+});
+
+// === Embedded mode ===
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+  document.addEventListener("click",function(e){
+    var a=e.target.closest("a");if(!a||!a.href)return;
+    try{var url=new URL(a.href,location.href)}catch(err){return}
+    if(url.pathname.startsWith("/trade-pipeline/")||url.pathname.startsWith("/observatory/")){
+      e.preventDefault();
+      window.top.postMessage({type:"dashboard-nav",action:"openResearch",url:url.pathname,title:a.textContent.trim().substring(0,60)},"*");
+    }
+  });
+})();
+
+// Initial positioning
+window.addEventListener("load",function(){positionNotes();});
+window.addEventListener("scroll",function(){positionNotes();});
+</script>
+</body>
+</html>

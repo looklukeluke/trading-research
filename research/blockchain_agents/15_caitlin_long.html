@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Caitlin Long — 认知代理人报告</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="../blockchain_shared.css">
+  <style>
+    /* === Page-specific overrides (under 80 lines) === */
+    .banking-accent { color: #2196f3; }
+    .banking-accent-dim { background: rgba(33, 150, 243, 0.12); }
+
+    .banking-card {
+      border: 1px solid rgba(33, 150, 243, 0.3);
+      border-left: 3px solid #2196f3;
+      border-radius: var(--radius-sm);
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      background: var(--bg-surface);
+    }
+    .banking-card h4 { color: #2196f3; margin-top: 0; font-size: 0.95rem; }
+
+    .chokepoint-alert {
+      border: 2px solid #ff5722;
+      border-radius: var(--radius-sm);
+      padding: 1.25rem;
+      margin: 1.5rem 0;
+      background: rgba(255, 87, 34, 0.05);
+    }
+    .chokepoint-alert h4 {
+      color: #ff5722;
+      margin-top: 0;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .timeline-step {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      padding: 0.8rem 1rem;
+      border-left: 3px solid var(--border-default);
+      background: var(--bg-elevated);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
+    .timeline-step.highlight { border-left-color: #2196f3; }
+    .timeline-step.denied { border-left-color: #f44336; }
+    .timeline-step .step-year {
+      min-width: 60px;
+      font-weight: 680;
+      color: var(--accent);
+      font-size: 0.85rem;
+    }
+    .timeline-step .step-text { flex: 1; }
+
+    .regulatory-tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      background: rgba(33, 150, 243, 0.15);
+      color: #2196f3;
+      font-weight: 590;
+      margin-right: 0.3rem;
+    }
+
+    .denied-tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      background: rgba(244, 67, 54, 0.15);
+      color: var(--tier-low);
+      font-weight: 590;
+      margin-right: 0.3rem;
+    }
+
+    .advocacy-tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      background: rgba(76, 175, 80, 0.15);
+      color: var(--tier-high);
+      font-weight: 590;
+      margin-right: 0.3rem;
+    }
+    /* Embedded + Reading mode */
+    body.embedded .sidebar { display: none !important; }
+    body.embedded .notes-sidebar { display: none !important; }
+    body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+    body.embedded .hamburger-btn { display: none !important; }
+    .reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+    .reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+    .reading-mode .hamburger-btn { display: none !important; }
+  </style>
+</head>
+<body>
+<nav style="position:sticky;top:0;z-index:999;background:rgba(8,9,10,0.95);backdrop-filter:blur(8px);padding:0.5rem 1.5rem;border-bottom:1px solid #23252a;font-family:Inter,-apple-system,system-ui,sans-serif;font-size:0.78rem;display:flex;gap:1rem;align-items:center;"><a href="../blockchain_hub.html" style="color:#f8a848;text-decoration:none;">&larr; Blockchain Hub</a><span style="color:#62666d;">&middot;</span><span style="color:#8a8f98;">Agent #15</span><span style="color:#62666d;">&middot;</span><span style="color:#2196f3;">Custodia Bank</span></nav>
+
+<!-- Hamburger button (mobile) -->
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Notes sidebar toggle + overlay -->
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes sidebar">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- Sidebar TOC -->
+  <aside class="sidebar" id="sidebar">
+    <a class="back-link" href="../blockchain_hub.html">&larr; Blockchain Hub</a>
+    <h4>目录导航</h4>
+    <nav>
+      <ul>
+        <li><a href="#summary"><span class="toc-num">&#9733;</span>速览摘要</a></li>
+        <li><a href="#why"><span class="toc-num">1</span>选择理由</a></li>
+        <li><a href="#actions"><span class="toc-num">2</span>行动证据</a></li>
+        <li><a href="#judgment"><span class="toc-num">3</span>核心判断</a></li>
+        <li><a href="#chokepoint"><span class="toc-num">4</span>Operation Chokepoint 2.0</a></li>
+        <li><a href="#trading"><span class="toc-num">5</span>交易含义</a></li>
+        <li><a href="#risk"><span class="toc-num">6</span>风险信号</a></li>
+        <li><a href="#provenance"><span class="toc-num">7</span>Provenance</a></li>
+      </ul>
+    </nav>
+    <h4 style="margin-top:1rem;">Agent 信息</h4>
+    <nav>
+      <ul>
+        <li><a href="#" style="color:var(--text-quaternary);">Node: N8 监管</a></li>
+        <li><a href="#" style="color:var(--text-quaternary);">Tier: B档 3/5</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+
+    <!-- Header -->
+    <header class="page-header">
+      <div class="role-badge">REGULATORY PIONEER</div>
+      <h1>Caitlin Long</h1>
+      <p class="subtitle">CEO, Custodia Bank &nbsp;|&nbsp; N8 监管节点 &nbsp;|&nbsp; 2026-03-22<br>
+      <span style="color:var(--text-quaternary);font-size:0.85em;">认知代理人报告 — Cognitive Agent Profile</span></p>
+      <div class="badge-row">
+        <span class="badge">B档 3/5</span>
+        <span class="badge">Wyoming SPDI</span>
+        <span class="badge">Fed Master Account</span>
+        <span class="badge">Chokepoint 2.0</span>
+        <span class="badge">Banking Access</span>
+      </div>
+    </header>
+
+    <!-- Top Controls -->
+    <div class="top-controls">
+      <span class="tc-label">&#129504; 元思考批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <!-- Priority Box -->
+    <div class="priority-box" id="summary">
+      <h2>&#9200; 速览摘要 — 60秒理解 Caitlin Long</h2>
+      <ol>
+        <li><strong>加密银行准入先驱</strong>：<mark class="hl-know" data-note="k1">推动Wyoming SPDI银行法</mark><sup class="nref" data-note="k1">K</sup>，为加密公司创建合法银行通道。Custodia Bank是这个愿景的实体化</li>
+        <li><strong>Fed对抗者</strong>：Custodia申请美联储主账户被拒——这一拒绝<strong>暴露了Fed的反加密偏见</strong>，成为Operation Chokepoint 2.0的标志性事件</li>
+        <li><strong>Operation Chokepoint 2.0 吹哨人</strong>：公开记录并曝光联邦监管机构系统性阻止加密公司获取银行服务的行为</li>
+        <li><strong>核心判断</strong>："The biggest barrier to crypto adoption is banking access, not technology." 银行准入才是最大瓶颈</li>
+        <li><strong>交易含义</strong>：<span class="signal signal-watch">WATCH</span> 不可直接投资。她的战斗是银行体系对加密开放度的领先指标</li>
+      </ol>
+    </div>
+
+    <!-- Section 1: Why -->
+    <section id="why">
+      <div class="section-header">
+        <h2>1. 选择理由 — Why This Agent</h2>
+      </div>
+      <p>Caitlin Long 代表了加密行业中一个常被忽视但至关重要的战线：<strong>传统银行系统的准入</strong>。技术可以无限创新，但如果加密公司无法开设银行账户、无法接入支付系统，所有创新都将被困在自己的围墙花园里。</p>
+      <p><strong>节点归属</strong>：N8（监管/政策）。Long的工作直接影响加密行业与传统金融系统的交界面。</p>
+      <p><strong>Tier B档 3/5</strong>：虽然不可直接投资，但她的监管战斗是整个行业的领先指标。Fed拒绝Custodia主账户的事件是理解美国加密监管的必读案例。</p>
+
+      <h3>背景：从华尔街到加密银行</h3>
+      <ul>
+        <li>22年华尔街经验（Morgan Stanley, Credit Suisse），理解传统金融体系的运作方式</li>
+        <li>Wyoming区块链立法的主要推动者，将学术理解转化为实际法律</li>
+        <li>创立Custodia Bank，试图从内部桥接传统银行和加密世界</li>
+      </ul>
+    </section>
+
+    <!-- Section 2: Actions -->
+    <section id="actions">
+      <div class="section-header">
+        <h2>2. 行动证据 — Key Actions</h2>
+      </div>
+
+      <div class="timeline-step highlight">
+        <div class="step-year">2018-19</div>
+        <div class="step-text">
+          <strong>Wyoming SPDI银行法</strong> <span class="regulatory-tag">立法</span><br>
+          推动Wyoming通过Special Purpose Depository Institution法律，为加密公司创建专门的银行牌照类型。这是美国第一个专门为数字资产设计的银行框架。
+        </div>
+      </div>
+
+      <div class="timeline-step highlight">
+        <div class="step-year">2020</div>
+        <div class="step-text">
+          <strong>Custodia Bank获得Wyoming特许</strong> <span class="regulatory-tag">牌照</span><br>
+          获得Wyoming SPDI银行牌照，成为美国首批合法的加密银行之一。
+        </div>
+      </div>
+
+      <div class="timeline-step denied">
+        <div class="step-year">2023</div>
+        <div class="step-text">
+          <strong>Fed主账户申请被拒</strong> <span class="denied-tag">被拒</span><br>
+          经过两年审查，美联储拒绝Custodia的主账户申请。Long公开指控这一决定是政治性的，而非基于风险评估。暴露了Fed系统性的反加密立场。
+        </div>
+      </div>
+
+      <div class="timeline-step highlight">
+        <div class="step-year">2023-24</div>
+        <div class="step-text">
+          <strong>Operation Chokepoint 2.0曝光</strong> <span class="advocacy-tag">吹哨</span><br>
+          系统性记录并公开曝光联邦监管机构（FDIC, OCC, Fed）协调打压加密公司银行准入的行为。成为行业内最重要的信息来源之一。
+        </div>
+      </div>
+
+      <div class="timeline-step highlight">
+        <div class="step-year">2024-26</div>
+        <div class="step-text">
+          <strong>公开倡导银行准入</strong> <span class="advocacy-tag">倡导</span><br>
+          持续通过国会听证、媒体采访、社交媒体推动银行准入议题。在Trump政府转向pro-crypto政策后，推动监管环境改善。
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Judgment -->
+    <section id="judgment">
+      <div class="section-header">
+        <h2>3. 核心判断 — Core Judgment</h2>
+      </div>
+
+      <blockquote>
+        "The biggest barrier to crypto adoption is banking access, not technology."
+        <span class="zh">加密采用的最大障碍是银行准入，而非技术。</span>
+      </blockquote>
+
+      <p>这个判断在2020-2024年间被反复验证。当银行系统对加密公司关闭时（Operation Chokepoint 2.0期间），即使技术完善的项目也无法正常运营——无法接受法币入金、无法支付员工工资、无法缴纳税款。</p>
+
+      <h3>判断验证</h3>
+      <ul>
+        <li><strong>Silvergate/Signature崩溃（2023）</strong>：两家主要的加密友好银行倒闭后，整个行业面临银行服务荒。验证了"银行准入是瓶颈"的论点</li>
+        <li><strong>Circle/USDC脱锚（2023.3）</strong>：SVB倒闭导致Circle储备金被冻结，USDC脱锚至$0.87。银行系统风险直接传导到加密稳定币</li>
+        <li><strong>Trump政府转向（2025-26）</strong>：新政府对加密友好政策的推动，包括暂停Chokepoint 2.0行动，部分验证了Long长期倡导的方向</li>
+      </ul>
+
+      <div class="banking-card">
+        <h4>&#127970; 银行准入 = 加密行业的氧气</h4>
+        <p>Long的核心洞察：区块链技术无论多先进，最终都需要与法币世界交互。而这个交互点——银行系统——是由传统监管机构控制的。控制了银行准入 = 控制了加密行业的生存权。</p>
+      </div>
+    </section>
+
+    <!-- Section 4: Chokepoint -->
+    <section id="chokepoint">
+      <div class="section-header">
+        <h2>4. Operation Chokepoint 2.0</h2>
+      </div>
+
+      <div class="chokepoint-alert">
+        <h4>&#9888;&#65039; Operation Chokepoint 2.0 — 系统性打压</h4>
+        <p>2022-2024年期间，美国联邦监管机构（FDIC, OCC, Federal Reserve）被指控协调行动，系统性阻止加密公司获取银行服务。主要手段：</p>
+        <ul>
+          <li><strong>FDIC "暂停信"</strong>：私下向银行发送非正式指令，要求暂停与加密公司的业务</li>
+          <li><strong>OCC非正式警告</strong>：通过检查流程对服务加密客户的银行施压</li>
+          <li><strong>Fed主账户拒绝</strong>：以各种技术理由拒绝加密银行的主账户申请</li>
+        </ul>
+        <p><strong>Caitlin Long的角色</strong>：作为Custodia Bank CEO亲历了这一过程，并系统性地公开记录了每一步，成为行业最重要的吹哨人。</p>
+      </div>
+
+      <h3>Chokepoint 2.0 的结束</h3>
+      <p><mark class="hl-know" data-note="k2">Trump政府上台后，Operation Chokepoint 2.0实质性结束</mark><sup class="nref" data-note="k2">K</sup>。FDIC在2025年撤回了部分"暂停信"，新任银行监管负责人公开表态支持加密创新。但结构性问题（Fed对加密银行的态度）仍未完全解决。</p>
+
+      <details>
+        <summary><strong>为什么Chokepoint 2.0很重要？</strong></summary>
+        <p>这不仅是一个监管事件，而是揭示了<strong>传统金融体系对加密的免疫反应</strong>。即使政策层面转向pro-crypto，银行系统的文化惯性意味着实际开放会滞后1-2年。</p>
+        <p><strong>投资含义</strong>：监控银行系统对加密的实际开放程度（而非政策宣言），是判断美国加密市场成熟度的关键指标。</p>
+      </details>
+    </section>
+
+    <!-- Section 5: Trading -->
+    <section id="trading">
+      <div class="section-header">
+        <h2>5. 交易含义 — Trading Implications</h2>
+      </div>
+
+      <p><span class="signal signal-watch">WATCH</span> Caitlin Long / Custodia Bank 不是直接可投资标的。但她的战斗是银行体系对加密开放度的<strong>领先指标</strong>。</p>
+
+      <h3>作为指标的价值</h3>
+      <ul>
+        <li><strong>银行准入晴雨表</strong>：Custodia是否最终获得Fed主账户 = 美国银行体系是否真正对加密开放的litmus test</li>
+        <li><strong>监管风向标</strong>：Long的公开发言和法律行动反映了监管环境的实时变化</li>
+        <li><strong>Chokepoint结束信号</strong>：<mark class="hl-know" data-note="k2">当银行不再因为服务加密客户而被惩罚时</mark><sup class="nref" data-note="k2">K</sup>，意味着行业基础设施瓶颈解除</li>
+      </ul>
+
+      <h3>二阶效应</h3>
+      <ul>
+        <li>银行准入开放 &rarr; 更多法币入金通道 &rarr; 整体加密市场流动性增加 &rarr; <span class="signal signal-bull">BULL</span> 对BTC/ETH等主流资产利好</li>
+        <li>SPDI银行牌照推广 &rarr; 更多州效仿Wyoming &rarr; 加密银行行业成长 &rarr; 关注BTC矿企/交易所相关标的</li>
+      </ul>
+    </section>
+
+    <!-- Section 6: Risk -->
+    <section id="risk">
+      <div class="section-header">
+        <h2>6. 风险信号 — Risk Signals</h2>
+      </div>
+
+      <figure>
+        <table>
+          <thead><tr><th>风险</th><th>概率</th><th>影响</th><th>监控信号</th></tr></thead>
+          <tbody>
+            <tr><td>Fed持续拒绝加密银行主账户</td><td>35%</td><td><span class="signal signal-bear">HIGH</span></td><td>Custodia诉讼进展、新任Fed理事表态</td></tr>
+            <tr><td>SPDI模式无法推广到其他州</td><td>40%</td><td><span class="signal signal-watch">MEDIUM</span></td><td>其他州是否推出类似立法</td></tr>
+            <tr><td>Custodia商业可行性问题</td><td>30%</td><td><span class="signal signal-watch">MEDIUM</span></td><td>融资动态、客户增长数据</td></tr>
+            <tr><td>Chokepoint 2.0重启（政权更替后）</td><td>25%</td><td><span class="signal signal-bear">HIGH</span></td><td>下一次政权更替后的监管任命</td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </section>
+
+    <!-- Section 7: Provenance -->
+    <section id="provenance">
+      <div class="section-header">
+        <h2>7. Provenance</h2>
+      </div>
+      <div class="meta-row">
+        <span>Agent #15</span>
+        <span>Node: N8 监管</span>
+        <span>Tier: B档 3/5</span>
+        <span>Created: 2026-03-22</span>
+      </div>
+      <p style="margin-top:1rem;">数据来源：Custodia Bank官方公告, Fed主账户裁决文件, FDIC Chokepoint 2.0相关FOIA文件, Wyoming立法记录, Caitlin Long国会听证证词, 社交媒体公开发言。</p>
+    </section>
+
+    <footer class="page-footer">
+      <p>Blockchain Research System &mdash; Cognitive Agent #15<br>
+      <a href="../blockchain_hub.html">&larr; Back to Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ========== RIGHT SIDEBAR: Anchored Annotations ========== -->
+  <aside class="notes-sidebar" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn" aria-label="Close notes">&#10005;</button>
+      <h4>&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+
+    <!-- === NOTE 1: Banking Access === -->
+    <div class="anno know-note open" data-section="judgment" id="k1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">知识</span>
+        <span class="mn-title">银行准入作为行业瓶颈</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Wyoming SPDI法</strong>创建了一种新型银行牌照，允许银行直接持有数字资产作为托管资产。这解决了传统银行法中"加密资产不是合法托管物"的灰色地带。</p>
+        <p><strong>为什么重要</strong>：加密公司获取银行服务的难度是衡量行业成熟度的最好标尺。当Coinbase、Kraken等大公司都抱怨银行准入问题时，说明这不是单一公司的问题，而是系统性障碍。</p>
+        <p><strong>投资信号</strong>：银行准入开放的速度 = 加密行业资金流入的天花板。Fed主账户是最后一道门。</p>
+      </div>
+    </div>
+
+    <!-- === NOTE 2: Chokepoint End === -->
+    <div class="anno know-note open" data-section="chokepoint" id="k2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">知识</span>
+        <span class="mn-title">Chokepoint 2.0结束的信号价值</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Operation Chokepoint 2.0的结束</strong>不是一个瞬间事件，而是一个渐进过程。关键里程碑：</p>
+        <p>1. FDIC撤回"暂停信"（2025 Q1） &rarr; 银行不再被惩罚<br>
+        2. OCC发布加密友好指引（2025 Q2） &rarr; 明确银行可以服务加密客户<br>
+        3. Fed主账户向加密银行开放（<strong>尚未发生</strong>） &rarr; 最终信号</p>
+        <p><span class="method-tag">交易信号</span>当第3步发生时 = 美国加密银行基础设施瓶颈完全解除。这将是一个重大利好催化剂，影响所有美国上市的加密相关标的。</p>
+        <p><strong>风险</strong>：这个过程是政治周期依赖的。如果政权再次更替，Chokepoint可能以新形式重启。</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<!-- JavaScript -->
+<script>
+(function() {
+  // 1. Left sidebar toggle
+  const hamburger = document.getElementById('hamburgerBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+
+  hamburger.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+  });
+
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+  });
+
+  sidebar.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 900) {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+      }
+    });
+  });
+
+  // 2. Note toggle function
+  window.toggleNote = function(head) {
+    head.parentElement.classList.toggle('open');
+    requestAnimationFrame(positionNotes);
+  };
+
+  // 3. Position notes to align with their sections
+  function positionNotes() {
+    const sidebarEl = document.getElementById('notesSidebar');
+    if (!sidebarEl) return;
+
+    const notes = [...sidebarEl.querySelectorAll('.anno')];
+    const scrollY = window.scrollY;
+    const sidebarAbsTop = sidebarEl.getBoundingClientRect().top + scrollY;
+    const headerEl = sidebarEl.querySelector('.notes-sidebar-header');
+    const headerHeight = headerEl ? headerEl.offsetHeight + 12 : 40;
+
+    notes.sort((a, b) => {
+      const secA = document.getElementById(a.dataset.section);
+      const secB = document.getElementById(b.dataset.section);
+      if (!secA || !secB) return 0;
+      return (secA.getBoundingClientRect().top) - (secB.getBoundingClientRect().top);
+    });
+
+    let lastBottom = headerHeight;
+    notes.forEach(note => {
+      if (note.style.display === 'none') return;
+      const section = document.getElementById(note.dataset.section);
+      if (!section) { note.style.display = 'none'; return; }
+
+      const sectionAbsTop = section.getBoundingClientRect().top + scrollY;
+      let targetY = sectionAbsTop - sidebarAbsTop;
+
+      if (targetY < lastBottom + 8) {
+        targetY = lastBottom + 8;
+      }
+
+      note.style.top = targetY + 'px';
+      lastBottom = targetY + note.offsetHeight;
+    });
+
+    sidebarEl.style.minHeight = (lastBottom + 40) + 'px';
+  }
+
+  // 4. Run positioning on load, resize, scroll
+  window.addEventListener('load', () => {
+    positionNotes();
+    document.querySelectorAll('details').forEach(d => {
+      d.addEventListener('toggle', () => setTimeout(positionNotes, 50));
+    });
+  });
+  window.addEventListener('resize', positionNotes);
+  let scrollTimer;
+  window.addEventListener('scroll', () => {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(positionNotes, 100);
+  }, { passive: true });
+
+  // 5. Highlight <-> Note sync
+  document.querySelectorAll('.nref, mark.hl-know').forEach(el => {
+    el.addEventListener('click', e => {
+      e.preventDefault();
+      const noteId = el.dataset.note;
+      const note = document.getElementById(noteId);
+      if (!note) return;
+      note.classList.add('open');
+      requestAnimationFrame(() => {
+        positionNotes();
+        note.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        note.classList.add('flash');
+        setTimeout(() => note.classList.remove('flash'), 1500);
+      });
+    });
+  });
+
+  // 6. Hover: bidirectional
+  document.querySelectorAll('.anno').forEach(note => {
+    note.addEventListener('mouseenter', () => {
+      document.querySelectorAll('[data-note="' + note.id + '"]').forEach(el => el.classList.add('hover'));
+    });
+    note.addEventListener('mouseleave', () => {
+      document.querySelectorAll('[data-note="' + note.id + '"]').forEach(el => el.classList.remove('hover'));
+    });
+    note.addEventListener('dblclick', () => {
+      const section = document.getElementById(note.dataset.section);
+      if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  document.querySelectorAll('[data-note]').forEach(el => {
+    if (el.classList.contains('anno')) return;
+    el.addEventListener('mouseenter', () => {
+      const note = document.getElementById(el.dataset.note);
+      if (note) note.classList.add('hover');
+    });
+    el.addEventListener('mouseleave', () => {
+      const note = document.getElementById(el.dataset.note);
+      if (note) note.classList.remove('hover');
+    });
+  });
+
+  // 7. Top controls
+  const allAnnos = document.querySelectorAll('.anno');
+  const knowNotes = document.querySelectorAll('.anno.know-note');
+  const knowMarks = document.querySelectorAll('mark.hl-know');
+  const knowRefs = document.querySelectorAll('.nref');
+  const metaNotes = document.querySelectorAll('.anno.meta-note');
+
+  document.getElementById('noteCountLabel').textContent = metaNotes.length + ' \u5143\u601d\u8003 + ' + knowNotes.length + ' \u77e5\u8bc6\u6279\u6ce8';
+
+  window.toggleKnowNotes = function() {
+    const btn = document.getElementById('knowToggleBtn');
+    const isActive = btn.classList.toggle('active');
+    btn.textContent = isActive ? '\u663e\u793a' : '\u9690\u85cf';
+    knowNotes.forEach(n => n.style.display = isActive ? '' : 'none');
+    knowMarks.forEach(m => { m.style.background = isActive ? '' : 'transparent'; m.style.borderBottom = isActive ? '' : 'none'; });
+    knowRefs.forEach(r => r.style.display = isActive ? '' : 'none');
+    requestAnimationFrame(positionNotes);
+  };
+
+  window.expandAllNotes = function() {
+    allAnnos.forEach(n => n.classList.add('open'));
+    requestAnimationFrame(positionNotes);
+  };
+
+  window.collapseAllNotes = function() {
+    allAnnos.forEach(n => n.classList.remove('open'));
+    requestAnimationFrame(positionNotes);
+  };
+
+  // 8. Right sidebar toggle (narrow screens)
+  var notesSidebarEl = document.getElementById('notesSidebar');
+  var notesToggleBtn = document.getElementById('notesToggleBtn');
+  var notesOverlayEl = document.getElementById('notesOverlay');
+  var notesCloseBtn = document.getElementById('notesCloseBtn');
+
+  function toggleNotesSidebar() {
+    var willClose = !notesSidebarEl.classList.contains('ns-closed');
+    notesSidebarEl.classList.toggle('ns-closed', willClose);
+    notesToggleBtn.style.display = willClose ? 'flex' : 'none';
+    notesOverlayEl.classList.toggle('open', !willClose);
+    if (!willClose) requestAnimationFrame(positionNotes);
+  }
+
+  if (notesToggleBtn) notesToggleBtn.addEventListener('click', toggleNotesSidebar);
+  if (notesOverlayEl) notesOverlayEl.addEventListener('click', toggleNotesSidebar);
+  if (notesCloseBtn) notesCloseBtn.addEventListener('click', toggleNotesSidebar);
+
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 1200) {
+      notesSidebarEl.classList.remove('ns-closed');
+      notesToggleBtn.style.display = 'none';
+      notesOverlayEl.classList.remove('open');
+    }
+  });
+})();
+</script>
+
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+
+</body>
+</html>

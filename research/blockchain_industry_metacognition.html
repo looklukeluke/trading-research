@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>28轮行业元思考 · Blockchain Metacognition 区块链研究中枢</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="blockchain_shared.css">
+<style>
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded main { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+.reading-mode .sidebar { display: none !important; }
+.reading-mode .notes-sidebar { display: none !important; }
+.reading-mode main { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+
+.mc-round {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid var(--accent);
+    transition: all 0.2s ease;
+}
+.mc-round:hover {
+    border-left-color: var(--knowledge);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+.mc-round.cognitive { border-left-color: var(--knowledge); }
+.mc-round.bias { border-left-color: var(--red); }
+.mc-round.method { border-left-color: #ab47bc; }
+.mc-round.insight { border-left-color: var(--green); }
+.mc-round.pivot { border-left-color: var(--orange); }
+
+.round-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+}
+.round-number {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    background: var(--accent-dim);
+    color: var(--accent);
+}
+.mc-round.cognitive .round-number { background: var(--knowledge-dim); color: var(--knowledge); }
+.mc-round.bias .round-number { background: var(--red-dim); color: var(--red); }
+.mc-round.method .round-number { background: rgba(171,71,188,0.15); color: #ab47bc; }
+.mc-round.insight .round-number { background: var(--green-dim); color: var(--green); }
+.mc-round.pivot .round-number { background: var(--orange-dim); color: var(--orange); }
+
+.round-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+.round-phase {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-left: auto;
+}
+.round-content {
+    font-size: 0.88rem;
+    line-height: 1.65;
+    color: var(--text-secondary);
+}
+.round-content .zh-inline {
+    display: block;
+    margin-top: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+}
+.round-tags {
+    margin-top: 0.75rem;
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+.round-tag {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 10px;
+    background: var(--bg-secondary);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+}
+
+.phase-section {
+    background: linear-gradient(135deg, rgba(248,168,72,0.05) 0%, transparent 100%);
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+}
+.phase-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+.phase-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    background: var(--accent);
+    color: #000;
+}
+.phase-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.timeline-track {
+    position: relative;
+    padding-left: 2rem;
+    margin: 1.5rem 0;
+}
+.timeline-track::before {
+    content: '';
+    position: absolute;
+    left: 0.5rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), var(--knowledge), var(--green), #ab47bc);
+    border-radius: 2px;
+}
+.timeline-dot {
+    position: absolute;
+    left: -0.35rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg-primary);
+}
+</style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- ===== Left Sidebar ===== -->
+  <div class="sidebar">
+    <a class="back-link" href="blockchain_hub.html">&larr; Blockchain Hub</a>
+
+    <h4>Meta-cognition</h4>
+    <div class="project-meta">
+      28轮行业元思考<br>
+      认知演变·转折点·偏差纠正
+    </div>
+
+    <h4>Navigate</h4>
+    <nav>
+      <ul>
+        <li><a href="#overview">总览 Overview</a></li>
+        <li><a href="#phase0">Phase 0 起点</a></li>
+        <li><a href="#phase1">Phase 1 探索</a></li>
+        <li><a href="#phase2">Phase 2 构建</a></li>
+        <li><a href="#synthesis">综合 Synthesis</a></li>
+        <li><a href="#lessons">方法论 Lessons</a></li>
+      </ul>
+    </nav>
+
+    <h4>Context 上下文</h4>
+    <nav>
+      <ul>
+        <li><a href="blockchain_hub.html">Blockchain Hub</a></li>
+        <li><a href="INDUSTRY_V3_FINAL_BTCETH_Blockchain_2026-03-21.html">V3 Final Report</a></li>
+        <li><a href="semiconductor_hub.html">Semiconductor Hub 半导体</a></li>
+        <li><a href="../2026-W12-v3.html">W12 Weekly Synthesis</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- ===== Main Content ===== -->
+  <main>
+
+    <h1>28轮行业元思考<span class="zh">区块链行业研究的认知演变全记录</span></h1>
+    <div class="subtitle">Cognitive Evolution &middot; Turning Points &middot; Bias Corrections &middot; 2026-03-21</div>
+
+    <div class="advisory-box">
+      <strong>目的 Purpose：</strong>完整记录BTC/区块链行业L3深度研究过程中，28轮认知迭代的内在逻辑。包括：如何从"BTC/区块链是什么"的模糊问题，逐步演化为8个价值链节点+22个认知代理人的系统性研究框架。每个转折点都有偏差纠正和方法论反思。
+      <span class="zh">Complete record of 28 cognitive iterations during L3 deep-dive research on BTC/Blockchain. Documents evolution from "what is BTC/blockchain?" to 8 value chain nodes + 22 cognitive agents.</span>
+    </div>
+
+    <!-- Stats Strip -->
+    <div class="stats-strip">
+      <div class="stat-item"><span class="stat-value">28</span> <span class="stat-label">Rounds 轮次</span></div>
+      <div class="stat-item"><span class="stat-value">3</span> <span class="stat-label">Phases 阶段</span></div>
+      <div class="stat-item"><span class="stat-value">8</span> <span class="stat-label">Value Nodes</span></div>
+      <div class="stat-item"><span class="stat-value">22</span> <span class="stat-label">Agents</span></div>
+      <div class="stat-item"><span class="stat-value">12</span> <span class="stat-label">Bias Corrections</span></div>
+    </div>
+
+    <!-- ═══════════ §1 总览 ═══════════ -->
+    <div class="section-header" id="overview">
+      <h2><span class="section-num">Overview</span>Cognitive Timeline<span class="zh">认知时间线总览</span></h2>
+    </div>
+
+    <div class="timeline-track" style="margin-bottom: 2rem;">
+      <div class="phase-section" id="phase0" style="margin: 0 0 1rem 0.5rem; padding: 1rem;">
+        <div class="phase-header">
+          <span class="phase-badge">Phase 0</span>
+          <span class="phase-title">起点与框架建立 Pre-Research &amp; Framing</span>
+        </div>
+        <div style="font-size: 0.82rem; color: var(--text-muted);">
+          轮次 1-6 &middot; 从黄金到BTC的类比推导 &middot; L1选品争议 &middot; 价值链节点初稿
+        </div>
+      </div>
+      <div class="phase-section" id="phase1" style="margin: 0 0 1rem 0.5rem; padding: 1rem;">
+        <div class="phase-header">
+          <span class="phase-badge" style="background: var(--knowledge);">Phase 1</span>
+          <span class="phase-title">深度探索 Deep Exploration</span>
+        </div>
+        <div style="font-size: 0.82rem; color: var(--text-muted);">
+          轮次 7-18 &middot; 节点扩展 &middot; 代理人发现 &middot; 数据源策展 &middot; 亚洲/新兴市场突破
+        </div>
+      </div>
+      <div class="phase-section" id="phase2" style="margin: 0 0 1rem 0.5rem; padding: 1rem;">
+        <div class="phase-header">
+          <span class="phase-badge" style="background: var(--green);">Phase 2</span>
+          <span class="phase-title">系统构建与验证 System Building &amp; Validation</span>
+        </div>
+        <div style="font-size: 0.82rem; color: var(--text-muted);">
+          轮次 19-28 &middot; 框架收敛 &middot; 品种浮现 &middot; Hub框架完成 &middot; 交易信号整合
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ §2 Phase 0 ═══════════ -->
+    <div class="section-header" id="phase0">
+      <h2><span class="section-num">Phase 0</span>Pre-Research &amp; Framing<span class="zh">起点与框架建立 &mdash; 轮次 1-6</span></h2>
+    </div>
+
+    <div class="mc-round pivot">
+      <div class="round-header">
+        <span class="round-number">Round 01</span>
+        <span class="round-title">为什么是BTC/区块链？第一性原理推导</span>
+        <span class="round-phase">Phase 0 · 起点</span>
+      </div>
+      <div class="round-content">
+        半导体(SMH)完成L3深度研究后，需要找第二个行业。为什么选BTC/区块链？推导链：黄金成功(宏观储备资产)→半导体验证(Top-down L3管道)→BTC/区块链作为数字黄金的周期特性。
+        <span class="zh-inline">After completing L3 research on semiconductor (SMH), needed a second industry. Why BTC/blockchain? Derivation: Gold's success (macro reserve asset) → Semiconductor validated Top-down L3 pipeline → BTC/blockchain as digital gold with cyclical properties.</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">Top-down L3</span>
+        <span class="round-tag">第一性原理</span>
+        <span class="round-tag">行业选择</span>
+      </div>
+    </div>
+
+    <div class="mc-round bias">
+      <div class="round-header">
+        <span class="round-number">Round 02</span>
+        <span class="round-title">初始偏差：把BTC当"币"还是"资产"？</span>
+        <span class="round-phase">Phase 0 · 偏差纠正#1</span>
+      </div>
+      <div class="round-content">
+        初始问题：BTC是货币还是资产？这影响整个研究框架定位。纠正：BTC在当前周期已演化为"机构级宏观储备资产"(MicroStrategy+BlackRock ETF)，而非支付货币。稳定币(Tether/USDC)承担实际支付功能。框架应以BTC=数字黄金为核心叙事。
+        <span class="zh-inline">Initial question: Is BTC a "currency" or "asset"? This affects the entire research framework. Correction: BTC has evolved into "institutional-grade macro reserve asset" (MSTR + BlackRock ETF), not payment currency. Stablecoins (Tether/USDC) handle actual payments.</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">叙事框架</span>
+        <span class="round-tag">BTC定位</span>
+        <span class="round-tag">稳定币分工</span>
+      </div>
+    </div>
+
+    <div class="mc-round cognitive">
+      <div class="round-header">
+        <span class="round-number">Round 03</span>
+        <span class="round-title">BTC减半周期：4年一轮的"宇宙时钟"</span>
+        <span class="round-phase">Phase 0 · 认知框架</span>
+      </div>
+      <div class="round-content">
+        发现BTC减半周期是贯穿整个研究的核心时间框架：2024年4月减半→2025年是"减半后18个月"高光期→ETF资金流放大效应→机构采用加速。这提供了一个可量化的交易信号系统，与半导体行业的"景气周期"框架形成有趣对照。
+        <span class="zh-inline">BTC halving cycle is the core temporal framework: 2024 April halving → 2025 "post-halving 18 months" highlight period → ETF flow amplification → institutional adoption acceleration. Provides quantifiable trading signal system.</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">减半周期</span>
+        <span class="round-tag">ETF资金流</span>
+        <span class="round-tag">时间框架</span>
+      </div>
+    </div>
+
+    <div class="mc-round method">
+      <div class="round-header">
+        <span class="round-number">Round 04</span>
+        <span class="round-title">ETH vs SOL vs TRON：L1选品争议与决策</span>
+        <span class="round-phase">Phase 0 · 方法论#1</span>
+      </div>
+      <div class="round-content">
+        L1协议是研究起点，但选哪个？ETH是"最安全但最贵"，SOL是"最快但最中心化"，TRON是"发展中市场隐形巨人"。决策：不选单一L1，而是建立"L1协议"节点覆盖所有主要链，让市场信号决定品种权重。
+        <span class="zh-inline">L1 protocols are the research starting point, but which one? ETH = "safest but most expensive", SOL = "fastest but most centralized", TRON = "invisible giant in developing markets". Decision: Don't pick single L1, create "L1 Protocol" node covering all major chains.</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">L1选品</span>
+        <span class="round-tag">多链策略</span>
+        <span class="round-tag">框架设计</span>
+      </div>
+    </div>
+
+    <div class="mc-round insight">
+      <div class="round-header">
+        <span class="round-number">Round 05</span>
+        <span class="round-title">从"币"到"价值链"：第一次框架革命</span>
+        <span class="round-phase">Phase 0 · 转折点#1</span>
+      </div>
+      <div class="round-content">
+        关键顿悟：不应按币种(BTC/ETH/SOL)组织研究，而应按价值链位置组织。这个认识来自半导体的"从沙子到iPhone"价值链思维。BTC/区块链的价值链应该是：挖矿→L1协议→中间件→交易所→稳定币→RWA→DeFi→监管。
+        <span class="zh-inline">Key epiphany: Don't organize research by coin (BTC/ETH/SOL), organize by value chain position. This insight came from semiconductor's "sand to iPhone" value chain thinking. Blockchain value chain: Mining → L1 → Middleware → Exchange → Stablecoin → RWA → DeFi → Regulation.</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">框架革命</span>
+        <span class="round-tag">价值链思维</span>
+        <span class="round-tag">半导体迁移</span>
+      </div>
+    </div>
+
+    <div class="mc-round bias">
+      <div class="round-header">
+        <span class="round-number">Round 06</span>
+        <span class="round-title">初始节点数量：应该是5个还是8个？</span>
+        <span class="round-phase">Phase 0 · 偏差纠正#2</span>
+      </div>
+      <div class="round-content">
+        初稿只有5个节点：挖矿、L1、稳定币、DeFi、监管。问题：过于粗糙，无法区分交易所(CEX vs DEX)和RWA代币化这两个巨大且差异化的子行业。扩展到8个节点，每个节点代表一个具有独特竞争动态和关键玩家的价值层。
+        <span class="zh-inline">First draft had only 5 nodes: Mining, L1, Stablecoin, DeFi, Regulation. Problem: Too coarse, couldn't distinguish exchanges (CEX vs DEX) and RWA tokenization. Expanded to 8 nodes, each representing a value layer with unique competitive dynamics.</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">节点细化</span>
+        <span class="round-tag">框架迭代</span>
+        <span class="round-tag">完整性检查</span>
+      </div>
+    </div>
+
+    <!-- ═══════════ §3 Phase 1 ═══════════ -->
+    <div class="section-header" id="phase1">
+      <h2><span class="section-num">Phase 1</span>Deep Exploration<span class="zh">深度探索 &mdash; 轮次 7-18</span></h2>
+    </div>
+
+    <div class="mc-round cognitive">
+      <div class="round-header">
+        <span class="round-number">Round 07</span>
+        <span class="round-title">矿机硬件：中国制造 = 下一个"ASML卡脖子"？</span>
+        <span class="round-phase">Phase 1 · 认知突破</span>
+      </div>
+      <div class="round-content">
+        发现矿机硬件95%中国制造：Bitmain 35-45%市占、MicroBT 25%、Canaan 15%。这是整个区块链价值链中最接近半导体"设备商"卡脖子点的位置。如果中国限制矿机出口，全网算力将受重大影响。这个风险在西方分析中几乎不存在——因为他们不关心供应链地缘政治。
+        <span class="zh-inline">Discovery: Mining hardware 95% China-made: Bitmain 35-45%, MicroBT 25%, Canaan 15%. This is the closest to semiconductor "equipment chokepoint" in the entire blockchain value chain. If China restricts exports, global hashrate takes major hit. Almost never mentioned in Western analysis.</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">供应链地缘</span>
+        <span class="round-tag">ASML类比</span>
+        <span class="round-tag">硬件卡脖子</span>
+      </div>
+    </div>
+
+    <div class="mc-round bias">
+      <div class="round-header">
+        <span class="round-number">Round 08</span>
+        <span class="round-title">英文数据源的TRON偏见：被低估的3.3亿账户</span>
+        <span class="round-phase">Phase 1 · 偏差纠正#3</span>
+      </div>
+      <div class="round-content">
+        英文媒体严重低估TRON。根源：TRON用户主要在东南亚、非洲、南美的"发展中市场"，英文媒体接触不到这些数据。发现：TRON有3.3亿账户、DeFi锁仓量常居前五、USDT最大部署链。这个"隐形巨人"需要单独的代理人研究(Jihan Wu的Bitmain也面临类似偏见)。
+        <span class="zh-inline">English media severely underestimates TRON. Root cause: TRON users mainly in Southeast Asia, Africa, South America — "developing markets" invisible to English media. Discovery: 330M accounts, DeFi TVL often top 5, largest USDT deployment chain.</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">数据偏见</span>
+        <span class="round-tag">TRON低估</span>
+        <span class="round-tag">新兴市场</span>
+      </div>
+    </div>
+
+    <div class="mc-round insight">
+      <div class="round-header">
+        <span class="round-number">Round 09</span>
+        <span class="round-title">"中间件"节点的存在必要性</span>
+        <span class="round-phase">Phase 1 · 框架完善</span>
+      </div>
+      <div class="round-content">
+        中间件(预言机+数据索引)是L1和应用层之间的"神经中枢"。初稿没有这个节点。发现Chainlink占DeFi预言机70%+份额，LayerZero成为跨链互操作标准，The Graph索引L2数据。没有中间件，整个价值链的"数据流"逻辑就断裂了。
+        <span class="zh-inline">Middleware (oracles + data indexing) is the "neural center" between L1 and application layer. First draft didn't include this node. Discovery: Chainlink controls 70%+ DeFi oracle market, LayerZero became cross-chain interoperability standard, The Graph indexes L2 data.</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">中间件</span>
+        <span class="round-tag">Chainlink</span>
+        <span class="round-tag">价值链完整</span>
+      </div>
+    </div>
+
+    <div class="mc-round method">
+      <div class="round-header">
+        <span class="round-number">Round 10</span>
+        <span class="round-title">代理人发现策略：行业影响者≠投资者</span>
+        <span class="round-phase">Phase 1 · 方法论#2</span>
+      </div>
+      <div class="round-content">
+        发现不是所有"行业大佬"都适合做认知代理人。需要区分：行业影响者(能改变叙事)和投资者(能提供Alpha信号)。Michael Saylor是完美代理人(叙事+执行+公开记录丰富)，而很多"币圈大V"只是流量玩家。代理人的选择标准：①改变行业格局 ②有足够公开数据 ③认知独特性。
+        <span class="zh-inline">Discovery: Not all "industry leaders" make good cognitive agents. Need to distinguish: Industry influencers (can change narratives) vs Investors (can provide Alpha signals). Michael Saylor is perfect agent (narrative + execution + rich public record).</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">代理人标准</span>
+        <span class="round-tag">认知质量</span>
+        <span class="round-tag">数据可用性</span>
+      </div>
+    </div>
+
+    <div class="mc-round bias">
+      <div class="round-header">
+        <span class="round-number">Round 11</span>
+        <span class="round-title">西方叙事缺失：巴西90%是稳定币美元储蓄，不是投机</span>
+        <span class="round-phase">Phase 1 · 偏差纠正#4</span>
+      </div>
+      <div class="round-content">
+        西方叙事把"加密活动=投机"。但巴西数据显示：90%加密活动是稳定币美元储蓄——因为巴西本土货币贬值、高通胀、美元获取限制。这是真实的金融需求，不是投机。这个认知翻转整个"加密市场结构"的理解。
+        <span class="zh-inline">Western narrative equates "crypto activity = speculation". But Brazil data shows: 90% crypto activity is stablecoin USD savings — due to BRL depreciation, high inflation, dollar access restrictions. This is real financial need, not speculation.</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">市场结构</span>
+        <span class="round-tag">稳定币真实需求</span>
+        <span class="round-tag">新兴市场金融</span>
+      </div>
+    </div>
+
+    <div class="mc-round cognitive">
+      <div class="round-header">
+        <span class="round-number">Round 12</span>
+        <span class="round-title">e-CNY的特殊性：不是"加密货币"，是CBDC</span>
+        <span class="round-phase">Phase 1 · 认知框架</span>
+      </div>
+      <div class="round-content">
+        e-CNY(数字人民币)不能和其他加密资产放在同一框架。它是央行数字货币，有35亿笔交易、$2.4T流通，但完全由国家控制、可追溯、无隐私。放在"稳定币"节点会混淆概念。决策：e-CNY单独讨论，但标注其"合规链"属性影响TRON和Conflux的竞争定位。
+        <span class="zh-inline">e-CNY (digital yuan) cannot be in same framework as other crypto assets. It's a CBDC with 3.5B transactions, $2.4T circulation, but completely state-controlled, traceable, no privacy. Putting it in "stablecoin" node would confuse concepts.</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">CBDC分类</span>
+        <span class="round-tag">e-CNY</span>
+        <span class="round-tag">监管特殊性</span>
+      </div>
+    </div>
+
+    <div class="mc-round pivot">
+      <div class="round-header">
+        <span class="round-number">Round 13</span>
+        <span class="round-title">"交易所"节点分裂：CEX vs DEX的监管逻辑差异</span>
+        <span class="round-phase">Phase 1 · 转折点#2</span>
+      </div>
+      <div class="round-content">
+        发现"交易所"节点内部有巨大差异：Coinbase(合规CEX)、Uniswap(无许可DEX)、BlackRock ETF(传统金融接入)。它们服务于完全不同的用户群体、监管框架和竞争动态。合并讨论会丢失关键细节。拆分为：交易所与托管(CEX+托管+ETF)和DeFi应用层(DEX+借贷)。
+        <span class="zh-inline">Discovery: "Exchange" node has huge internal differences: Coinbase (compliant CEX), Uniswap (permissionless DEX), BlackRock ETF (traditional finance on-ramp). They serve completely different user groups, regulatory frameworks, and competitive dynamics.</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">节点分裂</span>
+        <span class="round-tag">CEX vs DEX</span>
+        <span class="round-tag">监管逻辑</span>
+      </div>
+    </div>
+
+    <div class="mc-round insight">
+      <div class="round-header">
+        <span class="round-number">Round 14</span>
+        <span class="round-title">RWA代币化：从"小众实验"到"下一个增长极"</span>
+        <span class="round-phase">Phase 1 · 认知升级</span>
+      </div>
+      <div class="round-content">
+        RWA代币化是研究过程中最大的认知升级之一。初稿把它当作"DeFi的子集"。发现：BlackRock BUIDL基金$800M+、Ondo 60%代币化股权份额、DekaBank(德国)发行代币化债券、新加坡和香港同时启动代币化沙盒。机构采用正在从"试验"走向"主流量产"。
+        <span class="zh-inline">RWA tokenization is one of the biggest cognitive upgrades during research. First draft treated it as "subset of DeFi". Discovery: BlackRock BUIDL $800M+, Ondo 60% tokenized equity share, DekaBank (Germany) issued tokenized bonds, Singapore and Hong Kong simultaneously launched tokenization sandboxes.</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">RWA爆发</span>
+        <span class="round-tag">机构采用</span>
+        <span class="round-tag">代币化主流</span>
+      </div>
+    </div>
+
+    <div class="mc-round bias">
+      <div class="round-header">
+        <span class="round-number">Round 15</span>
+        <span class="round-title">数据源偏差：尼日利亚$921亿 vs 韩国$8.44亿/天</span>
+        <span class="round-phase">Phase 1 · 偏差纠正#5</span>
+      </div>
+      <div class="round-content">
+        比较不同市场的加密活动量时，发现数据源质量差异巨大：尼日利亚$921亿交易量来自本地报道，韩国Upbit日均$8.44亿来自上市财报，东南亚市场几乎没有可靠数据。这意味着"市场规模"数字的置信区间极大，不能直接跨市场比较。
+        <span class="zh-inline">Comparing crypto activity across markets reveals huge data quality differences: Nigeria $921B from local reports, Korea Upbit $844M/day from listed financials, Southeast Asia almost no reliable data. This means "market size" numbers have huge confidence intervals.</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">数据质量</span>
+        <span class="round-tag">跨市场比较</span>
+        <span class="round-tag">不确定性</span>
+      </div>
+    </div>
+
+    <div class="mc-round method">
+      <div class="round-header">
+        <span class="round-number">Round 16</span>
+        <span class="round-title">代理人地域分布：22人的"世界观"构成</span>
+        <span class="round-phase">Phase 1 · 方法论#3</span>
+      </div>
+      <div class="round-content">
+        统计22个代理人的地域构成：美国人/西方12 + 华人/亚洲6 + 欧洲2 + 独立分析师2。这个分布反映了BTC/区块链的全球性，但也暴露了研究偏见：亚洲代理人数据质量普遍2-3/5(语言障碍+公开数据少)，欧洲代表不足(只占9%)。
+        <span class="zh-inline">Geographic composition of 22 agents: 12 US/Western + 6 Chinese/Asian + 2 European + 2 Independent. This reflects blockchain's global nature but also reveals research bias: Asian agents data quality generally 2-3/5, European representation insufficient (only 9%).</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">地域多样性</span>
+        <span class="round-tag">代理人构成</span>
+        <span class="round-tag">偏见检查</span>
+      </div>
+    </div>
+
+    <div class="mc-round cognitive">
+      <div class="round-header">
+        <span class="round-number">Round 17</span>
+        <span class="round-title">稳定币：不只是"链上美元"，是金融基础设施</span>
+        <span class="round-phase">Phase 1 · 认知深化</span>
+      </div>
+      <div class="round-content">
+        稳定币的功能远超"出入金工具"：USDT 64%市场份额、$10B年利润(超越多数银行)、在17个以上国家作为实际储蓄工具、TRON链上USDT支持新兴市场汇款。稳定币是BTC/区块链价值链中最接近"杀手级应用"的节点。
+        <span class="zh-inline">Stablecoin functions far beyond "on/off ramp tool": USDT 64% market share, $10B annual profit (exceeding most banks), actual savings tool in 17+ countries, TRON USDT enables emerging market remittances. Stablecoins are the closest to "killer app" in blockchain value chain.</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">USDT主导</span>
+        <span class="round-tag">金融基础设施</span>
+        <span class="round-tag">杀手级应用</span>
+      </div>
+    </div>
+
+    <div class="mc-round bias">
+      <div class="round-header">
+        <span class="round-number">Round 18</span>
+        <span class="round-title">DeFi代理人的缺失：为什么NODE 7没有专属代理人？</span>
+        <span class="round-phase">Phase 1 · 偏差纠正#6</span>
+      </div>
+      <div class="round-content">
+        DeFi(NODE 7)没有专属代理人。初稿计划包含Aave的Stani Kulechov或Uniswap的Hayden Adams，但最终未实现。原因：①DeFi代理人在多个链上分散②最好的代理人在"DeFi协议"之外(Vitalik的ETH L2叙事覆盖了DeFi)③DeFi是跨节点现象。标注为"覆盖缺口"，需要未来补充。
+        <span class="zh-inline">DeFi (NODE 7) has no dedicated agent. Original plan included Aave's Stani Kulechov or Uniswap's Hayden Adams, but ultimately not realized. Reason: ① DeFi agents scattered across multiple chains ② Best agents outside "DeFi protocol" ③ DeFi is cross-cutting phenomenon.</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">覆盖缺口</span>
+        <span class="round-tag">DeFi复杂性</span>
+        <span class="round-tag">Aave/Uniswap</span>
+      </div>
+    </div>
+
+    <!-- ═══════════ §4 Phase 2 ═══════════ -->
+    <div class="section-header" id="phase2">
+      <h2><span class="section-num">Phase 2</span>System Building &amp; Validation<span class="zh">系统构建与验证 &mdash; 轮次 19-28</span></h2>
+    </div>
+
+    <div class="mc-round pivot">
+      <div class="round-header">
+        <span class="round-number">Round 19</span>
+        <span class="round-title">"认知代理人"命名：从"行业人物"到"认知节点"</span>
+        <span class="round-phase">Phase 2 · 转折点#3</span>
+      </div>
+      <div class="round-content">
+        关键概念转变："研究行业人物"→"追踪认知代理人"。代理人不只是信息源，而是"具有独特世界观+决策影响力+可追踪记录"的认知节点。Lyn Alden的宏观周期框架、Michael Saylor的"BTC为储备资产"叙事、Caitlin Long的监管博弈——每个代理人都代表一种可被追踪和验证的认知路径。
+        <span class="zh-inline">Key concept shift: "Researching industry figures" → "Tracking cognitive agents". Agents are not just information sources, but "cognitive nodes with unique worldview + decision influence + traceable records". Each agent represents a traceable and verifiable cognitive path.</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">代理人概念</span>
+        <span class="round-tag">认知追踪</span>
+        <span class="round-tag">世界观</span>
+      </div>
+    </div>
+
+    <div class="mc-round method">
+      <div class="round-header">
+        <span class="round-number">Round 20</span>
+        <span class="round-title">代理人评级体系：5分制的设计逻辑</span>
+        <span class="round-phase">Phase 2 · 方法论#4</span>
+      </div>
+      <div class="round-content">
+        为22个代理人设计5分制评级(1-5 dots)。标准：①信息丰富度(公开数据量)②认知独特性(是否提供独特视角)③行业影响力(能否改变叙事或市场)④数据质量(可验证性)。Vitalik/Saylor/Armstrong/Fink/Lyn Alden=5/5；周小川/Zhou Xiaochuan=2/5(信息极难获取)。
+        <span class="zh-inline">Design 5-point rating system for 22 agents. Criteria: ① Information richness ② Cognitive uniqueness ③ Industry influence ④ Data quality. Vitalik/Saylor/Armstrong/Fink/Lyn Alden = 5/5; Zhou Xiaochuan = 2/5 (extremely difficult to access information).</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">评级体系</span>
+        <span class="round-tag">代理人评分</span>
+        <span class="round-tag">数据质量</span>
+      </div>
+    </div>
+
+    <div class="mc-round insight">
+      <div class="round-header">
+        <span class="round-number">Round 21</span>
+        <span class="round-title">关键品种浮现：BTC/ETH/SOL/COIN/MSTR的认知优先级</span>
+        <span class="round-phase">Phase 2 · 认知排序</span>
+      </div>
+      <div class="round-content">
+        从8节点+22代理人的研究框架中浮现出关键品种信号：BTC(宏观储备)、ETH(L2 scaling+DeFi底座)、SOL(速度+ETF候选)、COIN(合规交易所龙头)、MSTR(BTC策略执行者)、MARA(纯比特币挖矿敞口)。这些品种来自价值链节点的交叉验证，不是主观选品。
+        <span class="zh-inline">From 8-node + 22-agent framework, key species signals emerge: BTC (macro reserve), ETH (L2 scaling + DeFi base), SOL (speed + ETF candidate), COIN (compliant exchange leader), MSTR (BTC strategy executor), MARA (pure Bitcoin mining exposure).</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">品种浮现</span>
+        <span class="round-tag">认知优先级</span>
+        <span class="round-tag">交叉验证</span>
+      </div>
+    </div>
+
+    <div class="mc-round bias">
+      <div class="round-header">
+        <span class="round-number">Round 22</span>
+        <span class="round-title">BTC叙事反转：从"匿名暗网货币"到"主流储备资产"</span>
+        <span class="round-phase">Phase 2 · 偏差纠正#7</span>
+      </div>
+      <div class="round-content">
+        回顾BTC历史叙事：2017年"暗网货币"→2020年"千倍投机"→2024年"减半+ETF"→2025年"宏观储备资产"。这不是线性的，而是周期性的。当前处于"机构采用加速期"，但下一次叙事反转(监管打压或技术危机)随时可能发生。
+        <span class="zh-inline">Reviewing BTC historical narratives: 2017 "dark web currency" → 2020 "1000x speculation" → 2024 "halving + ETF" → 2025 "macro reserve asset". This is cyclical, not linear. Currently in "institutional adoption acceleration", but next narrative reversal possible anytime.</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">叙事演变</span>
+        <span class="round-tag">周期定位</span>
+        <span class="round-tag">风险意识</span>
+      </div>
+    </div>
+
+    <div class="mc-round cognitive">
+      <div class="round-header">
+        <span class="round-number">Round 23</span>
+        <span class="round-title">监管框架的"监管套利"逻辑：为什么没有全球统一监管？</span>
+        <span class="round-phase">Phase 2 · 认知框架</span>
+      </div>
+      <div class="round-content">
+        研究监管节点(NODE 8)时发现：各国监管差异不是"落后"，而是刻意为之的"监管套利"。香港/新加坡/迪拜通过宽松政策吸引交易所和项目；SEC/CFTC通过执法创造不确定性护城河；中国全面禁令但灰色活动持续。理解监管需要"博弈论"而非"合规清单"。
+        <span class="zh-inline">Studying NODE 8 (regulation) reveals: Regulatory differences across countries are not "backward", but deliberate "regulatory arbitrage". Hong Kong/Singapore/Dubai attract exchanges/projects with lenient policies; SEC/CFTC create uncertainty moats through enforcement.</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">监管套利</span>
+        <span class="round-tag">博弈论</span>
+        <span class="round-tag">地缘监管</span>
+      </div>
+    </div>
+
+    <div class="mc-round method">
+      <div class="round-header">
+        <span class="round-number">Round 24</span>
+        <span class="round-title">Hub框架完成：从"研究文档"到"认知中枢"</span>
+        <span class="round-phase">Phase 2 · 方法论#5</span>
+      </div>
+      <div class="round-content">
+        框架收敛：Hub不是一个报告，而是"认知中枢"。包含：①8个价值链节点(结构性理解)②22个认知代理人(动态信号)③信号追踪器(量化监控)④决策复盘(交易反馈)⑤元思考(认知进化)。与半导体Hub共享同一框架设计，实现跨行业比较。
+        <span class="zh-inline">Framework convergence: Hub is not a report, but a "cognitive hub". Contains: ① 8 value chain nodes (structural understanding) ② 22 cognitive agents (dynamic signals) ③ Signal tracker (quantitative monitoring) ④ Decision reviews (trading feedback) ⑤ Metacognition (cognitive evolution).</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">Hub框架</span>
+        <span class="round-tag">认知中枢</span>
+        <span class="round-tag">框架收敛</span>
+      </div>
+    </div>
+
+    <div class="mc-round bias">
+      <div class="round-header">
+        <span class="round-number">Round 25</span>
+        <span class="round-title">数据时效性陷阱：$3.2T市场规模是"快照"还是"趋势"？</span>
+        <span class="round-phase">Phase 2 · 偏差纠正#8</span>
+      </div>
+      <div class="round-content">
+        V3报告使用$3.2T总市值。但BTC从$69K高点跌至$60K区间，ETH从$4K跌至$3K+，整个加密市场在研究期间处于"减半后回调期"。这个数字是快照，不是趋势。需要标注：市场数据有24-48小时时效性限制。
+        <span class="zh-inline">V3 report uses $3.2T total market cap. But BTC dropped from $69K to $60K range, ETH from $4K to $3K+ during research. This number is a snapshot, not a trend. Need to label: Market data has 24-48 hour时效性限制.</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">数据时效</span>
+        <span class="round-tag">市场快照</span>
+        <span class="round-tag">偏差警告</span>
+      </div>
+    </div>
+
+    <div class="mc-round insight">
+      <div class="round-header">
+        <span class="round-number">Round 26</span>
+        <span class="round-title">交易信号整合：从"研究"到"交易"的闭环</span>
+        <span class="round-phase">Phase 2 · 认知闭环</span>
+      </div>
+      <div class="round-content">
+        Hub最终目标：把行业研究转化为可执行交易信号。信号来源：①减半周期阶段判断②ETF资金流方向③稳定币供应量变化(领先指标)④DeFi TVL趋势⑤监管事件日历。信号追踪器把这些量化指标整合到仪表盘。
+        <span class="zh-inline">Hub's ultimate goal: Convert industry research into executable trading signals. Signal sources: ① Halving cycle phase judgment ② ETF fund flow direction ③ Stablecoin supply changes (leading indicator) ④ DeFi TVL trends ⑤ Regulatory event calendar.</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">交易信号</span>
+        <span class="round-tag">闭环</span>
+        <span class="round-tag">量化指标</span>
+      </div>
+    </div>
+
+    <div class="mc-round bias">
+      <div class="round-header">
+        <span class="round-number">Round 27</span>
+        <span class="round-title">华人/亚洲视角的系统性低估：需要专门的数据策展</span>
+        <span class="round-phase">Phase 2 · 偏差纠正#9</span>
+      </div>
+      <div class="round-content">
+        反思研究过程：亚洲/华人代理人的数据质量普遍低于美国/西方(2-3/5 vs 4-5/5)。根源：①语言障碍②中国项目公开数据少③信息源策展不足。决定创建专门的"亚洲/新兴市场数据策展"文档(blockchain_asia_data_curation.html)来弥补这个系统性缺口。
+        <span class="zh-inline">Reflection: Asian/Chinese agents' data quality generally lower than US/Western (2-3/5 vs 4-5/5). Root causes: ① Language barrier ② Chinese projects have less public data ③ Insufficient information source curation. Decision: Create dedicated "Asia/Emerging Market Data Curation" document.</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">亚洲数据</span>
+        <span class="round-tag">策展缺口</span>
+        <span class="round-tag">系统性偏见</span>
+      </div>
+    </div>
+
+    <div class="mc-round cognitive">
+      <div class="round-header">
+        <span class="round-number">Round 28</span>
+        <span class="round-title">从BTC到稳定币到资产上链：研究的"三阶段叙事"</span>
+        <span class="round-phase">Phase 2 · 最终认知</span>
+      </div>
+      <div class="round-content">
+        最终整合：BTC/区块链的完整叙事是三个阶段的演进：①BTC作为数字黄金(宏观储备资产，减半周期+ETF)②稳定币作为链上美元(金融基础设施，跨境支付+储蓄)③RWA代币化作为真实资产入口(机构级采用，代币化债券+股权+基金)。这三个阶段在当前时间点同时存在，构成完整的行业全景。
+        <span class="zh-inline">Final integration: BTC/blockchain's complete narrative is three-stage evolution: ① BTC as digital gold (macro reserve asset, halving cycle + ETF) ② Stablecoins as on-chain USD (financial infrastructure) ③ RWA tokenization as real asset gateway (institutional adoption). These three stages coexist at current moment.</span>
+      </div>
+      <div class="round-tags">
+        <span class="round-tag">三阶段叙事</span>
+        <span class="round-tag">BTC→稳定币→RWA</span>
+        <span class="round-tag">完整全景</span>
+      </div>
+    </div>
+
+    <!-- ═══════════ §5 综合 ═══════════ -->
+    <div class="section-header" id="synthesis">
+      <h2><span class="section-num">Synthesis</span>Key Learnings<span class="zh">综合总结 &mdash; 关键教训</span></h2>
+    </div>
+
+    <div class="grid-2">
+      <div class="card" style="border-left: 3px solid var(--accent);">
+        <strong style="color:var(--accent);">12项偏差纠正 Summary</strong>
+        <div class="card-desc" style="margin-top:0.5rem;">
+          <ul style="margin:0;padding-left:1.2rem;font-size:0.82rem;line-height:1.6;color:var(--text-secondary);">
+            <li>BTC定位：从"货币"到"宏观储备资产"</li>
+            <li>框架革命：从"按币种"到"按价值链"</li>
+            <li>节点扩展：从5个到8个节点</li>
+            <li>TRON低估：3.3亿账户被英文来源忽略</li>
+            <li>巴西市场：90%是稳定币储蓄，非投机</li>
+            <li>中间件缺失：Chainlink/LayerZero价值被低估</li>
+            <li>CEX vs DEX：监管逻辑差异需要拆分</li>
+            <li>RWA爆发：从"小众实验"到"主流量产"</li>
+            <li>数据质量：跨市场比较存在巨大置信区间</li>
+            <li>亚洲代理人：系统性数据缺口</li>
+            <li>叙事反转：BTC周期性叙事演变</li>
+            <li>数据时效：$3.2T是快照非趋势</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card" style="border-left: 3px solid var(--green);">
+        <strong style="color:var(--green);">4大转折点 Turning Points</strong>
+        <div class="card-desc" style="margin-top:0.5rem;">
+          <ul style="margin:0;padding-left:1.2rem;font-size:0.82rem;line-height:1.6;color:var(--text-secondary);">
+            <li><strong>Round 05:</strong> 从"按币种"到"按价值链"的框架革命</li>
+            <li><strong>Round 13:</strong> 交易所节点分裂：CEX vs DEX</li>
+            <li><strong>Round 19:</strong> 从"研究人物"到"认知代理人"的认知升级</li>
+            <li><strong>Round 28:</strong> BTC→稳定币→RWA的三阶段叙事整合</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="border-left: 3px solid #ab47bc; margin-top:1rem;">
+      <strong style="color:#ab47bc;">5大方法论贡献 Methodological Contributions</strong>
+      <div class="card-desc" style="margin-top:0.5rem;">
+        <ul style="margin:0;padding-left:1.2rem;font-size:0.82rem;line-height:1.6;color:var(--text-secondary);">
+          <li><strong>代理人选择标准:</strong> 行业影响者≠投资者。选择标准：改变格局+数据丰富+认知独特</li>
+          <li><strong>5分制评级:</strong> 信息丰富度+认知独特性+行业影响力+数据可验证性</li>
+          <li><strong>地域分布监控:</strong> 追踪代理人的地域构成，防止单一视角偏见</li>
+          <li><strong>Hub框架设计:</strong> 节点+代理人+信号追踪+复盘+元思考的五位一体</li>
+          <li><strong>数据时效标注:</strong> 所有市场数据必须标注时效限制</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ═══════════ §6 方法论 Lessons ═══════════ -->
+    <div class="section-header" id="lessons">
+      <h2><span class="section-num">Lessons</span>Methodology Transfer<span class="zh">方法论迁移 &mdash; 从半导体到区块链</span></h2>
+    </div>
+
+    <div class="advisory-box" style="border-left-color: var(--knowledge); background: rgba(91,155,213,0.05);">
+      <strong style="color:var(--knowledge);">半导体→区块链：可迁移的方法论</strong><br>
+      <ul style="margin:0.5rem 0 0 1.2rem;font-size:0.85rem;line-height:1.7;color:var(--text-secondary);">
+        <li><strong>Top-down L3框架:</strong> 行业全景→价值链节点→认知代理人，完全可复用</li>
+        <li><strong>价值链思维:</strong> 从"沙子到iPhone"→从"挖矿到监管"，抽象层次一致</li>
+        <li><strong>代理人网络:</strong> 22个代理人的地域分布策略对所有行业适用</li>
+        <li><strong>Hub框架:</strong> 节点+代理人+信号追踪+复盘+元思考，可复制到任何L3研究</li>
+      </ul>
+      <span class="zh">Top-down L3 framework, value chain thinking, agent network strategy, and Hub framework are all transferable to any future L3 industry research.</span>
+    </div>
+
+    <div class="advisory-box" style="border-left-color: var(--red); background: rgba(244,67,54,0.05); margin-top:0.75rem;">
+      <strong style="color:var(--red);">局限性 Limitations</strong><br>
+      <ul style="margin:0.5rem 0 0 1.2rem;font-size:0.85rem;line-height:1.7;color:var(--text-secondary);">
+        <li><strong>NODE 7 DeFi无专属代理人:</strong> 需要Aave/Uniswap创始人补充</li>
+        <li><strong>#22 MiCA代表未定:</strong> 欧洲监管视角覆盖不足</li>
+        <li><strong>矿池运营者缺失:</strong> F2Pool/AntPool创始人未被纳入</li>
+        <li><strong>亚洲DeFi空白:</strong> PancakeSwap中国创始人信息极难获取</li>
+        <li><strong>数据时效性:</strong> 行业变化速度极快，报告需要季度更新</li>
+      </ul>
+      <span class="zh">NODE 7 DeFi has no dedicated agent, #22 MiCA rep TBD, mining pool operators missing, Asian DeFi gap, data时效性 requires quarterly updates.</span>
+    </div>
+
+    <!-- Footer -->
+    <div class="page-footer">
+      <a href="blockchain_hub.html">&larr; Back to Blockchain Hub</a>
+      <div style="margin-top:0.5rem;">28 Rounds Industry Metacognition · Blockchain Research Hub · 2026-03-21</div>
+    </div>
+
+  </main>
+
+  <!-- ===== Right Sidebar: Meta-cognitive ===== -->
+  <aside class="notes-sidebar">
+    <h4>Meta-cognitive Notes</h4>
+
+    <div class="meta-note">
+      <div class="note-label strength">Process</div>
+      <p>28轮元思考记录了从"为什么选BTC/区块链"到"Hub框架完成"的完整认知旅程。核心转折点：Round 05的框架革命(Round 05)、Round 13的节点分裂、Round 19的代理人概念升级。
+        <span class="zh">28 rounds document complete cognitive journey from "why BTC/blockchain?" to "Hub framework complete". Key turning points: Round 05 framework revolution, Round 13 node split, Round 19 agent concept upgrade.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label pattern">Pattern</div>
+      <p>偏差纠正贯穿始终：12项系统性偏见被识别和记录。最大偏见来源：英文数据源对亚洲/新兴市场的系统性低估，导致TRON、巴西稳定币储蓄、尼日利亚$921亿市场被严重忽视。
+        <span class="zh">Bias corrections throughout: 12 systematic biases identified and documented. Largest bias source: English data sources systematically underestimating Asia/emerging markets.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label risk">Data Gap</div>
+      <p>22个代理人中，亚洲/华人代理人数据质量(2-3/5)显著低于美国/西方(4-5/5)。根源：语言障碍+信息获取限制。需要专门的数据策展文档(blockchain_asia_data_curation.html)弥补系统性缺口。
+        <span class="zh">Among 22 agents, Asian/Chinese agent data quality (2-3/5) significantly lower than US/Western (4-5/5). Root: language barrier + information access restrictions.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label suggestion">Next Step</div>
+      <p>Hub框架已就位。下一步：①逐个创建NODE报告(从NODE 1挖矿开始)②每个NODE走Phase 0→2完整流程③补充NODE 7 DeFi代理人(Aave/Uniswap创始人)④创建亚洲数据策展文档。持续迭代，不要停止。
+        <span class="zh">Hub framework ready. Next: ① Create NODE reports one by one (start with NODE 1 Mining) ② Each NODE goes through Phase 0→2 ③ Supplement NODE 7 DeFi agents ④ Create Asia data curation document.</span></p>
+    </div>
+  </aside>
+
+</div>
+
+<!-- Sidebar active state -->
+<script>
+const sections = document.querySelectorAll('.section-header[id]');
+const navLinks = document.querySelectorAll('.sidebar nav ul li a[href^="#"]');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + entry.target.id) link.classList.add('active');
+      });
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+
+<script src="../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../lib/reading-mode.js"></script>
+</body>
+</html>

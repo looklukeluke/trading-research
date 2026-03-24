@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Node 6: 本地服务 Local Services — Metacognition 元思考过程</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../internet_shared.css">
+<style>
+  /* ── 页面结构 ── */
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  @media (max-width:900px) {
+    .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); }
+    .sidebar.open { left:0; }
+    .hamburger-btn { display:block; }
+    .main-content { padding:2rem 1rem 4rem; }
+  }
+
+  /* ── 内容卡片 ── */
+  .meta-card { border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:1.1rem 1.3rem; margin-bottom:0.75rem; background:var(--bg-surface); }
+  .meta-card h3 { font-size:0.95rem; font-weight:590; margin-bottom:0.5rem; color:var(--text-primary); }
+  .meta-card p { font-size:0.82rem; color:var(--text-secondary); line-height:1.6; margin-bottom:0.5rem; }
+
+  /* ── 偏差标签 ── */
+  .bias-tag { display:inline-block; padding:0.15rem 0.5rem; border-radius:4px; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
+  .bias-confirmed { background:rgba(76,175,80,0.15); color:var(--tier-high); }
+  .bias-warning   { background:rgba(255,193,7,0.15);  color:var(--tier-medium); }
+  .bias-critical  { background:rgba(244,67,54,0.15);  color:var(--tier-low); }
+
+  /* ── 置信条 ── */
+  .confidence-bar { display:flex; align-items:center; gap:0.5rem; margin:0.5rem 0; }
+  .conf-track { flex:1; height:6px; background:var(--border-subtle); border-radius:3px; overflow:hidden; }
+  .conf-fill { height:100%; border-radius:3px; }
+  .conf-label { font-size:0.72rem; font-weight:590; color:var(--text-tertiary); min-width:2.5rem; }
+
+  /* ── 缺口项 ── */
+  .gap-item { border-left:3px solid var(--tier-low); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(244,67,54,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+
+  /* ── 交叉引用 ── */
+  .cross-ref { border-left:3px solid var(--knowledge); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(91,155,213,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+
+  /* ── 决策日志 ── */
+  .decision-log { font-size:0.78rem; color:var(--text-tertiary); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:0.8rem 1rem; background:var(--bg-elevated); margin-bottom:0.75rem; }
+
+  body.embedded .sidebar { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+</style>
+</head>
+<body>
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="page-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <a href="../internet_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Node 6: 本地服务<br>Local Services<br>Metacognition 元思考</div>
+    <h4>Contents</h4>
+    <nav><ul>
+      <li><a href="#definition">1 节点定义与边界 Definition</a></li>
+      <li><a href="#companies">2 关键公司归类 Companies</a></li>
+      <li><a href="#biases">3 认知偏差 Biases</a></li>
+      <li><a href="#updown">4 上下游交叉 Up‑down</a></li>
+      <li><a href="#gaps">5 信息缺口 Gaps</a></li>
+      <li><a href="#quality">6 质量评估 Quality</a></li>
+      <li><a href="#log">7 决策日志 Decision Log</a></li>
+    </ul></nav>
+    <h4>Related</h4>
+    <nav><ul>
+      <li><a href="node6_local_services_profile.html">Node 6 Profile</a></li>
+      <li><a href="sources_v4.html">Sources V4</a></li>
+    </ul></nav>
+  </aside>
+  <main class="main-content">
+    <header class="page-header">
+      <h1>Node 6: 本地服务 Local Services — Metacognition<span style="display:block;font-size:0.85rem;font-weight:400;color:var(--text-tertiary);margin-top:0.2rem;">元思考过程 — 研究中的认知审计</span></h1>
+      <p style="font-size:0.82rem;color:var(--text-quaternary);">Generated: 2026‑03‑22 &middot; Part of Blockchain Research Hub</p>
+    </header>
+
+    <!-- §1 节点定义与边界 -->
+    <div class="meta-card" id="definition">
+      <h3>节点定义与边界 / Node Definition & Boundaries</h3>
+      <p><strong>定义：</strong> 本地服务节点（Local Services）涵盖通过线上平台在特定地理范围内向终端用户提供实体商品或上门服务的公司。这类服务强调“最后一公里”交付、即时可用性以及线下体验的结合。</p>
+      <p><strong>Definition:</strong> The Local Services node encompasses companies that use online platforms to deliver physical goods or on‑site services within a defined geographic area. Emphasis is placed on last‑mile delivery, immediacy, and integration of offline experiences.</p>
+      <p><strong>边界 / Boundaries：</strong></p>
+      <ul>
+        <li><strong>包含 / Included：</strong>本地配送（餐饮、生鲜、零售），本地生活服务（保洁、维修、搬家），本地出行（打车、共享单车），本地玩乐（现场活动门票）。</li>
+        <li><strong>排除 / Excluded：</strong>跨国电商平台（如 Amazon Global），纯信息聚合平台（如 Yelp），不涉及实物交付的纯内容平台。</li>
+      </ul>
+      <p><strong>Excluded:</strong> Cross‑border e‑commerce platforms (e.g., Amazon Global), pure information aggregators (e.g., Yelp), and non‑physical content platforms.</p>
+    </div>
+
+    <!-- §2 关键公司归类 -->
+    <div class="meta-card" id="companies">
+      <h3>关键公司归类 / Key Company Categorization</h3>
+      <p>以下列出本节点涉及的主要公司及其细分领域（双语）：</p>
+      <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+        <thead>
+          <tr style="background:var(--bg-elevated);">
+            <th style="padding:0.4rem 0.6rem;text-align:left;">公司 / Company</th>
+            <th style="padding:0.4rem 0.6rem;text-align:left;">细分领域 / Sub‑sector</th>
+            <th style="padding:0.4rem 0.6rem;text-align:left;">备注 / Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-subtle);">DoorDash</td>
+            <td style="padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-subtle);">本地餐饮配送 / Local Food Delivery</td>
+            <td style="padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-subtle);">美国市场领先，扩展至杂货 / Leading US market, expanding to groceries</td>
+          </tr>
+          <tr>
+            <td style="padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-subtle);">Uber Eats</td>
+            <td style="padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-subtle);">本地餐饮配送 / Local Food Delivery</td>
+            <td style="padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-subtle);">全球覆盖，整合 Uber 运力 / Global reach, integrated Uber capacity</td>
+          </tr>
+          <tr>
+            <td style="padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-subtle);">Instacart</td>
+            <td style="padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-subtle);">本地零售（生鲜/杂货）/ Local Retail (Grocery)</td>
+            <td style="padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-subtle);">合作伙伴包括 Walmart、Costco / Partners include Walmart, Costco</td>
+          </tr>
+          <tr>
+            <td style="padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-subtle);">Gopuff</td>
+            <td style="padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-subtle);">即时零售（零食、饮料）/ Instant Retail (Snacks, Beverages)</td>
+            <td style="padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-subtle);">自有仓库网络 / Own micro‑fulfillment network</td>
+          </tr>
+          <tr>
+            <td style="padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-subtle);">TaskRabbit</td>
+            <td style="padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-subtle);">本地生活服务（搬家、装配）/ Local Lifestyle Services</td>
+            <td style="padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-subtle);">以“按需技能”模式 / “On‑demand skill” model</td>
+          </tr>
+          <tr>
+            <td style="padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-subtle);">Handy</td>
+            <td style="padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-subtle);">本地保洁、维修 / Local Cleaning & Repair</td>
+            <td style="padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-subtle);">与 Angie's List 合作 / Partnership with Angie's List</td>
+          </tr>
+          <tr>
+            <td style="padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-subtle);">Lyft</td>
+            <td style="padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-subtle);">本地出行（打车）/ Local Mobility (Ride‑hailing)</td>
+            <td style="padding:0.4rem 0.6rem;border-bottom:1px solid var(--border-subtle);">美国第二大平台 / Second‑largest US platform</td>
+          </tr>
+          <tr>
+            <td style="padding:0.4rem 0.6rem;">Didi Chuxing</td>
+            <td style="padding:0.4rem 0.6rem;">本地出行 / Local Mobility</td>
+            <td style="padding:0.4rem 0.6rem;">覆盖中国、拉美 / Covers China, LATAM</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- §3 认知偏差 -->
+    <div class="meta-card" id="biases">
+      <h3>认知偏差 / Cognitive Biases</h3>
+      <p>在划分本地服务节点时，研究团队可能受到以下认知偏差的影响（使用标签标注严重程度）：</p>
+      <ul>
+        <li>
+          <span class="bias-tag bias-warning">确认偏差</span> — 倾向于将已知的美国平台（如 DoorDash、Uber Eats）默认划分为本地服务，而忽视新兴市场的同类产品（如 Grab、Gojek）。
+          <span style="font-size:0.75rem;color:var(--text-tertiary);">（Confirmation bias: default to US platforms, neglect emerging‑market peers）</span>
+        </li>
+        <li>
+          <span class="bias-tag bias-critical">生存者偏差</span> — 仅关注当前存活的公司，未系统统计已倒闭或被并购的本地服务平台（如 Foodpanda、Postmates）。
+          <span style="font-size:0.75rem;color:var(--text-tertiary);">（Survivorship bias: only look at surviving firms, ignore defunct ones）</span>
+        </li>
+        <li>
+          <span class="bias-tag bias-warning">可得性启发</span> — 因媒体报道频繁而高估某些平台的规模（如 DoorDash 2020 年疫情期间的急速增长），导致对其业务模型可持续性的误判。
+          <span style="font-size:0.75rem;color:var(--text-tertiary);">（Availability heuristic: over‑estimate platforms with heavy media coverage）</span>
+        </li>
+        <li>
+          <span class="bias-tag bias-confirmed">锚定效应</span> — 在第一次划分时将“本地服务”定义为“外卖+配送”，后续扩展时仍以该定义为基准，导致新出现的本地维修、搬家等服务被边缘化。
+          <span style="font-size:0.75rem;color:var(--text-tertiary);">（Anchoring: initial definition focuses on delivery, later extensions remain anchored）</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- §4 上下游交叉 -->
+    <div class="meta-card" id="updown">
+      <h3>上下游交叉 / Up‑stream & Down‑stream Cross‑references</h3>
+      <p>本地服务节点与其他互联网核心节点之间的关联（交叉验证）如下：</p>
+      <div class="cross-ref">
+        <strong>上游（供应商）</strong> — 为本地服务平台提供关键技术或基础设施的节点：
+        <ul>
+          <li><a href="node2_payments.html">Node 2: 支付系统 Payments</a> — 支付网关、即时结算、加密货币集成。</li>
+          <li><a href="node3_logistics.html">Node 3: 物流 & 供应链 Logistics</a> — 车队管理、路线优化、仓储自动化。</li>
+          <li><a href="node5_mapping.html">Node 5: 地图 & 位置服务 Mapping</a> — 高精度定位、实时路况、地理围栏。</li>
+          <li><a href="node7_cloud.html">Node 7: 云计算 & CDN Cloud</a> — 大规模数据处理、内容分发、低延迟计算。</li>
+        </ul>
+      </div>
+      <div class="cross-ref">
+        <strong>下游（用户）</strong> — 本地服务的直接消费者或衍生需求：
+        <ul>
+          <li><a href="node1_consumer.html">Node 1: 消费者行为 Consumer Behavior</a> — 需求预测、用户画像、忠诚度计划。</li>
+          <li><a href="node4_advertising.html">Node 4: 广告 & 营销 Advertising</a> — 本地化推广、位置‑定向广告。</li>
+          <li><a href="node6_local_services.html">Node 6: 本地服务（自关联）Local Services</a> — 互为供需，形成服务生态。</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- §5 信息缺口 -->
+    <div class="meta-card" id="gaps">
+      <h3>信息缺口 / Information Gaps</h3>
+      <p>当前研究在本地服务节点上存在以下关键缺口（需进一步数据或研究填补）：</p>
+      <div class="gap-item">
+        <strong>缺口 1：新兴市场本地服务渗透率</strong><br>
+        缺乏东南亚、非洲等地区本地服务平台（Grab、Gojek）的公开财务与用户规模数据，导致全球市场份额估算不完整。<br>
+        <em>Gap 1: Emerging‑market local‑service penetration</em> — Limited public financial and user‑scale data for platforms like Grab and Gojek, resulting in incomplete global market share estimates.
+      </div>
+      <div class="gap-item">
+        <strong>缺口 2：零工经济从业者分类与福利</strong><br>
+        对配送员、维修工等零工的身份认定、福利保障及薪酬结构缺乏系统性数据，难以为政策建议提供依据。<br>
+        <em>Gap 2: Gig‑worker classification & benefits</em> — Insufficient systematic data on gig‑worker classification, benefits, and compensation structures.
+      </div>
+      <div class="gap-item">
+        <strong>缺口 3：服务质量的标准化衡量</strong><br>
+        行业内缺乏统一的“服务质量”指标（如准时率、用户满意度），不同平台的报告口径不一致，影响横向比较。<br>
+        <em>Gap 3: Standardized service‑quality metrics</em> — No unified service‑quality KPIs across platforms, hindering cross‑platform comparison.
+      </div>
+      <div class="gap-item">
+        <strong>缺口 4：环境影响与碳排放核算</strong><br>
+        本地服务的“最后一公里”配送对城市碳排放的影响尚未被系统量化，缺少低碳配送模式的实证数据。<br>
+        <em>Gap 4: Environmental impact & carbon accounting</em> — Last‑mile delivery's carbon impact on cities not systematically quantified; lack of low‑carbon delivery model data.
+      </div>
+    </div>
+
+    <!-- §6 质量评估 -->
+    <div class="meta-card" id="quality">
+      <h3>质量评估 / Quality Assessment</h3>
+      <p>对本节点研究质量的量化评估（使用置信条显示每项指标的置信度）：</p>
+
+      <div class="confidence-bar">
+        <span class="conf-label">数据完整度</span>
+        <div class="conf-track">
+          <div class="conf-fill" style="width:78%;background:var(--tier-high);" title="78%"></div>
+        </div>
+        <span class="conf-label">78%</span>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text-secondary);">主要来源于公开财报、媒体报道及公司官网；部分新兴市场的数据缺失。</p>
+      <p style="font-size:0.78rem;color:var(--text-secondary);"><em>Main sources: public earnings, media, corporate sites; some emerging‑market data missing.</em></p>
+
+      <div class="confidence-bar">
+        <span class="conf-label">来源可靠性</span>
+        <div class="conf-track">
+          <div class="conf-fill" style="width:85%;background:var(--tier-high);" title="85%"></div>
+        </div>
+        <span class="conf-label">85%</span>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text-secondary);">以权威财经媒体（Bloomberg、Reuters）和公司官方发布为主，第三方研究报告占比约 15%。</p>
+      <p style="font-size:0.78rem;color:var(--text-secondary);"><em>Primarily authoritative financial media and official corporate releases; third‑party research accounts for ~15%.</em></p>
+
+      <div class="confidence-bar">
+        <span class="conf-label">覆盖范围</span>
+        <div class="conf-track">
+          <div class="conf-fill" style="width:72%;background:var(--tier-medium);" title="72%"></div>
+        </div>
+        <span class="conf-label">72%</span>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text-secondary);">覆盖北美、欧洲、亚太主要市场；中东、非洲及拉美部分地区的覆盖仍不足。</p>
+      <p style="font-size:0.78rem;color:var(--text-secondary);"><em>Covers major North American, European, and Asia‑Pacific markets; coverage in MENA, Africa, and parts of LATAM remains insufficient.</em></p>
+
+      <div class="confidence-bar">
+        <span class="conf-label">一致性</span>
+        <div class="conf-track">
+          <div class="conf-fill" style="width:80%;background:var(--tier-high);" title="80%"></div>
+        </div>
+        <span class="conf-label">80%</span>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text-secondary);">同类数据在不同来源之间基本一致，差异主要体现在统计口径和报告时间。</p>
+      <p style="font-size:0.78rem;color:var(--text-secondary);"><em>Data largely consistent across sources; discrepancies stem from differing statistical definitions and reporting periods.</em></p>
+
+      <div class="confidence-bar">
+        <span class="conf-label">时效性</span>
+        <div class="conf-track">
+          <div class="conf-fill" style="width:90%;background:var(--tier-high);" title="90%"></div>
+        </div>
+        <span class="conf-label">90%</span>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text-secondary);">大部分数据为 2023‑2025 年的最新公开信息，少数历史数据用于趋势分析。</p>
+      <p style="font-size:0.78rem;color:var(--text-secondary);"><em>Majority of data from latest public info 2023‑2025; some historical data used for trend analysis.</em></p>
+    </div>
+
+    <!-- §7 决策日志 -->
+    <div class="meta-card" id="log">
+      <h3>决策日志 / Decision Log</h3>
+      <div class="decision-log">
+        <strong>2026‑03‑22 – 初始节点划分 / Initial Node Partitioning</strong><br>
+        决定将 DoorDash、Uber Eats、Instacart、Gopuff 纳入本地服务节点，因其核心业务为在特定城市内提供即时配送服务。<br>
+        <em>Decision: Include DoorDash, Uber Eats, Instacart, Gopuff in Local Services node due to core instant‑delivery operations within defined cities.</em>
+      </div>
+      <div class="decision-log">
+        <strong>2026‑03‑22 – 平台 vs. 提供者区分 / Platform vs. Provider Distinction</strong><br>
+        为避免将平台本身错误归类为服务提供者，决定在分类时标注“平台型”与“自营型”，并在后续分析中保持一致。<br>
+        <em>Decision: Tag companies as “platform” or “own‑operations” to avoid misclassifying platforms as service providers; maintain consistency in later analysis.</em>
+      </div>
+      <div class="decision-log">
+        <strong>2026‑03‑22 – 排除 Amazon Fresh / Exclusion of Amazon Fresh</strong><br>
+        Amazon Fresh 虽提供本地配送，但其业务高度整合全球供应链，决定将其归入全球零售节点（Node 8: Global Retail）而非本地服务。<br>
+        <em>Decision: Amazon Fresh is excluded from Local Services because its operations are heavily integrated with global supply chains; assign to Global Retail node (Node 8).</em>
+      </div>
+      <div class="decision-log">
+        <strong>2026‑03‑22 – 新增本地维修/搬家分类 / Adding Local Repair & Moving Sub‑categories</strong><br>
+        TaskRabbit 与 Handy 代表本地技能型服务，决定在子分类中加入“本地生活服务”。<br>
+        <em>Decision: TaskRabbit and Handy represent local skill‑based services; add sub‑category “Local Lifestyle Services”.</em>
+      </div>
+      <div class="decision-log">
+        <strong>2026‑03‑22 – 跨节点关联标记 / Cross‑node Link Tagging</strong><br>
+        为提升可追溯性，所有跨节点关联（如本地服务 ↔ 支付、物流）均使用 <code>cross‑ref</code> 样式标记。<br>
+        <em>Decision: All cross‑node links (e.g., Local Services ↔ Payments, Logistics) are marked with the <code>cross‑ref</code> style for traceability.</em>
+      </div>
+    </div>
+
+    <footer style="margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border-subtle);font-size:0.72rem;color:var(--text-quaternary);">
+      <p>Metacognition report &middot; <a href="../internet_hub.html">Blockchain Hub</a> &middot; 2026‑03‑22</p>
+    </footer>
+  </main>
+</div>
+<script>
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lyn Alden — 素材策展地图 V4</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  /* Page-specific V4 extensions (~75 lines) */
+  .priority-box { border:1px solid rgba(248,168,72,0.3); border-left:3px solid var(--accent); border-radius:var(--radius-sm); padding:1.25rem 1.5rem; margin-bottom:2rem; background:var(--bg-surface); }
+  .priority-box h2 { color:var(--accent); margin-top:0; font-size:1.1rem; font-weight:590; }
+  .priority-box ol { margin-bottom:0; padding-left:1.2rem; }
+  .priority-box li { margin-bottom:0.6rem; line-height:1.5; }
+  .time-badge { display:inline-block; padding:0.1rem 0.5rem; border-radius:10px; font-size:0.7rem; font-weight:590; margin-right:0.3rem; background:var(--accent); color:var(--bg-base); }
+  .anno { position:absolute; left:1rem; right:1rem; }
+  .anno.meta-note { padding:0.6rem 0.75rem; border-left:2px solid var(--accent); border-radius:0 6px 6px 0; background:rgba(248,168,72,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.meta-note:hover { box-shadow:0 0 0 1px var(--accent); }
+  .anno.know-note { padding:0.6rem 0.75rem; border-left:2px solid var(--knowledge); border-radius:0 6px 6px 0; background:rgba(91,155,213,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.know-note:hover { box-shadow:0 0 0 1px var(--knowledge); }
+  .anno .note-label { display:inline-block; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--bg-base); background:var(--accent); padding:0.1rem 0.4rem; border-radius:3px; margin-bottom:0.3rem; }
+  .anno .note-label.know { background:var(--knowledge); color:white; }
+  .anno .mn-head { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
+  .anno .mn-title { flex:1; font-weight:510; font-size:0.75rem; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .anno .mn-fold { font-size:0.55rem; color:var(--text-quaternary); transition:transform 0.2s; margin-left:auto; }
+  .anno.open .mn-fold { transform:rotate(180deg); }
+  .anno .mn-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+  .anno.open .mn-body { max-height:2000px; }
+  .anno .mn-body p { font-size:0.78rem; margin-bottom:0.3rem; color:var(--text-secondary); }
+  .anno.flash { animation:noteFlash 1.5s ease; }
+  @keyframes noteFlash { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--accent);} }
+  .anno.know-note.flash { animation:noteFlashBlue 1.5s ease; }
+  @keyframes noteFlashBlue { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--knowledge);} }
+  mark.hl-know { background:rgba(91,155,213,0.12); border-bottom:1.5px solid var(--knowledge); padding:0 2px; border-radius:2px; color:inherit; cursor:pointer; transition:background 0.15s; }
+  mark.hl-know:hover { background:rgba(91,155,213,0.28); }
+  .nref { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; font-size:0.48rem; font-weight:700; cursor:pointer; margin-left:1px; vertical-align:super; transition:transform 0.15s; text-decoration:none; background:var(--knowledge); color:white; }
+  .nref:hover { transform:scale(1.25); box-shadow:0 0 6px rgba(91,155,213,0.4); }
+  .top-controls { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; padding:0.35rem 0.7rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); font-size:0.72rem; flex-wrap:wrap; }
+  .top-controls .tc-label { font-weight:590; color:var(--knowledge); }
+  .top-controls button { padding:0.15rem 0.45rem; border-radius:4px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-tertiary); cursor:pointer; font-size:0.68rem; font-family:inherit; transition:all 0.15s; }
+  .top-controls button:hover { border-color:var(--knowledge); color:var(--text-primary); }
+  .top-controls button.active { background:var(--knowledge-dim); color:var(--knowledge); border-color:rgba(91,155,213,0.3); }
+  .top-controls .tc-sep { color:var(--border-default); margin:0 0.15rem; }
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .notes-sidebar { position:relative; width:320px; min-width:320px; padding:1.25rem 1rem; border-left:1px solid var(--border-subtle); background:var(--bg-elevated); }
+  .notes-sidebar-header { position:sticky; top:0; z-index:60; background:var(--bg-elevated); padding-bottom:0.5rem; border-bottom:1px solid var(--border-subtle); margin-bottom:0.75rem; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  .notes-toggle-btn { position:fixed; right:1rem; bottom:1.5rem; z-index:200; width:44px; height:44px; border-radius:50%; border:1px solid var(--border-default); background:var(--bg-surface); color:var(--text-secondary); cursor:pointer; font-size:1.1rem; display:none; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.4); }
+  .notes-close-btn { float:right; background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:1.1rem; padding:0; display:none; }
+  @media (max-width:1200px) { .notes-close-btn { display:block; } .notes-sidebar { position:fixed; right:0; top:0; height:100vh; overflow-y:auto; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.4); z-index:150; } .notes-sidebar.ns-closed { transform:translateX(100%); box-shadow:none; } .notes-toggle-btn { display:flex; } }
+  .notes-overlay-right { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:140; }
+  .notes-overlay-right.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  @media (min-width:1600px) { .main-content { max-width:1000px; } .notes-sidebar { width:360px; min-width:360px; } }
+  .rel-card { border:1px solid var(--border-subtle); border-radius:var(--radius-md); background:var(--bg-elevated); margin-bottom:0.75rem; }
+  .rel-card summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  .rel-card[open] summary { color:var(--accent); }
+  .rel-card .rel-body { padding:0 1rem 1rem; font-size:0.82rem; color:var(--text-secondary); line-height:1.6; }
+  .arc-item { border-left:3px solid var(--accent); padding:0.6rem 1rem; margin-bottom:0.75rem; background:rgba(66,165,245,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+  .arc-item strong { color:var(--text-primary); }
+  .question-box { border:2px solid var(--knowledge); background:rgba(91,155,213,0.05); border-radius:var(--radius-md); padding:1.5rem; text-align:center; margin:2rem 0; }
+  .question-box blockquote { border:none; margin:0; padding:0; }
+  .question-box p { font-size:1rem; font-weight:510; color:var(--text-primary); }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; margin-bottom:1rem; }
+  th { text-transform:uppercase; font-size:0.72rem; font-weight:510; color:var(--text-quaternary); letter-spacing:0.04em; text-align:left; padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-default); }
+  td { padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-subtle); vertical-align:top; color:var(--text-secondary); }
+  tr:hover td { background:var(--bg-elevated); }
+  .url-col { max-width:200px; word-break:break-all; }
+  .zh { display:block; font-size:0.85em; color:var(--text-tertiary); margin-top:0.15em; }
+  .zh-inline { font-size:0.85em; color:var(--text-tertiary); }
+  details { border:1px solid var(--border-subtle); background:var(--bg-elevated); border-radius:var(--radius-sm); padding:0; margin-bottom:0.75rem; }
+  details summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  details[open] summary { color:var(--accent); }
+  details > div, details > p { padding:0 1rem 1rem; font-size:0.82rem; line-height:1.6; color:var(--text-secondary); }
+  body.embedded .sidebar, body.embedded .notes-sidebar, body.embedded .hamburger-btn, body.embedded .notes-toggle-btn { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ========== LEFT SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Lyn Alden<br>素材策展地图 V4</div>
+
+    <h4>Contents</h4>
+    <nav>
+      <ul>
+        <li><a href="#priority"><span class="toc-num">&#9733;</span>如果只有2小时</a></li>
+        <li><a href="#analysts"><span class="toc-num">1</span>最佳分析师</a></li>
+        <li><a href="#longform"><span class="toc-num">2</span>必读长文/书籍</a></li>
+        <li><a href="#podcasts"><span class="toc-num">3</span>播客与视频</a></li>
+        <li><a href="#primary"><span class="toc-num">4</span>一手资料</a></li>
+        <li><a href="#relationships"><span class="toc-num">5</span>关键关系网</a></li>
+        <li><a href="#narratives"><span class="toc-num">6</span>叙事弧</a></li>
+        <li><a href="#gaps"><span class="toc-num">7</span>信息空白</a></li>
+        <li><a href="#quality"><span class="toc-num">8</span>质量评估</a></li>
+      </ul>
+    </nav>
+
+    <h4>Related</h4>
+    <nav>
+      <ul>
+        <li><a href="07_lyn_alden.html">Lyn Alden Profile</a></li>
+        <li><a href="07_lyn_alden_metacognition.html">Metacognition</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+
+    <div class="top-controls">
+      <span class="tc-label">&#128218; 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <header class="page-header">
+      <h1>Lyn Alden — 素材策展地图 V4</h1>
+      <p class="subtitle">Research Date: 2026-03-22 &nbsp;|&nbsp; 核心信源: 10 &middot; 播客: 9 &middot; 一手资料: 7 &middot; 关系: 8<br>
+      <span class="zh-inline">财政主导论 + 货币史框架的独立宏观分析师</span></p>
+      <div class="badge-row">
+        <span class="badge badge-core">核心: lynalden.com</span>
+        <span class="badge badge-key">关键: Broken Money</span>
+        <span class="badge badge-freq">高频: FRED/CBO</span>
+      </div>
+    </header>
+
+    <!-- ★ Priority Box -->
+    <div class="priority-box" id="priority">
+      <h2>&#9200; 如果只有2小时 — 推荐阅读路径</h2>
+      <ol>
+        <li><span class="time-badge">30分钟</span><a href="https://lynalden.com" target="_blank">LynAlden.com</a> 阅读免费文章 "Fiscal Dominance and the Future of Money" — 理解其核心框架的精华浓缩</li>
+        <li><span class="time-badge">60分钟</span>收听 <a href="https://www.whatbitcoindid.com" target="_blank">What Bitcoin Did</a> 播客访谈 — 最放松、最深入的对话形式</li>
+        <li><span class="time-badge">30分钟</span>浏览 <a href="https://x.com/LynAldenContact" target="_blank">Twitter/X</a> 最新宏观图表和数据解读</li>
+      </ol>
+    </div>
+
+    <!-- §1 最佳分析师 -->
+    <section id="analysts">
+      <div class="section-header">
+        <h2>1. 最佳分析师与独立研究<span class="zh">Best Analysts &amp; Independent Research</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Lyn Alden Investment Strategy</strong></td>
+            <td>付费订阅通讯</td>
+            <td class="url-col"><a href="https://lynalden.com" target="_blank">lynalden.com</a></td>
+            <td>⭐⭐⭐⭐⭐ <strong>核心</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Lyn Alden Research (Twitter/X)</strong></td>
+            <td>社交媒体</td>
+            <td class="url-col"><a href="https://x.com/LynAldenContact" target="_blank">x.com/LynAldenContact</a></td>
+            <td>⭐⭐⭐⭐⭐ <strong>核心</strong></td>
+          </tr>
+          <tr>
+            <td><strong>FRED</strong></td>
+            <td>政府数据库</td>
+            <td class="url-col"><a href="https://fred.stlouisfed.org" target="_blank">fred.stlouisfed.org</a></td>
+            <td>⭐⭐⭐⭐⭐ <strong>核心</strong></td>
+          </tr>
+          <tr>
+            <td><strong>CBO</strong></td>
+            <td>政府预算分析</td>
+            <td class="url-col"><a href="https://cbo.gov" target="_blank">cbo.gov</a></td>
+            <td>⭐⭐⭐⭐⭐ <strong>核心</strong></td>
+          </tr>
+          <tr>
+            <td><strong>US Treasury Fiscal Data</strong></td>
+            <td>政府财政数据</td>
+            <td class="url-col"><a href="https://fiscaldata.treasury.gov" target="_blank">fiscaldata.treasury.gov</a></td>
+            <td>⭐⭐⭐⭐⭐ <strong>核心</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Blockworks Macro</strong></td>
+            <td>加密宏观媒体</td>
+            <td class="url-col"><a href="https://blockworks.co" target="_blank">blockworks.co</a></td>
+            <td>⭐⭐⭐⭐ 重要</td>
+          </tr>
+          <tr>
+            <td><strong>Real Vision</strong></td>
+            <td>金融视频媒体</td>
+            <td class="url-col"><a href="https://realvision.com" target="_blank">realvision.com</a></td>
+            <td>⭐⭐⭐⭐ 重要</td>
+          </tr>
+          <tr>
+            <td><strong>Bianco Research</strong></td>
+            <td>独立宏观研究</td>
+            <td class="url-col"><a href="https://biancoresearch.com" target="_blank">biancoresearch.com</a></td>
+            <td>⭐⭐⭐⭐ 重要</td>
+          </tr>
+          <tr>
+            <td><strong>Luke Gromen (FFTT)</strong></td>
+            <td>独立宏观研究</td>
+            <td class="url-col"><a href="https://fftt-llc.com" target="_blank">fftt-llc.com</a></td>
+            <td>⭐⭐⭐⭐ 重要</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §2 必读长文/书籍 -->
+    <section id="longform">
+      <div class="section-header">
+        <h2>2. 必读长文与书籍<span class="zh">Must-Read Long-Form &amp; Books</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL/获取方式</th>
+            <th>重要性</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>《Broken Money》</strong></td>
+            <td>著作 (2023)</td>
+            <td class="url-col"><a href="https://amazon.com" target="_blank">Amazon</a> / 官网</td>
+            <td>⭐⭐⭐⭐⭐ <strong>核心</strong></td>
+          </tr>
+          <tr>
+            <td><strong>《The Price of Tomorrow》</strong></td>
+            <td>著作 (Jeff Booth)</td>
+            <td class="url-col"><a href="https://thepriceoftomorrow.com" target="_blank">thepriceoftomorrow.com</a></td>
+            <td>⭐⭐⭐⭐⭐ <strong>核心</strong></td>
+          </tr>
+          <tr>
+            <td><strong>"Fiscal Dominance and the Future of Money"</strong></td>
+            <td>长文</td>
+            <td class="url-col"><a href="https://lynalden.com" target="_blank">LynAlden.com 免费文章</a></td>
+            <td>⭐⭐⭐⭐⭐ <strong>核心</strong></td>
+          </tr>
+          <tr>
+            <td><strong>"The Fraying of the US Global Financial System"</strong></td>
+            <td>长文</td>
+            <td class="url-col"><a href="https://lynalden.com" target="_blank">LynAlden.com</a></td>
+            <td>⭐⭐⭐⭐⭐ <strong>核心</strong></td>
+          </tr>
+          <tr>
+            <td><strong>"Bitcoin as a Savings Technology"</strong></td>
+            <td>长文</td>
+            <td class="url-col"><a href="https://lynalden.com" target="_blank">LynAlden.com</a></td>
+            <td>⭐⭐⭐⭐⭐ <strong>核心</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Ray Dalio《Principles for Big Debt Crises》</strong></td>
+            <td>免费PDF</td>
+            <td class="url-col"><a href="https://principles.com" target="_blank">principles.com</a></td>
+            <td>⭐⭐⭐⭐ 重要</td>
+          </tr>
+          <tr>
+            <td><strong>《The Bitcoin Standard》</strong></td>
+            <td>著作 (Saifedean Ammous)</td>
+            <td class="url-col"><a href="https://saifedean.com" target="_blank">saifedean.com</a></td>
+            <td>⭐⭐⭐⭐ 重要</td>
+          </tr>
+          <tr>
+            <td><strong>CBO《Long-Term Budget Outlook 2024》</strong></td>
+            <td>政府报告</td>
+            <td class="url-col"><a href="https://cbo.gov" target="_blank">cbo.gov</a></td>
+            <td>⭐⭐⭐⭐⭐ <strong>核心</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §3 播客与视频 -->
+    <section id="podcasts">
+      <div class="section-header">
+        <h2>3. 播客与视频<span class="zh">Podcasts &amp; Video</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>What Bitcoin Did (Peter McCormack)</strong></td>
+            <td>播客</td>
+            <td class="url-col"><a href="https://whatbitcoindid.com" target="_blank">whatbitcoindid.com</a></td>
+            <td>⭐⭐⭐⭐⭐ <strong>核心</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Real Vision (Raoul Pal)</strong></td>
+            <td>视频访谈</td>
+            <td class="url-col"><a href="https://realvision.com" target="_blank">realvision.com</a> / YouTube</td>
+            <td>⭐⭐⭐⭐⭐ <strong>核心</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Bankless</strong></td>
+            <td>播客/视频</td>
+            <td class="url-col"><a href="https://banklesshq.com" target="_blank">banklesshq.com</a> / YouTube</td>
+            <td>⭐⭐⭐⭐⭐ <strong>核心</strong></td>
+          </tr>
+          <tr>
+            <td><strong>TFTC (Marty Bent)</strong></td>
+            <td>播客</td>
+            <td class="url-col"><a href="https://tftc.io" target="_blank">tftc.io</a></td>
+            <td>⭐⭐⭐⭐⭐ <strong>核心</strong></td>
+          </tr>
+          <tr>
+            <td><strong>The Pomp Podcast</strong></td>
+            <td>播客</td>
+            <td class="url-col">YouTube / 各平台</td>
+            <td>⭐⭐⭐⭐ 重要</td>
+          </tr>
+          <tr>
+            <td><strong>Forward Guidance (Blockworks)</strong></td>
+            <td>播客</td>
+            <td class="url-col"><a href="https://blockworks.co" target="_blank">blockworks.co</a></td>
+            <td>⭐⭐⭐⭐ 重要</td>
+          </tr>
+          <tr>
+            <td><strong>We Study Billionaires (Preston Pysh)</strong></td>
+            <td>播客</td>
+            <td class="url-col"><a href="https://theinvestorspodcast.com" target="_blank">theinvestorspodcast.com</a></td>
+            <td>⭐⭐⭐⭐ 重要</td>
+          </tr>
+          <tr>
+            <td><strong>Grant Williams' The End Game</strong></td>
+            <td>视频系列</td>
+            <td class="url-col"><a href="https://grant-williams.com" target="_blank">grant-williams.com</a></td>
+            <td>⭐⭐⭐⭐ 重要</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §4 一手资料 -->
+    <section id="primary">
+      <div class="section-header">
+        <h2>4. 一手资料<span class="zh">Primary Sources</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Congressional Testimony</strong></td>
+            <td>政府证词</td>
+            <td class="url-col"><a href="https://congress.gov" target="_blank">congress.gov</a></td>
+            <td>⭐⭐⭐⭐⭐ <strong>核心</strong></td>
+          </tr>
+          <tr>
+            <td><strong>C-SPAN 国会听证录像</strong></td>
+            <td>政府视频</td>
+            <td class="url-col"><a href="https://c-span.org" target="_blank">c-span.org</a></td>
+            <td>⭐⭐⭐⭐⭐ <strong>核心</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Federal Reserve Speeches &amp; Testimony</strong></td>
+            <td>央行文件</td>
+            <td class="url-col"><a href="https://federalreserve.gov" target="_blank">federalreserve.gov</a></td>
+            <td>⭐⭐⭐⭐⭐ <strong>核心</strong></td>
+          </tr>
+          <tr>
+            <td><strong>US Treasury Monthly Statement</strong></td>
+            <td>政府财政报告</td>
+            <td class="url-col"><a href="https://fiscaldata.treasury.gov" target="_blank">fiscaldata.treasury.gov</a></td>
+            <td>⭐⭐⭐⭐⭐ <strong>核心</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Lyn Alden Investment Strategy LLC</strong></td>
+            <td>公司实体</td>
+            <td class="url-col">Delaware 州注册</td>
+            <td>⭐⭐⭐⭐ 重要</td>
+          </tr>
+          <tr>
+            <td><strong>BIS Quarterly Review</strong></td>
+            <td>央行报告</td>
+            <td class="url-col"><a href="https://bis.org" target="_blank">bis.org</a></td>
+            <td>⭐⭐⭐⭐ 重要</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §5 关键关系网 -->
+    <section id="relationships">
+      <div class="section-header">
+        <h2>5. 关键关系网<span class="zh">Key Relationships</span></h2>
+      </div>
+      
+      <details class="rel-card" open>
+        <summary>🧠 思想同盟: Luke Gromen (FFTT) & Jeff Booth</summary>
+        <div class="rel-body">
+          <p><strong>Luke Gromen</strong> — "Forest for the Trees"，与 Alden 并列为"财政主导论"两大独立声音。Gromen 更侧重地缘政治和能源，Alden 更侧重货币史和技术。两人经常同时出现在同一播客，互相交叉验证。</p>
+          <p><strong>Jeff Booth</strong> — 《The Price of Tomorrow》作者，技术通缩论的提出者。Alden 承认其对她理解"为什么央行被迫印钱"的影响。</p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>🎙️ 媒体放大: Peter McCormack & Raoul Pal</summary>
+        <div class="rel-body">
+          <p><strong>Peter McCormack (What Bitcoin Did)</strong> — 最深入的长期访谈关系。McCormack 的访谈风格让 Alden 展现最未经编辑的思考。两人建立了信任关系，Alden 愿意在这里"试水"新观点。</p>
+          <p><strong>Raoul Pal (Real Vision)</strong> — Pal 的"Exponential Age"叙事与 Alden 的宏观框架有重叠，但 Pal 更乐观于所有风险资产，Alden 更聚焦BTC作为特定对冲。</p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>⚡ 领域互动: Michael Saylor & Saifedean Ammous</summary>
+        <div class="rel-body">
+          <p><strong>Michael Saylor</strong> — MicroStrategy 执行主席，企业BTC配置的激进推手。Alden 更谨慎、更宏观。两人在播客中互动，但 Alden 对 Saylor 的"永不出售"策略有微妙保留。</p>
+          <p><strong>Saifedean Ammous</strong> — 《The Bitcoin Standard》作者，奥地利学派BTC叙事的核心人物。Alden 认为自己是从"更主流的宏观经济学"角度到达类似结论。</p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>🏛️ 政策接口: 美国国会</summary>
+        <div class="rel-body">
+          <p>主要为共和党/自由派倾向的议员提供证词，如 Tom Emmer 等。她的独立性使她成为跨党派可接受的专家证人。2023-2024年就数字资产和货币政策在国会作证。</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- §6 叙事弧 -->
+    <section id="narratives">
+      <div class="section-header">
+        <h2>6. 关键叙事弧<span class="zh">Key Narrative Arcs</span></h2>
+      </div>
+      
+      <div class="arc-item">
+        <strong>叙事弧 #1: 财政主导论 (Fiscal Dominance)</strong><br>
+        <span class="zh-inline">核心论点：政府债务/GDP 比率不可持续，央行被迫维持低利率以减轻利息负担，实质上财政需求主导货币政策走向。这将导致货币贬值、通胀结构性上升。</span>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧 #2: 货币史演进 — 从贝壳到比特币</strong><br>
+        <span class="zh-inline">《Broken Money》的核心框架：从货币史角度论证当前法币体系的结构性缺陷，BTC作为技术演进的必然产物，是应对法币腐化的储蓄技术。</span>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧 #3: BTC 作为储蓄技术 (Not Speculation)</strong><br>
+        <span class="zh-inline">区别于投机叙事，Alden 强调BTC在长期储蓄/退休规划中的角色。在财政主导环境下，它是法币贬值的对冲工具，而非短期交易品种。</span>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧 #4: 美国全球金融体系的磨损</strong><br>
+        <span class="zh-inline">分析美元体系长期压力：储备货币地位、贸易逆差、军事支出、地缘政治竞争等多维度因素，论证去全球化趋势不可逆。</span>
+      </div>
+    </section>
+
+    <!-- §7 信息空白 -->
+    <section id="gaps">
+      <div class="section-header">
+        <h2>7. 信息空白 — What Doesn't Exist<span class="zh">Information Gaps</span></h2>
+      </div>
+      
+      <div class="question-box">
+        <blockquote>
+          <p>❓ <strong>关键套利机会</strong>：Alden 的深度分析（尤其是《Broken Money》级别的内容）在中文世界严重缺失。</p>
+          <p style="font-size:0.9rem; margin-top:0.5rem; color:var(--text-secondary);">中文投资者难以获取完整框架 — 这是巨大的信息套利空间。</p>
+        </blockquote>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>空白类别</th>
+            <th>具体描述</th>
+            <th>弥补建议</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>持仓透明度</strong></td>
+            <td>不公开个人投资组合的具体配置、成本基础、调仓时间</td>
+            <td>从文章中推断大致方向</td>
+          </tr>
+          <tr>
+            <td><strong>历史业绩记录</strong></td>
+            <td>无 audited track record；订阅通讯不构成投资顾问关系</td>
+            <td>手动跟踪公开预测并验证</td>
+          </tr>
+          <tr>
+            <td><strong>中文系统内容</strong></td>
+            <td>无《Broken Money》官方中文版；无系统性中文专栏</td>
+            <td>自行翻译关键文章</td>
+          </tr>
+          <tr>
+            <td><strong>实时交易信号</strong></td>
+            <td>不提供具体入场/出场价格、仓位大小</td>
+            <td>结合宏观变量与技术分析</td>
+          </tr>
+          <tr>
+            <td><strong>非美国视角</strong></td>
+            <td>框架高度美国中心；对欧盟、中国、日本分析薄弱</td>
+            <td>补充 Zoltan Pozsar 的分析</td>
+          </tr>
+          <tr>
+            <td><strong>技术细节深度</strong></td>
+            <td>对BTC协议层、Layer 2、具体技术升级分析较浅</td>
+            <td>补充 BTC Core 开发者邮件列表</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §8 质量评估 -->
+    <section id="quality">
+      <div class="section-header">
+        <h2>8. 素材质量评估<span class="zh">Source Quality Assessment</span></h2>
+      </div>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>评估维度</th>
+            <th>评分</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>独立性</strong></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>非注册投资顾问，无利益冲突披露义务；付费订阅模式保持编辑独立</td>
+          </tr>
+          <tr>
+            <td><strong>数据基础</strong></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>深度依赖一手政府数据（FRED/CBO/Treasury），图表质量高</td>
+          </tr>
+          <tr>
+            <td><strong>框架系统性</strong></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>《Broken Money》提供完整思想体系；不是碎片化观点</td>
+          </tr>
+          <tr>
+            <td><strong>可验证性</strong></td>
+            <td>⭐⭐⭐</td>
+            <td>预测模糊性较高；缺乏具体时间框架和可量化标准</td>
+          </tr>
+          <tr>
+            <td><strong>历史准确率</strong></td>
+            <td>⭐⭐⭐⭐</td>
+            <td>大方向判断较准，但具体时机把握存在误差</td>
+          </tr>
+          <tr>
+            <td><strong>中文可及性</strong></td>
+            <td>⭐⭐</td>
+            <td>几乎没有系统性中文翻译；信息套利空间巨大</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <details>
+        <summary>研究方法论说明</summary>
+        <div>
+          <p>本素材策展地图基于 Lyn Alden 公开资料及第三方分析报告综合整理。主要数据来源包括：</p>
+          <ul style="margin-left:1rem; margin-top:0.5rem;">
+            <li>Lyn Alden 官方网站 lynalden.com（免费文章 + 付费订阅说明）</li>
+            <li>Twitter/X @LynAldenContact 公开内容</li>
+            <li>各播客平台历史访谈记录</li>
+            <li>政府数据库 FRED、CBO、US Treasury</li>
+            <li>第三方加密媒体（Blockworks、Real Vision 等）</li>
+          </ul>
+          <p style="margin-top:0.75rem;">⚠️ <strong>免责声明</strong>：本地图仅供信息参考，不构成投资建议。Alden 的分析为"一般性信息"，不构成投资顾问关系。</p>
+        </div>
+      </details>
+    </section>
+
+    <footer style="margin-top:3rem; padding-top:1rem; border-top:1px solid var(--border-subtle); font-size:0.72rem; color:var(--text-quaternary);">
+      <p>Generated: 2026-03-22 &middot; V4 Template &middot; <a href="../blockchain_hub.html">Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ========== RIGHT SIDEBAR (Notes) ========== -->
+  <aside class="notes-sidebar ns-closed" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&times;</button>
+      <h4 style="font-size:0.7rem; font-weight:590; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-quaternary); margin:0;">&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+
+    <!-- META NOTES (8+) -->
+    <div class="anno meta-note" id="meta1" data-section="analysts">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">信源分类方法论</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>本地图将 Lyn Alden 的信息源分为五层：核心渠道（本人）、一手数据（政府）、同行引用、媒体放大、补充阅读。分层逻辑基于信息损耗率和获取成本。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="meta2" data-section="longform">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">《Broken Money》优先级依据</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>将其列为 P0 核心的原因：这是理解 Alden 框架的唯一完整来源。500+页的系统性论著，而非碎片化的通讯文章。她的所有后续分析都可以追溯到这本书的框架。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="meta3" data-section="podcasts">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">播客选择逻辑</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Why Bitcoin Did 排第一的原因：McCormack 的长访谈形式（2-3小时）让 Alden 展现最未经编辑的思考。相比 Real Vision 的制作感，这里更接近"真实想法"。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="meta4" data-section="primary">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">"一手资料"界定标准</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>此分类特指 Alden 本人不拥有版权的官方/政府来源。国会证词是"唯一官方记录的她的一手立场陈述"，因为她本人是证人。FRED/CBO/Treasury 是她分析的事实基础来源。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="meta5" data-section="relationships">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">关系网络绘制方法</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>关系分类维度：思想影响（谁塑造了她的框架）、媒体放大（谁帮她传播）、领域互动（谁在同一领域但立场不同）、政策接口（她影响的权力节点）。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="meta6" data-section="gaps">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">中文信息空白发现</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>这是本研究最重要的发现之一：Alden 几乎没有系统性中文翻译。这意味着：1）存在翻译套利空间；2）中文社区对她的理解存在严重偏差风险；3）但获取成本也意味着翻译价值高。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="meta7" data-section="quality">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">质量评估局限性</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>可验证性评分较低的原因：她不提供具体时间框架和可量化标准。"财政主导将加深"是方向性判断，但没有明确的验证指标或反例标准，这使得校准她的准确率变得困难。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="meta8" data-section="narratives">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">叙事弧提取逻辑</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>叙事弧不是简单的文章分类，而是从《Broken Money》和多年通讯中提炼的"元叙事"——她反复讲述的核心故事。这些叙事相互嵌套：财政主导是当前情境，BTC是应对方案，货币史是合法性来源。</p>
+      </div>
+    </div>
+
+    <!-- KNOWLEDGE NOTES (7+) -->
+    <div class="anno know-note" id="know1" data-section="analysts">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">订阅模式关键细节</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>年费约$400，但免费内容已极具价值。订阅者的10万+是指通讯订阅者数量还是网站访问量需要核实。但重要的是：即使不付费，也能获取她的核心框架。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="know2" data-section="analysts">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">FRED 使用关键</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>"学会用她的视角读FRED"是关键建议。她经常引用：M2增速、国债收益率曲线、实际利率（名义利率-通胀）、债务/GDP比率、利息支出/GDP。学会追踪这些指标，你就拥有了她分析的基本工具。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="know3" data-section="longform">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">"Fiscal Dominance" 文章定位</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>这篇文章通常可免费获取，是《Broken Money》中"财政主导"章节的浓缩版。如果只有时间读一篇文章，选这篇。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="know4" data-section="primary">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">国会证词搜索方法</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>在 congress.gov 搜索 "Lyn Alden" 即可找到她所有的国会证词。这是唯一可以核实她"对政策制定者说了什么"的官方记录。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="know5" data-section="relationships">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Gromen vs Alden 差异</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>关键区别：Gromen 更侧重地缘政治和能源（"资源民族主义"）；Alden 更侧重货币史和技术。两人框架互补，同时看两人可以覆盖更完整的"财政主导"叙事。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="know6" data-section="narratives">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">BTC叙事区分</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Alden 明确区分：BTC是"储蓄技术"而非"投机工具"。这意味着在她的框架里，BTC的持有逻辑是10年+的时间视野，而非短期交易。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="know7" data-section="gaps">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Zoltan Pozsar 补充建议</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>为什么建议补充 Pozsar？因为 Alden 的框架是"美国中心"的。Pozsar 的"布雷顿森林体系 III"分析提供了非美视角——特别是关于人民币、黄金和大宗商品在全球货币体系中的角色。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="know8" data-section="priority">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">2小时路径设计逻辑</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>30分钟框架文章 + 60分钟深度访谈 + 30分钟实时内容。这个路径的设计逻辑：从静态框架（文章）到动态思考（播客）再到实时更新（Twitter），覆盖"学什么"和"跟什么"。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="know9" data-section="quality">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">"非投资顾问"的法律意义</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>作为非注册投资顾问，她不受SEC注册要求约束。这是她的"独立性"的法律基础，但也意味着：无法像查基金经理一样查她的持仓历史、业绩记录、客户投诉。这是信息空白的重要来源。</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+// === Sidebar toggle (mobile) ===
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+
+// === Notes sidebar toggle ===
+(function(){
+  var btn=document.getElementById("notesToggleBtn"),ns=document.getElementById("notesSidebar"),ov=document.getElementById("notesOverlay"),cb=document.getElementById("notesCloseBtn");
+  if(!btn||!ns)return;
+  function toggle(){ns.classList.toggle("ns-closed");ov.classList.toggle("open");}
+  btn.onclick=toggle;
+  if(ov)ov.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(cb)cb.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(window.innerWidth>1200)ns.classList.remove("ns-closed");
+  window.addEventListener("resize",function(){if(window.innerWidth>1200)ns.classList.remove("ns-closed");});
+})();
+
+// === Toggle note ===
+function toggleNote(head){
+  var anno=head.closest(".anno");
+  if(anno){anno.classList.toggle("open");positionNotes();}
+}
+
+// === Position notes ===
+function positionNotes(){
+  var ns=document.getElementById("notesSidebar");if(!ns)return;
+  var annos=ns.querySelectorAll(".anno");
+  var lastBottom=80;
+  annos.forEach(function(a){
+    if(a.style.display==="none")return;
+    var sec=a.getAttribute("data-section");
+    var target=sec?document.getElementById(sec):null;
+    var top=target?target.getBoundingClientRect().top+window.scrollY-ns.getBoundingClientRect().top:lastBottom;
+    if(top<lastBottom)top=lastBottom;
+    a.style.top=top+"px";
+    lastBottom=top+a.offsetHeight+8;
+  });
+}
+
+// === Knowledge toggle ===
+function toggleKnowNotes(){
+  var btn=document.getElementById("knowToggleBtn");
+  var knowNotes=document.querySelectorAll(".anno.know-note");
+  var marks=document.querySelectorAll("mark.hl-know");
+  var nrefs=document.querySelectorAll(".nref");
+  var visible=btn.classList.contains("active");
+  knowNotes.forEach(function(n){n.style.display=visible?"none":"";});
+  marks.forEach(function(m){m.style.background=visible?"transparent":"";m.style.borderBottom=visible?"none":"";});
+  nrefs.forEach(function(r){r.style.display=visible?"none":"";});
+  btn.classList.toggle("active");
+  btn.textContent=visible?"显示":"隐藏";
+  positionNotes();
+}
+
+// === Expand / Collapse all ===
+function expandAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.add("open");});positionNotes();}
+function collapseAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.remove("open");});positionNotes();}
+
+// === Note count ===
+(function(){
+  var label=document.getElementById("noteCountLabel");if(!label)return;
+  var meta=document.querySelectorAll(".anno.meta-note").length;
+  var know=document.querySelectorAll(".anno.know-note").length;
+  label.textContent=meta+" META + "+know+" Knowledge";
+})();
+
+// === Highlight → Note sync ===
+document.addEventListener("click",function(e){
+  var mark=e.target.closest("mark.hl-know")||e.target.closest(".nref");
+  if(!mark)return;
+  var noteId=mark.getAttribute("data-note");if(!noteId)return;
+  var anno=document.getElementById(noteId);if(!anno)return;
+  anno.classList.add("open");
+  anno.scrollIntoView({behavior:"smooth",block:"center"});
+  anno.classList.add("flash");
+  setTimeout(function(){anno.classList.remove("flash");},1500);
+  positionNotes();
+});
+
+// === Embedded mode ===
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+  document.addEventListener("click",function(e){
+    var a=e.target.closest("a");if(!a||!a.href)return;
+    try{var url=new URL(a.href,location.href)}catch(err){return}
+    if(url.pathname.startsWith("/trade-pipeline/")||url.pathname.startsWith("/observatory/")){
+      e.preventDefault();
+      window.top.postMessage({type:"dashboard-nav",action:"openResearch",url:url.pathname,title:a.textContent.trim().substring(0,60)},"*");
+    }
+  });
+})();
+
+// Initial positioning
+window.addEventListener("load",function(){positionNotes();});
+window.addEventListener("scroll",function(){positionNotes();});
+</script>
+</body>
+</html>

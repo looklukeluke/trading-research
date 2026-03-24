@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Michael Saylor — 素材策展地图 V4</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  /* Page-specific V4 extensions (~75 lines) */
+  .priority-box { border:1px solid rgba(248,168,72,0.3); border-left:3px solid var(--accent); border-radius:var(--radius-sm); padding:1.25rem 1.5rem; margin-bottom:2rem; background:var(--bg-surface); }
+  .priority-box h2 { color:var(--accent); margin-top:0; font-size:1.1rem; font-weight:590; }
+  .priority-box ol { margin-bottom:0; padding-left:1.2rem; }
+  .priority-box li { margin-bottom:0.6rem; line-height:1.5; }
+  .time-badge { display:inline-block; padding:0.1rem 0.5rem; border-radius:10px; font-size:0.7rem; font-weight:590; margin-right:0.3rem; background:var(--accent); color:var(--bg-base); }
+  .anno { position:absolute; left:1rem; right:1rem; }
+  .anno.meta-note { padding:0.6rem 0.75rem; border-left:2px solid var(--accent); border-radius:0 6px 6px 0; background:rgba(248,168,72,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.meta-note:hover { box-shadow:0 0 0 1px var(--accent); }
+  .anno.know-note { padding:0.6rem 0.75rem; border-left:2px solid var(--knowledge); border-radius:0 6px 6px 0; background:rgba(91,155,213,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.know-note:hover { box-shadow:0 0 0 1px var(--knowledge); }
+  .anno .note-label { display:inline-block; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--bg-base); background:var(--accent); padding:0.1rem 0.4rem; border-radius:3px; margin-bottom:0.3rem; }
+  .anno .note-label.know { background:var(--knowledge); color:white; }
+  .anno .mn-head { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
+  .anno .mn-title { flex:1; font-weight:510; font-size:0.75rem; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .anno .mn-fold { font-size:0.55rem; color:var(--text-quaternary); transition:transform 0.2s; margin-left:auto; }
+  .anno.open .mn-fold { transform:rotate(180deg); }
+  .anno .mn-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+  .anno.open .mn-body { max-height:2000px; }
+  .anno .mn-body p { font-size:0.78rem; margin-bottom:0.3rem; color:var(--text-secondary); }
+  .anno.flash { animation:noteFlash 1.5s ease; }
+  @keyframes noteFlash { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--accent);} }
+  .anno.know-note.flash { animation:noteFlashBlue 1.5s ease; }
+  @keyframes noteFlashBlue { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--knowledge);} }
+  mark.hl-know { background:rgba(91,155,213,0.12); border-bottom:1.5px solid var(--knowledge); padding:0 2px; border-radius:2px; color:inherit; cursor:pointer; transition:background 0.15s; }
+  mark.hl-know:hover { background:rgba(91,155,213,0.28); }
+  .nref { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; font-size:0.48rem; font-weight:700; cursor:pointer; margin-left:1px; vertical-align:super; transition:transform 0.15s; text-decoration:none; background:var(--knowledge); color:white; }
+  .nref:hover { transform:scale(1.25); box-shadow:0 0 6px rgba(91,155,213,0.4); }
+  .top-controls { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; padding:0.35rem 0.7rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); font-size:0.72rem; flex-wrap:wrap; }
+  .top-controls .tc-label { font-weight:590; color:var(--knowledge); }
+  .top-controls button { padding:0.15rem 0.45rem; border-radius:4px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-tertiary); cursor:pointer; font-size:0.68rem; font-family:inherit; transition:all 0.15s; }
+  .top-controls button:hover { border-color:var(--knowledge); color:var(--text-primary); }
+  .top-controls button.active { background:var(--knowledge-dim); color:var(--knowledge); border-color:rgba(91,155,213,0.3); }
+  .top-controls .tc-sep { color:var(--border-default); margin:0 0.15rem; }
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .notes-sidebar { position:relative; width:320px; min-width:320px; padding:1.25rem 1rem; border-left:1px solid var(--border-subtle); background:var(--bg-elevated); }
+  .notes-sidebar-header { position:sticky; top:0; z-index:60; background:var(--bg-elevated); padding-bottom:0.5rem; border-bottom:1px solid var(--border-subtle); margin-bottom:0.75rem; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  .notes-toggle-btn { position:fixed; right:1rem; bottom:1.5rem; z-index:200; width:44px; height:44px; border-radius:50%; border:1px solid var(--border-default); background:var(--bg-surface); color:var(--text-secondary); cursor:pointer; font-size:1.1rem; display:none; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.4); }
+  .notes-close-btn { float:right; background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:1.1rem; padding:0; display:none; }
+  @media (max-width:1200px) { .notes-close-btn { display:block; } .notes-sidebar { position:fixed; right:0; top:0; height:100vh; overflow-y:auto; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.4); z-index:150; } .notes-sidebar.ns-closed { transform:translateX(100%); box-shadow:none; } .notes-toggle-btn { display:flex; } }
+  .notes-overlay-right { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:140; }
+  .notes-overlay-right.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  @media (min-width:1600px) { .main-content { max-width:1000px; } .notes-sidebar { width:360px; min-width:360px; } }
+  .rel-card { border:1px solid var(--border-subtle); border-radius:var(--radius-md); background:var(--bg-elevated); margin-bottom:0.75rem; }
+  .rel-card summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  .rel-card[open] summary { color:var(--accent); }
+  .rel-card .rel-body { padding:0 1rem 1rem; font-size:0.82rem; color:var(--text-secondary); line-height:1.6; }
+  .arc-item { border-left:3px solid var(--accent); padding:0.6rem 1rem; margin-bottom:0.75rem; background:rgba(66,165,245,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+  .arc-item strong { color:var(--text-primary); }
+  .question-box { border:2px solid var(--knowledge); background:rgba(91,155,213,0.05); border-radius:var(--radius-md); padding:1.5rem; text-align:center; margin:2rem 0; }
+  .question-box blockquote { border:none; margin:0; padding:0; }
+  .question-box p { font-size:1rem; font-weight:510; color:var(--text-primary); }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; margin-bottom:1rem; }
+  th { text-transform:uppercase; font-size:0.72rem; font-weight:510; color:var(--text-quaternary); letter-spacing:0.04em; text-align:left; padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-default); }
+  td { padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-subtle); vertical-align:top; color:var(--text-secondary); }
+  tr:hover td { background:var(--bg-elevated); }
+  .url-col { max-width:200px; word-break:break-all; }
+  .zh { display:block; font-size:0.85em; color:var(--text-tertiary); margin-top:0.15em; }
+  .zh-inline { font-size:0.85em; color:var(--text-tertiary); }
+  details { border:1px solid var(--border-subtle); background:var(--bg-elevated); border-radius:var(--radius-sm); padding:0; margin-bottom:0.75rem; }
+  details summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  details[open] summary { color:var(--accent); }
+  details > div, details > p { padding:0 1rem 1rem; font-size:0.82rem; line-height:1.6; color:var(--text-secondary); }
+  body.embedded .sidebar, body.embedded .notes-sidebar, body.embedded .hamburger-btn, body.embedded .notes-toggle-btn { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+  .source-tag { display:inline-block; padding:0.1rem 0.35rem; border-radius:3px; font-size:0.62rem; font-weight:590; background:var(--bg-elevated); color:var(--text-tertiary); margin-right:0.25rem; }
+  .priority-high { color:var(--accent); }
+  .source-link { color:var(--knowledge); text-decoration:none; }
+  .source-link:hover { text-decoration:underline; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ========== LEFT SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Michael Saylor<br>素材策展地图 V4</div>
+
+    <h4>Contents</h4>
+    <nav>
+      <ul>
+        <li><a href="#priority"><span class="toc-num">&#9733;</span>如果只有2小时</a></li>
+        <li><a href="#analysts"><span class="toc-num">1</span>最佳分析师</a></li>
+        <li><a href="#longform"><span class="toc-num">2</span>必读长文/书籍</a></li>
+        <li><a href="#podcasts"><span class="toc-num">3</span>播客与视频</a></li>
+        <li><a href="#primary"><span class="toc-num">4</span>一手资料</a></li>
+        <li><a href="#relationships"><span class="toc-num">5</span>关键关系网</a></li>
+        <li><a href="#narratives"><span class="toc-num">6</span>叙事弧</a></li>
+        <li><a href="#gaps"><span class="toc-num">7</span>信息空白</a></li>
+        <li><a href="#quality"><span class="toc-num">8</span>质量评估</a></li>
+      </ul>
+    </nav>
+
+    <h4>Related</h4>
+    <nav>
+      <ul>
+        <li><a href="01_michael_saylor.html">Michael Saylor Profile</a></li>
+        <li><a href="01_michael_saylor_metacognition.html">Metacognition</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+
+    <div class="top-controls">
+      <span class="tc-label">&#128218; 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <header class="page-header">
+      <h1>Michael Saylor — 素材策展地图 V4</h1>
+      <p class="subtitle">Research Date: 2026-03-22 &nbsp;|&nbsp; 8 Analysts + 9 Longform + 8 Podcasts + 8 Primary Sources<br>
+      <span class="zh-inline">研究数据来源全面覆盖，专注MSTR与BTC国库策略</span></p>
+      <div class="badge-row">
+        <span class="badge badge-accent">MSTR</span>
+        <span class="badge badge-know">BTC Treasury</span>
+        <span class="badge">Convertible Notes</span>
+      </div>
+    </header>
+
+    <!-- ★ Priority Box -->
+    <div class="priority-box" id="priority">
+      <h2>&#9200; 如果只有2小时 — 推荐阅读路径</h2>
+      <ol>
+        <li><strong>Saylor X/Twitter</strong> (<a href="https://x.com/saylor" class="source-link" target="_blank">@saylor</a>) — 实时买入信号与市场观点 <span class="zh-inline">| First signal for MSTR BTC purchases</span></li>
+        <li><strong>MSTR 8-K披露</strong> (<a href="https://sec.gov/cgi-bin/browse-edgar?action=getcompany&type=8-K&CIK=0001050446" class="source-link" target="_blank">SEC EDGAR</a>) — BTC购买时间与数量 <span class="zh-inline">| Official purchase announcements</span></li>
+        <li><strong>Will Clemente</strong> (<a href="https://x.com/WClementeIII" class="source-link" target="_blank">@WClementeIII</a>) — NAV溢价与链上分析 <span class="zh-inline">| Best MSTR on-chain analyst</span></li>
+        <li><strong>Joe Burnett</strong> (<a href="https://x.com/IIICapital" class="source-link" target="_blank">@IIICapital</a>) — MSTR财务模型构建者 <span class="zh-inline">| MSTR financial model builder</span></li>
+        <li><strong>《The Bitcoin Standard》</strong> — Saylor思想的理论基础 <span class="zh-inline">| Saylor's ideological foundation</span></li>
+      </ol>
+    </div>
+
+    <!-- §1 最佳分析师 -->
+    <section id="analysts">
+      <div class="section-header">
+        <h2>1. 最佳分析师与独立研究<span class="zh">Best Analysts &amp; Independent Research</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Name 名称</th>
+            <th>Type 类型</th>
+            <th>URL/Platform</th>
+            <th>Importance 重要性</th>
+            <th>Notes 备注</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Will Clemente</strong></td>
+            <td><span class="source-tag">On-Chain</span></td>
+            <td class="url-col"><a href="https://x.com/WClementeIII" class="source-link" target="_blank">@WClementeIII</a></td>
+            <td class="priority-high">⭐⭐⭐⭐⭐</td>
+            <td>最懂MSTR的分析师，专注BTC持仓与<mark class="hl-know" data-note="k1">NAV溢价</mark><sup class="nref" data-note="k1">K</sup>分析，实时追踪Saylor买入信号 <span class="zh-inline">| MSTR NAV premium tracker</span></td>
+          </tr>
+          <tr>
+            <td><strong>Dylan LeClair</strong></td>
+            <td><span class="source-tag">Macro</span></td>
+            <td class="url-col"><a href="https://x.com/DylanLeClair_" class="source-link" target="_blank">@DylanLeClair_</a> / Bitcoin Magazine</td>
+            <td class="priority-high">⭐⭐⭐⭐⭐</td>
+            <td>深度分析<mark class="hl-know" data-note="k2">可转债结构</mark><sup class="nref" data-note="k2">K</sup>、BTC国库策略的财务工程 <span class="zh-inline">| MSTR convertible notes expert</span></td>
+          </tr>
+          <tr>
+            <td><strong>Joe Burnett</strong></td>
+            <td><span class="source-tag">Independent</span></td>
+            <td class="url-col"><a href="https://x.com/IIICapital" class="source-link" target="_blank">@IIICapital</a></td>
+            <td class="priority-high">⭐⭐⭐⭐⭐</td>
+            <td>专门研究BTC国库公司，MSTR财务模型构建者 <span class="zh-inline">| MSTR financial model builder</span></td>
+          </tr>
+          <tr>
+            <td><strong>James Lavish</strong></td>
+            <td><span class="source-tag">Macro</span></td>
+            <td class="url-col"><a href="https://x.com/jameslavish" class="source-link" target="_blank">@jameslavish</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>前对冲基金PM，分析MSTR作为BTC<mark class="hl-know" data-note="k3">杠杆工具</mark><sup class="nref" data-note="k3">K</sup>的风险收益比 <span class="zh-inline">| Former hedge fund PM analyzing leverage</span></td>
+          </tr>
+          <tr>
+            <td><strong>Giovanni Santostasi</strong></td>
+            <td><span class="source-tag">Quant</span></td>
+            <td class="url-col"><a href="https://x.com/GSantostasi" class="source-link" target="_blank">@GSantostasi</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>研究MSTR股价与BTC相关性的量化模型 <span class="zh-inline">| MSTR-BTC correlation quant models</span></td>
+          </tr>
+          <tr>
+            <td><strong>Fintel.io MSTR</strong></td>
+            <td><span class="source-tag">Data</span></td>
+            <td class="url-col"><a href="https://fintel.io/ss/us/mstr" class="source-link" target="_blank">fintel.io/ss/us/mstr</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>机构持仓、空头头寸、<mark class="hl-know" data-note="k4">期权流量</mark><sup class="nref" data-note="k4">K</sup>一站式数据 <span class="zh-inline">| Institutional holdings & options flow</span></td>
+          </tr>
+          <tr>
+            <td><strong>K33 Research</strong></td>
+            <td><span class="source-tag">Institutional</span></td>
+            <td class="url-col"><a href="https://k33.com/research" class="source-link" target="_blank">k33.com/research</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>北欧加密研究机构，MSTR premium/discount实时追踪 <span class="zh-inline">| Nordic crypto research, MSTR premium tracker</span></td>
+          </tr>
+          <tr>
+            <td><strong>吴说区块链</strong></td>
+            <td><span class="source-tag">CN Media</span></td>
+            <td class="url-col"><a href="https://wublock123.com" class="source-link" target="_blank">wublock123.com</a></td>
+            <td class="priority-high">⭐⭐⭐⭐⭐</td>
+            <td>中文世界最及时的MSTR持仓更新与解读，必读 <span class="zh-inline">| Best Chinese MSTR coverage</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §2 必读长文/书籍 -->
+    <section id="longform">
+      <div class="section-header">
+        <h2>2. 必读长文与书籍<span class="zh">Must-Read Long-Form &amp; Books</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Title 标题</th>
+            <th>Type 类型</th>
+            <th>URL/Source</th>
+            <th>Importance 重要性</th>
+            <th>Notes 备注</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>The Bitcoin Standard</strong></td>
+            <td><span class="source-tag">Book</span></td>
+            <td class="url-col">Saifedean Ammous著</td>
+            <td class="priority-high">⭐⭐⭐⭐⭐</td>
+            <td>Saylor的"圣经"，理解其思想根基的必读。<mark class="hl-know" data-note="k5">数字黄金</mark><sup class="nref" data-note="k5">K</sup>叙事的理论基础 <span class="zh-inline">| Saylor's "bible", digital gold thesis</span></td>
+          </tr>
+          <tr>
+            <td><strong>21 Lessons</strong></td>
+            <td><span class="source-tag">E-Book</span></td>
+            <td class="url-col"><a href="https://21lessons.com" class="source-link" target="_blank">21lessons.com</a></td>
+            <td class="priority-high">⭐⭐⭐⭐⭐</td>
+            <td>Saylor本人反复推荐的入门框架，理解其世界观 <span class="zh-inline">| Saylor-recommended Bitcoin philosophy</span></td>
+          </tr>
+          <tr>
+            <td><strong>Bitcoin for Everybody</strong></td>
+            <td><span class="source-tag">Course</span></td>
+            <td class="url-col"><a href="https://saylor.org/course/blockchain-and-bitcoin-fundamentals/" class="source-link" target="_blank">saylor.org</a></td>
+            <td class="priority-high">⭐⭐⭐⭐⭐</td>
+            <td>Saylor本人制作的免费课程，<strong>一手思想源</strong> <span class="zh-inline">| Saylor's own free course, primary source</span></td>
+          </tr>
+          <tr>
+            <td><strong>MSTR 10-K/10-Q 2020-2024</strong></td>
+            <td><span class="source-tag">SEC</span></td>
+            <td class="url-col"><a href="https://sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001050446" class="source-link" target="_blank">SEC EDGAR</a></td>
+            <td class="priority-high">⭐⭐⭐⭐⭐</td>
+            <td><strong>最重要一手资料</strong>。BTC购买细节、可转债条款、风险披露全在此 <span class="zh-inline">| Most important primary source</span></td>
+          </tr>
+          <tr>
+            <td><strong>The Saylor Series</strong></td>
+            <td><span class="source-tag">Podcast</span></td>
+            <td class="url-col"><a href="https://whatbitcoindid.com/saylor-series" class="source-link" target="_blank">whatbitcoindid.com</a></td>
+            <td class="priority-high">⭐⭐⭐⭐⭐</td>
+            <td>6小时深度访谈，Saylor最系统的思想阐述 <span class="zh-inline">| 6-hour deep dive, most systematic Saylor interview</span></td>
+          </tr>
+          <tr>
+            <td><strong>MSTR BTC Strategy FAQ</strong></td>
+            <td><span class="source-tag">Official</span></td>
+            <td class="url-col"><a href="https://strategy.com/bitcoin" class="source-link" target="_blank">strategy.com/bitcoin</a></td>
+            <td class="priority-high">⭐⭐⭐⭐⭐</td>
+            <td>公司官方策略说明，<strong>一手资料</strong> <span class="zh-inline">| Company official strategy, primary source</span></td>
+          </tr>
+          <tr>
+            <td><strong>MSTR Investor Relations Deck</strong></td>
+            <td><span class="source-tag">IR</span></td>
+            <td class="url-col"><a href="https://strategy.com/investor-relations" class="source-link" target="_blank">strategy.com/ir</a></td>
+            <td class="priority-high">⭐⭐⭐⭐⭐</td>
+            <td>每季度更新，BTC持仓、财务模型、融资计划 <span class="zh-inline">| Quarterly BTC holdings & financing plans</span></td>
+          </tr>
+          <tr>
+            <td><strong>ARK: Why MSTR BTC Strategy Works</strong></td>
+            <td><span class="source-tag">Research</span></td>
+            <td class="url-col"><a href="https://ark-invest.com/articles/analyst-research/microstrategy-bitcoin" class="source-link" target="_blank">ark-invest.com</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>ARK Invest分析，理解机构视角下的MSTR逻辑 <span class="zh-inline">| ARK's institutional perspective on MSTR</span></td>
+          </tr>
+          <tr>
+            <td><strong>The Block: MSTR专题</strong></td>
+            <td><span class="source-tag">Data</span></td>
+            <td class="url-col"><a href="https://theblock.co/data/on-chain-metrics/bitcoin/microstrategy-bitcoin-holdings" class="source-link" target="_blank">theblock.co</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>可视化追踪持仓成本、未实现盈亏 <span class="zh-inline">| Visual tracking of cost basis & unrealized P&L</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §3 播客与视频 -->
+    <section id="podcasts">
+      <div class="section-header">
+        <h2>3. 播客与视频<span class="zh">Podcasts &amp; Video</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Title 标题</th>
+            <th>Type 类型</th>
+            <th>URL/Platform</th>
+            <th>Importance 重要性</th>
+            <th>Notes 备注</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>What Bitcoin Did - The Saylor Series</strong></td>
+            <td><span class="source-tag">Podcast</span></td>
+            <td class="url-col"><a href="https://whatbitcoindid.com" class="source-link" target="_blank">whatbitcoindid.com</a></td>
+            <td class="priority-high">⭐⭐⭐⭐⭐</td>
+            <td><strong>最核心采访</strong>。6集深度系列，Saylor思想完整版 <span class="zh-inline">| Core interview, 6-episode deep series</span></td>
+          </tr>
+          <tr>
+            <td><strong>Lex Fridman Podcast #276</strong></td>
+            <td><span class="source-tag">Video</span></td>
+            <td class="url-col"><a href="https://youtube.com/watch?v=4W2gX4PziXo" class="source-link" target="_blank">YouTube</a></td>
+            <td class="priority-high">⭐⭐⭐⭐⭐</td>
+            <td>4小时长谈，哲学层面理解Saylor的BTC世界观 <span class="zh-inline">| 4-hour philosophical deep dive</span></td>
+          </tr>
+          <tr>
+            <td><strong>Pomp Podcast</strong></td>
+            <td><span class="source-tag">Podcast</span></td>
+            <td class="url-col"><a href="https://youtube.com/@AnthonyPompliano" class="source-link" target="_blank">YouTube @AnthonyPompliano</a></td>
+            <td class="priority-high">⭐⭐⭐⭐⭐</td>
+            <td>Saylor最频繁的出镜平台，战术更新首选 <span class="zh-inline">| Most frequent platform, tactical updates</span></td>
+          </tr>
+          <tr>
+            <td><strong>The Investor's Podcast - BTC Fundamentals</strong></td>
+            <td><span class="source-tag">Podcast</span></td>
+            <td class="url-col"><a href="https://theinvestorspodcast.com/bitcoin-fundamentals" class="source-link" target="_blank">theinvestorspodcast.com</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>Preston Pysh与Saylor的多次对话，财务分析角度 <span class="zh-inline">| Financial analysis perspective</span></td>
+          </tr>
+          <tr>
+            <td><strong>Bloomberg Technology</strong></td>
+            <td><span class="source-tag">TV</span></td>
+            <td class="url-col"><a href="https://bloomberg.com" class="source-link" target="_blank">bloomberg.com</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>主流财经媒体曝光，观察Saylor如何向传统金融解释策略 <span class="zh-inline">| Mainstream finance exposure</span></td>
+          </tr>
+          <tr>
+            <td><strong>CNBC Fast Money / Squawk Box</strong></td>
+            <td><span class="source-tag">TV</span></td>
+            <td class="url-col"><a href="https://cnbc.com" class="source-link" target="_blank">cnbc.com</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>市场波动时的即时反应，短期交易信号 <span class="zh-inline">| Short-term trading signals during volatility</span></td>
+          </tr>
+          <tr>
+            <td><strong>Bitcoin Conference Keynotes</strong></td>
+            <td><span class="source-tag">Speech</span></td>
+            <td class="url-col"><a href="https://youtube.com/bitcoinmagazine" class="source-link" target="_blank">YouTube Bitcoin Magazine</a></td>
+            <td class="priority-high">⭐⭐⭐⭐⭐</td>
+            <td>年度思想更新，"21 Rules of Bitcoin"首发地 <span class="zh-inline">| Annual thought updates, "21 Rules" debut</span></td>
+          </tr>
+          <tr>
+            <td><strong>Saylor中文采访 (2021)</strong></td>
+            <td><span class="source-tag">Video</span></td>
+            <td class="url-col">哔哩哔哩/YouTube搜索</td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>偶尔有中文媒体采访，观察其对亚洲市场的态度 <span class="zh-inline">| Chinese media interviews, Asia market attitude</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §4 一手资料 -->
+    <section id="primary">
+      <div class="section-header">
+        <h2>4. 一手资料<span class="zh">Primary Sources</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Source 来源</th>
+            <th>Type 类型</th>
+            <th>URL</th>
+            <th>Frequency 更新频率</th>
+            <th>Notes 备注</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>MicroStrategy IR网站</strong></td>
+            <td><span class="source-tag">Official</span></td>
+            <td class="url-col"><a href="https://strategy.com" class="source-link" target="_blank">strategy.com</a></td>
+            <td>实时 Real-time</td>
+            <td>公司更名后的新官网，BTC策略核心页面 <span class="zh-inline">| New official website after rename</span></td>
+          </tr>
+          <tr>
+            <td><strong>SEC EDGAR - MSTR</strong></td>
+            <td><span class="source-tag">SEC</span></td>
+            <td class="url-col"><a href="https://sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001050446" class="source-link" target="_blank">SEC EDGAR</a></td>
+            <td>季度/事件驱动 Quarterly/Event</td>
+            <td><strong>10-K年报、10-Q季报、8-K重大事件</strong> <span class="zh-inline">| Annual, quarterly & current reports</span></td>
+          </tr>
+          <tr>
+            <td><strong>Saylor个人X/Twitter</strong></td>
+            <td><span class="source-tag">Social</span></td>
+            <td class="url-col"><a href="https://x.com/saylor" class="source-link" target="_blank">x.com/saylor</a></td>
+            <td>日更 Daily</td>
+            <td><strong>最重要实时信号</strong>。买入公告、市场观点首发地 <span class="zh-inline">| Most important real-time signal</span></td>
+          </tr>
+          <tr>
+            <td><strong>MicroStrategy官方X</strong></td>
+            <td><span class="source-tag">Social</span></td>
+            <td class="url-col"><a href="https://x.com/strategy" class="source-link" target="_blank">x.com/strategy</a></td>
+            <td>事件驱动 Event</td>
+            <td>公司官方公告，持仓更新 <span class="zh-inline">| Company official announcements</span></td>
+          </tr>
+          <tr>
+            <td><strong>MSTR 8-K 文件追踪</strong></td>
+            <td><span class="source-tag">SEC</span></td>
+            <td class="url-col"><a href="https://sec.gov/cgi-bin/browse-edgar?action=getcompany&type=8-K&CIK=0001050446" class="source-link" target="_blank">SEC EDGAR 8-K</a></td>
+            <td>事件驱动 Event</td>
+            <td><strong>最关键</strong>。每次BTC购买、融资操作都通过8-K披露 <span class="zh-inline">| Most critical, all BTC purchases via 8-K</span></td>
+          </tr>
+          <tr>
+            <td><strong>Convertible Notes Prospectus</strong></td>
+            <td><span class="source-tag">Prospectus</span></td>
+            <td class="url-col">SEC filings (2021, 2024, 2025)</td>
+            <td>融资时 When Financing</td>
+            <td>理解MSTR<mark class="hl-know" data-note="k6">杠杆结构</mark><sup class="nref" data-note="k6">K</sup>的核心——0%可转债条款、转换价格 <span class="zh-inline">| 0% convertible notes, conversion price</span></td>
+          </tr>
+          <tr>
+            <td><strong>Saylor Foundation</strong></td>
+            <td><span class="source-tag">Non-Profit</span></td>
+            <td class="url-col"><a href="https://saylor.org" class="source-link" target="_blank">saylor.org</a></td>
+            <td>不定期 Occasional</td>
+            <td>其教育使命的延伸，偶尔透露长期思考 <span class="zh-inline">| Educational mission extension</span></td>
+          </tr>
+          <tr>
+            <td><strong>FASB Accounting Standards</strong></td>
+            <td><span class="source-tag">Accounting</span></td>
+            <td class="url-col"><a href="https://fasb.org" class="source-link" target="_blank">fasb.org</a></td>
+            <td>年度 Annual</td>
+            <td>2024年新准则允许<mark class="hl-know" data-note="k7">公允价值计量</mark><sup class="nref" data-note="k7">K</sup>BTC，直接影响MSTR财报 <span class="zh-inline">| 2024 rule enables fair value accounting for BTC</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §5 关键关系网 -->
+    <section id="relationships">
+      <div class="section-header">
+        <h2>5. 关键关系网<span class="zh">Key Relationships</span></h2>
+      </div>
+      
+      <details class="rel-card" open>
+        <summary>🔗 核心管理层关系 <span class="zh-inline">Core Management Team</span></summary>
+        <div class="rel-body">
+          <ul style="margin:0; padding-left:1.2rem;">
+            <li><strong>Phong Le</strong> — MSTR CEO (2022年接任) <span class="zh-inline">| MSTR CEO since 2022</span><br>
+            <span style="color:var(--text-tertiary); font-size:0.78rem;">执行Saylor的BTC策略，财报电话会议关键声音 <span class="zh-inline">| Executes Saylor's BTC strategy, key voice on earnings calls</span></span></li>
+            <li><strong>Andrew Kang</strong> — MSTR CFO <span class="zh-inline">| MSTR CFO</span><br>
+            <span style="color:var(--text-tertiary); font-size:0.78rem;">财务工程操盘手，<mark class="hl-know" data-note="k8">可转债设计</mark><sup class="nref" data-note="k8">K</sup>的核心人物 <span class="zh-inline">| Financial engineering lead, convertible notes architect</span></span></li>
+          </ul>
+        </div>
+      </details>
+      
+      <details class="rel-card">
+        <summary>🏦 交易对手与服务机构 <span class="zh-inline">Counterparties & Service Providers</span></summary>
+        <div class="rel-body">
+          <ul style="margin:0; padding-left:1.2rem;">
+            <li><strong>Tether/Bitfinex</strong> — 主要OTC渠道之一 <span class="zh-inline">| Primary OTC channel</span><br>
+            <span style="color:var(--text-tertiary); font-size:0.78rem;">Saylor大额BTC购买的主要交易对手 <span class="zh-inline">| Main counterpart for large BTC purchases</span></span></li>
+            <li><strong>Coinbase Prime</strong> — 托管/交易服务 <span class="zh-inline">| Custody & trading</span><br>
+            <span style="color:var(--text-tertiary); font-size:0.78rem;">MSTR BTC主要托管方，机构级服务 <span class="zh-inline">| Primary BTC custodian, institutional services</span></span></li>
+            <li><strong>Fidelity</strong> — 机构股东 <span class="zh-inline">| Institutional shareholder</span><br>
+            <span style="color:var(--text-tertiary); font-size:0.78rem;">最大机构股东之一，影响股价波动 <span class="zh-inline">| Largest institutional shareholder, affects volatility</span></span></li>
+          </ul>
+        </div>
+      </details>
+      
+      <details class="rel-card">
+        <summary>🌐 理念同盟与模仿者 <span class="zh-inline">Ideological Allies & Copycats</span></summary>
+        <div class="rel-body">
+          <ul style="margin:0; padding-left:1.2rem;">
+            <li><strong>Cathie Wood / ARK</strong> — 理念同盟 <span class="zh-inline">| Ideological ally</span><br>
+            <span style="color:var(--text-tertiary); font-size:0.78rem;">ARK持有MSTR，双方经常互相引用 <span class="zh-inline">| ARK holds MSTR, mutual public references</span></span></li>
+            <li><strong>Metaplanet (日本)</strong> — "日本版MSTR" <span class="zh-inline">| "Japanese MSTR"</span><br>
+            <span style="color:var(--text-tertiary); font-size:0.78rem;">Saylor亲自指导，观察策略复制的样本 <span class="zh-inline">| Saylor personally guides, strategy replication case study</span></span></li>
+            <li><strong>BlackRock / IBIT</strong> — 竞争/互补 <span class="zh-inline">| Competition/complement</span><br>
+            <span style="color:var(--text-tertiary); font-size:0.78rem;">BTC ETF改变叙事——从"唯一选择"到"<mark class="hl-know" data-note="k9">杠杆替代</mark><sup class="nref" data-note="k9">K</sup>" <span class="zh-inline">| ETF changes narrative from "only option" to "leverage alternative"</span></span></li>
+          </ul>
+        </div>
+      </details>
+      
+      <details class="rel-card">
+        <summary>⚡ Bitcoin Mining Council <span class="zh-inline">Bitcoin Mining Council</span></summary>
+        <div class="rel-body">
+          <ul style="margin:0; padding-left:1.2rem;">
+            <li><strong>行业组织</strong> — Saylor发起 <span class="zh-inline">| Founded by Saylor</span><br>
+            <span style="color:var(--text-tertiary); font-size:0.78rem;">理解其能源/ESG叙事的关键 <span class="zh-inline">| Key to understanding his energy/ESG narrative</span></span></li>
+          </ul>
+        </div>
+      </details>
+
+    </section>
+
+    <!-- §6 叙事弧 -->
+    <section id="narratives">
+      <div class="section-header">
+        <h2>6. 关键叙事弧<span class="zh">Key Narrative Arcs</span></h2>
+      </div>
+      
+      <div class="arc-item">
+        <strong>叙事弧1：数字黄金旗手 <span class="zh-inline">| Narrative Arc 1: Digital Gold Standard-Bearer</span></strong>
+        <p style="margin-bottom:0.5rem;">Saylor从科技富豪转型为<mark class="hl-know" data-note="k10">BTC maximalist</mark><sup class="nref" data-note="k10">K</sup>，将其全部个人与公司资本投入BTC。这一叙事从2020年8月开始构建，通过持续买入、公开演讲、媒体采访不断强化"BTC是终极通胀对冲工具"的形象。 <span class="zh-inline">| Saylor's transformation from tech billionaire to BTC maximalist, committing all personal and corporate capital to BTC since August 2020.</span></p>
+      </div>
+      
+      <div class="arc-item">
+        <strong>叙事弧2：MSTR作为BTC杠杆工具 <span class="zh-inline">| Narrative Arc 2: MSTR as Bitcoin Leverage Tool</span></strong>
+        <p style="margin-bottom:0.5rem;">MSTR通过<mark class="hl-know" data-note="k11">可转债融资</mark><sup class="nref" data-note="k11">K</sup>持续买入BTC，股价形成对BTC的<mark class="hl-know" data-note="k12">2倍杠杆敞口</mark><sup class="nref" data-note="k12">K</sup>（NAV溢价本质）。这一"财务工程"叙事吸引寻求BTC杠杆敞口的投资者。 <span class="zh-inline">| MSTR uses convertible debt to buy BTC, creating 2x leverage exposure in stock price (NAV premium nature). This "financial engineering" attracts investors seeking BTC leverage.</span></p>
+      </div>
+      
+      <div class="arc-item">
+        <strong>叙事弧3：企业BTC treasury范式 <span class="zh-inline">| Narrative Arc 3: Corporate BTC Treasury Paradigm</span></strong>
+        <p style="margin-bottom:0.5rem;">MSTR的BTC treasury策略正在引发全球企业仿效——从日本的Metaplanet到美国的Semler Scientific。Saylor将此定位为"后美元时代"的企业财务管理范式转移。 <span class="zh-inline">| MSTR's BTC treasury strategy is inspiring global corporate imitation—from Japan's Metaplanet to US's Semler Scientific. Saylor positions this as a paradigm shift in corporate treasury management for the "post-dollar era."</span></p>
+      </div>
+      
+      <div class="arc-item">
+        <strong>叙事弧4：监管博弈与会计准则 <span class="zh-inline">| Narrative Arc 4: Regulatory博弈 & Accounting Standards</span></strong>
+        <p style="margin-bottom:0.5rem;">FASB 2024新准则允许BTC以<mark class="hl-know" data-note="k13">公允价值计量</mark><sup class="nref" data-note="k13">K</sup>，这消除了历史成本法的报表波动性。MSTR正在推动BTC成为主流企业资产的监管认可。 <span class="zh-inline">| FASB 2024 rule enables fair value accounting for BTC, eliminating volatility from historical cost method. MSTR is pushing for regulatory acceptance of BTC as mainstream corporate asset.</span></p>
+      </div>
+
+    </section>
+
+    <!-- §7 信息空白 -->
+    <section id="gaps">
+      <div class="section-header">
+        <h2>7. 信息空白 — What Doesn't Exist<span class="zh">Information Gaps</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Gap 空白领域</th>
+            <th>Risk/Opportunity 风险/机会</th>
+            <th>Tracking 追踪方式</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>实时BTC持仓成本</strong> <span class="zh-inline">| Real-time BTC cost basis</span></td>
+            <td>MSTR只披露季度平均成本，不披露单笔交易价格 <span class="zh-inline">| MSTR only discloses quarterly average cost</span></td>
+            <td>追踪8-K披露时间+链上分析推测OTC价格 <span class="zh-inline">| Track 8-K timing + on-chain analysis</span></td>
+          </tr>
+          <tr>
+            <td><strong>可转债对冲盘动态</strong> <span class="zh-inline">| Convertible note hedge flow</span></td>
+            <td>可转债买家的对冲操作影响股价 <span class="zh-inline">| Hedge operations by convertible buyers affect stock</span></td>
+            <td>追踪期权市场异常流量、Fintel空头数据 <span class="zh-inline">| Track options flow anomalies, Fintel short data</span></td>
+          </tr>
+          <tr>
+            <td><strong>Saylor个人财务杠杆</strong> <span class="zh-inline">| Saylor's personal financial leverage</span></td>
+            <td>其个人是否质押MSTR股票借款买BTC？无公开信息 <span class="zh-inline">| Does he pledge MSTR shares for BTC loans? No public info</span></td>
+            <td>关注13D/13G披露、质押公告 <span class="zh-inline">| Track 13D/13G filings, pledge announcements</span></td>
+          </tr>
+          <tr>
+            <td><strong>MSTR NAV溢价/折价模型</strong> <span class="zh-inline">| MSTR NAV premium/discount model</span></td>
+            <td>无官方公允价值指引，市场定价混乱 <span class="zh-inline">| No official fair value guidance, chaotic pricing</span></td>
+            <td>自建模型：BTC现货×持仓-负债/流通股 <span class="zh-inline">| Build model: BTC spot × holdings - debt / shares</span></td>
+          </tr>
+          <tr>
+            <td><strong>监管突袭风险</strong> <span class="zh-inline">| Regulatory crackdown risk</span></td>
+            <td>SEC对BTC会计处理、可转债结构的潜在挑战 <span class="zh-inline">| Potential SEC challenges on BTC accounting, convertible structure</span></td>
+            <td>追踪FASB更新、SEC会计公告 <span class="zh-inline">| Track FASB updates, SEC accounting announcements</span></td>
+          </tr>
+          <tr>
+            <td><strong>Saylor继任计划</strong> <span class="zh-inline">| Saylor succession plan</span></td>
+            <td>59岁，无明确接班人，策略可持续性存疑 <span class="zh-inline">| Age 59, no clear successor, strategy sustainability in doubt</span></td>
+            <td>关注财报电话会议管理层讨论 <span class="zh-inline">| Track earnings call management discussions</span></td>
+          </tr>
+          <tr>
+            <td><strong>中文一手信息缺失</strong> <span class="zh-inline">| Missing Chinese primary sources</span></td>
+            <td>Saylor极少接受中文媒体深度采访 <span class="zh-inline">| Saylor rarely gives in-depth Chinese media interviews</span></td>
+            <td>依赖吴说区块链等二手翻译，存在时滞 <span class="zh-inline">| Depend on secondary translations like WuTalk, with lag</span></td>
+          </tr>
+          <tr>
+            <td><strong>OTC交易对手风险</strong> <span class="zh-inline">| OTC counterparty risk</span></td>
+            <td>大额BTC购买的对手方、价格、条款不透明 <span class="zh-inline">| Large BTC purchase counterparties, prices, terms opaque</span></td>
+            <td>追踪Chainalysis链上标签、Coinbase财报披露 <span class="zh-inline">| Track Chainalysis labels, Coinbase earnings disclosures</span></td>
+          </tr>
+          <tr>
+            <td><strong>MSTR股票回购/分红可能性</strong> <span class="zh-inline">| MSTR buyback/dividend possibility</span></td>
+            <td>公司明确表示无计划，但若BTC长期停滞可能改变 <span class="zh-inline">| Company says no plans, but may change if BTC stalls</span></td>
+            <td>追踪10-K风险因素更新、管理层表态 <span class="zh-inline">| Track 10-K risk factor updates, management statements</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §8 质量评估 -->
+    <section id="quality">
+      <div class="section-header">
+        <h2>8. 素材质量评估<span class="zh">Source Quality Assessment</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Category 类别</th>
+            <th>Quality 质量</th>
+            <th>Bias 偏见</th>
+            <th>Update Frequency 更新频率</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>SEC Filings 监管文件</strong></td>
+            <td style="color:var(--accent);">★★★★★</td>
+            <td>Neutral 中立</td>
+            <td>Quarterly + Event 季度+事件</td>
+          </tr>
+          <tr>
+            <td><strong>Official X/Twitter</strong></td>
+            <td style="color:var(--accent);">★★★★★</td>
+            <td>Pro-MSTR (明显) <span class="zh-inline">| Obvious</span></td>
+            <td>Daily 日更</td>
+          </tr>
+          <tr>
+            <td><strong>Will Clemente / Dylan LeClair</strong></td>
+            <td style="color:var(--accent);">★★★★☆</td>
+            <td>Pro-BTC (温和) <span class="zh-inline">| Mild</span></td>
+            <td>Frequent 频繁</td>
+          </tr>
+          <tr>
+            <td><strong>Joe Burnett (IIICapital)</strong></td>
+            <td style="color:var(--accent);">★★★★★</td>
+            <td>Analytical 分析型</td>
+            <td>Regular 定期</td>
+          </tr>
+          <tr>
+            <td><strong>K33 Research</strong></td>
+            <td style="color:var(--accent);">★★★★☆</td>
+            <td>Neutral 中立</td>
+            <td>Weekly 周更</td>
+          </tr>
+          <tr>
+            <td><strong>Mainstream Media 主流媒体</strong></td>
+            <td>★★★☆☆</td>
+            <td>Mixed 混杂</td>
+            <td>Event-driven 事件驱动</td>
+          </tr>
+          <tr>
+            <td><strong>Chinese Media 中文媒体</strong></td>
+            <td>★★★☆☆</td>
+            <td>Secondary translation 二手翻译</td>
+            <td>Daily 日更</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="question-box">
+        <blockquote>
+          <p>💰 核心投资问题：<strong>MSTR的NAV溢价能否持续？若BTC进入长期熊市，可转债到期时MSTR如何再融资？</strong></p>
+          <p style="font-size:0.85rem; font-weight:400; color:var(--text-secondary); margin-top:0.5rem;">Core Investment Question: Can MSTR's NAV premium sustain? If BTC enters a prolonged bear market, how will MSTR refinance when convertible notes mature?</p>
+        </blockquote>
+      </div>
+
+    </section>
+
+    <footer style="margin-top:3rem; padding-top:1rem; border-top:1px solid var(--border-subtle); font-size:0.72rem; color:var(--text-quaternary);">
+      <p>Generated: 2026-03-22 &middot; V4 Template &middot; <a href="../blockchain_hub.html">Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ========== RIGHT SIDEBAR (Notes) ========== -->
+  <aside class="notes-sidebar ns-closed" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&times;</button>
+      <h4 style="font-size:0.7rem; font-weight:590; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-quaternary); margin:0;">&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+    
+    <!-- META Notes -->
+    <div class="anno meta-note" id="m1" data-section="analysts" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">分析师信息优先级</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Twitter/X是最快信号源，但需交叉验证。可将分析师分为两类：①链上数据派（Clemente）②财务工程派（Burnett/LeClair）</p>
+        <p style="font-size:0.7rem; color:var(--text-tertiary);">Analyst info priority: Twitter/X is fastest source, but cross-validation needed. Divide into: ① On-chain data (Clemente) ② Financial engineering (Burnett/LeClair)</p>
+      </div>
+    </div>
+    
+    <div class="anno meta-note" id="m2" data-section="longform" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">一手vs二手资料判断</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Saylor本人的内容（课程、采访、Twitter）是一手；分析MSTR的分析师报告是二手；主流媒体解读是三手。投资决策应尽量回溯到一手资料。</p>
+        <p style="font-size:0.7rem; color:var(--text-tertiary);">Saylor's own content (courses, interviews, Twitter) is primary; analyst reports on MSTR are secondary; mainstream media is tertiary. Investment decisions should trace back to primary sources.</p>
+      </div>
+    </div>
+    
+    <div class="anno meta-note" id="m3" data-section="podcasts" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">播客信息提取方法</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>长播客（如6集Saylor Series）适合深度理解世界观；短采访（如Bloomberg）适合捕捉即时情绪变化。建议：先用短采访判断兴趣，再用长播客深度研究。</p>
+        <p style="font-size:0.7rem; color:var(--text-tertiary);">Long podcasts (e.g., 6-episode Saylor Series) for deep worldview understanding; short interviews (e.g., Bloomberg) for capturing immediate sentiment changes. Suggest: Use short interviews to gauge interest, then deep-dive with long podcasts.</p>
+      </div>
+    </div>
+    
+    <div class="anno meta-note" id="m4" data-section="primary" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">SEC 8-K解读要点</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>8-K是MSTR BTC购买的最权威来源。重点关注：①购买时间戳②BTC数量③平均价格④总价。8-K通常在购买完成后数小时内提交。</p>
+        <p style="font-size:0.7rem; color:var(--text-tertiary);">8-K is the most authoritative source for MSTR BTC purchases. Key points: ① Timestamp ② BTC quantity ③ Average price ④ Total cost. 8-K usually filed hours after purchase completion.</p>
+      </div>
+    </div>
+    
+    <div class="anno meta-note" id="m5" data-section="relationships" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">模仿者分析价值</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Metaplanet、Semler Scientific等模仿者的存在，验证了MSTR策略的可复制性。追踪模仿者可以：①判断Saylor叙事的传播范围②发现MSTR竞争优势的边界。</p>
+        <p style="font-size:0.7rem; color:var(--text-tertiary);">Imitators like Metaplanet and Semler validate MSTR strategy replicability. Tracking imitators helps: ① Judge scope of Saylor narrative spread ② Identify boundaries of MSTR competitive advantage.</p>
+      </div>
+    </div>
+    
+    <div class="anno meta-note" id="m6" data-section="narratives" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">叙事监控频率</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>叙事弧是动态演进的。建议：①每日扫描Saylor Twitter②每周检查分析师更新③每季度深度阅读SEC文件④每年评估叙事格局变化。</p>
+        <p style="font-size:0.7rem; color:var(--text-tertiary);">Narrative arcs evolve dynamically. Suggest: ① Daily Saylor Twitter scan ② Weekly analyst updates ③ Quarterly deep SEC filing read ④ Annual narrative landscape assessment.</p>
+      </div>
+    </div>
+    
+    <div class="anno meta-note" id="m7" data-section="gaps" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">信息空白=Alpha机会</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>信息空白是差异化研究的起点。例如：NAV溢价模型若能自建并验证，可发现定价错误；Saylor继任计划若有内部消息，将是重大事件驱动信号。</p>
+        <p style="font-size:0.7rem; color:var(--text-tertiary);">Information gaps are starting points for differentiated research. E.g., if you can build and verify your own NAV premium model, you can discover pricing errors; inside info on Saylor succession would be major event-driven signal.</p>
+      </div>
+    </div>
+    
+    <div class="anno meta-note" id="m8" data-section="quality" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">偏见校准方法</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>所有来源都有偏见。Saylor官方渠道必然pro-MSTR；BTC maximalist分析师有确认偏见。校准方法：①区分事实vs观点②寻找反向论据③建立多空双方视角。</p>
+        <p style="font-size:0.7rem; color:var(--text-tertiary);">All sources have bias. Saylor's official channels are necessarily pro-MSTR; BTC maximalist analysts have confirmation bias. Calibration: ① Distinguish facts from opinions ② Find counter-arguments ③ Build bull/bear perspectives.</p>
+      </div>
+    </div>
+    
+    <!-- Knowledge Notes -->
+    <div class="anno know-note" id="k1" data-section="analysts" onclick="toggleNote(this)">
+      <span class="note-label know">K</span>
+      <div class="mn-head">
+        <span class="mn-title">NAV溢价 (NAV Premium)</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>MSTR股价 vs 其BTC持仓价值的比率。若NAV溢价为正，说明市场认为MSTR的杠杆结构、管理能力有额外价值；若为负，则折价交易。</p>
+        <p style="font-size:0.7rem; color:var(--text-tertiary);">MSTR stock price vs its BTC holdings value ratio. Positive NAV premium means market values MSTR's leverage structure and management; negative means trading at discount.</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="k2" data-section="analysts" onclick="toggleNote(this)">
+      <span class="note-label know">K</span>
+      <div class="mn-head">
+        <span class="mn-title">可转债结构 (Convertible Notes Structure)</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>MSTR发行0%票息可转债，持有者可以特定转换价格将债券转换为股票。这是一种杠杆工具，允许投资者获得对BTC的合成杠杆敞口。</p>
+        <p style="font-size:0.7rem; color:var(--text-tertiary);">MSTR issues 0% coupon convertible notes, holders can convert bonds to stock at specific conversion price. This is a leverage tool allowing investors synthetic leverage exposure to BTC.</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="k3" data-section="analysts" onclick="toggleNote(this)">
+      <span class="note-label know">K</span>
+      <div class="mn-head">
+        <span class="mn-title">杠杆工具 (Leverage Tool)</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>MSTR通过可转债融资买入BTC，股价波动幅度约为BTC的2倍。这种杠杆效应是双刃剑：BTC涨时股价涨更多，跌时也跌更多。</p>
+        <p style="font-size:0.7rem; color:var(--text-tertiary);">MSTR uses convertible debt to buy BTC, stock volatility is ~2x BTC. This leverage is double-edged: stock rises more when BTC rises, falls more when BTC falls.</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="k4" data-section="analysts" onclick="toggleNote(this)">
+      <span class="note-label know">K</span>
+      <div class="mn-head">
+        <span class="mn-title">期权流量 (Options Flow)</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>期权市场的机构大单交易可以暗示对MSTR股价的未来预期。大额看涨期权买入可能预示看涨情绪；大量看跌期权可能暗示对冲需求或看空。</p>
+        <p style="font-size:0.7rem; color:var(--text-tertiary);">Large institutional options trades can hint at future MSTR stock expectations. Large call buying may indicate bullish sentiment; large puts may signal hedging demand or bearish view.</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="k5" data-section="longform" onclick="toggleNote(this)">
+      <span class="note-label know">K</span>
+      <div class="mn-head">
+        <span class="mn-title">数字黄金 (Digital Gold)</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Saylor的核心叙事：BTC是优于黄金的数字价值存储，比黄金更稀缺、更便携、更可分割、更可验证。是对抗法定货币通胀的工具。</p>
+        <p style="font-size:0.7rem; color:var(--text-tertiary);">Saylor's core narrative: BTC is a superior digital store of value vs gold, more scarce, portable, divisible, verifiable. Tool against fiat currency inflation.</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="k6" data-section="primary" onclick="toggleNote(this)">
+      <span class="note-label know">K</span>
+      <div class="mn-head">
+        <span class="mn-title">杠杆结构 (Leverage Structure)</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>MSTR的独特之处：发行0%票息可转债（几乎无成本融资），将募集资金全部买入BTC。若BTC涨幅超过隐含借款成本，则策略正EV。</p>
+        <p style="font-size:0.7rem; color:var(--text-tertiary);">MSTR's uniqueness: Issues 0% coupon convertibles (nearly costless financing), deploys all proceeds to buy BTC. If BTC appreciation exceeds implied borrowing cost, strategy is positive EV.</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="k7" data-section="primary" onclick="toggleNote(this)">
+      <span class="note-label know">K</span>
+      <div class="mn-head">
+        <span class="mn-title">公允价值计量 (Fair Value Accounting)</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>FASB 2024新准则允许企业将BTC以市场价格（非历史成本）计入财务报表。这消除了BTC价格波动时的不对称会计处理，使MSTR财报更反映真实价值。</p>
+        <p style="font-size:0.7rem; color:var(--text-tertiary);">FASB 2024 rule allows companies to mark BTC at market price (not historical cost) in financial statements. Eliminates asymmetric accounting treatment, makes MSTR financials more reflective of true value.</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="k8" data-section="relationships" onclick="toggleNote(this)">
+      <span class="note-label know">K</span>
+      <div class="mn-head">
+        <span class="mn-title">可转债设计 (Convertible Note Design)</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>CFO Andrew Kang设计的可转债条款包括：0%票息、无担保、2025/2027/2028年到期、转换溢价等。这些条款直接影响投资者对MSTR杠杆结构的理解。</p>
+        <p style="font-size:0.7rem; color:var(--text-tertiary);">CFO Andrew Kang designed convertible terms: 0% coupon, unsecured, maturities 2025/2027/2028, conversion premiums. These terms directly impact understanding of MSTR's leverage structure.</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="k9" data-section="relationships" onclick="toggleNote(this)">
+      <span class="note-label know">K</span>
+      <div class="mn-head">
+        <span class="mn-title">杠杆替代 (Leverage Alternative)</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>BlackRock IBIT等BTC ETF的出现改变了MSTR的叙事。以前MSTR是"唯一合规BTC投资渠道"，现在变成"想要BTC杠杆的替代工具"。</p>
+        <p style="font-size:0.7rem; color:var(--text-tertiary);">BlackRock IBIT and other BTC ETFs changed MSTR's narrative. Previously MSTR was "only compliant BTC investment channel", now becomes "alternative for those wanting BTC leverage".</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="k10" data-section="narratives" onclick="toggleNote(this)">
+      <span class="note-label know">K</span>
+      <div class="mn-head">
+        <span class="mn-title">BTC Maximalist</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>指坚定认为BTC将赢得加密货币竞争、最终成为全球储备资产的投资者。Saylor是其中最具影响力的代表，将个人全部财富投入BTC。</p>
+        <p style="font-size:0.7rem; color:var(--text-tertiary);">Investors who firmly believe BTC will win crypto competition and become global reserve asset. Saylor is most influential representative, committing all personal wealth to BTC.</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="k11" data-section="narratives" onclick="toggleNote(this)">
+      <span class="note-label know">K</span>
+      <div class="mn-head">
+        <span class="mn-title">可转债融资 (Convertible Debt Financing)</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>MSTR通过发行可转换债券融资，债券持有者在未来可以特定价格转换为MSTR股票。这种方式让MSTR获得BTC购买资金，同时给予债券持有者上行潜力。</p>
+        <p style="font-size:0.7rem; color:var(--text-tertiary);">MSTR raises capital by issuing convertible bonds, bondholders can convert to MSTR stock at predetermined price in future. This gives MSTR BTC purchase capital while giving bondholders upside potential.</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="k12" data-section="narratives" onclick="toggleNote(this)">
+      <span class="note-label know">K</span>
+      <div class="mn-head">
+        <span class="mn-title">2倍杠杆敞口 (2x Leverage Exposure)</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>MSTR股价波动约为BTC的2倍。原因：MSTR以债务融资买入BTC，债务固定而BTC价值波动，因此BTC每波动1%，MSTR股价波动约2%。</p>
+        <p style="font-size:0.7rem; color:var(--text-tertiary);">MSTR stock volatility is ~2x BTC. Reason: MSTR finances BTC purchases with debt, debt is fixed while BTC value fluctuates, so BTC 1% move causes ~2% MSTR stock move.</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="k13" data-section="narratives" onclick="toggleNote(this)">
+      <span class="note-label know">K</span>
+      <div class="mn-head">
+        <span class="mn-title">公允价值计量 (Fair Value Accounting) - 重复</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>与主文K7相同：FASB 2024新准则允许企业将BTC以市场价格计入财务报表，消除了历史成本法下的报表扭曲。</p>
+        <p style="font-size:0.7rem; color:var(--text-tertiary);">Same as main text K7: FASB 2024 rule allows marking BTC at market price in financial statements, eliminating distortion from historical cost method.</p>
+      </div>
+    </div>
+    
+  </aside>
+
+</div>
+
+<script>
+// === Sidebar toggle (mobile) ===
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+
+// === Notes sidebar toggle ===
+(function(){
+  var btn=document.getElementById("notesToggleBtn"),ns=document.getElementById("notesSidebar"),ov=document.getElementById("notesOverlay"),cb=document.getElementById("notesCloseBtn");
+  if(!btn||!ns)return;
+  function toggle(){ns.classList.toggle("ns-closed");ov.classList.toggle("open");}
+  btn.onclick=toggle;
+  if(ov)ov.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(cb)cb.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(window.innerWidth>1200)ns.classList.remove("ns-closed");
+  window.addEventListener("resize",function(){if(window.innerWidth>1200)ns.classList.remove("ns-closed");});
+})();
+
+// === Toggle note ===
+function toggleNote(head){
+  var anno=head.closest(".anno");
+  if(anno){anno.classList.toggle("open");positionNotes();}
+}
+
+// === Position notes ===
+function positionNotes(){
+  var ns=document.getElementById("notesSidebar");if(!ns)return;
+  var annos=ns.querySelectorAll(".anno");
+  var lastBottom=80;
+  annos.forEach(function(a){
+    if(a.style.display==="none")return;
+    var sec=a.getAttribute("data-section");
+    var target=sec?document.getElementById(sec):null;
+    var top=target?target.getBoundingClientRect().top+window.scrollY-ns.getBoundingClientRect().top:lastBottom;
+    if(top<lastBottom)top=lastBottom;
+    a.style.top=top+"px";
+    lastBottom=top+a.offsetHeight+8;
+  });
+}
+
+// === Knowledge toggle ===
+function toggleKnowNotes(){
+  var btn=document.getElementById("knowToggleBtn");
+  var knowNotes=document.querySelectorAll(".anno.know-note");
+  var marks=document.querySelectorAll("mark.hl-know");
+  var nrefs=document.querySelectorAll(".nref");
+  var visible=btn.classList.contains("active");
+  knowNotes.forEach(function(n){n.style.display=visible?"none":"";});
+  marks.forEach(function(m){m.style.background=visible?"transparent":"";m.style.borderBottom=visible?"none":"";});
+  nrefs.forEach(function(r){r.style.display=visible?"none":"";});
+  btn.classList.toggle("active");
+  btn.textContent=visible?"显示":"隐藏";
+  positionNotes();
+}
+
+// === Expand / Collapse all ===
+function expandAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.add("open");});positionNotes();}
+function collapseAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.remove("open");});positionNotes();}
+
+// === Note count ===
+(function(){
+  var label=document.getElementById("noteCountLabel");if(!label)return;
+  var meta=document.querySelectorAll(".anno.meta-note").length;
+  var know=document.querySelectorAll(".anno.know-note").length;
+  label.textContent=meta+" META + "+know+" Knowledge";
+})();
+
+// === Highlight → Note sync ===
+document.addEventListener("click",function(e){
+  var mark=e.target.closest("mark.hl-know")||e.target.closest(".nref");
+  if(!mark)return;
+  var noteId=mark.getAttribute("data-note");if(!noteId)return;
+  var anno=document.getElementById(noteId);if(!anno)return;
+  anno.classList.add("open");
+  anno.scrollIntoView({behavior:"smooth",block:"center"});
+  anno.classList.add("flash");
+  setTimeout(function(){anno.classList.remove("flash");},1500);
+  positionNotes();
+});
+
+// === Embedded mode ===
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+  document.addEventListener("click",function(e){
+    var a=e.target.closest("a");if(!a||!a.href)return;
+    try{var url=new URL(a.href,location.href)}catch(err){return}
+    if(url.pathname.startsWith("/trade-pipeline/")||url.pathname.startsWith("/observatory/")){
+      e.preventDefault();
+      window.top.postMessage({type:"dashboard-nav",action:"openResearch",url:url.pathname,title:a.textContent.trim().substring(0,60)},"*");
+    }
+  });
+})();
+
+// Initial positioning
+window.addEventListener("load",function(){positionNotes();});
+window.addEventListener("scroll",function(){positionNotes();});
+</script>
+</body>
+</html>

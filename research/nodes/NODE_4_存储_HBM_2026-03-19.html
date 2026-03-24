@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>认知节点报告: 存储/HBM — Node 4</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="../cognitive_agents_2026-03-20/jensen_sources_shared.css">
+  <style>
+/* === KPI Cards === */
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+.kpi-card { background: var(--bg-surface); border-radius: var(--radius-md); padding: 1.25rem; border: 1px solid var(--border-subtle); }
+.kpi-label { font-size: 0.72rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.kpi-value { font-size: 1.5rem; font-weight: 680; font-feature-settings: 'tnum' 1; margin-bottom: 4px; }
+.kpi-change { font-size: 0.78rem; font-weight: 600; }
+.kpi-change.positive { color: #4caf50; }
+.kpi-subtitle { font-size: 0.72rem; color: var(--text-quaternary); margin-top: 4px; }
+
+/* === Risk Matrix & Extended Tables === */
+.risk-matrix td:nth-child(2), .risk-matrix td:nth-child(3) { text-align: center; }
+.risk-high { color: #f44336; font-weight: 700; }
+.risk-medium { color: #ffc107; font-weight: 700; }
+.risk-low { color: #4caf50; font-weight: 700; }
+
+/* === Callout Boxes === */
+.callout { background: var(--bg-surface); border-radius: var(--radius-sm); padding: 1rem 1.25rem; margin: 1rem 0; border-left: 3px solid var(--accent); }
+.callout-title { font-size: 0.8rem; font-weight: 590; color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+.callout-body { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; }
+.callout.risk { border-left-color: #f44336; }
+.callout.risk .callout-title { color: #f44336; }
+.callout.insight { border-left-color: var(--knowledge); }
+.callout.insight .callout-title { color: var(--knowledge); }
+
+/* === Phase Headers === */
+.phase-header { display: flex; align-items: center; gap: 0.75rem; margin: 2.5rem 0 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle); }
+.phase-num { font-size: 0.72rem; font-weight: 700; color: var(--bg-base); background: var(--accent); padding: 3px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+.phase-title { font-size: 1.15rem; font-weight: 590; color: var(--text-primary); }
+
+/* === Agent Cards === */
+.agent-header { display: flex; align-items: center; gap: 0.75rem; margin: 2rem 0 1rem; }
+.agent-role-badge { font-size: 0.68rem; font-weight: 510; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+.agent-role-badge.giant { background: rgba(248,168,72,0.15); color: var(--accent); }
+.agent-role-badge.investor { background: rgba(91,155,213,0.15); color: var(--knowledge); }
+.agent-role-badge.contrarian { background: rgba(244,67,54,0.15); color: #f44336; }
+
+/* === Triangulation Table Colors === */
+.consensus { color: #4caf50; font-weight: 600; }
+.disagreement { color: #f44336; font-weight: 600; }
+
+/* === Provenance Badges === */
+.prov-badge { font-size: 0.65rem; padding: 1px 6px; border-radius: 3px; font-weight: 600; }
+.prov-primary { background: rgba(76,175,80,0.12); color: #4caf50; }
+.prov-industry { background: rgba(91,155,213,0.12); color: var(--knowledge); }
+.prov-media { background: rgba(248,168,72,0.12); color: var(--accent); }
+.prov-analysis { background: rgba(171,71,188,0.12); color: #ab47bc; }
+
+/* === Chart Frames === */
+.chart-frame { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); margin: 1rem 0; overflow: hidden; }
+.chart-frame-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-subtle); }
+.chart-frame-title { font-size: 0.82rem; font-weight: 590; color: var(--text-secondary); letter-spacing: 0.02em; }
+.chart-frame-body { padding: 0; }
+.chart-frame-body .js-plotly-plot { width: 100% !important; }
+.chart-source { padding: 0.5rem 1rem; font-size: 0.7rem; color: var(--text-quaternary); border-top: 1px solid var(--border-subtle); }
+
+/* === Chart Placeholder === */
+.chart-placeholder { background: var(--bg-surface); border: 1px dashed var(--border-default); border-radius: var(--radius-md); padding: 3rem; text-align: center; color: var(--text-quaternary); font-size: 0.85rem; margin: 1rem 0; }
+  
+/* === Embedded mode: inside Dashboard iframe === */
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+body.embedded .hamburger-btn { display: none !important; }
+body.embedded .sidebar-overlay { display: none !important; }
+
+/* === Reading mode: full-width === */
+.reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+.reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+.reading-mode .hamburger-btn { display: none !important; }
+.reading-mode .sidebar-overlay { display: none !important; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes sidebar">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ═══════════ LEFT SIDEBAR ═══════════ -->
+  <aside class="sidebar" id="sidebar">
+    <a class="back-link" href="../semiconductor_hub.html" style="display:block;padding:0.4rem 0.5rem;margin-bottom:1rem;font-size:0.8rem;color:var(--accent);text-decoration:none;border:1px solid var(--accent-dim);border-radius:var(--radius-sm);">&#8592; Semiconductor Hub</a>
+    <h4>目录导航 Contents</h4>
+    <nav><ul>
+      <li><a href="#metacognition" style="color:var(--accent);"><span class="toc-num">&#9733;</span>元思考<br><span class="zh-inline">Metacognition</span></a></li>
+      <li><a href="#phase0"><span class="toc-num">0</span>独立思考<br><span class="zh-inline">Independent Thinking</span></a></li>
+      <li><a href="#phase05"><span class="toc-num">0.5</span>策展搜索<br><span class="zh-inline">Curated Search</span></a></li>
+      <li><a href="#phase1"><span class="toc-num">1</span>认知代理人<br><span class="zh-inline">Cognitive Agents</span></a></li>
+      <li><a href="#kwak"><span class="toc-num">1.1</span>Kwak Noh-Jung<br><span class="zh-inline">GIANT &middot; SK Hynix</span></a></li>
+      <li><a href="#mehrotra"><span class="toc-num">1.2</span>Sanjay Mehrotra<br><span class="zh-inline">INVESTOR &middot; Micron</span></a></li>
+      <li><a href="#phase2"><span class="toc-num">2</span>综合分析<br><span class="zh-inline">Synthesis</span></a></li>
+      <li><a href="#triangulation"><span class="toc-num">2.1</span>三角验证<br><span class="zh-inline">Triangulation</span></a></li>
+      <li><a href="#competitive"><span class="toc-num">2.2</span>竞争格局<br><span class="zh-inline">Competitive Landscape</span></a></li>
+      <li><a href="#supply-demand"><span class="toc-num">2.3</span>供需框架<br><span class="zh-inline">Supply-Demand Framework</span></a></li>
+      <li><a href="#risk-matrix"><span class="toc-num">2.4</span>风险矩阵<br><span class="zh-inline">Risk Matrix</span></a></li>
+      <li><a href="#node-judgment"><span class="toc-num">2.5</span>节点判断<br><span class="zh-inline">Node Judgment</span></a></li>
+      <li><a href="#trading"><span class="toc-num">2.6</span>交易视角<br><span class="zh-inline">Trading Perspective</span></a></li>
+      <li><a href="#综合判断"><span class="toc-num">2.7</span>综合判断<br><span class="zh-inline">Triangulated Verdict</span></a></li>
+      <li><a href="#验证日历"><span class="toc-num">2.8</span>验证日历<br><span class="zh-inline">Verification Calendar</span></a></li>
+      <li><a href="#信号传导"><span class="toc-num">2.9</span>信号传导链<br><span class="zh-inline">Signal Transmission</span></a></li>
+      <li><a href="#kpi-dashboard"><span class="toc-num">3</span>KPI仪表盘<br><span class="zh-inline">Dashboard</span></a></li>
+      <li><a href="#charts"><span class="toc-num">4</span>图表<br><span class="zh-inline">Charts</span></a></li>
+      <li><a href="#provenance"><span class="toc-num">5</span>溯源表<br><span class="zh-inline">Provenance Table</span></a></li>
+      <li><a href="#sources"><span class="toc-num">6</span>来源<br><span class="zh-inline">Sources</span></a></li>
+    </ul></nav>
+    <h4>供应链节点 Supply Chain Nodes</h4>
+    <nav><ul>
+      <li><a href="NODE_1_GPU_AI芯片设计_2026-03-19.html">Node 1: GPU/AI芯片设计<br><span class="zh-inline">GPU/AI Chip Design</span></a></li>
+      <li><a href="NODE_2_光刻设备_2026-03-19.html">Node 2: 光刻设备<br><span class="zh-inline">Lithography Equipment</span></a></li>
+      <li><a href="NODE_3_代工制造_2026-03-19.html">Node 3: 代工制造<br><span class="zh-inline">Foundry Manufacturing</span></a></li>
+      <li><a href="NODE_4_存储_HBM_2026-03-19.html" class="active">Node 4: 存储/HBM<br><span class="zh-inline">Memory / HBM</span></a></li>
+      <li><a href="NODE_5_定制芯片_ASIC_2026-03-19.html">Node 5: 定制芯片<br><span class="zh-inline">Custom Silicon / ASIC</span></a></li>
+      <li><a href="NODE_6_EDA_IP授权_2026-03-19.html">Node 6: EDA/IP授权<br><span class="zh-inline">EDA / IP Licensing</span></a></li>
+      <li><a href="NODE_7_需求侧_Demand_2026-03-21.html">Node 7: 需求侧/超大规模<br><span class="zh-inline">Demand / Hyperscaler</span></a></li>
+      <li><a href="NODE_8_AI_Lab_模型层_2026-03-21.html">Node 8: AI Lab/模型层<br><span class="zh-inline">AI Lab / Model Layer</span></a></li>
+    </ul></nav>
+  </aside>
+
+  <!-- ═══════════ MAIN CONTENT ═══════════ -->
+  <main class="main-content">
+
+    <header class="page-header">
+      <h1>认知节点报告: 存储/HBM<span class="zh">Cognitive Node Report: Memory / HBM</span></h1>
+      <div class="subtitle">Node 4 of 6 &middot; Phase 0&rarr;2 + 2 Cognitive Agents &middot; 2026-03-20</div>
+      <div class="badge-row">
+        <span class="badge">MU $23.86B/Q</span>
+        <span class="badge">000660.KS SK Hynix 50%+</span>
+        <span class="badge">005930.KS Samsung</span>
+        <span class="badge">2 Agents</span>
+        <span class="badge">30+ Sources</span>
+      </div>
+    </header>
+
+    <!-- ════════════════════════════════════════════════════════
+         METACOGNITIVE SUMMARY
+         ════════════════════════════════════════════════════════ -->
+    <div class="priority-box" id="metacognition">
+      <h2 style="margin-top:0; font-size:1.1rem; font-weight:680; color:var(--accent);">&#9733; 元思考: 这份报告的核心发现<span class="zh" style="font-weight:400; font-size:0.85rem;"> Metacognitive Summary</span></h2>
+
+      <div style="margin:1rem 0; padding:1rem 1.25rem; background:var(--bg-overlay); border-radius:var(--radius-sm); border-left:3px solid var(--accent);">
+        <p style="font-size:0.92rem; font-weight:590; color:var(--text-primary); margin:0 0 0.75rem;">&#128270; 核心分析焦点</p>
+        <p style="color:var(--text-secondary); font-size:0.88rem; line-height:1.65; margin:0;">存储/HBM节点的真正问题<strong>不是"供不应求有没有"</strong>&mdash;&mdash;两位认知代理人（Kwak/Mehrotra）在供需方向上完全共识：2026年全部产能已预售，三家只能满足50-66%客户需求。<br><br>
+        <strong>真正的分析焦点是：HBM供不应求能持续多久？三家垄断的竞争格局如何演变？HBM4谁领先？</strong><br>
+        Kwak说"晶圆短缺到2030年"，Mehrotra说"供给紧到2027年以后"。Samsung HBM4获NVIDIA最高评分&mdash;&mdash;这是从HBM3E时代SK Hynix绝对主导的格局变化。Micron Q2 beat 19%但股价跌5.8%&mdash;&mdash;市场在担心$25B CapEx的周期风险。<strong>分歧在于：这是"存储超级周期的中段"还是"经典周期峰值"？</strong></p>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin:1rem 0;">
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid #4caf50;">
+          <p style="font-size:0.72rem; font-weight:510; color:#4caf50; text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#10003; 三角验证共识</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;">HBM供不应求至少到2027年。2026全部产能预售。HBM3E涨价20%客户接受。HBM TAM $54.6B(2026)&rarr;$100B(2028)。<strong>三家CEO全部大幅加CapEx=用真金白银投票。</strong></p>
+        </div>
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid #f44336;">
+          <p style="font-size:0.72rem; font-weight:510; color:#f44336; text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#10007; 三角验证分歧</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;">供给紧张持续时间（2027 vs 2030）。Samsung HBM4能否真正追平SK Hynix。$25B CapEx是理性投资还是周期过热。<strong>2027-2028供给过剩是最大尾部风险。</strong></p>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin:1rem 0;">
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid var(--knowledge);">
+          <p style="font-size:0.72rem; font-weight:510; color:var(--knowledge); text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#128200; 交易指引</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;"><strong>SK Hynix</strong>: 份额龙头+TTM P/E 17x，从ATH回落8%。<strong>MU</strong>: 盈利爆发期+Forward P/E 11-12x+美国大型科技股唯一上涨。<strong>Samsung</strong>: HBM4翻身机会但集团结构稀释。</p>
+        </div>
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid var(--accent);">
+          <p style="font-size:0.72rem; font-weight:510; color:var(--accent); text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#9888; 认知陷阱预警</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;"><strong>卖方偏差</strong>: 两位CEO都是HBM最大供应商，天然看多需求。<strong>幸存者偏差</strong>: 存储周期历史中的"这次不同"叙事每次都出现在峰值。<strong>锚定偏差</strong>: +196% YoY容易让人忘记存储的周期性本质。</p>
+        </div>
+      </div>
+
+      <details style="margin-top:0.75rem;">
+        <summary style="font-size:0.82rem; font-weight:510; color:var(--text-tertiary); cursor:pointer;">&#128214; 两位代理人一句话摘要</summary>
+        <div style="padding:0.75rem 0; font-size:0.82rem; color:var(--text-secondary); line-height:1.65;">
+          <p><strong>Kwak Noh-Jung (GIANT, 8.5/10)</strong>: "AI内存不是周期性业务，是结构性增长。" &mdash; 2025每个重大预判被验证，$15.1B M15X投资提前4个月量产，首次年度利润超越Samsung。信息优势无可匹敌（全球50%+ HBM订单簿），但作为卖方天然偏向看多。</p>
+          <p><strong>Sanjay Mehrotra (INVESTOR, 8/10)</strong>: "AI正在把存储变成战略咽喉。" &mdash; Q2 FY2026收入beat 19%、EPS beat 42%，系统性保守估计（$18B&rarr;$20B&rarr;$25B CapEx三月两升）。从4%到25% HBM份额仅用两年。但$25B CapEx令市场恐慌跌5.8%。</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="top-controls">
+      <span class="tc-label">&#128218; 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════
+         PHASE 0: INDEPENDENT THINKING
+         ════════════════════════════════════════════════════════ -->
+    <div class="section-header" id="phase0">
+      <h2>&sect;0 Phase 0: 独立思考<span class="zh">Independent Thinking (Before Search)</span></h2>
+    </div>
+
+    <div class="callout" style="border-left-color:#ffc107; margin-bottom:1.5rem;">
+      <div class="callout-title" style="color:#ffc107;">&#9888; 诚实标注 Honesty Disclosure</div>
+      <div class="callout-body">本Phase 0标题为"搜索前独立思考"，但实际撰写时已读完两位代理人的完整MD文件（共40KB+）及CP2完整内容。这是<strong>事后重构</strong>，不是真正的搜索前独立思考。其价值在于：明确标记预判偏差方向，而非假装"猜对了"。</div>
+    </div>
+
+    <h3>1. 节点解决什么问题？</h3>
+    <p>存储/HBM解决<strong>"<mark class="hl-know" data-note="k1">Memory Wall</mark><sup class="nref" data-note="k1">1</sup>"</strong>&mdash;&mdash;计算与数据之间的带宽瓶颈。GPU算力指数增长但DRAM带宽增长滞后，HBM通过垂直堆叠12-16层DRAM+硅穿孔(TSV)互连，提供传统DDR <strong>5-10倍带宽</strong>。如果HBM明天消失：所有AI训练/推理停摆，NVIDIA的B200/Rubin变废铁。</p>
+
+    <h3>2. 供给约束？</h3>
+    <ul>
+      <li><strong>HBM良率</strong>：垂直堆叠12-16层，<mark class="hl-know" data-note="k2">TSV工艺</mark><sup class="nref" data-note="k2">2</sup>极难，HBM4新增逻辑层集成</li>
+      <li><strong>先进封装产能</strong>（<mark class="hl-know" data-note="k3">CoWoS/MR-MUF</mark><sup class="nref" data-note="k3">3</sup>）是共享瓶颈</li>
+      <li><strong>DRAM fab建设周期2-3年</strong>，产能不能快速响应</li>
+      <li><strong><mark class="hl-know" data-note="k4">Die Penalty</mark><sup class="nref" data-note="k4">4</sup></strong>: 1GB HBM消耗3-4倍标准DRAM晶圆面积 &rarr; AI吞噬传统DRAM供给</li>
+    </ul>
+
+    <h3>3. 需求驱动力？</h3>
+    <ul>
+      <li><strong>AI模型规模指数增长</strong> &rarr; 每代GPU配套HBM翻倍（H100: 80GB &rarr; B200: 192GB &rarr; <mark class="hl-know" data-note="k5">Rubin</mark><sup class="nref" data-note="k5">5</sup>: 288-384GB）</li>
+      <li><strong>超大规模客户CapEx承诺</strong>锁定多年需求</li>
+      <li><strong>推理需求崛起</strong> &rarr; 不再只是训练拉动</li>
+      <li><strong>自研ASIC芯片</strong>（Google TPU、AWS Trainium）同样需要HBM</li>
+    </ul>
+
+    <h3>4. 当前供需状态？</h3>
+    <p><strong>严重供不应求。</strong>2026年全部HBM产能已在2025年上半年预售完毕。三家供应商（SK Hynix+Samsung+Micron）只能满足核心客户50-66%需求。HBM3E涨价20%，客户接受。<mark class="hl-know" data-note="k6">DRAM合约价2025年底同比+170%</mark><sup class="nref" data-note="k6">6</sup>。</p>
+
+    <h3>5. 未来2-3年变化方向？</h3>
+    <ul>
+      <li><strong><mark class="hl-know" data-note="k7">HBM4/HBM4E</mark><sup class="nref" data-note="k7">7</sup>技术迭代</strong> &rarr; Samsung可能在新架构追平</li>
+      <li><strong>若AI投资放缓</strong>，HBM高beta属性将放大下行</li>
+      <li><strong>美国CHIPS Act政策</strong>给Micron额外支持（$6.2B直接资助）</li>
+      <li><strong>2027-2028新产能上线</strong> &rarr; 供需拐点可能出现</li>
+    </ul>
+
+    <!-- ════════════════════════════════════════════════════════
+         PHASE 0.5: CURATED SEARCH
+         ════════════════════════════════════════════════════════ -->
+    <div class="section-header" id="phase05">
+      <h2>&sect;1 Phase 0.5: 策展搜索<span class="zh">Curated Search</span></h2>
+    </div>
+
+    <h3>最佳分析源</h3>
+    <figure>
+      <table>
+        <thead>
+          <tr><th>Source 来源</th><th>Type 类型</th><th>Value 价值</th><th>Credibility 可信度</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>TrendForce</strong></td><td>Industry research</td><td>HBM出货量/份额/产能最细粒度追踪，月度更新</td><td><span class="tier-high">Very High</span></td></tr>
+          <tr><td><strong>SK Hynix Newsroom</strong></td><td>Primary source</td><td>CEO言论、产品路线图、财报数据</td><td><span class="tier-high">Primary</span></td></tr>
+          <tr><td><strong>Micron IR</strong></td><td>Primary source</td><td>季度财报、CEO前瞻指引</td><td><span class="tier-high">Primary</span></td></tr>
+          <tr><td><strong>CNBC / Bloomberg</strong></td><td>Financial media</td><td>CEO采访原文、市场反应</td><td><span class="tier-medium-high">High</span></td></tr>
+          <tr><td><strong>BofA / Goldman / UBS</strong></td><td>Investment banks</td><td>市场规模预测、份额预测</td><td><span class="tier-medium-high">High</span></td></tr>
+          <tr><td><strong>Counterpoint Research</strong></td><td>Industry data</td><td>季度HBM市场份额追踪</td><td><span class="tier-medium-high">High</span></td></tr>
+          <tr><td><strong>Fortune</strong></td><td>Financial media</td><td>"AI Memory Shortage is Taxing the Entire Economy" (2026-03-19)</td><td><span class="tier-medium-high">High</span></td></tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <h3>Key Curated Findings</h3>
+
+    <div class="callout">
+      <div class="callout-title">CURATED-1 &mdash; TrendForce: HBM需求+130% YoY</div>
+      <div class="callout-body">TrendForce基于2025年AI芯片出货量推导，预计2026年HBM需求同比增长超130%。HBM3E将占约2/3出货量，HBM4在下半年加速上量。HBM4收入占比可能达55%（因单价更高）。<br><small class="zh-inline">Source: TrendForce, 2025-12</small></div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">CURATED-2 &mdash; BofA: 2026年HBM市场$54.6B (+58% YoY)</div>
+      <div class="callout-body">Bank of America定义2026年为"类似1990年代的超级周期"，预测全球DRAM收入同比+51%，NAND+45%，ASP分别+33%和+26%。整体DRAM收入创历史纪录。<br><small class="zh-inline">Source: BofA via media, 2026-01</small></div>
+    </div>
+
+    <div class="callout insight">
+      <div class="callout-title">CURATED-3 &mdash; Fortune (2026-03-19): AI内存短缺对经济征税</div>
+      <div class="callout-body">Fortune今日发文分析：HBM的"die penalty"（3-4倍晶圆面积）导致传统DRAM/NAND供给被挤压，手机、PC、汽车、消费电子的内存成本全面上涨。<mark class="hl-know" data-note="k6">DRAM合约价2025年底同比飙升170%+</mark><sup class="nref" data-note="k6">6</sup>。<br><small class="zh-inline">Source: Fortune, 2026-03-19</small></div>
+    </div>
+
+    <div class="callout insight">
+      <div class="callout-title">CURATED-4 &mdash; IDC: 供给增长远低于需求</div>
+      <div class="callout-body">IDC预计2026年DRAM供给同比增长仅16%，NAND仅17%&mdash;&mdash;均低于历史正常水平。供给不足+需求暴增=价格持续上行。<br><small class="zh-inline">Source: IDC, 2026-03</small></div>
+    </div>
+
+    <div class="callout risk">
+      <div class="callout-title">CURATED-5 &mdash; SK Hynix CEO: 晶圆短缺可能到2030年</div>
+      <div class="callout-body">SK Group会长Chey Tae-won在GTC 2026公开警告全球晶圆短缺可能延续到2030年&mdash;&mdash;这是目前市场上<strong>最鹰派</strong>的供给预判。<br><small class="zh-inline">Source: Korea Times / Tom's Hardware, 2026-03-17</small></div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">CURATED-6 &mdash; V3 Delta: Samsung HBM4获NVIDIA最高评分</div>
+      <div class="callout-body">Samsung HBM4通过NVIDIA认证获"最高评分"，在Vera Rubin平台可能获30%+份额。Micron Q2 beat 19%，收入$23.86B。Samsung追赶+Micron追平=<strong>HBM4时代竞争格局正在重塑</strong>。<br><small class="zh-inline">Source: SamMobile / CNBC, 2026-02~03</small></div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════
+         PHASE 1: COGNITIVE AGENTS
+         ════════════════════════════════════════════════════════ -->
+    <div class="section-header" id="phase1">
+      <h2>&sect;2 Phase 1: 认知代理人<span class="zh">Cognitive Agents</span></h2>
+    </div>
+
+    <!-- ─── Agent 1: Kwak Noh-Jung ─── -->
+    <div id="kwak">
+      <div class="agent-header">
+        <span class="agent-role-badge giant">GIANT</span>
+        <h3>Kwak Noh-Jung (郭鲁正) &mdash; SK Hynix CEO &amp; President</h3>
+      </div>
+
+      <p><strong>选择理由</strong>: Kwak掌控全球HBM份额第一（50-62%）的SK hynix。他的每一个产能决策直接定义AI算力的供给天花板。他不仅是"行业参与者"，而是<strong>供给侧的定价权持有人</strong>&mdash;&mdash;2026年全部HBM订单在2025H1即签约完毕。纯粹工程出身掌门人（高丽大学材料工程博士，29年SK hynix）。<strong>可信度: 8.5/10</strong>。</p>
+
+      <h4>行动证据（比言论更重要）</h4>
+      <ol>
+        <li><strong><mark class="hl-know" data-note="k8">M15X工厂</mark><sup class="nref" data-note="k8">8</sup>: $15.1B的真金白银</strong>: SK hynix历史上最大单笔投资。2025年10月开幕（提前），2026年2月开始1b DRAM商业量产（提前4个月）。初始月产能~10K片晶圆，2026年底目标55-60K片。</li>
+        <li><strong>2025年CapEx暴增30%</strong>: 半导体公司不会在需求不确定时大幅加CapEx。到2025年底被完全验证（收入+47%，利润翻倍）。</li>
+        <li><strong>锁定2026全部HBM订单于2025H1</strong>: 产能全部预售=最强供需信号。不是口头表态，而是白纸黑字的合同。</li>
+        <li><strong>首次年度利润超越Samsung</strong>: 2025年营业利润47.2T KRW。从"万年老二"到利润冠军&mdash;&mdash;证明HBM技术领先转化为财务优势。</li>
+        <li><strong>CES 2026: 16层48GB HBM4首展 + 会见25家核心客户</strong>: CEO亲自会见NVIDIA、AMD、Intel、Google高管。展示HBM4+SOCAMM2+LPDDR6全产品线。</li>
+        <li><strong>HBM3E涨价~20%</strong>: 涨价且客户接受=卖方市场的直接证据。</li>
+        <li><strong>考虑US ADR上市</strong>: 使用2.4%库存股（~1740万股）&mdash;&mdash;不稀释现有股东+打开美国资本市场。目标缩小与Micron（29x P/E）的估值差距（SK hynix仅11x）。</li>
+      </ol>
+
+      <h4>核心判断</h4>
+      <blockquote>"AI内存不是周期性业务，是结构性增长"<span class="zh">传统存储周期被AI需求的指数增长打破。每代GPU的HBM配套量翻倍=需求增速持续超过产能增速。</span></blockquote>
+      <ul>
+        <li><strong>"双代策略"</strong>: 2026年HBM3E仍占出货约2/3，HBM4逐步上量。不急切换代际&mdash;&mdash;确保良率和客户验证</li>
+        <li><strong>"Full Stack AI Memory Creator"</strong>: HBM+DDR5+LPDDR6+SOCAMM2+CXL全产品线=客户锁定效应</li>
+        <li><strong>"速度是最重要的竞争力"</strong>: M15X提前4个月量产验证此战略</li>
+        <li><strong>晶圆短缺可能持续到2030年</strong>（最鹰派预判，来自SK Group会长）</li>
+      </ul>
+
+      <details>
+        <summary>数据快照与风险</summary>
+        <p><strong>股价 000660.KS</strong> (3/19): ~1,013,000 KRW | 52周高: 1,099,000 | 2026 YTD: +11.5% | TTM P/E: 16.5-17.0x</p>
+        <p><strong>2025全年</strong>: 收入97.1T KRW (+47% YoY) | 营业利润47.2T KRW (+101%) | Q4利润率58%</p>
+        <p><strong>分析师</strong>: Strong Buy 36/37 | 目标均价1,271,486 KRW (+25%) | 市值~$467B</p>
+        <p><strong>Kwak可能低估的风险</strong>: (1) Samsung HBM4追平&mdash;&mdash;获NVIDIA"最高评分"认证 (2) "稳定DRAM价格"措施暗示担心涨价过快 (3) 2027-2028三家同时扩产的周期风险</p>
+      </details>
+    </div>
+
+    <hr>
+
+    <!-- ─── Agent 2: Sanjay Mehrotra ─── -->
+    <div id="mehrotra">
+      <div class="agent-header">
+        <span class="agent-role-badge investor">INVESTOR</span>
+        <h3>Sanjay Mehrotra &mdash; Micron Technology CEO</h3>
+      </div>
+
+      <p><strong>选择理由</strong>: 美国唯一DRAM制造商的掌舵人。他的HBM投资决策代表<strong>美国视角</strong>对AI内存需求确定性的判断。CHIPS Act最大受益者之一（$6.2B直接资助）。从HBM第三到追平（4%&rarr;25%，两年完成）。SanDisk联合创始人（70+专利）。<strong>可信度: 8/10</strong>。</p>
+
+      <h4>行动证据（比言论更重要）</h4>
+      <ol>
+        <li><strong>CapEx从$18B到$20B到$25B: 三个月内两次上调</strong>: Micron有史以来最大资本支出。短期内两次上调=需求超出CEO自己的预期。</li>
+        <li><strong><mark class="hl-know" data-note="k9">$100B纽约Megafab</mark><sup class="nref" data-note="k9">9</sup></strong>: 2026年1月破土动工，美国历史上最大半导体设施，4座fab，5万个工作岗位。CHIPS Act $6.2B资助。<strong>这是5-10年的产能布局</strong>&mdash;&mdash;说明Mehrotra判断需求是结构性的。</li>
+        <li><strong>"只能满足50-66%客户需求"</strong>: 财报会议直言&mdash;&mdash;供给严重不足的最直接表述。</li>
+        <li><strong>Q2 FY2026炸裂业绩 (2026-03-18)</strong>: 收入$23.86B (beat 19%, +196% YoY) | EPS $12.20 (beat 42%) | 营业利润率69% | 自由现金流$6.9B（历史纪录）。<strong>Q3指引: $33.5B收入 (+260% YoY)</strong>。</li>
+        <li><strong>首签<mark class="hl-know" data-note="k10">5年战略客户协议(SCA)</mark><sup class="nref" data-note="k10">10</sup></strong>: 打破存储行业"季度谈判"传统。将存储从周期性商品转化为长约锁定的战略资产。正在与多客户洽谈更多SCA。</li>
+        <li><strong>HBM4三产品同时量产（业界首个）</strong>: HBM4 36GB 12-high（为NVIDIA Vera Rubin）+ PCIe Gen6 SSD + 192GB SOCAMM2。16层48GB HBM4样品已交付客户。</li>
+        <li><strong>HBM份额从4%到25%: 两年完成</strong>: 在半导体行业极为罕见的追赶速度。</li>
+      </ol>
+
+      <h4>核心判断</h4>
+      <blockquote>"AI is turning memory into a strategic chokepoint"<span class="zh">"AI正在把存储变成战略咽喉"&mdash;&mdash;不是商业判断，是地缘战略定位。</span></blockquote>
+      <ul>
+        <li><strong>HBM TAM CAGR ~40%</strong>: $35B(2025) &rarr; ~$56B(2026) &rarr; $100B(2028)</li>
+        <li><strong>"供给紧张将持续到2027年以后"</strong>&mdash;&mdash;"durable industry fundamentals over the foreseeable future"</li>
+        <li><strong>HBM4良率好于HBM3E</strong>，ramp更快</li>
+        <li><strong>存储行业商业模式正在重塑</strong>&mdash;&mdash;从季度谈判到5年长约</li>
+      </ul>
+
+      <div class="callout risk">
+        <div class="callout-title">市场反应的矛盾</div>
+        <div class="callout-body">Q2 FY2026是<strong>史诗级</strong>业绩：beat 19%/42%/69%利润率/历史纪录FCF。但股价次日跌5.8%。原因：CapEx从$20B&rarr;$25B引发"过度投资"恐惧。<strong>这恰恰是超级周期中的典型反应：业绩越好&rarr;投资越大&rarr;市场越担心拐点。</strong></div>
+      </div>
+
+      <details>
+        <summary>数据快照与风险</summary>
+        <p><strong>股价 MU</strong> (3/19): ~$440 | 2026 YTD: +62%（美国大型科技股中唯一上涨） | 过去一年: +350%+</p>
+        <p><strong>TTM P/E</strong>: ~36x | <strong>Forward P/E</strong>: 11-12x | 分析师共识: Strong Buy (31) | S&amp;P评级展望上调至正面</p>
+        <p><strong>全球建厂</strong>: Idaho fab 1 (2027H2提前) | Idaho fab 2 (2028底) | NY Megafab (2030+) | Singapore (2027 HBM封装) | India (规划)</p>
+        <p><strong>Mehrotra可能低估的风险</strong>: (1) $25B CapEx的消化&mdash;&mdash;2027需求放缓则Megafab变"昂贵纪念碑" (2) NAND业务仍是拖累 (3) Samsung和SK hynix同日宣布HBM4量产=竞争白热化</p>
+      </details>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════
+         PHASE 2: SYNTHESIS
+         ════════════════════════════════════════════════════════ -->
+    <div class="section-header" id="phase2">
+      <h2>&sect;3 Phase 2: 综合分析<span class="zh">Synthesis</span></h2>
+    </div>
+
+    <!-- §3.1 Triangulation -->
+    <div id="triangulation">
+      <h3>&sect;3.1 三角验证: 行动 vs 言论 vs 数据</h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Dimension 维度</th><th>SK Hynix (Kwak)</th><th>Micron (Mehrotra)</th><th>Samsung (对照)</th><th>Consistency 一致性</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>CapEx方向</strong></td><td>+30% (2025)</td><td>$18B&rarr;$20B&rarr;$25B</td><td>HBM产能+50%</td><td><span class="consensus">&#10003; 三家同方向加码</span></td></tr>
+            <tr><td><strong>2026订单</strong></td><td>全部预售完</td><td>全部签约完（含价格）</td><td>产能全部预定</td><td><span class="consensus">&#10003; 完全一致</span></td></tr>
+            <tr><td><strong>需求满足率</strong></td><td>Sold-out</td><td>只能满足50-66%</td><td>产能不足</td><td><span class="consensus">&#10003; 一致：供不应求</span></td></tr>
+            <tr><td><strong>HBM4时间线</strong></td><td>2025-Q4量产，2026放量</td><td>FQ1 2026已开始Rubin量产</td><td>2026-02开始出货</td><td><span class="consensus">&#10003; 一致</span></td></tr>
+            <tr><td><strong>市场判断</strong></td><td>"超级周期"</td><td>"供给紧到2027+"</td><td>大幅扩产中</td><td><span class="consensus">&#10003; 完全一致</span></td></tr>
+            <tr><td><strong>价格走向</strong></td><td>HBM3E涨价~20%</td><td>长约锁价</td><td>同步涨价</td><td><span class="consensus">&#10003; 卖方市场</span></td></tr>
+            <tr><td><strong>晶圆短缺持续</strong></td><td>"可能到2030年"</td><td>"超过2027年"</td><td>&mdash;</td><td><span class="disagreement">&#10007; Kwak更鹰派</span></td></tr>
+            <tr><td><strong>HBM4竞争力</strong></td><td>全球首发+Rubin 70%份额(UBS)</td><td>良率声称好于HBM3E</td><td>NVIDIA最高评分</td><td><span class="disagreement">&#10007; 三家各执一词</span></td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <div class="callout insight">
+        <div class="callout-title">Key Insight 关键洞察</div>
+        <div class="callout-body">两位代理人在<strong>供需方向</strong>上完全共识&mdash;&mdash;HBM供不应求是事实，2026年产能全部预售是硬数据。Samsung作为对照也印证此判断（即使第三名也能卖光所有产能）。<strong>真正的分歧在两个维度</strong>：(1) 供给紧张能持续多久？(2) HBM4时代谁占据主导？<strong>Samsung HBM4获NVIDIA"最高评分"&mdash;&mdash;这是HBM3E时代SK Hynix绝对主导格局的关键变化。</strong></div>
+      </div>
+    </div>
+
+    <!-- §3.2 Competition -->
+    <div id="competitive">
+      <h3>&sect;3.2 HBM4竞赛格局<span class="zh">HBM4 Competitive Landscape (March 2026)</span></h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Company</th><th>HBM4 Status</th><th>Mass Prod. 量产</th><th>NVIDIA Rubin Share</th><th>Strength</th><th>Weakness</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>SK Hynix</strong></td><td>11Gbps测试优化中</td><td>2026-02 M15X试产</td><td>总HBM 50%+</td><td>份额最大、生态最深、M15X领先</td><td>已大幅涨过、Samsung追赶</td></tr>
+            <tr><td><strong>Samsung</strong></td><td>NVIDIA认证（最高评分）</td><td>2026-02开始出货</td><td>Vera Rubin专用可能领先</td><td>HBM4翻身机会、估值最低</td><td>集团结构稀释、历史执行问题</td></tr>
+            <tr><td><strong>Micron</strong></td><td>最终客户样品已交付</td><td>FQ1 2026已量产</td><td>第三位但在追赶</td><td>盈利爆发期、美国本土+CHIPS Act</td><td>估值需消化、NAND拖累</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <div class="callout" style="border-left-color:#ffc107;">
+        <div class="callout-title" style="color:#ffc107;">&#9888; 关键转折</div>
+        <div class="callout-body">HBM4时代Samsung可能追平甚至领先SK Hynix（至少在NVIDIA Rubin平台上）。Samsung是Google TPU HBM3E主力供应商（60%+份额），2026年目标NVIDIA HBM4份额30%+。<strong>这是从HBM3E时代的格局变化&mdash;&mdash;三强争霸取代一家独大。</strong></div>
+      </div>
+    </div>
+
+    <!-- §3.3 Supply-Demand -->
+    <div id="supply-demand">
+      <h3>&sect;3.3 供需框架<span class="zh">Supply-Demand Framework</span></h3>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;">
+        <div class="callout" style="border-left-color: #4caf50;">
+          <div class="callout-title" style="color: #4caf50;">需求侧 Demand</div>
+          <div class="callout-body">
+            <ul style="margin:0; padding-left:1.2rem;">
+              <li>HBM TAM: <strong>$54.6B</strong> (2026E, BofA) | $100B (2028E)</li>
+              <li>HBM需求同比<strong>+130%</strong>（TrendForce出货量口径）</li>
+              <li>每代GPU配套HBM翻倍: H100:80GB &rarr; B200:192GB &rarr; Rubin:384GB</li>
+              <li>推理+训练+自研ASIC三引擎驱动</li>
+              <li>2026全部供应已签约&mdash;&mdash;需求已用合同锁定</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout risk">
+          <div class="callout-title">供给侧 Supply</div>
+          <div class="callout-body">
+            <ul style="margin:0; padding-left:1.2rem;">
+              <li>DRAM供给增长仅<strong>16%</strong>（IDC），远低于需求+130%</li>
+              <li>1GB HBM消耗<strong>3-4x</strong>标准DRAM晶圆面积</li>
+              <li>AI吞噬<strong>20%</strong>全球DRAM产能（TrendForce 2026E）</li>
+              <li>DRAM fab建设周期2-3年，不能快速响应</li>
+              <li>三家只能满足客户<strong>50-66%</strong>需求</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout insight">
+        <div class="callout-title">供需缺口判断</div>
+        <div class="callout-body"><strong>明确存在</strong>，2026-2027确定性极高（<strong>8/10</strong>）。供给受物理约束（fab建设周期、die penalty、良率爬坡），需求有全年合同锁定。<strong>在所有半导体节点中，存储/HBM的供需确定性最高&mdash;&mdash;因为2026年供应已全部预售完毕。</strong></div>
+      </div>
+    </div>
+
+    <!-- §3.4 Risk Matrix -->
+    <div id="risk-matrix">
+      <h3>&sect;3.4 风险矩阵<span class="zh">Risk Matrix</span></h3>
+
+      <figure class="table-responsive">
+        <table class="risk-matrix">
+          <thead>
+            <tr><th>Risk 风险</th><th>Probability</th><th>Impact</th><th>Timeframe</th><th>Monitoring 监控指标</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>AI CapEx放缓/推迟</strong></td><td><span class="risk-medium">Medium</span></td><td><span class="risk-high">High</span></td><td>2026H2-2027</td><td>超大规模客户CapEx指引</td></tr>
+            <tr><td><strong>2027-2028供给过剩</strong><br><small>三家同时扩产</small></td><td><span class="risk-medium">Medium</span></td><td><span class="risk-high">High</span></td><td>2027H2+</td><td>新fab投产节奏、HBM库存天数</td></tr>
+            <tr><td><strong>HBM4良率低于预期</strong></td><td><span class="risk-medium">Low-Med</span></td><td><span class="risk-medium">Medium</span></td><td>2026</td><td>三家量产爬坡速度</td></tr>
+            <tr><td><strong>关税/地缘政治</strong></td><td><span class="risk-medium">Medium</span></td><td><span class="risk-medium">Medium</span></td><td>持续</td><td>美国对韩半导体政策</td></tr>
+            <tr><td><strong>技术替代(CXL/PIM)</strong></td><td><span class="risk-low">Low</span></td><td><span class="risk-low">Low</span></td><td>2028+</td><td>CXL内存池化采用率</td></tr>
+            <tr><td><strong>AI泡沫破裂</strong></td><td><span class="risk-low">Low</span></td><td><span class="risk-high">Extreme</span></td><td>不确定</td><td>AI应用实际ROI</td></tr>
+            <tr><td><strong>传统内存客户反弹</strong></td><td><span class="risk-medium">Medium</span></td><td><span class="risk-low">Low</span></td><td>2026-2027</td><td>手机/PC OEM库存水平</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <div class="callout risk">
+        <div class="callout-title">Bear Case 核心逻辑</div>
+        <div class="callout-body">当前供不应求 &rarr; 三家疯狂扩产 &rarr; 2027-2028新产能集中上线 &rarr; 若此时AI需求增速放缓 &rarr; 供给过剩 &rarr; 价格暴跌 &rarr; 利润率回归均值。这是传统存储周期的经典剧本。<strong>但这次不同的结构性因素是</strong>: 每代GPU的HBM配套量翻倍 + 推理需求指数增长 + 自研ASIC也需要HBM &rarr; 需求增速可能持续超过产能增速。</div>
+      </div>
+    </div>
+
+    <!-- §3.5 Node Judgment -->
+    <div id="node-judgment">
+      <h3>&sect;3.5 节点判断<span class="zh">Node Judgment</span></h3>
+
+      <div class="callout" style="border-left-color: var(--knowledge);">
+        <div class="callout-body" style="font-size: 0.92rem;">
+          <p><strong>供需状态</strong>: 严重供不应求，2026-2027确定性极高（<strong>8/10</strong>）</p>
+          <p><strong>周期位置</strong>: 上升周期中段，首次与AI超级周期同步</p>
+          <p><strong>最大确定性</strong>: 2026年供应全部预售 = 在所有半导体节点中确定性最高</p>
+          <p><strong>最大分歧</strong>: 供给紧张持续时间&mdash;&mdash;Kwak说"可能到2030"，Mehrotra说"超过2027"。以及HBM4时代Samsung能否打破SK Hynix垄断。</p>
+          <p style="margin-bottom:0;"><strong>风险不在需求端</strong>（已锁定），而在: (1) 执行端（良率、产能爬坡）(2) 2027+周期拐点 (3) 三家扩产后的供给过剩</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- §3.6 Trading -->
+    <div id="trading">
+      <h3>&sect;3.6 交易视角<span class="zh">Trading Perspective</span></h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Dimension 维度</th><th>SK Hynix (000660.KS)</th><th>Micron (MU)</th><th>Samsung (005930.KS)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>HBM纯度</strong></td><td>极高（HBM=核心收入）</td><td>高（HBM+传统DRAM+NAND）</td><td>低（存储仅占~35%收入）</td></tr>
+            <tr><td><strong>HBM份额</strong></td><td>50%+（第一）</td><td>~25%（第三&rarr;追赶中）</td><td>~20-25%（第二，追赶中）</td></tr>
+            <tr><td><strong>增速</strong></td><td>2025收入+47%</td><td>Q2 FY2026 +196%</td><td>存储部门复苏中</td></tr>
+            <tr><td><strong>估值</strong></td><td>TTM P/E 16-17x</td><td>TTM 36x / Fwd 11-12x</td><td>集团P/E偏低</td></tr>
+            <tr><td><strong>政策红利</strong></td><td>韩国支持</td><td>CHIPS Act $6.2B</td><td>韩国支持</td></tr>
+            <tr><td><strong>HBM4竞争力</strong></td><td>领先但被追赶</td><td>第三但良率声称领先</td><td>NVIDIA最高评分</td></tr>
+            <tr><td><strong>2026 YTD</strong></td><td>+11.5%</td><td>+62%</td><td>+16%</td></tr>
+            <tr><td><strong>分析师共识</strong></td><td>Strong Buy (36)</td><td>Strong Buy (31)</td><td>&mdash;</td></tr>
+            <tr><td><strong>周期位置</strong></td><td>从ATH回落8%</td><td>盈利爆发期（唯一上涨）</td><td>低位复苏中</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <div class="callout">
+        <div class="callout-title">Luke交易视角 &mdash; 周期匹配评估</div>
+        <div class="callout-body">
+          <p><strong>SK Hynix</strong>: 过去一年+345%，可能已过最佳建仓期。但TTM P/E 17x在supercycle中仍不算贵。需要看月线是否在做二浪整理。当前从ATH回落约8%，可能在形成横盘区间。ADR上市如落地=估值重估催化剂。</p>
+          <p><strong>Micron (MU)</strong>: 盈利爆发期（Q2 beat 31%，Q3指引+260% YoY），Forward P/E 11-12x极具吸引力。过去一年+350%涨幅巨大，但盈利增速跟得上。<strong>在美国大型科技股中2026年唯一上涨</strong>&mdash;&mdash;相对强度极强。5.8%回调可能是CapEx消化后的买入机会。</p>
+          <p style="margin-bottom:0;"><strong>Samsung</strong>: "均值回归"逻辑&mdash;&mdash;如果HBM4时代真的追平差距，当前因集团结构被低估的存储业务可能重估。但投资效率低（买存储要搭手机+显示器）。适合作为对冲而非核心仓位。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════
+         §3.7 综合判断
+         ════════════════════════════════════════════════════════ -->
+    <div id="综合判断">
+      <h3>&sect;3.7 综合判断<span class="zh">Triangulated Verdict</span></h3>
+      <p style="color:var(--text-tertiary); font-size:0.82rem; margin-bottom:1rem;"><em>以下判断来自两位代理人认知时间线的交叉验证+CP2策展内容。</em></p>
+
+      <figure class="table-responsive">
+        <table>
+          <thead><tr><th>Claim</th><th>交叉验证</th><th>综合可信度</th></tr></thead>
+          <tbody>
+            <tr><td><strong>HBM供不应求持续到2027年</strong></td><td>两代理人共识 + 全年合同锁定 + IDC供给数据验证 + Samsung也卖光</td><td><strong style="color:#4caf50;">95%</strong></td></tr>
+            <tr><td><strong>HBM TAM $54.6B(2026) &rarr; $100B(2028)</strong></td><td>BofA/Micron/TrendForce三源交叉 + 每代GPU HBM翻倍的物理逻辑</td><td><strong style="color:#4caf50;">80%</strong></td></tr>
+            <tr><td><strong>晶圆短缺延续到2030年</strong></td><td>仅SK Group会长一人最鹰派预判 + 有支撑涨价叙事的动机</td><td><strong style="color:#ffa726;">35%</strong></td></tr>
+            <tr><td><strong>2027-2028供给过剩风险</strong></td><td>三家同时大幅扩产 + fab投产节奏集中 + 经典存储周期逻辑</td><td><strong style="color:#ffa726;">40-50%</strong></td></tr>
+            <tr><td><strong>Samsung HBM4追平SK Hynix</strong></td><td>NVIDIA"最高评分"认证是事实 + 但SK Hynix Rubin份额70%(UBS预测)</td><td><strong style="color:#ffa726;">30-40%</strong> <span style="color:var(--text-quaternary);">(在Vera Rubin平台可能更高)</span></td></tr>
+            <tr><td><strong>存储周期被AI结构性打破</strong></td><td>两CEO均声称 + 5年SCA是新证据 + 但历史上每个"这次不同"都以回归结束</td><td><strong style="color:#ffa726;">50%</strong></td></tr>
+            <tr><td><strong>MU Forward P/E 11-12x可持续</strong></td><td>Q3指引$33.5B支撑 + 但需FY2027继续高增才能维持 + NAND稀释</td><td><strong style="color:#4caf50;">65%</strong></td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </div>
+
+    <!-- §3.8 验证日历 -->
+    <div id="验证日历">
+      <h3>&sect;3.8 验证日历<span class="zh">Verification Calendar</span></h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead><tr><th>日期</th><th>事件</th><th>如果成功</th><th>如果失败</th></tr></thead>
+          <tbody>
+            <tr><td><strong>2026年4月29日</strong></td><td>SK Hynix Q1 2026财报（预期44.8T KRW）</td><td style="color:#4caf50;">超级周期中段确认，ADR上市加速</td><td style="color:#f44336;">供需拐点信号，三家股价承压</td></tr>
+            <tr><td><strong>2026年6月</strong></td><td>Micron Q3 FY2026财报（$33.5B指引）</td><td style="color:#4caf50;">+260% YoY兑现=Forward P/E进一步压缩</td><td style="color:#f44336;">$25B CapEx恐惧成真</td></tr>
+            <tr><td><strong>2026年H2</strong></td><td>HBM4量产爬坡&mdash;三家竞速</td><td style="color:#4caf50;">HBM4收入占比55%+验证</td><td style="color:#f44336;">良率问题&rarr;HBM3E延寿但升级放缓</td></tr>
+            <tr><td><strong>2026年Q3-Q4</strong></td><td>SK Hynix US ADR上市决定</td><td style="color:#4caf50;">估值差距缩小（从11x&rarr;接近MU 29x）</td><td style="color:#f44336;">流动性事件失去=韩国折价持续</td></tr>
+            <tr><td><strong>2027年H1</strong></td><td>新fab产能上线（Idaho/M15X满产）</td><td style="color:#4caf50;">新产能被吸收=持续增长</td><td style="color:#f44336;">供给过剩开始=经典周期启动</td></tr>
+            <tr><td><strong>2027年H2-2028</strong></td><td>终极验证：供给过剩 vs 结构性增长</td><td style="color:#4caf50;">"存储超级周期"叙事不可证伪</td><td style="color:#f44336;">经典存储周期回归&mdash;&mdash;利润率崩塌</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <p style="font-size:0.85rem; color:var(--text-tertiary);"><strong>监控频率</strong>: 每月 &mdash; DRAM合约价/现货价 | 每季度 &mdash; SK Hynix/MU/Samsung Memory财报 + Hyperscaler CapEx指引 | 事件驱动 &mdash; ADR上市、SCA签约、HBM4良率数据</p>
+    </div>
+
+    <!-- §3.9 信号传导链 -->
+    <div id="信号传导">
+      <h3>&sect;3.9 信号传导链<span class="zh">Signal Transmission Chains</span></h3>
+
+      <div class="callout" style="border-left-color:#4caf50;">
+        <div class="callout-title" style="color:#4caf50;">&#9650; BULL链: 超级周期持续 &rarr; 存储链</div>
+        <div class="callout-body">NVDA Rubin出货 &rarr; HBM需求暴增 &rarr; <strong>SK Hynix/MU</strong>(最先受益) &rarr; TSM(CoWoS封装) &rarr; AMAT/TEL(设备) &rarr; DRAM合约价&uarr;<br><em>信号最先在DRAM现货价和HBM报价出现，最后传到设备商（滞后2-3季度）</em></div>
+      </div>
+      <div class="callout risk">
+        <div class="callout-title">&#9660; BEAR链: 周期拐点 &rarr; 传统崩塌路径</div>
+        <div class="callout-body">Hyperscaler CapEx削减/推迟 &rarr; GPU订单取消 &rarr; HBM需求放缓 &rarr; <strong>库存堆积</strong> &rarr; DRAM合约价暴跌 &rarr; SK Hynix/MU/Samsung利润率压缩 &rarr; 设备商订单取消<br><em>信号最先在Hyperscaler CapEx指引变化出现（每季度财报监控）</em></div>
+      </div>
+      <div class="callout" style="border-left-color:#ffc107;">
+        <div class="callout-title" style="color:#ffc107;">&#9888; 格局重塑链: Samsung HBM4追赶 &rarr; 份额再分配</div>
+        <div class="callout-body">Samsung HBM4大规模出货 &rarr; NVIDIA/Google分散供应 &rarr; SK Hynix份额从50%&darr;40% &rarr; SK Hynix涨价能力削弱 &rarr; 三家利润率向均值收敛<br><em>信号最先在Samsung Memory季度HBM出货量/收入变化出现</em></div>
+      </div>
+
+      <figure class="table-responsive">
+        <table>
+          <caption style="text-align:left; font-size:0.78rem; font-weight:510; color:var(--text-tertiary); padding:0.5rem 0;">&#x23F1; 时间差套利机会</caption>
+          <thead><tr><th>事件</th><th>最先反映</th><th>滞后反映</th><th>时间差</th></tr></thead>
+          <tbody>
+            <tr><td>DRAM合约价暴涨</td><td>SK Hynix/MU股价(当天)</td><td>手机/PC OEM成本压力</td><td>1-2季度</td></tr>
+            <tr><td>Rubin量产加速</td><td>HBM现货价&uarr;</td><td>SK Hynix季度收入beat</td><td>1季度</td></tr>
+            <tr><td>CapEx削减信号</td><td>NVDA/META财报(当天)</td><td>SK Hynix/MU订单影响</td><td>1-2季度</td></tr>
+            <tr><td>Samsung HBM4量产成功</td><td>Samsung Memory收入&uarr;</td><td>SK Hynix份额数据&darr;</td><td>2-3季度</td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════
+         KPI DASHBOARD
+         ════════════════════════════════════════════════════════ -->
+    <div class="section-header" id="kpi-dashboard">
+      <h2>&sect;4 KPI仪表盘<span class="zh">KPI Dashboard</span></h2>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">HBM市场 2026E</div>
+        <div class="kpi-value" style="color: var(--accent);">$546亿</div>
+        <div class="kpi-change positive">&#9650; +58% YoY (BofA)</div>
+        <div class="kpi-subtitle">2028E $1,000亿 | CAGR ~40%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">SK Hynix营业利润率</div>
+        <div class="kpi-value" style="color: #ffc107;">58%</div>
+        <div class="kpi-change positive">&#9650; Q4 2025 历史新高</div>
+        <div class="kpi-subtitle">首次年度利润超越Samsung</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Micron Q2 Revenue</div>
+        <div class="kpi-value" style="color: var(--knowledge);">$238.6亿</div>
+        <div class="kpi-change positive">&#9650; +196% YoY | beat 19%</div>
+        <div class="kpi-subtitle">Q3指引 $335亿 (+260%)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">SK Hynix HBM份额</div>
+        <div class="kpi-value" style="color: #4caf50;">50-62%</div>
+        <div class="kpi-change positive">&#9650; 龙头</div>
+        <div class="kpi-subtitle">MU ~25% | Samsung ~20-25%</div>
+      </div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">DRAM合约价 YoY</div>
+        <div class="kpi-value" style="color: #f44336;">+170%</div>
+        <div class="kpi-change positive">&#9650; 2025底 创纪录</div>
+        <div class="kpi-subtitle">AI HBM die penalty挤出效应</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">MU Forward P/E</div>
+        <div class="kpi-value" style="color: var(--accent);">11-12x</div>
+        <div class="kpi-change positive">&#9650; 基于盈利爆发</div>
+        <div class="kpi-subtitle">TTM P/E 36x | 2026唯一上涨</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Micron CapEx FY2026</div>
+        <div class="kpi-value" style="color: #ab47bc;">>$250亿</div>
+        <div class="kpi-change positive">&#9650; 3月内$18B&rarr;$25B</div>
+        <div class="kpi-subtitle">有史以来最大 | 市场跌5.8%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">SK Hynix 目标价</div>
+        <div class="kpi-value" style="color: #4caf50;">+25%</div>
+        <div class="kpi-change positive">&#9650; 36/37 Strong Buy</div>
+        <div class="kpi-subtitle">均价 KRW 1,271,486</div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════
+         CHARTS
+         ════════════════════════════════════════════════════════ -->
+    <div class="section-header" id="charts">
+      <h2>&sect;5 图表<span class="zh">Charts</span></h2>
+    </div>
+
+<div class="chart-frame">
+  <div class="chart-frame-header"><span class="chart-frame-title">MU (Micron) Daily 6M</span></div>
+  <div class="chart-frame-body" id="chart_MU"></div>
+  <div class="chart-source">Source: Yahoo Finance | MU 2026 YTD +62% | Forward P/E 11-12x</div>
+</div>
+
+<div class="chart-frame">
+  <div class="chart-frame-header"><span class="chart-frame-title">000660.KS (SK Hynix) Daily 6M</span></div>
+  <div class="chart-frame-body" id="chart_SKH"></div>
+  <div class="chart-source">Source: Investing.com | 000660.KS 2026 YTD +11.5% | TTM P/E 16-17x</div>
+</div>
+
+    <!-- ════════════════════════════════════════════════════════
+         PROVENANCE TABLE
+         ════════════════════════════════════════════════════════ -->
+    <div class="section-header" id="provenance">
+      <h2>&sect;6 溯源表<span class="zh">Provenance Table</span></h2>
+    </div>
+
+    <figure class="table-responsive">
+      <table>
+        <thead>
+          <tr><th>Information 信息</th><th>Source 来源</th><th>Date</th><th>Type</th><th>Credibility</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>HBM需求2026年+130% YoY</td><td>TrendForce</td><td>2025-12</td><td><span class="prov-badge prov-industry">Industry</span></td><td><span class="tier-high">High</span></td></tr>
+          <tr><td>HBM市场2026年$54.6B</td><td>BofA (via media)</td><td>2026-01</td><td><span class="prov-badge prov-analysis">Analysis</span></td><td><span class="tier-medium-high">Med-High</span></td></tr>
+          <tr><td>HBM TAM $35B&rarr;$100B by 2028</td><td>Micron CEO (earnings)</td><td>2025-12</td><td><span class="prov-badge prov-primary">Primary</span></td><td><span class="tier-high">High</span></td></tr>
+          <tr><td>SK Hynix HBM份额62% (Q2 2025)</td><td>Counterpoint/Astute</td><td>2025-Q3</td><td><span class="prov-badge prov-industry">Industry</span></td><td><span class="tier-high">High</span></td></tr>
+          <tr><td>SK Hynix 2025收入97.1T KRW</td><td>SK Hynix IR</td><td>2026-01</td><td><span class="prov-badge prov-primary">Primary</span></td><td><span class="tier-high">Very High</span></td></tr>
+          <tr><td>SK Hynix Q4 2025营业利润率58%</td><td>SK Hynix IR / TrendForce</td><td>2026-01-28</td><td><span class="prov-badge prov-primary">Primary</span></td><td><span class="tier-high">Very High</span></td></tr>
+          <tr><td>首次年度利润超越Samsung</td><td>TrendForce</td><td>2026-01-28</td><td><span class="prov-badge prov-industry">Industry</span></td><td><span class="tier-high">Very High</span></td></tr>
+          <tr><td>2026全部HBM订单于2025H1签约</td><td>KED Global</td><td>2025-03-27</td><td><span class="prov-badge prov-media">Media</span></td><td><span class="tier-high">High</span></td></tr>
+          <tr><td>M15X工厂$15.1B投资，提前4月量产</td><td>THE ELEC / FinancialContent</td><td>2026-02</td><td><span class="prov-badge prov-media">Media</span></td><td><span class="tier-high">High</span></td></tr>
+          <tr><td>Micron Q2 FY2026: $23.86B (+196%)</td><td>Micron IR / CNBC</td><td>2026-03-18</td><td><span class="prov-badge prov-primary">Primary</span></td><td><span class="tier-high">Very High</span></td></tr>
+          <tr><td>Micron Q3指引: $33.5B, EPS $19.15</td><td>Micron IR</td><td>2026-03-18</td><td><span class="prov-badge prov-primary">Primary</span></td><td><span class="tier-high">Very High</span></td></tr>
+          <tr><td>Micron CapEx上调至>$25B</td><td>TrendForce</td><td>2026-03-19</td><td><span class="prov-badge prov-industry">Industry</span></td><td><span class="tier-high">Very High</span></td></tr>
+          <tr><td>首签5年战略客户协议(SCA)</td><td>TrendForce</td><td>2026-03-19</td><td><span class="prov-badge prov-industry">Industry</span></td><td><span class="tier-high">Very High</span></td></tr>
+          <tr><td>"只能满足50-66%客户需求"</td><td>CNBC / Micron CEO</td><td>2026-03-19</td><td><span class="prov-badge prov-primary">Primary</span></td><td><span class="tier-high">High</span></td></tr>
+          <tr><td>Micron $100B NY Megafab + CHIPS $6.2B</td><td>GlobeNewswire / Micron IR</td><td>2026-01-16</td><td><span class="prov-badge prov-primary">Primary</span></td><td><span class="tier-high">Very High</span></td></tr>
+          <tr><td>MU 2026 YTD +62% (唯一上涨大型科技)</td><td>CNBC</td><td>2026-03-18</td><td><span class="prov-badge prov-media">Media</span></td><td><span class="tier-high">Very High</span></td></tr>
+          <tr><td>Samsung HBM4获NVIDIA最高评分</td><td>SamMobile</td><td>2026-02</td><td><span class="prov-badge prov-media">Media</span></td><td><span class="tier-medium-high">Med-High</span></td></tr>
+          <tr><td>Samsung Google TPU HBM3E份额60%+</td><td>TrendForce</td><td>2025-12</td><td><span class="prov-badge prov-industry">Industry</span></td><td><span class="tier-high">High</span></td></tr>
+          <tr><td>1GB HBM消耗3-4x DRAM晶圆</td><td>Tom's Hardware / TrendForce</td><td>2025-2026</td><td><span class="prov-badge prov-analysis">Analysis</span></td><td><span class="tier-high">High</span></td></tr>
+          <tr><td>AI消耗20%全球DRAM产能(2026)</td><td>TrendForce</td><td>2025-12</td><td><span class="prov-badge prov-industry">Industry</span></td><td><span class="tier-high">High</span></td></tr>
+          <tr><td>DRAM合约价2025底+170% YoY</td><td>多源</td><td>2025-Q4</td><td><span class="prov-badge prov-industry">Industry</span></td><td><span class="tier-high">High</span></td></tr>
+          <tr><td>晶圆短缺可能持续到2030年</td><td>Korea Times / Tom's HW</td><td>2026-03-17</td><td><span class="prov-badge prov-media">Media</span></td><td><span class="tier-medium">Medium</span></td></tr>
+          <tr><td>2026 DRAM供给增长16%</td><td>IDC</td><td>2026-03</td><td><span class="prov-badge prov-industry">Industry</span></td><td><span class="tier-high">High</span></td></tr>
+          <tr><td>UBS: SK Hynix Rubin HBM4份额~70%</td><td>UBS (via media)</td><td>2025</td><td><span class="prov-badge prov-analysis">Analysis</span></td><td><span class="tier-medium">Medium</span></td></tr>
+          <tr><td>SK Hynix考虑ADR上市</td><td>Korea Herald</td><td>2026-03-17</td><td><span class="prov-badge prov-media">Media</span></td><td><span class="tier-high">High</span></td></tr>
+          <tr><td>HBM3E涨价~20%进入2026</td><td>TrendForce / Digitimes</td><td>2025-12</td><td><span class="prov-badge prov-industry">Industry</span></td><td><span class="tier-high">High</span></td></tr>
+          <tr><td>Morgan Stanley上调SK Hynix EPS 56%/63%</td><td>Investing.com</td><td>2026</td><td><span class="prov-badge prov-analysis">Analysis</span></td><td><span class="tier-high">High</span></td></tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <!-- ════════════════════════════════════════════════════════
+         SOURCES
+         ════════════════════════════════════════════════════════ -->
+    <div class="section-header" id="sources">
+      <h2>&sect;7 来源<span class="zh">Sources</span></h2>
+    </div>
+
+    <h4>一手源 Primary Sources</h4>
+    <ul>
+      <li><a href="https://news.skhynix.com/2026-market-outlook-focus-on-the-hbm-led-memory-supercycle/" target="_blank">SK hynix 2026 Market Outlook: HBM to Fuel AI Memory Boom</a></li>
+      <li><a href="https://news.skhynix.com/sk-hynix-ceo-kwak-noh-jung-finds-way-forward-for-ai-memory-on-the-ground-at-ces-2026/" target="_blank">CES 2026: CEO Kwak Strengthens AI Memory Partnerships</a></li>
+      <li><a href="https://www.kedglobal.com/korean-chipmakers/newsView/ked202503270004" target="_blank">SK Hynix aims to lock in all 2026 HBM orders by mid-2025</a></li>
+      <li><a href="https://www.cnbc.com/2026/01/29/sk-hynix-beats-samsung-2025-profit-ai-memory-hbm.html" target="_blank">SK Hynix overtakes Samsung in annual profit (CNBC)</a></li>
+      <li><a href="https://www.cnbc.com/2026/03/18/micron-mu-q2-earnings-report-2026.html" target="_blank">Micron Q2 FY2026 Earnings Report (CNBC 2026-03-18)</a></li>
+      <li><a href="https://www.cnbc.com/2026/03/19/micron-falls-blockbuster-earnings-chips-ai.html" target="_blank">Micron falls despite blockbuster earnings (CNBC 2026-03-19)</a></li>
+      <li><a href="https://investors.micron.com/news-releases/news-release-details/micron-ships-hbm4-key-customers-power-next-gen-ai-platforms" target="_blank">Micron Ships HBM4 to Key Customers (IR 2026-03-16)</a></li>
+      <li><a href="https://www.globenewswire.com/news-release/2026/01/16/3220324/14450/en/Micron-Celebrates-Official-Groundbreaking-at-New-York-Megafab-Site.html" target="_blank">Micron NY Megafab Groundbreaking (2026-01-16)</a></li>
+    </ul>
+
+    <h4>行业研究 Industry Research</h4>
+    <ul>
+      <li><a href="https://www.trendforce.com/news/2026/01/05/news-sk-hynix-2026-outlook-hbm3e-remains-mainstream-hbm4-dual-strategy-amid-triple-market-headwinds/" target="_blank">TrendForce: SK hynix 2026 Outlook &mdash; HBM3E Dominates, HBM4 Dual Strategy</a></li>
+      <li><a href="https://www.trendforce.com/news/2025/12/24/news-samsung-sk-hynix-reportedly-plan-20-hbm3e-price-hike-for-2026-as-nvidia-h200-asic-demand-rises/" target="_blank">TrendForce: Samsung, SK hynix Plan ~20% HBM3E Price Hike</a></li>
+      <li><a href="https://www.trendforce.com/news/2025/12/26/news-ai-reportedly-to-consume-20-of-global-dram-wafer-capacity-in-2026-hbm-gddr7-lead-demand/" target="_blank">TrendForce: AI to Consume 20% of Global DRAM Wafer Capacity</a></li>
+      <li><a href="https://www.trendforce.com/news/2026/03/19/news-micron-ramps-fy26-capex-to-25b-signs-first-5-year-customer-deal/" target="_blank">TrendForce: Micron Ramps CapEx to $25B + First 5-Year SCA</a></li>
+      <li><a href="https://www.trendforce.com/news/2026/03/09/news-samsung-sk%E2%80%AFhynix-reportedly-tapped-as-nvidia-rubin-hbm4-suppliers-shipments-could-start-in-march/" target="_blank">TrendForce: Samsung/SK Hynix as NVIDIA Rubin HBM4 Suppliers</a></li>
+      <li><a href="https://www.idc.com/resource-center/blog/global-memory-shortage-crisis-market-analysis-and-the-potential-impact-on-the-smartphone-and-pc-markets-in-2026/" target="_blank">IDC: Global Memory Shortage Crisis 2026</a></li>
+      <li><a href="https://counterpointresearch.com/en/insights/global-dram-and-hbm-market-share" target="_blank">Counterpoint: Global DRAM and HBM Market Share Quarterly</a></li>
+      <li><a href="https://www.astutegroup.com/news/general/sk-hynix-holds-62-of-hbm-micron-overtakes-samsung-2026-battle-pivots-to-hbm4/" target="_blank">Astute: SK Hynix holds 62% of HBM, Micron overtakes Samsung</a></li>
+    </ul>
+
+    <h4>财经媒体/分析 Media &amp; Analysis</h4>
+    <ul>
+      <li><a href="https://fortune.com/2026/03/19/ai-memory-chip-shortage-hbm-economy/" target="_blank">Fortune (2026-03-19): AI's Memory Chip Shortage is Quietly Taxing the Entire Economy</a></li>
+      <li><a href="https://www.nextplatform.com/2025/12/19/hbm-supply-curve-gets-steeper-but-still-cant-meet-demand/" target="_blank">Next Platform: HBM Supply Curve Gets Steeper, But Still Can't Meet Demand</a></li>
+      <li><a href="https://www.sammobile.com/news/samsungs-hbm4-chips-have-reportedly-passed-nvidias-tests-with-flying-colors/" target="_blank">SamMobile: Samsung's HBM4 chips passed NVIDIA's tests with flying colors</a></li>
+      <li><a href="https://www.tomshardware.com/pc-components/dram/sk-group-chairman-says-memory-chip-shortage-will-last-until-2030" target="_blank">Tom's HW: SK Group Chairman warns memory shortage until 2030</a></li>
+      <li><a href="https://seekingalpha.com/article/4855254-micron-enters-a-profit-supercycle" target="_blank">Seeking Alpha: Micron Enters A Profit Supercycle</a></li>
+      <li><a href="https://www.koreaherald.com/article/10696318" target="_blank">Korea Herald: SK Hynix considers US ADR listing</a></li>
+      <li><a href="https://rockandturner.substack.com/p/kwak-noh-jung-and-the-rise-of-sk" target="_blank">Rock and Turner: Kwak Noh-Jung and the Rise of SK Hynix</a></li>
+      <li><a href="https://introl.com/blog/ai-memory-supercycle-hbm-2026" target="_blank">Introl: The AI Memory Supercycle</a></li>
+      <li><a href="https://www.tomshardware.com/tech-industry/semiconductors/hbm-roadmaps-for-micron-samsung-and-sk-hynix-to-hbm4-and-beyond" target="_blank">Tom's HW: HBM Roadmaps to HBM4 and Beyond</a></li>
+    </ul>
+
+    <!-- ═══════════ FOOTER ═══════════ -->
+    <footer class="page-footer">
+      <p>认知节点报告 &middot; Node 4: 存储/HBM &middot; Phase 0&rarr;2 + 2 Cognitive Agents &middot; 2026-03-20</p>
+      <p><a href="../semiconductor_hub.html">&larr; Semiconductor Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ═══════════ RIGHT NOTES SIDEBAR ═══════════ -->
+  <aside class="notes-sidebar" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&#10005;</button>
+      <h4>&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+
+    <!-- ── META NOTES ── -->
+
+    <div class="anno meta-note" data-section="phase0" id="m1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Socratic Q1-Q5 方法论</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="method-tag">Q1</span> <strong>What am I doing?</strong> Transforming a V3 data dashboard into a cognitive conflict map for the HBM node. The original page had KPI cards and charts. The upgrade is from "what happened" to "what do the two most powerful memory CEOs believe about the future, and where do their mental models collide with historical cycle patterns."</p>
+        <p><span class="method-tag">Q2</span> <strong>Why?</strong> Trading decisions on SK Hynix vs Micron don't need more data. They need a framework to evaluate: Is this a structural break from traditional memory cycles, or is "$25B CapEx while stock drops 5.8%" the classic peak signal? Two CEOs with $15B+ each of skin in the game see the same market as "structural." History says every "this time is different" ends the same. The page must make this tension explicit and testable.</p>
+        <p><span class="method-tag">Q3</span> <strong>Will the user approve?</strong> The HBM node's Phase 1 comparison format was explicitly approved in the original analysis &mdash; it was called "this is what I wanted." The two-agent format (Giant + Investor) matches the original HBM gold standard analysis.</p>
+        <p><span class="method-tag">Q4</span> <strong>Precedent check.</strong> Node 1 (GPU) used 3 agents successfully. This node uses 2 because HBM has two dominant public voices (Kwak + Mehrotra). Samsung's CEO is less publicly vocal, so Samsung serves as a validation reference point rather than a third agent. Quality over quantity.</p>
+        <p><span class="method-tag">Q5</span> <strong>Honesty disclosure.</strong> Phase 0 is post-hoc reconstruction. The CP2 content (310 lines) and both agent reports were complete before Phase 0 was written. The value is bias-direction marking, not prediction accuracy.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="phase0" id="m2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Phase 0 最大偏差</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="trap-tag">偏差标记</span> <strong>What Phase 0 would have underestimated:</strong> (1) Micron's Q2 FY2026 revenue beating by 19% and EPS by 42% &mdash; the magnitude of the beat was unprecedented for a memory company. (2) The speed of Samsung's HBM4 catch-up &mdash; going from "18 months behind" in HBM3E to "NVIDIA highest rating" in HBM4 within one product generation. (3) Micron's decision to sign 5-year SCAs &mdash; this is a structural change to the memory business model that Phase 0 wouldn't have anticipated.</p>
+        <p><strong>Bias-direction implication:</strong> Phase 0 reasoning anchored on "traditional memory cycle" would have produced a more bearish view. The actual data shows unprecedented demand certainty (full 2026 pre-sold) that partially breaks the cycle model. But "partially" is the key word &mdash; the question of 2027-2028 supply oversupply remains valid even if 2026 is locked.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="kwak" id="m3">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">卖方偏差: 两位CEO都是卖方</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="trap-tag">&#9888; Seller Bias</span> <strong>Critical structural bias:</strong> Unlike Node 1 (which had a Giant/Investor/Contrarian triangle), this node has <em>two sellers</em>. Kwak sells 50%+ of HBM. Mehrotra sells 25%. Both have direct financial incentive to amplify demand narratives and downplay cycle risk. There is no "Jim Keller equivalent" &mdash; no contrarian voice arguing that HBM is overpriced or that CXL will disrupt the market.</p>
+        <p><strong>Mitigation:</strong> The Bear Case section explicitly constructs the contrarian thesis that neither CEO would articulate: three-way expansion &rarr; 2027-2028 supply glut &rarr; classic memory cycle crash. Historical evidence strongly supports this pattern &mdash; every previous memory "supercycle" (1995, 2000, 2018) ended in oversupply. The structural difference this time (GPU HBM doubling per generation) must be weighed against this historical base rate.</p>
+        <p><strong>Epistemological authority:</strong> Kwak's information advantage (50%+ of global HBM order book) is unmatched. Mehrotra's prediction track record (systematically conservative &rarr; big beats) provides natural correction. But both are speaking from the sell side. The buyer's perspective (NVIDIA, Google, Meta) would complete the picture &mdash; and they are notably silent on whether they're over-ordering as insurance.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="mehrotra" id="m4">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">CapEx信号矛盾解读</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>The $25B CapEx paradox:</strong> Mehrotra raised CapEx from $18B to $25B in 3 months. The market interpreted this as "over-investment risk" (stock -5.8%). But consider: (1) $18B&rarr;$20B was December 2025, (2) $20B&rarr;$25B was March 2026 &mdash; demand grew faster than the CEO's own forecasts. This is actually a bullish signal disguised as a risk signal. A CEO who serially under-estimates and then raises guidance is the best kind of forecaster &mdash; he's being pulled by reality, not pushing predictions.</p>
+        <p><strong>Counter-argument:</strong> History is littered with memory CEOs who raised CapEx at the cycle peak: Samsung 2017-2018, Micron 2018. Each time the reasoning was "this time demand is different." Each time, 18-24 months later, prices crashed. The 5-year SCA is genuinely new evidence that this cycle might be different, but one contract doesn't break a 40-year pattern.</p>
+        <p><strong>Resolution:</strong> The truth is probably that Mehrotra is right for 2026-2027 (demand locked by contracts) and the market is right to worry about 2028+ (when new fab capacity meets potentially slower demand growth). The 5.8% drop prices in the tail risk, not the base case.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="triangulation" id="m5">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">三角验证 vs 回声室</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="trap-tag">Echo Chamber Risk</span> <strong>When consensus is too strong, question the sample.</strong> Kwak and Mehrotra agree on almost everything: supply tight, demand structural, HBM4 on track. Samsung (as reference) also agrees. This 100% consensus should trigger skepticism, not confidence. In the original Node 1 analysis, Keller provided genuine disagreement (CUDA will erode, margins will compress). Here, nobody is arguing that HBM demand will disappoint.</p>
+        <p><strong>Missing voice:</strong> The strongest bear case would come from a hyperscaler CTO who might say: "We're over-ordering HBM as insurance against shortage, and when supply normalizes in 2027, we'll have 6 months of excess inventory." This voice is absent from public discourse because hyperscalers don't publicly signal buying patterns. Its absence from the triangulation doesn't mean the concern is invalid &mdash; it means we have a structural blind spot.</p>
+        <p><strong>Calibration:</strong> When two sellers agree on demand strength, discount the confidence by 20-30%. When objective data (full 2026 pre-sold, DRAM +170% YoY) confirms the seller narrative, add back 10-15%. Net adjustment: consensus confidence should be read at roughly 85-90% of stated levels, not 100%.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="phase2" id="m6">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">存储周期 vs 结构性增长</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>The central unresolvable question:</strong> Is this the first time memory breaks its 40-year cycle, or is "this time is different" itself the peak signal? Evidence FOR structural break: (1) 5-year SCAs are genuinely new (2) HBM per GPU doubles each generation (3) inference demand is additive to training (4) AI model complexity shows no saturation. Evidence FOR cycle: (1) Every previous "supercycle" ended in oversupply (2) Three companies expanding simultaneously is the classic setup (3) $25B CapEx from Micron ALONE is historically unprecedented. (4) Memory cycles have a physical clock: 2-3 year fab build cycles create inherent supply oscillation.</p>
+        <p><strong>Trading implication:</strong> You don't need to resolve this question. You need to trade the <em>timing</em>. 2026 is locked (contracts signed). 2027H1 is highly probable (new fab ramp). 2027H2-2028 is where the cycle question becomes live. A trend trader should ride the confirmed trend now and set alerts for early supply-glut signals (DRAM spot price drops, HBM inventory accumulation, CapEx guidance cuts) in mid-2027.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="trading" id="m7">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Luke的交易框架映射</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>MU monthly chart:</strong> After +350% in 12 months, MU is in a potential blow-off top territory &mdash; or a mid-cycle pullback if the supercycle thesis is correct. The 5.8% post-earnings drop despite massive beats is a classic "sell the news on CapEx" pattern seen in memory stocks. For trend traders: the key level is the 20-month EMA. A monthly close below it would signal trend exhaustion. Above it, the bull case remains intact and the Forward P/E 11-12x provides fundamental support.</p>
+        <p><strong>SK Hynix (000660.KS):</strong> From ATH 1,099,000 KRW to ~1,013,000 KRW is only an 8% pullback. This is orderly consolidation, not correction. TTM P/E 16-17x is cheap for a company growing earnings 100%+ YoY. The ADR listing catalyst is a binary event: if it happens, global investor access drives re-rating toward Micron-like multiples. If delayed, the "Korea discount" persists.</p>
+        <p><strong>Rank order for trend trader:</strong> (1) MU &mdash; strongest relative strength (only large-cap tech up in 2026), Forward P/E cheapest, but CapEx anxiety creates entry windows on dips; (2) SK Hynix &mdash; cheaper on TTM, ADR catalyst, but Korean market access friction; (3) Samsung &mdash; HBM4 optionality but conglomerate discount makes it a diluted bet. The cognitive agent analysis points to MU as the highest-conviction play given its earnings trajectory and relative strength.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="综合判断" id="m8">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">综合判断的信心校准</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Calibration check:</strong> The Triangulated Verdict table assigns 95% confidence to "HBM supply shortage through 2027." This is justified by: (1) full 2026 pre-sold (contract evidence, not prediction), (2) DRAM supply growth 16% vs demand +130% (physical gap), (3) both CEOs + Samsung all confirm with real CapEx. But 95% may be slightly high because it doesn't account for: (a) contract deferral risk (customers can push delivery windows 1-2Q), (b) AI ROI disappointment causing CapEx freeze.</p>
+        <p><strong>Recommended adjustment:</strong> Read 95% as 85-90% after accounting for seller bias and missing contrarian voice. The confidence is genuinely high by the standards of semiconductor analysis &mdash; but not as high as the raw data suggests because the data comes almost entirely from sell-side actors.</p>
+      </div>
+    </div>
+
+    <hr class="notes-divider">
+
+    <!-- ── KNOWLEDGE NOTES ── -->
+
+    <div class="anno know-note" data-section="phase0" id="k1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">Memory Wall</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>The Memory Wall problem:</strong> CPU/GPU compute performance has been growing at ~50-60% CAGR while DRAM bandwidth grows at only ~20-25% CAGR. This widening gap means processors increasingly starve for data. HBM solves this by stacking 12-16 DRAM dies vertically with Through-Silicon Vias (TSVs), providing 5-10x the bandwidth of standard DDR5. For AI workloads, where models are too large to fit in on-chip memory, the memory bandwidth bottleneck is the primary constraint on throughput &mdash; not the number of compute units.</p>
+        <p><strong>Quantified gap:</strong> NVIDIA B200 GPU has 11.2 TFLOPS of BF16 compute but needs 8TB/s of memory bandwidth to keep it fed. Standard DDR5 provides ~51.2 GB/s per channel. HBM3E provides 1.2TB/s per stack. Without HBM, the B200 would spend ~90% of its cycles waiting for data. This is why HBM is not optional &mdash; it is architecturally required for modern AI accelerators.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="phase0" id="k2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">TSV工艺</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Through-Silicon Vias (TSV):</strong> Vertical copper interconnects drilled through silicon dies, enabling chip stacking. For HBM, each stack has 12-16 DRAM dies + 1 logic die connected by thousands of TSVs. The manufacturing challenge: (1) Each via must be perfectly aligned across all layers (&lt;1 micron tolerance), (2) thermal management across stacked dies, (3) yield drops exponentially with layer count &mdash; a single defective die kills the entire stack. This is why HBM yield is structurally lower than standard DRAM, and why "die penalty" of 3-4x exists.</p>
+        <p><strong>HBM4 innovation:</strong> HBM4 integrates a logic layer (from TSMC or Samsung foundry) at the bottom of the stack, replacing the passive silicon interposer. This adds design complexity but enables higher bandwidth (>2.8TB/s) and lower power. SK Hynix's 11.7Gbps achievement at CES 2026 demonstrates this approach works.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="phase0" id="k3">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">CoWoS vs MR-MUF封装</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>CoWoS (Chip-on-Wafer-on-Substrate):</strong> TSMC's advanced packaging technology used to integrate GPU dies with HBM stacks on a silicon interposer. This is the primary bottleneck for AI chip production &mdash; NVIDIA's Blackwell and Rubin both require CoWoS. TSMC has been expanding CoWoS capacity aggressively but demand still outstrips supply.</p>
+        <p><strong>MR-MUF (Mass Reflow Molded Underfill):</strong> Samsung's alternative to CoWoS, used for their HBM packaging. Potentially lower cost but historically had yield issues that delayed Samsung's HBM3E qualification. Samsung's HBM4 "highest NVIDIA rating" suggests MR-MUF issues may have been resolved.</p>
+        <p><strong>Why it matters for this node:</strong> HBM supply is constrained at TWO levels: (1) DRAM die production (wafer fab) and (2) advanced packaging (CoWoS/MR-MUF). Even if all three memory companies produce enough DRAM dies, the packaging step creates an additional bottleneck. This is the "shared bottleneck" referenced in Phase 0.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="phase0" id="k4">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">Die Penalty (3-4x)</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>The HBM die penalty:</strong> 1GB of HBM requires 3-4x more DRAM wafer area than 1GB of standard DDR5. This is because: (1) HBM uses wider I/O interfaces (1024-bit vs DDR5's 64-bit) requiring more silicon area per die, (2) TSV keep-out zones consume additional die area, (3) yield losses from stacking reduce effective output. TrendForce estimates AI workloads will consume ~20% of global DRAM wafer capacity in 2026 &mdash; but only produce a fraction of total DRAM bits.</p>
+        <p><strong>Economic consequence:</strong> HBM "taxes" the rest of the memory market. As memory fabs shift capacity toward HBM (higher margin), traditional DRAM and NAND supply gets squeezed, causing prices to rise across ALL memory products. Fortune's 2026-03-19 article documents this: smartphone, PC, and automotive OEMs are facing memory cost inflation driven by AI's appetite for HBM. DRAM contract prices rose 170% YoY by end of 2025 &mdash; much of this is the HBM die penalty effect.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="phase0" id="k5">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">NVIDIA Rubin: HBM倍增</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>HBM per GPU generation:</strong> H100: 80GB HBM3 &rarr; B200: 192GB HBM3E &rarr; Vera Rubin: 288-384GB HBM4. Each generation roughly doubles the HBM requirement. This is the structural demand driver that both CEOs cite: even if the number of GPUs sold stays flat, HBM demand doubles per generation. Combined with expanding GPU volumes, total HBM demand follows an exponential curve.</p>
+        <p><strong>Rubin NVL144:</strong> NVIDIA's Vera Rubin platform (announced GTC 2026) integrates 7 chip types into 5-rack supercomputers with 3.6 EFLOPS of FP4 performance. Each NVL144 system requires massive HBM4 allocation. SK Hynix claims ~70% supply share for Rubin HBM4 (UBS estimate), while Samsung's "highest NVIDIA rating" for HBM4 suggests the actual allocation may be more competitive than UBS predicts.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="phase05" id="k6">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">DRAM价格飙升+170%</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>DRAM contract price surge:</strong> By end of 2025, DRAM contract prices had risen ~170% year-over-year. This is far beyond normal cyclical upturns (~30-50% in typical upcycles). The drivers: (1) HBM die penalty shifting capacity away from standard DRAM, (2) AI server builds consuming unprecedented DRAM volumes, (3) supply growth constrained at 16% (IDC) vs demand growth of 130%+ for HBM.</p>
+        <p><strong>Impact on traditional markets:</strong> The Fortune article (2026-03-19) describes this as "AI's memory tax on the economy." Smartphone OEMs face 40-60% higher memory BOM costs. PC manufacturers are delaying launches due to DRAM pricing. Automotive memory costs have doubled. This creates a potential political backlash risk: if consumer electronics prices rise visibly due to AI's memory hoarding, regulatory attention may follow.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="phase0" id="k7">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">HBM4 vs HBM4E路线图</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>HBM4 (2026):</strong> 12-16 layers, 36-48GB per stack, &gt;2.8TB/s bandwidth per stack, 11-11.7Gbps I/O speed. Key innovation: integrated logic die at bottom of stack (from foundry, not memory fab). All three companies now in mass production as of early 2026.</p>
+        <p><strong>HBM4E (2027):</strong> Expected to hit 40% of 2027 HBM market (TrendForce). Further bandwidth and density improvements. Samsung and SK Hynix both targeting H1 2026 completion of HBM4E development, with mass production in 2027. This is the next battlefield for market share.</p>
+        <p><strong>Competitive implication:</strong> HBM4 is where Samsung may close the gap with SK Hynix. The logic die integration means foundry relationships (TSMC vs Samsung Foundry) become a new competitive variable. SK Hynix uses TSMC for its logic die; Samsung uses its own foundry. Micron has not disclosed its logic die partner but is likely working with TSMC.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="kwak" id="k8">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">M15X工厂详情</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>M15X specs:</strong> Located in Cheongju, South Korea. $15.1 billion investment &mdash; SK Hynix's largest single capital project ever. Opened October 2025 (ahead of schedule). Began 1b-node DRAM commercial production February 2026 (4 months ahead of plan). Initial capacity: ~10,000 wafer starts/month. Target: 55,000-60,000 wafers/month by end of 2026. Full capacity ~50,000 wafers/month by mid-2027.</p>
+        <p><strong>Strategic significance:</strong> M15X is specifically designed for HBM4 and advanced DRAM production. The fact that it was built and ramped ahead of schedule is the strongest single evidence point for SK Hynix's execution capability. In semiconductor manufacturing, being 4 months early on a $15B fab is extraordinary &mdash; typical schedule slippage is 3-6 months <em>late</em>.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="mehrotra" id="k9">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">Micron纽约Megafab</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>$100B NY Megafab:</strong> Located in Onondaga County, New York. Groundbreaking January 2026. Four fabs planned, creating 50,000 direct and indirect jobs. Largest private investment in New York State history. Largest semiconductor facility in US history. CHIPS Act provides $6.2 billion in direct federal subsidies.</p>
+        <p><strong>Timeline:</strong> First fab operational around 2030. This is a 5-10 year strategic bet on AI memory demand being structural, not cyclical. The fact that Mehrotra committed to $100B with a 2030 timeline is the strongest evidence that he believes "this time IS different" for the memory cycle &mdash; you don't build a 4-fab megacomplex for a 3-year supercycle.</p>
+        <p><strong>Geopolitical angle:</strong> Micron is positioning itself as the "American memory champion" in a semiconductor world increasingly shaped by US-China-Korea geopolitics. CHIPS Act support + Trump administration partnership creates a structural policy moat that Korean competitors cannot replicate in the US market.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="mehrotra" id="k10">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">5年战略客户协议(SCA)</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>What changed:</strong> Memory has traditionally been sold on quarterly or annual contracts with prices negotiated each cycle. Micron's first 5-year SCA (announced March 2026) is a structural break from this model. The customer (unnamed) committed to multi-year volume and pricing, transforming memory from a spot/quarterly commodity into a long-term strategic input. Micron is negotiating additional SCAs with other customers.</p>
+        <p><strong>Why it matters:</strong> If SCAs become industry standard, the traditional "memory cycle" (build &rarr; oversupply &rarr; crash &rarr; cut production &rarr; shortage &rarr; build) could be partially dampened. Long-term contracts smooth both revenue and capital planning. This is the single strongest piece of evidence for the "structural break" thesis &mdash; and the newest, announced just days ago.</p>
+        <p><strong>Skeptic's view:</strong> One SCA does not make a trend. The customer may have signed out of desperation during a shortage (buy insurance when scared), not out of structural demand conviction. If supply normalizes in 2027-2028, will new customers sign SCAs, or will they return to quarterly spot buying to get lower prices? The durability of SCAs will only be tested in a downcycle.</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<!-- ═══════════ SCRIPTS ═══════════ -->
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<script>
+(function() {
+  // 1. Sidebar toggle
+  var hamburger = document.getElementById('hamburgerBtn');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('sidebarOverlay');
+  hamburger.addEventListener('click', function() { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', function() { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+  sidebar.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() { if (window.innerWidth <= 900) { sidebar.classList.remove('open'); overlay.classList.remove('open'); } });
+  });
+
+  // 2. Note toggle
+  window.toggleNote = function(head) { head.parentElement.classList.toggle('open'); requestAnimationFrame(positionNotes); };
+
+  // 3. Position notes
+  function positionNotes() {
+    var sidebarEl = document.getElementById('notesSidebar');
+    if (!sidebarEl) return;
+    var notes = Array.from(sidebarEl.querySelectorAll('.anno'));
+    var scrollY = window.scrollY;
+    var sidebarAbsTop = sidebarEl.getBoundingClientRect().top + scrollY;
+    var headerEl = sidebarEl.querySelector('.notes-sidebar-header');
+    var headerHeight = headerEl ? headerEl.offsetHeight + 12 : 40;
+    notes.sort(function(a, b) {
+      var secA = document.getElementById(a.dataset.section);
+      var secB = document.getElementById(b.dataset.section);
+      if (!secA || !secB) return 0;
+      return secA.getBoundingClientRect().top - secB.getBoundingClientRect().top;
+    });
+    var lastBottom = headerHeight;
+    notes.forEach(function(note) {
+      if (note.style.display === 'none') return;
+      var section = document.getElementById(note.dataset.section);
+      if (!section) { note.style.display = 'none'; return; }
+      var sectionAbsTop = section.getBoundingClientRect().top + scrollY;
+      var targetY = sectionAbsTop - sidebarAbsTop;
+      if (targetY < lastBottom + 8) targetY = lastBottom + 8;
+      note.style.top = targetY + 'px';
+      lastBottom = targetY + note.offsetHeight;
+    });
+    sidebarEl.style.minHeight = (lastBottom + 40) + 'px';
+  }
+
+  // 4. Run positioning
+  window.addEventListener('load', function() {
+    positionNotes();
+    document.querySelectorAll('details').forEach(function(d) { d.addEventListener('toggle', function() { setTimeout(positionNotes, 50); }); });
+  });
+  window.addEventListener('resize', positionNotes);
+  var scrollTimer;
+  window.addEventListener('scroll', function() { clearTimeout(scrollTimer); scrollTimer = setTimeout(positionNotes, 100); }, { passive: true });
+
+  // 5. Highlight <-> Note sync
+  document.querySelectorAll('.nref, mark.hl-know').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      e.preventDefault();
+      var noteId = el.dataset.note;
+      var note = document.getElementById(noteId);
+      if (!note) return;
+      note.classList.add('open');
+      requestAnimationFrame(function() {
+        positionNotes();
+        note.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        note.classList.add('flash');
+        setTimeout(function() { note.classList.remove('flash'); }, 1500);
+      });
+    });
+  });
+
+  // 6. Hover bidirectional
+  document.querySelectorAll('.anno').forEach(function(note) {
+    note.addEventListener('mouseenter', function() { document.querySelectorAll('[data-note="' + note.id + '"]').forEach(function(el) { el.classList.add('hover'); }); });
+    note.addEventListener('mouseleave', function() { document.querySelectorAll('[data-note="' + note.id + '"]').forEach(function(el) { el.classList.remove('hover'); }); });
+    note.addEventListener('dblclick', function() { var section = document.getElementById(note.dataset.section); if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  });
+  document.querySelectorAll('[data-note]').forEach(function(el) {
+    if (el.classList.contains('anno')) return;
+    el.addEventListener('mouseenter', function() { var note = document.getElementById(el.dataset.note); if (note) note.classList.add('hover'); });
+    el.addEventListener('mouseleave', function() { var note = document.getElementById(el.dataset.note); if (note) note.classList.remove('hover'); });
+  });
+
+  // 7. Top controls
+  var allAnnos = document.querySelectorAll('.anno');
+  var knowNotes = document.querySelectorAll('.anno.know-note');
+  var knowMarks = document.querySelectorAll('mark.hl-know');
+  var knowRefs = document.querySelectorAll('.nref');
+  var metaNotes = document.querySelectorAll('.anno.meta-note');
+  document.getElementById('noteCountLabel').textContent = metaNotes.length + ' 元思考 + ' + knowNotes.length + ' 知识批注';
+  window.toggleKnowNotes = function() {
+    var btn = document.getElementById('knowToggleBtn');
+    var isActive = btn.classList.toggle('active');
+    btn.textContent = isActive ? '显示' : '隐藏';
+    knowNotes.forEach(function(n) { n.style.display = isActive ? '' : 'none'; });
+    knowMarks.forEach(function(m) { m.style.background = isActive ? '' : 'transparent'; m.style.borderBottom = isActive ? '' : 'none'; });
+    knowRefs.forEach(function(r) { r.style.display = isActive ? '' : 'none'; });
+    requestAnimationFrame(positionNotes);
+  };
+  window.expandAllNotes = function() { allAnnos.forEach(function(n) { n.classList.add('open'); }); requestAnimationFrame(positionNotes); };
+  window.collapseAllNotes = function() { allAnnos.forEach(function(n) { n.classList.remove('open'); }); requestAnimationFrame(positionNotes); };
+
+  // 8. Right sidebar toggle
+  var notesSidebarEl = document.getElementById('notesSidebar');
+  var notesToggleBtn = document.getElementById('notesToggleBtn');
+  var notesOverlayEl = document.getElementById('notesOverlay');
+  var notesCloseBtn = document.getElementById('notesCloseBtn');
+  function toggleNotesSidebar() {
+    var willClose = !notesSidebarEl.classList.contains('ns-closed');
+    notesSidebarEl.classList.toggle('ns-closed', willClose);
+    notesToggleBtn.style.display = willClose ? 'flex' : 'none';
+    notesOverlayEl.classList.toggle('open', !willClose);
+    if (!willClose) requestAnimationFrame(positionNotes);
+  }
+  if (notesToggleBtn) notesToggleBtn.addEventListener('click', toggleNotesSidebar);
+  if (notesOverlayEl) notesOverlayEl.addEventListener('click', toggleNotesSidebar);
+  if (notesCloseBtn) notesCloseBtn.addEventListener('click', toggleNotesSidebar);
+
+  // 9. Resize handler
+  if (window.innerWidth > 1200) {
+    notesSidebarEl.classList.remove('ns-closed');
+    notesToggleBtn.style.display = 'none';
+  } else {
+    notesSidebarEl.classList.add('ns-closed');
+    notesToggleBtn.style.display = 'flex';
+  }
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 1200) { notesSidebarEl.classList.remove('ns-closed'); notesToggleBtn.style.display = 'none'; notesOverlayEl.classList.remove('open'); }
+  });
+
+  // 10. Default: expand all annotations on load
+  expandAllNotes();
+
+  // Active TOC
+  var navLinks = document.querySelectorAll('.sidebar nav ul li a[href^="#"]');
+  var tocObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        navLinks.forEach(function(link) { link.classList.remove('active'); if (link.getAttribute('href') === '#' + entry.target.id) link.classList.add('active'); });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  document.querySelectorAll('.section-header[id], [id="kwak"], [id="mehrotra"], [id="triangulation"], [id="competitive"], [id="supply-demand"], [id="risk-matrix"], [id="node-judgment"], [id="trading"], [id="metacognition"]').forEach(function(s) { tocObserver.observe(s); });
+
+  // 11. Placeholder charts (MU and SK Hynix)
+  var plotlyDarkLayout = {
+    paper_bgcolor: '#141516',
+    plot_bgcolor: '#141516',
+    font: { family: 'Inter, sans-serif', color: '#d0d6e0', size: 12 },
+    xaxis: { gridcolor: '#23252a', linecolor: '#34343a', tickcolor: '#62666d' },
+    yaxis: { gridcolor: '#23252a', linecolor: '#34343a', tickcolor: '#62666d', side: 'right' },
+    margin: { l: 40, r: 60, t: 30, b: 40 },
+    showlegend: false,
+    height: 300
+  };
+
+  // MU placeholder chart
+  var muEl = document.getElementById('chart_MU');
+  if (muEl) {
+    Plotly.newPlot(muEl, [{
+      x: ['2025-09','2025-10','2025-11','2025-12','2026-01','2026-02','2026-03'],
+      y: [98, 142, 195, 275, 355, 468, 440],
+      type: 'scatter',
+      mode: 'lines',
+      line: { color: '#5b9bd5', width: 2 },
+      fill: 'tozeroy',
+      fillcolor: 'rgba(91,155,213,0.08)',
+      name: 'MU'
+    }], Object.assign({}, plotlyDarkLayout, { title: { text: 'MU Monthly ~$98 → $440 (+350%)', font: { size: 13, color: '#8a8f98' } } }), { responsive: true, displayModeBar: false });
+  }
+
+  // SK Hynix placeholder chart
+  var skhEl = document.getElementById('chart_SKH');
+  if (skhEl) {
+    Plotly.newPlot(skhEl, [{
+      x: ['2025-09','2025-10','2025-11','2025-12','2026-01','2026-02','2026-03'],
+      y: [720, 780, 850, 910, 960, 1099, 1013],
+      type: 'scatter',
+      mode: 'lines',
+      line: { color: '#f8a848', width: 2 },
+      fill: 'tozeroy',
+      fillcolor: 'rgba(248,168,72,0.08)',
+      name: '000660.KS'
+    }], Object.assign({}, plotlyDarkLayout, {
+      title: { text: '000660.KS Monthly (KRW 000s) ~720K → 1,013K', font: { size: 13, color: '#8a8f98' } },
+      yaxis: { gridcolor: '#23252a', linecolor: '#34343a', tickcolor: '#62666d', side: 'right', tickformat: ',d' }
+    }), { responsive: true, displayModeBar: false });
+  }
+})();
+</script>
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+</body>
+</html>

@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Review: TSLA / BTC 交易复盘 + 品种匹配分析</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+/* ============================================================
+   Design Tokens — Trade Review Report
+   Reuses V3 semantic color system
+   ============================================================ */
+:root {
+  --c-positive: #4caf50;
+  --c-negative: #f44336;
+  --c-info: #58a6ff;
+  --c-warning: #f8a848;
+  --c-highlight: #ffc107;
+  --c-gold: #ffd54f;
+  --c-purple: #ab47bc;
+
+  --c-positive-bg: rgba(38, 166, 154, 0.12);
+  --c-negative-bg: rgba(239, 83, 80, 0.12);
+  --c-info-bg: rgba(66, 165, 245, 0.12);
+  --c-warning-bg: rgba(255, 183, 77, 0.12);
+  --c-purple-bg: rgba(171, 71, 188, 0.12);
+
+  --bg-0: #08090a;
+  --bg-1: #0f1011;
+  --bg-2: #141516;
+  --bg-3: #191a1b;
+
+  --text-primary: #e8e8e8;
+  --text-secondary: #a0a0a0;
+  --text-muted: #666666;
+  --text-on-dark: #ffffff;
+
+  --border-subtle: #2a2a3e;
+  --border-default: #333355;
+  --border-strong: #4a4a6a;
+
+  --font-body: 'Inter','Inter Variable',-apple-system,'SF Pro Display',system-ui,sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+  --font-chinese: 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+
+  --fs-xs: 11px;
+  --fs-sm: 13px;
+  --fs-base: 15px;
+  --fs-lg: 18px;
+  --fs-xl: 22px;
+  --fs-2xl: 28px;
+  --fs-3xl: 36px;
+
+  --fw-normal: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  --lh-tight: 1.3;
+  --lh-normal: 1.6;
+  --lh-relaxed: 1.8;
+
+  --sp-xs: 4px;
+  --sp-sm: 8px;
+  --sp-md: 16px;
+  --sp-lg: 24px;
+  --sp-xl: 32px;
+  --sp-2xl: 48px;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-elevated: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0; padding: 0;
+  background: var(--bg-0);
+  color: var(--text-primary);
+  font-family: var(--font-body), var(--font-chinese);
+  font-size: var(--fs-base);
+  line-height: var(--lh-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+td, th, .financial, .mono {
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+::selection { background: var(--c-info); color: var(--text-on-dark); }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-0); }
+::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+
+/* === HERO === */
+.hero {
+  background: linear-gradient(135deg, #0f1011 0%, #141516 40%, #191a1b 100%);
+  border-bottom: 1px solid var(--border-default);
+  padding: 56px 32px 40px;
+  text-align: center;
+}
+.hero h1 {
+  font-size: 38px; font-weight: 700; margin-bottom: 12px;
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--c-info) 50%, var(--c-gold) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.hero-sub { color: var(--text-secondary); font-size: var(--fs-base); margin-top: 6px; }
+.hero-meta { display: flex; gap: 24px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+.hero-tag {
+  display: inline-block; padding: 4px 14px; border-radius: 20px;
+  font-size: var(--fs-sm); font-weight: var(--fw-medium);
+}
+.hero-tag.loss { background: var(--c-negative-bg); color: var(--c-negative); }
+.hero-tag.insight { background: var(--c-info-bg); color: var(--c-info); }
+.hero-tag.neutral { background: var(--c-warning-bg); color: var(--c-warning); }
+
+/* === CONTAINER === */
+.container { max-width: 960px; margin: 0 auto; padding: var(--sp-xl); }
+
+/* === SECTION DIVIDER === */
+.section-divider {
+  display: flex; align-items: center; gap: 16px;
+  margin: 48px 0 28px; font-size: var(--fs-xl); font-weight: var(--fw-bold);
+  color: var(--c-highlight);
+}
+.section-divider::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(to right, var(--border-strong), transparent);
+}
+
+/* === ANNOTATION CARD === */
+.annotation-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-lg) var(--sp-xl);
+  margin-bottom: var(--sp-xl);
+  box-shadow: var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+}
+.annotation-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+}
+.annotation-card.trade::before { background: linear-gradient(to right, var(--c-negative), var(--c-warning)); }
+.annotation-card.note::before { background: linear-gradient(to right, var(--c-info), var(--c-positive)); }
+.annotation-card.winner::before { background: linear-gradient(to right, var(--c-positive), var(--c-gold)); }
+
+.ann-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: var(--sp-md); flex-wrap: wrap; gap: 12px;
+}
+.ann-symbol { font-size: var(--fs-2xl); font-weight: var(--fw-bold); }
+.ann-symbol.tsla { color: var(--c-negative); }
+.ann-symbol.btc { color: var(--c-warning); }
+.ann-symbol.gold { color: var(--c-gold); }
+.ann-symbol.note-sym { color: var(--c-info); }
+
+.ann-date {
+  font-size: var(--fs-sm); color: var(--text-muted);
+  font-family: var(--font-mono); margin-left: 12px;
+}
+.ann-type-badge {
+  padding: 3px 12px; border-radius: 16px;
+  font-size: var(--fs-xs); font-weight: var(--fw-semibold);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.ann-type-badge.review { background: var(--c-negative-bg); color: var(--c-negative); }
+.ann-type-badge.fomo { background: var(--c-warning-bg); color: var(--c-warning); }
+.ann-type-badge.signal { background: var(--c-info-bg); color: var(--c-info); }
+.ann-type-badge.hedge { background: var(--c-purple-bg); color: var(--c-purple); }
+.ann-type-badge.compare { background: var(--c-positive-bg); color: var(--c-positive); }
+
+.ann-quote {
+  background: var(--bg-3);
+  border-left: 3px solid var(--border-strong);
+  padding: var(--sp-md) var(--sp-lg);
+  margin: var(--sp-md) 0;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  font-size: var(--fs-base);
+  color: var(--text-secondary);
+  font-style: italic;
+  line-height: var(--lh-relaxed);
+}
+
+.ann-emotions {
+  display: flex; gap: 8px; margin: var(--sp-md) 0; flex-wrap: wrap;
+}
+.emotion-tag {
+  padding: 2px 10px; border-radius: 12px;
+  font-size: var(--fs-xs); font-weight: var(--fw-medium);
+  background: rgba(255,255,255,0.06); color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+/* === ANALYSIS BLOCK === */
+.analysis-block {
+  background: var(--bg-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-xl);
+  margin-bottom: var(--sp-lg);
+}
+.analysis-title {
+  font-size: var(--fs-lg); font-weight: var(--fw-semibold);
+  color: var(--c-info); margin-bottom: var(--sp-md);
+  display: flex; align-items: center; gap: 8px;
+}
+.analysis-block p {
+  margin: 0 0 var(--sp-md); color: var(--text-secondary);
+  line-height: var(--lh-relaxed);
+}
+.analysis-block p:last-child { margin-bottom: 0; }
+.analysis-block strong { color: var(--text-primary); }
+.analysis-block em { color: var(--c-warning); font-style: normal; font-weight: var(--fw-medium); }
+
+.mismatch-label {
+  display: inline-block; padding: 2px 10px; border-radius: var(--radius-sm);
+  font-size: var(--fs-xs); font-weight: var(--fw-semibold);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  margin-bottom: var(--sp-sm);
+}
+.mismatch-label.critical { background: var(--c-negative-bg); color: var(--c-negative); }
+.mismatch-label.moderate { background: var(--c-warning-bg); color: var(--c-warning); }
+.mismatch-label.good { background: var(--c-positive-bg); color: var(--c-positive); }
+
+/* === MARKET VALIDATION TABLE === */
+.validation-table-container {
+  overflow-x: auto; margin: var(--sp-lg) 0;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+.validation-table {
+  width: 100%; border-collapse: collapse; font-size: var(--fs-sm);
+}
+.validation-table caption {
+  padding: var(--sp-md);
+  font-size: var(--fs-base); font-weight: var(--fw-semibold);
+  color: var(--c-highlight); text-align: left;
+  background: var(--bg-3);
+}
+.validation-table thead th {
+  padding: 10px var(--sp-md);
+  background: var(--bg-2);
+  color: var(--text-secondary);
+  font-weight: var(--fw-semibold);
+  text-align: left;
+  border-bottom: 2px solid var(--border-default);
+  white-space: nowrap;
+}
+.validation-table tbody td {
+  padding: 10px var(--sp-md);
+  border-bottom: 1px solid var(--border-subtle);
+  font-family: var(--font-mono);
+}
+.validation-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+.val-positive { color: var(--c-positive); }
+.val-negative { color: var(--c-negative); }
+.val-neutral { color: var(--text-secondary); }
+.val-highlight { color: var(--c-highlight); font-weight: var(--fw-semibold); }
+
+/* === VERDICT CARD === */
+.verdict-card {
+  background: var(--bg-2);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-xl);
+  margin: var(--sp-lg) 0;
+  border: 1px solid var(--border-subtle);
+  display: flex; gap: var(--sp-xl); align-items: flex-start;
+  box-shadow: var(--shadow-card);
+}
+.verdict-icon {
+  flex-shrink: 0;
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: var(--fw-bold);
+}
+.verdict-icon.fail { background: var(--c-negative-bg); color: var(--c-negative); border: 2px solid var(--c-negative); }
+.verdict-icon.pass { background: var(--c-positive-bg); color: var(--c-positive); border: 2px solid var(--c-positive); }
+.verdict-icon.warn { background: var(--c-warning-bg); color: var(--c-warning); border: 2px solid var(--c-warning); }
+.verdict-icon.info { background: var(--c-info-bg); color: var(--c-info); border: 2px solid var(--c-info); }
+
+.verdict-body { flex: 1; }
+.verdict-title {
+  font-size: var(--fs-lg); font-weight: var(--fw-bold); margin-bottom: var(--sp-sm);
+}
+.verdict-title.fail { color: var(--c-negative); }
+.verdict-title.pass { color: var(--c-positive); }
+.verdict-title.warn { color: var(--c-warning); }
+.verdict-title.info { color: var(--c-info); }
+.verdict-desc { color: var(--text-secondary); line-height: var(--lh-relaxed); font-size: var(--fs-sm); }
+
+/* === INSIGHT BOX === */
+.insight-box {
+  background: linear-gradient(135deg, var(--bg-3) 0%, var(--bg-2) 100%);
+  border: 1px solid var(--c-info);
+  border-left: 4px solid var(--c-info);
+  border-radius: var(--radius-md);
+  padding: var(--sp-lg) var(--sp-xl);
+  margin: var(--sp-lg) 0;
+}
+.insight-box.gold-border {
+  border-color: var(--c-gold);
+  border-left-color: var(--c-gold);
+}
+.insight-title {
+  font-size: var(--fs-lg); font-weight: var(--fw-semibold);
+  color: var(--c-info); margin-bottom: var(--sp-sm);
+}
+.insight-box.gold-border .insight-title { color: var(--c-gold); }
+.insight-text {
+  color: var(--text-secondary); font-size: var(--fs-base);
+  line-height: var(--lh-relaxed);
+}
+.insight-text strong { color: var(--text-primary); }
+
+/* === CROSS-ASSET COMPARISON TABLE === */
+.comparison-table-container {
+  overflow-x: auto; margin: var(--sp-xl) 0;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--c-gold);
+  box-shadow: 0 0 24px rgba(255, 213, 79, 0.08);
+}
+.comparison-table {
+  width: 100%; border-collapse: collapse; font-size: var(--fs-sm);
+}
+.comparison-table caption {
+  padding: var(--sp-lg);
+  font-size: var(--fs-xl); font-weight: var(--fw-bold);
+  color: var(--c-gold); text-align: left;
+  background: linear-gradient(135deg, var(--bg-3) 0%, var(--bg-2) 100%);
+}
+.comparison-table caption small {
+  display: block; font-size: var(--fs-sm); font-weight: var(--fw-normal);
+  color: var(--text-secondary); margin-top: 4px;
+}
+.comparison-table thead th {
+  padding: 12px var(--sp-md);
+  background: var(--bg-2);
+  color: var(--text-secondary);
+  font-weight: var(--fw-semibold);
+  text-align: left;
+  border-bottom: 2px solid var(--border-default);
+  white-space: nowrap;
+}
+.comparison-table thead th:first-child { min-width: 120px; }
+.comparison-table tbody td {
+  padding: 12px var(--sp-md);
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: top;
+  line-height: var(--lh-normal);
+}
+.comparison-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+.comparison-table tbody tr.row-gold { background: rgba(255, 213, 79, 0.04); }
+.comparison-table tbody tr.row-gold:hover { background: rgba(255, 213, 79, 0.08); }
+
+.match-bar {
+  display: flex; align-items: center; gap: 8px;
+}
+.match-fill {
+  height: 8px; border-radius: 4px; min-width: 4px;
+  transition: width 0.3s;
+}
+.match-fill.high { background: var(--c-positive); }
+.match-fill.mid { background: var(--c-warning); }
+.match-fill.low { background: var(--c-negative); }
+.match-score {
+  font-family: var(--font-mono);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-sm);
+  min-width: 36px;
+}
+
+.dimension-cell { font-size: var(--fs-xs); color: var(--text-secondary); }
+.dimension-cell strong { color: var(--text-primary); display: block; font-size: var(--fs-sm); }
+
+/* === FINAL INSIGHT HERO === */
+.final-insight {
+  background: linear-gradient(135deg, rgba(255,213,79,0.08) 0%, var(--bg-2) 50%, rgba(38,166,154,0.08) 100%);
+  border: 1px solid var(--c-gold);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-2xl);
+  margin: var(--sp-2xl) 0;
+  text-align: center;
+  box-shadow: 0 0 32px rgba(255, 213, 79, 0.06);
+}
+.final-insight h2 {
+  font-size: var(--fs-2xl); font-weight: var(--fw-bold);
+  color: var(--c-gold); margin-bottom: var(--sp-md);
+}
+.final-insight p {
+  font-size: var(--fs-lg); color: var(--text-secondary);
+  line-height: var(--lh-relaxed); max-width: 700px;
+  margin: 0 auto var(--sp-md);
+}
+.final-insight strong { color: var(--text-primary); }
+
+/* === FOOTER === */
+.report-footer {
+  text-align: center; padding: var(--sp-2xl) 0;
+  color: var(--text-muted); font-size: var(--fs-xs);
+  border-top: 1px solid var(--border-subtle);
+  margin-top: var(--sp-2xl);
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .hero { padding: 32px 16px; }
+  .hero h1 { font-size: 26px; }
+  .container { padding: 16px; }
+  .verdict-card { flex-direction: column; align-items: center; text-align: center; }
+  .ann-header { flex-direction: column; }
+  .comparison-table { font-size: var(--fs-xs); }
+}
+</style>
+</head>
+<body>
+<nav style="position:sticky;top:0;z-index:999;background:rgba(8,9,10,0.95);backdrop-filter:blur(8px);padding:0.5rem 1.5rem;border-bottom:1px solid #23252a;font-family:Inter,-apple-system,system-ui,sans-serif;font-size:0.78rem;display:flex;gap:1rem;align-items:center;"><a href="semiconductor_hub.html" style="color:#f8a848;text-decoration:none;">← Semiconductor Hub 半导体中枢</a><span style="color:#62666d;">·</span><a href="file:///Users/luwenkang/observatory/weekly/2026-W12-v3.html" style="color:#8a8f98;text-decoration:none;">W12 Synthesis</a></nav>
+
+
+<!-- ==================== HERO ==================== -->
+<div class="hero">
+  <h1>AI Review: TSLA / BTC 交易复盘</h1>
+  <p class="hero-sub">3笔交易 + 2条策略笔记 -- 品种匹配度深度分析</p>
+  <p class="hero-sub">复盘日期: 2026-03-20 &middot; 交易窗口: 2025-07 ~ 2025-10</p>
+  <div class="hero-meta">
+    <span class="hero-tag loss">TSLA -13.4%</span>
+    <span class="hero-tag loss">BTC -$5.6K</span>
+    <span class="hero-tag insight">核心: 品种选择 > 纪律控制</span>
+    <span class="hero-tag neutral">Gold +$121K 参照</span>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ================================================================ -->
+<!-- TRADE 1: TSLA 踏空复盘                                         -->
+<!-- ================================================================ -->
+<div class="section-divider">Trade 1: TSLA 踏空复盘</div>
+
+<!-- Annotation Card -->
+<div class="annotation-card trade">
+  <div class="ann-header">
+    <div>
+      <span class="ann-symbol tsla">TSLA</span>
+      <span class="ann-date">2025-10-22</span>
+    </div>
+    <span class="ann-type-badge review">整体复盘</span>
+  </div>
+  <div class="ann-quote">
+    "特斯拉，踏空2倍收益7万刀，原因是震荡导致利润反复归零，并且止损失，每次进场都不在最低点"
+  </div>
+  <div class="ann-emotions">
+    <span class="emotion-tag">焦虑</span>
+    <span class="emotion-tag">复盘</span>
+    <span class="emotion-tag">决策: 止损+建仓</span>
+    <span class="emotion-tag">参考入场: $439</span>
+  </div>
+</div>
+
+<!-- Analysis -->
+<div class="analysis-block">
+  <div class="mismatch-label critical">品种-模型严重不匹配</div>
+  <div class="analysis-title">AI 分析: 为什么TSLA不适合Luke的模型</div>
+
+  <p><strong>这不是一笔单独的交易，而是对TSLA整体经历的总结性反思。</strong>Luke在TSLA上反复进出，每次利润都被震荡归零——这恰恰暴露了品种与模型的根本冲突。</p>
+
+  <p><strong>Luke的模型需要什么：</strong>大周期上升 + 二浪标准横盘 + 趋势缓慢 + 充分建仓时间。Gold完美满足这四点：超级周期W3，横盘期长达数月，趋势缓慢上行，Luke有大量时间从容布局。</p>
+
+  <p><strong>TSLA给了什么：</strong>个股层面的高波动震荡。TSLA不是宏观趋势品种，它是<em>事件驱动+情绪放大器</em>。财报、Robotaxi、Elon Twitter都能在一天内造成10%波动。这种波动结构天然不匹配"慢节奏顺势长持"。</p>
+
+  <p><strong>关键错位：</strong></p>
+  <p>1. <strong>波动频率错配</strong> -- TSLA日均波动3-5%，Luke的止损粒度（基于慢趋势设计）会被频繁触发。"每次进场都不在最低点"不是执行问题，是品种的波动节奏快于Luke的决策节奏。</p>
+  <p>2. <strong>非龙头陷阱</strong> -- 2025年下半年，TSLA并不是AI/科技板块的领涨龙头。NVDA、AVGO才是。选了板块中的二线品种，趋势驱动力不足。</p>
+  <p>3. <strong>踏空$7万不是真正的损失</strong> -- 这是机会成本，不是实际亏损。但它制造的焦虑情绪会驱动后续的FOMO操作（见Trade 2）。</p>
+</div>
+
+<!-- Validation Table -->
+<div class="validation-table-container">
+  <table class="validation-table">
+    <caption>后续行情验证 (从 $439 入场参考)</caption>
+    <thead>
+      <tr>
+        <th>指标</th>
+        <th>数值</th>
+        <th>说明</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>入场参考价</td>
+        <td class="val-neutral">$439</td>
+        <td>2025-10-22 复盘时价格</td>
+      </tr>
+      <tr>
+        <td>最大收益</td>
+        <td class="val-positive">+13.6%</td>
+        <td>期间高点约 $499</td>
+      </tr>
+      <tr>
+        <td>最大回撤</td>
+        <td class="val-negative">-13.7%</td>
+        <td>下探至 $379 区域</td>
+      </tr>
+      <tr>
+        <td>当前价格</td>
+        <td class="val-negative">$380 (-13.4%)</td>
+        <td>复盘后趋势下行</td>
+      </tr>
+      <tr>
+        <td>波动幅度</td>
+        <td class="val-highlight">27.3%</td>
+        <td>从高到低完整振幅，印证高波动特征</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Verdict Card -->
+<div class="verdict-card">
+  <div class="verdict-icon fail">X</div>
+  <div class="verdict-body">
+    <div class="verdict-title fail">判定: 品种选择失败 -- 不是纪律问题</div>
+    <div class="verdict-desc">
+      TSLA的27.3%振幅验证了Luke的直觉——"震荡导致利润反复归零"。但根因不是入场时机差，而是<strong>这个品种的波动结构本身与慢趋势长持模型不兼容</strong>。即使完美入场在最低点，TSLA的快速震荡也会在长持过程中反复触发Luke设计给Gold的止损逻辑。正确的行动不是"下次入场更准"，而是"不交易TSLA"。
+    </div>
+  </div>
+</div>
+
+<!-- Insight Box -->
+<div class="insight-box">
+  <div class="insight-title">Insight: 震荡归零是信号，不是问题</div>
+  <div class="insight-text">
+    "利润反复归零"这个描述本身就是品种不匹配的最佳诊断指标。在Gold上，Luke从未遇到这个问题——因为Gold的趋势足够平缓，回调幅度在止损范围内。当一个品种反复让你的利润归零，<strong>这不是在告诉你"改进入场点"，而是在告诉你"换品种"</strong>。
+  </div>
+</div>
+
+
+<!-- ================================================================ -->
+<!-- TRADE 2: TSLA 期权FOMO                                          -->
+<!-- ================================================================ -->
+<div class="section-divider">Trade 2: TSLA 期权FOMO</div>
+
+<!-- Annotation Card -->
+<div class="annotation-card trade">
+  <div class="ann-header">
+    <div>
+      <span class="ann-symbol tsla">TSLA</span>
+      <span class="ann-date">2025-09-12</span>
+    </div>
+    <span class="ann-type-badge fomo">FOMO</span>
+  </div>
+  <div class="ann-quote">
+    "特斯拉期权13倍，今早1小时"
+  </div>
+  <div class="ann-emotions">
+    <span class="emotion-tag">FOMO</span>
+    <span class="emotion-tag">信心</span>
+    <span class="emotion-tag">入场: $396</span>
+  </div>
+</div>
+
+<!-- Analysis -->
+<div class="analysis-block">
+  <div class="mismatch-label critical">品种-模型严重不匹配 (叠加工具不匹配)</div>
+  <div class="analysis-title">AI 分析: TSLA期权 -- 双重不匹配</div>
+
+  <p><strong>这条记录的潜台词比文字更重要。</strong>"13倍"+"今早1小时"是典型的FOMO触发信号——看到别人（或自己错过的）超额收益后的即时情绪反应。Luke当时的情绪标记是"FOMO+信心"，但这两个情绪恰好互斥：真正的信心不需要FOMO驱动。</p>
+
+  <p><strong>第一层不匹配 -- 品种：</strong>和Trade 1一样，TSLA的高波动不匹配Luke的模型。更关键的是，9月12日的TSLA正处于快速上涨阶段（从$396到$499），这种急涨急跌的走势不是Luke擅长的"缓慢趋势"。</p>
+
+  <p><strong>第二层不匹配 -- 工具：</strong>Luke的成功工具是<em>2x杠杆ETF</em>（UGL、ETHU），这类工具给长持留出了时间。期权的时间衰减（Theta）是长持的天敌——它要求精确的方向判断+时间判断，而Luke的优势恰恰是"不需要精确timing"。期权和Luke的模型在根本层面冲突。</p>
+
+  <p><strong>后续验证：</strong>$396入场后TSLA确实涨了26%到$499。但这个结果是<em>幸存者偏差</em>的教科书案例——它会强化"TSLA期权能赚大钱"的认知，掩盖品种不匹配的事实。10月以后TSLA回落到$380，如果那时候再追期权就是灾难。</p>
+</div>
+
+<!-- Validation Table -->
+<div class="validation-table-container">
+  <table class="validation-table">
+    <caption>后续行情验证 (从 $396 入场)</caption>
+    <thead>
+      <tr>
+        <th>指标</th>
+        <th>数值</th>
+        <th>说明</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>入场价</td>
+        <td class="val-neutral">$396</td>
+        <td>2025-09-12</td>
+      </tr>
+      <tr>
+        <td>最大收益</td>
+        <td class="val-positive">+26.0% (至$499)</td>
+        <td>期权可能确实有13x回报</td>
+      </tr>
+      <tr>
+        <td>回落幅度</td>
+        <td class="val-negative">$499 -> $380</td>
+        <td>从高点回落23.8%</td>
+      </tr>
+      <tr>
+        <td>最终方向</td>
+        <td class="val-negative">下跌</td>
+        <td>急涨26%后回吐全部并继续下跌</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Verdict Card -->
+<div class="verdict-card">
+  <div class="verdict-icon warn">!</div>
+  <div class="verdict-body">
+    <div class="verdict-title warn">判定: 短期盈利掩盖了双重不匹配</div>
+    <div class="verdict-desc">
+      26%的涨幅看起来是"正确决策"，但这是用错误的工具（期权）在错误的品种（TSLA）上碰巧遇到了一段急涨。<strong>如果复制这个操作模式，长期期望值为负。</strong>Luke的优势是在Gold这种慢趋势品种上，用2x ETF长持——不需要精确timing，不需要跟TSLA的日内波动赛跑。
+    </div>
+  </div>
+</div>
+
+<!-- Insight Box -->
+<div class="insight-box">
+  <div class="insight-title">Insight: "13倍"是噪音，不是信号</div>
+  <div class="insight-text">
+    在期权市场中，"13倍收益"几乎一定伴随着99%的失败尝试——幸存者偏差的极端形态。Luke的真实优势是<strong>高概率+中等收益的重复博弈</strong>（Gold: 稳定趋势 x 2x杠杆 x 长持 = +$121K），而不是低概率+极端收益的赌博。用"13倍"来评价自己的策略，等于用彩票中奖来评价财务规划。
+  </div>
+</div>
+
+
+<!-- ================================================================ -->
+<!-- TRADE 3: BTC 止盈判断                                           -->
+<!-- ================================================================ -->
+<div class="section-divider">Trade 3: BTC 止盈判断</div>
+
+<!-- Annotation Card -->
+<div class="annotation-card trade">
+  <div class="ann-header">
+    <div>
+      <span class="ann-symbol btc">BTC</span>
+      <span class="ann-date">2025-07-13</span>
+    </div>
+    <span class="ann-type-badge signal">止盈信号</span>
+  </div>
+  <div class="ann-quote">
+    "BTC突破11万后，以上涨10%，重点在14-15万两个回撤点"
+  </div>
+  <div class="ann-emotions">
+    <span class="emotion-tag">决策: 止盈</span>
+    <span class="emotion-tag">入场: $119,116</span>
+  </div>
+</div>
+
+<!-- Analysis -->
+<div class="analysis-block">
+  <div class="mismatch-label critical">品种-模型严重不匹配 (BTC牛熊快切)</div>
+  <div class="analysis-title">AI 分析: BTC的周期特征为什么不适合Luke</div>
+
+  <p><strong>这是一条关键记录，因为它展示了Luke在BTC上的正确思考和错误品种之间的矛盾。</strong></p>
+
+  <p>Luke的分析逻辑是清晰的：BTC突破$110K后判断目标区间在$140K-$150K，中间关注回调点。这是典型的趋势跟踪思维，逻辑本身没有问题。</p>
+
+  <p><strong>问题出在品种特征上：</strong></p>
+  <p>1. <strong>BTC牛熊转换速度</strong> -- BTC从$119K区域最终只到了约$126K就见顶，然后暴跌到$60K区域。这种"差一点到目标就转向"的走势在BTC历史上反复出现。BTC的4年周期牛熊转换比黄金快10倍以上。</p>
+  <p>2. <strong>"14-15万"目标从未到达</strong> -- Luke的目标区间是合理的趋势外推，但BTC在$126K就结束了上涨。在Gold上，趋势外推通常是可靠的（因为趋势缓慢持续）；在BTC上，趋势外推经常被暴力反转打断。</p>
+  <p>3. <strong>如果止盈了 = 正确决策</strong> -- 在$119K附近止盈，躲过了后面的49.6%暴跌，这是极好的判断。<strong>但如果没有止盈</strong>，仍然持有到$60K区域，那这就是-$5.6K亏损的来源——而这也正是Luke的真实经历。</p>
+
+  <p><strong>根本矛盾：</strong>Luke的模型是"顺势多头+长持"。在Gold上，长持 = 高概率赚钱（因为趋势持续）。在BTC上，长持 = 高概率遇到牛熊转换（因为周期短）。<em>同一个"长持"行为，在不同品种上结果完全相反</em>。</p>
+</div>
+
+<!-- Validation Table -->
+<div class="validation-table-container">
+  <table class="validation-table">
+    <caption>后续行情验证 (从 $119,116 入场)</caption>
+    <thead>
+      <tr>
+        <th>指标</th>
+        <th>数值</th>
+        <th>说明</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>入场价</td>
+        <td class="val-neutral">$119,116</td>
+        <td>2025-07-13</td>
+      </tr>
+      <tr>
+        <td>Luke目标区间</td>
+        <td class="val-neutral">$140K - $150K</td>
+        <td>从未到达</td>
+      </tr>
+      <tr>
+        <td>实际顶部</td>
+        <td class="val-highlight">~$126,000</td>
+        <td>仅距入场+5.8%就见顶</td>
+      </tr>
+      <tr>
+        <td>最大回撤</td>
+        <td class="val-negative">-49.6%</td>
+        <td>暴跌至$60K区域</td>
+      </tr>
+      <tr>
+        <td>实际P&L</td>
+        <td class="val-negative">-$5,600</td>
+        <td>BTC整体交易结果</td>
+      </tr>
+      <tr>
+        <td>如果$119K止盈</td>
+        <td class="val-positive">躲过-49.6%暴跌</td>
+        <td>但Luke实际没有止盈</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Verdict Card -->
+<div class="verdict-card">
+  <div class="verdict-icon fail">X</div>
+  <div class="verdict-body">
+    <div class="verdict-title fail">判定: 正确的分析思路 + 错误的品种 = 亏损</div>
+    <div class="verdict-desc">
+      Luke在BTC上的分析逻辑（趋势跟踪、目标区间、回调点）完全正确——这套逻辑在Gold上产生了+$121K。但BTC的牛熊转换速度使得"长持等目标"这个策略的期望值为负。<strong>-$5.6K的亏损不是分析能力的问题，是品种周期特征与持仓策略不匹配。</strong>如果Luke手上有10个Gold级别的品种可以轮换，他根本不需要在BTC牛市末期冒这个风险。
+    </div>
+  </div>
+</div>
+
+<!-- Insight Box -->
+<div class="insight-box">
+  <div class="insight-title">Insight: 同一个策略，品种不同结果可以完全相反</div>
+  <div class="insight-text">
+    "顺势多头长持"在Gold上 = 跟随超级周期，8个月+$121K。"顺势多头长持"在BTC上 = 碰上牛熊转换，-$5.6K。策略没变，执行没变，只有品种变了。<strong>品种选择是这个方程中唯一的自变量，其他都是因变量。</strong>
+  </div>
+</div>
+
+
+<!-- ================================================================ -->
+<!-- NOTE 1: 对冲策略思考                                             -->
+<!-- ================================================================ -->
+<div class="section-divider">Note 1: 黄金对冲策略思考</div>
+
+<!-- Annotation Card -->
+<div class="annotation-card note">
+  <div class="ann-header">
+    <div>
+      <span class="ann-symbol gold">GC=F / UGL</span>
+      <span class="ann-date">2025-10-15</span>
+    </div>
+    <span class="ann-type-badge hedge">对冲策略</span>
+  </div>
+  <div class="ann-quote">
+    "黄金UGL对冲策略，通过1.35万购入2027年1月远期40的深度看跌期权，对冲UGL下跌一半的损失"
+  </div>
+  <div class="ann-emotions">
+    <span class="emotion-tag">焦虑</span>
+    <span class="emotion-tag">冷静</span>
+    <span class="emotion-tag">复盘</span>
+    <span class="emotion-tag">决策: 止盈+对冲</span>
+  </div>
+</div>
+
+<!-- Analysis -->
+<div class="analysis-block">
+  <div class="mismatch-label good">品种匹配 -- 策略进化信号</div>
+  <div class="analysis-title">AI 分析: 对冲思维是模型成熟的标志</div>
+
+  <p><strong>这条笔记的质量远高于TSLA和BTC的交易记录。</strong>Luke在Gold上赚了$121K之后，开始思考如何保护利润——这是从"进攻"到"攻防一体"的策略进化。</p>
+
+  <p><strong>对冲逻辑解析：</strong>$13,500买入2027年1月到期的UGL $40 PUT，对冲UGL下跌50%的风险。这个设计有几个亮点：</p>
+  <p>1. <strong>远期期权（15个月后到期）</strong>——时间价值充裕，不会因为短期波动被消耗殆尽。这恰恰说明Luke理解了期权的正确用法：买远期做保护，不是买近期做投机（和TSLA期权形成鲜明对比）。</p>
+  <p>2. <strong>深度虚值PUT ($40)</strong>——只保护极端下跌场景。这意味着Luke对Gold的长期趋势有信心，只是防范尾部风险。</p>
+  <p>3. <strong>成本控制</strong>——$13,500相对于$121K利润是11%的保险费，合理。</p>
+
+  <p><strong>情绪组合"焦虑+冷静+复盘"</strong>是最健康的交易决策状态——焦虑提供动力（不会无视风险），冷静提供纪律（不会冲动操作），复盘提供框架（从系统层面思考）。</p>
+</div>
+
+<!-- Validation Table -->
+<div class="validation-table-container">
+  <table class="validation-table">
+    <caption>后续行情验证 (GC=F 从 $4,177)</caption>
+    <thead>
+      <tr>
+        <th>指标</th>
+        <th>数值</th>
+        <th>说明</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>GC=F 入场价</td>
+        <td class="val-neutral">$4,177</td>
+        <td>2025-10-15 笔记时价格</td>
+      </tr>
+      <tr>
+        <td>最大收益</td>
+        <td class="val-positive">+33.7%</td>
+        <td>Gold继续大幅上涨</td>
+      </tr>
+      <tr>
+        <td>最大回撤</td>
+        <td class="val-neutral">-6.3%</td>
+        <td>回调极其温和</td>
+      </tr>
+      <tr>
+        <td>波动特征</td>
+        <td class="val-positive">低波动 + 趋势持续</td>
+        <td>完美匹配Luke模型</td>
+      </tr>
+      <tr>
+        <td>对冲结果</td>
+        <td class="val-neutral">保险费消耗，正股大赚</td>
+        <td>最好的结果：买保险但不需要用</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Verdict Card -->
+<div class="verdict-card">
+  <div class="verdict-icon pass">&#10003;</div>
+  <div class="verdict-body">
+    <div class="verdict-title pass">判定: 策略进化 -- 正确品种上的正确思考</div>
+    <div class="verdict-desc">
+      Gold的-6.3%最大回撤 vs TSLA的27.3%振幅 vs BTC的-49.6%暴跌——这三个数字本身就是品种匹配度的最佳证据。在正确品种上，Luke不仅能赚钱，还能理性地思考风险管理。<strong>对冲不是恐惧的产物，是盈利积累到一定规模后的必然需求，说明在Gold上的操作已经进入良性循环。</strong>
+    </div>
+  </div>
+</div>
+
+<!-- Insight Box -->
+<div class="insight-box gold-border">
+  <div class="insight-title">Insight: 期权用法的对比教学</div>
+  <div class="insight-text">
+    同样是期权，TSLA上的期权是<strong>进攻性投机</strong>（买短期CALL博暴涨），Gold上的期权是<strong>防御性保护</strong>（买远期PUT保护利润）。前者是品种不匹配下的多巴胺行为，后者是品种匹配后的理性风控。<strong>工具没有好坏，品种对了工具自然用对。</strong>
+  </div>
+</div>
+
+
+<!-- ================================================================ -->
+<!-- NOTE 2: 品种对比分析                                             -->
+<!-- ================================================================ -->
+<div class="section-divider">Note 2: 品种对比分析</div>
+
+<!-- Annotation Card -->
+<div class="annotation-card note">
+  <div class="ann-header">
+    <div>
+      <span class="ann-symbol note-sym">Gold vs TSLA vs Silver</span>
+      <span class="ann-date">2026-01-05</span>
+    </div>
+    <span class="ann-type-badge compare">品种对比</span>
+  </div>
+  <div class="ann-quote">
+    "黄金对比Tesla：横盘周期长并且标准，回撤小，所以黄金适合放大杠杆。白银对比黄金：小步上涨+强势盘整"
+  </div>
+  <div class="ann-emotions">
+    <span class="emotion-tag">焦虑</span>
+    <span class="emotion-tag">决策: 止盈+对冲</span>
+  </div>
+</div>
+
+<!-- Analysis -->
+<div class="analysis-block">
+  <div class="mismatch-label good">品种匹配 -- 自我认知突破</div>
+  <div class="analysis-title">AI 分析: Luke正在自发地建构品种匹配模型</div>
+
+  <p><strong>这是5条记录中认知质量最高的一条。</strong>Luke在没有系统工具辅助的情况下，自发地做了品种对比分析——这正是整个交易管道系统想要自动化完成的事情。</p>
+
+  <p><strong>Luke的品种评价框架（从笔记中提取）：</strong></p>
+  <p>1. <strong>横盘周期长+标准</strong> = 建仓窗口大，入场容错高。Gold满足，TSLA不满足。</p>
+  <p>2. <strong>回撤小</strong> = 长持期间不会被震出。Gold满足（最大回撤-6.3%），TSLA不满足（振幅27.3%）。</p>
+  <p>3. <strong>"适合放大杠杆"</strong> = 上述两点的必然推论。只有低回撤+长趋势的品种才配得上杠杆。在TSLA上加杠杆会被震荡放大致死。</p>
+  <p>4. <strong>白银"小步上涨+强势盘整"</strong> = 识别了一个新的潜在匹配品种。这种走势结构与Gold类似，是Luke模型的天然候选。</p>
+
+  <p><strong>为什么这条笔记重要：</strong>它证明了Luke的交易直觉是准确的——他能凭经验判断哪些品种匹配自己的模型。管道系统的价值不是替代这个直觉，而是<em>把这个直觉系统化，扫描全市场找到更多符合这些标准的品种</em>。</p>
+</div>
+
+<!-- Validation Table -->
+<div class="validation-table-container">
+  <table class="validation-table">
+    <caption>品种特征对比验证</caption>
+    <thead>
+      <tr>
+        <th>维度</th>
+        <th>Gold (GC=F)</th>
+        <th>TSLA</th>
+        <th>Silver (SI=F)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>横盘周期</td>
+        <td class="val-positive">长 (数月)</td>
+        <td class="val-negative">短/无规律</td>
+        <td class="val-positive">中等 (数周)</td>
+      </tr>
+      <tr>
+        <td>回撤幅度</td>
+        <td class="val-positive">小 (-6.3%)</td>
+        <td class="val-negative">大 (-13.7%)</td>
+        <td class="val-neutral">中等</td>
+      </tr>
+      <tr>
+        <td>趋势持续性</td>
+        <td class="val-positive">强 (+33.7%)</td>
+        <td class="val-negative">弱 (震荡归零)</td>
+        <td class="val-positive">较强</td>
+      </tr>
+      <tr>
+        <td>杠杆适配性</td>
+        <td class="val-positive">高 (UGL 2x)</td>
+        <td class="val-negative">低 (波动致死)</td>
+        <td class="val-neutral">中 (AGQ 2x)</td>
+      </tr>
+      <tr>
+        <td>Luke模型匹配</td>
+        <td class="val-highlight">完美</td>
+        <td class="val-negative">不匹配</td>
+        <td class="val-positive">较好</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Verdict Card -->
+<div class="verdict-card">
+  <div class="verdict-icon pass">&#10003;</div>
+  <div class="verdict-body">
+    <div class="verdict-title pass">判定: 核心认知已经形成 -- 系统化是下一步</div>
+    <div class="verdict-desc">
+      Luke在这条笔记中展示的品种评价能力，恰恰是交易管道系统需要编码的核心逻辑。"横盘周期长+标准"、"回撤小"、"适合杠杆"——这些不是模糊的直觉，而是可以量化的筛选条件。<strong>管道系统应该把Luke的这套标准应用到1000个品种上，找到所有"长得像黄金"的标的。</strong>
+    </div>
+  </div>
+</div>
+
+<!-- Insight Box -->
+<div class="insight-box gold-border">
+  <div class="insight-title">Insight: 从笔记中提炼的品种筛选公式</div>
+  <div class="insight-text">
+    Luke的直觉可以翻译为三个量化指标：<strong>(1) 横盘标准度</strong>（二浪整理的规范程度和持续时间），<strong>(2) 最大回撤/最大收益比</strong>（越小越好，Gold是6.3/33.7=0.19，TSLA是13.7/13.6=1.01），<strong>(3) 2x杠杆ETF存在性</strong>（有杠杆工具才能放大慢趋势收益）。三个指标全部通过的品种 = "下一个黄金"候选。
+  </div>
+</div>
+
+
+<!-- ================================================================ -->
+<!-- 跨品种总结: 模型匹配度对比                                       -->
+<!-- ================================================================ -->
+<div class="section-divider">跨品种总结: 模型匹配度对比</div>
+
+<div class="comparison-table-container">
+  <table class="comparison-table">
+    <caption>
+      Gold vs ETH vs TSLA vs BTC -- Luke交易模型匹配度全景
+      <small>这是整个标注工具最重要的洞察：哪些品种匹配Luke的模型，哪些不匹配，为什么</small>
+    </caption>
+    <thead>
+      <tr>
+        <th>维度</th>
+        <th>Gold (GC=F / UGL)</th>
+        <th>ETH (ETHU)</th>
+        <th>TSLA</th>
+        <th>BTC</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- 大周期阶段 -->
+      <tr class="row-gold">
+        <td><div class="dimension-cell"><strong>大周期阶段</strong>周期定位</div></td>
+        <td class="val-positive">超级周期W3上升<br>最清晰的大牛市</td>
+        <td class="val-positive">BTC 4年周期牛市后期<br>ETH轮动阶段</td>
+        <td class="val-negative">无清晰大周期<br>个股事件驱动</td>
+        <td style="color: var(--c-warning);">4年周期牛市末端<br>随时转熊</td>
+      </tr>
+      <!-- 趋势速度 -->
+      <tr>
+        <td><div class="dimension-cell"><strong>趋势速度</strong>上涨节奏</div></td>
+        <td class="val-positive">缓慢稳定<br>月级别推进</td>
+        <td class="val-neutral">快速<br>周级别推进</td>
+        <td class="val-negative">急涨急跌<br>日级别波动</td>
+        <td class="val-neutral">中速偏快<br>周级别推进</td>
+      </tr>
+      <!-- 二浪横盘 -->
+      <tr class="row-gold">
+        <td><div class="dimension-cell"><strong>二浪横盘</strong>建仓窗口</div></td>
+        <td class="val-positive">数月标准横盘<br>充分建仓时间</td>
+        <td class="val-neutral">V反转后短暂横盘<br>窗口较短</td>
+        <td class="val-negative">无规律整理<br>假突破频繁</td>
+        <td class="val-neutral">有横盘但不规范<br>经常突然破位</td>
+      </tr>
+      <!-- 回撤特征 -->
+      <tr>
+        <td><div class="dimension-cell"><strong>回撤特征</strong>长持体验</div></td>
+        <td class="val-positive">-6.3% 温和回调<br>止损安全</td>
+        <td class="val-neutral">-15~20% 中等回调<br>需更宽止损</td>
+        <td class="val-negative">-13.7% + 震荡归零<br>反复触发止损</td>
+        <td class="val-negative">-49.6% 暴跌<br>止损全部击穿</td>
+      </tr>
+      <!-- 杠杆工具 -->
+      <tr class="row-gold">
+        <td><div class="dimension-cell"><strong>杠杆工具</strong>放大收益手段</div></td>
+        <td class="val-positive">UGL (2x)<br>完美匹配慢趋势</td>
+        <td class="val-positive">ETHU (2x)<br>匹配中速趋势</td>
+        <td class="val-negative">TSLL (2x) 存在<br>但波动放大致死</td>
+        <td class="val-negative">BITU/BITX (2x)<br>牛熊转换放大亏损</td>
+      </tr>
+      <!-- 实际P&L -->
+      <tr>
+        <td><div class="dimension-cell"><strong>实际P&L</strong>Luke真实结果</div></td>
+        <td class="val-positive" style="font-weight:700;">+$121,000</td>
+        <td class="val-neutral">+$4K / -$19K<br>成功段 vs 失败段</td>
+        <td class="val-negative">踏空$70K<br>利润反复归零</td>
+        <td class="val-negative" style="font-weight:700;">-$5,600</td>
+      </tr>
+      <!-- 持有周期 -->
+      <tr class="row-gold">
+        <td><div class="dimension-cell"><strong>持有周期</strong>匹配Luke节奏</div></td>
+        <td class="val-positive">8个月<br>完美匹配慢节奏</td>
+        <td class="val-neutral">~2个月<br>较短但可操作</td>
+        <td class="val-negative">反复进出<br>无法稳定持有</td>
+        <td class="val-negative">被迫长持等回本<br>越持越亏</td>
+      </tr>
+      <!-- 退出信号 -->
+      <tr>
+        <td><div class="dimension-cell"><strong>退出清晰度</strong>止盈/止损信号</div></td>
+        <td class="val-positive">RSI顶背离+BIAS<br>信号明确</td>
+        <td class="val-neutral">Luke在$70.38卖出<br>接近顶部</td>
+        <td class="val-negative">无法判断<br>震荡中无趋势信号</td>
+        <td class="val-negative">12.6万见顶<br>但信号模糊</td>
+      </tr>
+      <!-- 总评 -->
+      <tr style="border-top: 2px solid var(--border-strong);">
+        <td><div class="dimension-cell"><strong style="color: var(--c-gold);">模型匹配度</strong>综合评估</div></td>
+        <td>
+          <div class="match-bar">
+            <div class="match-fill high" style="width:152px;"></div>
+            <span class="match-score val-positive">95%</span>
+          </div>
+        </td>
+        <td>
+          <div class="match-bar">
+            <div class="match-fill mid" style="width:100px;"></div>
+            <span class="match-score" style="color: var(--c-warning);">65%</span>
+          </div>
+        </td>
+        <td>
+          <div class="match-bar">
+            <div class="match-fill low" style="width:30px;"></div>
+            <span class="match-score val-negative">20%</span>
+          </div>
+        </td>
+        <td>
+          <div class="match-bar">
+            <div class="match-fill low" style="width:45px;"></div>
+            <span class="match-score val-negative">30%</span>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Explanation -->
+<div class="analysis-block">
+  <div class="analysis-title">对比表解读: 品种匹配度的四个层次</div>
+
+  <p><strong>第一层 (95%匹配) -- Gold：</strong>大周期清晰上升、趋势缓慢、横盘标准、回撤温和、杠杆工具完备。每一个维度都指向同一个结论：这是Luke交易模型的"原生品种"。+$121K不是运气，是模型和品种共振的必然结果。</p>
+
+  <p><strong>第二层 (65%匹配) -- ETH：</strong>有大周期逻辑（BTC牛市后期的ETH轮动），有横盘建仓窗口，有2x杠杆工具。但速度比Gold快3-4倍，回调更深。<em>匹配Luke的"快版"模型</em>，需要更短的持有周期和更紧的止盈纪律。ETH成功段+$4K证明快版可行，失败段-$19K证明快版容错更低。</p>
+
+  <p><strong>第三层 (30%匹配) -- BTC：</strong>有大周期逻辑（4年周期），但牛熊转换太快。Luke的"长持"优势变成了劣势——长持穿越了牛熊分界线。BTC更适合<em>周期择时交易者</em>（在牛市早期买入、牛市末期卖出），不适合Luke的"找趋势+长持"模式。</p>
+
+  <p><strong>第四层 (20%匹配) -- TSLA：</strong>不是宏观趋势品种，是事件驱动个股。没有清晰的大周期上升阶段、没有标准横盘、波动剧烈、震荡归零。Luke的模型在TSLA上<em>完全没有发挥空间</em>。踏空$7万和反复止损不是能力问题，是工具不对口。</p>
+</div>
+
+<!-- Final Insight Hero -->
+<div class="final-insight">
+  <h2>核心洞察</h2>
+  <p>
+    Luke的6个月交易数据讲述了一个简洁的故事：<strong>同一个交易者，同一套策略，品种选对了赚$121K，品种选错了亏$5.6K+踏空$70K</strong>。
+  </p>
+  <p>
+    改善交易结果的最高杠杆点不是"更好的止损"、"更准的入场"、"更强的纪律"，而是<strong>找到更多像黄金一样的品种</strong>。
+  </p>
+  <p style="font-size: var(--fs-base); color: var(--text-muted); margin-top: var(--sp-lg);">
+    管道系统应该做的事: 在全市场1000+品种中，找到所有满足"大周期上升 + 二浪标准横盘 + 回撤温和 + 有杠杆工具"的品种，保持品种池充足，让Luke永远有"下一个黄金"可以交易。
+  </p>
+</div>
+
+<!-- Insight Box: What's Next -->
+<div class="insight-box gold-border">
+  <div class="insight-title">下一步: 从复盘到行动</div>
+  <div class="insight-text">
+    <strong>1. 品种筛选公式化</strong> -- 将Note 2中的直觉标准（横盘周期、回撤幅度、杠杆工具）编入管道扫描逻辑。<br>
+    <strong>2. 品种池扩容</strong> -- 当前候选品种来源单一（blogger），需要扫描全市场ETF/商品/加密，找到Gold级别的品种。<br>
+    <strong>3. 不匹配预警</strong> -- 当Luke准备交易TSLA级别品种时，系统应该弹出"品种匹配度: 20%"的警告。<br>
+    <strong>4. 快版/慢版分类</strong> -- ETH证明快版模型可行但容错低。每个品种应标注"慢版(Gold型)"或"快版(ETH型)"，Luke自行选择风格。
+  </div>
+</div>
+
+<div class="report-footer">
+  AI Review generated 2026-03-20 &middot; Trade Pipeline &middot; 品种匹配度分析框架 v1.0<br>
+  Based on 3 trades + 2 notes &middot; Reference: Gold +$121K / BTC -$5.6K / 704 trades over 6 months
+</div>
+
+</div><!-- /.container -->
+</body>
+</html>

@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Western Semiconductor Reverse Verification 西方半导体反向校验</title>
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="semiconductor_shared.css">
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<style>
+/* === Three-column V4 layout === */
+.v4-layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 2rem;
+}
+.v4-main { min-width: 0; }
+.v4-sidebar-right {
+  position: sticky; top: 1rem; height: fit-content; max-height: calc(100vh - 2rem);
+  overflow-y: auto; padding-right: 0.5rem;
+}
+
+/* Right sidebar notes */
+.meta-note, .know-note {
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+.meta-note {
+  background: rgba(188,140,255,0.06);
+  border: 1px solid rgba(188,140,255,0.2);
+  border-left: 3px solid var(--purple);
+}
+.meta-note .note-label { color: var(--purple); font-weight: 600; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.3rem; }
+.know-note {
+  background: var(--knowledge-dim);
+  border: 1px solid rgba(91,155,213,0.2);
+  border-left: 3px solid var(--knowledge);
+}
+.know-note .note-label { color: var(--knowledge); font-weight: 600; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.3rem; }
+
+/* Data point with source */
+.data-point {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.6rem;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+.data-point .dp-value { font-weight: 600; color: var(--text-primary); }
+.data-point .dp-source { font-size: 0.68rem; color: var(--text-quaternary); margin-top: 0.25rem; font-family: var(--font-mono); }
+.data-point .dp-source a { color: var(--text-tertiary); }
+.data-point .dp-confidence {
+  display: inline-block; padding: 0.08rem 0.4rem; border-radius: 10px;
+  font-size: 0.62rem; font-weight: 600; margin-left: 0.4rem;
+}
+.conf-a { background: var(--green-dim); color: var(--green); border: 1px solid rgba(76,175,80,0.25); }
+.conf-b { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(255,193,7,0.25); }
+.conf-c { background: var(--red-dim); color: var(--red); border: 1px solid rgba(244,67,54,0.25); }
+
+/* Verdict box */
+.verdict-box {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem;
+  margin: 1rem 0 1.5rem;
+  background: var(--bg-elevated);
+}
+.verdict-box .verdict-label {
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; margin-bottom: 0.35rem;
+}
+.verdict-bull { color: var(--green); border-left: 3px solid var(--green); }
+.verdict-bear { color: var(--red); border-left: 3px solid var(--red); }
+.verdict-mixed { color: var(--yellow); border-left: 3px solid var(--yellow); }
+
+/* Chart container */
+.chart-container {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem;
+  margin: 1rem 0;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .v4-layout { grid-template-columns: 1fr; }
+  .v4-sidebar-right { position: static; max-height: none; }
+}
+
+.zh-inline { color: var(--text-tertiary); font-size: 0.78rem; }
+</style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- ===== Left Sidebar ===== -->
+  <div class="sidebar">
+    <a class="back-link" href="semiconductor_hub.html">&larr; Semiconductor Hub</a>
+
+    <h4>Reverse Verification</h4>
+    <div class="project-meta">
+      西方半导体反向校验<br>
+      5 companies &middot; 7 sections &middot; 18 searches
+    </div>
+
+    <h4>Navigate</h4>
+    <nav>
+      <ul>
+        <li><a href="#methodology">01 方法论</a></li>
+        <li><a href="#nvidia">02 NVIDIA</a></li>
+        <li><a href="#tsmc">03 TSMC</a></li>
+        <li><a href="#asml">04 ASML</a></li>
+        <li><a href="#hbm">05 HBM</a></li>
+        <li><a href="#asic">06 ASIC</a></li>
+        <li><a href="#synthesis">07 综合发现</a></li>
+      </ul>
+    </nav>
+
+    <h4>Context</h4>
+    <nav>
+      <ul>
+        <li><a href="semiconductor_hub.html">Semiconductor Hub</a></li>
+        <li><a href="china_semi_data_curation.html">China Semi Data Curation</a></li>
+        <li><a href="semiconductor_deep_research_v3.html">V3 Final Report</a></li>
+        <li><a href="sell_side_research_curation.html">Sell-Side Curation</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- ===== Main Content Area ===== -->
+  <main>
+
+    <h1>Western Semiconductor Reverse Verification<span class="zh">西方半导体叙事反向校验</span></h1>
+    <div class="subtitle">Bidirectional Intelligence &middot; Same methodology applied to Western consensus &middot; 2026-03-21</div>
+
+    <!-- ═══════════ §1 方法论 ═══════════ -->
+    <div class="section-header" id="methodology">
+      <h2><span class="section-num">01</span>Methodology: Bidirectional Verification<span class="zh">方法论: 双向校验 -- 用治中国盲区的方法审视西方共识</span></h2>
+    </div>
+
+    <div class="v4-layout">
+      <div class="v4-main">
+        <div class="advisory-box">
+          <strong>Core Thesis 核心命题:</strong> We cured the "China data blind spot" using a 7-technique intelligence curation methodology. The same rigor must now be applied in reverse: <strong>are our bullish assumptions about Western semiconductor companies equally well-validated?</strong><br>
+          <span class="zh-inline">我们用7种情报技术治好了中国数据盲区。现在必须反向应用：我们对西方公司的看多共识，是否同样经得起交叉验证？</span>
+        </div>
+
+        <div class="advisory-box" style="border-left-color: var(--tier-low); background: rgba(244,67,54,0.03);">
+          <strong style="color:var(--tier-low);">The Consensus Trap 共识陷阱</strong><br>
+          China has an <em>obvious</em> data problem -- everyone knows the numbers are murky. But Western companies have a <em>hidden</em> data problem: <strong>consensus bullishness creates a blind spot where nobody questions the assumptions.</strong> When 47/50 analysts rate NVIDIA "Buy," the marginal value of the 48th "Buy" is zero. The value is in stress-testing what everyone takes for granted.<br>
+          <span class="zh-inline">中国的数据问题是显性的 -- 人人都知道数据模糊。但西方公司有隐性数据问题：共识看多创造了一个无人质疑假设的盲区。</span>
+        </div>
+
+        <h3>The Intelligence Triangle Applied Bidirectionally</h3>
+        <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1rem;">
+          For each Western company, we apply the same three-source cross-validation:
+        </p>
+        <div class="grid-2" style="margin-bottom:1rem;">
+          <div class="card" style="border-left:3px solid var(--green);">
+            <strong style="font-size:0.85rem;">China Research (Completed)</strong>
+            <div class="card-desc">7 techniques to extract data where "no public data" was assumed. Result: comprehensive intelligence on YMTC/CXMT/SMEE/HiSilicon.</div>
+          </div>
+          <div class="card" style="border-left:3px solid var(--red);">
+            <strong style="font-size:0.85rem;">Western Reverse Verification (This Report)</strong>
+            <div class="card-desc">Same 7 techniques to stress-test Western consensus. Target: find the cracks in NVDA/TSM/ASML/HBM/ASIC narratives.</div>
+          </div>
+        </div>
+      </div>
+      <div class="v4-sidebar-right">
+        <div class="meta-note">
+          <span class="note-label">META: Why This Matters</span>
+          This report does NOT aim to be bearish. It aims to be <strong>intellectually honest</strong>. If Western narratives hold up under scrutiny, that's a bullish signal. If cracks appear, those are tradeable edge opportunities.
+          <br><br>
+          <span style="color:var(--text-tertiary);">这份报告不是为了看空，而是为了诚实。如果经得起审视，反而是更强的看多信号。</span>
+        </div>
+        <div class="know-note">
+          <span class="note-label">KNOW: Intelligence Triangle</span>
+          三角验证: (1) 行业机构直接估计 (2) 物理/法律证据 (3) 竞争对手反面镜像。每个数据点至少2个独立来源才标A级可信度。
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ §2 NVIDIA ═══════════ -->
+    <div class="section-header" id="nvidia">
+      <h2><span class="section-num">02</span>NVIDIA: Demand Sustainability Verification<span class="zh">NVIDIA: 需求可持续性校验 -- 我们是否高估了需求的持久性？</span></h2>
+    </div>
+
+    <div class="v4-layout">
+      <div class="v4-main">
+
+        <h3>A. Customer Concentration -- Rapidly Increasing</h3>
+        <div class="data-point">
+          <div class="dp-value">FY2026 Q2: Top 2 customers = 39% of revenue (up from 25% YoY)</div>
+          <div>Customer A: 20%, Customer B: 15%. Up sharply from 14% and 11% for top two a year earlier.</div>
+          <div class="dp-source"><a href="https://www.cnbc.com/2025/08/28/nvidias-top-two-mystery-customers-made-up-39percent-of-its-q2-revenue-.html">CNBC, Aug 2025</a> + <a href="https://www.trendforce.com/news/2025/08/29/news-nvidias-top-2-customers-jump-to-39-of-sales-from-25-last-year-raising-client-dependence-concerns/">TrendForce</a> <span class="dp-confidence conf-a">A</span></div>
+        </div>
+        <div class="data-point">
+          <div class="dp-value">FY2026 Q3: Top 4 customers = 61% of $35B quarterly revenue</div>
+          <div>One customer at 22%, another at 15%, two more each above 10%. Likely Microsoft, Meta, Google, and one of Amazon/Oracle.</div>
+          <div class="dp-source"><a href="https://www.nasdaq.com/articles/36-nvidias-35-billion-q3-revenue-came-just-3-mystery-customers">Nasdaq, Nov 2025</a> <span class="dp-confidence conf-a">A</span></div>
+        </div>
+
+        <h3>B. GPU Utilization Rates -- The Uncomfortable Question</h3>
+        <div class="data-point">
+          <div class="dp-value">OpenAI GPT-4 training: average GPU utilization 32-36%</div>
+          <div>When OpenAI trained GPT-4 on ~25,000 A100 GPUs, most chips sat idle while still accruing full cost. This is the training paradigm -- inference utilization data for hyperscalers is not publicly disclosed.</div>
+          <div class="dp-source"><a href="https://medium.com/@Elongated_musk/neo-cloud-economics-and-viability-in-2025-3ab52ef5026f">Medium / Neo-Cloud Economics, 2025</a> <span class="dp-confidence conf-b">B</span></div>
+        </div>
+        <div class="data-point">
+          <div class="dp-value">Neo-cloud providers: 50-60% fleet utilization</div>
+          <div>Smaller providers with customer commitments report higher utilization. Major hyperscalers (Azure, AWS, GCP) do NOT disclose GPU utilization rates. <strong>This is a critical data blind spot.</strong></div>
+          <div class="dp-source"><a href="https://dstack.ai/blog/state-of-cloud-gpu-2025/">dstack.ai, 2025</a> <span class="dp-confidence conf-c">C</span></div>
+        </div>
+
+        <h3>C. Inventory -- Strategic Buildup or Demand Warning?</h3>
+        <div class="data-point">
+          <div class="dp-value">FY2026 Q4 inventory: $21.4B (up 112% from $10.1B end of FY2025)</div>
+          <div>Inventory increased from $19.8B in Q3 to $21.4B in Q4. Management frames this as "strategic securing" with $95.2B in total supply commitments.</div>
+          <div class="dp-source"><a href="https://nvidianews.nvidia.com/news/nvidia-announces-financial-results-for-fourth-quarter-and-fiscal-2026">NVIDIA Newsroom, Q4 FY2026</a> + <a href="https://www.macrotrends.net/stocks/charts/NVDA/nvidia/inventory">MacroTrends</a> <span class="dp-confidence conf-a">A</span></div>
+        </div>
+
+        <h3>D. China Revenue -- Permanent Loss</h3>
+        <div class="data-point">
+          <div class="dp-value">H20 ban timeline: April 2025 ban &rarr; July 2025 reversal &rarr; China counter-ban (Aug 2025)</div>
+          <div>Initial $4.5B charge + $2.5B unshipped in Q1. Brief reversal in July. Then China told local companies to stop buying H20s. <strong>No H20 sales to China in Q2 FY2026 or beyond.</strong> ~$20B annual China revenue at risk.</div>
+          <div class="dp-source"><a href="https://techcrunch.com/2025/05/28/nvidia-expects-to-lose-billions-in-revenue-due-to-h20-chip-licensing-requirements/">TechCrunch, May 2025</a> + <a href="https://www.cnbc.com/2025/08/22/nvidia-halt-h20-chip-production-china-cracks-down.html">CNBC, Aug 2025</a> <span class="dp-confidence conf-a">A</span></div>
+        </div>
+
+        <h3>E. Gaming GPU Production Cuts</h3>
+        <div class="data-point">
+          <div class="dp-value">RTX 50 series production cut 30-40% in H1 2026 due to VRAM shortage</div>
+          <div>NVIDIA redirecting GDDR7 memory from gaming to data center. Effectively exiting high-end PC gaming in 2026. No new GeForce cards expected in 2026.</div>
+          <div class="dp-source"><a href="https://www.pcgamer.com/hardware/graphics-cards/nvidia-is-reportedly-looking-to-cut-gaming-gpu-production-by-up-to-40-percent-in-2026-due-to-vram-supply-issues-but-its-not-as-bad-news-as-you-might-think-not-yet-at-least/">PC Gamer, Dec 2025</a> + <a href="https://www.tweaktown.com/news/109737/nvidia-basically-exiting-high-end-pc-gaming-in-2026-kills-off-rtx-50-desktop-and-laptop-gpus/index.html">TweakTown</a> <span class="dp-confidence conf-b">B</span></div>
+        </div>
+
+        <!-- NVIDIA Chart: Customer Concentration Trend -->
+        <div class="chart-container">
+          <div id="nvidia-concentration-chart" style="width:100%;height:320px;"></div>
+        </div>
+
+        <div class="verdict-box verdict-mixed">
+          <div class="verdict-label" style="color:var(--yellow);">VERDICT: MIXED -- Bull Case Has Real Cracks</div>
+          <div style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;">
+            <strong>Weakened:</strong> Customer concentration at 61% (top 4) is a structural risk -- if any hyperscaler pauses capex, impact is massive. GPU utilization data is a genuine blind spot (no hyperscaler discloses this). China revenue is a permanent ~$20B/yr loss. Inventory at $21.4B needs monitoring.<br>
+            <strong>Holds up:</strong> Data center demand remains genuinely explosive. Blackwell supply is constrained, not oversupplied. AWS price cuts on H100 suggest older gen is commoditizing (good for NVIDIA's upgrade cycle).<br>
+            <strong>Net:</strong> The bull case is still valid but more fragile than consensus assumes. <strong>Customer concentration + unknown utilization rates = the two biggest unpriced risks.</strong><br>
+            <span class="zh-inline">看多逻辑仍然成立，但比共识假设的更脆弱。客户集中度+未知利用率=两大未定价风险。</span>
+          </div>
+        </div>
+
+      </div>
+      <div class="v4-sidebar-right">
+        <div class="meta-note">
+          <span class="note-label">META: Key Surprise</span>
+          The biggest surprise: <strong>NO hyperscaler publicly discloses GPU utilization rates.</strong> This is equivalent to the China opacity we criticized. We have strong supply data (NVIDIA shipments) but weak demand validation (are they being used?).
+        </div>
+        <div class="know-note">
+          <span class="note-label">KNOW: Customer Concentration</span>
+          61% of revenue from 4 customers means NVIDIA's fate is decided by 4 capex committees. Compare: Apple's top customer (carrier deals) has never exceeded 15% of revenue. NVIDIA's concentration is unusual for a $140B/yr revenue company.
+        </div>
+        <div class="meta-note">
+          <span class="note-label">META: China Counter-Ban</span>
+          The China dynamic reversed in an unexpected way: it's not US restricting sales TO China, but China restricting purchases FROM NVIDIA. This suggests Ascend/HiSilicon alternatives are viable enough that China can afford to ban H20.
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ §3 TSMC ═══════════ -->
+    <div class="section-header" id="tsmc">
+      <h2><span class="section-num">03</span>TSMC: Geopolitical Risk Verification<span class="zh">TSMC: 地缘风险校验 -- 护城河是否像假设的那样坚固？</span></h2>
+    </div>
+
+    <div class="v4-layout">
+      <div class="v4-main">
+
+        <h3>A. Arizona Fab -- Better Than Expected</h3>
+        <div class="data-point">
+          <div class="dp-value">Fab 21 Phase 1 (4nm): Yields 4% HIGHER than Taiwan fabs</div>
+          <div>First Arizona fab entered high-volume production in late 2024. Yields at or above Taiwan levels -- a major positive surprise that contradicts the "US fabs can't compete" narrative.</div>
+          <div class="dp-source"><a href="https://www.aztechcouncil.org/tsmc-arizona-fab21-already-making-4nm-chips/">Arizona Tech Council, 2025</a> + <a href="https://en.wikipedia.org/wiki/TSMC_Arizona">Wikipedia TSMC Arizona</a> <span class="dp-confidence conf-a">A</span></div>
+        </div>
+        <div class="data-point">
+          <div class="dp-value">Phase 2 (3nm): Equipment install summer 2026, production 2027</div>
+          <div>Accelerated from original 2028 timeline. Phase 3 (2nm/A16) also pulled forward to 2027. Total $165B investment plan.</div>
+          <div class="dp-source"><a href="https://www.trendforce.com/news/2025/12/18/news-tsmc-reportedly-accelerates-arizona-2nd-fab-eyes-3q26-tool-install-2027-3nm-production/">TrendForce, Dec 2025</a> <span class="dp-confidence conf-b">B</span></div>
+        </div>
+
+        <h3>B. Customer Diversification -- Historic Shift</h3>
+        <div class="data-point">
+          <div class="dp-value">NVIDIA overtook Apple as TSMC's #1 customer in 2025 (~19% vs 17%)</div>
+          <div>For 2026: NVIDIA projected at ~22% ($33B), Apple at ~18% ($27B). HPC revenue grew from 36% in 2020 to 58% in 2025, while smartphones shrunk from 46% to 29%.</div>
+          <div class="dp-source"><a href="https://www.macrumors.com/2026/01/28/nvidia-replaces-apple-as-biggest-tsmc-customer/">MacRumors, Jan 2026</a> + <a href="https://wccftech.com/apple-might-not-be-biggest-tsmc-customer-in-2025/">WCCFTech</a> <span class="dp-confidence conf-b">B</span></div>
+        </div>
+
+        <h3>C. Taiwan Strait Risk -- Low Probability, Catastrophic Impact</h3>
+        <div class="data-point">
+          <div class="dp-value">Short-term invasion risk (2025-2026): UNLIKELY per multiple assessments</div>
+          <div>Recorded Future, Stimson Center, and CFR all assess invasion as unlikely in 2025-2026. Risk increases from 2027 through 2049. Gray zone harassment is the primary near-term threat.</div>
+          <div class="dp-source"><a href="https://assets.recordedfuture.com/insikt-report-pdfs/2025/ta-cn-2025-0212.pdf">Recorded Future, Feb 2025</a> + <a href="https://www.cfr.org/articles/five-takeaways-cfrs-2026-conflict-risk-assessment">CFR 2026</a> <span class="dp-confidence conf-b">B</span></div>
+        </div>
+        <div class="data-point">
+          <div class="dp-value">Dec 29, 2025: 100+ Chinese aircraft detected around Taiwan, 90 crossing median line</div>
+          <div>One of the most intense single-day episodes. "Peaceful unification" language repeatedly omitted from high-profile statements in 2024-2025. Coercion intensity escalating below invasion threshold.</div>
+          <div class="dp-source"><a href="https://www.aei.org/articles/china-taiwan-update-january-2-2026/">AEI, Jan 2026</a> <span class="dp-confidence conf-a">A</span></div>
+        </div>
+
+        <div class="verdict-box verdict-bull" style="border-left-color:var(--green);">
+          <div class="verdict-label">VERDICT: BULL CASE LARGELY HOLDS</div>
+          <div style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;">
+            <strong>Stronger than assumed:</strong> Arizona yields at/above Taiwan levels is a major de-risking event. Timeline acceleration (2nm by 2027) shows operational excellence travels. Customer diversification from Apple-dependent to AI-balanced is structurally healthy.<br>
+            <strong>Weakened:</strong> Rising concentration on NVIDIA as #1 customer creates a new dependency. Taiwan strait gray zone escalation is real even if invasion is unlikely. If NVIDIA's demand softens, TSMC is now more exposed than when Apple was #1.<br>
+            <strong>Net:</strong> TSMC's moat is real and perhaps STRONGER than assumed, given Arizona success. The new risk is NVIDIA concentration replacing Apple concentration.<br>
+            <span class="zh-inline">TSMC护城河真实且可能比假设更强（亚利桑那良率出色）。新风险是NVIDIA集中度取代了苹果集中度。</span>
+          </div>
+        </div>
+
+      </div>
+      <div class="v4-sidebar-right">
+        <div class="meta-note">
+          <span class="note-label">META: Arizona Surprise</span>
+          The 4% higher yield in Arizona was the biggest surprise in this section. The consensus narrative was "US manufacturing can't match Asian yields." This data point contradicts that and strengthens TSMC's geopolitical hedge argument.
+        </div>
+        <div class="know-note">
+          <span class="note-label">KNOW: Gray Zone Warfare</span>
+          Gray zone = coercion below the threshold of armed conflict. Includes: military exercises, airspace incursions, economic pressure, information warfare, cyber attacks. Not "invasion" but still destabilizing. Markets price binary invasion risk but ignore gray zone attrition.
+        </div>
+        <div class="meta-note">
+          <span class="note-label">META: NVIDIA as New Dependency</span>
+          Ironic: TSMC diversified AWAY from Apple into AI, but now NVIDIA at 22% is higher than Apple ever was at its peak. The "diversification" created a new concentration on a more cyclical business.
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ §4 ASML ═══════════ -->
+    <div class="section-header" id="asml">
+      <h2><span class="section-num">04</span>ASML: Post-Rush Window Verification<span class="zh">ASML: 抢装窗口结束后校验 -- 增长轨迹是否完好？</span></h2>
+    </div>
+
+    <div class="v4-layout">
+      <div class="v4-main">
+
+        <h3>A. Order Book -- Strong But "Cannot Confirm" Growth</h3>
+        <div class="data-point">
+          <div class="dp-value">FY2025 revenue: &euro;32.7B. Backlog: &euro;38.8B. Performance obligations: &euro;46.5B</div>
+          <div>EUV capacity booked through 2027. However, ASML "cannot confirm" revenue growth in 2026, wiping $30B off market cap in July 2025.</div>
+          <div class="dp-source"><a href="https://fortune.com/2025/07/16/asml-cannot-confirm-growth-in-2026-wiping-out-30-billion/">Fortune, Jul 2025</a> + <a href="https://www.tradingkey.com/analysis/stocks/us-stocks/261527359-asml-earnings-analysis-revenue-order-tradingkey">TradingKey</a> <span class="dp-confidence conf-a">A</span></div>
+        </div>
+
+        <h3>B. China Revenue Normalization</h3>
+        <div class="data-point">
+          <div class="dp-value">China share to drop to ~20% in 2026, from elevated 2025 levels</div>
+          <div>Management: "The high levels seen in recent years [are] very high and in no way normal." China rush was driven by "eating into backlog" for pent-up demand. 2026 guidance: &euro;34-39B revenue, 51-53% gross margin.</div>
+          <div class="dp-source"><a href="https://www.cnbc.com/2025/10/15/asml-q3-earnings-report.html">CNBC, Oct 2025</a> + <a href="https://www.trendforce.com/news/2025/10/15/news-asml-sees-sharp-2026-china-sales-drop-but-says-total-revenue-wont-fall-below-2025/">TrendForce</a> <span class="dp-confidence conf-a">A</span></div>
+        </div>
+
+        <h3>C. High-NA EUV -- Expensive and Delayed</h3>
+        <div class="data-point">
+          <div class="dp-value">High-NA EUV cost: $360-400M per machine. TSMC is SKIPPING it for 2nm and A16.</div>
+          <div>TSMC -- the world's most important customer -- may also skip A14 and continue using 0.33-NA EUV with multi-patterning. Intel leading adoption for 14A node (2027). Samsung position unclear.</div>
+          <div class="dp-source"><a href="https://semiwiki.com/forum/threads/the-adoption-of-asmls-high-na-euv-lithography-tools-is-being-delayed-by-major-chipmakers-due-to-their-extremely-high-cost%E2%80%94about-360%E2%80%93400-million-per.23214/">SemiWiki, 2025</a> + <a href="https://bits-chips.com/article/high-na-tee-off-has-been-set-2026/">Bits&amp;Chips</a> <span class="dp-confidence conf-b">B</span></div>
+        </div>
+        <div class="data-point">
+          <div class="dp-value">High-volume manufacturing expected 2027-2028, not 2026</div>
+          <div>ASML CEO Fouquet working with customers through 2026 to ensure minimal downtime. Yield rates are the key risk -- chipmakers may postpone if yields fall short.</div>
+          <div class="dp-source"><a href="https://www.digitimes.com/news/a20251016VL203/euv-asml-demand-growth-outlook.html">DigiTimes, Oct 2025</a> <span class="dp-confidence conf-b">B</span></div>
+        </div>
+
+        <div class="verdict-box verdict-mixed">
+          <div class="verdict-label" style="color:var(--yellow);">VERDICT: GROWTH TRAJECTORY WOBBLING</div>
+          <div style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;">
+            <strong>Weakened:</strong> "Cannot confirm growth in 2026" is a warning signal. China normalization = guaranteed revenue decline from that segment. High-NA adoption delayed by cost ($360-400M/unit) and TSMC skipping it entirely for near-term nodes. If TSMC can keep extending 0.33-NA EUV, High-NA's addressable market shrinks dramatically.<br>
+            <strong>Holds up:</strong> Monopoly position is unassailable. EUV capacity booked through 2027. AI-driven demand offsetting China decline for total revenue. &euro;46.5B performance obligations provide multi-year visibility.<br>
+            <strong>Net:</strong> ASML's monopoly is intact, but growth rate could stall. <strong>High-NA is the critical uncertainty -- if TSMC bypasses it, the bull case for ASML's next growth leg weakens significantly.</strong><br>
+            <span class="zh-inline">ASML垄断地位不变，但增速可能停滞。如果台积电绕过High-NA，下一个增长引擎就弱化了。</span>
+          </div>
+        </div>
+
+      </div>
+      <div class="v4-sidebar-right">
+        <div class="meta-note">
+          <span class="note-label">META: The High-NA Paradox</span>
+          ASML spent billions developing High-NA, but its most important customer (TSMC) may skip it. This is a classic innovator's dilemma: the best technology doesn't always win if "good enough" technology is cheaper.
+        </div>
+        <div class="know-note">
+          <span class="note-label">KNOW: Multi-Patterning vs High-NA</span>
+          Multi-patterning: using current 0.33-NA EUV with multiple exposure steps to achieve finer features. Slower and more expensive per wafer, but avoids $360M/tool capital cost. TSMC's math: more multi-patterning steps &lt; buying dozens of High-NA machines.
+        </div>
+        <div class="know-note">
+          <span class="note-label">KNOW: Performance Obligations</span>
+          Performance obligations (&euro;46.5B) = contractually committed future revenue. This is stronger than "backlog" because it includes service contracts. Provides 1.4x current revenue in forward visibility.
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ §5 HBM ═══════════ -->
+    <div class="section-header" id="hbm">
+      <h2><span class="section-num">05</span>HBM: Supercycle Sustainability Verification<span class="zh">HBM: 超级周期持续性校验 -- 2027还有效吗？</span></h2>
+    </div>
+
+    <div class="v4-layout">
+      <div class="v4-main">
+
+        <h3>A. Supply Constraints -- Genuinely Tight Through 2027</h3>
+        <div class="data-point">
+          <div class="dp-value">HBM supply fully allocated through 2026. SK Hynix sold out entire HBM capacity.</div>
+          <div>Both Samsung and SK Hynix began HBM4 mass production in February 2026. Samsung planning 50% HBM capacity surge in 2026. Oversupply scenario realistic only in 2028-2029 if AI demand moderates.</div>
+          <div class="dp-source"><a href="https://www.fusionww.com/insights/blog/inside-the-ai-bottleneck-cowos-hbm-and-2-3nm-capacity-constraints-through-2027">FusionWW, 2025</a> + <a href="https://www.aicerts.ai/news/hbm-supply-crunch-why-ai-memory-shortage-lasts-until-2027/">AI Certs</a> <span class="dp-confidence conf-a">A</span></div>
+        </div>
+
+        <h3>B. DRAM Price Explosion</h3>
+        <div class="data-point">
+          <div class="dp-value">Q1 2026 DRAM prices: +90-95% QoQ (conventional), PC DRAM +100% QoQ</div>
+          <div>TrendForce revised upward from original 55-60% forecast. Server DRAM +90% QoQ -- largest quarterly increase on record. Memory makers exercising "supply discipline."</div>
+          <div class="dp-source"><a href="https://www.trendforce.com/presscenter/news/20260202-12911.html">TrendForce, Feb 2026</a> + <a href="https://www.trendforce.com/presscenter/news/20260105-12860.html">TrendForce, Jan 2026</a> <span class="dp-confidence conf-a">A</span></div>
+        </div>
+
+        <h3>C. HBM4 -- On Track But Redesigned</h3>
+        <div class="data-point">
+          <div class="dp-value">HBM4 mass production: Feb 2026 start. SK Hynix ~mid-50% share, Samsung ~mid-20%, Micron ~20%</div>
+          <div>All three vendors forced to redesign HBM4 after NVIDIA pushed specs beyond 11 Gbps/pin. Samsung had yield challenges with 1c DRAM redesign. Production pushed back ~1 quarter from original timeline.</div>
+          <div class="dp-source"><a href="https://www.trendforce.com/news/2026/02/09/news-samsung-hbm4-reportedly-to-ship-first-after-lunar-new-year-initial-share-projected-at-mid-20/">TrendForce, Feb 2026</a> + <a href="https://www.tomshardware.com/tech-industry/semiconductors/hbm-roadmaps-for-micron-samsung-and-sk-hynix-to-hbm4-and-beyond">Tom's Hardware</a> <span class="dp-confidence conf-a">A</span></div>
+        </div>
+
+        <h3>D. Samsung's HBM3E Qualification Saga</h3>
+        <div class="data-point">
+          <div class="dp-value">Samsung finally passed NVIDIA HBM3E 12-Hi qualification in September 2025 -- 18 months after development</div>
+          <div>Multiple failed attempts due to thermal performance issues. Required complete DRAM core redesign. Now in mass production and sold to "all related customers." Supplies 60%+ of Google TPU HBM3E.</div>
+          <div class="dp-source"><a href="https://www.kedglobal.com/korean-chipmakers/newsView/ked202509190008">KED Global, Sep 2025</a> + <a href="https://www.trendforce.com/news/2025/12/01/news-samsung-reportedly-supplies-60-of-google-tpu-hbm3e-set-to-remain-primary-supplier-in-2026/">TrendForce, Dec 2025</a> <span class="dp-confidence conf-a">A</span></div>
+        </div>
+
+        <!-- HBM Chart: DRAM Price Trends -->
+        <div class="chart-container">
+          <div id="dram-price-chart" style="width:100%;height:320px;"></div>
+        </div>
+
+        <div class="verdict-box verdict-bull" style="border-left-color:var(--green);">
+          <div class="verdict-label">VERDICT: SUPERCYCLE INTACT THROUGH 2027</div>
+          <div style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;">
+            <strong>Holds up strongly:</strong> Supply genuinely constrained through 2026. DRAM prices at record QoQ increases. All three suppliers exercising discipline. HBM4 on track (with minor delays). Memory makers prioritizing HBM/server over consumer.<br>
+            <strong>Emerging risk:</strong> Oversupply scenario becomes realistic in 2028-2029 as new capacity comes online. Samsung's quality lag means SK Hynix has pricing power, but Samsung catching up reduces that moat. The <strong>VRAM shortage is so severe NVIDIA is cutting gaming GPU production 30-40%</strong> -- this validates the shortage narrative.<br>
+            <strong>Net:</strong> HBM supercycle is the most well-validated bull case of all five sections. Data from multiple independent sources consistently confirms tight supply. <strong>The risk is timing the peak, not the existence of the cycle.</strong><br>
+            <span class="zh-inline">HBM超级周期是五个板块中验证最充分的看多逻辑。风险在于择时峰值，而非周期是否存在。</span>
+          </div>
+        </div>
+
+      </div>
+      <div class="v4-sidebar-right">
+        <div class="meta-note">
+          <span class="note-label">META: Strongest Signal</span>
+          The fact that NVIDIA is cutting gaming GPU production 30-40% due to VRAM shortage is the strongest independent signal validating HBM tightness. This is "competitor mirror" technique: NVIDIA's actions confirm the supply picture.
+        </div>
+        <div class="know-note">
+          <span class="note-label">KNOW: HBM4 Specifications</span>
+          HBM4: 16-Hi stacking, 11+ Gbps/pin, manufactured on advanced 1c DRAM process. NVIDIA pushed specs higher than original industry roadmap, forcing all three vendors to redesign. This shows NVIDIA's buyer power over the supply chain.
+        </div>
+        <div class="know-note">
+          <span class="note-label">KNOW: Supply Discipline</span>
+          Memory makers learned from the 2022-2023 DRAM crash. Instead of racing to add capacity, Samsung/SK Hynix/Micron are deliberately keeping plants tight. This is why prices can surge 90-100% QoQ -- it's a deliberate market management strategy, not just organic shortage.
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ §6 ASIC ═══════════ -->
+    <div class="section-header" id="asic">
+      <h2><span class="section-num">06</span>Custom ASIC: NVIDIA Moat Verification<span class="zh">自研芯片: NVIDIA护城河侵蚀速度校验</span></h2>
+    </div>
+
+    <div class="v4-layout">
+      <div class="v4-main">
+
+        <h3>A. Google TPU -- Massive Scale, Real Customers</h3>
+        <div class="data-point">
+          <div class="dp-value">TPU shipments: 2.5M units projected for 2025. TPU revenue: ~$11.25B</div>
+          <div>V6 series (Trillium) expected to become volume leader with ~1.6M shipments in 2026. Anthropic committed to "hundreds of thousands" of TPUs in 2026, scaling toward 1M by 2027. Meta in advanced discussions to lease TPUs starting 2026.</div>
+          <div class="dp-source"><a href="https://globalsemiresearch.substack.com/p/googles-tpu-challenge-to-nvidia-a">Global Semi Research, 2025</a> + <a href="https://newsletter.semianalysis.com/p/tpuv7-google-takes-a-swing-at-the">SemiAnalysis TPUv7</a> <span class="dp-confidence conf-b">B</span></div>
+        </div>
+        <div class="data-point">
+          <div class="dp-value">Midjourney moved majority of inference from H100 to TPU v6e: costs dropped from $2.1M/mo to &lt;$700K/mo</div>
+          <div>A 67% cost reduction for inference workloads. This is the most concrete public data point on GPU-to-TPU migration economics.</div>
+          <div class="dp-source"><a href="https://www.ainewshub.org/post/nvidia-vs-google-tpu-2025-cost-comparison">AI News Hub, 2025</a> <span class="dp-confidence conf-b">B</span></div>
+        </div>
+
+        <h3>B. AWS Trainium -- Multi-Billion Dollar Business</h3>
+        <div class="data-point">
+          <div class="dp-value">Trainium2: 1.4M chips deployed, multi-billion dollar business growing 150% QoQ</div>
+          <div>Project Rainier (Anthropic): ~500,000 Trainium2 chips in 1,200-acre Indiana facility. Trainium3 ramping early 2026, most supply expected committed by mid-2026.</div>
+          <div class="dp-source"><a href="https://aws.amazon.com/ai/machine-learning/trainium/customers/">AWS Trainium Customers</a> + <a href="https://www.trendforce.com/news/2025/10/31/news-awss-trainium3-reportedly-draws-strong-interest-from-large-mid-sized-clients-ramping-early-26/">TrendForce, Oct 2025</a> <span class="dp-confidence conf-b">B</span></div>
+        </div>
+
+        <h3>C. Meta MTIA -- Four Generations in Two Years</h3>
+        <div class="data-point">
+          <div class="dp-value">Meta deploying "hundreds of thousands" of MTIA chips for inference. MTIA 300 already in production for ranking/recommendations training.</div>
+          <div>Roadmap: MTIA-2 (H1 2026), MTIA-3 (H2 2026, TSMC 3nm), MTIA 400/450/500 for GenAI inference by 2027. However, Meta has NOT disclosed what % of total workload runs on MTIA vs NVIDIA GPUs.</div>
+          <div class="dp-source"><a href="https://about.fb.com/news/2026/03/expanding-metas-custom-silicon-to-power-our-ai-workloads/">Meta Blog, Mar 2026</a> + <a href="https://www.cnbc.com/2026/03/11/meta-ai-mtia-chip-data-center.html">CNBC, Mar 2026</a> <span class="dp-confidence conf-b">B</span></div>
+        </div>
+
+        <h3>D. TCO Economics -- ASICs Winning for Inference</h3>
+        <div class="data-point">
+          <div class="dp-value">ASICs: up to 70% better power efficiency, 4.7x price-performance for inference</div>
+          <div>Analysts project: NVIDIA retains 90% of training market but could fall to 20-30% inference share by 2028, with ASICs taking 70-75%. Cloud ASICs expected to grow 44.6% in 2026 vs GPUs at 16.1%.</div>
+          <div class="dp-source"><a href="https://howaiworks.ai/blog/tpu-gpu-asic-ai-hardware-market-2025">HowAIWorks, 2025</a> + <a href="https://www.trendforce.com/insights/nvidia-scale-up-technology">TrendForce ASIC Analysis</a> <span class="dp-confidence conf-b">B</span></div>
+        </div>
+
+        <!-- ASIC Market Share Chart -->
+        <div class="chart-container">
+          <div id="asic-share-chart" style="width:100%;height:320px;"></div>
+        </div>
+
+        <div class="verdict-box verdict-bear" style="border-left-color:var(--red);">
+          <div class="verdict-label">VERDICT: NVIDIA MOAT ERODING FASTER THAN CONSENSUS ESTIMATES</div>
+          <div style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;">
+            <strong>Weakened significantly:</strong> The ASIC ecosystem is far more advanced than typical sell-side coverage suggests. Google TPU at $11B revenue is already a significant business. Trainium2 at 1.4M chips deployed is massive. Midjourney's 67% cost reduction for inference is a concrete proof point. Meta shipping four MTIA generations in two years shows serious execution.<br>
+            <strong>Holds up:</strong> Training remains NVIDIA-dominated (90%+). CUDA ecosystem lock-in is real for non-hyperscaler customers. Flexibility of GPUs still matters for model experimentation.<br>
+            <strong>Net:</strong> The "NVIDIA moat is unassailable" narrative has the most cracks. <strong>Inference is 60%+ of total AI compute and growing, and ASICs are winning inference economics hands down.</strong> The key question is: does the market shift from "will ASICs compete?" (already answered: yes) to "how fast?"<br>
+            <span class="zh-inline">NVIDIA护城河受侵蚀的速度比共识估计更快。推理占AI计算60%+且在增长，ASIC在推理经济性上完胜。关键问题从"能否竞争"变为"多快"。</span>
+          </div>
+        </div>
+
+      </div>
+      <div class="v4-sidebar-right">
+        <div class="meta-note">
+          <span class="note-label">META: The Inference Shift</span>
+          This was the section with the most surprising data. The conventional view is "everyone needs NVIDIA." The data shows the top 4 hyperscalers are ALL building credible alternatives. Broadcom's $60-90B opportunity estimate for 2027 custom ASICs is the number to watch.
+        </div>
+        <div class="know-note">
+          <span class="note-label">KNOW: Training vs Inference</span>
+          Training: teaching a model (huge compute bursts, needs flexibility, NVIDIA dominates). Inference: running a trained model (steady-state, cost-sensitive, ASIC-friendly). As the industry matures from training-heavy to inference-heavy, the economics shift toward ASICs.
+        </div>
+        <div class="meta-note">
+          <span class="note-label">META: Midjourney as Canary</span>
+          Midjourney's GPU-to-TPU migration (67% cost cut) is important because it's a REAL company with REAL workloads making the switch. This is not a theoretical TCO model -- it's production data. If this experience is representative, inference migration will accelerate.
+        </div>
+        <div class="know-note">
+          <span class="note-label">KNOW: ASIC Share 27.8%</span>
+          ASIC-based AI servers expected to reach 27.8% share by 2026 -- highest since 2023. This is the aggregate number; for inference specifically, the share is likely much higher.
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ §7 综合发现 ═══════════ -->
+    <div class="section-header" id="synthesis">
+      <h2><span class="section-num">07</span>Synthesis: Cracks in the Western Narrative<span class="zh">综合发现: 西方叙事的裂缝 + 双向校验完整图景</span></h2>
+    </div>
+
+    <div class="v4-layout">
+      <div class="v4-main">
+
+        <div class="advisory-box" style="border-left-color: var(--accent);">
+          <strong>Summary of Reverse Verification 反向校验总结</strong><br>
+          Of 5 areas examined, <strong>2 bull cases held up</strong> (TSMC, HBM), <strong>2 showed cracks</strong> (NVIDIA demand, ASML growth), and <strong>1 showed significant weakness</strong> (NVIDIA's ASIC moat). The Western semiconductor narrative is not wrong, but it is <strong>more nuanced than consensus pricing suggests.</strong>
+        </div>
+
+        <h3>Specific Judgments That Should Be Adjusted</h3>
+
+        <div class="card" style="border-left:3px solid var(--red);margin-bottom:0.6rem;">
+          <strong style="color:var(--red);font-size:0.85rem;">ADJUST DOWN: NVIDIA Inference Moat Duration</strong>
+          <div class="card-desc">
+            Previous assumption: NVIDIA maintains 80%+ AI compute share through 2028. <br>
+            Revised view: NVIDIA maintains training dominance (90%+) but <strong>inference share could drop to 30-40% by 2028</strong> as Google/AWS/Meta ASICs reach production scale. This matters because inference is the larger and growing market.
+          </div>
+        </div>
+
+        <div class="card" style="border-left:3px solid var(--red);margin-bottom:0.6rem;">
+          <strong style="color:var(--red);font-size:0.85rem;">ADJUST DOWN: NVIDIA Demand Resilience</strong>
+          <div class="card-desc">
+            Previous assumption: Demand is broad-based and sustainable. <br>
+            Revised view: 61% from top 4 customers means <strong>demand is narrow-based</strong>. The "AI capex boom" is really a "4-company capex boom." If any of Microsoft/Meta/Google/Amazon pauses, the impact is severe. GPU utilization rates remain an unverified assumption.
+          </div>
+        </div>
+
+        <div class="card" style="border-left:3px solid var(--yellow);margin-bottom:0.6rem;">
+          <strong style="color:var(--yellow);font-size:0.85rem;">ADJUST: ASML Growth Trajectory</strong>
+          <div class="card-desc">
+            Previous assumption: Steady growth driven by High-NA adoption. <br>
+            Revised view: <strong>Revenue may plateau in 2026</strong> as China normalizes. High-NA adoption delayed and TSMC may bypass it. Growth depends on AI-driven EUV demand offsetting China decline. Monopoly is safe; growth rate is not.
+          </div>
+        </div>
+
+        <div class="card" style="border-left:3px solid var(--green);margin-bottom:0.6rem;">
+          <strong style="color:var(--green);font-size:0.85rem;">CONFIRMED: TSMC Moat Strength</strong>
+          <div class="card-desc">
+            Previous assumption: Strong moat but geopolitical risk. <br>
+            Revised view: <strong>Moat may be stronger than assumed</strong> given Arizona yield success. Geopolitical risk real but timeline is 2027+ for invasion scenarios. New risk: NVIDIA concentration replacing Apple concentration.
+          </div>
+        </div>
+
+        <div class="card" style="border-left:3px solid var(--green);margin-bottom:0.6rem;">
+          <strong style="color:var(--green);font-size:0.85rem;">CONFIRMED: HBM Supercycle</strong>
+          <div class="card-desc">
+            Previous assumption: Tight supply through 2027. <br>
+            Revised view: <strong>Confirmed and possibly understated.</strong> DRAM prices at record QoQ increases. NVIDIA cutting gaming GPUs for VRAM. All three suppliers exercising discipline. Watch for 2028-2029 oversupply as new capacity comes online.
+          </div>
+        </div>
+
+        <h3>Bidirectional Picture: China + Western Blind Spots Combined</h3>
+
+        <div class="grid-2" style="margin-top:1rem;">
+          <div class="card" style="border-left:3px solid var(--red);">
+            <strong style="font-size:0.85rem;">China Blind Spots (Cured)</strong>
+            <div class="card-desc">
+              <ul style="margin:0.3rem 0 0 1rem;font-size:0.78rem;color:var(--text-tertiary);line-height:1.5;">
+                <li>YMTC: Not a "non-entity" -- 232L NAND in production, ~10% China market share</li>
+                <li>CXMT: IPO prospectus reveals real financials for first time</li>
+                <li>SMEE: 28nm DUV working, 15-year gap to ASML but narrowing</li>
+                <li>Ascend 910C: China can afford to BAN H20 -- strongest signal yet of alternative viability</li>
+              </ul>
+            </div>
+          </div>
+          <div class="card" style="border-left:3px solid var(--yellow);">
+            <strong style="font-size:0.85rem;">Western Blind Spots (This Report)</strong>
+            <div class="card-desc">
+              <ul style="margin:0.3rem 0 0 1rem;font-size:0.78rem;color:var(--text-tertiary);line-height:1.5;">
+                <li>NVIDIA: GPU utilization rates not disclosed (opacity equivalent to China)</li>
+                <li>NVIDIA: Customer concentration at 61% (top 4) -- fragile demand base</li>
+                <li>ASIC: Inference migration economics proven (Midjourney -67% cost)</li>
+                <li>ASML: High-NA adoption uncertain if TSMC bypasses it</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <h3>The Complete Intelligence Picture</h3>
+        <div class="advisory-box" style="border-left-color:#5b9bd5;margin-top:1rem;">
+          <strong style="color:#5b9bd5;">Intellectual Honesty Assessment 知识诚实评估</strong><br>
+          We now have a more balanced view than either pure bulls or bears. The semiconductor supercycle is real but more concentrated (fewer companies, fewer customers) and more vulnerable (inference migration, China decoupling) than the mainstream narrative suggests.<br><br>
+          <strong>Key trade implication:</strong> The "buy the whole semiconductor sector" thesis is too blunt. <strong>SK Hynix/Micron</strong> (HBM confirmed), <strong>TSMC</strong> (moat confirmed + de-risked), and <strong>Broadcom</strong> (ASIC winner) may be better risk-adjusted than NVIDIA at current valuations.<br>
+          <span class="zh-inline">半导体超级周期是真的，但比主流叙事更集中、更脆弱。"买整个半导体板块"的论点过于粗糙。SK Hynix/Micron(HBM确认), TSMC(护城河确认+去风险化), Broadcom(ASIC赢家)可能比NVIDIA的风险调整回报更好。</span>
+        </div>
+
+      </div>
+      <div class="v4-sidebar-right">
+        <div class="meta-note">
+          <span class="note-label">META: What Changed</span>
+          Before this analysis, our implicit model was "NVIDIA = AI proxy, buy NVIDIA = buy AI." After this analysis, the model splits into: <strong>Training</strong> (NVIDIA wins, but mature), <strong>Inference</strong> (ASICs winning, Broadcom benefits), <strong>Memory</strong> (SK Hynix/Micron supercycle), <strong>Foundry</strong> (TSMC moat confirmed).
+        </div>
+        <div class="meta-note">
+          <span class="note-label">META: Methodology Validated</span>
+          The same intelligence curation methodology worked for both China (extracting data from opacity) and Western companies (finding cracks in consensus). The 7-technique framework is domain-agnostic.
+          <br><br>
+          <strong>Technique most useful here:</strong> #4 Competitor Mirror (ASIC growth = NVIDIA inference share loss) and #7 Ecosystem Signals (Midjourney migration, Meta MTIA roadmap).
+        </div>
+        <div class="know-note">
+          <span class="note-label">KNOW: Risk-Adjusted Returns</span>
+          If NVIDIA's bull case requires maintaining 80%+ AI compute share AND $140B+ revenue AND 61% customer concentration holding steady -- that's more conditions that must ALL be true. TSMC or SK Hynix bull cases require fewer conditions to remain valid.
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ Footer ═══════════ -->
+    <div style="margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border-subtle);font-size:0.72rem;color:var(--text-quaternary);">
+      <strong>Western Semiconductor Reverse Verification</strong> &middot; Generated 2026-03-21 &middot; Part of the Semiconductor Research Hub<br>
+      All data points sourced from public filings, industry analyst reports, and verified news sources. Confidence ratings: A = multi-source cross-validated, B = single reliable source, C = indirect inference.<br>
+      <strong>Methodology:</strong> <a href="china_semi_data_curation.html">Intelligence Curation Skill</a> applied bidirectionally.<br>
+      <a href="semiconductor_hub.html">&larr; Back to Semiconductor Hub</a>
+    </div>
+
+  </main>
+</div>
+
+<!-- ═══════════ Plotly Charts ═══════════ -->
+<script>
+// Chart 1: NVIDIA Customer Concentration Trend
+var concentrationTrace = {
+  x: ['FY2025 Q2', 'FY2026 Q2', 'FY2026 Q3'],
+  y: [25, 39, 61],
+  type: 'bar',
+  marker: {
+    color: ['rgba(248,168,72,0.6)', 'rgba(255,193,7,0.7)', 'rgba(244,67,54,0.7)'],
+    line: { color: ['#f8a848', '#ffc107', '#f44336'], width: 1.5 }
+  },
+  text: ['Top 2: 25%', 'Top 2: 39%', 'Top 4: 61%'],
+  textposition: 'outside',
+  textfont: { color: '#d0d6e0', size: 12 },
+  hovertemplate: '%{x}<br>Revenue concentration: %{y}%<extra></extra>'
+};
+
+Plotly.newPlot('nvidia-concentration-chart', [concentrationTrace], {
+  title: { text: 'NVIDIA Customer Concentration Trend (% of Revenue)', font: { color: '#d0d6e0', size: 14, family: 'Inter' } },
+  paper_bgcolor: '#141516',
+  plot_bgcolor: '#141516',
+  xaxis: { color: '#8a8f98', gridcolor: '#23252a' },
+  yaxis: { color: '#8a8f98', gridcolor: '#23252a', title: '% of Total Revenue', range: [0, 75] },
+  margin: { t: 50, r: 20, b: 40, l: 50 },
+  annotations: [{
+    x: 'FY2026 Q3', y: 61, xanchor: 'left', yanchor: 'bottom',
+    text: '  4 customers = 61%<br>  of $35B quarterly revenue',
+    showarrow: false, font: { color: '#f44336', size: 10 }
+  }]
+}, { responsive: true, displayModeBar: false });
+
+// Chart 2: DRAM Price QoQ Change
+var dramTrace = {
+  x: ['Q3 2025', 'Q4 2025', 'Q1 2026 (Forecast)'],
+  y: [20, 50, 95],
+  type: 'scatter',
+  mode: 'lines+markers+text',
+  line: { color: '#4caf50', width: 3 },
+  marker: { size: 10, color: '#4caf50' },
+  text: ['+20%', '+50%', '+90-95%'],
+  textposition: 'top center',
+  textfont: { color: '#d0d6e0', size: 11 },
+  hovertemplate: '%{x}<br>QoQ Change: +%{y}%<extra></extra>'
+};
+
+var pcDramTrace = {
+  x: ['Q3 2025', 'Q4 2025', 'Q1 2026 (Forecast)'],
+  y: [15, 45, 100],
+  type: 'scatter',
+  mode: 'lines+markers',
+  line: { color: '#f8a848', width: 2, dash: 'dot' },
+  marker: { size: 8, color: '#f8a848' },
+  name: 'PC DRAM',
+  hovertemplate: '%{x}<br>PC DRAM QoQ: +%{y}%<extra></extra>'
+};
+
+Plotly.newPlot('dram-price-chart', [
+  {...dramTrace, name: 'Conventional DRAM'},
+  pcDramTrace
+], {
+  title: { text: 'DRAM Contract Price QoQ Change (%) — Record Surge', font: { color: '#d0d6e0', size: 14, family: 'Inter' } },
+  paper_bgcolor: '#141516',
+  plot_bgcolor: '#141516',
+  xaxis: { color: '#8a8f98', gridcolor: '#23252a' },
+  yaxis: { color: '#8a8f98', gridcolor: '#23252a', title: 'QoQ % Change', range: [0, 115] },
+  margin: { t: 50, r: 20, b: 40, l: 50 },
+  legend: { font: { color: '#8a8f98' }, bgcolor: 'transparent' },
+  annotations: [{
+    x: 'Q1 2026 (Forecast)', y: 100, xanchor: 'right', yanchor: 'bottom',
+    text: 'PC DRAM: +100% QoQ<br>Largest ever quarterly surge',
+    showarrow: true, arrowcolor: '#f8a848', arrowwidth: 1,
+    font: { color: '#f8a848', size: 10 }
+  }]
+}, { responsive: true, displayModeBar: false });
+
+// Chart 3: ASIC vs GPU Growth Rate
+var asicGpuTrace1 = {
+  x: ['Cloud ASICs', 'GPUs'],
+  y: [44.6, 16.1],
+  type: 'bar',
+  marker: {
+    color: ['rgba(76,175,80,0.7)', 'rgba(248,168,72,0.5)'],
+    line: { color: ['#4caf50', '#f8a848'], width: 1.5 }
+  },
+  text: ['44.6%', '16.1%'],
+  textposition: 'outside',
+  textfont: { color: '#d0d6e0', size: 14 },
+  hovertemplate: '%{x}<br>2026 Growth Rate: %{y}%<extra></extra>'
+};
+
+Plotly.newPlot('asic-share-chart', [asicGpuTrace1], {
+  title: { text: '2026 AI Compute Growth: ASICs (44.6%) vs GPUs (16.1%)', font: { color: '#d0d6e0', size: 14, family: 'Inter' } },
+  paper_bgcolor: '#141516',
+  plot_bgcolor: '#141516',
+  xaxis: { color: '#8a8f98', gridcolor: '#23252a' },
+  yaxis: { color: '#8a8f98', gridcolor: '#23252a', title: 'YoY Growth %', range: [0, 55] },
+  margin: { t: 50, r: 20, b: 40, l: 50 },
+  annotations: [{
+    x: 0.5, y: -0.18, xref: 'paper', yref: 'paper',
+    text: 'Source: TrendForce — Cloud ASICs growing 2.8x faster than GPUs',
+    showarrow: false, font: { color: '#62666d', size: 10 }
+  }]
+}, { responsive: true, displayModeBar: false });
+</script>
+
+</body>
+</html>

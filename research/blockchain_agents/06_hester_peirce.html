@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hester Peirce — 认知代理人报告</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="../blockchain_shared.css">
+  <style>
+/* === Agent-specific extensions (keep under 80 lines) === */
+.reg-accent { color: #7c4dff; }
+.reg-card {
+  border: 1px solid rgba(124, 77, 255, 0.3);
+  border-left: 3px solid #7c4dff;
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem;
+  margin: 1rem 0;
+  background: var(--bg-surface);
+}
+.reg-card h4 { color: #7c4dff; margin-top: 0; font-size: 0.95rem; }
+.dissent-tag {
+  display: inline-block; font-size: 0.65rem; padding: 0.1rem 0.4rem;
+  border-radius: 3px; background: rgba(124,77,255,0.15);
+  color: #7c4dff; font-weight: 590; margin-right: 0.3rem;
+}
+.proposal-tag {
+  display: inline-block; font-size: 0.65rem; padding: 0.1rem 0.4rem;
+  border-radius: 3px; background: rgba(76,175,80,0.15);
+  color: var(--tier-high); font-weight: 590; margin-right: 0.3rem;
+}
+.speech-tag {
+  display: inline-block; font-size: 0.65rem; padding: 0.1rem 0.4rem;
+  border-radius: 3px; background: rgba(248,168,72,0.15);
+  color: var(--accent); font-weight: 590; margin-right: 0.3rem;
+}
+.timeline-step {
+  display: flex; gap: 1rem; margin-bottom: 1rem; padding: 0.8rem 1rem;
+  border-left: 3px solid var(--border-default);
+  background: var(--bg-elevated); border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.timeline-step.highlight { border-left-color: #7c4dff; }
+.timeline-step .step-year {
+  min-width: 60px; font-weight: 680; color: var(--accent); font-size: 0.85rem;
+}
+.timeline-step .step-text { flex: 1; }
+.callout { background: var(--bg-surface); border-radius: var(--radius-sm); padding: 1rem 1.25rem; margin: 1rem 0; border-left: 3px solid var(--accent); }
+.callout-title { font-size: 0.8rem; font-weight: 590; color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+.callout-body { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; }
+.callout.risk { border-left-color: #f44336; }
+.callout.risk .callout-title { color: #f44336; }
+.callout.insight { border-left-color: var(--knowledge); }
+.callout.insight .callout-title { color: var(--knowledge); }
+.prov-badge { font-size: 0.65rem; padding: 1px 6px; border-radius: 3px; font-weight: 600; }
+.prov-primary { background: rgba(76,175,80,0.12); color: #4caf50; }
+.prov-industry { background: rgba(91,155,213,0.12); color: var(--knowledge); }
+.prov-media { background: rgba(248,168,72,0.12); color: var(--accent); }
+body.embedded .sidebar, body.embedded .notes-sidebar { display: none !important; }
+body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+body.embedded .hamburger-btn, body.embedded .sidebar-overlay { display: none !important; }
+.reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+.reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+.reading-mode .hamburger-btn, .reading-mode .sidebar-overlay { display: none !important; }
+  </style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes sidebar">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <a class="back-link" href="../blockchain_hub.html">&larr; Blockchain Hub</a>
+
+    <h4>Hester Peirce</h4>
+    <div class="project-meta">
+      SEC Commissioner, "Crypto Mom"<br>
+      N8 监管 &middot; A档 4/5
+    </div>
+
+    <h4>目录导航</h4>
+    <nav>
+      <ul>
+        <li><a href="#summary"><span class="toc-num">&#9733;</span>速览摘要</a></li>
+        <li><a href="#thesis"><span class="toc-num">1</span>核心命题</a></li>
+        <li><a href="#actions"><span class="toc-num">2</span>行动证据</a></li>
+        <li><a href="#framework"><span class="toc-num">3</span>认知框架</a></li>
+        <li><a href="#judgment"><span class="toc-num">4</span>判断与立场</a></li>
+        <li><a href="#trading"><span class="toc-num">5</span>交易含义</a></li>
+        <li><a href="#risk"><span class="toc-num">6</span>风险信号</a></li>
+        <li><a href="#provenance"><span class="toc-num">7</span>Provenance</a></li>
+      </ul>
+    </nav>
+
+    <h4 style="margin-top:1rem;">相关文件</h4>
+    <nav>
+      <ul>
+        <li><a href="../blockchain_hub.html">Blockchain Hub &rarr;</a></li>
+        <li><a href="../blockchain_hub.html#agents" style="color:var(--accent);">All Agents &rarr;</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <!-- Header -->
+    <header class="page-header">
+      <div class="role-badge">REGULATORY REFORMER</div>
+      <h1>Hester Peirce</h1>
+      <p class="subtitle">SEC Commissioner &nbsp;|&nbsp; "Crypto Mom" &nbsp;|&nbsp; 2026-03-22<br>
+      <span style="color:var(--text-quaternary);font-size:0.85em;">认知代理人报告 — Cognitive Agent Profile</span></p>
+      <div class="badge-row">
+        <span class="badge">N8 监管</span>
+        <span class="badge">A档 4/5</span>
+        <span class="badge">Token Safe Harbor</span>
+        <span class="badge">SEC Reform</span>
+        <span class="badge">2025 Leadership</span>
+        <span class="badge">Pro-Crypto</span>
+      </div>
+    </header>
+
+    <!-- Priority Box -->
+    <div class="priority-box" id="summary">
+      <h2>&#9200; 速览摘要 — 60秒理解 Hester Peirce</h2>
+      <ol>
+        <li><strong>最具影响力的亲加密美国监管者</strong>：在 SEC 内部长期为加密创新辩护，被行业称为"Crypto Mom"</li>
+        <li><strong>Token Safe Harbor 提案</strong>：提出为代币项目提供3年豁免期的安全港框架，允许团队在不被认定为证券的前提下构建网络</li>
+        <li><strong>SEC 内部改革者</strong>：通过大量异议投票和公开声明，系统性挑战 SEC 的"执法优先"加密监管路线</li>
+        <li><strong>2025 SEC 领导层变化</strong>：Gensler 离任后，SEC 政策风向转变与 Peirce 长期倡导的方向高度一致</li>
+        <li><strong>核心判断</strong>："Regulation should enable innovation, not kill it through enforcement."</li>
+      </ol>
+    </div>
+
+    <!-- Section 1: Core Thesis -->
+    <section id="thesis">
+      <div class="section-header">
+        <h2>1. 核心命题 Core Thesis</h2>
+      </div>
+      <p>Peirce 的核心信念是：<strong>监管应该是创新的护栏，而非绞索</strong>。SEC 在 Gensler 时代采取的"执法即监管"策略（regulation by enforcement）不仅扼杀了美国的加密创新，还将项目和人才推向海外。正确的做法是建立清晰的规则框架，让创新者知道边界在哪里。</p>
+
+      <blockquote>
+        "Regulation should enable innovation, not kill it through enforcement. We need clear rules, not enforcement actions, to guide an emerging industry."<br>
+        <span style="color:var(--text-quaternary);font-size:0.82rem;">&mdash; Hester Peirce, SEC Commissioner Dissent, 2023</span>
+      </blockquote>
+    </section>
+
+    <!-- Section 2: Action Evidence -->
+    <section id="actions">
+      <div class="section-header">
+        <h2>2. 行动证据 Action Evidence</h2>
+      </div>
+
+      <div class="timeline-step highlight">
+        <div class="step-year">2020</div>
+        <div class="step-text">
+          <strong>Token Safe Harbor 提案 (v1)</strong> <span class="proposal-tag">提案</span><br>
+          提出为代币项目提供3年安全港期，在此期间代币销售不被视为证券发行。项目团队需披露关键信息但无需完整证券注册。这是美国监管框架中首次有委员正式提出代币豁免方案。
+        </div>
+      </div>
+
+      <div class="timeline-step highlight">
+        <div class="step-year">2021</div>
+        <div class="step-text">
+          <strong>Safe Harbor 2.0</strong> <span class="proposal-tag">提案</span><br>
+          根据行业反馈更新安全港提案，增加退出条件和信息披露要求。虽然未被 SEC 采纳，但为后续立法讨论（如 FIT21 法案）提供了概念基础。
+        </div>
+      </div>
+
+      <div class="timeline-step highlight">
+        <div class="step-year">2020-24</div>
+        <div class="step-text">
+          <strong>系统性异议投票</strong> <span class="dissent-tag">异议</span><br>
+          在 SEC 对 Ripple、Coinbase、Kraken 等主要加密公司的执法行动中持续投出异议票，并发表详细的异议声明。每份声明都实质性地分析了 SEC 立场的法律和逻辑漏洞。
+        </div>
+      </div>
+
+      <div class="timeline-step highlight">
+        <div class="step-year">2020-26</div>
+        <div class="step-text">
+          <strong>公开演讲与行业对话</strong> <span class="speech-tag">演讲</span><br>
+          在 Consensus、Token2049 等行业峰会持续发声，同时在学术和法律论坛阐述监管改革主张。她的演讲被视为 SEC 内部亲加密声音的窗口。
+        </div>
+      </div>
+
+      <div class="timeline-step highlight">
+        <div class="step-year">2025</div>
+        <div class="step-text">
+          <strong>SEC 领导层转向</strong> <span class="proposal-tag">转折</span><br>
+          Gensler 离任后，SEC 新领导层的政策方向与 Peirce 多年倡导的框架高度吻合。她从"少数派异议者"变成了"政策方向的先驱"。
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Framework -->
+    <section id="framework">
+      <div class="section-header">
+        <h2>3. 认知框架 Cognitive Framework</h2>
+      </div>
+
+      <div class="reg-card">
+        <h4>&#9878; Peirce 的监管哲学三原则</h4>
+        <p><strong>原则一 — 清晰优先</strong>：监管规则必须在执法之前建立。不能让企业在不知道规则的情况下因违反未成文规则而被惩罚。</p>
+        <p><strong>原则二 — 技术中立</strong>：监管框架应关注经济实质（这个资产的功能是什么？），而非技术形式（它是否在区块链上？）。同一功能，同一规则。</p>
+        <p><strong>原则三 — 创新空间</strong>：新技术需要实验空间。Safe Harbor 的核心逻辑就是给项目团队时间去构建去中心化网络，而非在第一天就要求其符合证券法。</p>
+      </div>
+
+      <div class="callout insight">
+        <div class="callout-title">Safe Harbor 机制解析</div>
+        <div class="callout-body">
+          <p><strong>问题</strong>：代币项目在早期阶段往往具有证券特征（团队筹资、投资者期望回报），但一旦网络去中心化后，代币可能不再是证券。Howey Test 是静态的，无法处理这种动态转变。</p>
+          <p><strong>解决方案</strong>：给予项目3年豁免期，在此期间必须：(1) 定期披露开发进展；(2) 明确退出条件（网络去中心化或返还资金）；(3) 在到期时要么证明不是证券，要么按证券注册。</p>
+          <p><strong>影响</strong>：虽未被采纳，但成为 FIT21 等后续立法的概念源头。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Judgment -->
+    <section id="judgment">
+      <div class="section-header">
+        <h2>4. 判断与立场 Judgment</h2>
+      </div>
+
+      <div class="callout">
+        <div class="callout-title">核心判断</div>
+        <div class="callout-body">
+          <p>"Regulation should enable innovation, not kill it through enforcement."</p>
+          <ul>
+            <li><strong>Gensler 路线失败假说</strong>：通过执法而非立法来监管加密行业是错误的 — 它没有消灭加密，只是把创新推向海外。<span class="confirmed">&#10003; 2025年政策转向验证</span></li>
+            <li><strong>Safe Harbor 必要性</strong>：代币经济需要从"证券"到"非证券"的渐进式过渡框架，一刀切的分类无法适应区块链的动态性质。<span class="pending">&#8987; 待立法验证</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>偏见分析 Bias Assessment</h3>
+      <ul>
+        <li><strong>意识形态偏见</strong>：Peirce 是自由市场主义者，天然倾向于更少的监管干预。这使她可能低估某些加密项目的欺诈风险。</li>
+        <li><strong>机构内部博弈</strong>：作为长期少数派，她的公开声明在一定程度上是机构内部政治的表达，而非纯粹的政策分析。</li>
+        <li><strong>行业好感偏见</strong>：加密行业给予她"Crypto Mom"的称号和大量正面关注，这种正反馈可能强化她的亲加密立场。</li>
+      </ul>
+    </section>
+
+    <!-- Section 5: Trading -->
+    <section id="trading">
+      <div class="section-header">
+        <h2>5. 交易含义 Trading Implications</h2>
+      </div>
+
+      <figure>
+        <table>
+          <thead><tr><th>信号</th><th>逻辑</th><th>类型</th><th>触发条件</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Peirce 公开声明</strong></td><td>她的表态是 SEC 政策风向的领先指标，特别是在领导层变化后</td><td><span class="signal signal-bull">BULL</span></td><td>亲加密表态 + 新规则提案</td></tr>
+            <tr><td><strong>SEC 执法行动减少</strong></td><td>执法行动数量下降 = Peirce 路线胜出 = 监管不确定性降低</td><td><span class="signal signal-bull">BULL</span></td><td>季度执法统计</td></tr>
+            <tr><td><strong>Safe Harbor 类立法</strong></td><td>代币安全港写入法律 = 新代币项目合法化 = altcoin 利好</td><td><span class="signal signal-bull">BULL</span></td><td>FIT21 或类似法案进展</td></tr>
+            <tr><td><strong>SEC 领导层再次变化</strong></td><td>如果未来 SEC 主席回归 Gensler 路线 = 监管风险重现</td><td><span class="signal signal-bear">BEAR</span></td><td>政权更替 + 新任命</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <div class="callout">
+        <div class="callout-title">交易者视角</div>
+        <div class="callout-body">
+          Peirce 的公开声明是 SEC 政策意图的<strong>最佳实时信号源</strong>。Pro-crypto SEC = bullish for all crypto assets, 特别是受执法行动影响最大的 altcoins 和交易所代币。核心跟踪指标：(1) SEC 执法行动频率；(2) 代币分类立法进展；(3) SEC 委员投票记录。2025年后 SEC 风向变化已是结构性利好。
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: Risk -->
+    <section id="risk">
+      <div class="section-header">
+        <h2>6. 风险信号 Risk Signals</h2>
+      </div>
+
+      <div class="callout risk">
+        <div class="callout-title">风险监控</div>
+        <div class="callout-body">
+          <ul>
+            <li><strong>政治周期依赖</strong>：Peirce 的影响力与政治周期紧密挂钩。当前的 pro-crypto 政策环境可能在下一次政权更替后逆转</li>
+            <li><strong>任期限制</strong>：SEC 委员任期有限。Peirce 离任后，继任者的立场不确定</li>
+            <li><strong>Safe Harbor 风险</strong>：代币安全港可能被利用为新型欺诈工具 — 项目方拿到3年豁免后圈钱跑路。如果发生大规模事件，Peirce 的方案将被清算</li>
+            <li><strong>行业俘获风险</strong>：过度亲加密的监管者可能对行业风险视而不见，导致投资者保护不足</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 7: Provenance -->
+    <section id="provenance">
+      <div class="section-header">
+        <h2>7. Provenance 来源溯源</h2>
+      </div>
+      <figure>
+        <table>
+          <thead><tr><th>来源</th><th>类型</th><th>时间</th><th>可信度</th></tr></thead>
+          <tbody>
+            <tr><td>SEC Commissioner Dissenting Statements</td><td><span class="prov-badge prov-primary">一手</span></td><td>2020-2025</td><td><span class="tier-high">高</span></td></tr>
+            <tr><td>Token Safe Harbor Proposal (v1 &amp; v2)</td><td><span class="prov-badge prov-primary">一手</span></td><td>2020-2021</td><td><span class="tier-high">高</span></td></tr>
+            <tr><td>SEC Enforcement Action Records</td><td><span class="prov-badge prov-primary">一手</span></td><td>持续</td><td><span class="tier-high">高</span></td></tr>
+            <tr><td>Conference Keynotes &amp; Interviews</td><td><span class="prov-badge prov-media">媒体</span></td><td>2020-2026</td><td><span class="tier-mid">中</span></td></tr>
+            <tr><td>FIT21 / Market Structure Legislation</td><td><span class="prov-badge prov-primary">一手</span></td><td>2023-2025</td><td><span class="tier-high">高</span></td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </section>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+      <p>Hester Peirce 认知代理人报告 &mdash; Blockchain Research System &middot; 2026-03-22<br>
+      <a href="../blockchain_hub.html">&larr; Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- RIGHT SIDEBAR: Notes -->
+  <aside class="notes-sidebar" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn" aria-label="Close notes">&#10005;</button>
+      <h4>&#129504; 注解 Notes</h4>
+    </div>
+
+    <!-- Note 1: SEC Attitude as Market Driver -->
+    <div class="anno meta-note open" data-section="trading" id="n1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">SEC 态度作为市场驱动力</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>SEC 对加密的态度是美国加密市场最重要的单一变量之一。不是因为 SEC 直接控制价格，而是因为它决定了：</p>
+        <p><strong>1. 机构参与度</strong>：机构资金只在监管明确时进入。Gensler 时代 = 机构观望；Peirce 路线 = 机构入场。</p>
+        <p><strong>2. 创新地理</strong>：严厉监管 &rarr; 项目迁往海外 &rarr; 美国投资者失去早期接触机会。宽松监管 &rarr; 项目回流 &rarr; 更多投资标的。</p>
+        <p><strong>3. 代币分类</strong>：SEC 是否将某代币视为证券，直接决定其在美国交易所的上架/下架。这是最直接的价格影响机制。</p>
+        <p><span style="color:var(--accent);font-weight:590;">交易启示</span>：跟踪 SEC 委员的公开声明和投票记录，特别是 Peirce 的表态，可以提前预判监管风向变化。</p>
+      </div>
+    </div>
+
+    <!-- Note 2: Regulatory Cycle Awareness -->
+    <div class="anno meta-note open" data-section="risk" id="n2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">监管周期意识</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>加密监管存在明显的<strong>政治周期性</strong>：</p>
+        <p>&bull; Obama-era SEC &rarr; 观望<br>
+        &bull; Trump 1.0 SEC &rarr; 相对宽松<br>
+        &bull; Biden/Gensler SEC &rarr; 强硬执法<br>
+        &bull; Trump 2.0 SEC &rarr; 亲加密转向</p>
+        <p>Peirce 是跨越这些周期的常量 &mdash; 她的立场不随政治风向变化，但她的<strong>影响力</strong>随政治风向波动。</p>
+        <p><span style="color:var(--accent);font-weight:590;">关键问题</span>：当前的 pro-crypto 政策窗口能持续多久？下一次政权更替后是否会回到 Gensler 模式？交易者需要在窗口期内最大化收益，同时为政策反转设置止损。</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+(function() {
+  // 1. Sidebar toggle
+  var hamburger = document.getElementById('hamburgerBtn');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('sidebarOverlay');
+  hamburger.addEventListener('click', function() { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', function() { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+  sidebar.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() { if (window.innerWidth <= 900) { sidebar.classList.remove('open'); overlay.classList.remove('open'); } });
+  });
+
+  // 2. Note toggle
+  window.toggleNote = function(head) { head.parentElement.classList.toggle('open'); };
+
+  // 3. Right sidebar toggle
+  var notesSidebarEl = document.getElementById('notesSidebar');
+  var notesToggleBtn = document.getElementById('notesToggleBtn');
+  var notesOverlayEl = document.getElementById('notesOverlay');
+  var notesCloseBtn = document.getElementById('notesCloseBtn');
+  function toggleNotesSidebar() {
+    var willClose = !notesSidebarEl.classList.contains('ns-closed');
+    notesSidebarEl.classList.toggle('ns-closed', willClose);
+    notesToggleBtn.style.display = willClose ? 'flex' : 'none';
+    notesOverlayEl.classList.toggle('open', !willClose);
+  }
+  if (notesToggleBtn) notesToggleBtn.addEventListener('click', toggleNotesSidebar);
+  if (notesOverlayEl) notesOverlayEl.addEventListener('click', toggleNotesSidebar);
+  if (notesCloseBtn) notesCloseBtn.addEventListener('click', toggleNotesSidebar);
+
+  // 4. Resize handler
+  if (window.innerWidth > 1200) {
+    notesSidebarEl.classList.remove('ns-closed');
+    notesToggleBtn.style.display = 'none';
+  } else {
+    notesSidebarEl.classList.add('ns-closed');
+    notesToggleBtn.style.display = 'flex';
+  }
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 1200) { notesSidebarEl.classList.remove('ns-closed'); notesToggleBtn.style.display = 'none'; notesOverlayEl.classList.remove('open'); }
+  });
+
+  // 5. Expand all notes on load
+  document.querySelectorAll('.anno').forEach(function(n) { n.classList.add('open'); });
+
+  // 6. Active TOC
+  var navLinks = document.querySelectorAll('.sidebar nav ul li a[href^="#"]');
+  var tocObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        navLinks.forEach(function(link) { link.classList.remove('active'); if (link.getAttribute('href') === '#' + entry.target.id) link.classList.add('active'); });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  document.querySelectorAll('[id="summary"],[id="thesis"],[id="actions"],[id="framework"],[id="judgment"],[id="trading"],[id="risk"],[id="provenance"]').forEach(function(s) { tocObserver.observe(s); });
+})();
+</script>
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+</body>
+</html>

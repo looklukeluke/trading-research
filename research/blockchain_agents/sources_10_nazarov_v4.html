@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sergey Nazarov — 素材策展地图 V4</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  .priority-box { border:1px solid rgba(248,168,72,0.3); border-left:3px solid var(--accent); border-radius:var(--radius-sm); padding:1.25rem 1.5rem; margin-bottom:2rem; background:var(--bg-surface); }
+  .priority-box h2 { color:var(--accent); margin-top:0; font-size:1.1rem; font-weight:590; }
+  .priority-box ol { margin-bottom:0; padding-left:1.2rem; }
+  .priority-box li { margin-bottom:0.6rem; line-height:1.5; }
+  .time-badge { display:inline-block; padding:0.1rem 0.5rem; border-radius:10px; font-size:0.7rem; font-weight:590; margin-right:0.3rem; background:var(--accent); color:var(--bg-base); }
+  .anno { position:absolute; left:1rem; right:1rem; }
+  .anno.meta-note { padding:0.6rem 0.75rem; border-left:2px solid var(--accent); border-radius:0 6px 6px 0; background:rgba(248,168,72,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.meta-note:hover { box-shadow:0 0 0 1px var(--accent); }
+  .anno.know-note { padding:0.6rem 0.75rem; border-left:2px solid var(--knowledge); border-radius:0 6px 6px 0; background:rgba(91,155,213,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.know-note:hover { box-shadow:0 0 0 1px var(--knowledge); }
+  .anno .note-label { display:inline-block; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--bg-base); background:var(--accent); padding:0.1rem 0.4rem; border-radius:3px; margin-bottom:0.3rem; }
+  .anno .note-label.know { background:var(--knowledge); color:white; }
+  .anno .mn-head { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
+  .anno .mn-title { flex:1; font-weight:510; font-size:0.75rem; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .anno .mn-fold { font-size:0.55rem; color:var(--text-quaternary); transition:transform 0.2s; margin-left:auto; }
+  .anno.open .mn-fold { transform:rotate(180deg); }
+  .anno .mn-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+  .anno.open .mn-body { max-height:2000px; }
+  .anno .mn-body p { font-size:0.78rem; margin-bottom:0.3rem; color:var(--text-secondary); }
+  .anno.flash { animation:noteFlash 1.5s ease; }
+  @keyframes noteFlash { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--accent);} }
+  .anno.know-note.flash { animation:noteFlashBlue 1.5s ease; }
+  @keyframes noteFlashBlue { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--knowledge);} }
+  mark.hl-know { background:rgba(91,155,213,0.12); border-bottom:1.5px solid var(--knowledge); padding:0 2px; border-radius:2px; color:inherit; cursor:pointer; transition:background 0.15s; }
+  mark.hl-know:hover { background:rgba(91,155,213,0.28); }
+  .nref { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; font-size:0.48rem; font-weight:700; cursor:pointer; margin-left:1px; vertical-align:super; transition:transform 0.15s; text-decoration:none; background:var(--knowledge); color:white; }
+  .nref:hover { transform:scale(1.25); box-shadow:0 0 6px rgba(91,155,213,0.4); }
+  .top-controls { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; padding:0.35rem 0.7rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); font-size:0.72rem; flex-wrap:wrap; }
+  .top-controls .tc-label { font-weight:590; color:var(--knowledge); }
+  .top-controls button { padding:0.15rem 0.45rem; border-radius:4px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-tertiary); cursor:pointer; font-size:0.68rem; font-family:inherit; transition:all 0.15s; }
+  .top-controls button:hover { border-color:var(--knowledge); color:var(--text-primary); }
+  .top-controls button.active { background:var(--knowledge-dim); color:var(--knowledge); border-color:rgba(91,155,213,0.3); }
+  .top-controls .tc-sep { color:var(--border-default); margin:0 0.15rem; }
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .notes-sidebar { position:relative; width:320px; min-width:320px; padding:1.25rem 1rem; border-left:1px solid var(--border-subtle); background:var(--bg-elevated); }
+  .notes-sidebar-header { position:sticky; top:0; z-index:60; background:var(--bg-elevated); padding-bottom:0.5rem; border-bottom:1px solid var(--border-subtle); margin-bottom:0.75rem; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  .notes-toggle-btn { position:fixed; right:1rem; bottom:1.5rem; z-index:200; width:44px; height:44px; border-radius:50%; border:1px solid var(--border-default); background:var(--bg-surface); color:var(--text-secondary); cursor:pointer; font-size:1.1rem; display:none; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.4); }
+  .notes-close-btn { float:right; background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:1.1rem; padding:0; display:none; }
+  @media (max-width:1200px) { .notes-close-btn { display:block; } .notes-sidebar { position:fixed; right:0; top:0; height:100vh; overflow-y:auto; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.4); z-index:150; } .notes-sidebar.ns-closed { transform:translateX(100%); box-shadow:none; } .notes-toggle-btn { display:flex; } }
+  .notes-overlay-right { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:140; }
+  .notes-overlay-right.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  @media (min-width:1600px) { .main-content { max-width:1000px; } .notes-sidebar { width:360px; min-width:360px; } }
+  .rel-card { border:1px solid var(--border-subtle); border-radius:var(--radius-md); background:var(--bg-elevated); margin-bottom:0.75rem; }
+  .rel-card summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  .rel-card[open] summary { color:var(--accent); }
+  .rel-card .rel-body { padding:0 1rem 1rem; font-size:0.82rem; color:var(--text-secondary); line-height:1.6; }
+  .arc-item { border-left:3px solid var(--accent); padding:0.6rem 1rem; margin-bottom:0.75rem; background:rgba(66,165,245,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+  .arc-item strong { color:var(--text-primary); }
+  .question-box { border:2px solid var(--knowledge); background:rgba(91,155,213,0.05); border-radius:var(--radius-md); padding:1.5rem; text-align:center; margin:2rem 0; }
+  .question-box blockquote { border:none; margin:0; padding:0; }
+  .question-box p { font-size:1rem; font-weight:510; color:var(--text-primary); }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; margin-bottom:1rem; }
+  th { text-transform:uppercase; font-size:0.72rem; font-weight:510; color:var(--text-quaternary); letter-spacing:0.04em; text-align:left; padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-default); }
+  td { padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-subtle); vertical-align:top; color:var(--text-secondary); }
+  tr:hover td { background:var(--bg-elevated); }
+  .url-col { max-width:200px; word-break:break-all; }
+  .zh { display:block; font-size:0.85em; color:var(--text-tertiary); margin-top:0.15em; }
+  .zh-inline { font-size:0.85em; color:var(--text-tertiary); }
+  details { border:1px solid var(--border-subtle); background:var(--bg-elevated); border-radius:var(--radius-sm); padding:0; margin-bottom:0.75rem; }
+  details summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  details[open] summary { color:var(--accent); }
+  details > div, details > p { padding:0 1rem 1rem; font-size:0.82rem; line-height:1.6; color:var(--text-secondary); }
+  body.embedded .sidebar, body.embedded .notes-sidebar, body.embedded .hamburger-btn, body.embedded .notes-toggle-btn { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+  .importance { color:var(--accent); font-size:0.75rem; letter-spacing:0.05em; }
+  .gap-risk-high { color:#ef5350; font-weight:590; }
+  .gap-risk-med { color:#ffb74d; font-weight:590; }
+  .gap-risk-low { color:#66bb6a; font-weight:590; }
+  .section-header { margin-bottom:1.25rem; padding-bottom:0.75rem; border-bottom:1px solid var(--border-subtle); }
+  .section-header h2 { font-size:1.2rem; font-weight:590; color:var(--text-primary); margin:0; }
+  .badge-row { display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.75rem; }
+  .badge { display:inline-block; padding:0.2rem 0.6rem; border-radius:4px; font-size:0.68rem; font-weight:590; background:var(--bg-elevated); border:1px solid var(--border-subtle); color:var(--text-secondary); }
+  .subtitle { color:var(--text-secondary); font-size:0.9rem; margin-top:0.5rem; line-height:1.5; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ========== LEFT SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Sergey Nazarov<br>素材策展地图 V4</div>
+
+    <h4>Contents</h4>
+    <nav>
+      <ul>
+        <li><a href="#priority"><span class="toc-num">&#9733;</span>如果只有2小时</a></li>
+        <li><a href="#analysts"><span class="toc-num">1</span>最佳分析师</a></li>
+        <li><a href="#longform"><span class="toc-num">2</span>必读长文/书籍</a></li>
+        <li><a href="#podcasts"><span class="toc-num">3</span>播客与视频</a></li>
+        <li><a href="#primary"><span class="toc-num">4</span>一手资料</a></li>
+        <li><a href="#relationships"><span class="toc-num">5</span>关键关系网</a></li>
+        <li><a href="#narratives"><span class="toc-num">6</span>叙事弧</a></li>
+        <li><a href="#gaps"><span class="toc-num">7</span>信息空白</a></li>
+        <li><a href="#quality"><span class="toc-num">8</span>质量评估</a></li>
+      </ul>
+    </nav>
+
+    <h4>Related</h4>
+    <nav>
+      <ul>
+        <li><a href="10_sergey_nazarov.html">Sergey Nazarov Profile</a></li>
+        <li><a href="10_sergey_nazarov_metacognition.html">Metacognition</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+
+    <div class="top-controls">
+      <span class="tc-label">&#128218; 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <header class="page-header">
+      <h1>Sergey Nazarov — 素材策展地图 V4</h1>
+      <p class="subtitle">Research Date: 2026-03-22 &nbsp;|&nbsp; 5 Categories &middot; 25+ Sources &middot; 6 Key Relationships<br>
+      <span class="zh-inline">Chainlink 创始人投资研究信息源全面梳理</span></p>
+      <div class="badge-row">
+        <span class="badge">&#128274; 高信息不对称</span>
+        <span class="badge">&#127981; DeFi 基础设施</span>
+        <span class="badge">&#127970; RWA 叙事</span>
+        <span class="badge">&#9888; 非上市企业</span>
+      </div>
+    </header>
+
+    <!-- ★ Priority Box -->
+    <div class="priority-box" id="priority">
+      <h2>&#9200; 如果只有2小时 — 推荐阅读路径</h2>
+      <ol>
+        <li><span class="time-badge">60min</span><strong>Chainlink 2.0 白皮书</strong> — 理解 CCIP、OCR 2.0、DECO 技术路线图 <span class="nref" data-note="note-wp" title="白皮书解读">1</span></li>
+        <li><span class="time-badge">30min</span><strong>Messari 预言机季度报告</strong> — 市场份额、收入模型、竞争格局全景 <span class="nref" data-note="note-messari" title="Messari分析">2</span></li>
+        <li><span class="time-badge">20min</span><strong>Token Terminal TVS 数据</strong> — 验证"收入与代币脱钩"的核心指标 <span class="nref" data-note="note-tvs" title="TVS解读">3</span></li>
+        <li><span class="time-badge">15min</span><strong>回看 2022-2024 SmartCon Keynote</strong> — 观察叙事从"预言机→CCIP→RWA"的演变 <span class="nref" data-note="note-smartcon" title="SmartCon分析">4</span></li>
+      </ol>
+    </div>
+
+    <!-- §1 最佳分析师 -->
+    <section id="analysts">
+      <div class="section-header">
+        <h2>1. 最佳分析师与独立研究<span class="zh">Best Analysts & Independent Research</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Messari</strong></td>
+            <td>机构研报</td>
+            <td class="url-col"><a href="https://messari.io/research" target="_blank" rel="noopener">messari.io/research</a></td>
+            <td class="importance">&#9733;&#9733;&#9733;&#9733;&#9733;</td>
+            <td>预言机赛道最权威季度报告，覆盖Chainlink市场份额、收入模型、竞争格局。免费版已含关键数据。<span class="nref" data-note="note-messari-detail">5</span></td>
+          </tr>
+          <tr>
+            <td><strong>Token Terminal</strong></td>
+            <td>数据平台</td>
+            <td class="url-col"><a href="https://tokenterminal.com/terminal/projects/chainlink" target="_blank" rel="noopener">tokenterminal.com</a></td>
+            <td class="importance">&#9733;&#9733;&#9733;&#9733;&#9733;</td>
+            <td>链上收入、费用、TVS核心指标。验证"收入与代币脱钩"的关键工具。<span class="nref" data-note="note-tt-detail">6</span></td>
+          </tr>
+          <tr>
+            <td><strong>The Block Research</strong></td>
+            <td>机构研报</td>
+            <td class="url-col"><a href="https://research.theblock.co" target="_blank" rel="noopener">research.theblock.co</a></td>
+            <td class="importance">&#9733;&#9733;&#9733;&#9733;</td>
+            <td>深度拆解CCIP技术架构、SWIFT合作进展、质押经济学2.0。付费但质量最高。</td>
+          </tr>
+          <tr>
+            <td><strong>Delphi Digital</strong></td>
+            <td>独立研究</td>
+            <td class="url-col"><a href="https://members.delphidigital.io" target="_blank" rel="noopener">members.delphidigital.io</a></td>
+            <td class="importance">&#9733;&#9733;&#9733;&#9733;</td>
+            <td>对LINK代币经济学批评最尖锐的独立研究，"<mark class="hl-know" data-note="note-fat-protocol">胖协议瘦代币</mark>"论述来源。</td>
+          </tr>
+          <tr>
+            <td><strong>Nansen</strong></td>
+            <td>链上分析</td>
+            <td class="url-col"><a href="https://nansen.ai" target="_blank" rel="noopener">nansen.ai</a></td>
+            <td class="importance">&#9733;&#9733;&#9733;&#9733;</td>
+            <td>监控团队钱包抛售、质押者行为、Smart Money持仓变化。<span class="nref" data-note="note-nansen">7</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §2 必读长文/书籍 -->
+    <section id="longform">
+      <div class="section-header">
+        <h2>2. 必读长文与书籍<span class="zh">Must-Read Long-Form & Books</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Chainlink 2.0 白皮书</strong></td>
+            <td>技术白皮书</td>
+            <td class="url-col"><a href="https://chain.link/whitepaper" target="_blank" rel="noopener">chain.link/whitepaper</a></td>
+            <td class="importance">&#9733;&#9733;&#9733;&#9733;&#9733;</td>
+            <td>预言机网络向"去中心化预言机网络2.0"演进的路线图，<mark class="hl-know" data-note="note-ccip">CCIP</mark>、DECO、OCR 2.0技术细节。<span class="nref" data-note="note-wp">1</span></td>
+          </tr>
+          <tr>
+            <td><strong>Smart Contracts Are Eating the World</strong></td>
+            <td>博客长文</td>
+            <td class="url-col"><a href="https://blog.chain.link/smart-contracts-eating-world" target="_blank" rel="noopener">blog.chain.link</a></td>
+            <td class="importance">&#9733;&#9733;&#9733;&#9733;&#9733;</td>
+            <td>Nazarov核心思想：预言机是智能合约的"输入/输出"层，类比TCP/IP。理解其战略野心的必读。</td>
+          </tr>
+          <tr>
+            <td><strong>The Oracle Problem</strong></td>
+            <td>技术博客</td>
+            <td class="url-col"><a href="https://chain.link/education-hub/oracle-problem" target="_blank" rel="noopener">chain.link/education</a></td>
+            <td class="importance">&#9733;&#9733;&#9733;&#9733;</td>
+            <td>预言机问题的本质：区块链无法原生获取链外数据。Chainlink存在的理论根基。<span class="nref" data-note="note-oracle-prob">8</span></td>
+          </tr>
+          <tr>
+            <td><strong>Chainlink Economics 2.0</strong></td>
+            <td>官方文档</td>
+            <td class="url-col"><a href="https://docs.chain.link/architecture-overview/economics-2-0" target="_blank" rel="noopener">docs.chain.link</a></td>
+            <td class="importance">&#9733;&#9733;&#9733;&#9733;</td>
+            <td>质押机制、BUILD计划、费用分享模型的官方解释。<mark class="hl-know" data-note="note-econ-caveat">注意：实际执行远慢于文档承诺。</mark></td>
+          </tr>
+          <tr>
+            <td><strong>The Truth About Team Selling</strong></td>
+            <td>社区分析</td>
+            <td class="url-col">链闻/吴说区块链</td>
+            <td class="importance">&#9733;&#9733;&#9733;&#9733;</td>
+            <td>中文社区对团队持续抛售的最完整追踪，需结合Etherscan验证。<span class="nref" data-note="note-team-selling">9</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §3 播客与视频 -->
+    <section id="podcasts">
+      <div class="section-header">
+        <h2>3. 播客与视频<span class="zh">Podcasts & Video</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>SmartCon</strong> (年度大会)</td>
+            <td>会议视频</td>
+            <td class="url-col"><a href="https://youtube.com/chainlink" target="_blank" rel="noopener">youtube.com/chainlink</a></td>
+            <td class="importance">&#9733;&#9733;&#9733;&#9733;&#9733;</td>
+            <td>Nazarov年度 keynote 必看。2022-2024年主题演变：预言机→CCIP→RWA/TradFi。观察叙事转向的第一手资料。<span class="nref" data-note="note-smartcon">4</span></td>
+          </tr>
+          <tr>
+            <td><strong>Bankless - Sergey Nazarov</strong></td>
+            <td>播客</td>
+            <td class="url-col"><a href="https://banklesshq.com" target="_blank" rel="noopener">banklesshq.com</a></td>
+            <td class="importance">&#9733;&#9733;&#9733;&#9733;&#9733;</td>
+            <td>2021、2023两次深度访谈。Nazarov最放松的状态，透露SWIFT合作的幕后故事。</td>
+          </tr>
+          <tr>
+            <td><strong>Unchained - Chainlink专场</strong></td>
+            <td>播客</td>
+            <td class="url-col"><a href="https://unchainedcrypto.com" target="_blank" rel="noopener">unchainedcrypto.com</a></td>
+            <td class="importance">&#9733;&#9733;&#9733;&#9733;</td>
+            <td>Laura Shin的尖锐提问风格，Nazarov回应"价值捕获"质疑的录音。</td>
+          </tr>
+          <tr>
+            <td><strong>Lex Fridman Podcast #284</strong></td>
+            <td>长视频</td>
+            <td class="url-col"><a href="https://youtube.com/lexfridman" target="_blank" rel="noopener">youtube.com/lexfridman</a></td>
+            <td class="importance">&#9733;&#9733;&#9733;&#9733;</td>
+            <td>3小时技术深度访谈，Nazarov解释OCR共识、<mark class="hl-know" data-note="note-threshold-sig">阈值签名</mark>、未来10年愿景。适合技术背景投资者。</td>
+          </tr>
+          <tr>
+            <td><strong>中文：区块律动/链捕手专访</strong></td>
+            <td>视频/文字</td>
+            <td class="url-col">哔哩哔哩/链捕手公众号</td>
+            <td class="importance">&#9733;&#9733;&#9733;</td>
+            <td>2019-2021年Nazarov对华社区沟通记录，观察其对中国市场态度变化（从重视到冷淡）。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §4 一手资料 -->
+    <section id="primary">
+      <div class="section-header">
+        <h2>4. 一手资料<span class="zh">Primary Sources</span></h2>
+      </div>
+      
+      <details>
+        <summary>&#128279; Chainlink Official Blog <span class="zh-inline">官方博客</span></summary>
+        <div>
+          <p><strong>URL:</strong> <a href="https://blog.chain.link" target="_blank" rel="noopener">blog.chain.link</a></p>
+          <p>集成公告、合作伙伴、技术升级的第一来源。</p>
+          <p><mark class="hl-know" data-note="note-blog-caveat">注意：报喜不报忧，需交叉验证"1000+集成"的实际活跃度。</mark></p>
+        </div>
+      </details>
+
+      <details>
+        <summary>&#128200; Chainlink Data Feeds <span class="zh-inline">实时数据</span></summary>
+        <div>
+          <p><strong>URL:</strong> <a href="https://data.chain.link" target="_blank" rel="noopener">data.chain.link</a></p>
+          <p>直接查看哪些协议在使用、更新频率、偏差阈值。验证"70%市场份额"的原始数据。<span class="nref" data-note="note-data-feeds">10</span></p>
+        </div>
+      </details>
+
+      <details>
+        <summary>&#128279; CCIP Explorer <span class="zh-inline">链上工具</span></summary>
+        <div>
+          <p><strong>URL:</strong> <a href="https://ccip.chain.link" target="_blank" rel="noopener">ccip.chain.link</a></p>
+          <p>跨链消息实时追踪。评估CCIP实际采用率 vs 宣传热度的关键工具。<span class="nref" data-note="note-ccip-explorer">11</span></p>
+        </div>
+      </details>
+
+      <details>
+        <summary>&#128187; Chainlink GitHub <span class="zh-inline">开源代码</span></summary>
+        <div>
+          <p><strong>URL:</strong> <a href="https://github.com/smartcontractkit" target="_blank" rel="noopener">github.com/smartcontractkit</a></p>
+          <p>OCR、CCIP、Chainlink Functions 的开源代码。技术尽职调查必备。</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>&#128244; Sergey Nazarov Twitter/X <span class="zh-inline">社交媒体</span></summary>
+        <div>
+          <p><strong>URL:</strong> <a href="https://x.com/SergeyNazarov" target="_blank" rel="noopener">x.com/SergeyNazarov</a></p>
+          <p>发言频率低但关键节点必发（SWIFT、质押升级）。<mark class="hl-know" data-note="note-twitter-compare">对比2017-2021年的高频互动，可见心态变化。</mark></p>
+        </div>
+      </details>
+    </section>
+
+    <!-- §5 关键关系网 -->
+    <section id="relationships">
+      <div class="section-header">
+        <h2>5. 关键关系网<span class="zh">Key Relationships</span></h2>
+      </div>
+
+      <details class="rel-card" open>
+        <summary>&#127773; SWIFT <span class="zh-inline">战略合作伙伴</span></summary>
+        <div class="rel-body">
+          <p><strong>重要性:</strong> &#9733;&#9733;&#9733;&#9733;&#9733;</p>
+          <p>2022年PoC合作，2023-2024年多次"进展"公告。</p>
+          <p><mark class="hl-know" data-note="note-swap-signal">关键问题：何时从试点转为生产？这是LINK最大的叙事催化剂。</mark></p>
+          <p><strong>监控路径:</strong> SWIFT官方新闻稿 + 合作银行披露文件</p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>&#128188; Aave / Compound / Synthetix <span class="zh-inline">核心客户</span></summary>
+        <div class="rel-body">
+          <p><strong>重要性:</strong> &#9733;&#9733;&#9733;&#9733;&#9733;</p>
+          <p>DeFi蓝筹的依赖 = Chainlink的护城河。</p>
+          <p><mark class="hl-know" data-note="note-defi-migration">监控这些协议是否尝试自研预言机或转向Pyth。</mark></p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>&#128104; Ari Juels <span class="zh-inline">技术联合创始人</span></summary>
+        <div class="rel-body">
+          <p><strong>重要性:</strong> &#9733;&#9733;&#9733;&#9733;</p>
+          <p>Cornell教授、Chainlink Labs CSO。学术背书的核心，"预言机问题"的学术定义者。</p>
+          <p>其论文质量决定Chainlink的技术可信度。</p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>&#9876; Pyth Network <span class="zh-inline">主要竞争对手</span></summary>
+        <div class="rel-body">
+          <p><strong>重要性:</strong> &#9733;&#9733;&#9733;&#9733;</p>
+          <p>Solana生态的高频预言机，低延迟但中心化争议。</p>
+          <p><mark class="hl-know" data-note="note-pyth-share">监控其与Chainlink的市场份额变化。</mark></p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>&#127760; LayerZero <span class="zh-inline">竞争/合作</span></summary>
+        <div class="rel-body">
+          <p><strong>重要性:</strong> &#9733;&#9733;&#9733;&#9733;</p>
+          <p>CCIP的直接竞争对手。</p>
+          <p><mark class="hl-know" data-note="note-layerzero-claim">有趣的是，两者都声称与SWIFT有合作——需要验证真伪。</mark></p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>&#127970; 传统金融 (DTCC, BNY Mellon等) <span class="zh-inline">RWA叙事关键</span></summary>
+        <div class="rel-body">
+          <p><strong>重要性:</strong> &#9733;&#9733;&#9733;&#9733;</p>
+          <p>Chainlink 2024年后叙事重心转向"代币化资产基础设施"。</p>
+          <p>这些机构的实际采用决定第二增长曲线。</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- §6 叙事弧 -->
+    <section id="narratives">
+      <div class="section-header">
+        <h2>6. 关键叙事弧<span class="zh">Key Narrative Arcs</span></h2>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事1: 预言机 → 去中心化基础设施</strong>
+        <p>从"为智能合约提供数据"演变为"区块链互联网的TCP/IP层"。这是Nazarov最核心的叙事，也是理解Chainlink估值逻辑的关键。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事2: DeFi → CCIP → RWA/TradFi</strong>
+        <p>2020-2021 DeFi Summer后转向跨链互操作性协议(CCIP)，2023年后重押传统金融代币化(RWA)。每次叙事转换都伴随LINK价格大幅波动。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事3: 价值捕获争议</strong>
+        <p>"胖协议瘦代币"批评 vs Nazarov的"<mark class="hl-know" data-note="note-staking-value">质押经济学2.0将让LINK成为生产性资产</mark>"。这是LINK估值最大的分歧点。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事4: 团队抛售叙事</strong>
+        <p>持续抛售 vs 再投资(收购、质押激励)。社区情绪与链上数据存在巨大信息差。</p>
+      </div>
+    </section>
+
+    <!-- §7 信息空白 -->
+    <section id="gaps">
+      <div class="section-header">
+        <h2>7. 信息空白 — What Doesn't Exist<span class="zh">Information Gaps</span></h2>
+      </div>
+
+      <div class="question-box">
+        <blockquote>
+          <p>&#9888; Chainlink Labs 是非上市公司，这意味着什么？</p>
+        </blockquote>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>空白领域</th>
+            <th>风险等级</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Chainlink Labs 财务数据</strong></td>
+            <td class="gap-risk-high">&#128997; 高风险</td>
+            <td>非上市公司，无审计财报。无法验证"真实收入"规模、烧钱速度、runway。这是投资LINK最大的信息不对称。<span class="nref" data-note="note-financial-gap">12</span></td>
+          </tr>
+          <tr>
+            <td><strong>团队代币抛售的完整历史</strong></td>
+            <td class="gap-risk-high">&#128997; 高风险</td>
+            <td>已知持续抛售，但缺乏2017-2024年的完整链上追踪。需要自建Nansen监控。<span class="nref" data-note="note-selling-gap">13</span></td>
+          </tr>
+          <tr>
+            <td><strong>CCIP 实际交易量 vs 宣传</strong></td>
+            <td class="gap-risk-med">&#129000; 中风险</td>
+            <td>跨链消息数量公开，但价值量、客户留存率、与LayerZero的真实竞争格局不透明。</td>
+          </tr>
+          <tr>
+            <td><strong>SWIFT 合作的具体条款</strong></td>
+            <td class="gap-risk-med">&#129000; 中风险</td>
+            <td>"战略合作" vs "付费客户"？收入规模？续约条款？全部未披露。</td>
+          </tr>
+          <tr>
+            <td><strong>中文市场的真实地位</strong></td>
+            <td class="gap-risk-low">&#129001; 机会</td>
+            <td>2019年后Nazarov对华互动锐减，但Chainlink喂价仍被大量中国DeFi团队使用。中文社区情绪与全球脱钩，可能存在信息差。</td>
+          </tr>
+          <tr>
+            <td><strong>质押 Economics 2.0 的实际收益率</strong></td>
+            <td class="gap-risk-med">&#129000; 中风险</td>
+            <td>官方APY vs 实际收益（考虑代币解锁、通胀）？长期质押者行为数据缺乏。<span class="nref" data-note="note-staking-gap">14</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §8 质量评估 -->
+    <section id="quality">
+      <div class="section-header">
+        <h2>8. 素材质量评估<span class="zh">Source Quality Assessment</span></h2>
+      </div>
+
+      <details open>
+        <summary>&#9989; 高可信度来源</summary>
+        <div>
+          <ul style="margin:0; padding-left:1.2rem;">
+            <li><strong>链上数据</strong> (Etherscan, Token Terminal, Nansen) — 可验证，但需注意钱包归属标注准确性</li>
+            <li><strong>Messari / The Block Research</strong> — 机构背书，方法论相对严谨</li>
+            <li><strong>Chainlink GitHub</strong> — 开源代码，技术事实可验证</li>
+            <li><strong>SmartCon 视频</strong> — 第一手叙事演变记录</li>
+          </ul>
+        </div>
+      </details>
+
+      <details>
+        <summary>&#9888; 需要交叉验证</summary>
+        <div>
+          <ul style="margin:0; padding-left:1.2rem;">
+            <li><strong>官方博客/白皮书</strong> — 存在夸大宣传，需对比实际采用数据</li>
+            <li><strong>Twitter/X 发言</strong> — 高情绪放大效应，偶有误导性表述</li>
+            <li><strong>中文社区分析</strong> — 信息丰富但质量参差，需追溯原始来源</li>
+          </ul>
+        </div>
+      </details>
+
+      <details>
+        <summary>&#10060; 信息真空区</summary>
+        <div>
+          <ul style="margin:0; padding-left:1.2rem;">
+            <li><strong>财务数据</strong> — 非上市，信息真空，只能通过间接推断</li>
+            <li><strong>SWIFT 合作细节</strong> — 商业机密，无法获取</li>
+            <li><strong>团队长期抛售计划</strong> — 无官方披露</li>
+          </ul>
+        </div>
+      </details>
+    </section>
+
+    <footer style="margin-top:3rem; padding-top:1rem; border-top:1px solid var(--border-subtle); font-size:0.72rem; color:var(--text-quaternary);">
+      <p>Generated: 2026-03-22 &middot; V4 Template &middot; <a href="../blockchain_hub.html">Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ========== RIGHT SIDEBAR (Notes) ========== -->
+  <aside class="notes-sidebar ns-closed" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&times;</button>
+      <h4 style="font-size:0.7rem; font-weight:590; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-quaternary); margin:0;">&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+
+    <!-- Meta Notes -->
+    <div class="anno meta-note" id="note-wp" data-section="priority" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">白皮书vs实际落地时间差</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Chainlink 2.0白皮书描绘的路线图雄心勃勃，但OCR 2.0、DECO等核心功能的实际落地时间往往比文档承诺晚1-2年。评估时应预留时间缓冲。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-messari" data-section="priority" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">Messari季度报告的价值定位</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Messari的预言机赛道报告是业内最系统的分析，但更新频率为季度。重大事件（如SWIFT公告）后需即时追踪其他来源。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-tvs" data-section="priority" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">TVS指标的局限性</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Total Value Secured (TVS) 是Chainlink自己定义的指标，高TVS不等于高收入。TVS增长应结合实际费用收入交叉验证。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-smartcon" data-section="priority" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">SmartCon叙事的演变规律</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>观察2019-2024年SmartCon主题：DeFi预言机→CCIP→RWA。每次主题切换后6-12个月内往往伴随LINK价格大幅波动。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-messari-detail" data-section="analysts" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">Messari免费版vs付费版差异</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>免费版包含核心数据（市场份额、TVS趋势），付费版增加收入模型拆解和竞争格局深度分析。基础投资决策免费版足够。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-tt-detail" data-section="analysts" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">Token Terminal数据更新频率</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Token Terminal的链上收入数据通常有24-48小时延迟。对于快速变化的市场，需结合实时Etherscan验证。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-nansen" data-section="analysts" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">Nansen监控优先级</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>重点监控：(1) Chainlink Labs官方钱包动向 (2) staking contract大额充值 (3) Smart Money建仓信号。设置价格预警。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-oracle-prob" data-section="longform" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">Oracle Problem的学术vs商业解读</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>学术定义强调安全性（数据完整性），商业叙事强调必要性（数据来源）。理解两者差异有助于评估Nazarov的真实护城河。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-team-selling" data-section="longform" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">团队抛售的时机分析</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>历史上团队抛售往往在价格高点，且与融资/合作公告时间吻合。需建立"抛售-公告"时间关联数据库。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-ccip-explorer" data-section="primary" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">CCIP数据的解读方法</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>CCIP Explorer显示的消息数量≠实际价值量。大额跨链交易(>$1M)才是真正有意义的采用指标。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-financial-gap" data-section="gaps" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">财务数据缺失的应对策略</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>无法获取财报时，可通过：(1) 招聘规模变化推断增长/收缩 (2) GitHub commit频率评估开发力度 (3) 合作伙伴公告推断商业进展。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-selling-gap" data-section="gaps" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">自建链上监控方案</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>使用Nansen的wallet tagging功能标记Chainlink团队已知地址，设置大额转出自动预警。结合Etherscan历史数据追溯抛售模式。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-staking-gap" data-section="gaps" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">质押收益率计算陷阱</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>官方APY不扣除：(1) 代币通胀稀释 (2) 奖励代币的线性解锁 (3) 网络slash惩罚。实际年化收益可能仅为宣传值的30-50%。</p>
+      </div>
+    </div>
+
+    <!-- Knowledge Notes -->
+    <div class="anno know-note" id="note-fat-protocol" data-section="analysts" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">"胖协议瘦代币"理论</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>由Joel Monegro提出，指区块链协议层（底层）捕获大部分价值，而应用层价值较薄。Delphi Digital将此框架应用于Chainlink，认为LINK代币价值捕获能力有限，除非质押机制真正兑现。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-ccip" data-section="longform" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">CCIP: Cross-Chain Interoperability Protocol</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Chainlink的跨链互操作性协议，允许不同区块链之间的消息传递和资产转移。核心创新：Risk Management Networks（风险管理网络）为跨链交易提供额外的安全层。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-econ-caveat" data-section="longform" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">Economics 2.0执行延迟案例</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>2021年宣布的质押机制2.0原计划2022年初上线，实际分阶段落地延迟至2023年底。LINK持有者应关注承诺 vs 实际执行的差距。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-threshold-sig" data-section="podcasts" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">阈值签名 (Threshold Signatures)</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>一种密码学技术，需要多方（阈值）的签名才能授权交易。例如，5-of-9的阈值签名需要9个签名者中至少5个同意才能执行。这确保了即使部分节点被攻击，系统仍然安全。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-blog-caveat" data-section="primary" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">"1000+集成"的真实性验证</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Chainlink声称拥有超过1000个集成，但其中相当比例可能是测试网项目或已停止运营的协议。建议使用DeFi Llama或类似工具验证实际活跃的TVL贡献。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-twitter-compare" data-section="primary" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">Nazarov社交媒体风格演变</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>2017-2021年高频互动期：频繁回复社区问题，解释技术细节。2022年后：转为战略性沉默，仅在重大公告时发声。这种变化可能反映公司成熟度提升或战略调整。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-swap-signal" data-section="relationships" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">SWIFT合作的里程碑信号</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>真正的催化剂不是"PoC成功"，而是：(1) 正式商业合同签署 (2) 首批银行客户上线 (3) SWIFT官方SDK集成Chainlink。持续关注SWIFT官方的SI (Swift Institute) 研究发布。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-defi-migration" data-section="relationships" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">DeFi协议自研预言机的案例</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Uniswap已部分采用Pyth喂价，dYdX曾尝试自建预言机。关键问题：这些迁移是否因为成本？还是因为Chainlink的中心化担忧？原因决定威胁程度。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-pyth-share" data-section="relationships" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">Pyth vs Chainlink市场份额追踪</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Pyth专注于高频交易场景（perp DEX），Chainlink主攻蓝筹DeFi和安全敏感场景。两者并非完全替代关系，但Pyth的扩张速度值得监控。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-layerzero-claim" data-section="relationships" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">SWIFT合作声明的验证方法</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>LayerZero和Chainlink都声称与SWIFT有合作。验证方法：(1) 检查SWIFT官方合作伙伴页面 (2) 追溯银行侧披露文件 (3) 独立新闻源交叉验证。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-staking-value" data-section="narratives" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">质押经济学2.0的价值捕获逻辑</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Nazarov的论点：随着staking 2.0推出，LINK持有者可通过质押获得网络费用分成，使LINK从"utility token"转变为"productive asset"。批评者认为：高通胀率和稀释效应会抵消质押收益。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-data-feeds" data-section="primary" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">Data Feeds市场份额的验证方法</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Chainlink声称拥有DeFi 70%+市场份额。可通过DeFi Llama的预言机分布数据独立验证。重点关注新兴DeFi协议（如Friend.tech）的预言机选择。</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+// === Sidebar toggle (mobile) ===
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+
+// === Notes sidebar toggle ===
+(function(){
+  var btn=document.getElementById("notesToggleBtn"),ns=document.getElementById("notesSidebar"),ov=document.getElementById("notesOverlay"),cb=document.getElementById("notesCloseBtn");
+  if(!btn||!ns)return;
+  function toggle(){ns.classList.toggle("ns-closed");ov.classList.toggle("open");}
+  btn.onclick=toggle;
+  if(ov)ov.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(cb)cb.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(window.innerWidth>1200)ns.classList.remove("ns-closed");
+  window.addEventListener("resize",function(){if(window.innerWidth>1200)ns.classList.remove("ns-closed");});
+})();
+
+// === Toggle note ===
+function toggleNote(head){
+  var anno=head.closest(".anno");
+  if(anno){anno.classList.toggle("open");positionNotes();}
+}
+
+// === Position notes ===
+function positionNotes(){
+  var ns=document.getElementById("notesSidebar");if(!ns)return;
+  var annos=ns.querySelectorAll(".anno");
+  var lastBottom=80;
+  annos.forEach(function(a){
+    if(a.style.display==="none")return;
+    var sec=a.getAttribute("data-section");
+    var target=sec?document.getElementById(sec):null;
+    var top=target?target.getBoundingClientRect().top+window.scrollY-ns.getBoundingClientRect().top:lastBottom;
+    if(top<lastBottom)top=lastBottom;
+    a.style.top=top+"px";
+    lastBottom=top+a.offsetHeight+8;
+  });
+}
+
+// === Knowledge toggle ===
+function toggleKnowNotes(){
+  var btn=document.getElementById("knowToggleBtn");
+  var knowNotes=document.querySelectorAll(".anno.know-note");
+  var marks=document.querySelectorAll("mark.hl-know");
+  var nrefs=document.querySelectorAll(".nref");
+  var visible=btn.classList.contains("active");
+  knowNotes.forEach(function(n){n.style.display=visible?"none":"";});
+  marks.forEach(function(m){m.style.background=visible?"transparent":"";m.style.borderBottom=visible?"none":"";});
+  nrefs.forEach(function(r){r.style.display=visible?"none":"";});
+  btn.classList.toggle("active");
+  btn.textContent=visible?"显示":"隐藏";
+  positionNotes();
+}
+
+// === Expand / Collapse all ===
+function expandAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.add("open");});positionNotes();}
+function collapseAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.remove("open");});positionNotes();}
+
+// === Note count ===
+(function(){
+  var label=document.getElementById("noteCountLabel");if(!label)return;
+  var meta=document.querySelectorAll(".anno.meta-note").length;
+  var know=document.querySelectorAll(".anno.know-note").length;
+  label.textContent=meta+" META + "+know+" Knowledge";
+})();
+
+// === Highlight → Note sync ===
+document.addEventListener("click",function(e){
+  var mark=e.target.closest("mark.hl-know")||e.target.closest(".nref");
+  if(!mark)return;
+  var noteId=mark.getAttribute("data-note");if(!noteId)return;
+  var anno=document.getElementById(noteId);if(!anno)return;
+  anno.classList.add("open");
+  anno.scrollIntoView({behavior:"smooth",block:"center"});
+  anno.classList.add("flash");
+  setTimeout(function(){anno.classList.remove("flash");},1500);
+  positionNotes();
+});
+
+// === Embedded mode ===
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+  document.addEventListener("click",function(e){
+    var a=e.target.closest("a");if(!a||!a.href)return;
+    try{var url=new URL(a.href,location.href)}catch(err){return}
+    if(url.pathname.startsWith("/trade-pipeline/")||url.pathname.startsWith("/observatory/")){
+      e.preventDefault();
+      window.top.postMessage({type:"dashboard-nav",action:"openResearch",url:url.pathname,title:a.textContent.trim().substring(0,60)},"*");
+    }
+  });
+})();
+
+// Initial positioning
+window.addEventListener("load",function(){positionNotes();});
+window.addEventListener("scroll",function(){positionNotes();});
+</script>
+</body>
+</html>

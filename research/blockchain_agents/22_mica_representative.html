@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MiCA Representative — 认知代理人报告</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="../blockchain_shared.css">
+  <style>
+    .anno { position:absolute; left:1rem; right:1rem; }
+    .anno.meta-note { padding:0.6rem 0.75rem; border-left:2px solid var(--accent); border-radius:0 6px 6px 0; background:rgba(248,168,72,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+    .anno.meta-note:hover { box-shadow:0 0 0 1px var(--accent); }
+    .anno.know-note { padding:0.6rem 0.75rem; border-left:2px solid var(--knowledge); border-radius:0 6px 6px 0; background:rgba(91,155,213,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+    .anno.know-note:hover { box-shadow:0 0 0 1px var(--knowledge); }
+    .anno .note-label { display:inline-block; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--bg-base); background:var(--accent); padding:0.1rem 0.4rem; border-radius:3px; margin-bottom:0.3rem; }
+    .anno .note-label.know { background:var(--knowledge); color:white; }
+    .anno .mn-head { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
+    .anno .mn-title { flex:1; font-weight:510; font-size:0.75rem; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .anno .mn-fold { font-size:0.55rem; color:var(--text-quaternary); transition:transform 0.2s; margin-left:auto; }
+    .anno.open .mn-fold { transform:rotate(180deg); }
+    .anno .mn-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+    .anno.open .mn-body { max-height:2000px; }
+    .anno .mn-body p { font-size:0.78rem; margin-bottom:0.3rem; color:var(--text-secondary); }
+    .anno.flash { animation:noteFlash 1.5s ease; }
+    @keyframes noteFlash { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--accent);} }
+    .anno.know-note.flash { animation:noteFlashBlue 1.5s ease; }
+    @keyframes noteFlashBlue { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--knowledge);} }
+    .anno.hover { outline:2px solid var(--accent); outline-offset:-1px; }
+    .anno.know-note.hover { outline-color:var(--knowledge); }
+    mark.hl-know { background:rgba(91,155,213,0.12); border-bottom:1.5px solid var(--knowledge); padding:0 2px; border-radius:2px; color:inherit; cursor:pointer; transition:background 0.15s; }
+    mark.hl-know:hover, mark.hl-know.hover { background:rgba(91,155,213,0.28); }
+    .nref { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; font-size:0.48rem; font-weight:700; cursor:pointer; margin-left:1px; vertical-align:super; transition:transform 0.15s; text-decoration:none; background:var(--knowledge); color:white; }
+    .nref:hover { transform:scale(1.25); box-shadow:0 0 6px rgba(91,155,213,0.4); }
+    .top-controls { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; padding:0.35rem 0.7rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); font-size:0.72rem; flex-wrap:wrap; }
+    .top-controls .tc-label { font-weight:590; color:var(--knowledge); }
+    .top-controls button { padding:0.15rem 0.45rem; border-radius:4px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-tertiary); cursor:pointer; font-size:0.68rem; font-family:inherit; transition:all 0.15s; }
+    .top-controls button:hover { border-color:var(--knowledge); color:var(--text-primary); }
+    .top-controls button.active { background:var(--knowledge-dim); color:var(--knowledge); border-color:rgba(91,155,213,0.3); }
+    .top-controls .tc-sep { color:var(--border-default); margin:0 0.15rem; }
+    .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+    .notes-sidebar-header { position:sticky; top:0; z-index:60; background:var(--bg-elevated); padding-bottom:0.5rem; border-bottom:1px solid var(--border-subtle); margin-bottom:0.75rem; }
+    .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+    .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+    .sidebar-overlay.open { display:block; }
+    .notes-toggle-btn { position:fixed; right:1rem; bottom:1.5rem; z-index:200; width:44px; height:44px; border-radius:50%; border:1px solid var(--border-default); background:var(--bg-surface); color:var(--text-secondary); cursor:pointer; font-size:1.1rem; display:none; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.4); font-family:inherit; }
+    .notes-close-btn { float:right; background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:1.1rem; padding:0; display:none; font-family:inherit; }
+    @media (max-width:1200px) { .notes-close-btn { display:block; } }
+    .notes-overlay-right { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:140; }
+    .notes-overlay-right.open { display:block; }
+    .verified { color:var(--tier-high); font-weight:590; }
+    .partial { color:var(--tier-medium); font-weight:590; }
+    .failed { color:var(--tier-low); font-weight:590; }
+    .pending { color:var(--text-tertiary); font-weight:510; }
+    .credibility-meter { display:flex; align-items:center; gap:0.75rem; margin:0.75rem 0; }
+    .meter-bar { flex:1; height:8px; background:var(--border-subtle); border-radius:4px; overflow:hidden; }
+    .meter-fill { height:100%; border-radius:4px; }
+    .meter-label { font-size:1.2rem; font-weight:680; min-width:3rem; }
+    .badge-row { display:flex; flex-wrap:wrap; gap:0.4rem; }
+    .role-badge { display:inline-block; padding:0.15rem 0.6rem; border-radius:4px; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:0.5rem; background:var(--accent-dim); color:var(--accent); }
+    .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+    .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+    @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+    @media (max-width:1200px) { .notes-sidebar { position:fixed; right:0; top:0; height:100vh; overflow-y:auto; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.4); z-index:150; } .notes-sidebar.ns-closed { transform:translateX(100%); box-shadow:none; } }
+    @media (min-width:1600px) { .main-content { max-width:1000px; } .notes-sidebar { width:360px; min-width:360px; } }
+    body.embedded .sidebar, body.embedded .notes-sidebar, body.embedded .hamburger-btn, body.embedded .notes-toggle-btn { display:none!important; }
+    body.embedded .main-content { max-width:100%; padding:1.5rem; }
+    body.reading-mode .notes-sidebar { display:none!important; }
+    body.reading-mode .main-content { max-width:720px; margin:0 auto; }
+  </style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="page-wrapper">
+
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">MiCA Framework<br>Agent #22 &middot; C档 1/5</div>
+    <h4>Contents</h4>
+    <nav>
+      <ul>
+        <li><a href="#overview"><span class="toc-num">&sect;0</span> Framework Overview</a></li>
+        <li><a href="#action"><span class="toc-num">&sect;1</span> Key Provisions</a></li>
+        <li><a href="#judgment"><span class="toc-num">&sect;2</span> Core Logic</a></li>
+        <li><a href="#predictions"><span class="toc-num">&sect;3</span> Impact Assessment</a></li>
+        <li><a href="#trading"><span class="toc-num">&sect;4</span> Trading Implications</a></li>
+        <li><a href="#sources"><span class="toc-num">&sect;5</span> Source Curation</a></li>
+      </ul>
+    </nav>
+    <h4>Related</h4>
+    <nav><ul><li><a href="../blockchain_hub.html">Blockchain Hub</a></li></ul></nav>
+  </aside>
+
+  <main class="main-content">
+
+    <div class="top-controls">
+      <span class="tc-label" id="noteCountLabel"></span>
+      <span class="tc-sep">|</span>
+      <button id="knowToggleBtn" class="active" onclick="toggleKnowNotes()">Knowledge</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">Expand All</button>
+      <button onclick="collapseAllNotes()">Collapse All</button>
+    </div>
+
+    <header class="page-header" id="overview">
+      <div class="role-badge">C档 Agent #22 &middot; Node 8 监管</div>
+      <h1>MiCA Framework</h1>
+      <p class="subtitle">EU Markets in Crypto-Assets Regulation &mdash; C档 Agent #22 &middot; Node 8 监管 &middot; 框架分析 &middot; 2026-03-22</p>
+      <div class="badge-row">
+        <span class="badge badge-gold">MiCA</span>
+        <span class="badge badge-gold">EU Regulation</span>
+        <span class="badge badge-gold">Stablecoin Licensing</span>
+        <span class="badge badge-purple">Framework (No Person)</span>
+      </div>
+    </header>
+
+    <section id="overview-body">
+      <div class="section-header">
+        <h2><span class="section-num">&sect;0</span> Framework Overview <span class="zh">框架概述</span></h2>
+      </div>
+      <p>MiCA（Markets in Crypto-Assets）是<mark class="hl-know" data-note="k1">全球首个完整的加密资产监管框架</mark>，由欧盟制定并于2024年开始全面实施。覆盖稳定币发行许可、交易所注册、环境信息披露等方面。MiCA的"布鲁塞尔效应"（Brussels Effect）可能迫使全球加密企业采用欧盟标准。最直接的影响是：Tether（USDT）可能被迫退出欧洲市场。</p>
+      <p style="font-size:0.85rem; color:var(--text-tertiary); margin-top:1rem; padding:0.75rem; border:1px dashed var(--border-default); border-radius:var(--radius-sm);">
+        <strong>注意</strong>：这是框架分析页面，不对应特定人物。MiCA由欧盟委员会、欧洲议会和理事会共同制定，无单一代理人。C档 1/5反映"无个人行动力"的评估，并非对框架重要性的否定。
+      </p>
+      <div class="credibility-meter">
+        <span style="font-size:0.82rem; color:var(--text-tertiary);">Credibility</span>
+        <div class="meter-bar">
+          <div class="meter-fill" style="width:20%; background:linear-gradient(90deg, var(--tier-low), var(--tier-medium));"></div>
+        </div>
+        <span class="meter-label" style="color:var(--tier-low);">1/5</span>
+      </div>
+      <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+        无特定代理人，无法追踪个人判断和行动。框架本身重要但作为"认知代理人"评分最低。<br>
+        <strong style="color:var(--tier-low);">局限</strong>：官僚体系产出，决策过程不透明。执行细节仍在演化。
+      </p>
+    </section>
+
+    <section id="action">
+      <div class="section-header">
+        <h2><span class="section-num">&sect;1</span> Key Provisions <span class="zh">关键条款</span></h2>
+      </div>
+      <div class="card">
+        <strong>1. 稳定币发行许可</strong>
+        <p class="card-desc">所有在欧盟运营的稳定币必须获得电子货币许可证（EMI）。USDT因未获许可面临被欧洲交易所下架风险。USDC（Circle）已获许可，竞争优势明显。</p>
+        <span class="card-meta">2024&ndash;2025 &middot; Stablecoin licensing requirement</span>
+      </div>
+      <div class="card">
+        <strong>2. CASP注册要求</strong>
+        <p class="card-desc">Crypto-Asset Service Providers必须在欧盟注册并满足资本充足性、治理和消费者保护要求。类似传统金融的MiFID框架。</p>
+        <span class="card-meta">2024 &middot; Exchange/service provider registration</span>
+      </div>
+      <div class="card">
+        <strong>3. 环境信息披露</strong>
+        <p class="card-desc">加密资产白皮书必须包含能源消耗和环境影响信息。PoW（如BTC挖矿）面临额外披露负担。</p>
+        <span class="card-meta">2024 &middot; Environmental disclosure mandate</span>
+      </div>
+      <div class="card">
+        <strong>4. Tether欧洲困境</strong>
+        <p class="card-desc">Tether未获EMI许可。多家欧洲交易所已下架或限制USDT交易对。如果执行严格，可能导致欧洲流动性向USDC转移。</p>
+        <span class="card-meta">2025&ndash;2026 &middot; USDT delisting risk in EU</span>
+      </div>
+      <div class="card">
+        <strong>5. Brussels Effect</strong>
+        <p class="card-desc">欧盟监管标准的全球溢出效应。跨国企业倾向于采用最严格的标准以简化运营 &rarr; MiCA可能成为全球事实标准。</p>
+        <span class="card-meta">Ongoing &middot; Regulatory export effect</span>
+      </div>
+    </section>
+
+    <section id="judgment">
+      <div class="section-header">
+        <h2><span class="section-num">&sect;2</span> Core Logic <span class="zh">核心逻辑</span></h2>
+      </div>
+      <blockquote>MiCA = the world's first complete crypto regulatory framework. Brussels sets the global standard.</blockquote>
+      <ul>
+        <li>消费者保护优先 &mdash; 加密资产不应逃避金融监管的基本原则</li>
+        <li>稳定币是系统性风险 &rarr; 需要银行级别的审慎监管</li>
+        <li>环境可持续性必须纳入加密资产评估框架</li>
+        <li>监管清晰性吸引合规企业，排斥不合规企业 &rarr; 市场自然净化</li>
+      </ul>
+    </section>
+
+    <section id="predictions">
+      <div class="section-header">
+        <h2><span class="section-num">&sect;3</span> Impact Assessment <span class="zh">影响评估</span></h2>
+      </div>
+      <figure>
+        <table>
+          <thead><tr><th>Impact Area</th><th>Assessment</th><th>Status</th><th>Confidence</th></tr></thead>
+          <tbody>
+            <tr><td>USDT在欧洲被限制</td><td>高概率</td><td><span class="partial">进行中 (多交易所已限制)</span></td><td>8/10</td></tr>
+            <tr><td>USDC获竞争优势</td><td>高概率</td><td><span class="verified">&#10003; 正在发生</span></td><td>8/10</td></tr>
+            <tr><td>Brussels Effect全球扩散</td><td>中概率</td><td><span class="pending">待观察</span></td><td>&mdash;</td></tr>
+            <tr><td>欧洲成为加密创新中心</td><td>低概率</td><td><span class="failed">&#10007; 企业更多选择迪拜/新加坡</span></td><td>3/10</td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </section>
+
+    <section id="trading">
+      <div class="section-header">
+        <h2><span class="section-num">&sect;4</span> Trading Implications <span class="zh">交易含义</span></h2>
+      </div>
+      <div class="alert alert-gold">
+        <strong>MiCA执行日期和细则是可预期的催化事件</strong>
+      </div>
+      <ul>
+        <li><strong>USDT vs USDC</strong>：MiCA利好USDC（已合规），利空USDT（未合规）&mdash; 监控市场份额变化</li>
+        <li><strong>合规交易所</strong>受益：Coinbase Europe、Bitstamp等已获牌照的平台</li>
+        <li><strong>执行时间节点</strong>是可交易事件 &mdash; 每个MiCA执行里程碑都值得关注</li>
+        <li><strong>反向信号</strong>：如果MiCA过于严格导致企业出走，可能利空欧洲crypto但利好亚洲/中东</li>
+      </ul>
+    </section>
+
+    <section id="sources">
+      <div class="section-header">
+        <h2><span class="section-num">&sect;5</span> Source Curation <span class="zh">信源策展</span></h2>
+      </div>
+      <h3>Primary</h3>
+      <ul>
+        <li>EU Official Journal &mdash; MiCA full text</li>
+        <li>ESMA (European Securities and Markets Authority) guidelines</li>
+        <li>EBA (European Banking Authority) stablecoin standards</li>
+      </ul>
+      <h3>Secondary</h3>
+      <ul><li>The Block MiCA tracker</li><li>CoinDesk EU regulation coverage</li></ul>
+      <h3>Chinese Sources</h3>
+      <ul><li>吴说区块链欧洲监管专题</li><li>PANews MiCA解读</li></ul>
+    </section>
+
+    <footer class="page-footer">
+      <p>MiCA Framework &middot; Cognitive Agent #22 &middot; Blockchain Research &middot; 2026-03-22</p>
+      <p><a href="../blockchain_hub.html">Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <aside class="notes-sidebar" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn" aria-label="Close notes">&#10005;</button>
+      <h4>&#129504; Meta + &#128218; Knowledge</h4>
+    </div>
+
+    <div class="anno know-note open" data-section="overview" id="k1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">Knowledge</span>
+        <span class="mn-title">Brussels Effect in crypto regulation</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>The "Brussels Effect" describes how EU regulations become de facto global standards because multinational companies adopt the strictest rules for simplicity. MiCA could replicate what GDPR did for data privacy. However, unlike GDPR, crypto companies can easily relocate &mdash; many are choosing Dubai/Singapore over EU compliance. The Brussels Effect may be weaker in crypto than in data privacy because crypto is inherently borderless and relocation costs are low.</p>
+        <p><span class="zh">"布鲁塞尔效应"描述了欧盟法规如何成为事实上的全球标准，因为跨国公司为简化运营而采用最严格的规则。MiCA可能复制GDPR在数据隐私方面的效果。然而，与GDPR不同，加密公司可以轻松迁移 &mdash; 许多公司选择迪拜/新加坡而非欧盟合规。布鲁塞尔效应在加密领域可能弱于数据隐私，因为加密本质上是无国界的，迁移成本低。</span></p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes">&#128218;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<script>
+(function() {
+  const hamburger = document.getElementById('hamburgerBtn'); const sidebar = document.getElementById('sidebar'); const overlay = document.getElementById('sidebarOverlay');
+  hamburger.addEventListener('click', () => { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+  sidebar.querySelectorAll('a').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 900) { sidebar.classList.remove('open'); overlay.classList.remove('open'); } }); });
+  window.toggleNote = function(head) { head.parentElement.classList.toggle('open'); requestAnimationFrame(positionNotes); };
+  function positionNotes() {
+    const sidebarEl = document.getElementById('notesSidebar'); if (!sidebarEl) return;
+    const notes = [...sidebarEl.querySelectorAll('.anno')]; const scrollY = window.scrollY; const sidebarAbsTop = sidebarEl.getBoundingClientRect().top + scrollY;
+    const headerEl = sidebarEl.querySelector('.notes-sidebar-header'); const headerHeight = headerEl ? headerEl.offsetHeight + 12 : 40;
+    notes.sort((a, b) => { const secA = document.getElementById(a.dataset.section); const secB = document.getElementById(b.dataset.section); if (!secA || !secB) return 0; return secA.getBoundingClientRect().top - secB.getBoundingClientRect().top; });
+    let lastBottom = headerHeight;
+    notes.forEach(note => { if (note.style.display === 'none') return; const section = document.getElementById(note.dataset.section); if (!section) { note.style.display = 'none'; return; } const sectionAbsTop = section.getBoundingClientRect().top + scrollY; let targetY = sectionAbsTop - sidebarAbsTop; if (targetY < lastBottom + 8) targetY = lastBottom + 8; note.style.top = targetY + 'px'; lastBottom = targetY + note.offsetHeight; });
+    sidebarEl.style.minHeight = (lastBottom + 40) + 'px';
+  }
+  window.addEventListener('load', () => { positionNotes(); document.querySelectorAll('details').forEach(d => { d.addEventListener('toggle', () => setTimeout(positionNotes, 50)); }); });
+  window.addEventListener('resize', positionNotes);
+  let scrollTimer; window.addEventListener('scroll', () => { clearTimeout(scrollTimer); scrollTimer = setTimeout(positionNotes, 100); }, { passive: true });
+  document.querySelectorAll('.nref, mark.hl-know').forEach(el => { el.addEventListener('click', e => { e.preventDefault(); const noteId = el.dataset.note; const note = document.getElementById(noteId); if (!note) return; note.classList.add('open'); requestAnimationFrame(() => { positionNotes(); note.scrollIntoView({ behavior: 'smooth', block: 'center' }); note.classList.add('flash'); setTimeout(() => note.classList.remove('flash'), 1500); }); }); });
+  document.querySelectorAll('.anno').forEach(note => { note.addEventListener('mouseenter', () => { document.querySelectorAll('[data-note="' + note.id + '"]').forEach(el => el.classList.add('hover')); }); note.addEventListener('mouseleave', () => { document.querySelectorAll('[data-note="' + note.id + '"]').forEach(el => el.classList.remove('hover')); }); note.addEventListener('dblclick', () => { const section = document.getElementById(note.dataset.section); if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' }); }); });
+  document.querySelectorAll('[data-note]').forEach(el => { if (el.classList.contains('anno')) return; el.addEventListener('mouseenter', () => { const note = document.getElementById(el.dataset.note); if (note) note.classList.add('hover'); }); el.addEventListener('mouseleave', () => { const note = document.getElementById(el.dataset.note); if (note) note.classList.remove('hover'); }); });
+  const allAnnos = document.querySelectorAll('.anno'); const knowNotes = document.querySelectorAll('.anno.know-note'); const knowMarks = document.querySelectorAll('mark.hl-know'); const knowRefs = document.querySelectorAll('.nref'); const metaNotes = document.querySelectorAll('.anno.meta-note');
+  document.getElementById('noteCountLabel').textContent = metaNotes.length + ' \u5143\u601d\u8003 + ' + knowNotes.length + ' \u77e5\u8bc6\u6279\u6ce8';
+  window.toggleKnowNotes = function() { const btn = document.getElementById('knowToggleBtn'); const isActive = btn.classList.toggle('active'); btn.textContent = isActive ? 'Knowledge' : 'Hidden'; knowNotes.forEach(n => n.style.display = isActive ? '' : 'none'); knowMarks.forEach(m => { m.style.background = isActive ? '' : 'transparent'; m.style.borderBottom = isActive ? '' : 'none'; }); knowRefs.forEach(r => r.style.display = isActive ? '' : 'none'); requestAnimationFrame(positionNotes); };
+  window.expandAllNotes = function() { allAnnos.forEach(n => n.classList.add('open')); requestAnimationFrame(positionNotes); };
+  window.collapseAllNotes = function() { allAnnos.forEach(n => n.classList.remove('open')); requestAnimationFrame(positionNotes); };
+  var notesSidebarEl = document.getElementById('notesSidebar'); var notesToggleBtn = document.getElementById('notesToggleBtn'); var notesOverlayEl = document.getElementById('notesOverlay'); var notesCloseBtn = document.getElementById('notesCloseBtn');
+  function toggleNotesSidebar() { var willClose = !notesSidebarEl.classList.contains('ns-closed'); notesSidebarEl.classList.toggle('ns-closed', willClose); notesToggleBtn.style.display = willClose ? 'flex' : 'none'; notesOverlayEl.classList.toggle('open', !willClose); if (!willClose) requestAnimationFrame(positionNotes); }
+  if (notesToggleBtn) notesToggleBtn.addEventListener('click', toggleNotesSidebar);
+  if (notesOverlayEl) notesOverlayEl.addEventListener('click', toggleNotesSidebar);
+  if (notesCloseBtn) notesCloseBtn.addEventListener('click', toggleNotesSidebar);
+  window.addEventListener('resize', function() { if (window.innerWidth > 1200) { notesSidebarEl.classList.remove('ns-closed'); notesToggleBtn.style.display = 'none'; notesOverlayEl.classList.remove('open'); } });
+  const tocLinks = sidebar.querySelectorAll('nav ul li a[href^="#"]'); const sections = [...tocLinks].map(a => document.getElementById(a.getAttribute('href').slice(1))).filter(Boolean);
+  function updateActiveToc() { let current = ''; sections.forEach(sec => { if (sec.getBoundingClientRect().top <= 120) current = sec.id; }); tocLinks.forEach(a => { a.classList.toggle('active', a.getAttribute('href') === '#' + current); }); }
+  window.addEventListener('scroll', updateActiveToc, { passive: true }); updateActiveToc();
+  if (window.location.search.includes('embedded=1') || window !== window.top) document.body.classList.add('embedded');
+  if (window.location.search.includes('reading=1')) document.body.classList.add('reading-mode');
+})();
+</script>
+
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+
+</body>
+</html>

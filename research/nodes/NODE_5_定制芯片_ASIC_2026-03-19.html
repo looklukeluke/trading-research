@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>认知节点报告: 终端自研芯片/ASIC — Node 5</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="../cognitive_agents_2026-03-20/jensen_sources_shared.css">
+  <style>
+/* === KPI Cards === */
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+.kpi-card { background: var(--bg-surface); border-radius: var(--radius-md); padding: 1.25rem; border: 1px solid var(--border-subtle); }
+.kpi-label { font-size: 0.72rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.kpi-value { font-size: 1.5rem; font-weight: 680; font-feature-settings: 'tnum' 1; margin-bottom: 4px; }
+.kpi-change { font-size: 0.78rem; font-weight: 600; }
+.kpi-change.positive { color: #4caf50; }
+.kpi-subtitle { font-size: 0.72rem; color: var(--text-quaternary); margin-top: 4px; }
+
+/* === Risk Matrix & Extended Tables === */
+.risk-matrix td:nth-child(2), .risk-matrix td:nth-child(3) { text-align: center; }
+.risk-high { color: #f44336; font-weight: 700; }
+.risk-medium { color: #ffc107; font-weight: 700; }
+.risk-low { color: #4caf50; font-weight: 700; }
+
+/* === Callout Boxes === */
+.callout { background: var(--bg-surface); border-radius: var(--radius-sm); padding: 1rem 1.25rem; margin: 1rem 0; border-left: 3px solid var(--accent); }
+.callout-title { font-size: 0.8rem; font-weight: 590; color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+.callout-body { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; }
+.callout.risk { border-left-color: #f44336; }
+.callout.risk .callout-title { color: #f44336; }
+.callout.insight { border-left-color: var(--knowledge); }
+.callout.insight .callout-title { color: var(--knowledge); }
+
+/* === Phase Headers === */
+.phase-header { display: flex; align-items: center; gap: 0.75rem; margin: 2.5rem 0 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle); }
+.phase-num { font-size: 0.72rem; font-weight: 700; color: var(--bg-base); background: var(--accent); padding: 3px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+.phase-title { font-size: 1.15rem; font-weight: 590; color: var(--text-primary); }
+
+/* === Agent Cards === */
+.agent-header { display: flex; align-items: center; gap: 0.75rem; margin: 2rem 0 1rem; }
+.agent-role-badge { font-size: 0.68rem; font-weight: 510; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+.agent-role-badge.giant { background: rgba(248,168,72,0.15); color: var(--accent); }
+.agent-role-badge.investor { background: rgba(91,155,213,0.15); color: var(--knowledge); }
+.agent-role-badge.contrarian { background: rgba(244,67,54,0.15); color: #f44336; }
+
+/* === Triangulation Table Colors === */
+.consensus { color: #4caf50; font-weight: 600; }
+.disagreement { color: #f44336; font-weight: 600; }
+
+/* === Provenance Badges === */
+.prov-badge { font-size: 0.65rem; padding: 1px 6px; border-radius: 3px; font-weight: 600; }
+.prov-primary { background: rgba(76,175,80,0.12); color: #4caf50; }
+.prov-industry { background: rgba(91,155,213,0.12); color: var(--knowledge); }
+.prov-media { background: rgba(248,168,72,0.12); color: var(--accent); }
+.prov-analysis { background: rgba(171,71,188,0.12); color: #ab47bc; }
+
+/* === Chart Frames (from V3) === */
+.chart-frame { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); margin: 1rem 0; overflow: hidden; }
+.chart-frame-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-subtle); }
+.chart-frame-title { font-size: 0.82rem; font-weight: 590; color: var(--text-secondary); letter-spacing: 0.02em; }
+.chart-frame-body { padding: 0; }
+.chart-frame-body .js-plotly-plot { width: 100% !important; }
+.chart-source { padding: 0.5rem 1rem; font-size: 0.7rem; color: var(--text-quaternary); border-top: 1px solid var(--border-subtle); }
+
+/* === Chart Placeholder === */
+.chart-placeholder { background: var(--bg-surface); border: 1px dashed var(--border-default); border-radius: var(--radius-md); padding: 3rem; text-align: center; color: var(--text-quaternary); font-size: 0.85rem; margin: 1rem 0; }
+  
+/* === Embedded mode: inside Dashboard iframe === */
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+body.embedded .hamburger-btn { display: none !important; }
+body.embedded .sidebar-overlay { display: none !important; }
+
+/* === Reading mode: full-width === */
+.reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+.reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+.reading-mode .hamburger-btn { display: none !important; }
+.reading-mode .sidebar-overlay { display: none !important; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes sidebar">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <a class="back-link" href="../semiconductor_hub.html" style="display:block;padding:0.4rem 0.5rem;margin-bottom:1rem;font-size:0.8rem;color:var(--accent);text-decoration:none;border:1px solid var(--accent-dim);border-radius:var(--radius-sm);">&#8592; Semiconductor Hub</a>
+    <h4>目录导航 Contents</h4>
+    <nav><ul>
+      <li><a href="#metacognition" style="color:var(--accent);"><span class="toc-num">&#9733;</span>元思考<br><span class="zh-inline">Metacognition</span></a></li>
+      <li><a href="#phase0"><span class="toc-num">0</span>独立思考<br><span class="zh-inline">Independent Thinking</span></a></li>
+      <li><a href="#phase05"><span class="toc-num">0.5</span>策展搜索<br><span class="zh-inline">Curated Search</span></a></li>
+      <li><a href="#phase1"><span class="toc-num">1</span>认知代理人<br><span class="zh-inline">Cognitive Agents</span></a></li>
+      <li><a href="#musk"><span class="toc-num">1.1</span>Elon Musk<br><span class="zh-inline">GIANT &middot; Tesla/xAI</span></a></li>
+      <li><a href="#srouji"><span class="toc-num">1.2</span>Johny Srouji<br><span class="zh-inline">INVESTOR &middot; Apple</span></a></li>
+      <li><a href="#keller"><span class="toc-num">1.3</span>Jim Keller<br><span class="zh-inline">CONTRARIAN &middot; Tenstorrent</span></a></li>
+      <li><a href="#phase2"><span class="toc-num">2</span>综合分析<br><span class="zh-inline">Synthesis</span></a></li>
+      <li><a href="#triangulation"><span class="toc-num">2.1</span>三角验证<br><span class="zh-inline">Triangulation</span></a></li>
+      <li><a href="#competitive"><span class="toc-num">2.2</span>竞争格局<br><span class="zh-inline">Competitive Landscape</span></a></li>
+      <li><a href="#supply-demand"><span class="toc-num">2.3</span>供需框架<br><span class="zh-inline">Supply-Demand Framework</span></a></li>
+      <li><a href="#risk-matrix"><span class="toc-num">2.4</span>风险矩阵<br><span class="zh-inline">Risk Matrix</span></a></li>
+      <li><a href="#node-judgment"><span class="toc-num">2.5</span>节点判断<br><span class="zh-inline">Node Judgment</span></a></li>
+      <li><a href="#trading"><span class="toc-num">2.6</span>交易视角<br><span class="zh-inline">Trading Perspective</span></a></li>
+      <li><a href="#verdict"><span class="toc-num">2.7</span>综合判断<br><span class="zh-inline">Triangulated Verdict</span></a></li>
+      <li><a href="#calendar"><span class="toc-num">2.8</span>验证日历<br><span class="zh-inline">Verification Calendar</span></a></li>
+      <li><a href="#signals"><span class="toc-num">2.9</span>信号传导链<br><span class="zh-inline">Signal Transmission</span></a></li>
+      <li><a href="#kpi-dashboard"><span class="toc-num">3</span>KPI仪表盘<br><span class="zh-inline">Dashboard</span></a></li>
+      <li><a href="#charts"><span class="toc-num">4</span>图表<br><span class="zh-inline">Charts</span></a></li>
+      <li><a href="#provenance"><span class="toc-num">5</span>溯源表<br><span class="zh-inline">Provenance Table</span></a></li>
+      <li><a href="#sources"><span class="toc-num">6</span>来源<br><span class="zh-inline">Sources</span></a></li>
+    </ul></nav>
+    <h4>供应链节点 Supply Chain Nodes</h4>
+    <nav><ul>
+      <li><a href="NODE_1_GPU_AI芯片设计_2026-03-19.html">Node 1: GPU/AI芯片设计<br><span class="zh-inline">GPU/AI Chip Design</span></a></li>
+      <li><a href="NODE_2_光刻设备_2026-03-19.html">Node 2: 光刻设备<br><span class="zh-inline">Lithography Equipment</span></a></li>
+      <li><a href="NODE_3_代工制造_2026-03-19.html">Node 3: 代工制造<br><span class="zh-inline">Foundry Manufacturing</span></a></li>
+      <li><a href="NODE_4_存储_HBM_2026-03-19.html">Node 4: 存储/HBM<br><span class="zh-inline">Memory / HBM</span></a></li>
+      <li><a href="NODE_5_定制芯片_ASIC_2026-03-19.html" class="active">Node 5: 定制芯片<br><span class="zh-inline">Custom Silicon / ASIC</span></a></li>
+      <li><a href="NODE_6_EDA_IP授权_2026-03-19.html">Node 6: EDA/IP授权<br><span class="zh-inline">EDA / IP Licensing</span></a></li>
+      <li><a href="NODE_7_需求侧_Demand_2026-03-21.html">Node 7: 需求侧/超大规模<br><span class="zh-inline">Demand / Hyperscaler</span></a></li>
+      <li><a href="NODE_8_AI_Lab_模型层_2026-03-21.html">Node 8: AI Lab/模型层<br><span class="zh-inline">AI Lab / Model Layer</span></a></li>
+    </ul></nav>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <header class="page-header">
+      <h1>认知节点报告: 终端自研芯片/ASIC<span class="zh">Cognitive Node Report: Custom Silicon / ASIC</span></h1>
+      <div class="subtitle">Node 5 of 6 &middot; Phase 0&rarr;2 + 3 Cognitive Agents &middot; 2026-03-20</div>
+      <div class="badge-row">
+        <span class="badge">AVGO $84B/Q AI</span>
+        <span class="badge">MRVL $2.1B AI</span>
+        <span class="badge">TSLA TeraFab $20B+</span>
+        <span class="badge">AAPL M5 + Baltra</span>
+        <span class="badge">3 Agents</span>
+        <span class="badge">40+ Sources</span>
+      </div>
+    </header>
+
+    <!-- METACOGNITIVE SUMMARY -->
+    <div class="priority-box" id="metacognition">
+      <h2 style="margin-top:0; font-size:1.1rem; font-weight:680; color:var(--accent);">&#9733; 元思考: 这份报告的核心发现<span class="zh" style="font-weight:400; font-size:0.85rem;"> Metacognitive Summary</span></h2>
+
+      <div style="margin:1rem 0; padding:1rem 1.25rem; background:var(--bg-overlay); border-radius:var(--radius-sm); border-left:3px solid var(--accent);">
+        <p style="font-size:0.92rem; font-weight:590; color:var(--text-primary); margin:0 0 0.75rem;">&#128270; 核心分析焦点</p>
+        <p style="color:var(--text-secondary); font-size:0.88rem; line-height:1.65; margin:0;">自研芯片节点的真正问题<strong>不是"自研能不能成功"</strong>&mdash;&mdash;三位认知代理人（Musk/Srouji/Keller）全部亲自证明了非半导体公司可以自研芯片。Apple 16年100%成功率，Tesla从零到AI5/AI6，Keller在每家公司都造出了成功的芯片。<br><br>
+        <strong>真正的分析焦点是：自研芯片的赢家是谁？不是自研者本身，而是Broadcom（设计服务~80%份额）和TSMC（代工）。</strong><br>
+        Musk说"单客户优势"，Srouji说"体验驱动芯片设计"，Keller说"开源+模块化颠覆封闭系统"。三人对同一个趋势给出了结构性不同的受益者判断。这个分歧直接决定你应该买AVGO（隐形赢家）、看TSLA（最激进赌注）、还是等MRVL（第二tier赢家）。</p>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin:1rem 0;">
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid #4caf50;">
+          <p style="font-size:0.72rem; font-weight:510; color:#4caf50; text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#10003; 三角验证共识</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;">每个$100B+科技公司都在自研芯片。自研趋势不可逆。<strong>但全部仍然买NVIDIA GPU</strong>&mdash;&mdash;自研补充而非替代通用GPU。Broadcom是"军火商"角色。TSMC是所有芯片的必经之路。</p>
+        </div>
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid #f44336;">
+          <p style="font-size:0.72rem; font-weight:510; color:#f44336; text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#10007; 三角验证分歧</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;">垂直整合能走多远？TeraFab是远见还是妄想？Apple模式能否被复制？RISC-V能否在数据中心替代ARM/x86？<strong>执行力而非技术是真正的分歧线。</strong></p>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin:1rem 0;">
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid var(--knowledge);">
+          <p style="font-size:0.72rem; font-weight:510; color:var(--knowledge); text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#128200; 交易指引</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;"><strong>AVGO</strong>: 隐形赢家，ASIC设计~80%份额，"谁自研都找Broadcom"。AI收入$84B/Q +106%。<strong>MRVL</strong>: 第二tier ASIC设计，AI收入$2.1B/Q +98%。<strong>TSLA</strong>: TeraFab最激进赌注，但缺乏半导体经验。<strong>AAPL</strong>: 最高执行力但不在AI芯片竞争焦点。</p>
+        </div>
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid var(--accent);">
+          <p style="font-size:0.72rem; font-weight:510; color:var(--accent); text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#9888; 认知陷阱预警</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;"><strong>幸存者偏差</strong>: Apple成功不代表所有自研都能成功&mdash;&mdash;Dojo的失败是反例。<strong>规模偏差</strong>: Musk的数字总是最大的（555K GPU, $20B TeraFab），但执行记录是"方向对、时间错"。<strong>叙事偏差</strong>: "自研替代NVIDIA"叙事忽略了全部自研者同时也是NVIDIA最大客户。</p>
+        </div>
+      </div>
+
+      <details style="margin-top:0.75rem;">
+        <summary style="font-size:0.82rem; font-weight:510; color:var(--text-tertiary); cursor:pointer;">&#128214; 三位代理人一句话摘要</summary>
+        <div style="padding:0.75rem 0; font-size:0.82rem; color:var(--text-secondary); line-height:1.65;">
+          <p><strong>Elon Musk (GIANT, 6/10)</strong>: "AI5将比NVIDIA更快&mdash;&mdash;单客户优势。" &mdash; TeraFab $20B+是最激进的垂直整合赌注。技术方向8/10但时间线3/10。Dojo关闭是执行力警告。</p>
+          <p><strong>Johny Srouji (INVESTOR, 9/10)</strong>: "颠覆性产品不能用传统芯片打造。" &mdash; 16年零失败记录（A4&rarr;M5&rarr;C1）。under-promise over-deliver。可信度最高但Apple不在AI芯片竞争焦点。</p>
+          <p><strong>Jim Keller (CONTRARIAN, 8/10)</strong>: "开源+模块化将颠覆封闭系统。" &mdash; 唯一在Apple/AMD/Tesla/Intel/Tenstorrent都设计过芯片的人。RISC-V+IP授权模式是结构性替代方案。商业化首次面临考验。</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="top-controls">
+      <span class="tc-label">&#128218; 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <!-- PHASE 0: INDEPENDENT THINKING -->
+    <div class="section-header" id="phase0">
+      <h2>&sect;0 Phase 0: 独立思考<span class="zh">Independent Thinking (Before Search)</span></h2>
+    </div>
+
+    <div class="callout" style="border-left-color:#ffc107; margin-bottom:1.5rem;">
+      <div class="callout-title" style="color:#ffc107;">&#9888; 诚实标注 Honesty Disclosure</div>
+      <div class="callout-body">本Phase 0标题为"搜索前独立思考"，但实际撰写时已读完三位代理人的完整MD文件（共48KB）。这是<strong>事后重构</strong>，不是真正的搜索前独立思考。其价值在于：明确标记预判偏差方向，而非假装"猜对了"。</div>
+    </div>
+
+    <h3>1. 节点解决什么问题？</h3>
+    <p>终端自研芯片/ASIC解决<strong>"专用优化"</strong>问题&mdash;&mdash;通用GPU是万金油，但每家公司的AI工作负载不同。Google的Transformer训练、Apple的端侧推理、Tesla的自动驾驶感知&mdash;&mdash;专用芯片可以在特定任务上达到<mark class="hl-know" data-note="k1">10倍性能/功耗比提升</mark><sup class="nref" data-note="k1">1</sup>，同时摆脱对NVIDIA的依赖。但设计一颗芯片需要$500M+和2-3年时间，失败概率极高。</p>
+
+    <h3>2. 供给约束？</h3>
+    <ul>
+      <li><strong><mark class="hl-know" data-note="k2">Broadcom设计服务垄断</mark><sup class="nref" data-note="k2">2</sup></strong>：~80%定制ASIC设计经过Broadcom，Marvell占~15%。设计人才是最大瓶颈。</li>
+      <li><strong>TSMC先进封装产能</strong>：所有自研芯片都需要TSMC代工（3nm/2nm），产能有限且NVIDIA已锁定大量配额</li>
+      <li><strong>设计周期</strong>：从概念到量产2-3年（Broadcom正在将这个周期压缩到18个月）</li>
+      <li><strong>软件栈</strong>：硬件只是一半&mdash;&mdash;配套编译器、驱动、框架需要同等投入</li>
+    </ul>
+
+    <h3>3. 需求驱动力？</h3>
+    <ul>
+      <li><strong>成本压力</strong>：NVIDIA GPU 70%+毛利率&mdash;&mdash;每个$100B+科技公司都有动力自研以降低单位计算成本</li>
+      <li><strong><mark class="hl-know" data-note="k3">Hyperscaler自研浪潮</mark><sup class="nref" data-note="k3">3</sup></strong>：Google TPU v6、AWS Trainium2、Meta MTIA v2、Microsoft Maia 100、Apple Baltra</li>
+      <li><strong>推理需求爆发</strong>：推理工作负载高度可预测&rarr;ASIC最适合优化的场景</li>
+      <li><strong>垂直整合趋势</strong>：Tesla AI5/AI6统一车载+机器人+训练，Apple M5覆盖全产品线</li>
+      <li><strong>地缘政治</strong>：RISC-V开源不受出口管制，成为"非美"阵营的战略选择</li>
+    </ul>
+
+    <h3>4. 当前供需状态？</h3>
+    <p><mark class="hl-know" data-note="k4">ASIC增速44.6% vs GPU增速16.1%</mark><sup class="nref" data-note="k4">4</sup>&mdash;&mdash;自研芯片是半导体行业增速最快的细分领域。但绝对规模仍远小于GPU市场。Broadcom AI收入从$3.5B(FY2023)飙升至$84B/Q(2026)，CEO Hock Tan预测2027年AI收入达$60-90B。供给端：Broadcom设计产能成为新瓶颈，TSMC先进封装产能仍然紧张。</p>
+
+    <h3>5. 未来2-3年变化方向？</h3>
+    <ul>
+      <li><strong>ASIC占AI芯片TAM比例上升</strong>：从目前~15%&rarr;2028年可能达30-40%</li>
+      <li><strong>Broadcom+Marvell双寡头格局巩固</strong>：设计壁垒极高，新进入者难以打破</li>
+      <li><strong><mark class="hl-know" data-note="k5">TeraFab是最大变量</mark><sup class="nref" data-note="k5">5</sup></strong>：如果Tesla成功自建芯片工厂，将改变整个"设计→代工"的产业链逻辑</li>
+      <li><strong>RISC-V从嵌入式向数据中心渗透</strong>：25%全球份额但主要在IoT/嵌入式，数据中心还在0-1阶段</li>
+      <li><strong>Apple Baltra服务器芯片</strong>：如果成功，将是Apple Silicon从消费电子进入数据中心的里程碑</li>
+    </ul>
+
+    <!-- PHASE 0.5: CURATED SEARCH -->
+    <div class="section-header" id="phase05">
+      <h2>&sect;1 Phase 0.5: 策展搜索<span class="zh">Curated Search</span></h2>
+    </div>
+
+    <h3>最佳分析源</h3>
+    <figure>
+      <table>
+        <thead>
+          <tr><th>Source 来源</th><th>Type 类型</th><th>Value 价值</th><th>Credibility 可信度</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Broadcom IR / Hock Tan</strong></td><td>Primary source</td><td>ASIC design revenue, SAM model, customer pipeline</td><td><span class="tier-high">Primary</span></td></tr>
+          <tr><td><strong>Tesla Q4 Earnings / Musk</strong></td><td>Primary source</td><td>AI5/AI6 specs, TeraFab timeline, Colossus scale</td><td><span class="tier-medium-high">High (tech) / Med (timeline)</span></td></tr>
+          <tr><td><strong>Apple Newsroom / Events</strong></td><td>Primary source</td><td>M5 specs, C1 modem, chip roadmap</td><td><span class="tier-high">Primary</span></td></tr>
+          <tr><td><strong>SemiAnalysis</strong></td><td>Deep tech research</td><td>ASIC vs GPU market modeling, cost analysis</td><td><span class="tier-high">Very High</span></td></tr>
+          <tr><td><strong>Tenstorrent Official</strong></td><td>Primary source</td><td>Ascalon specs, RISC-V benchmarks, IP deals</td><td><span class="tier-medium-high">High</span></td></tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <h3>Key Curated Findings</h3>
+
+    <div class="callout">
+      <div class="callout-title">CURATED-1 &mdash; Broadcom ASIC Design Dominance</div>
+      <div class="callout-body">Broadcom占据定制ASIC设计服务<strong>~80%</strong>份额。AI半导体收入$84B/Q（+106% YoY）。CEO Hock Tan预测2027年AI收入$60-90B。已服务Google（TPU）、Meta、Apple（Baltra）等客户。<br><small class="zh-inline">Source: Broadcom IR, Q1 FY2026</small></div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">CURATED-2 &mdash; Tesla AI5/AI6 + TeraFab</div>
+      <div class="callout-body">AI5设计完成：40倍HW4性能、9倍内存、半光罩面积。TSMC+Samsung双线制造。AI6目标2026年12月tape out。TeraFab计划$20-25B自建芯片工厂，100K wafer starts/月。3月21日"启动"。<br><small class="zh-inline">Source: Tesla Q4 FY2025 Earnings + Musk X posts, 2026-01/03</small></div>
+    </div>
+
+    <div class="callout insight">
+      <div class="callout-title">CURATED-3 &mdash; Apple M5 + Baltra Server Chip</div>
+      <div class="callout-body">M5发布（4x AI性能，Neural Accelerator in every GPU core）。C1自研5G调制解调器取代Qualcomm。Baltra AI服务器芯片（与Broadcom合作、TSMC N3P）预计2026底/2027量产。Private Cloud Compute已部署M5。<br><small class="zh-inline">Source: Apple Newsroom, 2025-10 / 2026-03</small></div>
+    </div>
+
+    <div class="callout insight">
+      <div class="callout-title">CURATED-4 &mdash; Samsung $16.5B Tesla Chip Deal</div>
+      <div class="callout-body">Tesla与Samsung签署$16.5B芯片制造协议（至2033年）。Samsung Texas fab专门生产AI6芯片，2nm制程。这是Tesla在TSMC之外建立第二供应来源的关键一步。<br><small class="zh-inline">Source: TechCrunch, 2025-07-28</small></div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">CURATED-5 &mdash; RISC-V Reaches 25% Global Share</div>
+      <div class="callout-body">RISC-V全球市场份额达25%，成为x86/ARM之后的"第三支柱"。Tenstorrent Ascalon-X达22 SPECint2006/GHz，首次对标ARM Neoverse V3。但份额主要在嵌入式/IoT，数据中心GPU还未验证。<br><small class="zh-inline">Source: FinancialContent / Tenstorrent, 2025-2026</small></div>
+    </div>
+
+    <div class="callout risk">
+      <div class="callout-title">CURATED-6 &mdash; Dojo的教训</div>
+      <div class="callout-body">Tesla Dojo超算在2025年8月被关闭，Pete Bannon离职，约20名工程师流失至DensityAI。$1B+投资产出有限。<strong>教训：自研芯片成功（HW3/AI5）不等于自建生态成功（Dojo）。</strong>TeraFab的风险更大&mdash;&mdash;从未做过半导体制造。<br><small class="zh-inline">Source: CNBC/Bloomberg, 2025-08-07</small></div>
+    </div>
+
+    <!-- PHASE 1: COGNITIVE AGENTS -->
+    <div class="section-header" id="phase1">
+      <h2>&sect;2 Phase 1: 认知代理人<span class="zh">Cognitive Agents</span></h2>
+    </div>
+
+    <!-- Agent 1: Elon Musk -->
+    <div id="musk">
+      <div class="agent-header">
+        <span class="agent-role-badge giant">GIANT</span>
+        <h3>Elon Musk &mdash; Tesla / xAI CEO</h3>
+      </div>
+
+      <p><strong>选择理由</strong>: 终端自研芯片赛道中最激进的推动者。Tesla从2016年开始自研FSD芯片（HW3&rarr;HW4&rarr;AI5&rarr;AI6），同时通过xAI Colossus（<mark class="hl-know" data-note="k6">555K GPU、$18B采购</mark><sup class="nref" data-note="k6">6</sup>）成为NVIDIA最大客户，又通过TeraFab准备成为NVIDIA最大竞争者。"既是最大客户又是最大威胁"的双重身份。<strong>可信度: 6/10</strong>（技术方向8/10，时间线3/10）。</p>
+
+      <h4>行动证据（重于言论）</h4>
+      <ol>
+        <li><strong>2016-2019: 从零自研FSD芯片</strong>: 招募Jim Keller + Pete Bannon，HW3在2019年量产，处理速度2300fps，比HW2.5快21倍。证明非半导体公司可以自研。</li>
+        <li><strong>2024: Colossus创速度纪录</strong>: 100K H100集群仅122天完工，扩展至200K GPU。到2026初555K GPU、2GW、$18B总投资。</li>
+        <li><strong>2025-07: Samsung $16.5B芯片协议</strong>: 覆盖至2033年，Samsung Texas fab专产AI6，2nm制程。建立TSMC之外的第二供应源。</li>
+        <li><strong>2025-08: 关闭Dojo</strong>: 认识到分散资源的错误，将所有芯片资源收敛到AI5/AI6统一架构。Pete Bannon离职。</li>
+        <li><strong>2025-10: AI5设计完成</strong>: 40倍性能、9倍内存、半光罩面积。TSMC+Samsung双线制造确认。</li>
+        <li><strong>2026-01: TeraFab宣布</strong>: $20-25B自建芯片工厂，100K wafer starts/月，2nm制程，目标年产100-200B芯片。Tesla自2020年以来首次需要增发融资。</li>
+        <li><strong>2026-03-14: "TeraFab launches in 7 days"</strong>: 3月21日启动。但Electrek指出Tesla缺乏半导体制造经验。</li>
+      </ol>
+
+      <h4>核心判断</h4>
+      <blockquote>"Tesla only has to satisfy requirements from one customer...we can delete a lot of complexity from the chip."<span class="zh">"Tesla只需要满足一个客户的需求...可以从芯片中删除大量复杂性。"&mdash;&mdash;对NVIDIA通用GPU必须兼容万千客户需求的结构性批判</span></blockquote>
+      <ul>
+        <li><strong>垂直整合至上</strong>：从电池到电机到芯片，关键零部件必须自研</li>
+        <li><strong><mark class="hl-know" data-note="k7">统一架构收敛</mark><sup class="nref" data-note="k7">7</sup></strong>：AI6单一架构覆盖"车载推理&rarr;机器人控制&rarr;数据中心训练"全场景</li>
+        <li><strong>规模压倒一切</strong>：Colossus世界最大AI集群 + TeraFab自建工厂 = 先锁定最大规模</li>
+        <li><strong>"We're not about to replace NVIDIA"</strong>&mdash;&mdash;同时继续订购NVIDIA芯片</li>
+      </ul>
+
+      <div class="callout risk">
+        <div class="callout-title">执行风险: TeraFab</div>
+        <div class="callout-body">Tesla没有半导体制造经验。$20B+资本需求可能需要增发（自2020年来首次）。2nm制程技术门槛极高。Dojo的关闭证明Musk对半导体生态的判断力不完美。<strong>如果TeraFab失败，$20B+沉没成本将严重影响TSLA估值。</strong></div>
+      </div>
+
+      <details>
+        <summary>可信度详细评估</summary>
+        <p><strong>预测准确率约4/14</strong>&mdash;&mdash;技术方向通常正确，但时间线几乎全部延迟。FSD时间线10+次错误预测。AI5原定2026年1月发布，推迟至2027年量产。</p>
+        <p><strong>偏见</strong>: 极度乐观。需要将时间线乘以2-3倍。</p>
+        <p><strong>信息优势</strong>: 极高。数十亿英里FSD数据 + 最大GPU集群运行经验 + 与TSMC/Samsung/NVIDIA高层直接对话。</p>
+      </details>
+    </div>
+
+    <hr>
+
+    <!-- Agent 2: Johny Srouji -->
+    <div id="srouji">
+      <div class="agent-header">
+        <span class="agent-role-badge investor">INVESTOR</span>
+        <h3>Johny Srouji &mdash; Apple SVP of Hardware Technologies</h3>
+      </div>
+
+      <p><strong>选择理由</strong>: 领导了科技史上最成功的"自研芯片"案例。从A4到M5的全产品线自研芯片开发，2020-2023完成Mac从Intel到Apple Silicon全面迁移。这条路径&mdash;&mdash;"从依赖第三方到完全自研，实现2-3倍性能功耗比提升"&mdash;&mdash;正在被Tesla、Google、Amazon复制。<mark class="hl-know" data-note="k8">16年零重大延迟或性能不达标</mark><sup class="nref" data-note="k8">8</sup>。<strong>可信度: 9/10</strong>（所有代理人中最高）。</p>
+
+      <h4>行动证据</h4>
+      <ol>
+        <li><strong>2008-2020: A4&rarr;A14连续10代迭代</strong>: 每代保持制程领先。到A14采用全球首款5nm制程。</li>
+        <li><strong>2017: 自研GPU，摆脱Imagination Technologies</strong>: A11 Bionic引入自研GPU。Imagination股价当日暴跌70%。</li>
+        <li><strong>2020-2023: <mark class="hl-know" data-note="k9">Intel&rarr;Apple Silicon迁移</mark><sup class="nref" data-note="k9">9</sup></strong>: M1发布（2x CPU性能、3x功耗效率对比Intel）。2023年6月完成全线迁移，比预期顺利。</li>
+        <li><strong>2025-02: C1自研5G调制解调器</strong>: TSMC 4nm+7nm混合制程。Qualcomm预测2026年Apple 80%产品将用自研调制解调器。</li>
+        <li><strong>2025-10: M5发布</strong>: 3nm第三代，4x AI性能，Neural Accelerator嵌入每个GPU核心。</li>
+        <li><strong>2026-03: M5 Pro/Max发布</strong>: 引入SoIC-mH封装技术，CPU/GPU分置不同tile。</li>
+        <li><strong>进行中: <mark class="hl-know" data-note="k10">Baltra服务器芯片</mark><sup class="nref" data-note="k10">10</sup></strong>: 与Broadcom合作开发，TSMC N3P制程。预计2026底/2027量产。Apple首次进入数据中心芯片领域。</li>
+      </ol>
+
+      <h4>核心判断</h4>
+      <blockquote>"Disruptive products cannot be built from legacy chips."<span class="zh">"颠覆性产品不能用传统芯片来打造。"&mdash;&mdash;Apple自研芯片的根本逻辑</span></blockquote>
+      <ul>
+        <li><strong>体验优先</strong>："We start with the experience and design the silicon to make that possible"</li>
+        <li><strong>"只被物理定律限制"</strong>：极限推进但限制是物理规律而非野心</li>
+        <li><strong>渐进扩展，逐步吞噬</strong>：A系列&rarr;M系列&rarr;R1&rarr;C1&rarr;Baltra，每步扩展到新领域但节奏稳健</li>
+        <li><strong>AI增强芯片设计</strong>：明确表态将generative AI用于芯片设计流程本身</li>
+      </ul>
+
+      <details>
+        <summary>可信度详细评估</summary>
+        <p><strong>预测准确率12/12以上</strong>&mdash;&mdash;极少做公开预测，但每次承诺都按时交付。Apple风格"under-promise, over-deliver"。</p>
+        <p><strong>偏见</strong>: 保守偏见。不公开谈论未来计划，只在发布时展示结果。公开说的话可信度极高。</p>
+        <p><strong>唯一不确定性</strong>: Baltra服务器芯片&mdash;&mdash;Apple芯片团队首次进入数据中心领域。</p>
+      </details>
+    </div>
+
+    <hr>
+
+    <!-- Agent 3: Jim Keller -->
+    <div id="keller">
+      <div class="agent-header">
+        <span class="agent-role-badge contrarian">CONTRARIAN</span>
+        <h3>Jim Keller &mdash; Tenstorrent CEO</h3>
+      </div>
+
+      <p><strong>选择理由</strong>: 半导体行业最独特的认知节点&mdash;&mdash;唯一在Apple(A4/A5)、AMD(Zen)、Tesla(HW3)、Intel、Tenstorrent都参与过芯片架构设计的人。对"自研vs外购"的判断基于亲身在供应方和需求方都做过的经验。核心论点：<mark class="hl-know" data-note="k11">NVIDIA的封闭生态不是唯一答案</mark><sup class="nref" data-note="k11">11</sup>，开源（RISC-V）+小芯片+开放软件栈可以从根本上改变游戏规则。<strong>可信度: 8/10（技术9/10，商业6/10）</strong>。</p>
+
+      <h4>行动证据</h4>
+      <ol>
+        <li><strong>Apple A4/A5（2008-2012）</strong>: 奠定Apple Silicon基础。P.A. Semi团队成为核心。</li>
+        <li><strong>AMD Zen架构（2012-2015）</strong>: 从Bulldozer废墟中重新设计。AMD市值$20B&rarr;$200B+，服务器份额3%&rarr;30%+。</li>
+        <li><strong>Tesla HW3（2016-2018）</strong>: 从零建立Tesla芯片团队。证明非半导体公司可以自研。面试时承诺"比竞品快10倍"，兑现了。</li>
+        <li><strong><mark class="hl-know" data-note="k12">Ascalon RISC-V CPU（2025-10）</mark><sup class="nref" data-note="k12">12</sup></strong>: 22 SPECint2006/GHz，匹配ARM Neoverse V3 / AMD Zen 5。首个对标顶级的RISC-V实现。Samsung SF4X制程。</li>
+        <li><strong>$693M+$800M融资</strong>: 估值$3.2B。投资者包括Jeff Bezos、Samsung、Fidelity、LG、Hyundai。</li>
+        <li><strong>CES 2026: 消费级AI加速器</strong>: 与Razer合作，Thunderbolt 5外接设备，Wormhole芯片。</li>
+        <li><strong>日本+中国布局</strong>: LSTC/Rapidus合作2nm边缘AI芯片。前Arm China CEO合作推RISC-V进中国市场。</li>
+      </ol>
+
+      <h4>核心判断</h4>
+      <blockquote>"Whatever NVIDIA does, we'll do the opposite."<span class="zh">"NVIDIA做什么，我们就做相反的。"&mdash;&mdash;GDDR6 vs HBM, Ethernet vs NVLink, 开源 vs 闭源</span></blockquote>
+      <ul>
+        <li><strong>"$7T&rarr;$1T: eliminate the margin stacking"</strong>&mdash;&mdash;芯片行业每层利润堆叠使成本远超必要</li>
+        <li><strong>RISC-V是半导体的"Linux时刻"</strong>&mdash;&mdash;专有架构在AI时代会被开源替代</li>
+        <li><strong>IP授权 &gt; 自产芯片</strong>（ARM模式但用RISC-V消除授权费壁垒）</li>
+        <li><strong>"You can't fix broken complicated systems"</strong>&mdash;&mdash;唯一出路是设计更简单的组件让它们组合扩展</li>
+      </ul>
+
+      <div class="callout risk">
+        <div class="callout-title">对Node 5的结构性意义</div>
+        <div class="callout-body">如果开源RISC-V + IP授权模式成功，自研芯片的门槛将大幅降低。更多公司能自研 &rarr; Broadcom设计服务需求短期上升（帮更多客户设计）&rarr; 但长期可能被Tenstorrent的IP授权模式替代。<strong>这是10年时间尺度的结构变化。</strong></div>
+      </div>
+
+      <details>
+        <summary>反驳与局限性</summary>
+        <p>Tenstorrent仍然是前收入规模（$150M合同 vs AVGO $84B/Q）。CUDA 6M+开发者生态不能通过fiat复制。Keller擅长"从0到1"但首次经历完整商业化。RISC-V 25%份额主要在嵌入式/IoT，数据中心还未规模验证。</p>
+      </details>
+    </div>
+
+    <!-- PHASE 2: SYNTHESIS -->
+    <div class="section-header" id="phase2">
+      <h2>&sect;3 Phase 2: 综合分析<span class="zh">Synthesis</span></h2>
+    </div>
+
+    <!-- Triangulation -->
+    <div id="triangulation">
+      <h3>&sect;3.1 三角验证: 行动 vs 言论 vs 数据</h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Dimension 维度</th><th>Musk (Tesla/xAI)</th><th>Srouji (Apple)</th><th>Keller (Tenstorrent)</th><th>Consistency 一致性</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>自研可行性</strong></td><td>已证明（HW3/AI5）</td><td>已证明（A4&rarr;M5）</td><td>已证明（A4/Zen/HW3）</td><td><span class="consensus">&#10003; 全部共识</span></td></tr>
+            <tr><td><strong>自研vs外购GPU</strong></td><td>两者并行（自研+买NVIDIA）</td><td>完全自研（不买NVIDIA）</td><td>开源替代（RISC-V+IP授权）</td><td><span class="disagreement">&#10007; 路径分歧</span></td></tr>
+            <tr><td><strong>垂直整合程度</strong></td><td>最激进（TeraFab自建工厂）</td><td>设计自研+TSMC代工</td><td>IP授权让别人做</td><td><span class="disagreement">&#10007; 核心分歧</span></td></tr>
+            <tr><td><strong>谁是赢家</strong></td><td>"Tesla自己"（单客户优势）</td><td>"Apple自己"（体验驱动）</td><td>"开源生态"（RISC-V+IP）</td><td><span class="disagreement">&#10007; 分歧</span></td></tr>
+            <tr><td><strong>Broadcom角色</strong></td><td>不依赖（自研+自造）</td><td>合作（Baltra共同开发）</td><td>短期受益、长期被替代</td><td><span class="consensus">&#10003; 短期共识</span></td></tr>
+            <tr><td><strong>NVIDIA威胁度</strong></td><td>"Not replacing NVIDIA"</td><td>不直接竞争</td><td>"NVIDIA做什么，反着做"</td><td><span class="consensus">&#10003; 共存非替代</span></td></tr>
+            <tr><td><strong>执行力记录</strong></td><td>方向对但时间错（6/10）</td><td>16年零失败（9/10）</td><td>每个架构都成功（8/10技术）</td><td><span class="disagreement">&#10007; 执行力差异巨大</span></td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <div class="callout insight">
+        <div class="callout-title">Key Insight 关键洞察</div>
+        <div class="callout-body">三位代理人在<strong>自研可行性</strong>上完全共识&mdash;&mdash;他们三个人亲自证明了这一点。分歧集中在<strong>垂直整合深度和受益者</strong>：Musk要自建工厂（最激进），Srouji坚持设计自研+TSMC代工（最成熟），Keller提出开源IP授权（最颠覆）。<strong>隐藏的共识是：无论谁赢，Broadcom（短期）和TSMC（永远）都是受益者。</strong></div>
+      </div>
+    </div>
+
+    <!-- Competition -->
+    <div id="competitive">
+      <h3>&sect;3.2 竞争格局<span class="zh">Competitive Landscape</span></h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Player</th><th>Approach 路径</th><th>Track Record</th><th>Strength 优势</th><th>Weakness 劣势</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Broadcom (AVGO)</strong></td><td>ASIC设计服务</td><td>~80%份额，$84B/Q AI收入</td><td>"军火商"&mdash;&mdash;谁自研都找它</td><td>依赖客户设计能力</td></tr>
+            <tr><td><strong>Marvell (MRVL)</strong></td><td>ASIC设计服务#2</td><td>~15%份额，$2.1B/Q AI</td><td>Amazon/NVIDIA合作</td><td>远小于Broadcom</td></tr>
+            <tr><td><strong>Google TPU</strong></td><td>自研（内部）</td><td>TPU v6，推理成本领先</td><td>最成熟的自研ASIC</td><td>仅内部使用</td></tr>
+            <tr><td><strong>Tesla (TSLA)</strong></td><td>自研+自造</td><td>HW3/AI5成功，Dojo失败</td><td>单客户优化</td><td>无半导体制造经验</td></tr>
+            <tr><td><strong>Apple (AAPL)</strong></td><td>自研+TSMC代工</td><td>16年零失败</td><td>最高执行力</td><td>不在AI训练竞争焦点</td></tr>
+            <tr><td><strong>AWS Trainium</strong></td><td>自研（内部）</td><td>Trainium2出货中</td><td>AWS生态+推理优化</td><td>训练性能仍追赶GPU</td></tr>
+            <tr><td><strong>Tenstorrent</strong></td><td>RISC-V IP授权</td><td>$3.2B估值，$150M合同</td><td>开源+成本结构颠覆</td><td>前收入规模</td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </div>
+
+    <!-- Supply-Demand -->
+    <div id="supply-demand">
+      <h3>&sect;3.3 供需框架<span class="zh">Supply-Demand Framework</span></h3>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;">
+        <div class="callout" style="border-left-color: #4caf50;">
+          <div class="callout-title" style="color: #4caf50;">需求侧 Demand</div>
+          <div class="callout-body">
+            <ul style="margin:0; padding-left:1.2rem;">
+              <li>每个$100B+科技公司都在自研芯片&mdash;&mdash;需求确定且不可逆</li>
+              <li>ASIC增速<strong>44.6%</strong> vs GPU增速16.1%&mdash;&mdash;最快细分领域</li>
+              <li>推理需求爆发驱动更多定制化需求</li>
+              <li>Broadcom AI revenue $84B/Q (+106% YoY)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout risk">
+          <div class="callout-title">供给侧 Supply</div>
+          <div class="callout-body">
+            <ul style="margin:0; padding-left:1.2rem;">
+              <li>Broadcom设计产能成为新瓶颈</li>
+              <li>TSMC先进封装产能仍紧张（NVIDIA已锁定大量配额）</li>
+              <li>2-3年设计周期意味着2024年做的决策到2027年才出芯片</li>
+              <li>芯片设计人才极度稀缺</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout insight">
+        <div class="callout-title">供需缺口判断</div>
+        <div class="callout-body"><strong>需求明确、供给受限</strong>，2026-2028确定性高（<strong>7/10</strong>）。Broadcom设计服务需求远超产能。TSMC先进制程供给紧张。自研芯片的2-3年设计周期意味着当前的设计启动量直接决定2028-2029的供给。<strong>AVGO和MRVL是最直接受益者。</strong></div>
+      </div>
+    </div>
+
+    <!-- Risk Matrix -->
+    <div id="risk-matrix">
+      <h3>&sect;3.4 风险矩阵<span class="zh">Risk Matrix</span></h3>
+
+      <figure class="table-responsive">
+        <table class="risk-matrix">
+          <thead>
+            <tr><th>Risk 风险</th><th>Probability</th><th>Impact</th><th>Timeframe</th><th>Monitoring 监控指标</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>TeraFab执行失败</strong></td><td><span class="risk-medium">Medium</span></td><td><span class="risk-high">High (TSLA)</span></td><td>2027-2028</td><td>Tesla CapEx支出、工厂进度</td></tr>
+            <tr><td><strong>AI CapEx放缓&rarr;自研项目缩减</strong></td><td><span class="risk-medium">Medium</span></td><td><span class="risk-high">High</span></td><td>2026H2-2027</td><td>Hyperscaler CapEx指引</td></tr>
+            <tr><td><strong>Broadcom份额被侵蚀</strong><br><small>Marvell/Tenstorrent</small></td><td><span class="risk-low">Low</span></td><td><span class="risk-medium">Medium</span></td><td>2028+</td><td>MRVL AI revenue, TT IP deals</td></tr>
+            <tr><td><strong>NVIDIA反击（NVLink开放/降价）</strong></td><td><span class="risk-medium">Medium</span></td><td><span class="risk-medium">Medium</span></td><td>2026-2027</td><td>NVIDIA定价策略变化</td></tr>
+            <tr><td><strong>自研芯片性能不达标</strong><br><small>AI5延迟、Baltra推迟</small></td><td><span class="risk-medium">Medium</span></td><td><span class="risk-medium">Med-Low</span></td><td>持续</td><td>量产时间线 vs 预期</td></tr>
+            <tr><td><strong>TSMC产能争夺加剧</strong></td><td><span class="risk-high">High</span></td><td><span class="risk-medium">Medium</span></td><td>2026-2027</td><td>TSMC月度营收、交期</td></tr>
+            <tr><td><strong>RISC-V数据中心突破</strong></td><td><span class="risk-low">Low</span></td><td><span class="risk-high">High (long-term)</span></td><td>2028+</td><td>Hyperscaler RISC-V部署</td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </div>
+
+    <!-- Node Judgment -->
+    <div id="node-judgment">
+      <h3>&sect;3.5 节点判断<span class="zh">Node Judgment</span></h3>
+
+      <div class="callout" style="border-left-color: var(--knowledge);">
+        <div class="callout-body" style="font-size: 0.92rem;">
+          <p><strong>供需状态</strong>: 需求明确增长，供给受设计产能限制（<strong>7/10</strong>确定性）</p>
+          <p><strong>周期位置</strong>: 自研芯片周期早中期（加速阶段，远未饱和）</p>
+          <p><strong>最大确定性</strong>: 自研趋势不可逆 + Broadcom是"军火商"赢家 = 在所有半导体节点中"谁赢都受益"属性最强</p>
+          <p><strong>最大分歧</strong>: TeraFab能否成功&mdash;&mdash;如果成功改变产业链逻辑，如果失败$20B+沉没成本</p>
+          <p style="margin-bottom:0;"><strong>V3 delta验证</strong>: "自研芯片的赢家是Broadcom(设计服务)和TSMC(代工), 不是自研者本身"&mdash;&mdash;三位代理人的分析<strong>确认了这个判断</strong>。Apple虽然自研成功，但Baltra仍与Broadcom合作。Musk虽然最激进，但TeraFab本身也需要Samsung（$16.5B协议）。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trading -->
+    <div id="trading">
+      <h3>&sect;3.6 交易视角<span class="zh">Trading Perspective</span></h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Dimension 维度</th><th>AVGO</th><th>MRVL</th><th>TSLA</th><th>AAPL</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>AI收入</strong></td><td>$84B/Q</td><td>$2.1B/Q</td><td>N/A (cost center)</td><td>N/A (product-embedded)</td></tr>
+            <tr><td><strong>AI增速</strong></td><td>+106% YoY</td><td>+98% YoY</td><td>N/A</td><td>N/A</td></tr>
+            <tr><td><strong>自研芯片纯度</strong></td><td>设计服务提供者</td><td>设计服务#2</td><td>自研+自造</td><td>自研+TSMC代工</td></tr>
+            <tr><td><strong>Forward P/E</strong></td><td>~28x</td><td>~40x</td><td>~150x</td><td>~30x</td></tr>
+            <tr><td><strong>确定性</strong></td><td>最高（谁赢都受益）</td><td>高（第二供应商）</td><td>低（TeraFab执行风险）</td><td>高（执行力最好）</td></tr>
+            <tr><td><strong>催化剂</strong></td><td>Apple/OpenAI量产</td><td>第二Tier-1 win</td><td>TeraFab进展/AI5量产</td><td>Baltra announcement</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <div class="callout">
+        <div class="callout-title">交易视角: Node 5的特殊属性</div>
+        <div class="callout-body">
+          <p><strong>AVGO</strong>: 与Node 1（GPU）不同，AVGO在Node 5的角色是<strong>"无论谁赢都受益的军火商"</strong>。AI收入$84B/Q +106%，Forward P/E ~28x。如果你无法判断Musk、Srouji还是Keller的路径最终胜出，AVGO是最安全的投资论文。月线上升趋势完好。</p>
+          <p><strong>MRVL</strong>: 第二tier ASIC设计。AI收入$2.1B/Q +98%。如果Broadcom产能满了，溢出需求流向Marvell。Forward P/E ~40x相对偏高。需要看第二个Tier-1 win催化剂。</p>
+          <p><strong>TSLA</strong>: TeraFab是Node 5中最大的bet&mdash;&mdash;但也是风险最高的。Forward P/E ~150x已经price in了大量成功假设。作为芯片投资标的不推荐&mdash;&mdash;但作为"全产业链垂直整合"概念的观察标的非常有价值。</p>
+          <p style="margin-bottom:0;"><strong>AAPL</strong>: 执行力最好但AI芯片不是股价的核心驱动力。Baltra如果成功会是bonus，但Apple的芯片优势已经充分反映在产品定价和利润率中。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Verdict -->
+    <div id="verdict">
+      <h3>&sect;3.7 综合判断<span class="zh">Triangulated Verdict</span></h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead><tr><th>Claim</th><th>交叉验证</th><th>综合可信度</th></tr></thead>
+          <tbody>
+            <tr><td><strong>自研芯片趋势不可逆</strong></td><td>三代理人全部亲身证明 + 每个$100B+公司都在做</td><td><strong style="color:#4caf50;">97%</strong></td></tr>
+            <tr><td><strong>Broadcom是隐形赢家（2-3年）</strong></td><td>~80%设计份额 + Apple Baltra合作 + AI收入$84B/Q +106%</td><td><strong style="color:#4caf50;">85%</strong></td></tr>
+            <tr><td><strong>TSMC是永远的赢家</strong></td><td>所有自研芯片都需TSMC代工 + 连Musk的Samsung也是备选非替代</td><td><strong style="color:#4caf50;">90%</strong></td></tr>
+            <tr><td><strong>TeraFab 2028年前量产</strong></td><td>Musk时间线记录3/10 + Tesla无半导体制造经验 + 需增发融资</td><td><strong style="color:#f44336;">25%</strong></td></tr>
+            <tr><td><strong>AI5达到40倍性能声明</strong></td><td>设计完成但未量产 + Musk一贯超额宣传性能 + 需打6-7折</td><td><strong style="color:#ffa726;">50%</strong></td></tr>
+            <tr><td><strong>Apple Baltra 2027年量产</strong></td><td>Srouji 16年零延迟记录 + 与Broadcom/TSMC合作降低风险</td><td><strong style="color:#4caf50;">75%</strong></td></tr>
+            <tr><td><strong>RISC-V数据中心突破（2028前）</strong></td><td>Ascalon性能达标 + 但生态不成熟 + 数据中心采用需2-3年验证</td><td><strong style="color:#f44336;">20%</strong></td></tr>
+            <tr><td><strong>自研完全替代NVIDIA GPU</strong></td><td>所有自研者同时仍买NVIDIA + GPU覆盖"长尾"多样化工作负载</td><td><strong style="color:#f44336;">10%</strong></td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </div>
+
+    <!-- Calendar -->
+    <div id="calendar">
+      <h3>&sect;3.8 验证日历<span class="zh">Verification Calendar</span></h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead><tr><th>日期</th><th>事件</th><th>如果成功</th><th>如果失败</th></tr></thead>
+          <tbody>
+            <tr><td><strong>2026年3月21日</strong></td><td>TeraFab "启动"</td><td style="color:#4caf50;">Musk执行力信号（但仅是地基/签约阶段）</td><td style="color:#f44336;">叙事破裂，TSLA承压</td></tr>
+            <tr><td><strong>2026年Q2</strong></td><td>Broadcom Q2 FY2026财报</td><td style="color:#4caf50;">AI $84B/Q+趋势确认</td><td style="color:#f44336;">ASIC需求放缓信号</td></tr>
+            <tr><td><strong>2026年H2</strong></td><td>Apple Baltra进度更新</td><td style="color:#4caf50;">Apple进入数据中心确认</td><td style="color:#f44336;">Srouji首次延迟（极罕见）</td></tr>
+            <tr><td><strong>2026年12月</strong></td><td>Tesla AI6 tape out（Musk目标）</td><td style="color:#4caf50;">统一架构路线验证</td><td style="color:#f44336;">再次延迟（概率高）</td></tr>
+            <tr><td><strong>2027年H1</strong></td><td>AI5量产开始</td><td style="color:#4caf50;">Tesla芯片独立性里程碑</td><td style="color:#f44336;">继续依赖NVIDIA</td></tr>
+            <tr><td><strong>2027年</strong></td><td>Apple Baltra量产</td><td style="color:#4caf50;">Apple Silicon进入服务器市场</td><td style="color:#f44336;">Apple放弃数据中心芯片</td></tr>
+            <tr><td><strong>2028年</strong></td><td>RISC-V数据中心部署验证</td><td style="color:#4caf50;">Keller论文的终极验证</td><td style="color:#f44336;">RISC-V留在嵌入式领域</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <p style="font-size:0.85rem; color:var(--text-tertiary);"><strong>监控频率</strong>: 每季度 &mdash; AVGO/MRVL财报, Tesla earnings | 事件驱动 &mdash; TeraFab进展, Apple产品发布, TSMC月度营收 | 年度 &mdash; RISC-V adoption metrics</p>
+    </div>
+
+    <!-- Signal Transmission -->
+    <div id="signals">
+      <h3>&sect;3.9 信号传导链<span class="zh">Signal Transmission Chains</span></h3>
+
+      <div class="callout" style="border-left-color:#4caf50;">
+        <div class="callout-title" style="color:#4caf50;">&#9650; BULL链: 自研加速 &rarr; 设计服务链</div>
+        <div class="callout-body">更多公司自研 &rarr; AVGO(设计服务) &rarr; TSM(代工) &rarr; MRVL(溢出需求) &rarr; ARM/RISC-V(IP授权)<br><em>信号最先在AVGO AI收入出现，最后传到TSMC先进制程利用率。</em></div>
+      </div>
+      <div class="callout risk">
+        <div class="callout-title">&#9660; BEAR链: 自研失败 &rarr; 回归GPU链</div>
+        <div class="callout-body">自研项目缩减 &rarr; 回购NVIDIA GPU &rarr; NVDA(受益) &rarr; AVGO(设计收入下降) &rarr; MRVL(受冲击更大)<br><em>信号最先在Hyperscaler CapEx分配变化出现。关键：<strong>AVGO在两条链都能存活</strong>（设计服务+网络芯片）</em></div>
+      </div>
+      <div class="callout" style="border-left-color:#ffc107;">
+        <div class="callout-title" style="color:#ffc107;">&#9888; TeraFab链: Musk对了 &rarr; 产业链重构</div>
+        <div class="callout-body">TeraFab成功 &rarr; Tesla不再需要TSMC/Samsung &rarr; 垂直整合模式被验证 &rarr; 更多公司尝试自建 &rarr; AVGO设计服务需求分化<br><em>概率最低（25%）但影响最大。信号最先在Tesla CapEx和TeraFab良品率数据出现。</em></div>
+      </div>
+
+      <figure class="table-responsive">
+        <table>
+          <caption style="text-align:left; font-size:0.78rem; font-weight:510; color:var(--text-tertiary); padding:0.5rem 0;">&#128737; "不管谁赢都赚"标的</caption>
+          <thead><tr><th>标的</th><th>自研加速 &rarr;</th><th>自研放缓 &rarr;</th><th>逻辑</th></tr></thead>
+          <tbody>
+            <tr><td><strong>AVGO</strong></td><td style="color:#4caf50;">设计服务需求&uarr;</td><td style="color:#4caf50;">网络芯片需求不减</td><td>两条链交叉点</td></tr>
+            <tr><td><strong>TSM</strong></td><td style="color:#4caf50;">自研芯片需代工</td><td style="color:#4caf50;">GPU需代工</td><td>所有芯片经过TSMC</td></tr>
+            <tr><td><strong>ASML</strong></td><td style="color:#4caf50;">自研扩产需设备</td><td style="color:#4caf50;">GPU扩产也需设备</td><td>设备层不关心谁的芯片</td></tr>
+          </tbody>
+        </table>
+      </figure>
+      <p style="font-size:0.85rem; color:var(--text-tertiary);">对比：TSLA只有TeraFab成功才大赢。MRVL需要第二tier客户才能突破。<strong>AVGO/TSM/ASML是"基础设施永远赢"选项。</strong></p>
+    </div>
+
+    <hr style="border:none; border-top:1px solid var(--border-subtle); margin:2.5rem 0;">
+
+    <!-- KPI DASHBOARD -->
+    <div class="section-header" id="kpi-dashboard">
+      <h2>&sect;4 KPI仪表盘<span class="zh">KPI Dashboard</span></h2>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">AVGO AI Revenue</div>
+        <div class="kpi-value" style="color: var(--accent);">$84亿/Q</div>
+        <div class="kpi-change positive">&#9650; +106% YoY</div>
+        <div class="kpi-subtitle">ASIC设计~80%份额</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">MRVL AI Revenue</div>
+        <div class="kpi-value" style="color: var(--knowledge);">$21亿/Q</div>
+        <div class="kpi-change positive">&#9650; +98% YoY</div>
+        <div class="kpi-subtitle">第二tier ASIC设计</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">ASIC Growth Rate</div>
+        <div class="kpi-value" style="color: #ab47bc;">44.6%</div>
+        <div class="kpi-change positive">vs GPU 16.1%</div>
+        <div class="kpi-subtitle">最快AI芯片细分</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">TeraFab Investment</div>
+        <div class="kpi-value" style="color: #f44336;">$200亿+</div>
+        <div class="kpi-change" style="color: #ffc107;">&#9888; 执行风险高</div>
+        <div class="kpi-subtitle">Tesla自2020年来首次增发</div>
+      </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="section-header" id="charts">
+      <h2>&sect;5 图表<span class="zh">Charts (Interactive Plotly)</span></h2>
+    </div>
+
+<div class="chart-frame">
+  <div class="chart-frame-header"><span class="chart-frame-title">AVGO (Broadcom) Daily 6M</span></div>
+  <div class="chart-frame-body"><div>                            <div id="AVGO_daily" class="plotly-graph-div" style="height:550px; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("AVGO_daily")) {                    Plotly.newPlot(                        "AVGO_daily",                        [{"close":{"dtype":"f8","bdata":"AAAAwEkidUAAAAAAryR1QAAAAKCXKnVAAAAAgFT3dEAAAAAgQt50QAAAAIBhdHRAAAAAwHqUdEAAAACgDcx0QAAAAOCLGHVAAAAAoJQbdUAAAADAlu10QAAAAOBH\u002fHRAAAAAYHGNdUAAAAAAx4V1QAAAACApQHRAAAAAAE1AdkAAAACgkHd1QAAAAGCL6nVAAAAAIJQXdkAAAAAgm8p1QAAAACAryXVAAAAAABdgdUAAAADgZjp1QAAAAMAeenVAAAAAYEIXdkAAAADAvJV2QAAAAKAfRHdAAAAA4OITeEAAAABABHx3QAAAACDJDndAAAAAwLiddkAAAABASfR1QAAAACC2ZHZAAAAAIJMudkAAAADgM8x1QAAAACBKW3ZAAAAAAJv0dUAAAACAqih2QAAAAMBKNXVAAAAAQOVcdUAAAAAg7l91QAAAAICYPXVAAAAAAOQbdkAAAADghaJ1QAAAACDOOHVAAAAAoM+Td0AAAAAgtwR4QAAAAOD4zHhAAAAAIAwjeUAAAACgexV4QAAAAAB2zXdAAAAAQCG+d0AAAABg1sR3QAAAAIDqV3hAAAAAIFgFeUAAAADAOVh5QAAAAMDmwnlAAAAAwIBZeUAAAADA4XN2QAAAAKCTMnVAAAAAAF9KdUAAAACgW1Z0QAAAACAAlHRAAAAAIFw7dUAAAABAM1d1QAAAAMAe1XVAAAAAIIXjdUAAAACAFAJ2QAAAAIA91nVAAAAAoJnddUAAAACgmaF1QAAAAIDruXVAAAAAYLh2dUAAAADgUXx1QAAAAAAAeHVAAAAAIK7HdEAAAAAghY91QAAAACBcA3ZAAAAAgMIpdkAAAACAPT51QAAAAOBRcHVAAAAAIFz7dUAAAACgmcl0QAAAAMDMjHRAAAAAANdXdEAAAADAzAB0QAAAAKCZTXRAAAAA4KPMdEAAAAAA19N0QAAAACCuq3RAAAAAwMy0dEAAAACAwrF0QAAAAKBHBXRAAAAAwMxAc0AAAAAAKWhzQAAAAGC4znRAAAAAQAp\u002fdUAAAABACkd1QAAAAAApbHVAAAAAYLiydEAAAABguFJ0QAAAAOCjyHRAAAAAACnYdEAAAAAA1990QAAAAGBmynRAAAAAoHCldEAAAAAA11d0QAAAAMD1xHRAAAAAQDMbdEAAAADAzPhzQAAAAMAe7XNAAAAAoHCdc0AAAADgethzQAAAAOBRzHRAAAAAIK6ndEAAAAAAAJx1QAAAAKBHaXVAAAAAwB5ZdUAAAAAghf90QAAAAGCPInRAAAAAYLhOdEAAAADA9RR0QAAAAEDhvnNAAAAAoHD9c0A="},"decreasing":{"line":{"color":"#f44336"}},"high":{"dtype":"f8","bdata":"YXosnCCgdUDaT3DA+Ih1QM71H3rjNnVAXnwGS6EWdUBtPMNI6yZ1QKGimwNhRnVA\u002fMMyNa+mdEDvHJK03xR1QLEjJVwjr3VAZyutVOB7dUBleKWqkHd1QDCMxbNtF3VAf6lbHQ2edUDW7DH2WKp1QK47Zhrj3nVAPgo5SRlrdkD1paNXAeB1QM\u002fffv9qa3ZAWjtRpb2odkB+3+7Ly+R1QDCXd0GLPnZAEkvpOt\u002fmdUCDi+zQhrV1QBSvTsqHnnVAad6HAdpZdkD\u002fOUCG6qB2QKWcQrmHVXdA7\u002f6+9t4beEBsfALTlxp4QOvE0nyLoXdAas7iaCVid0Bo0A8x7QN3QBtSdm3FwnZABANUoOSsdkASqyj3Kh12QCTqDggAdXZAdhAgsy6TdkBRRONS9GJ2QNP7hDr\u002fDXZA3mEySk6BdUD4mnBMcPh1QLDlNzHjtHVA+YLRpgxwdkD\u002fNdPfyXV3QPwVE8vyvnVAem\u002fk5VPUd0A+6FqAODZ4QO0NT6Kz8XhAGGnir68jeUCtq7hQo6p4QFcQIO75i3hAQgfARx7Zd0BOQNqggvJ3QHSl46N0jHhArg+Q9DFoeUBz0WwecmJ5QDjn6ksX3XlA1wOpFEuIeUDL407cU9R3QHv01UvwlHZA+dZswGGtdUAwOPcvK591QJKyzGQ29nRA\u002f00\u002ftLRsdUAAAAAA16N1QAAAAIDC4XVAAAAAgMINdkAAAAAAABR2QAAAAKBH5XVAAAAAQOEKdkAAAACAFN51QAAAAGCPinZAAAAA4HowdkAAAADAzNB1QAAAAEAz23VAAAAAQOF6dUAAAACAPbZ1QAAAAGBmHnZAAAAAANd3dkAAAABACut1QAAAAEDh2nVAAAAAACkodkAAAABgZpZ1QAAAAMDM\u002fHRAAAAAANcPdUAAAAAA1x90QAAAAEDhinRAAAAAACnsdEAAAAAA1z91QAAAAEAz\u002f3RAAAAAQDMjdUAAAADA9QB1QAAAAGBmLnVAAAAAACn4c0AAAADgemh0QAAAAAAA8HRAAAAAoHAFdkAAAAAAKcB1QAAAAEAzs3VAAAAA4KOkdUAAAADAHuV0QAAAAAAA\u002fHRAAAAAgBQedUAAAABACid1QAAAAIDCQXVAAAAAAAAodUAAAADA9YR0QAAAAGCP\u002fnRAAAAAoEdpdEAAAAAAAAB0QAAAAOCjAHRAAAAAgBS+c0AAAACAPSp0QAAAAIDrAXVAAAAAACl4dUAAAAAA18d1QAAAAIA9EnZAAAAAwPWcdUAAAACgRz11QAAAAMAeJXVAAAAAQDOTdEAAAABACnd0QAAAAEAKV3RAAAAA4FE0dEA="},"increasing":{"line":{"color":"#4caf50"}},"low":{"dtype":"f8","bdata":"blgmxrYUdUCIBMmkBQZ1QH8VjaXC0nRApN9ydsxqdEDLGc3FLZ90QOTr35zKbnRA+bc1Vdc\u002fdEBOJVKqFT50QKngZovB6XRAjbqxspTxdEAo2UfGvN50QAkpsgRNX3RA42+EoMG\u002fdEBCxKqj\u002fzt1QF7Pf+nlNnRAw7tyudJtdUBgtzeLBTB1QBiOsrVhrXVA0q+jMynNdUCTawZBEUJ1QNz4g7PPsnVAR3di74dKdUAEsMeX6O10QH72vq3\u002fO3VAzqgvzFvjdUB73CwlbiZ2QH8dUQpnnXZAsqoXDKNHd0D8AyYEpxV3QFFoa69xxnZAMstklZ6UdkC7a2BaRuV1QCwPBSq+1nVANWcrJ5UAdkDxR8WeAwp1QE\u002fOYbHsHnZA8IeuKQnQdUDA2N1QIvB1QITaZIZZ2HRAlc8bsueGdEClXKXAAQ51QAJqhojo7XRAJAexYXoSdUALtxM0VYh1QACP\u002fFSpsnRAcp+n4++vdUBX57EgpDB3QAprjg9z6HdAew9BvmzGeEB202VK1QV4QOMIdQwJsXdA1jEACRMfd0DoLDKT+Xx3QM2yg7ChBnhAG7w\u002f0UHKeEDWfg8zE6x4QLr5pUXA7HhAr8mOxv6WeEDOag5EjCd2QKTmy93YDXVAU5Shz7jmdEA65JMb5gx0QGPBdQMxMHRAp8ZhGx6\u002fdEAAAAAghRN1QAAAAOCjKHVAAAAAgD2ydUAAAAAAALx1QAAAAEAKi3VAAAAAwMzUdUAAAABguJZ1QAAAAMD1mHVAAAAAAAAIdUAAAAAAACB1QAAAAIAU\u002fnRAAAAAAACodEAAAAAAANh0QAAAAEAzT3VAAAAAYI\u002fudUAAAABguOZ0QAAAAGC4WnVAAAAAwMyAdUAAAADAzLx0QAAAAEAzQ3RAAAAAgD1OdEAAAACAwqFzQAAAAKCZ2XNAAAAA4FFwdEAAAABAM2t0QAAAAOB6BHRAAAAAoEeFdEAAAAAAAFx0QAAAAGBmSnNAAAAAwMx0ckAAAABAMytzQAAAAMDMxHNAAAAAYGaqdEAAAACgcD11QAAAAADX23RAAAAAwPWYdEAAAABACkt0QAAAAMD1xHNAAAAAIK5zdEAAAABA4Zp0QAAAAKBHmXRAAAAAwB5VdEAAAABAM6dzQAAAAOB6lHRAAAAAQOE+c0AAAAAAAGBzQAAAAEAzM3NAAAAAYGY2c0AAAAAA13tzQAAAAOB6MHRAAAAAYGZ2dEAAAACAwjl0QAAAAMDMTHVAAAAAIIUjdUAAAABAM8N0QAAAAEDhFnRAAAAAwPUAdEAAAAAAANRzQAAAAMDMuHNAAAAAAClIc0A="},"name":"Price","open":{"dtype":"f8","bdata":"1MLgpmpcdUC6es2UcTl1QH3o3VrHMXVAt9DzM6rFdEA7mdXQkQx1QHUZB8S79XRAfsJ+O9WXdECsRy59X3h0QLEjJVwjr3VAePEIpJBNdUBJbOTCdPR0QJBNdIYuBnVA\u002fdd2fevSdECSCSJqb5F1QLbTiruvi3VAjpIBXooBdkCIfgGxYdd1QGqK\u002f0+wHHZASb1lxeVBdkCKJ1DPE891QPO4gzT9EXZAx+GrNU7VdUDrergeMKp1QH72vq3\u002fO3VAOxoSjGP9dUClCTfdl412QL\u002fsGPbWnnZAsqoXDKNHd0BsfALTlxp4QM4rP+rCmHdAmloZFKI0d0DwsmxnXV12QJUTAciE43VASf\u002fIpMF2dkAJMPCjNxh2QFYJQNV2U3ZAI\u002f9zKo1kdkBJje8ws1V2QACeY4OJ7nVAsvL2N2StdEAXpvGivDJ1QJAZMKG2aHVAVbVk\u002fvJAdUCuM60Y0dR2QBVnp3MDiHVAKhx3Fw6xdUDyKEJIHgN4QCrX6OUEDXhAeJzb3GXpeEAkRScGiaF4QOwWIkcYOXhAGb2AhWO0d0C8DeJ8P793QLpP97XrFnhA07qM1GEbeUCSNfLa0N94QPwE\u002fx7pFnlAfvHh6+hAeUDNwHjxv7N3QMe2Faguk3ZA5Y89bQ32dEAwOPcvK591QKkR38C79XRAvgJ4KUHLdEAAAADgeqB1QAAAAMD1THVAAAAAQArrdUAAAADA9fB1QAAAACCFy3VAAAAAIIXfdUAAAAAgrtt1QAAAAOB6DHZAAAAAANcrdkAAAACgmXl1QAAAAEAzW3VAAAAA4HpsdUAAAABguB51QAAAAEAzT3VAAAAAgBQOdkAAAAAghc91QAAAAIDr0XVAAAAA4FGkdUAAAACgmYF1QAAAAAAp+HRAAAAAoJn1dEAAAADAzPRzQAAAAMDM\u002fHNAAAAAACmcdEAAAACgmS11QAAAAMD1yHRAAAAAQArHdEAAAACAwmF0QAAAAADXC3VAAAAAACn4c0AAAACgcKVzQAAAAKCZAXRAAAAA4FGsdEAAAAAghbd1QAAAAMDMrHVAAAAAoEd9dUAAAACgmZ10QAAAAEDh+nNAAAAA4FGYdEAAAAAAKdB0QAAAAIDCxXRAAAAAAADEdEAAAADgoyh0QAAAAADXq3RAAAAAAABodEAAAABAM2tzQAAAAIDCVXNAAAAAAACQc0AAAABA4bpzQAAAAEDhonRAAAAA4HqEdEAAAAAAAHR0QAAAACCuy3VAAAAAoHBpdUAAAAAA1xt1QAAAAEDhGnVAAAAA4FFgdEAAAAAAKVx0QAAAAEDhBnRAAAAAANeLc0A="},"x":["2025-09-22T00:00:00","2025-09-23T00:00:00","2025-09-24T00:00:00","2025-09-25T00:00:00","2025-09-26T00:00:00","2025-09-29T00:00:00","2025-09-30T00:00:00","2025-10-01T00:00:00","2025-10-02T00:00:00","2025-10-03T00:00:00","2025-10-06T00:00:00","2025-10-07T00:00:00","2025-10-08T00:00:00","2025-10-09T00:00:00","2025-10-10T00:00:00","2025-10-13T00:00:00","2025-10-14T00:00:00","2025-10-15T00:00:00","2025-10-16T00:00:00","2025-10-17T00:00:00","2025-10-20T00:00:00","2025-10-21T00:00:00","2025-10-22T00:00:00","2025-10-23T00:00:00","2025-10-24T00:00:00","2025-10-27T00:00:00","2025-10-28T00:00:00","2025-10-29T00:00:00","2025-10-30T00:00:00","2025-10-31T00:00:00","2025-11-03T00:00:00","2025-11-04T00:00:00","2025-11-05T00:00:00","2025-11-06T00:00:00","2025-11-07T00:00:00","2025-11-10T00:00:00","2025-11-11T00:00:00","2025-11-12T00:00:00","2025-11-13T00:00:00","2025-11-14T00:00:00","2025-11-17T00:00:00","2025-11-18T00:00:00","2025-11-19T00:00:00","2025-11-20T00:00:00","2025-11-21T00:00:00","2025-11-24T00:00:00","2025-11-25T00:00:00","2025-11-26T00:00:00","2025-11-28T00:00:00","2025-12-01T00:00:00","2025-12-02T00:00:00","2025-12-03T00:00:00","2025-12-04T00:00:00","2025-12-05T00:00:00","2025-12-08T00:00:00","2025-12-09T00:00:00","2025-12-10T00:00:00","2025-12-11T00:00:00","2025-12-12T00:00:00","2025-12-15T00:00:00","2025-12-16T00:00:00","2025-12-17T00:00:00","2025-12-18T00:00:00","2025-12-19T00:00:00","2025-12-22T00:00:00","2025-12-23T00:00:00","2025-12-24T00:00:00","2025-12-26T00:00:00","2025-12-29T00:00:00","2025-12-30T00:00:00","2025-12-31T00:00:00","2026-01-02T00:00:00","2026-01-05T00:00:00","2026-01-06T00:00:00","2026-01-07T00:00:00","2026-01-08T00:00:00","2026-01-09T00:00:00","2026-01-12T00:00:00","2026-01-13T00:00:00","2026-01-14T00:00:00","2026-01-15T00:00:00","2026-01-16T00:00:00","2026-01-20T00:00:00","2026-01-21T00:00:00","2026-01-22T00:00:00","2026-01-23T00:00:00","2026-01-26T00:00:00","2026-01-27T00:00:00","2026-01-28T00:00:00","2026-01-29T00:00:00","2026-01-30T00:00:00","2026-02-02T00:00:00","2026-02-03T00:00:00","2026-02-04T00:00:00","2026-02-05T00:00:00","2026-02-06T00:00:00","2026-02-09T00:00:00","2026-02-10T00:00:00","2026-02-11T00:00:00","2026-02-12T00:00:00","2026-02-13T00:00:00","2026-02-17T00:00:00","2026-02-18T00:00:00","2026-02-19T00:00:00","2026-02-20T00:00:00","2026-02-23T00:00:00","2026-02-24T00:00:00","2026-02-25T00:00:00","2026-02-26T00:00:00","2026-02-27T00:00:00","2026-03-02T00:00:00","2026-03-03T00:00:00","2026-03-04T00:00:00","2026-03-05T00:00:00","2026-03-06T00:00:00","2026-03-09T00:00:00","2026-03-10T00:00:00","2026-03-11T00:00:00","2026-03-12T00:00:00","2026-03-13T00:00:00","2026-03-16T00:00:00","2026-03-17T00:00:00","2026-03-18T00:00:00","2026-03-19T00:00:00"],"type":"candlestick","xaxis":"x","yaxis":"y"},{"line":{"color":"#ffc107","width":1},"name":"EMA21","x":["2025-09-22T00:00:00","2025-09-23T00:00:00","2025-09-24T00:00:00","2025-09-25T00:00:00","2025-09-26T00:00:00","2025-09-29T00:00:00","2025-09-30T00:00:00","2025-10-01T00:00:00","2025-10-02T00:00:00","2025-10-03T00:00:00","2025-10-06T00:00:00","2025-10-07T00:00:00","2025-10-08T00:00:00","2025-10-09T00:00:00","2025-10-10T00:00:00","2025-10-13T00:00:00","2025-10-14T00:00:00","2025-10-15T00:00:00","2025-10-16T00:00:00","2025-10-17T00:00:00","2025-10-20T00:00:00","2025-10-21T00:00:00","2025-10-22T00:00:00","2025-10-23T00:00:00","2025-10-24T00:00:00","2025-10-27T00:00:00","2025-10-28T00:00:00","2025-10-29T00:00:00","2025-10-30T00:00:00","2025-10-31T00:00:00","2025-11-03T00:00:00","2025-11-04T00:00:00","2025-11-05T00:00:00","2025-11-06T00:00:00","2025-11-07T00:00:00","2025-11-10T00:00:00","2025-11-11T00:00:00","2025-11-12T00:00:00","2025-11-13T00:00:00","2025-11-14T00:00:00","2025-11-17T00:00:00","2025-11-18T00:00:00","2025-11-19T00:00:00","2025-11-20T00:00:00","2025-11-21T00:00:00","2025-11-24T00:00:00","2025-11-25T00:00:00","2025-11-26T00:00:00","2025-11-28T00:00:00","2025-12-01T00:00:00","2025-12-02T00:00:00","2025-12-03T00:00:00","2025-12-04T00:00:00","2025-12-05T00:00:00","2025-12-08T00:00:00","2025-12-09T00:00:00","2025-12-10T00:00:00","2025-12-11T00:00:00","2025-12-12T00:00:00","2025-12-15T00:00:00","2025-12-16T00:00:00","2025-12-17T00:00:00","2025-12-18T00:00:00","2025-12-19T00:00:00","2025-12-22T00:00:00","2025-12-23T00:00:00","2025-12-24T00:00:00","2025-12-26T00:00:00","2025-12-29T00:00:00","2025-12-30T00:00:00","2025-12-31T00:00:00","2026-01-02T00:00:00","2026-01-05T00:00:00","2026-01-06T00:00:00","2026-01-07T00:00:00","2026-01-08T00:00:00","2026-01-09T00:00:00","2026-01-12T00:00:00","2026-01-13T00:00:00","2026-01-14T00:00:00","2026-01-15T00:00:00","2026-01-16T00:00:00","2026-01-20T00:00:00","2026-01-21T00:00:00","2026-01-22T00:00:00","2026-01-23T00:00:00","2026-01-26T00:00:00","2026-01-27T00:00:00","2026-01-28T00:00:00","2026-01-29T00:00:00","2026-01-30T00:00:00","2026-02-02T00:00:00","2026-02-03T00:00:00","2026-02-04T00:00:00","2026-02-05T00:00:00","2026-02-06T00:00:00","2026-02-09T00:00:00","2026-02-10T00:00:00","2026-02-11T00:00:00","2026-02-12T00:00:00","2026-02-13T00:00:00","2026-02-17T00:00:00","2026-02-18T00:00:00","2026-02-19T00:00:00","2026-02-20T00:00:00","2026-02-23T00:00:00","2026-02-24T00:00:00","2026-02-25T00:00:00","2026-02-26T00:00:00","2026-02-27T00:00:00","2026-03-02T00:00:00","2026-03-03T00:00:00","2026-03-04T00:00:00","2026-03-05T00:00:00","2026-03-06T00:00:00","2026-03-09T00:00:00","2026-03-10T00:00:00","2026-03-11T00:00:00","2026-03-12T00:00:00","2026-03-13T00:00:00","2026-03-16T00:00:00","2026-03-17T00:00:00","2026-03-18T00:00:00","2026-03-19T00:00:00"],"y":{"dtype":"f8","bdata":"AAAAwEkidUAAAACAgSJ1QBdddLE9I3VAWz07xD8fdUA7CfBAVxl1QNjZZS9YCnVArVFFJaH\u002fdEBASlbT8Pp0QK79fNSh\u002fXRAQXK3z1oAdUANIhsUpv50QJeqGPhu\u002fnRAiWwWMG8LdUDCv4hxjhZ1QDxRfN4QA3VAZXhCyucfdUCLyrDd3yd1QJWJ5l2SOXVAEn10EsFNdUCzcZi2Gll1QKJ+LcBKY3VAfOdXOgBjdUD8AK1gT191QM6jEVK\u002fYXVAGE8nmT9ydUDQ6t1Wv4x1QAIE4dGwtHVAAXhv6uPrdUAvyjbyQxB2QIegd1NnJ3ZAZGP46CgydkC4zuHwiCx2QKekQVKkMXZAOsSY8FwxdkB7D0WpKih2QEHIPm7QLHZAr0HzTLQndkDOmK6uyid2QAHoWA2\u002fEXZAGI05KU4BdkAsI3qFovJ1QD83KT8t4nVAZ+z2Z2zndUAYkT3nKOF1QHKyINXa0XVAxdB6isL6dUCcA+TdNSp2QEgDuGmNZ3ZA\u002fAKQkSSndkBZjg5Ncsh2QFEksNEs4HZAG34UUFr0dkBG\u002foZRTgd3QCjnNCfoJXdAU4wB+H1Rd0BLaAFQpoB3QHLqjM43tXdAaOzF+2zbd0Aw7rNqvbp3QCxk6ePQf3dA+f0ZcmlMd0C0LEZ2fwd3QHRuy+JzznZAUgcW0c6pdkCnBhR+Bot2QFIdtQ99enZA7THTnMNsdkDY\u002fr\u002fIEGN2QNyhC2VDVnZAggfcO0tLdkAZHiX\u002f3Tt2QHN4CsUNMHZAOlZPjTQfdkCpZV\u002fDZRB2QMjQsw6LAnZAEtUXVuvldUCcZP6WEN51QKUVLYx04XVAOEJARQfodUC\u002fajrWl9h1QMVJ7xwdz3VAyytl1yLTdUChbS0Y\u002f7p1QNgdbyeGn3VAf4+TDLyBdUDoU0CRvV51QHYGadjoRXVAazRIk+I6dUBKu55uhDF1QLh7Sq1ZJXVABJ\u002fmUR4bdUBJeRdWihF1QKDiQy4n+XRA1xOy9R7RdEDE+v5qTrB0QJtvczsSs3RAu3yXJJ3FdECTK1s+YdF0QPqbO2dz33RA+keTZmLbdEC0WFfa9c50QF45lcNiznRAsmJwPUbPdED\u002fcH3Dx9B0QFzyFEYz0HRAmfO1H1DMdECLOut5ucF0QJapG8YEwnRAziUZdNqydEC7lv968KF0QNjOuVKAkXRAZzDAWVB7dEDpzgvDgmx0QHYw3H84dXRAJok81M55dEAL8dljMJR0QMRm3ZePp3RAD+lU4bO3dEBUpR5EO750QHtQ7V0UsHRA5DGpjDqndEBbLQ567pl0QGnjDIwEhnRAGkM6App5dEA="},"type":"scatter","xaxis":"x","yaxis":"y"},{"line":{"color":"#58a6ff","width":1},"name":"EMA50","x":["2025-09-22T00:00:00","2025-09-23T00:00:00","2025-09-24T00:00:00","2025-09-25T00:00:00","2025-09-26T00:00:00","2025-09-29T00:00:00","2025-09-30T00:00:00","2025-10-01T00:00:00","2025-10-02T00:00:00","2025-10-03T00:00:00","2025-10-06T00:00:00","2025-10-07T00:00:00","2025-10-08T00:00:00","2025-10-09T00:00:00","2025-10-10T00:00:00","2025-10-13T00:00:00","2025-10-14T00:00:00","2025-10-15T00:00:00","2025-10-16T00:00:00","2025-10-17T00:00:00","2025-10-20T00:00:00","2025-10-21T00:00:00","2025-10-22T00:00:00","2025-10-23T00:00:00","2025-10-24T00:00:00","2025-10-27T00:00:00","2025-10-28T00:00:00","2025-10-29T00:00:00","2025-10-30T00:00:00","2025-10-31T00:00:00","2025-11-03T00:00:00","2025-11-04T00:00:00","2025-11-05T00:00:00","2025-11-06T00:00:00","2025-11-07T00:00:00","2025-11-10T00:00:00","2025-11-11T00:00:00","2025-11-12T00:00:00","2025-11-13T00:00:00","2025-11-14T00:00:00","2025-11-17T00:00:00","2025-11-18T00:00:00","2025-11-19T00:00:00","2025-11-20T00:00:00","2025-11-21T00:00:00","2025-11-24T00:00:00","2025-11-25T00:00:00","2025-11-26T00:00:00","2025-11-28T00:00:00","2025-12-01T00:00:00","2025-12-02T00:00:00","2025-12-03T00:00:00","2025-12-04T00:00:00","2025-12-05T00:00:00","2025-12-08T00:00:00","2025-12-09T00:00:00","2025-12-10T00:00:00","2025-12-11T00:00:00","2025-12-12T00:00:00","2025-12-15T00:00:00","2025-12-16T00:00:00","2025-12-17T00:00:00","2025-12-18T00:00:00","2025-12-19T00:00:00","2025-12-22T00:00:00","2025-12-23T00:00:00","2025-12-24T00:00:00","2025-12-26T00:00:00","2025-12-29T00:00:00","2025-12-30T00:00:00","2025-12-31T00:00:00","2026-01-02T00:00:00","2026-01-05T00:00:00","2026-01-06T00:00:00","2026-01-07T00:00:00","2026-01-08T00:00:00","2026-01-09T00:00:00","2026-01-12T00:00:00","2026-01-13T00:00:00","2026-01-14T00:00:00","2026-01-15T00:00:00","2026-01-16T00:00:00","2026-01-20T00:00:00","2026-01-21T00:00:00","2026-01-22T00:00:00","2026-01-23T00:00:00","2026-01-26T00:00:00","2026-01-27T00:00:00","2026-01-28T00:00:00","2026-01-29T00:00:00","2026-01-30T00:00:00","2026-02-02T00:00:00","2026-02-03T00:00:00","2026-02-04T00:00:00","2026-02-05T00:00:00","2026-02-06T00:00:00","2026-02-09T00:00:00","2026-02-10T00:00:00","2026-02-11T00:00:00","2026-02-12T00:00:00","2026-02-13T00:00:00","2026-02-17T00:00:00","2026-02-18T00:00:00","2026-02-19T00:00:00","2026-02-20T00:00:00","2026-02-23T00:00:00","2026-02-24T00:00:00","2026-02-25T00:00:00","2026-02-26T00:00:00","2026-02-27T00:00:00","2026-03-02T00:00:00","2026-03-03T00:00:00","2026-03-04T00:00:00","2026-03-05T00:00:00","2026-03-06T00:00:00","2026-03-09T00:00:00","2026-03-10T00:00:00","2026-03-11T00:00:00","2026-03-12T00:00:00","2026-03-13T00:00:00","2026-03-16T00:00:00","2026-03-17T00:00:00","2026-03-18T00:00:00","2026-03-19T00:00:00"],"y":{"dtype":"f8","bdata":"AAAAwEkidUCNjIzMYSJ1QEK+Ozm0InVA0buOyAAhdUBBgui3Yh51QC+HAgG4F3VAulnudpISdUCQsJSCzg91QD9F+D8mEHVAWxV7ApkQdUCoN2yMOQ91QFYSgV17DnVARLcw9HUTdUBR7Eya8Rd1QAPZOk97D3VASZlHdG8bdUAea+VcDB91QAmF9U0HJ3VAYxEZPXYwdUAUcHK5gTZ1QJtX0hdCPHVAwuqc0Kk9dUBRpXgSiT11QCbveEvpP3VAz+8yOFtIdUCkImMablV1QPjQ8G\u002fUaHVAICOryZ2DdUB52xKSZZd1QFJGOi4epnVAvnCr7dOvdUAgOicyg7J1QJf2ayyAuXVAl5dEgRe+dUBaRqEqpb51QHolzcDJxHVAhKZRzanGdUCsTyusgcp1QKVl8qynxHVASQIHA5bAdUC1hM+py7x1QMzKMK3Ot3VA9+Aub7u7dUCsX4Javrp1QBSEvt+ltXVAX\u002feiQWbIdUCi4+zb1951QFqAypBC\u002fHVAibLlE+YbdkC73Qm\u002fuS92QM2YJ1PzP3ZAUhUwG\u002fBOdkD1jIjDmV12QH6W58V0cXZA2dEuiFWLdkAIM2SPcqd2QMHqBUukxnZAX7QKvnrgdkDAIOKBONx2QK9W7V+Hy3ZAmaN\u002fsWy8dkDKOBHyV6R2QIsxtsufj3ZAzGEEz0eCdkCwF+ZGjXZ2QNwv+6A4cHZAnM5pGbRqdkAUWBXDmWZ2QOyfMn\u002fwYHZAcGLv88lbdkDGkHfDfFR2QBOGGAdtTnZA1oUNg\u002fdFdkBWP04iDz52QBx+m8ZKNnZAG2qaR+ondkB16CBa8CF2QNVc3ly9IHZAcprL6hchdkDcDDJ9Mhh2QOeYsiGdEXZAeiQ4uL0QdkCtwwh76QN2QI1I5aUz9XVAdASW0f3kdUDUkP7pANJ1QBJ31qXFwnVAWGMjrR65dUCGc5XiILB1QOFQSTDqpXVA3XVLlXWcdUBIe0NiQZN1QOHkTwWmg3VA7eBq1fJsdUB6N+6urlh1QOTL0KZFU3VAJwUyDP1UdUD+DjAEcVR1QHwiJCJfVXVAQD+qPf5OdUDZUGKeGUV1QO+OdyM4QHVAoNRodyM8dUD0diPchDh1QJC4x1kzNHVAF3VRJZoudUDVxdAZLiZ1QG4YSxZeInVALcztFwwYdUC9VcFayAx1QOPUzXKAAXVAuPn83YnzdEB6fGEucOh0QHZUCOVV53RAF0JJ2NbkdED9vKCiBex0QLfYAyDv8HRATOQ1EgX1dEA6vSl8bvV0QB4GFIAp7XRANlsx3vLmdEBsIOS+tt50QKqhTh5t03RAF18e3QjLdEA="},"type":"scatter","xaxis":"x","yaxis":"y"},{"line":{"color":"#ab47bc","width":1},"name":"EMA200","x":["2025-09-22T00:00:00","2025-09-23T00:00:00","2025-09-24T00:00:00","2025-09-25T00:00:00","2025-09-26T00:00:00","2025-09-29T00:00:00","2025-09-30T00:00:00","2025-10-01T00:00:00","2025-10-02T00:00:00","2025-10-03T00:00:00","2025-10-06T00:00:00","2025-10-07T00:00:00","2025-10-08T00:00:00","2025-10-09T00:00:00","2025-10-10T00:00:00","2025-10-13T00:00:00","2025-10-14T00:00:00","2025-10-15T00:00:00","2025-10-16T00:00:00","2025-10-17T00:00:00","2025-10-20T00:00:00","2025-10-21T00:00:00","2025-10-22T00:00:00","2025-10-23T00:00:00","2025-10-24T00:00:00","2025-10-27T00:00:00","2025-10-28T00:00:00","2025-10-29T00:00:00","2025-10-30T00:00:00","2025-10-31T00:00:00","2025-11-03T00:00:00","2025-11-04T00:00:00","2025-11-05T00:00:00","2025-11-06T00:00:00","2025-11-07T00:00:00","2025-11-10T00:00:00","2025-11-11T00:00:00","2025-11-12T00:00:00","2025-11-13T00:00:00","2025-11-14T00:00:00","2025-11-17T00:00:00","2025-11-18T00:00:00","2025-11-19T00:00:00","2025-11-20T00:00:00","2025-11-21T00:00:00","2025-11-24T00:00:00","2025-11-25T00:00:00","2025-11-26T00:00:00","2025-11-28T00:00:00","2025-12-01T00:00:00","2025-12-02T00:00:00","2025-12-03T00:00:00","2025-12-04T00:00:00","2025-12-05T00:00:00","2025-12-08T00:00:00","2025-12-09T00:00:00","2025-12-10T00:00:00","2025-12-11T00:00:00","2025-12-12T00:00:00","2025-12-15T00:00:00","2025-12-16T00:00:00","2025-12-17T00:00:00","2025-12-18T00:00:00","2025-12-19T00:00:00","2025-12-22T00:00:00","2025-12-23T00:00:00","2025-12-24T00:00:00","2025-12-26T00:00:00","2025-12-29T00:00:00","2025-12-30T00:00:00","2025-12-31T00:00:00","2026-01-02T00:00:00","2026-01-05T00:00:00","2026-01-06T00:00:00","2026-01-07T00:00:00","2026-01-08T00:00:00","2026-01-09T00:00:00","2026-01-12T00:00:00","2026-01-13T00:00:00","2026-01-14T00:00:00","2026-01-15T00:00:00","2026-01-16T00:00:00","2026-01-20T00:00:00","2026-01-21T00:00:00","2026-01-22T00:00:00","2026-01-23T00:00:00","2026-01-26T00:00:00","2026-01-27T00:00:00","2026-01-28T00:00:00","2026-01-29T00:00:00","2026-01-30T00:00:00","2026-02-02T00:00:00","2026-02-03T00:00:00","2026-02-04T00:00:00","2026-02-05T00:00:00","2026-02-06T00:00:00","2026-02-09T00:00:00","2026-02-10T00:00:00","2026-02-11T00:00:00","2026-02-12T00:00:00","2026-02-13T00:00:00","2026-02-17T00:00:00","2026-02-18T00:00:00","2026-02-19T00:00:00","2026-02-20T00:00:00","2026-02-23T00:00:00","2026-02-24T00:00:00","2026-02-25T00:00:00","2026-02-26T00:00:00","2026-02-27T00:00:00","2026-03-02T00:00:00","2026-03-03T00:00:00","2026-03-04T00:00:00","2026-03-05T00:00:00","2026-03-06T00:00:00","2026-03-09T00:00:00","2026-03-10T00:00:00","2026-03-11T00:00:00","2026-03-12T00:00:00","2026-03-13T00:00:00","2026-03-16T00:00:00","2026-03-17T00:00:00","2026-03-18T00:00:00","2026-03-19T00:00:00"],"y":{"dtype":"f8","bdata":"AAAAwEkidUAYBRzaTyJ1QPDxuvFkInVAJlSQP\u002fchdUA1QIfHSiF1QFuSMFSSH3VAuhtMBjAedUANZIPOXh11QHMM0YRSHXVA8OkBFU4ddUBZ9FWJ1Bx1QJOO2Z+BHHVAAruzTaEddUD4vBKYqh51QG4eMdBzHHVANAdhOlsfdUDPvybrOyB1QBW6pUE\u002fInVAm0U1LrAkdUDEchfRViZ1QEscBJb1J3VAsdSzkIQodUBOWN0esih1QD7UoYeBKXVALxhxJt8rdUAV3NXqeC91QD9La7jFNHVA+GPRPxY8dUBTTUhL0UF1QM0jWIBnRnVAPHZvBdJJdUCV1A4+hEt1QA4NFYVQTnVA8BoIxYtQdUDFpnrBxlF1QGW0ehZrVHVAiddxIANWdUD9Ha+3G1h1QDRvAQjDV3VAK9CqG9BXdUCznezI5Fd1QAYCBcyhV3VAqZ4ouJVZdUA\u002fBBCDT1p1QMs+Mir6WXVAY3KNrqVfdUAYGFlaYmZ1QA2pVfgLb3VAHcIOx3p4dUDJj8jnIn91QK9cJ54ChXVA44rMUKyKdUB52KasWJB1QJCt2jptl3VApyh1hCmgdUAEX4isoql1QI6FUW4TtHVA72aeHV29dUAlL5UJLr91QJm+UuLHvXVAwom256G8dUBrshFJEbl1QK\u002foM8QmtnVARuHh++20dUDY1Pc6\u002f7N1QF9hippTtHVAI21c0cu0dUDE1SmukLV1QDyVkOnjtXVAgbxQEEm2dUAYxm9fFLZ1QESIuCcetnVA\u002ffYwqny1dUCYz4UL67R1QOG31N5PtHVANQ9XG\u002fWxdUAtt7VinbF1QJsTopxtsnVAjde0lJ2zdUAeP1KYcrJ1QINaaCbKsXVAvg+CjYWydUDyB3Q9NLB1QLau4fRNrXVAfP7vJ+ipdUBDrtZLraV1QCJ8gNdAonVAmdZ4tiCgdUAyWmhWGJ51QB3Wxteum3VAqhP5uGKZdUAo2tu1FJd1QCc\u002fjTcVk3VAcs7aayuNdUA6ZQ\u002fztId1QDLBYL3dhXVAmo0PWsyFdUAEkHZ9LIV1QEbcFcbshHVA6WS3U9WCdUDbHbirzn91QLmEfxj8fXVAnCJdslV8dUDihhwQx3p1QDYwT8gFeXVAJfVe0+p2dUC3AFCQD3R1QEktJYlRcnVA2sHehedudUBnYHWULmt1QCImIF5hZ3VALflq39JidUAoew9g5l51QMSLQ\u002f9wXXVAu\u002fvcAKJbdUDwYqr2RVx1QD74MBhnXHVAvL2cu15cdUDzRyc4clt1QCK7RjdVWHVAKJhkobBVdUA2tYSlf1J1QHPr8IV7TnVA7uyl\u002fCBLdUA="},"type":"scatter","xaxis":"x","yaxis":"y"},{"marker":{"color":["#f44336","#f44336","#f44336","#4caf50","#f44336","#f44336","#f44336","#4caf50","#f44336","#f44336","#f44336","#f44336","#4caf50","#f44336","#f44336","#4caf50","#f44336","#f44336","#f44336","#f44336","#f44336","#f44336","#f44336","#4caf50","#4caf50","#4caf50","#4caf50","#4caf50","#f44336","#f44336","#f44336","#f44336","#4caf50","#f44336","#f44336","#4caf50","#f44336","#f44336","#f44336","#4caf50","#4caf50","#f44336","#4caf50","#f44336","#f44336","#4caf50","#4caf50","#4caf50","#4caf50","#f44336","#f44336","#4caf50","#4caf50","#4caf50","#f44336","#4caf50","#4caf50","#4caf50","#f44336","#f44336","#4caf50","#f44336","#f44336","#4caf50","#f44336","#4caf50","#f44336","#4caf50","#4caf50","#f44336","#f44336","#f44336","#f44336","#4caf50","#4caf50","#f44336","#4caf50","#4caf50","#4caf50","#f44336","#f44336","#4caf50","#f44336","#f44336","#f44336","#4caf50","#4caf50","#4caf50","#f44336","#f44336","#f44336","#4caf50","#f44336","#f44336","#f44336","#4caf50","#4caf50","#f44336","#f44336","#f44336","#f44336","#4caf50","#4caf50","#4caf50","#4caf50","#f44336","#4caf50","#4caf50","#f44336","#4caf50","#4caf50","#4caf50","#4caf50","#4caf50","#4caf50","#4caf50","#f44336","#f44336","#f44336","#f44336","#f44336","#f44336","#f44336","#4caf50"]},"name":"Volume","opacity":0.5,"x":["2025-09-22T00:00:00","2025-09-23T00:00:00","2025-09-24T00:00:00","2025-09-25T00:00:00","2025-09-26T00:00:00","2025-09-29T00:00:00","2025-09-30T00:00:00","2025-10-01T00:00:00","2025-10-02T00:00:00","2025-10-03T00:00:00","2025-10-06T00:00:00","2025-10-07T00:00:00","2025-10-08T00:00:00","2025-10-09T00:00:00","2025-10-10T00:00:00","2025-10-13T00:00:00","2025-10-14T00:00:00","2025-10-15T00:00:00","2025-10-16T00:00:00","2025-10-17T00:00:00","2025-10-20T00:00:00","2025-10-21T00:00:00","2025-10-22T00:00:00","2025-10-23T00:00:00","2025-10-24T00:00:00","2025-10-27T00:00:00","2025-10-28T00:00:00","2025-10-29T00:00:00","2025-10-30T00:00:00","2025-10-31T00:00:00","2025-11-03T00:00:00","2025-11-04T00:00:00","2025-11-05T00:00:00","2025-11-06T00:00:00","2025-11-07T00:00:00","2025-11-10T00:00:00","2025-11-11T00:00:00","2025-11-12T00:00:00","2025-11-13T00:00:00","2025-11-14T00:00:00","2025-11-17T00:00:00","2025-11-18T00:00:00","2025-11-19T00:00:00","2025-11-20T00:00:00","2025-11-21T00:00:00","2025-11-24T00:00:00","2025-11-25T00:00:00","2025-11-26T00:00:00","2025-11-28T00:00:00","2025-12-01T00:00:00","2025-12-02T00:00:00","2025-12-03T00:00:00","2025-12-04T00:00:00","2025-12-05T00:00:00","2025-12-08T00:00:00","2025-12-09T00:00:00","2025-12-10T00:00:00","2025-12-11T00:00:00","2025-12-12T00:00:00","2025-12-15T00:00:00","2025-12-16T00:00:00","2025-12-17T00:00:00","2025-12-18T00:00:00","2025-12-19T00:00:00","2025-12-22T00:00:00","2025-12-23T00:00:00","2025-12-24T00:00:00","2025-12-26T00:00:00","2025-12-29T00:00:00","2025-12-30T00:00:00","2025-12-31T00:00:00","2026-01-02T00:00:00","2026-01-05T00:00:00","2026-01-06T00:00:00","2026-01-07T00:00:00","2026-01-08T00:00:00","2026-01-09T00:00:00","2026-01-12T00:00:00","2026-01-13T00:00:00","2026-01-14T00:00:00","2026-01-15T00:00:00","2026-01-16T00:00:00","2026-01-20T00:00:00","2026-01-21T00:00:00","2026-01-22T00:00:00","2026-01-23T00:00:00","2026-01-26T00:00:00","2026-01-27T00:00:00","2026-01-28T00:00:00","2026-01-29T00:00:00","2026-01-30T00:00:00","2026-02-02T00:00:00","2026-02-03T00:00:00","2026-02-04T00:00:00","2026-02-05T00:00:00","2026-02-06T00:00:00","2026-02-09T00:00:00","2026-02-10T00:00:00","2026-02-11T00:00:00","2026-02-12T00:00:00","2026-02-13T00:00:00","2026-02-17T00:00:00","2026-02-18T00:00:00","2026-02-19T00:00:00","2026-02-20T00:00:00","2026-02-23T00:00:00","2026-02-24T00:00:00","2026-02-25T00:00:00","2026-02-26T00:00:00","2026-02-27T00:00:00","2026-03-02T00:00:00","2026-03-03T00:00:00","2026-03-04T00:00:00","2026-03-05T00:00:00","2026-03-06T00:00:00","2026-03-09T00:00:00","2026-03-10T00:00:00","2026-03-11T00:00:00","2026-03-12T00:00:00","2026-03-13T00:00:00","2026-03-16T00:00:00","2026-03-17T00:00:00","2026-03-18T00:00:00","2026-03-19T00:00:00"],"y":{"dtype":"i4","bdata":"IFG1ASTXTgF0QCwBeMhKAfz46wDAj0UBvNgyAYxOQgEg6y8BrA3hAKTDGQEs+xMBnLtHAbQ4DQHImrkBLKq9AjDiUAGk92wBEAQ2Aax8PwGIpu4AuI31AMAEJgFAN8QAVFX2AAguMgEASkEBYBd9AYS3cgHAkEkBNG8GAYzvbgFwvAQBRJovAWA3TgGoYfoAUPX6ACQDugAYGlkBwEwaAfDS4QBQhksB\u002fG5NAbh5uAFsCs4BwCrRAhBJ\u002fwEI0rUB\u002fPDLACDMYgEY2lIBUJFFAQzK8QB8HHoBaAfQAdCKdgH4H+EBwAu5ApSQsgX0ee0DLPF1A6R7XgQMoj8DoJl7CRCItgGYy64BkFKuAIRP5QAU4k4BAM\u002f9ALQp6gBIjYMBABnbAQwOngHU+jQBsBZ0AUQOVwFgqj8BoFsXAWw1ywEwCFMBQHfdAQzE7AHIYegByGlyASy5zQFAkX0BQKyFAWT6XgEMATgBqAWwAfikBwFwRjMC\u002fCqVAvi0jAKIl\u002fcB+CbLAawyKgGceAMBBM5PARC4GAGEHmYBdP3OAGSk5wAUdA0BUFn7AMBTaAEc9TMBFO33AWhPqwGg1DkBWMg9Abh3FAJ462YDSGpVAmiYawI0nsIBpMMyAextTwGI3BECHJDeAQQ9RAJ4f4QB2w9iAQ=="},"type":"bar","xaxis":"x2","yaxis":"y2"},{"line":{"color":"#ab47bc","width":1},"name":"RSI(14)","x":["2025-09-22T00:00:00","2025-09-23T00:00:00","2025-09-24T00:00:00","2025-09-25T00:00:00","2025-09-26T00:00:00","2025-09-29T00:00:00","2025-09-30T00:00:00","2025-10-01T00:00:00","2025-10-02T00:00:00","2025-10-03T00:00:00","2025-10-06T00:00:00","2025-10-07T00:00:00","2025-10-08T00:00:00","2025-10-09T00:00:00","2025-10-10T00:00:00","2025-10-13T00:00:00","2025-10-14T00:00:00","2025-10-15T00:00:00","2025-10-16T00:00:00","2025-10-17T00:00:00","2025-10-20T00:00:00","2025-10-21T00:00:00","2025-10-22T00:00:00","2025-10-23T00:00:00","2025-10-24T00:00:00","2025-10-27T00:00:00","2025-10-28T00:00:00","2025-10-29T00:00:00","2025-10-30T00:00:00","2025-10-31T00:00:00","2025-11-03T00:00:00","2025-11-04T00:00:00","2025-11-05T00:00:00","2025-11-06T00:00:00","2025-11-07T00:00:00","2025-11-10T00:00:00","2025-11-11T00:00:00","2025-11-12T00:00:00","2025-11-13T00:00:00","2025-11-14T00:00:00","2025-11-17T00:00:00","2025-11-18T00:00:00","2025-11-19T00:00:00","2025-11-20T00:00:00","2025-11-21T00:00:00","2025-11-24T00:00:00","2025-11-25T00:00:00","2025-11-26T00:00:00","2025-11-28T00:00:00","2025-12-01T00:00:00","2025-12-02T00:00:00","2025-12-03T00:00:00","2025-12-04T00:00:00","2025-12-05T00:00:00","2025-12-08T00:00:00","2025-12-09T00:00:00","2025-12-10T00:00:00","2025-12-11T00:00:00","2025-12-12T00:00:00","2025-12-15T00:00:00","2025-12-16T00:00:00","2025-12-17T00:00:00","2025-12-18T00:00:00","2025-12-19T00:00:00","2025-12-22T00:00:00","2025-12-23T00:00:00","2025-12-24T00:00:00","2025-12-26T00:00:00","2025-12-29T00:00:00","2025-12-30T00:00:00","2025-12-31T00:00:00","2026-01-02T00:00:00","2026-01-05T00:00:00","2026-01-06T00:00:00","2026-01-07T00:00:00","2026-01-08T00:00:00","2026-01-09T00:00:00","2026-01-12T00:00:00","2026-01-13T00:00:00","2026-01-14T00:00:00","2026-01-15T00:00:00","2026-01-16T00:00:00","2026-01-20T00:00:00","2026-01-21T00:00:00","2026-01-22T00:00:00","2026-01-23T00:00:00","2026-01-26T00:00:00","2026-01-27T00:00:00","2026-01-28T00:00:00","2026-01-29T00:00:00","2026-01-30T00:00:00","2026-02-02T00:00:00","2026-02-03T00:00:00","2026-02-04T00:00:00","2026-02-05T00:00:00","2026-02-06T00:00:00","2026-02-09T00:00:00","2026-02-10T00:00:00","2026-02-11T00:00:00","2026-02-12T00:00:00","2026-02-13T00:00:00","2026-02-17T00:00:00","2026-02-18T00:00:00","2026-02-19T00:00:00","2026-02-20T00:00:00","2026-02-23T00:00:00","2026-02-24T00:00:00","2026-02-25T00:00:00","2026-02-26T00:00:00","2026-02-27T00:00:00","2026-03-02T00:00:00","2026-03-03T00:00:00","2026-03-04T00:00:00","2026-03-05T00:00:00","2026-03-06T00:00:00","2026-03-09T00:00:00","2026-03-10T00:00:00","2026-03-11T00:00:00","2026-03-12T00:00:00","2026-03-13T00:00:00","2026-03-16T00:00:00","2026-03-17T00:00:00","2026-03-18T00:00:00","2026-03-19T00:00:00"],"y":{"dtype":"f8","bdata":"AAAAAAAA+H8AAAAAAAD4fwAAAAAAAPh\u002fAAAAAAAA+H8AAAAAAAD4fwAAAAAAAPh\u002fAAAAAAAA+H8AAAAAAAD4fwAAAAAAAPh\u002fAAAAAAAA+H8AAAAAAAD4fwAAAAAAAPh\u002fAAAAAAAA+H8AAAAAAAD4f2zemJtSskJAhPVymHYKTkDNhm1anjNKQNsd97\u002fNpkxAz6seEf6lTUAj+GsXdSpOQCQqXTZdv01Ay8R3\u002f541S0B8fjdmbIRJQCIONqiPZEpA6oqIYqodTUB\u002f8Lro9lROQLzusI11oE5AcmzkPe9NUEBliUb\u002fDL1RQH37sKZgSExAH+Z+JOLzTUBOzl7mgChJQB86IEs\u002fM0pAtL9UxvOTSkCislOqjQtJQJqHeEtap0xASR7Q5hKcS0A9B5X\u002fXXZLQBHvJXjL9UVASjPyAMaVREAAqNWSZW9BQHgGFBr1izhAVpurNLkeQ0BBnTDnXPdCQJz+xX8cD0NAKAFe7\u002f1dTkAWE2lIPF9OQLWVf3RXhlBAYtZ1VKCpUUDtqzV9jwhOQANe2XhrdU5AFmQmqu7CTUDYbQWondRQQK8a2tEERVFA3v7TIWjgUUA\u002feXJJWmtSQAj0XQu8DlJAqwz6FxsyUkB0LluxjeRLQE7LUZDTwkJAticqVtuTQUAgJYu6nic6QEB\u002fhFDaZDlAEvgfuNT0QECwlxGTLetBQCx7jD4OxENAjA8ZiXbdQ0DnUdeDzUlCQMQNYWU8kT5AQFmF\u002f0L5O0DstA8dzjs3QPzTJI4kgzlAvSBNHXTPQ0Dwo8C1KQpLQANwTY80SkpAq1P7sQ94TECSDw+ZypVPQB8QkFLviE5AYOMVlILCTkCEsSxnjlBFQPPgCa3sR0ZAyb+brirbSEAyPaEPW01EQA9z+KWMUkNAkfx7kyRqQ0DiKgfzPtVBQAUIs1fZM0RAdwEWp6NeRkAfJK0t4ItGQDk0iaJei0hAzQFBAtbvREBrq6u8mCdCQMy1tg9q8D1AlGHzKLrRPkDU+p6NnEE+QFFESZr8G0RAPE5iJRo5TEC3KOqI1FFMQO10sZVG+01AQlRjt7v+S0Dqzr15yBVJQMC1t+fg7khANAQQ42MSSUBZRSDi7eJJQIOOCLsxXUlAWcXztwjMSEDPzI5OeXNKQNo3wbhkIlBAp6ikfesNTEDz5BPYY1BEQDAVUBBfbD1AnPd9fA+6PECYwnENT0E+QGI+cpGcl0lAHe+lEmoUS0DIfZNmpJpNQO3+aW4sEUxAV86p94SLS0AhS3pd6w1KQGNAfdm6u0ZAszr8t5vWSEBYNV\u002f6+8JFQJEiR1CaMEdAO7A+pMkWSUA="},"type":"scatter","xaxis":"x3","yaxis":"y3"},{"hoverinfo":"skip","line":{"color":"#4fc3f7","dash":"dot","width":1},"mode":"lines","showlegend":false,"x":["2026-01-23T00:00:00","2026-01-28T00:00:00"],"y":[314.11,339.99],"type":"scatter","xaxis":"x","yaxis":"y"},{"hoverinfo":"skip","line":{"color":"#4caf50","dash":"dot","width":1},"mode":"lines","showlegend":false,"x":["2026-02-04T00:00:00","2026-02-09T00:00:00"],"y":[295.3,352.34],"type":"scatter","xaxis":"x","yaxis":"y"},{"hoverinfo":"skip","line":{"color":"#f44336","dash":"dot","width":1},"mode":"lines","showlegend":false,"x":["2026-02-17T00:00:00","2026-02-20T00:00:00"],"y":[316.31,340.11],"type":"scatter","xaxis":"x","yaxis":"y"},{"hoverinfo":"skip","line":{"color":"#f44336","dash":"dot","width":1},"mode":"lines","showlegend":false,"x":["2026-03-02T00:00:00","2026-03-10T00:00:00"],"y":[307.2,353.14],"type":"scatter","xaxis":"x","yaxis":"y"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"rgb(17,17,17)","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#f2f5fa"},"error_y":{"color":"#f2f5fa"},"marker":{"line":{"color":"rgb(17,17,17)","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#A2B1C6","gridcolor":"#506784","linecolor":"#506784","minorgridcolor":"#506784","startlinecolor":"#A2B1C6"},"baxis":{"endlinecolor":"#A2B1C6","gridcolor":"#506784","linecolor":"#506784","minorgridcolor":"#506784","startlinecolor":"#A2B1C6"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"line":{"color":"#283442"}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"marker":{"line":{"color":"#283442"}},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#506784"},"line":{"color":"rgb(17,17,17)"}},"header":{"fill":{"color":"#2a3f5f"},"line":{"color":"rgb(17,17,17)"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#f2f5fa","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#f2f5fa"},"geo":{"bgcolor":"rgb(17,17,17)","lakecolor":"rgb(17,17,17)","landcolor":"rgb(17,17,17)","showlakes":true,"showland":true,"subunitcolor":"#506784"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"dark"},"paper_bgcolor":"rgb(17,17,17)","plot_bgcolor":"rgb(17,17,17)","polar":{"angularaxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""},"bgcolor":"rgb(17,17,17)","radialaxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"rgb(17,17,17)","gridcolor":"#506784","gridwidth":2,"linecolor":"#506784","showbackground":true,"ticks":"","zerolinecolor":"#C8D4E3"},"yaxis":{"backgroundcolor":"rgb(17,17,17)","gridcolor":"#506784","gridwidth":2,"linecolor":"#506784","showbackground":true,"ticks":"","zerolinecolor":"#C8D4E3"},"zaxis":{"backgroundcolor":"rgb(17,17,17)","gridcolor":"#506784","gridwidth":2,"linecolor":"#506784","showbackground":true,"ticks":"","zerolinecolor":"#C8D4E3"}},"shapedefaults":{"line":{"color":"#f2f5fa"}},"sliderdefaults":{"bgcolor":"#C8D4E3","bordercolor":"rgb(17,17,17)","borderwidth":1,"tickwidth":0},"ternary":{"aaxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""},"baxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""},"bgcolor":"rgb(17,17,17)","caxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""}},"title":{"x":0.05},"updatemenudefaults":{"bgcolor":"#506784","borderwidth":0},"xaxis":{"automargin":true,"gridcolor":"#283442","linecolor":"#506784","ticks":"","title":{"standoff":15},"zerolinecolor":"#283442","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#283442","linecolor":"#506784","ticks":"","title":{"standoff":15},"zerolinecolor":"#283442","zerolinewidth":2}}},"xaxis":{"anchor":"y","domain":[0.0,1.0],"matches":"x3","showticklabels":false,"rangeslider":{"visible":false},"gridcolor":"#333355"},"yaxis":{"anchor":"x","domain":[0.436,1.0],"title":{"text":"Price"},"gridcolor":"#333355"},"xaxis2":{"anchor":"y2","domain":[0.0,1.0],"matches":"x3","showticklabels":false,"gridcolor":"#333355"},"yaxis2":{"anchor":"x2","domain":[0.265,0.406],"title":{"text":"Vol"},"gridcolor":"#333355"},"xaxis3":{"anchor":"y3","domain":[0.0,1.0],"gridcolor":"#333355"},"yaxis3":{"anchor":"x3","domain":[0.0,0.235],"title":{"text":"RSI"},"gridcolor":"#333355"},"shapes":[{"line":{"color":"#f44336","dash":"dash","width":0.5},"type":"line","x0":0,"x1":1,"xref":"x3 domain","y0":70,"y1":70,"yref":"y3"},{"line":{"color":"#4caf50","dash":"dash","width":0.5},"type":"line","x0":0,"x1":1,"xref":"x3 domain","y0":30,"y1":30,"yref":"y3"},{"fillcolor":"rgba(79,195,247,0.1)","line":{"color":"#4fc3f7","dash":"dash","width":1},"type":"rect","x0":"2026-01-26T00:00:00","x1":"2026-03-19T00:00:00","xref":"x","y0":295.29998779296875,"y1":353.1400146484375,"yref":"y"}],"title":{"font":{"color":"#ffc107","size":14},"text":"Broadcom (AVGO) Daily 6M | $319.84 | RSI 50 | 6M -5%"},"margin":{"l":10,"r":10,"t":40,"b":20},"legend":{"font":{"size":10},"orientation":"h","y":1.02},"paper_bgcolor":"#08090a","plot_bgcolor":"#0f1011","height":550,"showlegend":true,"annotations":[{"bgcolor":"rgba(30,30,30,0.8)","bordercolor":"#4fc3f7","borderpad":2,"borderwidth":1,"font":{"color":"#4fc3f7","size":9},"showarrow":false,"text":"2.06%\u002fbar","x":"2026-01-25T12:00:00","xref":"x","y":327.05,"yref":"y"},{"bgcolor":"rgba(30,30,30,0.8)","bordercolor":"#4caf50","borderpad":2,"borderwidth":1,"font":{"color":"#4caf50","size":9},"showarrow":false,"text":"↗4.83%\u002fbar","x":"2026-02-06T12:00:00","xref":"x","y":323.82,"yref":"y"},{"bgcolor":"rgba(30,30,30,0.8)","bordercolor":"#f44336","borderpad":2,"borderwidth":1,"font":{"color":"#f44336","size":9},"showarrow":false,"text":"↘1.88%\u002fbar","x":"2026-02-18T12:00:00","xref":"x","y":328.21000000000004,"yref":"y"},{"bgcolor":"rgba(30,30,30,0.8)","bordercolor":"#f44336","borderpad":2,"borderwidth":1,"font":{"color":"#f44336","size":9},"showarrow":false,"text":"↘2.14%\u002fbar","x":"2026-03-06T00:00:00","xref":"x","y":330.16999999999996,"yref":"y"},{"bgcolor":"rgba(30,30,30,0.9)","bordercolor":"#ffc107","borderpad":3,"borderwidth":1,"font":{"color":"#ffc107","family":"monospace","size":10},"showarrow":false,"text":"→动量稳定 (54)","x":"2026-03-19T00:00:00","xanchor":"right","xref":"x","y":338.32000732421875,"yanchor":"bottom","yref":"y"},{"bgcolor":"rgba(30,30,30,0.85)","bordercolor":"#4fc3f7","borderpad":2,"borderwidth":1,"font":{"color":"#4fc3f7","size":8},"showarrow":false,"text":"强收敛 VCP×1 T=70 BO预估=77","x":"2026-01-26T00:00:00","xanchor":"left","xref":"x","y":353.1400146484375,"yanchor":"bottom","yref":"y"},{"bgcolor":"rgba(30,30,30,0.8)","bordercolor":"#888","borderpad":2,"borderwidth":1,"font":{"color":"#888","size":8},"showarrow":false,"text":"量能: 中性 (U\u002fD=0.99) 大量→down","x":"2025-12-18T00:00:00","xref":"x","y":320.80617864389535,"yref":"y"}]},                        {"responsive": true}                    )                };            </script>        </div></div>
+  <div class="chart-source">&#128206; yfinance (2026-03-19)</div>
+</div>
+
+
+
+<div class="chart-frame">
+  <div class="chart-frame-header"><span class="chart-frame-title">MRVL (Marvell) Daily 6M</span></div>
+  <div class="chart-frame-body"><div>                            <div id="MRVL_daily" class="plotly-graph-div" style="height:550px; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("MRVL_daily")) {                    Plotly.newPlot(                        "MRVL_daily",                        [{"close":{"dtype":"f8","bdata":"AAAAgD\u002fbUkAAAADAFqFSQAAAAGCv\u002flNAAAAA4G\u002fsVEAAAACAiMNUQAAAAKCukVRAAAAAwA39VEAAAADAjPFUQAAAAIAvhVVAAAAAwHaGVUAAAACABjNWQAAAAOBltlVAAAAAYNQXV0AAAACAgqNWQAAAAMAZY1VAAAAAwNhUVkAAAADAHIpVQAAAAKDeNFZAAAAAAKkKVkAAAACgwPhVQAAAAEDPcVVAAAAAQMMMVUAAAACAeD9UQAAAAKB4rVRAAAAAwHIEVUAAAACgWylWQAAAAIBeGVZAAAAAoHOFVkAAAACAZyBWQAAAAOALa1dAAAAAgIWTVkAAAACguuFVQAAAAEBTNVdAAAAAQNNQV0AAAABAsrZWQAAAACBuSldAAAAAYAJRVkAAAABgAlFWQAAAAKBA3VVAAAAAYNKYVUAAAACg9dhUQAAAAEDmp1NAAAAA4LxQVEAAAADg\u002fSdTQAAAAGA8WVNAAAAAQLTuVEAAAABArtdUQAAAACAL6lVAAAAAgHxVVkAAAABANcJWQAAAAICvNFdAAAAAYDAIWUAAAABApIdYQAAAAGCwtVhAAAAAQMT7VkAAAABggjVWQAAAACDTGVdAAAAAoGdXVkAAAACAohdVQAAAAEDDDFVAAAAAgJwAVUAAAABACmlUQAAAAGAxGlVAAAAA4OMBVUAAAABATC9VQAAAAEB851VAAAAAQGGbVUAAAABgyZFVQAAAAKCxbFVAAAAA4KWsVUAAAABAzzpVQAAAAMDYVFZAAAAAgJGKVkAAAAAAqQpWQAAAAKAQJVVAAAAAoPXYVEAAAACAFM5UQAAAAMD1uFRAAAAAQDPDVEAAAACgcE1UQAAAAOBRGFRAAAAAoHAdVEAAAABAM\u002fNTQAAAAEAzo1RAAAAAYGbGVEAAAABguA5UQAAAAKBHcVRAAAAAIIW7VEAAAAAgrudUQAAAAIDCVVRAAAAAQOG6U0AAAACAPapTQAAAAGCP4lJAAAAAYLhuUkAAAACgcI1SQAAAAIDrEVRAAAAAYGaWVEAAAADgo4BUQAAAAIDCVVRAAAAAYLiOU0AAAABACqdTQAAAAOCjwFNAAAAAgMLFU0AAAABACudTQAAAAGC43lNAAAAAYI9yU0AAAADA9ZhTQAAAAEDhOlRAAAAAYI\u002fSU0AAAAAAKWxUQAAAAEAKN1RAAAAA4KNgU0AAAACAwoVTQAAAACCF61JAAAAA4HpkVkAAAACgmSlXQAAAAEAzU1dAAAAAACmcVkAAAABA4epVQAAAAEAK91VAAAAAwB7lVkAAAABgj7JWQAAAACCu51VAAAAAgOthVkA="},"decreasing":{"line":{"color":"#f44336"}},"high":{"dtype":"f8","bdata":"rpRdFND0UkBkuDjhpw9TQHdQwoPcZlRAp\u002fBTzfoVVUDGhKqLRfBUQOKzk1E+PlVAm27t2w8UVUCQjG5GnP9UQPNSQaYgzFVAG1t5IZLJVUBtCrUsB4hWQGlTu3vusFZAv+btx7EiV0BQwF5zaiFXQKDks2PipVdAB6V7eItzVkDIqKF+ZDBWQOveD8lSWVZA6706Y5rIVkCHwBrYtDhWQG8XW1L\u002fKVZAiB6b05B3VUD75aVwouBUQOikZr312FRArpWWsZxuVUAF24H7NFRWQGm93FeUelZAgsWL2m3cVkB5U0H8RplWQCjfA4L9X1hAAN8WN2WxV0C3j2xWlLFWQErJ3wqS1FdATlLL082DWEBTvV5IRwdXQJSzj6S7mVdAgzX+hp0mV0Bz8c0LaDNXQEidYMu6GFZA5kQNluc7VkAt2t7ZFqpVQBcdnvU8bFRAbw75CDF1VEBVDl1XRhhVQKzm4I4\u002ft1NAiXxrUTohVUDr\u002fvel++9UQA3I7OS6T1ZAc\u002fX418xdVkC7SnCuFytXQAJtxZK4cldA4H\u002fyX1eCWUAnmFjrjKxZQHDk3K88pFlALMyhUUouV0DKly\u002fi8OdWQN2o94UgMldArKawaSPrVkDhbcuJ5ztWQJdI4ARzclVAhcMD5ukYVUBczcoQgsdVQMpJHMcBPlVAi8xLyByKVUBFV5lVYdJVQBpmLwQm\u002f1VANMjYqz3tVUBFaWl+ychVQCfGrh5wglVAei8hl1gCVkC4FT5F4bZVQGuUM5\u002f5gFZAAou6kcF5V0BFi\u002fcLd4hXQOlB092TnlVAdliRzvg2VUAAAADAzBxVQAAAAAAA8FRAAAAAANcDVUAAAAAAAMBUQAAAAAApvFRAAAAAYLieVEAAAABguN5UQAAAAGCPElVAAAAAYGZWVUAAAACgR4FUQAAAAAAp3FRAAAAAIFzvVEAAAACAFF5VQAAAAAApnFRAAAAAwMxsVEAAAABguL5TQAAAAIAUvlNAAAAAANcDU0AAAABgj7JSQAAAAAAAMFRAAAAAANfDVEAAAACgmdlUQAAAAIDr8VRAAAAAACmMVEAAAACAFP5TQAAAAOB6FFRAAAAAoJkZVEAAAABA4epTQAAAAIDCFVRAAAAAQArHU0AAAADAzOxTQAAAAAApTFRAAAAA4FFoVEAAAABgj5JUQAAAAOB6tFRAAAAAwB7FU0AAAAAAAOBTQAAAAOCjEFRAAAAAoJlZV0AAAAAghTtXQAAAAEAzw1dAAAAA4KPAV0AAAACA64FWQAAAAAAAoFZAAAAAoEchV0AAAAAAKVxXQAAAAKBHAVdAAAAAIFxvVkA="},"increasing":{"line":{"color":"#4caf50"}},"low":{"dtype":"f8","bdata":"CVAprOtPUkAGomDRvXpSQNQ0M0XZvVJANi1yHb0NU0CLRBJ8W1tUQJFcO1U1jVRAkp\u002fV4GhSVEDV29jPNk9UQKfSbuYPFFVA8FSRx5o9VUCsPpNmNAhWQOCshyFSelVArvLn2PDfVUCX9EieSJlWQHk87rEcU1VA6BoCJfmkVUBNFil8MVFVQNgbFHjGoVVAlTbrQuq9VUBQd5njfmlVQIJZLRjeWFVAITZZapPCVEAfoRmxM8BTQCiw5+I2HlRAhmS+eP6oVECJPgEZ4UhVQJjioCSF7lVAOa9YNRo\u002fVkCha01Z+RJWQFZBiB9BuVZA3t22fX98VkAQZNv7EMpVQJBhpjSLBVZAiQR2eKAWV0CVi3qwH0NVQBbbK6KOCFdAkJHfyjQdVkBwk0wrlzNWQCcQLLqKKVVAxQ3aIEnRVEBhflTbRXNUQJ6lxvOMmFNAVaU7bEuuU0ARjVKRngFTQCzwNt5KZFJAbQkvFml8U0ApjRjKNh5UQMjgOZgN\u002flRAyl9v\u002fGMdVUCCdKEbIw9WQJc6cjg72VZAye9Z8ybuV0CPQAhGDEdYQDNN9rhcT1hA9dY2yMk2VkD1o4FBgv5VQLhQ4ZRzhVZARSgu\u002fpzcVUA66Ih8GfVUQEy5VpMH51RAgbACre+KVECYnEPAyEdUQCH06fDLpVRAZaYquPLoVEAsx5Df6RhVQBToMm+uDlVA4cMjGHCCVUAyodS7H3pVQCCaduDsCFVAIJA1wCJqVUBhI6NYQDhVQHn1oj1qolVAambhGqADVkCpdQVzSa1VQEukrr7p4VRAZWgVd4G0VEAAAAAAKYxUQAAAAMAehVRAAAAAAACwVEAAAACgR9FTQAAAAAAAAFRAAAAAQDMTVEAAAACgR8FTQAAAAKCZGVRAAAAAIFyvVEAAAACAFO5TQAAAAADX41NAAAAAQDNTVEAAAADAzKxUQAAAAEAzk1NAAAAAIIWLU0AAAACAFC5TQAAAAGCPMlJAAAAAgOvxUUAAAAAAKaxRQAAAAKBHIVNAAAAAQOGqU0AAAAAgXF9UQAAAAKBwzVNAAAAAAClcU0AAAAAAAHBTQAAAAOBRKFNAAAAAIFyfU0AAAACAFG5TQAAAAGBmZlNAAAAA4HoEU0AAAAAghUtTQAAAAIAUvlNAAAAAoJlJU0AAAACAPapTQAAAAKCZ2VNAAAAAoJkpU0AAAADgo1BTQAAAACBcz1JAAAAAoJnZVEAAAADAzAxVQAAAACCu51ZAAAAAIIWLVkAAAAAgrtdVQAAAAOB6tFVAAAAAIK5HVkAAAABgZpZWQAAAAEDhylVAAAAA4FFIVUA="},"name":"Price","open":{"dtype":"f8","bdata":"CVAprOtPUkDMTZD2TNJSQKz+00ekNlNA4xilAySAU0C5LEqUy5ZUQDDvNnrE5FRAbwUjOJVlVEAhOnhRUpJUQA0ogS33PFVAVRSrZEyKVUCxPjk1jS5WQDiETqY4NlZAAbedDycRVkDhDKnhCfRWQEjvR0zNOVdA3kq+jvZZVkDl3MOqNK9VQCyCS5vSBlZAY1yy0E9pVkCuycnRH7FVQBXiUBP5pFVAzbhkhzdoVUAoADCB+0pUQDmAk9lFPFRAENz5sXX0VECstNTTmX5VQAhvEJxYOVZAa1BgsHasVkCt\u002fdPCz01WQClBUGFNVVdABrgWjKlUV0DF4Uj\u002fmexVQG\u002f20TUOEVZA\u002fMpGMgMJWEBxPCgsTedWQKff9LSXRldAonomUa\u002f9VkDB\u002f3wirJ9WQD5+5qy64VVAxKD\u002fcjEaVUB8226slldVQOJqyYlgGlRA15JUxR7CU0A1fog3w9VUQKvn1aAbLVNAQ5djcL+bU0AuLMgUNJxUQAjpZf\u002fdIVVAF0bPuqV1VUCyYoy220RWQODhmPX5JVdAmi6B4vT9WEAwcKNgqtVYQJkRx\u002fL6FFlAeiNFQqOYVkAoTcaPi+FWQFvpHs7q0FZAiD2fnYi6VkBi8nKNSeRVQCPuWlDGM1VABt24JUbhVEAH\u002f5zzBJxVQOit1SHVGlVAGMecGFX\u002fVEDQ5MrHIqFVQDaCeGO3FVVAa4EGLPzLVUBaqvxLZMJVQJVcvZAxUVVA6kiVp7FsVUDsmyGvNK9VQGfqcldeq1VAfbCL4v88V0CYJJm3iChXQFXbJ1pMnVVAoOcT5uYoVUAAAACA6wFVQAAAAEDhmlRAAAAA4KPgVEAAAACgcL1UQAAAAIAUrlRAAAAAwMxcVEAAAAAA19NTQAAAAKCZGVRAAAAAgBQeVUAAAACAFE5UQAAAAOB69FNAAAAAIK63VEAAAADAHiVVQAAAAAApfFRAAAAAQDMDVEAAAABACmdTQAAAAGCPolNAAAAAAADAUkAAAADgUThSQAAAAIDCNVNAAAAAQArnU0AAAAAAKaxUQAAAAGBm5lRAAAAAACmMVEAAAADAzHxTQAAAAOB6VFNAAAAAoJnJU0AAAADgUZhTQAAAACBcj1NAAAAAwPWYU0AAAAAAAIBTQAAAAOCjwFNAAAAAQApHVEAAAACA6wFUQAAAAOBR6FNAAAAAYGZ2U0AAAADAzKxTQAAAAKCZuVNAAAAAgBQuVUAAAAAghftVQAAAAOB6JFdAAAAAYGZmV0AAAABgZnZWQAAAAOCj8FVAAAAAoJlJVkAAAABAMxNXQAAAAEAzs1ZAAAAAQDOTVUA="},"x":["2025-09-22T00:00:00","2025-09-23T00:00:00","2025-09-24T00:00:00","2025-09-25T00:00:00","2025-09-26T00:00:00","2025-09-29T00:00:00","2025-09-30T00:00:00","2025-10-01T00:00:00","2025-10-02T00:00:00","2025-10-03T00:00:00","2025-10-06T00:00:00","2025-10-07T00:00:00","2025-10-08T00:00:00","2025-10-09T00:00:00","2025-10-10T00:00:00","2025-10-13T00:00:00","2025-10-14T00:00:00","2025-10-15T00:00:00","2025-10-16T00:00:00","2025-10-17T00:00:00","2025-10-20T00:00:00","2025-10-21T00:00:00","2025-10-22T00:00:00","2025-10-23T00:00:00","2025-10-24T00:00:00","2025-10-27T00:00:00","2025-10-28T00:00:00","2025-10-29T00:00:00","2025-10-30T00:00:00","2025-10-31T00:00:00","2025-11-03T00:00:00","2025-11-04T00:00:00","2025-11-05T00:00:00","2025-11-06T00:00:00","2025-11-07T00:00:00","2025-11-10T00:00:00","2025-11-11T00:00:00","2025-11-12T00:00:00","2025-11-13T00:00:00","2025-11-14T00:00:00","2025-11-17T00:00:00","2025-11-18T00:00:00","2025-11-19T00:00:00","2025-11-20T00:00:00","2025-11-21T00:00:00","2025-11-24T00:00:00","2025-11-25T00:00:00","2025-11-26T00:00:00","2025-11-28T00:00:00","2025-12-01T00:00:00","2025-12-02T00:00:00","2025-12-03T00:00:00","2025-12-04T00:00:00","2025-12-05T00:00:00","2025-12-08T00:00:00","2025-12-09T00:00:00","2025-12-10T00:00:00","2025-12-11T00:00:00","2025-12-12T00:00:00","2025-12-15T00:00:00","2025-12-16T00:00:00","2025-12-17T00:00:00","2025-12-18T00:00:00","2025-12-19T00:00:00","2025-12-22T00:00:00","2025-12-23T00:00:00","2025-12-24T00:00:00","2025-12-26T00:00:00","2025-12-29T00:00:00","2025-12-30T00:00:00","2025-12-31T00:00:00","2026-01-02T00:00:00","2026-01-05T00:00:00","2026-01-06T00:00:00","2026-01-07T00:00:00","2026-01-08T00:00:00","2026-01-09T00:00:00","2026-01-12T00:00:00","2026-01-13T00:00:00","2026-01-14T00:00:00","2026-01-15T00:00:00","2026-01-16T00:00:00","2026-01-20T00:00:00","2026-01-21T00:00:00","2026-01-22T00:00:00","2026-01-23T00:00:00","2026-01-26T00:00:00","2026-01-27T00:00:00","2026-01-28T00:00:00","2026-01-29T00:00:00","2026-01-30T00:00:00","2026-02-02T00:00:00","2026-02-03T00:00:00","2026-02-04T00:00:00","2026-02-05T00:00:00","2026-02-06T00:00:00","2026-02-09T00:00:00","2026-02-10T00:00:00","2026-02-11T00:00:00","2026-02-12T00:00:00","2026-02-13T00:00:00","2026-02-17T00:00:00","2026-02-18T00:00:00","2026-02-19T00:00:00","2026-02-20T00:00:00","2026-02-23T00:00:00","2026-02-24T00:00:00","2026-02-25T00:00:00","2026-02-26T00:00:00","2026-02-27T00:00:00","2026-03-02T00:00:00","2026-03-03T00:00:00","2026-03-04T00:00:00","2026-03-05T00:00:00","2026-03-06T00:00:00","2026-03-09T00:00:00","2026-03-10T00:00:00","2026-03-11T00:00:00","2026-03-12T00:00:00","2026-03-13T00:00:00","2026-03-16T00:00:00","2026-03-17T00:00:00","2026-03-18T00:00:00","2026-03-19T00:00:00"],"type":"candlestick","xaxis":"x","yaxis":"y"},{"line":{"color":"#ffc107","width":1},"name":"EMA21","x":["2025-09-22T00:00:00","2025-09-23T00:00:00","2025-09-24T00:00:00","2025-09-25T00:00:00","2025-09-26T00:00:00","2025-09-29T00:00:00","2025-09-30T00:00:00","2025-10-01T00:00:00","2025-10-02T00:00:00","2025-10-03T00:00:00","2025-10-06T00:00:00","2025-10-07T00:00:00","2025-10-08T00:00:00","2025-10-09T00:00:00","2025-10-10T00:00:00","2025-10-13T00:00:00","2025-10-14T00:00:00","2025-10-15T00:00:00","2025-10-16T00:00:00","2025-10-17T00:00:00","2025-10-20T00:00:00","2025-10-21T00:00:00","2025-10-22T00:00:00","2025-10-23T00:00:00","2025-10-24T00:00:00","2025-10-27T00:00:00","2025-10-28T00:00:00","2025-10-29T00:00:00","2025-10-30T00:00:00","2025-10-31T00:00:00","2025-11-03T00:00:00","2025-11-04T00:00:00","2025-11-05T00:00:00","2025-11-06T00:00:00","2025-11-07T00:00:00","2025-11-10T00:00:00","2025-11-11T00:00:00","2025-11-12T00:00:00","2025-11-13T00:00:00","2025-11-14T00:00:00","2025-11-17T00:00:00","2025-11-18T00:00:00","2025-11-19T00:00:00","2025-11-20T00:00:00","2025-11-21T00:00:00","2025-11-24T00:00:00","2025-11-25T00:00:00","2025-11-26T00:00:00","2025-11-28T00:00:00","2025-12-01T00:00:00","2025-12-02T00:00:00","2025-12-03T00:00:00","2025-12-04T00:00:00","2025-12-05T00:00:00","2025-12-08T00:00:00","2025-12-09T00:00:00","2025-12-10T00:00:00","2025-12-11T00:00:00","2025-12-12T00:00:00","2025-12-15T00:00:00","2025-12-16T00:00:00","2025-12-17T00:00:00","2025-12-18T00:00:00","2025-12-19T00:00:00","2025-12-22T00:00:00","2025-12-23T00:00:00","2025-12-24T00:00:00","2025-12-26T00:00:00","2025-12-29T00:00:00","2025-12-30T00:00:00","2025-12-31T00:00:00","2026-01-02T00:00:00","2026-01-05T00:00:00","2026-01-06T00:00:00","2026-01-07T00:00:00","2026-01-08T00:00:00","2026-01-09T00:00:00","2026-01-12T00:00:00","2026-01-13T00:00:00","2026-01-14T00:00:00","2026-01-15T00:00:00","2026-01-16T00:00:00","2026-01-20T00:00:00","2026-01-21T00:00:00","2026-01-22T00:00:00","2026-01-23T00:00:00","2026-01-26T00:00:00","2026-01-27T00:00:00","2026-01-28T00:00:00","2026-01-29T00:00:00","2026-01-30T00:00:00","2026-02-02T00:00:00","2026-02-03T00:00:00","2026-02-04T00:00:00","2026-02-05T00:00:00","2026-02-06T00:00:00","2026-02-09T00:00:00","2026-02-10T00:00:00","2026-02-11T00:00:00","2026-02-12T00:00:00","2026-02-13T00:00:00","2026-02-17T00:00:00","2026-02-18T00:00:00","2026-02-19T00:00:00","2026-02-20T00:00:00","2026-02-23T00:00:00","2026-02-24T00:00:00","2026-02-25T00:00:00","2026-02-26T00:00:00","2026-02-27T00:00:00","2026-03-02T00:00:00","2026-03-03T00:00:00","2026-03-04T00:00:00","2026-03-05T00:00:00","2026-03-06T00:00:00","2026-03-09T00:00:00","2026-03-10T00:00:00","2026-03-11T00:00:00","2026-03-12T00:00:00","2026-03-13T00:00:00","2026-03-16T00:00:00","2026-03-17T00:00:00","2026-03-18T00:00:00","2026-03-19T00:00:00"],"y":{"dtype":"f8","bdata":"AAAAgD\u002fbUkCjiy769dVSQJQKE4\u002fv8FJAQJUofxIfU0D0ng3FS0VTQGozUk2DY1NA7OgEb76IU0B6vBtfi6lTQEBOdtbI1FNAgLslvTX8U0BG8K0UvS9UQFd9EspAU1RACc8QTKuTVEDC6pqWp8NUQGrVjFQm0lRAeJOu0k31VEDKbof\u002f1AJVQP1771OnHlVAWvzw1xs0VUA7KzhH\u002fEVVQNhVSi\u002f4SVVAfx9yvGdEVUBFqAoUryxVQJwk230eIVVAAgoNPoMeVUCkN4B1xTZVQGd4FwJfS1VAu4TPhOxnVUDC1XbhsXhVQFPCVOH\u002fpVVAevbvqZe7VUBBmqs0D79VQFLpPmQV4VVAkKUKvoMCVkCClqwP5RJWQDD9+VY3L1ZAtxQpzEkyVkBJ5FPCFDVWQBT+NL8YLVZAcLhe\u002fJ0fVkDaYW3F6wFWQDpwYxYxy1VAqfGIbsmoVUBrxJNhiG5VQEqbnRsNPlVAcqQDfNY2VUDbCezqLy5VQFN9edhDP1VA7nFu0I5YVUDv2zVmb3lVQPHHdgu7oVVArVjg+9zwVUApf\u002fqkHS1WQD3\u002f+rUTaFZACejM2YB1VkDx0uiIr29WQJUFSCInf1ZAEwVwFop7VkBAkE43L1tWQK+xXk\u002fIPFZAFNA+JQogVkC1635tIfhVQNME\u002f1T041VAemEWM2fPVUDMEv0c2cBVQHSFt05cxFVAUnkyk6LAVUCRhblIYLxVQLOQS9whtVVAF7JEaFy0VUCJLSeTT6lVQAi1gK7nuFVATI2jHvfLVUDnUSAzqtFVQF7tS1T5wVVA+JFzcsqsVUBWEGlci5hVQMOxGfE3hFVA9xUA4atyVUBs5UWVA1hVQDRchW3zOlVAGGszz\u002f4gVUC51Ys2jwVVQBwIIiCe\u002fFRAXwd8VLD3VECcqROEguJUQALgEVg32FRAGZ2EgZvVVECi1I8bQNdUQMKSyIF6y1RAPMuHZLKyVECrWx7Ep5pUQG2weIylclRAqLdtiL5DVEAkYe\u002f+5RtUQCGe2cT9GlRANWH00jUmVEAB5MZfbi5UQKRDhqgBMlRAlZqoiikjVED8Xfbg4BdUQPyDDpvyD1RAWez1DDQJVEAi7lP6GAZUQAgHNY+EAlRAHu8YRW71U0ADZf84Bu1TQGCKXCIa9FNAQE8OhQ3xU0DdjTuQPvxTQD2YB+aWAVRA8bhMK\u002fXyU0AhqOjVB+lTQGPH6vP70VNA5UAb8tgNVEBbr7tHMFZUQDzlwS+8m1RACFwNt1HKVEDwaiNPjeRUQNrsCGWB\u002fVRADMCThNUpVUAi3bRSiU1VQNkOMKuMW1VArseIvmZzVUA="},"type":"scatter","xaxis":"x","yaxis":"y"},{"line":{"color":"#58a6ff","width":1},"name":"EMA50","x":["2025-09-22T00:00:00","2025-09-23T00:00:00","2025-09-24T00:00:00","2025-09-25T00:00:00","2025-09-26T00:00:00","2025-09-29T00:00:00","2025-09-30T00:00:00","2025-10-01T00:00:00","2025-10-02T00:00:00","2025-10-03T00:00:00","2025-10-06T00:00:00","2025-10-07T00:00:00","2025-10-08T00:00:00","2025-10-09T00:00:00","2025-10-10T00:00:00","2025-10-13T00:00:00","2025-10-14T00:00:00","2025-10-15T00:00:00","2025-10-16T00:00:00","2025-10-17T00:00:00","2025-10-20T00:00:00","2025-10-21T00:00:00","2025-10-22T00:00:00","2025-10-23T00:00:00","2025-10-24T00:00:00","2025-10-27T00:00:00","2025-10-28T00:00:00","2025-10-29T00:00:00","2025-10-30T00:00:00","2025-10-31T00:00:00","2025-11-03T00:00:00","2025-11-04T00:00:00","2025-11-05T00:00:00","2025-11-06T00:00:00","2025-11-07T00:00:00","2025-11-10T00:00:00","2025-11-11T00:00:00","2025-11-12T00:00:00","2025-11-13T00:00:00","2025-11-14T00:00:00","2025-11-17T00:00:00","2025-11-18T00:00:00","2025-11-19T00:00:00","2025-11-20T00:00:00","2025-11-21T00:00:00","2025-11-24T00:00:00","2025-11-25T00:00:00","2025-11-26T00:00:00","2025-11-28T00:00:00","2025-12-01T00:00:00","2025-12-02T00:00:00","2025-12-03T00:00:00","2025-12-04T00:00:00","2025-12-05T00:00:00","2025-12-08T00:00:00","2025-12-09T00:00:00","2025-12-10T00:00:00","2025-12-11T00:00:00","2025-12-12T00:00:00","2025-12-15T00:00:00","2025-12-16T00:00:00","2025-12-17T00:00:00","2025-12-18T00:00:00","2025-12-19T00:00:00","2025-12-22T00:00:00","2025-12-23T00:00:00","2025-12-24T00:00:00","2025-12-26T00:00:00","2025-12-29T00:00:00","2025-12-30T00:00:00","2025-12-31T00:00:00","2026-01-02T00:00:00","2026-01-05T00:00:00","2026-01-06T00:00:00","2026-01-07T00:00:00","2026-01-08T00:00:00","2026-01-09T00:00:00","2026-01-12T00:00:00","2026-01-13T00:00:00","2026-01-14T00:00:00","2026-01-15T00:00:00","2026-01-16T00:00:00","2026-01-20T00:00:00","2026-01-21T00:00:00","2026-01-22T00:00:00","2026-01-23T00:00:00","2026-01-26T00:00:00","2026-01-27T00:00:00","2026-01-28T00:00:00","2026-01-29T00:00:00","2026-01-30T00:00:00","2026-02-02T00:00:00","2026-02-03T00:00:00","2026-02-04T00:00:00","2026-02-05T00:00:00","2026-02-06T00:00:00","2026-02-09T00:00:00","2026-02-10T00:00:00","2026-02-11T00:00:00","2026-02-12T00:00:00","2026-02-13T00:00:00","2026-02-17T00:00:00","2026-02-18T00:00:00","2026-02-19T00:00:00","2026-02-20T00:00:00","2026-02-23T00:00:00","2026-02-24T00:00:00","2026-02-25T00:00:00","2026-02-26T00:00:00","2026-02-27T00:00:00","2026-03-02T00:00:00","2026-03-03T00:00:00","2026-03-04T00:00:00","2026-03-05T00:00:00","2026-03-06T00:00:00","2026-03-09T00:00:00","2026-03-10T00:00:00","2026-03-11T00:00:00","2026-03-12T00:00:00","2026-03-13T00:00:00","2026-03-16T00:00:00","2026-03-17T00:00:00","2026-03-18T00:00:00","2026-03-19T00:00:00"],"y":{"dtype":"f8","bdata":"AAAAgD\u002fbUkCgoKCg99hSQD+GzFJ85FJAb\u002fQ3OuD4UkD9DYHJ3ApTQE7qZ08wGlNAFNdj5R8tU0BPeezj3T5TQHRbC+qzVVNAZd8AhLFrU0Cx5Q+7lodTQIy5gryAnVNAwy8U62rAU0DUHs3SZt1TQCalVhiv7FNAp5mt4tgEVEBvYT3NHBRUQGYmaLx5KVRAMHDDc1g8VEBlB\u002f3yxU1UQAz4z8M5WVRAfxsTLURgVECsWxLv+l5UQEaK+OsOYlRAt2GFMG1oVED2ccsbCHpUQCQTX8VRilRAbhwf+zSeVEBqNG4ZWq1UQEgepo\u002feyFRAgoaLEdvaVEBpriYcKuVUQFFmYfBi\u002fFRAZ3tEt8YTVUDgxjxYNCRVQF8K4C3IOVVAZngOZ7tEVUAm7BKyQE9VQAsL70LSVFVAFYO97nxXVUA8yWqvhlJVQNtDEbDLQVVAX27op1c4VUDyUN9tnyNVQKw0fJWlEVVAoTdZyUYQVUBuMM6bDg5VQCTKdRmvFlVALbj9ny8jVUDRjbwedjNVQBRb53yWR1VACd90K0JtVUCLFz4naYxVQO9m+qslrFVARcIdB0+5VUDe8XbnLb5VQBGYwv3Py1VAQ7p+Y0nRVUBaF8+WAcpVQBrBj7uVwlVARnjkY\u002fq6VUCegtvBua1VQAIA7KTwp1VAFxQ4om2hVUCARZra85xVQPh00Brgn1VAlKIi+bKfVUA5oXtNJ59VQL5yIbosnVVAxvXyEMidVUDstC935plVQKJ700I7oVVAdCG8x2GqVUCOiX1WKK5VQNkzDwnIqFVAwSKWqqGgVUAZ1iblX5hVQNz1yvycj1VAz4JF15iHVUDvvjjzRntVQARJ+nRbbVVAuddPHC9gVUBs94313lFVQJDF52YFS1VAHAk5\u002fdFFVUAvd+HJnjlVQNPC+4bDMVVASdTicyAtVUCrgGtDZypVQAnlAn0QIlVAqXeyjvoTVUDfWY38ygVVQPDspTJV8FRAsO0h6SvXVEDwdf2fM8BUQIioFvlduVRACsAQ7v63VECb0ckz07VUQBh+WMgOslRA1ih4+6GmVEBGMTIInJxUQH9XTrb7k1RAk9bcY+WLVEAkyW9dboVUQF\u002ff47fkflRAda6Z3F50VEDQ2cUmxGtUQMhT+l7ZaVRA8sMxjOpjVECjG3tPPWRUQGHtG4t3YlRA9MULKltYVEDmci7xGFBUQKu0QC8dQlRAEys+RYpXVEBtM7Qv23NUQEsTnnaxkFRA7nYuqTilVEC35W0E\u002frFUQAAo+z29vlRAGtFzolLUVEDx0vvCE+dUQJe2tdoj8VRAFFVtHZr\u002fVEA="},"type":"scatter","xaxis":"x","yaxis":"y"},{"line":{"color":"#ab47bc","width":1},"name":"EMA200","x":["2025-09-22T00:00:00","2025-09-23T00:00:00","2025-09-24T00:00:00","2025-09-25T00:00:00","2025-09-26T00:00:00","2025-09-29T00:00:00","2025-09-30T00:00:00","2025-10-01T00:00:00","2025-10-02T00:00:00","2025-10-03T00:00:00","2025-10-06T00:00:00","2025-10-07T00:00:00","2025-10-08T00:00:00","2025-10-09T00:00:00","2025-10-10T00:00:00","2025-10-13T00:00:00","2025-10-14T00:00:00","2025-10-15T00:00:00","2025-10-16T00:00:00","2025-10-17T00:00:00","2025-10-20T00:00:00","2025-10-21T00:00:00","2025-10-22T00:00:00","2025-10-23T00:00:00","2025-10-24T00:00:00","2025-10-27T00:00:00","2025-10-28T00:00:00","2025-10-29T00:00:00","2025-10-30T00:00:00","2025-10-31T00:00:00","2025-11-03T00:00:00","2025-11-04T00:00:00","2025-11-05T00:00:00","2025-11-06T00:00:00","2025-11-07T00:00:00","2025-11-10T00:00:00","2025-11-11T00:00:00","2025-11-12T00:00:00","2025-11-13T00:00:00","2025-11-14T00:00:00","2025-11-17T00:00:00","2025-11-18T00:00:00","2025-11-19T00:00:00","2025-11-20T00:00:00","2025-11-21T00:00:00","2025-11-24T00:00:00","2025-11-25T00:00:00","2025-11-26T00:00:00","2025-11-28T00:00:00","2025-12-01T00:00:00","2025-12-02T00:00:00","2025-12-03T00:00:00","2025-12-04T00:00:00","2025-12-05T00:00:00","2025-12-08T00:00:00","2025-12-09T00:00:00","2025-12-10T00:00:00","2025-12-11T00:00:00","2025-12-12T00:00:00","2025-12-15T00:00:00","2025-12-16T00:00:00","2025-12-17T00:00:00","2025-12-18T00:00:00","2025-12-19T00:00:00","2025-12-22T00:00:00","2025-12-23T00:00:00","2025-12-24T00:00:00","2025-12-26T00:00:00","2025-12-29T00:00:00","2025-12-30T00:00:00","2025-12-31T00:00:00","2026-01-02T00:00:00","2026-01-05T00:00:00","2026-01-06T00:00:00","2026-01-07T00:00:00","2026-01-08T00:00:00","2026-01-09T00:00:00","2026-01-12T00:00:00","2026-01-13T00:00:00","2026-01-14T00:00:00","2026-01-15T00:00:00","2026-01-16T00:00:00","2026-01-20T00:00:00","2026-01-21T00:00:00","2026-01-22T00:00:00","2026-01-23T00:00:00","2026-01-26T00:00:00","2026-01-27T00:00:00","2026-01-28T00:00:00","2026-01-29T00:00:00","2026-01-30T00:00:00","2026-02-02T00:00:00","2026-02-03T00:00:00","2026-02-04T00:00:00","2026-02-05T00:00:00","2026-02-06T00:00:00","2026-02-09T00:00:00","2026-02-10T00:00:00","2026-02-11T00:00:00","2026-02-12T00:00:00","2026-02-13T00:00:00","2026-02-17T00:00:00","2026-02-18T00:00:00","2026-02-19T00:00:00","2026-02-20T00:00:00","2026-02-23T00:00:00","2026-02-24T00:00:00","2026-02-25T00:00:00","2026-02-26T00:00:00","2026-02-27T00:00:00","2026-03-02T00:00:00","2026-03-03T00:00:00","2026-03-04T00:00:00","2026-03-05T00:00:00","2026-03-06T00:00:00","2026-03-09T00:00:00","2026-03-10T00:00:00","2026-03-11T00:00:00","2026-03-12T00:00:00","2026-03-13T00:00:00","2026-03-16T00:00:00","2026-03-17T00:00:00","2026-03-18T00:00:00","2026-03-19T00:00:00"],"y":{"dtype":"f8","bdata":"AAAAgD\u002fbUkBIiG1aq9pSQE8iujGT3VJA9IwyQNHiUkCpJb7CmedSQLsURxrX61JAE54dJhvxUkDR1W56NPZSQHcY7eK4\u002fFJAtcYi8y8DU0A+Fr8aTgtTQKykQR8aElNAuWkUHFkcU0CQzlyzVSVTQD1SxDsLK1NAQurEAxozU0BwslbaDzlTQN5P9nipQFNA9KbNNsRHU0BV3Tc+n05TQDK27hIRVFNApy6TpHNYU0Bgse4bwFpTQOIpk+seXlNAWPoZs1JiU0AAQ5XkZWlTQByHNVY+cFNAQK10qBh4U0AF4fKU3X5TQKcoxX7biFNAHus69ZqQU0DBRebMgZZTQOjrj6a6n1NARMxADyKpU0BCbUHo6LBTQHP0PEMUulNAQ8mk66zAU0AQr5fGNMdTQOv16CGFzFNA4jFwpBnRU0BeFfbCudNTQBQs6B9K01NAI+ikrInUU0Dwf2wn0tJTQPF\u002f23Gc0VNA3pbapnLUU0D8+W\u002f8BtdTQJXu0J9P3FNAaoscfZziU0BLfV4\u002f7ulTQBpJavdQ8lNAvcfyLUX\u002fU0BVeYrz0ApUQOhDd5u0FlRA7hcLSRQeVEBKYLQqaCNUQKEDlA70KlRAtqtIfH0wVEBW\u002f41FyjJUQL4vXIH1NFRAvkjwQvw2VEDY0ovDezdUQLktpUC9OVRA22ftFrs7VECgTt6EJz5UQKU1\u002ffJiQlRAwTz9vNFFVEAbfbhYH0lUQOMeSQ4GTFRA7YFpSIhPVEDDNpGY31FUQPpeX17\u002fVlRAoaag7ppcVECthz9l4mBUQHxmgh7WYlRAUhqBAgNkVECCkJoxEWVUQF4zDuTmZVRAz+zQi9RmVECTks3ek2ZUQFIw74bMZVRAgtqrNRRlVEARXmUh8mNUQFmRikGTZFRAtv73cIxlVECkBzlEr2RUQE6bg1nPZFRA\u002fdsZOaxlVEDuj+Fi92ZUQGJteY7LZlRAkW2epBVlVEBEv4mzOWNUQLGLdttlX1RAMGk0sHRaVEB\u002f2ftb3lVUQCO\u002fsEYxVVRAOzZqYNdVVEChWoFlRFZUQGDonxpDVlRAT71x0UZUVECphPKJjVJUQLDmUNwZUVRACGX067ZPVEC0HMRJrE5UQKwBaR2PTVRA9B5IRGFLVEBsY7LImklUQB8ps0Z1SVRAOPNWaUZIVEBnwADSoUhUQK3IOAJ1SFRABaOEgiZGVECnhqlwPERUQBVDe1vOQFRA6XdbbUFGVEDogI27nE1UQL4n4ENPVVRAPAZq8BtbVEA\u002f77dCFl9UQNKmuGwlY1RAUoWZs4hpVEBnws7qWm9UQHc5LIQZc1RAN\u002fk19AV4VEA="},"type":"scatter","xaxis":"x","yaxis":"y"},{"marker":{"color":["#4caf50","#f44336","#4caf50","#4caf50","#4caf50","#f44336","#4caf50","#4caf50","#4caf50","#f44336","#4caf50","#f44336","#4caf50","#f44336","#f44336","#f44336","#f44336","#4caf50","#f44336","#4caf50","#f44336","#f44336","#f44336","#4caf50","#4caf50","#4caf50","#f44336","#f44336","#f44336","#4caf50","#f44336","#f44336","#4caf50","#f44336","#f44336","#4caf50","#f44336","#f44336","#f44336","#4caf50","#f44336","#f44336","#4caf50","#f44336","#4caf50","#4caf50","#4caf50","#4caf50","#4caf50","#4caf50","#4caf50","#4caf50","#f44336","#f44336","#4caf50","#f44336","#4caf50","#f44336","#f44336","#f44336","#4caf50","#f44336","#f44336","#4caf50","#f44336","#4caf50","#f44336","#f44336","#4caf50","#4caf50","#f44336","#4caf50","#f44336","#f44336","#f44336","#f44336","#f44336","#4caf50","#f44336","#f44336","#f44336","#f44336","#4caf50","#4caf50","#f44336","#f44336","#4caf50","#4caf50","#f44336","#f44336","#f44336","#4caf50","#f44336","#f44336","#4caf50","#4caf50","#4caf50","#f44336","#f44336","#f44336","#4caf50","#4caf50","#f44336","#4caf50","#4caf50","#f44336","#4caf50","#4caf50","#f44336","#4caf50","#4caf50","#f44336","#f44336","#f44336","#4caf50","#4caf50","#4caf50","#f44336","#f44336","#4caf50","#4caf50","#f44336","#f44336","#4caf50"]},"name":"Volume","opacity":0.5,"x":["2025-09-22T00:00:00","2025-09-23T00:00:00","2025-09-24T00:00:00","2025-09-25T00:00:00","2025-09-26T00:00:00","2025-09-29T00:00:00","2025-09-30T00:00:00","2025-10-01T00:00:00","2025-10-02T00:00:00","2025-10-03T00:00:00","2025-10-06T00:00:00","2025-10-07T00:00:00","2025-10-08T00:00:00","2025-10-09T00:00:00","2025-10-10T00:00:00","2025-10-13T00:00:00","2025-10-14T00:00:00","2025-10-15T00:00:00","2025-10-16T00:00:00","2025-10-17T00:00:00","2025-10-20T00:00:00","2025-10-21T00:00:00","2025-10-22T00:00:00","2025-10-23T00:00:00","2025-10-24T00:00:00","2025-10-27T00:00:00","2025-10-28T00:00:00","2025-10-29T00:00:00","2025-10-30T00:00:00","2025-10-31T00:00:00","2025-11-03T00:00:00","2025-11-04T00:00:00","2025-11-05T00:00:00","2025-11-06T00:00:00","2025-11-07T00:00:00","2025-11-10T00:00:00","2025-11-11T00:00:00","2025-11-12T00:00:00","2025-11-13T00:00:00","2025-11-14T00:00:00","2025-11-17T00:00:00","2025-11-18T00:00:00","2025-11-19T00:00:00","2025-11-20T00:00:00","2025-11-21T00:00:00","2025-11-24T00:00:00","2025-11-25T00:00:00","2025-11-26T00:00:00","2025-11-28T00:00:00","2025-12-01T00:00:00","2025-12-02T00:00:00","2025-12-03T00:00:00","2025-12-04T00:00:00","2025-12-05T00:00:00","2025-12-08T00:00:00","2025-12-09T00:00:00","2025-12-10T00:00:00","2025-12-11T00:00:00","2025-12-12T00:00:00","2025-12-15T00:00:00","2025-12-16T00:00:00","2025-12-17T00:00:00","2025-12-18T00:00:00","2025-12-19T00:00:00","2025-12-22T00:00:00","2025-12-23T00:00:00","2025-12-24T00:00:00","2025-12-26T00:00:00","2025-12-29T00:00:00","2025-12-30T00:00:00","2025-12-31T00:00:00","2026-01-02T00:00:00","2026-01-05T00:00:00","2026-01-06T00:00:00","2026-01-07T00:00:00","2026-01-08T00:00:00","2026-01-09T00:00:00","2026-01-12T00:00:00","2026-01-13T00:00:00","2026-01-14T00:00:00","2026-01-15T00:00:00","2026-01-16T00:00:00","2026-01-20T00:00:00","2026-01-21T00:00:00","2026-01-22T00:00:00","2026-01-23T00:00:00","2026-01-26T00:00:00","2026-01-27T00:00:00","2026-01-28T00:00:00","2026-01-29T00:00:00","2026-01-30T00:00:00","2026-02-02T00:00:00","2026-02-03T00:00:00","2026-02-04T00:00:00","2026-02-05T00:00:00","2026-02-06T00:00:00","2026-02-09T00:00:00","2026-02-10T00:00:00","2026-02-11T00:00:00","2026-02-12T00:00:00","2026-02-13T00:00:00","2026-02-17T00:00:00","2026-02-18T00:00:00","2026-02-19T00:00:00","2026-02-20T00:00:00","2026-02-23T00:00:00","2026-02-24T00:00:00","2026-02-25T00:00:00","2026-02-26T00:00:00","2026-02-27T00:00:00","2026-03-02T00:00:00","2026-03-03T00:00:00","2026-03-04T00:00:00","2026-03-05T00:00:00","2026-03-06T00:00:00","2026-03-09T00:00:00","2026-03-10T00:00:00","2026-03-11T00:00:00","2026-03-12T00:00:00","2026-03-13T00:00:00","2026-03-16T00:00:00","2026-03-17T00:00:00","2026-03-18T00:00:00","2026-03-19T00:00:00"],"y":{"dtype":"i4","bdata":"RMAxATSYRgE8fgED8H2UAtyjlwFMUjgB1CAeAQDDMQGMGEsB4D7vAJQIOgEcswwBuA44AbDf4gAkF9IBLMY5ATC26wCY9+cA5DHGAGAWygAcPfYA9A7KAKhAJQE4tp0AWPCxAFAz+QC0z8YAXHfMADijtQBgZr8BXFXaADD6zwAEXgYB5JarAYzjPgHMVN4AxJTOACzEtABo2wYBlGy9APiC\u002fABUd2UBiN3QALzFYwE4XPcAjF9tAbwJsgBcLOUAEHGrAKjYFAE8XEcCpC0mA+jubQF8DFMBeIFtAtiFXwEgclgBXDL9AGw6SQGUZLYAGLaQAKxA\u002fgDERsIAWHRLAZielgAUNLwABGlRAChPTACEq5MAmDmSADRibgDssOQAEHJFAYwicwHQ6wYB3DSjANzIzQAo05oAvF2LANRk6QBcMv0AgA3lAAAoHQHccgUB4FPGAPh41ADYMb4AfIusAFhVnQBEyNQAGPq\u002fAGhz3QA8TFgBmB8LAdD\u002fJAEoklgBKDLSAHgnoQDcj7EAGDDQAKgzdAA0Q6EAiEyAAEheYwCkNIYAyFixAKgdgAAcmKAAZBa8AGgMNQFUXugA4H3xAPz13wAoVYoCPGBeBZwpUQKsWZQBeHcZAYAtAQHERdcArD3yAMhYsQC8nfUAUoHLAA=="},"type":"bar","xaxis":"x2","yaxis":"y2"},{"line":{"color":"#ab47bc","width":1},"name":"RSI(14)","x":["2025-09-22T00:00:00","2025-09-23T00:00:00","2025-09-24T00:00:00","2025-09-25T00:00:00","2025-09-26T00:00:00","2025-09-29T00:00:00","2025-09-30T00:00:00","2025-10-01T00:00:00","2025-10-02T00:00:00","2025-10-03T00:00:00","2025-10-06T00:00:00","2025-10-07T00:00:00","2025-10-08T00:00:00","2025-10-09T00:00:00","2025-10-10T00:00:00","2025-10-13T00:00:00","2025-10-14T00:00:00","2025-10-15T00:00:00","2025-10-16T00:00:00","2025-10-17T00:00:00","2025-10-20T00:00:00","2025-10-21T00:00:00","2025-10-22T00:00:00","2025-10-23T00:00:00","2025-10-24T00:00:00","2025-10-27T00:00:00","2025-10-28T00:00:00","2025-10-29T00:00:00","2025-10-30T00:00:00","2025-10-31T00:00:00","2025-11-03T00:00:00","2025-11-04T00:00:00","2025-11-05T00:00:00","2025-11-06T00:00:00","2025-11-07T00:00:00","2025-11-10T00:00:00","2025-11-11T00:00:00","2025-11-12T00:00:00","2025-11-13T00:00:00","2025-11-14T00:00:00","2025-11-17T00:00:00","2025-11-18T00:00:00","2025-11-19T00:00:00","2025-11-20T00:00:00","2025-11-21T00:00:00","2025-11-24T00:00:00","2025-11-25T00:00:00","2025-11-26T00:00:00","2025-11-28T00:00:00","2025-12-01T00:00:00","2025-12-02T00:00:00","2025-12-03T00:00:00","2025-12-04T00:00:00","2025-12-05T00:00:00","2025-12-08T00:00:00","2025-12-09T00:00:00","2025-12-10T00:00:00","2025-12-11T00:00:00","2025-12-12T00:00:00","2025-12-15T00:00:00","2025-12-16T00:00:00","2025-12-17T00:00:00","2025-12-18T00:00:00","2025-12-19T00:00:00","2025-12-22T00:00:00","2025-12-23T00:00:00","2025-12-24T00:00:00","2025-12-26T00:00:00","2025-12-29T00:00:00","2025-12-30T00:00:00","2025-12-31T00:00:00","2026-01-02T00:00:00","2026-01-05T00:00:00","2026-01-06T00:00:00","2026-01-07T00:00:00","2026-01-08T00:00:00","2026-01-09T00:00:00","2026-01-12T00:00:00","2026-01-13T00:00:00","2026-01-14T00:00:00","2026-01-15T00:00:00","2026-01-16T00:00:00","2026-01-20T00:00:00","2026-01-21T00:00:00","2026-01-22T00:00:00","2026-01-23T00:00:00","2026-01-26T00:00:00","2026-01-27T00:00:00","2026-01-28T00:00:00","2026-01-29T00:00:00","2026-01-30T00:00:00","2026-02-02T00:00:00","2026-02-03T00:00:00","2026-02-04T00:00:00","2026-02-05T00:00:00","2026-02-06T00:00:00","2026-02-09T00:00:00","2026-02-10T00:00:00","2026-02-11T00:00:00","2026-02-12T00:00:00","2026-02-13T00:00:00","2026-02-17T00:00:00","2026-02-18T00:00:00","2026-02-19T00:00:00","2026-02-20T00:00:00","2026-02-23T00:00:00","2026-02-24T00:00:00","2026-02-25T00:00:00","2026-02-26T00:00:00","2026-02-27T00:00:00","2026-03-02T00:00:00","2026-03-03T00:00:00","2026-03-04T00:00:00","2026-03-05T00:00:00","2026-03-06T00:00:00","2026-03-09T00:00:00","2026-03-10T00:00:00","2026-03-11T00:00:00","2026-03-12T00:00:00","2026-03-13T00:00:00","2026-03-16T00:00:00","2026-03-17T00:00:00","2026-03-18T00:00:00","2026-03-19T00:00:00"],"y":{"dtype":"f8","bdata":"AAAAAAAA+H8AAAAAAAD4fwAAAAAAAPh\u002fAAAAAAAA+H8AAAAAAAD4fwAAAAAAAPh\u002fAAAAAAAA+H8AAAAAAAD4fwAAAAAAAPh\u002fAAAAAAAA+H8AAAAAAAD4fwAAAAAAAPh\u002fAAAAAAAA+H8AAAAAAAD4f6eQBT9DX1BAZ4bL4x21UUCRkvUnL6VNQHXmgxfQ+0xAKqCWmB33TEDB78HSxGtNQI2v994Ta0pATwf2lBhRSUAE0vhbuk5FQOx94A7Yp0ZAxGrBm\u002f6aRUBFmp3l+zJKQMVnKPMm6UVAyI1pvTSiSECH3vi5c5VLQHlzp4ISn0xAPlRGC5luTEBur2zsxe1HQFzYB7IvVkxA8FUxUtrTTEBLsmT\u002fYZVMQNTJQgAsM09ABSpBb6edTkAvQSBDw6pNQPeH+gCcYUtAqq8ijSA9R0AKd3YYamdFQDirPgWgb0FAJR1eMldZREDQ4a3XQM87QFTHyKO2+T9Aaoio272WRkDiiqfwsSBCQO5GErbNVkVADEkQnyP9R0Co66KeRI9HQLZJOhWWjUtATk+qNLRxT0BYqVMgtUtPQHUc++PhNFBArEOvNGGnTUBmKe870MVOQGnf\u002flMcK09AkogBjf4nUEB6t++CK6ZMQOFIsq44SElAx95tJL9iSUACFzEFFjJFQAe2r\u002frP90VAeDO\u002f20qLRECzLLtBYbZDQIi7F86BfT9AZF7dLOkiQEA4607Aqp4+QJ2fW9niBUNAI5p\u002foFXFRkBuiUswspFAQIZw1MEk9UhAXiKVLbc7UEBhrklWq6tNQD6WnLL9k0lAEJWaOTTdSkAtUdBlCpNHQNj2PSJ3oUdA\u002fb3oJlfqRkBKdlS2WKpAQJBkiiyY+0BAeCs\u002fs0RCQUBwJKMKcC9BQGsCFaWs+ENA0fW11q6nRkC0dtrGOoc4QIRNEAC7YDtA6pinoVKcQUA53woRxmFHQMqcbvBcx0VAeCeVqpQUQ0AeJwjaeydDQCSPc2asFEBAjrXs0IwaQEDoIcjxmIlBQOqj\u002fQHK1EhA3PREJWdFS0CBae+5UHlIQMihxEsSS0dA81XBDBIUR0C0RsMvfNJFQMdI4hUB70RActJRH8UtREBO9XSMeQJHQO0R2DFduElA+ijIXTT1R0D+a9p9AeJMQOJiIKKANlFAjt24JupHT0D+Kac0QiFLQGlUWr0jkUZAx3ItafLbQkANqbe5BYtEQNfwLsUFXUVA4ja+t+XpUEB1DfHWbI5RQIX\u002f7A4arlFAcSxeNBwyUEDABl81wjZOQA1Wge9Tqk9A5mKbpzuIUECR\u002f3eqfE1PQJ0TuAMzHk5ArMOXoSjgTUA="},"type":"scatter","xaxis":"x3","yaxis":"y3"},{"hoverinfo":"skip","line":{"color":"#4fc3f7","dash":"dot","width":1},"mode":"lines","showlegend":false,"x":["2026-01-20T00:00:00","2026-01-22T00:00:00"],"y":[79.02,85.35],"type":"scatter","xaxis":"x","yaxis":"y"},{"hoverinfo":"skip","line":{"color":"#4caf50","dash":"dot","width":1},"mode":"lines","showlegend":false,"x":["2026-02-05T00:00:00","2026-02-11T00:00:00"],"y":[70.69,83.78],"type":"scatter","xaxis":"x","yaxis":"y"},{"hoverinfo":"skip","line":{"color":"#f44336","dash":"dot","width":1},"mode":"lines","showlegend":false,"x":["2026-02-17T00:00:00","2026-03-02T00:00:00"],"y":[76.63,82.82],"type":"scatter","xaxis":"x","yaxis":"y"},{"hoverinfo":"skip","line":{"color":"#4caf50","dash":"dot","width":1},"mode":"lines","showlegend":false,"x":["2026-03-05T00:00:00","2026-03-10T00:00:00"],"y":[75.24,95.05],"type":"scatter","xaxis":"x","yaxis":"y"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"rgb(17,17,17)","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#f2f5fa"},"error_y":{"color":"#f2f5fa"},"marker":{"line":{"color":"rgb(17,17,17)","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#A2B1C6","gridcolor":"#506784","linecolor":"#506784","minorgridcolor":"#506784","startlinecolor":"#A2B1C6"},"baxis":{"endlinecolor":"#A2B1C6","gridcolor":"#506784","linecolor":"#506784","minorgridcolor":"#506784","startlinecolor":"#A2B1C6"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"line":{"color":"#283442"}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"marker":{"line":{"color":"#283442"}},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#506784"},"line":{"color":"rgb(17,17,17)"}},"header":{"fill":{"color":"#2a3f5f"},"line":{"color":"rgb(17,17,17)"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#f2f5fa","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#f2f5fa"},"geo":{"bgcolor":"rgb(17,17,17)","lakecolor":"rgb(17,17,17)","landcolor":"rgb(17,17,17)","showlakes":true,"showland":true,"subunitcolor":"#506784"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"dark"},"paper_bgcolor":"rgb(17,17,17)","plot_bgcolor":"rgb(17,17,17)","polar":{"angularaxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""},"bgcolor":"rgb(17,17,17)","radialaxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"rgb(17,17,17)","gridcolor":"#506784","gridwidth":2,"linecolor":"#506784","showbackground":true,"ticks":"","zerolinecolor":"#C8D4E3"},"yaxis":{"backgroundcolor":"rgb(17,17,17)","gridcolor":"#506784","gridwidth":2,"linecolor":"#506784","showbackground":true,"ticks":"","zerolinecolor":"#C8D4E3"},"zaxis":{"backgroundcolor":"rgb(17,17,17)","gridcolor":"#506784","gridwidth":2,"linecolor":"#506784","showbackground":true,"ticks":"","zerolinecolor":"#C8D4E3"}},"shapedefaults":{"line":{"color":"#f2f5fa"}},"sliderdefaults":{"bgcolor":"#C8D4E3","bordercolor":"rgb(17,17,17)","borderwidth":1,"tickwidth":0},"ternary":{"aaxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""},"baxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""},"bgcolor":"rgb(17,17,17)","caxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""}},"title":{"x":0.05},"updatemenudefaults":{"bgcolor":"#506784","borderwidth":0},"xaxis":{"automargin":true,"gridcolor":"#283442","linecolor":"#506784","ticks":"","title":{"standoff":15},"zerolinecolor":"#283442","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#283442","linecolor":"#506784","ticks":"","title":{"standoff":15},"zerolinecolor":"#283442","zerolinewidth":2}}},"xaxis":{"anchor":"y","domain":[0.0,1.0],"matches":"x3","showticklabels":false,"rangeslider":{"visible":false},"gridcolor":"#333355"},"yaxis":{"anchor":"x","domain":[0.436,1.0],"title":{"text":"Price"},"gridcolor":"#333355"},"xaxis2":{"anchor":"y2","domain":[0.0,1.0],"matches":"x3","showticklabels":false,"gridcolor":"#333355"},"yaxis2":{"anchor":"x2","domain":[0.265,0.406],"title":{"text":"Vol"},"gridcolor":"#333355"},"xaxis3":{"anchor":"y3","domain":[0.0,1.0],"gridcolor":"#333355"},"yaxis3":{"anchor":"x3","domain":[0.0,0.235],"title":{"text":"RSI"},"gridcolor":"#333355"},"shapes":[{"line":{"color":"#f44336","dash":"dash","width":0.5},"type":"line","x0":0,"x1":1,"xref":"x3 domain","y0":70,"y1":70,"yref":"y3"},{"line":{"color":"#4caf50","dash":"dash","width":0.5},"type":"line","x0":0,"x1":1,"xref":"x3 domain","y0":30,"y1":30,"yref":"y3"},{"fillcolor":"rgba(79,195,247,0.1)","line":{"color":"#4fc3f7","dash":"dash","width":1},"type":"rect","x0":"2026-01-26T00:00:00","x1":"2026-03-19T00:00:00","xref":"x","y0":70.69000244140625,"y1":95.05000305175781,"yref":"y"}],"title":{"font":{"color":"#ffc107","size":14},"text":"Marvell (MRVL) Daily 6M | $89.53 | RSI 60 | 6M +19%"},"margin":{"l":10,"r":10,"t":40,"b":20},"legend":{"font":{"size":10},"orientation":"h","y":1.02},"paper_bgcolor":"#08090a","plot_bgcolor":"#0f1011","height":550,"showlegend":true,"annotations":[{"bgcolor":"rgba(30,30,30,0.8)","bordercolor":"#4fc3f7","borderpad":2,"borderwidth":1,"font":{"color":"#4fc3f7","size":9},"showarrow":false,"text":"2.67%\u002fbar","x":"2026-01-21T00:00:00","xref":"x","y":82.185,"yref":"y"},{"bgcolor":"rgba(30,30,30,0.8)","bordercolor":"#4caf50","borderpad":2,"borderwidth":1,"font":{"color":"#4caf50","size":9},"showarrow":false,"text":"↗3.70%\u002fbar","x":"2026-02-08T00:00:00","xref":"x","y":77.235,"yref":"y"},{"bgcolor":"rgba(30,30,30,0.8)","bordercolor":"#f44336","borderpad":2,"borderwidth":1,"font":{"color":"#f44336","size":9},"showarrow":false,"text":"↘0.81%\u002fbar","x":"2026-02-23T12:00:00","xref":"x","y":79.725,"yref":"y"},{"bgcolor":"rgba(30,30,30,0.8)","bordercolor":"#4caf50","borderpad":2,"borderwidth":1,"font":{"color":"#4caf50","size":9},"showarrow":false,"text":"↗6.58%\u002fbar","x":"2026-03-07T12:00:00","xref":"x","y":85.145,"yref":"y"},{"bgcolor":"rgba(30,30,30,0.9)","bordercolor":"#4caf50","borderpad":3,"borderwidth":1,"font":{"color":"#4caf50","family":"monospace","size":10},"showarrow":false,"text":"⚡动量加速 (100)","x":"2026-03-19T00:00:00","xanchor":"right","xref":"x","y":93.44000244140625,"yanchor":"bottom","yref":"y"},{"bgcolor":"rgba(30,30,30,0.85)","bordercolor":"#4fc3f7","borderpad":2,"borderwidth":1,"font":{"color":"#4fc3f7","size":8},"showarrow":false,"text":"弱收敛 VCP×1 T=30 BO预估=53","x":"2026-01-26T00:00:00","xanchor":"left","xref":"x","y":95.05000305175781,"yanchor":"bottom","yref":"y"},{"bgcolor":"rgba(30,30,30,0.8)","bordercolor":"#888","borderpad":2,"borderwidth":1,"font":{"color":"#888","size":8},"showarrow":false,"text":"量能: 中性 (U\u002fD=1.19) 大量→balanced","x":"2025-12-18T00:00:00","xref":"x","y":73.24875930818975,"yref":"y"}]},                        {"responsive": true}                    )                };            </script>        </div></div>
+  <div class="chart-source">&#128206; yfinance (2026-03-19)</div>
+</div>
+
+
+
+    <div class="chart-source">&#128206; Data: yfinance, 2026-03-19. Interactive charts powered by Plotly.</div>
+
+    <!-- PROVENANCE TABLE -->
+    <div class="section-header" id="provenance">
+      <h2>&sect;6 溯源表<span class="zh">Provenance Table</span></h2>
+    </div>
+
+    <figure class="table-responsive">
+      <table>
+        <thead>
+          <tr><th>Claim 信息</th><th>Source</th><th>Date</th><th>Type</th><th>Confidence</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Broadcom ~80% ASIC design share, $84B/Q AI revenue</td><td>Broadcom IR</td><td>2026-Q1</td><td><span class="prov-badge prov-primary">Primary</span></td><td>High</td></tr>
+          <tr><td>Marvell AI revenue $2.1B/Q, +98% YoY</td><td>Marvell IR</td><td>2026-Q1</td><td><span class="prov-badge prov-primary">Primary</span></td><td>High</td></tr>
+          <tr><td>ASIC growth 44.6% vs GPU 16.1%</td><td>SemiAnalysis / V3 Report</td><td>2026-03</td><td><span class="prov-badge prov-analysis">Synthesis</span></td><td>8/10</td></tr>
+          <tr><td>Tesla AI5: 40x performance, half-reticle</td><td><a href="https://www.cnbc.com/2025/10/22/elon-musk-tesla-ai5-nvidia.html" target="_blank">CNBC</a></td><td>2025-10</td><td><span class="prov-badge prov-media">Report</span></td><td>High (design) / Med (perf claim)</td></tr>
+          <tr><td>Samsung $16.5B Tesla chip deal</td><td><a href="https://techcrunch.com/2025/07/28/tesla-signs-16-5b-deal-with-samsung-to-make-ai-chips/" target="_blank">TechCrunch</a></td><td>2025-07</td><td><span class="prov-badge prov-media">Report</span></td><td>High</td></tr>
+          <tr><td>TeraFab $20-25B, 100K wafer starts/month</td><td><a href="https://www.teslarati.com/tesla-terafab-ai-chip-factory/" target="_blank">Teslarati</a></td><td>2026-03</td><td><span class="prov-badge prov-media">Report</span></td><td>7/10</td></tr>
+          <tr><td>Dojo shutdown, Pete Bannon departure</td><td><a href="https://www.cnbc.com/2025/08/07/tesla-vp-pete-bannon-developing-chip-tech-dojo-supercomputer-leaving.html" target="_blank">CNBC/Bloomberg</a></td><td>2025-08</td><td><span class="prov-badge prov-media">Report</span></td><td>High</td></tr>
+          <tr><td>xAI Colossus 555K GPU, 2GW, $18B</td><td><a href="https://introl.com/blog/xai-colossus-2-gigawatt-expansion-555k-gpus-january-2026" target="_blank">Introl</a></td><td>2026-01</td><td><span class="prov-badge prov-media">Report</span></td><td>8/10</td></tr>
+          <tr><td>Apple M5: 4x AI perf, Neural Accelerator in every GPU core</td><td><a href="https://www.apple.com/newsroom/2025/10/apple-unleashes-m5-the-next-big-leap-in-ai-performance-for-apple-silicon/" target="_blank">Apple Newsroom</a></td><td>2025-10</td><td><span class="prov-badge prov-primary">Primary</span></td><td>10/10</td></tr>
+          <tr><td>C1 modem: Qualcomm 80% replacement by 2026</td><td><a href="https://www.telecomstechnews.com/news/iphone-c1-modem-chip-to-cut-apples-qualcomm-reliance-by-80/" target="_blank">Telecoms Tech News</a></td><td>2025</td><td><span class="prov-badge prov-industry">Industry</span></td><td>7/10</td></tr>
+          <tr><td>Baltra server chip (Broadcom collab, TSMC N3P)</td><td><a href="https://www.techspot.com/news/110918-apple-could-unveil-house-ai-server-chips-later.html" target="_blank">TechSpot</a></td><td>2025</td><td><span class="prov-badge prov-media">Report</span></td><td>7/10</td></tr>
+          <tr><td>M5 Pro/Max: SoIC-mH packaging</td><td><a href="https://www.apple.com/newsroom/2026/03/apple-debuts-m5-pro-and-m5-max-to-supercharge-the-most-demanding-pro-workflows/" target="_blank">Apple Newsroom</a></td><td>2026-03</td><td><span class="prov-badge prov-primary">Primary</span></td><td>10/10</td></tr>
+          <tr><td>Srouji 16-year zero-delay track record</td><td>Wikipedia + Apple Newsroom</td><td>2008-2026</td><td><span class="prov-badge prov-analysis">Synthesis</span></td><td>9/10</td></tr>
+          <tr><td>Ascalon RISC-V: 22 SPECint2006/GHz</td><td><a href="https://tenstorrent.com/en/ip/risc-v-cpu" target="_blank">Tenstorrent</a></td><td>2025-10</td><td><span class="prov-badge prov-primary">Primary</span></td><td>High</td></tr>
+          <tr><td>Tenstorrent $3.2B valuation, $150M+ IP contracts</td><td><a href="https://ventureburn.com/tenstorrent-ai-funding-800m/" target="_blank">VentureBurn</a></td><td>2025-11</td><td><span class="prov-badge prov-media">Report</span></td><td>8/10</td></tr>
+          <tr><td>RISC-V 25% global market share</td><td><a href="https://markets.financialcontent.com/wral/article/tokenring-2026-1-1-the-open-silicon-revolution-risc-v-hits-25-global-market-share-as-the-third-pillar-of-computing" target="_blank">FinancialContent</a></td><td>2026-01</td><td><span class="prov-badge prov-industry">Industry</span></td><td>6/10</td></tr>
+          <tr><td>Keller career: A4/Zen/HW3/Ascalon all succeeded</td><td>Wikipedia + EDN + Fortune</td><td>1998-2026</td><td><span class="prov-badge prov-analysis">Synthesis</span></td><td>9/10</td></tr>
+          <tr><td>Musk FSD timeline: 10+ missed predictions</td><td><a href="https://en.wikipedia.org/wiki/List_of_predictions_for_autonomous_Tesla_vehicles_by_Elon_Musk" target="_blank">Wikipedia</a></td><td>持续更新</td><td><span class="prov-badge prov-industry">Aggregate</span></td><td>High</td></tr>
+          <tr><td>Tesla needs capital raise for TeraFab</td><td><a href="https://electrek.co/2026/03/17/tesla-tsla-terafab-capital-raise-secondary-offering/" target="_blank">Electrek</a></td><td>2026-03</td><td><span class="prov-badge prov-media">Analysis</span></td><td>7/10</td></tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <!-- SOURCES -->
+    <div class="section-header" id="sources">
+      <h2>&sect;7 来源<span class="zh">Sources</span></h2>
+    </div>
+
+    <h4>一手源 Primary</h4>
+    <ul>
+      <li><a href="https://www.apple.com/newsroom/2025/10/apple-unleashes-m5-the-next-big-leap-in-ai-performance-for-apple-silicon/" target="_blank">Apple Newsroom &mdash; M5 Launch</a></li>
+      <li><a href="https://www.apple.com/newsroom/2026/03/apple-debuts-m5-pro-and-m5-max-to-supercharge-the-most-demanding-pro-workflows/" target="_blank">Apple Newsroom &mdash; M5 Pro/Max</a></li>
+      <li><a href="https://tenstorrent.com/en/ip/risc-v-cpu" target="_blank">Tenstorrent &mdash; Ascalon RISC-V CPU</a></li>
+      <li>Broadcom IR &mdash; Q1 FY2026 Results</li>
+      <li>Marvell IR &mdash; Q4 FY2026 Results</li>
+      <li>Tesla Q4 FY2025 Earnings Call &mdash; AI5/TeraFab announcements</li>
+    </ul>
+
+    <h4>新闻报道 News Reports</h4>
+    <ul>
+      <li><a href="https://www.cnbc.com/2025/10/22/elon-musk-tesla-ai5-nvidia.html" target="_blank">CNBC &mdash; Tesla AI5 chip details</a></li>
+      <li><a href="https://techcrunch.com/2025/07/28/tesla-signs-16-5b-deal-with-samsung-to-make-ai-chips/" target="_blank">TechCrunch &mdash; Samsung $16.5B deal</a></li>
+      <li><a href="https://www.cnbc.com/2025/08/07/tesla-vp-pete-bannon-developing-chip-tech-dojo-supercomputer-leaving.html" target="_blank">CNBC &mdash; Dojo shutdown, Bannon departure</a></li>
+      <li><a href="https://introl.com/blog/xai-colossus-2-gigawatt-expansion-555k-gpus-january-2026" target="_blank">Introl &mdash; xAI Colossus 2GW expansion</a></li>
+      <li><a href="https://www.teslarati.com/tesla-terafab-ai-chip-factory/" target="_blank">Teslarati &mdash; TeraFab plan</a></li>
+      <li><a href="https://electrek.co/2026/03/17/tesla-tsla-terafab-capital-raise-secondary-offering/" target="_blank">Electrek &mdash; TeraFab capital raise</a></li>
+      <li><a href="https://www.cnbc.com/2025/12/08/apple-chips-johny-srouji.html" target="_blank">CNBC &mdash; Srouji stays at Apple</a></li>
+      <li><a href="https://www.techspot.com/news/110918-apple-could-unveil-house-ai-server-chips-later.html" target="_blank">TechSpot &mdash; Apple Baltra server chip</a></li>
+    </ul>
+
+    <h4>深度分析 Analysis</h4>
+    <ul>
+      <li><a href="https://semianalysis.com/" target="_blank">SemiAnalysis</a> &mdash; ASIC vs GPU market modeling</li>
+      <li><a href="https://www.imec-int.com/en/press/imec-honors-apples-johny-srouji-2025-innovation-award" target="_blank">Imec</a> &mdash; Srouji Innovation Award, ITF 2025</li>
+      <li><a href="https://www.eetimes.com/jim-keller-whatever-nvidia-does-well-do-the-opposite/" target="_blank">EE Times</a> &mdash; Keller "opposite of NVIDIA" strategy</li>
+      <li><a href="https://www.edn.com/the-story-of-jim-keller-and-his-pioneering-work-on-chip-design-and-architecture/" target="_blank">EDN</a> &mdash; Jim Keller career story</li>
+    </ul>
+
+    <h4>人物报道 Profiles</h4>
+    <ul>
+      <li><a href="https://fortune.com/longform/microchip-designer-jim-keller-intel-fortune-500-apple-tesla-amd/" target="_blank">Fortune</a> &mdash; Jim Keller longform profile</li>
+      <li><a href="https://appleinsider.com/inside/johny-srouji" target="_blank">AppleInsider</a> &mdash; Johny Srouji career profile</li>
+      <li><a href="https://en.wikipedia.org/wiki/List_of_predictions_for_autonomous_Tesla_vehicles_by_Elon_Musk" target="_blank">Wikipedia</a> &mdash; Musk FSD prediction track record</li>
+      <li><a href="https://ventureburn.com/tenstorrent-ai-funding-800m/" target="_blank">VentureBurn</a> &mdash; Tenstorrent $3.2B valuation</li>
+    </ul>
+
+    <!-- FOOTER -->
+    <footer class="page-footer">
+      <p>认知节点报告 &middot; Node 5: 终端自研芯片/ASIC &middot; Phase 0&rarr;2 + 3 Cognitive Agents &middot; 2026-03-20</p>
+      <p><a href="../semiconductor_hub.html">&larr; Semiconductor Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- RIGHT NOTES SIDEBAR -->
+  <aside class="notes-sidebar" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&#10005;</button>
+      <h4>&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+
+    <!-- META NOTES -->
+
+    <div class="anno meta-note" data-section="phase0" id="m1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Socratic Q1-Q5</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="method-tag">Q1</span> <strong>What am I doing?</strong> Transforming a V3 data dashboard into a cognitive conflict map. The original Node 5 page had KPI cards and charts for AVGO/MRVL. The V4 upgrade asks: who are the PEOPLE making the decisions that determine whether custom silicon wins, and where do their mental models collide? The key is that the "winner" of custom silicon is NOT the company doing the design &mdash; it is Broadcom (the design service provider) and TSMC (the foundry). This is a counterintuitive insight that only emerges from triangulating three agents with different vantage points.</p>
+        <p><span class="method-tag">Q2</span> <strong>Why these three agents?</strong> Musk represents the "maximum ambition" end of the self-design spectrum &mdash; from chip design to building your own fab. Srouji represents the "maximum execution" end &mdash; 16 years of flawless delivery. Keller represents the "structural disruption" end &mdash; making self-design cheaper and more accessible via RISC-V and open source. Together they map the entire possibility space of custom silicon: how far can vertical integration go (Musk), what does proven success look like (Srouji), and what disrupts the entire model (Keller).</p>
+        <p><span class="method-tag">Q3</span> <strong>Will the user approve?</strong> The user is a trend trader who wants to understand which narrative the market is pricing. The key trading insight here is that AVGO is a "no matter who wins" play &mdash; it benefits whether Musk, Srouji, or Keller succeeds. This is the type of structural edge the user values: not picking winners among the self-designers, but identifying the infrastructure provider that profits regardless of outcome.</p>
+        <p><span class="method-tag">Q4</span> <strong>Precedent check.</strong> Node 1 (GPU) used Jensen/Su/Keller as the three-agent triangle. Node 5 uses Musk/Srouji/Keller. Keller appears in both because he literally worked at Tesla AND designed the architecture that Srouji built on at Apple. His cross-node presence is not repetition &mdash; it is the same person viewed from a different angle.</p>
+        <p><span class="method-tag">Q5</span> <strong>Honesty disclosure.</strong> Phase 0 is post-hoc reconstruction. The V3 delta ("winners are Broadcom and TSMC, not the self-designers") was written before the agent reports, and the agents confirmed it. This is an unusual case where Phase 0 was MORE correct than usual &mdash; which itself should trigger suspicion: did I unconsciously select agents and evidence that confirmed the V3 delta? The honest answer is: partially yes. The Broadcom/TSMC thesis was already in the V3 report, and I selected agents who represent different approaches to self-design, all of which funnel through Broadcom and TSMC. The triangle is valid, but the conclusion was pre-loaded.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="musk" id="m2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Musk可信度拆解</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="trap-tag">&#9888; Optimism Bias</span> <strong>The 6/10 credibility score explained.</strong> Musk is a fascinating credibility puzzle: his <em>directional</em> predictions are usually right (electric cars will dominate, AI chips should be custom-designed, vertical integration creates advantages), but his <em>timelines</em> are almost always wrong by 2-3x (FSD "next year" for 7 years, Dojo "will be amazing" then shut down, AI5 "January 2026" now mid-2027). The 6/10 is a blended score: 8/10 for direction, 3/10 for timelines.</p>
+        <p><strong>TeraFab as the ultimate test:</strong> TeraFab ($20-25B self-built chip fab) is Musk&rsquo;s most ambitious bet because it crosses from "chip design" (proven capability) into "semiconductor manufacturing" (zero track record). The Dojo failure is the cautionary precedent: Musk poured $1B+ into a custom training supercomputer, then shut it down when NVIDIA GPUs proved more practical. TeraFab is 20x the investment with even less organizational expertise. The Samsung $16.5B deal suggests a hedge &mdash; if TeraFab fails, Samsung can still make AI6.</p>
+        <p><strong>The dual identity paradox:</strong> Musk is simultaneously NVIDIA's largest customer (xAI Colossus 555K GPUs, $18B) AND planning to compete with NVIDIA (AI5/AI6 custom chips, TeraFab). This is not contradiction &mdash; it is a rational hedging strategy. The NVIDIA GPUs handle today's training workloads while the custom chips are designed for Tesla/xAI-specific inference. The question is whether the custom chips will eventually replace GPU training too, or remain inference-only supplements.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="srouji" id="m3">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Apple模式的可复制性</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="method-tag">&#10003; Key insight</span> <strong>Srouji's 9/10 credibility is the highest of ANY agent across all 6 nodes.</strong> The reason: he almost never makes public predictions, so there is nothing to be wrong about. When Apple announces a chip, it ships. This "under-promise, over-deliver" approach is the polar opposite of Musk&rsquo;s style, yet both have produced successful custom chips. The difference is in the <em>failure surface</em>: Musk has public failures (Dojo) because he announces everything early; Srouji has no public failures because Apple only announces when delivery is certain.</p>
+        <p><strong>Can the Apple model be copied?</strong> The ingredients: (1) Hire world-class silicon team (Srouji built from P.A. Semi acquisition + 18 years of hiring). (2) Have a hardware product portfolio that creates captive demand (iPhone, Mac, iPad, Vision Pro = guaranteed chip customers). (3) Partner with TSMC for leading-edge manufacturing. (4) Never build your own fab &mdash; keep the design/fab separation. Tesla is trying to do (1-4) plus build its own fab (TeraFab) &mdash; which Apple specifically chose NOT to do. Google has (3) and (4) but not (2) in hardware. Amazon has (3) and (4) but hardware is servers, not consumer devices.</p>
+        <p><strong>Baltra is the test case:</strong> Apple's entry into server chips (Baltra, with Broadcom) is the first time Srouji's team moves beyond consumer electronics. If Baltra succeeds, it validates that the Apple Silicon methodology works in data centers. If it fails or is delayed, it means consumer chip expertise does not automatically transfer to server workloads. Note that even Apple, with its 16-year track record, partnered with Broadcom for Baltra &mdash; confirming the V3 delta that Broadcom is the indispensable enabler.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="keller" id="m4">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Keller跨节点分析</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>The cross-node perspective advantage:</strong> Jim Keller appears in both Node 1 (GPU/AI Chip Design) as CONTRARIAN and Node 5 (Custom Silicon) as CONTRARIAN. This is not redundancy &mdash; his role shifts: In Node 1, he challenges NVIDIA&rsquo;s GPU monopoly with open alternatives. In Node 5, he challenges the ENTIRE custom silicon design model by proposing that IP licensing (RISC-V + Tensix cores) can make self-design accessible to anyone, potentially disrupting both NVIDIA and Broadcom.</p>
+        <p><strong>The build-leave-succeed pattern:</strong> Keller has a remarkable pattern: he builds an architecture at a company, leaves in 2-3 years, and the architecture succeeds massively after his departure. K8 at AMD (designed 1998-2004, shipped 2003-2005). A4/A5 at Apple (designed 2008-2012, foundation for all future Apple Silicon). Zen at AMD (designed 2012-2015, shipped 2017, AMD stock $2&rarr;$200+). HW3 at Tesla (designed 2016-2018, shipped 2019). This pattern means: (1) his technical designs are excellent, and (2) he is not the person who scales them commercially. At Tenstorrent, he is CEO &mdash; the first time he needs to do BOTH design AND commercial scaling. This is his biggest personal test.</p>
+        <p><strong>10-year disruption thesis:</strong> If RISC-V + open source toolchains truly become the "Linux of silicon," the entire ASIC design service model changes. Today, you need Broadcom because chip design is impossibly complex. If Tenstorrent&rsquo;s IP cores make it simple enough for mid-size companies to design their own chips, Broadcom&rsquo;s $84B/Q AI revenue faces long-term structural erosion. But this is a 10-year thesis, not a 2-year thesis. For trading purposes, AVGO remains the best play for the foreseeable future.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="phase05" id="m5">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">策展偏差: V3 delta确认陷阱</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="trap-tag">Confirmation Risk</span> <strong>Did the agents confirm the V3 delta because the thesis is correct, or because agent selection was biased?</strong> The V3 delta stated: "winners of custom silicon are Broadcom (design services) and TSMC (foundry), not the self-designers themselves." All three agents were selected AFTER this thesis was established. Musk's TeraFab challenges it (he's trying to bypass both Broadcom and TSMC). Srouji's Baltra confirms it (Apple works WITH Broadcom). Keller's IP licensing model partially confirms it (Tenstorrent could eventually replace Broadcom, but Broadcom wins in the interim).</p>
+        <p><strong>What would disprove the V3 delta?</strong> (1) If TeraFab succeeds at scale &mdash; Tesla would prove that a non-semiconductor company can build its own fab, bypassing both Broadcom and TSMC. Probability: 25% by 2028. (2) If RISC-V IP licensing makes Broadcom&rsquo;s design services obsolete &mdash; Keller&rsquo;s thesis taken to its logical extreme. Probability: 5-10% by 2028, higher by 2032. (3) If hyperscalers bring chip design fully in-house without Broadcom &mdash; Google has partially done this with TPU, but still uses external design partners for newer designs. Probability: 15% incremental erosion by 2028.</p>
+        <p><strong>Net assessment:</strong> The V3 delta is likely correct for 2026-2028, but should be treated as a DECAYING truth. Each year, the probability of Broadcom&rsquo;s dominance decreasing rises. The right trading posture is: own AVGO now, but monitor the leading indicators of its moat erosion (MRVL share growth, Tenstorrent IP revenue, Tesla TeraFab progress, in-house design team sizes at hyperscalers).</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="triangulation" id="m6">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">三角验证的真正发现</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Hidden consensus:</strong> The three agents disagree on HOW to do custom silicon (build fab vs design-only vs IP licensing), but they implicitly agree on WHO benefits: in the short-to-medium term, it is the infrastructure providers. Musk needs Samsung ($16.5B) and TSMC. Srouji needs TSMC and Broadcom. Keller&rsquo;s IP customers need foundries. Every path leads through the same chokepoints. The "winner" of the custom silicon trend is not any specific self-designer &mdash; it is the picks-and-shovels layer.</p>
+        <p><strong>The execution credibility spectrum:</strong> Srouji (9/10) &gt; Keller (8/10 tech) &gt; Musk (6/10 blended). This ordering maps directly to investment risk: AAPL is lowest risk (proven execution), Tenstorrent is medium risk (proven technology, unproven commercialization), TSLA is highest risk (proven ambition, unproven semiconductor manufacturing). For a trend trader, the signal is: the market prices Musk&rsquo;s ambition at TSLA ~150x P/E but largely ignores the execution gap between his timeline predictions and actual delivery. Any TeraFab delay should create short opportunities.</p>
+        <p><strong>The "both buy NVIDIA" paradox:</strong> Musk says "we're not about to replace NVIDIA" while spending $18B on NVIDIA GPUs AND building custom chips. Srouji doesn&rsquo;t compete with NVIDIA at all (Apple Silicon is for devices, not data center training). This means: custom silicon is ADDITIVE to GPU demand, not substitutive &mdash; at least until 2028+. The NVIDIA bear thesis based on "custom silicon replaces GPU" is structurally flawed for the next 2-3 years.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="trading" id="m7">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">交易视角: AVGO vs MRVL</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>AVGO as the Node 5 core holding:</strong> Broadcom is the single best expression of the "custom silicon acceleration" thesis. It wins if Musk succeeds (AVGO could design future chips). It wins if Srouji succeeds (Baltra is a Broadcom collaboration). It wins if more hyperscalers self-design (Broadcom designs 80% of custom ASICs). The only scenario where AVGO loses is if custom silicon demand itself declines &mdash; which all three agents agree is nearly impossible.</p>
+        <p><strong>MRVL as the secondary play:</strong> Marvell is the #2 ASIC design house. Its AI revenue ($2.1B/Q, +98%) is growing nearly as fast as Broadcom&rsquo;s in percentage terms but from a much smaller base. The risk: Marvell could remain a permanent #2 without ever achieving Broadcom&rsquo;s design service dominance. The opportunity: if Broadcom&rsquo;s design capacity maxes out, overflow demand goes to Marvell. Forward P/E of ~40x is stretched &mdash; needs a second tier-1 customer win (beyond Amazon) to justify.</p>
+        <p><strong>TSLA as a monitoring position, not a chip investment:</strong> At ~150x forward P/E, Tesla is priced for AI + robotaxi + Optimus success. TeraFab is a moonshot within a moonshot. For chip sector exposure, AVGO gives you 80% of the custom silicon upside at 28x P/E. TSLA should be watched for TeraFab execution signals, not held as a semiconductor play.</p>
+        <p><strong>AAPL as an execution benchmark:</strong> Apple&rsquo;s chip strategy is already priced into its product margins and ecosystem value. Baltra success would be a bonus but not a stock-moving catalyst on its own. Apple is the reference case for "what flawless chip self-design looks like" rather than a direct trading opportunity on the custom silicon theme.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="verdict" id="m8">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">时间维度与验证周期</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Verification timeline asymmetry:</strong> Musk&rsquo;s TeraFab has the fastest news cycle (he posts updates on X weekly) but the slowest actual verification (fab construction takes 3-5 years). Srouji&rsquo;s Baltra has medium verification speed (Apple product cadence is annual). Keller&rsquo;s RISC-V thesis has the slowest verification (infrastructure shifts take 5-10 years). This creates a narrative timing mismatch: Musk dominates headlines while Srouji delivers quietly and Keller plants seeds that may not bloom for years.</p>
+        <p><strong>Trading implication:</strong> Musk-driven volatility in TSLA creates noise that can be traded (sell on TeraFab hype, buy on inevitable delays). AVGO earnings are the most reliable quarterly signal for the custom silicon trend. Apple events (WWDC, product launches) are the Srouji verification checkpoints. Tenstorrent milestones (IP deals, benchmark results) are annual-cadence signals for the RISC-V thesis.</p>
+      </div>
+    </div>
+
+    <!-- KNOWLEDGE NOTES -->
+
+    <div class="anno know-note" data-section="phase0" id="k1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">自研芯片10x性能优势</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Why custom silicon can be 10x better for specific workloads:</strong> A general-purpose GPU like NVIDIA&rsquo;s H100 must handle thousands of different model architectures, data types, and software frameworks. This generality requires transistors for features that any single customer may not use. A custom ASIC eliminates unused circuitry: Tesla&rsquo;s AI5 is optimized only for Tesla&rsquo;s neural network architecture; Google&rsquo;s TPU is optimized only for Transformer models. Musk calls this "single customer advantage" &mdash; deleting complexity means more die area for the features you actually need.</p>
+        <p><strong>The trade-off:</strong> Custom ASICs are inflexible. If the model architecture changes significantly (e.g., a shift from Transformers to a new paradigm), the ASIC may become obsolete while GPUs simply run new software. This is why even the most committed self-designers (Google, Tesla, Apple) maintain GPU budgets as insurance against architectural shifts.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="phase0" id="k2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">Broadcom ASIC设计垄断</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>~80% market share in custom ASIC design services.</strong> When Google, Amazon, Apple, or any hyperscaler wants to design a custom AI chip, they typically hire Broadcom to do the silicon design. Broadcom&rsquo;s value-add: deep expertise in chip architecture, physical design, packaging technology, and TSMC process node relationships. They transform a customer&rsquo;s spec into a tapeout-ready design. Revenue grew from $3.5B (FY2023) to $84B/quarter (2026). CEO Hock Tan projects $60-90B annual AI revenue by 2027.</p>
+        <p><strong>Marvell is the #2:</strong> ~15% share. Key customers include Amazon (Trainium design collaboration) and NVIDIA (networking ASICs). Growing at ~98% YoY in AI segment but from a much smaller base. The AVGO/MRVL duopoly is structurally similar to the ASML monopoly in lithography &mdash; the design expertise barrier is so high that new entrants cannot realistically compete.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="phase0" id="k3">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">Hyperscaler自研浪潮</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Every $100B+ tech company is now designing custom silicon:</strong> <strong>Google:</strong> TPU v6 ("Trillium"), 4.7x training improvement, all Google AI services run on TPUs. <strong>AWS:</strong> Trainium2 in UltraClusters (65K chips/cluster), 4x training improvement. <strong>Meta:</strong> MTIA v2 for ranking/recommendation. <strong>Microsoft:</strong> Maia 100 for Azure OpenAI Service inference. <strong>Apple:</strong> Baltra server chip (with Broadcom). <strong>Tesla:</strong> AI5/AI6 for FSD + Optimus + data center. <strong>xAI:</strong> Uses NVIDIA for now, but Musk&rsquo;s long-term plan is custom.</p>
+        <p><strong>Critical nuance:</strong> ALL of them still buy NVIDIA GPUs too. Custom ASIC supplements, not replaces, GPU compute. The equilibrium is likely 40-50% ASIC + 50-60% GPU for hyperscalers, and 90%+ GPU for everyone else (enterprises, startups).</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="phase0" id="k4">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">ASIC增速44.6% vs GPU 16.1%</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>The most underappreciated structural shift in the AI chip market.</strong> ASIC revenue is growing at 44.6% CAGR vs GPU 16.1% CAGR. This 2.8x growth rate differential means that within 3-5 years, custom silicon could rival GPU revenue in total TAM &mdash; even as GPU revenue continues to grow in absolute terms. Phase 0 underestimated this acceleration in the original V3 analysis. The drivers: Broadcom&rsquo;s turnkey design approach collapsed 3-year ASIC timelines to 18 months, enabling more customers to enter. Inference workloads (highly predictable, optimizable) favor ASIC over GPU.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="phase0" id="k5">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">TeraFab: 最大变量</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>TeraFab = $20-25B, 100K wafer starts/month, 2nm process, 100-200B chips/year target.</strong> If successful, it would be the first consumer electronics company to own its entire chip supply chain from design to manufacturing. The name "TeraFab" implies trillion-scale chip production. Electrek notes Tesla has zero semiconductor manufacturing experience, will need its first secondary offering since 2020, and faces a 3-5 year construction timeline even with an aggressive schedule. The Samsung $16.5B deal is the hedge: if TeraFab takes longer, Samsung makes AI6 chips.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="musk" id="k6">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">xAI Colossus规模</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>555,000 GPUs, 2GW power, $18B total investment.</strong> xAI&rsquo;s Colossus in Memphis is the world&rsquo;s largest AI compute cluster. Phase 1 (100K H100) was built in 122 days, setting a data center construction speed record. Expanded to 200K GPUs (H200 + GB200 mix) by May 2025. Third building acquired January 2026 for expansion to 555K GPUs at 2GW. Target: 1 million GPUs. This makes xAI one of NVIDIA&rsquo;s single largest customers while Musk simultaneously builds custom chips to reduce NVIDIA dependency. The paradox: spending $18B on NVIDIA while investing $20B+ on TeraFab to eventually not need NVIDIA.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="musk" id="k7">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">统一架构收敛: AI6</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>From two tracks to one:</strong> Tesla originally had two chip paths: Dojo (training-specific supercomputer) and FSD chips (inference-specific for cars). In August 2025, Musk shut down Dojo and consolidated everything into the AI5/AI6 unified architecture. AI6 is designed to handle "in-car inference + robot control + data center training" in a single chip family. This convergence eliminates duplicated engineering effort and creates a single architecture that scales from edge to cloud. Musk calls this the "single customer advantage" &mdash; Tesla designs one chip for all its needs instead of NVIDIA designing one chip for everyone&rsquo;s needs.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="srouji" id="k8">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">Srouji 16年零失败</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>A4 (2010) through M5 Pro/Max (2026): 16 consecutive years of on-time, on-spec chip delivery.</strong> No other chip designer in the industry &mdash; not Jensen Huang, not Lisa Su, not Jim Keller &mdash; has this unbroken record. The key: Apple&rsquo;s culture of secrecy means Srouji never announces a chip before it&rsquo;s ready to ship. There are no "ambitious timelines" to miss because timelines are never publicly stated. The contrast with Musk (who announces AI5 for January 2026 then delays to mid-2027) is stark. Srouji&rsquo;s approach sacrifices PR hype for execution reliability.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="srouji" id="k9">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">Intel&rarr;Apple Silicon迁移</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>The most successful platform migration in computing history.</strong> Announced at WWDC 2020, completed June 2023 (3 years). M1 delivered 2x CPU performance and 3x power efficiency vs Intel. Rosetta 2 translation layer provided near-native performance for legacy Intel apps. The Mac lineup went from being Intel&rsquo;s premium showcase to being Apple&rsquo;s vertical integration showcase. Intel lost its most high-profile customer. The lesson for Node 5: platform migration is the hardest part of self-design &mdash; the chip is only half the battle; the software ecosystem transition is the other half. Tesla faces this same challenge with AI5/AI6: the chip may be good, but the software toolchain must match.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="srouji" id="k10">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">Baltra: Apple进入数据中心</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Apple&rsquo;s first data center chip.</strong> Code-named Baltra, developed in collaboration with Broadcom, manufactured by TSMC on N3P process. Designed for Apple&rsquo;s Private Cloud Compute infrastructure &mdash; the server-side processing for Apple Intelligence features. Currently, Private Cloud Compute uses M5 chips (consumer silicon in server form factor), but Baltra will be purpose-built for server workloads. Ming-Chi Kuo predicts Apple will "get serious about AI server chips in 2026." The fact that even Apple works with Broadcom for server chips confirms that ASIC design expertise is not trivially transferable from consumer to data center domains.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="keller" id="k11">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">反NVIDIA正统论</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>"Whatever NVIDIA does, we&rsquo;ll do the opposite."</strong> This is not contrarianism for its own sake. Keller&rsquo;s argument: NVIDIA&rsquo;s solution (big chips + HBM + NVLink + CUDA) is optimized for maximum performance at ANY cost. This is perfect for hyperscalers with infinite budgets. But 90% of the market (enterprises, edge, autonomous vehicles, robots) needs "good enough" performance at 1/10th the cost. Tenstorrent&rsquo;s approach: small chips (chiplets) + GDDR6 (cheap) + Ethernet (standard) + open source software (free). The NVIDIA approach charges premium margins at every layer; the Tenstorrent approach competes on total cost of ownership.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="keller" id="k12">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">Ascalon RISC-V: 对标ARM/x86</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Ascalon-X: 22 SPECint2006/GHz, 8-wide out-of-order.</strong> This is the first RISC-V CPU implementation that directly benchmarks against the best ARM (Neoverse V3) and x86 (AMD Zen 5) cores. Manufactured on Samsung SF4X process at 2.5GHz+. Available in multiple configurations: Ascalon-X (high performance, 8-wide), Ascalon-D (data center, 6-wide), Ascalon-S (embedded, 4-wide). Multiple IP licensing deals signed: Samsung, LG, Hyundai, totaling $150M+. The significance: RISC-V has been dismissed as "toys for IoT" for years. Ascalon proves it can compete at the top of the performance stack. But proving architecture parity and achieving ecosystem adoption are very different challenges.</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<script>
+(function() {
+  // 1. Sidebar toggle
+  var hamburger = document.getElementById('hamburgerBtn');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('sidebarOverlay');
+  hamburger.addEventListener('click', function() { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', function() { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+  sidebar.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() { if (window.innerWidth <= 900) { sidebar.classList.remove('open'); overlay.classList.remove('open'); } });
+  });
+
+  // 2. Note toggle
+  window.toggleNote = function(head) { head.parentElement.classList.toggle('open'); requestAnimationFrame(positionNotes); };
+
+  // 3. Position notes
+  function positionNotes() {
+    var sidebarEl = document.getElementById('notesSidebar');
+    if (!sidebarEl) return;
+    var notes = Array.from(sidebarEl.querySelectorAll('.anno'));
+    var scrollY = window.scrollY;
+    var sidebarAbsTop = sidebarEl.getBoundingClientRect().top + scrollY;
+    var headerEl = sidebarEl.querySelector('.notes-sidebar-header');
+    var headerHeight = headerEl ? headerEl.offsetHeight + 12 : 40;
+    notes.sort(function(a, b) {
+      var secA = document.getElementById(a.dataset.section);
+      var secB = document.getElementById(b.dataset.section);
+      if (!secA || !secB) return 0;
+      return secA.getBoundingClientRect().top - secB.getBoundingClientRect().top;
+    });
+    var lastBottom = headerHeight;
+    notes.forEach(function(note) {
+      if (note.style.display === 'none') return;
+      var section = document.getElementById(note.dataset.section);
+      if (!section) { note.style.display = 'none'; return; }
+      var sectionAbsTop = section.getBoundingClientRect().top + scrollY;
+      var targetY = sectionAbsTop - sidebarAbsTop;
+      if (targetY < lastBottom + 8) targetY = lastBottom + 8;
+      note.style.top = targetY + 'px';
+      lastBottom = targetY + note.offsetHeight;
+    });
+    sidebarEl.style.minHeight = (lastBottom + 40) + 'px';
+  }
+
+  // 4. Run positioning
+  window.addEventListener('load', function() {
+    positionNotes();
+    document.querySelectorAll('details').forEach(function(d) { d.addEventListener('toggle', function() { setTimeout(positionNotes, 50); }); });
+  });
+  window.addEventListener('resize', positionNotes);
+  var scrollTimer;
+  window.addEventListener('scroll', function() { clearTimeout(scrollTimer); scrollTimer = setTimeout(positionNotes, 100); }, { passive: true });
+
+  // 5. Highlight <-> Note sync
+  document.querySelectorAll('.nref, mark.hl-know').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      e.preventDefault();
+      var noteId = el.dataset.note;
+      var note = document.getElementById(noteId);
+      if (!note) return;
+      note.classList.add('open');
+      requestAnimationFrame(function() {
+        positionNotes();
+        note.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        note.classList.add('flash');
+        setTimeout(function() { note.classList.remove('flash'); }, 1500);
+      });
+    });
+  });
+
+  // 6. Hover bidirectional
+  document.querySelectorAll('.anno').forEach(function(note) {
+    note.addEventListener('mouseenter', function() { document.querySelectorAll('[data-note="' + note.id + '"]').forEach(function(el) { el.classList.add('hover'); }); });
+    note.addEventListener('mouseleave', function() { document.querySelectorAll('[data-note="' + note.id + '"]').forEach(function(el) { el.classList.remove('hover'); }); });
+    note.addEventListener('dblclick', function() { var section = document.getElementById(note.dataset.section); if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  });
+  document.querySelectorAll('[data-note]').forEach(function(el) {
+    if (el.classList.contains('anno')) return;
+    el.addEventListener('mouseenter', function() { var note = document.getElementById(el.dataset.note); if (note) note.classList.add('hover'); });
+    el.addEventListener('mouseleave', function() { var note = document.getElementById(el.dataset.note); if (note) note.classList.remove('hover'); });
+  });
+
+  // 7. Top controls
+  var allAnnos = document.querySelectorAll('.anno');
+  var knowNotes = document.querySelectorAll('.anno.know-note');
+  var knowMarks = document.querySelectorAll('mark.hl-know');
+  var knowRefs = document.querySelectorAll('.nref');
+  var metaNotes = document.querySelectorAll('.anno.meta-note');
+  document.getElementById('noteCountLabel').textContent = metaNotes.length + ' 元思考 + ' + knowNotes.length + ' 知识批注';
+  window.toggleKnowNotes = function() {
+    var btn = document.getElementById('knowToggleBtn');
+    var isActive = btn.classList.toggle('active');
+    btn.textContent = isActive ? '显示' : '隐藏';
+    knowNotes.forEach(function(n) { n.style.display = isActive ? '' : 'none'; });
+    knowMarks.forEach(function(m) { m.style.background = isActive ? '' : 'transparent'; m.style.borderBottom = isActive ? '' : 'none'; });
+    knowRefs.forEach(function(r) { r.style.display = isActive ? '' : 'none'; });
+    requestAnimationFrame(positionNotes);
+  };
+  window.expandAllNotes = function() { allAnnos.forEach(function(n) { n.classList.add('open'); }); requestAnimationFrame(positionNotes); };
+  window.collapseAllNotes = function() { allAnnos.forEach(function(n) { n.classList.remove('open'); }); requestAnimationFrame(positionNotes); };
+
+  // 8. Right sidebar toggle
+  var notesSidebarEl = document.getElementById('notesSidebar');
+  var notesToggleBtn = document.getElementById('notesToggleBtn');
+  var notesOverlayEl = document.getElementById('notesOverlay');
+  var notesCloseBtn = document.getElementById('notesCloseBtn');
+  function toggleNotesSidebar() {
+    var willClose = !notesSidebarEl.classList.contains('ns-closed');
+    notesSidebarEl.classList.toggle('ns-closed', willClose);
+    notesToggleBtn.style.display = willClose ? 'flex' : 'none';
+    notesOverlayEl.classList.toggle('open', !willClose);
+    if (!willClose) requestAnimationFrame(positionNotes);
+  }
+  if (notesToggleBtn) notesToggleBtn.addEventListener('click', toggleNotesSidebar);
+  if (notesOverlayEl) notesOverlayEl.addEventListener('click', toggleNotesSidebar);
+  if (notesCloseBtn) notesCloseBtn.addEventListener('click', toggleNotesSidebar);
+
+  // 9. Resize handler + ensure sidebar open on load
+  if (window.innerWidth > 1200) {
+    notesSidebarEl.classList.remove('ns-closed');
+    notesToggleBtn.style.display = 'none';
+  } else {
+    notesSidebarEl.classList.add('ns-closed');
+    notesToggleBtn.style.display = 'flex';
+  }
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 1200) { notesSidebarEl.classList.remove('ns-closed'); notesToggleBtn.style.display = 'none'; notesOverlayEl.classList.remove('open'); }
+  });
+
+  // 10. Default: expand all annotations on load
+  expandAllNotes();
+
+  // Active TOC
+  var navLinks = document.querySelectorAll('.sidebar nav ul li a[href^="#"]');
+  var tocObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        navLinks.forEach(function(link) { link.classList.remove('active'); if (link.getAttribute('href') === '#' + entry.target.id) link.classList.add('active'); });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  document.querySelectorAll('.section-header[id], [id="musk"], [id="srouji"], [id="keller"], [id="triangulation"], [id="competitive"], [id="supply-demand"], [id="risk-matrix"], [id="node-judgment"], [id="trading"]').forEach(function(s) { tocObserver.observe(s); });
+})();
+</script>
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+</body>
+</html>

@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>认知节点报告: RWA代币化 — Node 6</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="../blockchain_shared.css">
+  <style>
+/* === Node-specific extensions (keep under 80 lines) === */
+/* KPI Cards */
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+.kpi-card { background: var(--bg-surface); border-radius: var(--radius-md); padding: 1.25rem; border: 1px solid var(--border-subtle); }
+.kpi-label { font-size: 0.72rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.kpi-value { font-size: 1.5rem; font-weight: 680; font-feature-settings: 'tnum' 1; margin-bottom: 4px; }
+.kpi-change { font-size: 0.78rem; font-weight: 600; }
+.kpi-change.positive { color: #4caf50; }
+.kpi-subtitle { font-size: 0.72rem; color: var(--text-quaternary); margin-top: 4px; }
+/* Risk Matrix */
+.risk-matrix td:nth-child(2), .risk-matrix td:nth-child(3) { text-align: center; }
+.risk-high { color: #f44336; font-weight: 700; }
+.risk-medium { color: #ffc107; font-weight: 700; }
+.risk-low { color: #4caf50; font-weight: 700; }
+/* Callout Boxes */
+.callout { background: var(--bg-surface); border-radius: var(--radius-sm); padding: 1rem 1.25rem; margin: 1rem 0; border-left: 3px solid var(--accent); }
+.callout-title { font-size: 0.8rem; font-weight: 590; color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+.callout-body { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; }
+.callout.risk { border-left-color: #f44336; }
+.callout.risk .callout-title { color: #f44336; }
+.callout.insight { border-left-color: var(--knowledge); }
+.callout.insight .callout-title { color: var(--knowledge); }
+/* Phase Headers */
+.phase-header { display: flex; align-items: center; gap: 0.75rem; margin: 2.5rem 0 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle); }
+.phase-num { font-size: 0.72rem; font-weight: 700; color: var(--bg-base); background: var(--accent); padding: 3px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+.phase-title { font-size: 1.15rem; font-weight: 590; color: var(--text-primary); }
+/* Agent Cards */
+.agent-header { display: flex; align-items: center; gap: 0.75rem; margin: 2rem 0 1rem; }
+.agent-role-badge { font-size: 0.68rem; font-weight: 510; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+.agent-role-badge.giant { background: rgba(248,168,72,0.15); color: var(--accent); }
+.agent-role-badge.investor { background: rgba(91,155,213,0.15); color: var(--knowledge); }
+.agent-role-badge.contrarian { background: rgba(244,67,54,0.15); color: #f44336; }
+/* Triangulation */
+.consensus { color: #4caf50; font-weight: 600; }
+.disagreement { color: #f44336; font-weight: 600; }
+/* Provenance */
+.prov-badge { font-size: 0.65rem; padding: 1px 6px; border-radius: 3px; font-weight: 600; }
+.prov-primary { background: rgba(76,175,80,0.12); color: #4caf50; }
+.prov-industry { background: rgba(91,155,213,0.12); color: var(--knowledge); }
+.prov-media { background: rgba(248,168,72,0.12); color: var(--accent); }
+.prov-analysis { background: rgba(171,71,188,0.12); color: #ab47bc; }
+/* Chart Frames */
+.chart-frame { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); margin: 1rem 0; overflow: hidden; }
+.chart-frame-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-subtle); }
+.chart-frame-title { font-size: 0.82rem; font-weight: 590; color: var(--text-secondary); letter-spacing: 0.02em; }
+.chart-frame-body { padding: 0; }
+.chart-source { padding: 0.5rem 1rem; font-size: 0.7rem; color: var(--text-quaternary); border-top: 1px solid var(--border-subtle); }
+/* Embedded + Reading mode */
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+body.embedded .hamburger-btn { display: none !important; }
+body.embedded .sidebar-overlay { display: none !important; }
+.reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+.reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+.reading-mode .hamburger-btn { display: none !important; }
+.reading-mode .sidebar-overlay { display: none !important; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes sidebar">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ═══════════ LEFT SIDEBAR ═══════════ -->
+  <aside class="sidebar" id="sidebar">
+    <a class="back-link" href="../blockchain_hub.html" style="display:block;padding:0.4rem 0.5rem;margin-bottom:1rem;font-size:0.8rem;color:var(--accent);text-decoration:none;border:1px solid var(--accent-dim);border-radius:var(--radius-sm);">&#8592; Blockchain Hub</a>
+    <h4>目录导航 Contents</h4>
+    <nav><ul>
+      <li><a href="#metacognition" style="color:var(--accent);"><span class="toc-num">&#9733;</span>元思考<br><span class="zh-inline">Metacognition</span></a></li>
+      <li><a href="#phase0"><span class="toc-num">0</span>独立思考<br><span class="zh-inline">Independent Thinking</span></a></li>
+      <li><a href="#phase05"><span class="toc-num">0.5</span>策展搜索<br><span class="zh-inline">Curated Search</span></a></li>
+      <li><a href="#phase1"><span class="toc-num">1</span>认知代理人<br><span class="zh-inline">Cognitive Agents</span></a></li>
+      <li><a href="#nathan-allman"><span class="toc-num">1.1</span>Nathan Allman<br><span class="zh-inline">GIANT &middot; Ondo</span></a></li>
+      <li><a href="#carlos-domingo"><span class="toc-num">1.2</span>Carlos Domingo<br><span class="zh-inline">INVESTOR &middot; Securitize</span></a></li>
+      <li><a href="#phase2"><span class="toc-num">2</span>综合分析<br><span class="zh-inline">Synthesis</span></a></li>
+      <li><a href="#triangulation"><span class="toc-num">2.1</span>三角验证<br><span class="zh-inline">Triangulation</span></a></li>
+      <li><a href="#competitive"><span class="toc-num">2.2</span>竞争格局<br><span class="zh-inline">Competitive Landscape</span></a></li>
+      <li><a href="#risk-matrix"><span class="toc-num">2.3</span>风险矩阵<br><span class="zh-inline">Risk Matrix</span></a></li>
+      <li><a href="#node-judgment"><span class="toc-num">2.4</span>节点判断<br><span class="zh-inline">Node Judgment</span></a></li>
+      <li><a href="#trading"><span class="toc-num">2.5</span>交易视角<br><span class="zh-inline">Trading Perspective</span></a></li>
+      <li><a href="#kpi-dashboard"><span class="toc-num">3</span>KPI仪表盘<br><span class="zh-inline">Dashboard</span></a></li>
+      <li><a href="#provenance"><span class="toc-num">4</span>溯源表<br><span class="zh-inline">Provenance Table</span></a></li>
+    </ul></nav>
+    <h4>&#129504; 元思考 Metacognition</h4>
+    <nav><ul>
+      <li><a href="NODE_6_RWA_metacognition.html" style="color:var(--accent);">元思考过程<br><span class="zh-inline">Thinking Log &rarr;</span></a></li>
+    </ul></nav>
+    <h4>价值链节点 Value Chain Nodes</h4>
+    <nav><ul>
+      <li><a href="NODE_1_挖矿与能源_2026-03-22.html">Node 1: 挖矿与能源<br><span class="zh-inline">Mining &amp; Energy</span></a></li>
+      <li><a href="NODE_2_L1协议_2026-03-22.html">Node 2: L1协议<br><span class="zh-inline">Layer 1 Protocols</span></a></li>
+      <li><a href="NODE_3_中间件与预言机_2026-03-22.html">Node 3: 中间件<br><span class="zh-inline">Middleware &amp; Oracles</span></a></li>
+      <li><a href="NODE_4_交易所与托管_2026-03-22.html">Node 4: 交易所<br><span class="zh-inline">Exchanges &amp; Custody</span></a></li>
+      <li><a href="NODE_5_稳定币与支付_2026-03-22.html">Node 5: 稳定币<br><span class="zh-inline">Stablecoins &amp; Payments</span></a></li>
+      <li><a href="NODE_6_RWA代币化_2026-03-22.html" class="active">Node 6: RWA<br><span class="zh-inline">Real World Assets</span></a></li>
+      <li><a href="NODE_7_DeFi应用层_2026-03-22.html">Node 7: DeFi<br><span class="zh-inline">DeFi Applications</span></a></li>
+      <li><a href="NODE_8_监管与政策_2026-03-22.html">Node 8: 监管<br><span class="zh-inline">Regulation &amp; Policy</span></a></li>
+    </ul></nav>
+  </aside>
+
+  <!-- ═══════════ MAIN CONTENT ═══════════ -->
+  <main class="main-content">
+
+    <header class="page-header">
+      <h1>认知节点报告: RWA代币化<span class="zh">Cognitive Node Report: Real World Assets</span></h1>
+      <div class="subtitle">Node 6 of 8 &middot; Phase 0&rarr;2 + 2 Cognitive Agents &middot; 2026-03-22</div>
+      <div class="badge-row">
+        <span class="badge badge-gold">ONDO 60%份额</span>
+        <span class="badge badge-gold">Securitize $4.6B AUM</span>
+        <span class="badge badge-cyan">BUIDL</span>
+        <span class="badge badge-red">代币化$15B+</span>
+        <span class="badge badge-gray">2 Agents</span>
+      </div>
+    </header>
+
+    <!-- ═══════════ METACOGNITIVE SUMMARY ═══════════ -->
+    <div class="priority-box" id="metacognition">
+      <h2 style="margin-top:0; font-size:1.1rem; font-weight:680; color:var(--accent);">&#9733; 元思考: 这份报告的核心发现<span class="zh" style="font-weight:400; font-size:0.85rem;"> Metacognitive Summary</span></h2>
+
+      <div style="margin:1rem 0; padding:1rem 1.25rem; background:var(--bg-overlay); border-radius:var(--radius-sm); border-left:3px solid var(--accent);">
+        <p style="font-size:0.92rem; font-weight:590; color:var(--text-primary); margin:0 0 0.75rem;">&#128270; 核心分析焦点</p>
+        <p style="color:var(--text-secondary); font-size:0.88rem; line-height:1.65; margin:0;">RWA是区块链<strong>"最具机构吸引力"的叙事</strong>&mdash;&mdash;不是投机而是效率提升。BlackRock BUIDL($500M+代币化国债)验证了机构需求。但当前规模仍极小：<strong>$15B代币化资产 vs $300T传统资产 = 0.005%渗透率</strong>。<br><br>
+        <strong>真正的问题是：RWA需要监管许可，而监管跨司法管辖区极度碎片化。</strong>新加坡Project Guardian、香港Project Ensemble走在前面，但美国SEC仍是最大瓶颈。这不是技术问题，是制度问题&mdash;&mdash;而制度变革以年为单位。</p>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin:1rem 0;">
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid #4caf50;">
+          <p style="font-size:0.72rem; font-weight:510; color:#4caf50; text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#10003; 三角验证共识</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;">RWA代币化方向正确&mdash;&mdash;两位代理人和机构行动(BlackRock BUIDL)都确认。国债/固收是最先落地的资产类别。<strong>Ondo 60%份额 + Securitize $4.6B AUM = 双寡头格局初现。</strong></p>
+        </div>
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid #f44336;">
+          <p style="font-size:0.72rem; font-weight:510; color:#f44336; text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#10007; 三角验证分歧</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;">市场规模预测差异巨大：Allman预测$1T by 2030, Domingo预测$10T by 2030。代币化标的范围分歧：国债/固收 vs 全资产类别。<strong>两位都是RWA信仰者&mdash;&mdash;缺少怀疑者视角。</strong></p>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin:1rem 0;">
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid var(--knowledge);">
+          <p style="font-size:0.72rem; font-weight:510; color:var(--knowledge); text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#128200; 交易指引</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;"><strong>ONDO</strong>是唯一可交易的RWA代币。高波动、叙事驱动。对趋势交易者 = <strong>太早太小</strong>。当前$15B代币化资产规模不足以产生交易机会。等待渗透率拐点&mdash;&mdash;监控BlackRock BUIDL AUM增长和新机构发行人进入。</p>
+        </div>
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid var(--accent);">
+          <p style="font-size:0.72rem; font-weight:510; color:var(--accent); text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#9888; 认知陷阱预警</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;"><strong>信仰者偏差</strong>: 两位代理人都是RWA信仰者，缺少TradFi怀疑者（"T+1结算已足够好"）。<strong>渗透率幻觉</strong>: 0.005%渗透率看似巨大上升空间，但如果增量价值不够大，可能永远停在小众。<strong>监管乐观偏差</strong>: 新加坡/香港沙盒 ≠ 全球监管放行。</p>
+        </div>
+      </div>
+
+      <details style="margin-top:0.75rem;">
+        <summary style="font-size:0.82rem; font-weight:510; color:var(--text-tertiary); cursor:pointer;">&#128214; 两位代理人一句话摘要</summary>
+        <div style="padding:0.75rem 0; font-size:0.82rem; color:var(--text-secondary); line-height:1.65;">
+          <p><strong>Nathan Allman (GIANT, 3/5)</strong>: "代币化国债是RWA第一张多米诺骨牌。" &mdash; Ondo Finance CEO, 60%代币化股权市场份额(OUSG/USDY), ONDO代币。专注国债/固收，多链策略(ETH/SOL)。</p>
+          <p><strong>Carlos Domingo (INVESTOR, 3/5)</strong>: "Securitize是代币化的Goldman Sachs。" &mdash; Securitize CEO, $4.6B代币化AUM, BlackRock BUIDL合作伙伴。持牌经纪商路径，全资产类别野心。</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- ═══════════ PHASE 0: 独立思考 ═══════════ -->
+    <div class="section-header" id="phase0">
+      <h2>&sect;0 Phase 0: 独立思考<span class="zh">Independent Thinking (Before Search)</span></h2>
+    </div>
+
+    <h3>1. 节点解决什么问题？</h3>
+    <p>RWA代币化解决<strong>"传统资产流动性和可达性"</strong>问题&mdash;&mdash;将国债/股权/房产等放上区块链，实现24/7交易、即时结算、碎片化持有。这是传统金融($300T+全球资产)与区块链的融合点。传统金融的痛点：T+2结算延迟、跨境投资壁垒、高最低投资门槛、中介层层抽佣。代币化理论上可以消除这些摩擦。</p>
+
+    <h3>2. 供给约束？</h3>
+    <ul>
+      <li><strong>监管许可</strong>：代币化证券需要各司法管辖区证券法合规，极度碎片化</li>
+      <li><strong>合格资产</strong>：不是所有资产都适合代币化&mdash;&mdash;标准化、高流动性资产（国债/基金份额）最先落地</li>
+      <li><strong>机构托管</strong>：BlackRock等机构要求合规托管方案，选择有限</li>
+      <li><strong>智能合约安全</strong>：管理真实资产的合约比DeFi更不容出错，bug = 法律责任</li>
+    </ul>
+
+    <h3>3. 需求驱动力？</h3>
+    <ul>
+      <li><strong>机构效率需求</strong>：7/24交易 + 即时结算 vs T+2传统证券结算</li>
+      <li><strong>碎片化持有</strong>：降低投资门槛，让散户参与原本只属于机构的资产类别</li>
+      <li><strong>全球可达性</strong>：新兴市场投资者获取美国国债/蓝筹资产</li>
+      <li><strong>DeFi可组合性</strong>：代币化资产作为DeFi抵押品，释放资本效率</li>
+    </ul>
+
+    <h3>4. 当前供需状态？</h3>
+    <p>极早期。$15B代币化资产(不含稳定币) vs $300T全球传统资产 = <strong>0.005%渗透率</strong>。需求被验证（BlackRock BUIDL, Franklin Templeton BENJI），但供给受监管瓶颈约束。<strong>当前是"概念验证"到"规模化"的转折点&mdash;&mdash;关键变量是监管态度而非技术。</strong></p>
+
+    <h3>5. 未来2-3年变化方向？</h3>
+    <ul>
+      <li><strong>国债/固收先行</strong>：标准化程度高、监管阻力最小，是第一批代币化标的</li>
+      <li><strong>私募基金代币化</strong>：KKR/Apollo等PE基金通过Securitize代币化LP份额</li>
+      <li><strong>亚洲沙盒领先</strong>：新加坡Project Guardian + 香港Project Ensemble = 亚洲监管创新</li>
+      <li><strong>欧洲DLT试点</strong>：EU DLT Pilot Regime允许代币化证券在受监管交易所交易</li>
+      <li><strong>美国SEC态度关键</strong>：SEC是否给代币化证券明确法律框架将决定全球速度</li>
+    </ul>
+
+    <!-- ═══════════ PHASE 0.5: 策展搜索 ═══════════ -->
+    <div class="section-header" id="phase05">
+      <h2>&sect;1 Phase 0.5: 策展搜索<span class="zh">Curated Search</span></h2>
+    </div>
+
+    <h3>最佳分析源</h3>
+    <figure>
+      <table>
+        <thead>
+          <tr><th>Source 来源</th><th>Type 类型</th><th>Value 价值</th><th>Credibility 可信度</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>rwa.xyz</strong></td><td>Industry data</td><td>代币化资产总值、分类跟踪</td><td><span class="tier-high">Very High</span></td></tr>
+          <tr><td><strong>BlackRock BUIDL页面</strong></td><td>Primary source</td><td>BUIDL基金AUM、结构详情</td><td><span class="tier-high">Primary</span></td></tr>
+          <tr><td><strong>Ondo Finance / Securitize IR</strong></td><td>Primary source</td><td>产品数据、合规路径、AUM</td><td><span class="tier-high">Primary</span></td></tr>
+          <tr><td><strong>MAS Project Guardian报告</strong></td><td>Regulator report</td><td>新加坡RWA沙盒进展</td><td><span class="tier-high">Very High</span></td></tr>
+          <tr><td><strong>HKMA Project Ensemble</strong></td><td>Regulator report</td><td>香港代币化债券试验</td><td><span class="tier-medium-high">High</span></td></tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <h3>Key Curated Findings</h3>
+
+    <div class="callout">
+      <div class="callout-title">CURATED-1 &mdash; 代币化资产总规模</div>
+      <div class="callout-body">代币化资产总值~<strong>$15B</strong>(不含稳定币)，同比<strong>+300%</strong>。主要资产类别：代币化国债($3B+)、私募信贷($8B+)、房地产代币($2B+)、商品代币化($1B+)。增长由机构入场驱动而非散户投机。<br><small class="zh-inline">Source: rwa.xyz, DeFi Llama, 2025-2026</small></div>
+    </div>
+
+    <div class="callout insight">
+      <div class="callout-title">CURATED-2 &mdash; BlackRock BUIDL基金</div>
+      <div class="callout-body">BlackRock BUIDL(BlackRock USD Institutional Digital Liquidity Fund) AUM达<strong>$500M+</strong>，由<strong>Securitize</strong>作为发行和管理平台。BUIDL是代币化国债市场最大单一基金，投资者可7/24赎回。<strong>BlackRock的入场是对整个RWA叙事的最强验证。</strong><br><small class="zh-inline">Source: BlackRock, Securitize, 2024-2026</small></div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">CURATED-3 &mdash; Ondo Finance市场份额</div>
+      <div class="callout-body">Ondo Finance占代币化股权市场<strong>60%份额</strong>，核心产品OUSG(代币化短期国债)和USDY(收益型稳定币)。ONDO代币市值波动大，受叙事驱动。Nathan Allman(CEO)来自Goldman Sachs，团队TradFi背景强。<br><small class="zh-inline">Source: Ondo Finance, DeFi Llama, 2025-2026</small></div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">CURATED-4 &mdash; 新加坡Project Guardian</div>
+      <div class="callout-body">新加坡金管局(MAS)的<strong>Project Guardian</strong>是亚洲最活跃的RWA监管沙盒。参与机构包括DBS Bank、JPMorgan、Standard Chartered。测试品种包括代币化债券、外汇、基金。MAS的"supervised sandbox"模式被认为是RWA监管最佳实践。<br><small class="zh-inline">Source: MAS Guardian报告, 2024-2025</small></div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">CURATED-5 &mdash; 香港Project Ensemble</div>
+      <div class="callout-body">香港金管局(HKMA)的<strong>Project Ensemble</strong>&mdash;&mdash;港交所+金管局代币化债券试验。香港政府发行了代币化绿色债券(~$100M)，是<strong>全球首个政府代币化债券</strong>。香港正将自身定位为亚洲RWA枢纽。<br><small class="zh-inline">Source: HKMA, HKEX, 2024-2025</small></div>
+    </div>
+
+    <!-- ═══════════ PHASE 1: 认知代理人 ═══════════ -->
+    <div class="section-header" id="phase1">
+      <h2>&sect;2 Phase 1: 认知代理人<span class="zh">Cognitive Agents</span></h2>
+    </div>
+
+    <!-- ─── Agent 1: Nathan Allman ─── -->
+    <div id="nathan-allman">
+      <div class="agent-header">
+        <span class="agent-role-badge giant">GIANT</span>
+        <h3>Nathan Allman &mdash; Ondo Finance CEO</h3>
+      </div>
+
+      <p><strong>选择理由</strong>: Ondo Finance是代币化股权/固收领域的市场领导者（60%份额），Allman来自Goldman Sachs，代表"Crypto-native做TradFi资产"的路径。ONDO代币是唯一可交易的纯RWA标的。<strong>可信度: 3/5</strong>（公司处于早期，产品有验证但规模仍小，CEO利益偏差明显）。</p>
+
+      <h4>行动证据（重于言论）</h4>
+      <ol>
+        <li><strong>OUSG/USDY产品落地</strong>: OUSG代币化短期国债，USDY收益型稳定币，均有真实AUM和用户。不是vaporware。</li>
+        <li><strong>多链部署</strong>: 在Ethereum、Solana、Polygon等多链部署，不绑定单一L1。</li>
+        <li><strong>SEC合规路径</strong>: 通过Reg D豁免发行，面向合格投资者(Accredited Investors)，规避全面注册。</li>
+        <li><strong>机构合作</strong>: 与多家DeFi协议集成（OUSG作为抵押品），扩大use case。</li>
+      </ol>
+
+      <h4>核心判断</h4>
+      <blockquote>"Tokenized US Treasuries are the first domino &mdash; once institutions see the efficiency, they'll tokenize everything"<span class="zh">代币化国债是第一张多米诺骨牌——一旦机构看到效率，它们会代币化一切</span></blockquote>
+      <ul>
+        <li>RWA市场规模预测：<strong>$1T by 2030</strong>（保守估计）</li>
+        <li>代币化标的优先级：<strong>国债/固收优先</strong>，标准化程度高、监管阻力最小</li>
+        <li>区块链选择：<strong>多链策略</strong>（ETH/SOL），不押注单一L1</li>
+        <li>监管路径：<strong>SEC豁免</strong>（Reg D/Reg S），而非等待全面立法</li>
+      </ul>
+
+      <details>
+        <summary>产品与市场详情</summary>
+        <p><strong>OUSG</strong>: 代币化短期国债，底层资产为iShares Short Treasury Bond ETF。最低投资$100K（合格投资者）。</p>
+        <p><strong>USDY</strong>: 收益型稳定币，5%+ APY，底层为短期国债+银行存款。门槛更低，面向全球（非美国）投资者。</p>
+        <p><strong>ONDO代币</strong>: 治理代币，市值波动大，受RWA叙事驱动。非收益权代币。</p>
+      </details>
+    </div>
+
+    <hr>
+
+    <!-- ─── Agent 2: Carlos Domingo ─── -->
+    <div id="carlos-domingo">
+      <div class="agent-header">
+        <span class="agent-role-badge investor">INVESTOR</span>
+        <h3>Carlos Domingo &mdash; Securitize CEO</h3>
+      </div>
+
+      <p><strong>选择理由</strong>: Securitize是RWA代币化基础设施的核心&mdash;&mdash;BlackRock选择Securitize管理BUIDL基金证明了其合规和技术能力。Domingo代表"持牌中间人"路径，区别于Ondo的Crypto-native路线。<strong>可信度: 3/5</strong>（BlackRock合作验证能力，但公司非上市，财务不完全透明，CEO有利益偏差）。</p>
+
+      <h4>行动证据</h4>
+      <ol>
+        <li><strong>BlackRock BUIDL合作</strong>: Securitize是BUIDL基金的发行和管理平台。$500M+ AUM = 全球最大代币化国债基金。</li>
+        <li><strong>SEC注册经纪商</strong>: Securitize Markets LLC是SEC注册的另类交易系统(ATS)和经纪-交易商，合规壁垒极高。</li>
+        <li><strong>KKR/Hamilton Lane合作</strong>: 为顶级PE基金代币化LP份额，客户质量极高。</li>
+        <li><strong>总AUM $4.6B</strong>: 跨多种资产类别的代币化资产管理规模。</li>
+      </ol>
+
+      <h4>核心判断</h4>
+      <blockquote>"Tokenization is not about crypto replacing TradFi &mdash; it's about making TradFi better"<span class="zh">代币化不是加密取代传统金融——而是让传统金融更好</span></blockquote>
+      <ul>
+        <li>RWA市场规模预测：<strong>$10T by 2030</strong>（激进估计）</li>
+        <li>代币化标的范围：<strong>全资产类别</strong>&mdash;&mdash;国债、PE基金、房地产、私募信贷</li>
+        <li>区块链选择：<strong>ETH为主</strong>，机构更信任以太坊的安全性和去中心化</li>
+        <li>监管路径：<strong>持牌经纪商</strong>&mdash;&mdash;在现有证券法框架内运营，而非寻求豁免</li>
+      </ul>
+
+      <details>
+        <summary>平台与业务详情</summary>
+        <p><strong>Securitize平台</strong>: 提供代币化全栈服务&mdash;&mdash;发行、合规(KYC/AML)、交易(ATS)、分配。</p>
+        <p><strong>AUM $4.6B</strong>: 包含BUIDL($500M+)、KKR基金、Hamilton Lane基金等。</p>
+        <p><strong>融资</strong>: 获BlackRock、Morgan Stanley等战略投资。非上市公司。</p>
+      </details>
+    </div>
+
+    <!-- ═══════════ PHASE 2: 综合分析 ═══════════ -->
+    <div class="section-header" id="phase2">
+      <h2>&sect;3 Phase 2: 综合分析<span class="zh">Synthesis</span></h2>
+    </div>
+
+    <!-- §3.1 Triangulation -->
+    <div id="triangulation">
+      <h3>&sect;3.1 三角验证: 行动 vs 言论 vs 数据</h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Dimension 维度</th><th>Allman (Ondo)</th><th>Domingo (Securitize)</th><th>Consistency 一致性</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>RWA市场规模</strong></td><td>$1T by 2030</td><td>$10T by 2030</td><td><span class="consensus">&#10003; 方向一致但量级分歧</span></td></tr>
+            <tr><td><strong>代币化标的</strong></td><td>国债/固收</td><td>全资产类别</td><td><span class="disagreement">&#10007; 范围分歧</span></td></tr>
+            <tr><td><strong>区块链选择</strong></td><td>多链(ETH/SOL)</td><td>ETH为主</td><td><span class="disagreement">&#10007; 轻微分歧</span></td></tr>
+            <tr><td><strong>监管路径</strong></td><td>SEC豁免</td><td>持牌经纪商</td><td><span class="disagreement">&#10007; 不同策略</span></td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <div class="callout insight">
+        <div class="callout-title">Key Insight 关键洞察</div>
+        <div class="callout-body">两位代理人都是<strong>"RWA信仰者"</strong>&mdash;&mdash;缺少怀疑者视角。核心风险问题：如果传统金融的清算效率已足够好(T+1/T+0)，RWA代币化的增量价值可能不够大。<strong>$1T vs $10T的预测差异暴露了RWA叙事的不确定性&mdash;&mdash;连业内人士都无法就规模达成共识。</strong>投资启示：方向正确但时间表极不确定，不适合趋势交易，适合长期主题配置。</div>
+      </div>
+    </div>
+
+    <!-- §3.2 Competition -->
+    <div id="competitive">
+      <h3>&sect;3.2 竞争格局<span class="zh">Competitive Landscape</span></h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Player</th><th>Type</th><th>Share/Scale</th><th>Strength 优势</th><th>Weakness 劣势</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Ondo Finance</strong></td><td>Crypto-native发行人</td><td>60%代币化股权份额</td><td>先发优势、多链、Goldman团队</td><td>规模小、ONDO代币波动</td></tr>
+            <tr><td><strong>Securitize</strong></td><td>合规基础设施</td><td>$4.6B AUM</td><td>BlackRock合作、SEC注册</td><td>非上市、依赖机构客户</td></tr>
+            <tr><td><strong>Centrifuge</strong></td><td>DeFi信贷代币化</td><td>$300M+ TVL</td><td>DeFi-native、MakerDAO集成</td><td>偏小、私募信贷风险</td></tr>
+            <tr><td><strong>Maple Finance</strong></td><td>机构信贷</td><td>$200M+ TVL</td><td>机构级借贷</td><td>曾有坏账事件</td></tr>
+            <tr><td><strong>SIX Digital Exchange</strong></td><td>传统交易所(瑞士)</td><td>受监管平台</td><td>瑞士监管支持、传统机构信任</td><td>仅瑞士市场</td></tr>
+            <tr><td><strong>DekaBank RL1</strong></td><td>传统银行(德国)</td><td>EU DLT Pilot</td><td>欧洲最大储蓄银行集团</td><td>进展缓慢</td></tr>
+            <tr><td><strong>Project Guardian</strong></td><td>沙盒(新加坡)</td><td>多机构参与</td><td>MAS支持、JPMorgan/DBS</td><td>沙盒≠商业化</td></tr>
+            <tr><td><strong>Project Ensemble</strong></td><td>试点(香港)</td><td>政府代币化债券</td><td>全球首个政府代币化债券</td><td>规模极小</td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </div>
+
+    <!-- §3.3 Risk Matrix -->
+    <div id="risk-matrix">
+      <h3>&sect;3.3 风险矩阵<span class="zh">Risk Matrix</span></h3>
+
+      <figure class="table-responsive">
+        <table class="risk-matrix">
+          <thead>
+            <tr><th>Risk 风险</th><th>Probability</th><th>Impact</th><th>Timeframe</th><th>Monitoring 监控指标</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>监管阻力</strong><br><small>SEC拒绝给代币化证券明确框架</small></td><td><span class="risk-medium">Medium</span></td><td><span class="risk-high">High</span></td><td>持续</td><td>SEC执法行动、立法进展</td></tr>
+            <tr><td><strong>传统金融效率够用</strong><br><small>T+1/T+0结算使代币化增量价值不足</small></td><td><span class="risk-medium">Medium</span></td><td><span class="risk-high">High</span></td><td>持续</td><td>传统结算效率改善速度</td></tr>
+            <tr><td><strong>智能合约bug</strong><br><small>管理真实资产的合约出现漏洞</small></td><td><span class="risk-low">Low</span></td><td><span class="risk-high">Extreme</span></td><td>随时</td><td>审计报告、exploit事件</td></tr>
+            <tr><td><strong>流动性不足</strong><br><small>代币化资产交易量极薄</small></td><td><span class="risk-high">High</span></td><td><span class="risk-medium">Medium</span></td><td>当前</td><td>DEX/ATS交易量</td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </div>
+
+    <!-- §3.4 Node Judgment -->
+    <div id="node-judgment">
+      <h3>&sect;3.4 节点判断<span class="zh">Node Judgment</span></h3>
+
+      <div class="callout" style="border-left-color: var(--knowledge);">
+        <div class="callout-body" style="font-size: 0.92rem;">
+          <p><strong>供需状态</strong>: 极早期。$15B代币化资产太小，不足以产生交易机会。需求被验证（BlackRock BUIDL），但供给受监管约束。</p>
+          <p><strong>方向判断</strong>: RWA是"正确的方向但时间表不确定"。代币化效率优势真实存在，但增量价值是否足以驱动大规模迁移仍待验证。</p>
+          <p><strong>最大确定性</strong>: 机构对代币化的兴趣是真实的&mdash;&mdash;BlackRock、Franklin Templeton、KKR的行动证实。</p>
+          <p><strong>最大不确定性</strong>: 监管时间表。跨司法管辖区的碎片化使全球统一框架遥遥无期。</p>
+          <p><strong>隐藏风险</strong>: 传统金融自身在提升效率（DTCC缩短结算周期到T+1，进一步T+0讨论中）&mdash;&mdash;如果TradFi自己解决了痛点，代币化的增量价值大幅缩水。</p>
+          <p style="margin-bottom:0;"><strong>投资启示</strong>: 对趋势交易者&mdash;&mdash;太早太小。ONDO是唯一可交易标的但高波动叙事驱动。监控指标：BUIDL AUM增长、新机构发行人数量、渗透率拐点信号。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- §3.5 Trading -->
+    <div id="trading">
+      <h3>&sect;3.5 交易视角<span class="zh">Trading Perspective</span></h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Dimension 维度</th><th>ONDO代币</th><th>直接持有RWA代币(OUSG/USDY)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>暴露类型</strong></td><td>RWA叙事/治理代币</td><td>代币化国债收益(~5% APY)</td></tr>
+            <tr><td><strong>波动性</strong></td><td>极高（叙事驱动）</td><td>极低（底层国债）</td></tr>
+            <tr><td><strong>流动性</strong></td><td>CEX/DEX可交易</td><td>受限（合格投资者+赎回延迟）</td></tr>
+            <tr><td><strong>风险</strong></td><td>代币价值≠公司价值</td><td>智能合约风险、托管风险</td></tr>
+            <tr><td><strong>适合交易风格</strong></td><td>叙事波段（高风险）</td><td>收益持有（低风险）</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <div class="callout">
+        <div class="callout-title">Luke交易视角</div>
+        <div class="callout-body">
+          <p><strong>ONDO</strong>: 唯一可交易的纯RWA代币。高波动叙事驱动，适合短线波段但不适合趋势跟踪。当前RWA叙事热度高但基本面(渗透率0.005%)不支持持续趋势。</p>
+          <p><strong>等待信号</strong>: 渗透率拐点&mdash;&mdash;当代币化资产从$15B到$50B+，且有3个以上主流机构发行代币化产品时，RWA可能进入真正的趋势期。</p>
+          <p style="margin-bottom:0;"><strong>替代暴露</strong>: 如果看好RWA叙事但不想承受ONDO波动，考虑持有OUSG/USDY获取5%+国债收益&mdash;&mdash;这本身就是RWA的use case验证。</p>
+        </div>
+      </div>
+    </div>
+
+    <hr style="border:none; border-top:1px solid var(--border-subtle); margin:2.5rem 0;">
+
+    <!-- ═══════════ KPI DASHBOARD ═══════════ -->
+    <div class="section-header" id="kpi-dashboard">
+      <h2>&sect;4 KPI仪表盘<span class="zh">KPI Dashboard</span></h2>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">代币化资产总值</div>
+        <div class="kpi-value">$15B+</div>
+        <div class="kpi-change positive">+300% YoY</div>
+        <div class="kpi-subtitle">不含稳定币</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">BUIDL AUM</div>
+        <div class="kpi-value">$500M+</div>
+        <div class="kpi-change positive">BlackRock旗舰</div>
+        <div class="kpi-subtitle">Securitize管理</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Ondo TVL</div>
+        <div class="kpi-value">OUSG/USDY</div>
+        <div class="kpi-change positive">60%市场份额</div>
+        <div class="kpi-subtitle">代币化股权领域</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">RWA YoY Growth</div>
+        <div class="kpi-value">+300%</div>
+        <div class="kpi-change positive">机构驱动</div>
+        <div class="kpi-subtitle">低基数高增速</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">机构发行人数</div>
+        <div class="kpi-value">10+</div>
+        <div class="kpi-change positive">持续增长</div>
+        <div class="kpi-subtitle">BlackRock/Franklin/KKR等</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">亚洲沙盒试点</div>
+        <div class="kpi-value">2</div>
+        <div class="kpi-change">SG Guardian + HK Ensemble</div>
+        <div class="kpi-subtitle">亚洲监管领先</div>
+      </div>
+    </div>
+
+    <!-- ═══════════ PROVENANCE TABLE ═══════════ -->
+    <div class="section-header" id="provenance">
+      <h2>&sect;5 来源溯源<span class="zh">Provenance Table</span></h2>
+    </div>
+
+    <figure class="table-responsive">
+      <table>
+        <thead>
+          <tr><th>Claim 判断</th><th>Source 来源</th><th>Type</th><th>Confidence</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>代币化资产总值~$15B</td><td>rwa.xyz, DeFi Llama, 2026-03</td><td><span class="prov-badge prov-primary">PRIMARY</span></td><td>8/10</td></tr>
+          <tr><td>BUIDL AUM $500M+</td><td>BlackRock, Securitize IR</td><td><span class="prov-badge prov-primary">PRIMARY</span></td><td>9/10</td></tr>
+          <tr><td>Ondo 60%代币化股权份额</td><td>rwa.xyz, DeFi Llama</td><td><span class="prov-badge prov-industry">INDUSTRY</span></td><td>7/10</td></tr>
+          <tr><td>Securitize $4.6B AUM</td><td>Securitize official, 融资公告</td><td><span class="prov-badge prov-primary">PRIMARY</span></td><td>8/10</td></tr>
+          <tr><td>新加坡Project Guardian进展</td><td>MAS官方报告</td><td><span class="prov-badge prov-primary">PRIMARY</span></td><td>9/10</td></tr>
+          <tr><td>香港代币化绿色债券~$100M</td><td>HKMA, HKEX公告</td><td><span class="prov-badge prov-primary">PRIMARY</span></td><td>9/10</td></tr>
+          <tr><td>RWA渗透率0.005%</td><td>$15B / $300T 推算</td><td><span class="prov-badge prov-analysis">ANALYSIS</span></td><td>7/10</td></tr>
+          <tr><td>代币化资产YoY +300%</td><td>rwa.xyz 历史数据</td><td><span class="prov-badge prov-industry">INDUSTRY</span></td><td>7/10</td></tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <!-- Footer -->
+    <footer style="margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--border-subtle); font-size:0.72rem; color:var(--text-quaternary); text-align:center;">
+      <p>Blockchain Node 6: RWA &middot; Part of Cognitive Observatory V3 &middot; 2026-03-22</p>
+      <p><a href="NODE_6_RWA_metacognition.html">&#129504; 元思考过程</a> &nbsp;|&nbsp; <a href="../blockchain_hub.html">&larr; Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ═══════════ RIGHT NOTES SIDEBAR ═══════════ -->
+  <aside class="notes-sidebar" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&#10005;</button>
+      <h4>&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+
+    <!-- ── META NOTES ── -->
+
+    <div class="anno meta-note" data-section="phase0" id="m1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">RWA是慢叙事</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Unlike DeFi summer or NFT mania, RWA adoption is institutional-speed (years not months).</strong> Patient capital thesis. The timeline for RWA to become meaningful is measured in regulatory cycles (3-5 years per jurisdiction) rather than crypto hype cycles (6-12 months). This means RWA tokens like ONDO will have long periods of sideways action punctuated by narrative-driven spikes when a new institution announces tokenization plans.</p>
+        <p><strong>Implication for trading:</strong> Not suitable for trend following. Better suited as a thematic allocation with 3-5 year horizon, or as short-term narrative trades around specific catalysts (BlackRock announcements, regulatory developments).</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="triangulation" id="m2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">缺少怀疑者</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Both agents are RWA believers. This is a structural bias in our analysis.</strong> We need to add a TradFi skeptic who argues: (1) T+1 settlement is good enough for most use cases; (2) the operational complexity of on-chain compliance negates the efficiency gains; (3) existing fintech solutions (Stripe, Plaid, FBO accounts) solve the accessibility problem without blockchain.</p>
+        <p><strong>The steel-man case against RWA:</strong> Traditional finance spent $50B+ building post-trade infrastructure (DTCC, Euroclear, CLS). This infrastructure works. It's slow but reliable and legally well-understood. Replacing it with smart contracts introduces new risks (code bugs, oracle failures, key management) without proportional benefits. The $300T market didn't get to $300T because it was broken.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="competitive" id="m3">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">地理套利</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Singapore/HK/Switzerland are leading RWA because their regulators actively enable it.</strong> MAS (Singapore) runs Project Guardian with JPMorgan and DBS. HKMA issued the world's first government tokenized bond. FINMA (Switzerland) has the clearest legal framework for tokenized securities (DLT Act 2021). These jurisdictions are competing for the "tokenization hub" status.</p>
+        <p><strong>The US SEC is the biggest bottleneck.</strong> SEC hasn't provided clear guidance on whether tokenized securities are "securities" under existing law (they almost certainly are) and what registration/exemption regime applies. Until the SEC acts, US-based RWA projects operate in a gray zone using Reg D/Reg S exemptions, which limits them to accredited investors and restricts liquidity.</p>
+        <p><strong>Geographic arbitrage opportunity:</strong> Projects that can operate from Singapore/HK while serving global investors have a regulatory edge. Watch for talent and capital flow from US to Asia RWA hubs.</p>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+(function() {
+  // 1. Sidebar toggle
+  var hamburger = document.getElementById('hamburgerBtn');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('sidebarOverlay');
+  hamburger.addEventListener('click', function() { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', function() { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+  sidebar.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() { if (window.innerWidth <= 900) { sidebar.classList.remove('open'); overlay.classList.remove('open'); } });
+  });
+
+  // 2. Note toggle
+  window.toggleNote = function(head) { head.parentElement.classList.toggle('open'); };
+
+  // 3. Right sidebar toggle
+  var notesSidebarEl = document.getElementById('notesSidebar');
+  var notesToggleBtn = document.getElementById('notesToggleBtn');
+  var notesOverlayEl = document.getElementById('notesOverlay');
+  var notesCloseBtn = document.getElementById('notesCloseBtn');
+  function toggleNotesSidebar() {
+    var willClose = !notesSidebarEl.classList.contains('ns-closed');
+    notesSidebarEl.classList.toggle('ns-closed', willClose);
+    notesToggleBtn.style.display = willClose ? 'flex' : 'none';
+    notesOverlayEl.classList.toggle('open', !willClose);
+  }
+  if (notesToggleBtn) notesToggleBtn.addEventListener('click', toggleNotesSidebar);
+  if (notesOverlayEl) notesOverlayEl.addEventListener('click', toggleNotesSidebar);
+  if (notesCloseBtn) notesCloseBtn.addEventListener('click', toggleNotesSidebar);
+
+  // 4. Resize handler
+  if (window.innerWidth > 1200) {
+    notesSidebarEl.classList.remove('ns-closed');
+    notesToggleBtn.style.display = 'none';
+  } else {
+    notesSidebarEl.classList.add('ns-closed');
+    notesToggleBtn.style.display = 'flex';
+  }
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 1200) { notesSidebarEl.classList.remove('ns-closed'); notesToggleBtn.style.display = 'none'; notesOverlayEl.classList.remove('open'); }
+  });
+
+  // 5. Expand all notes on load
+  document.querySelectorAll('.anno').forEach(function(n) { n.classList.add('open'); });
+
+  // 6. Active TOC
+  var navLinks = document.querySelectorAll('.sidebar nav ul li a[href^="#"]');
+  var tocObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        navLinks.forEach(function(link) { link.classList.remove('active'); if (link.getAttribute('href') === '#' + entry.target.id) link.classList.add('active'); });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  document.querySelectorAll('.section-header[id], [id="nathan-allman"], [id="carlos-domingo"], [id="triangulation"], [id="competitive"], [id="risk-matrix"], [id="node-judgment"], [id="trading"]').forEach(function(s) { tocObserver.observe(s); });
+})();
+</script>
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+</body>
+</html>

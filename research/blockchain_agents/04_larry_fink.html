@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Larry Fink — 认知代理人报告</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="../blockchain_shared.css">
+  <style>
+/* === Agent-specific extensions (keep under 80 lines) === */
+/* KPI Cards */
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+.kpi-card { background: var(--bg-surface); border-radius: var(--radius-md); padding: 1.25rem; border: 1px solid var(--border-subtle); }
+.kpi-label { font-size: 0.72rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.kpi-value { font-size: 1.5rem; font-weight: 680; font-feature-settings: 'tnum' 1; margin-bottom: 4px; }
+.kpi-change { font-size: 0.78rem; font-weight: 600; }
+.kpi-change.positive { color: #4caf50; }
+.kpi-subtitle { font-size: 0.72rem; color: var(--text-quaternary); margin-top: 4px; }
+/* Callout Boxes */
+.callout { background: var(--bg-surface); border-radius: var(--radius-sm); padding: 1rem 1.25rem; margin: 1rem 0; border-left: 3px solid var(--accent); }
+.callout-title { font-size: 0.8rem; font-weight: 590; color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+.callout-body { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; }
+.callout.risk { border-left-color: #f44336; }
+.callout.risk .callout-title { color: #f44336; }
+.callout.insight { border-left-color: var(--knowledge); }
+.callout.insight .callout-title { color: var(--knowledge); }
+/* Pivot indicator */
+.pivot-arrow { display: inline-block; color: var(--accent); font-size: 1.4rem; vertical-align: middle; margin: 0 0.25rem; }
+/* Agent Role Badges */
+.agent-role-badge { font-size: 0.68rem; font-weight: 510; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+.agent-role-badge.giant { background: rgba(248,168,72,0.15); color: var(--accent); }
+.agent-role-badge.institutional { background: rgba(91,155,213,0.15); color: var(--knowledge); }
+/* Provenance */
+.prov-badge { font-size: 0.65rem; padding: 1px 6px; border-radius: 3px; font-weight: 600; }
+.prov-primary { background: rgba(76,175,80,0.12); color: #4caf50; }
+.prov-industry { background: rgba(91,155,213,0.12); color: var(--knowledge); }
+.prov-media { background: rgba(248,168,72,0.12); color: var(--accent); }
+/* Chart Frames */
+.chart-frame { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); margin: 1rem 0; overflow: hidden; }
+.chart-frame-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-subtle); }
+.chart-frame-title { font-size: 0.82rem; font-weight: 590; color: var(--text-secondary); letter-spacing: 0.02em; }
+.chart-frame-body { padding: 0; }
+.chart-source { padding: 0.5rem 1rem; font-size: 0.7rem; color: var(--text-quaternary); border-top: 1px solid var(--border-subtle); }
+/* Timeline pivot */
+.pivot-box { border: 2px solid var(--accent); border-radius: var(--radius-md); padding: 1.25rem; margin: 1.5rem 0; background: var(--accent-dim); }
+.pivot-box h3 { color: var(--accent); margin-top: 0; font-size: 1rem; }
+/* Embedded + Reading mode */
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+body.embedded .hamburger-btn { display: none !important; }
+body.embedded .sidebar-overlay { display: none !important; }
+.reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+.reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+.reading-mode .hamburger-btn { display: none !important; }
+.reading-mode .sidebar-overlay { display: none !important; }
+  </style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes sidebar">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ═══════════ LEFT SIDEBAR ═══════════ -->
+  <aside class="sidebar" id="sidebar">
+    <a class="back-link" href="../blockchain_hub.html">&larr; Blockchain Hub</a>
+
+    <h4>Larry Fink</h4>
+    <div class="project-meta">
+      CEO, BlackRock (BLK)<br>
+      N4+N6 &middot; A档 5/5
+    </div>
+
+    <h4>目录导航</h4>
+    <nav>
+      <ul>
+        <li><a href="#summary"><span class="toc-num">&#9733;</span>速览摘要</a></li>
+        <li><a href="#pivot"><span class="toc-num">1</span>180° BTC 转向</a></li>
+        <li><a href="#actions"><span class="toc-num">2</span>行动证据</a></li>
+        <li><a href="#framework"><span class="toc-num">3</span>核心认知框架</a></li>
+        <li><a href="#kpi"><span class="toc-num">4</span>关键数据</a></li>
+        <li><a href="#judgment"><span class="toc-num">5</span>判断与立场</a></li>
+        <li><a href="#trading"><span class="toc-num">6</span>交易含义</a></li>
+        <li><a href="#risk"><span class="toc-num">7</span>风险信号</a></li>
+        <li><a href="#provenance"><span class="toc-num">8</span>Provenance</a></li>
+      </ul>
+    </nav>
+
+    <h4 style="margin-top:1rem;">相关文件</h4>
+    <nav>
+      <ul>
+        <li><a href="../blockchain_hub.html">Blockchain Hub &rarr;</a></li>
+        <li><a href="../blockchain_hub.html#agents" style="color:var(--accent);">All Agents &rarr;</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ═══════════ MAIN CONTENT ═══════════ -->
+  <main class="main-content">
+
+    <!-- Header -->
+    <header class="page-header">
+      <div class="role-badge">INSTITUTIONAL GIANT</div>
+      <h1>Larry Fink</h1>
+      <p class="subtitle">CEO &amp; Chairman, BlackRock (BLK) &nbsp;|&nbsp; $11.5T AUM &nbsp;|&nbsp; 2026-03-22<br>
+      <span style="color:var(--text-quaternary);font-size:0.85em;">认知代理人报告 — Cognitive Agent Profile</span></p>
+      <div class="badge-row">
+        <span class="badge">N4 BTC矿业+持有 &middot; N6 RWA</span>
+        <span class="badge">A档 5/5</span>
+        <span class="badge">IBIT BTC ETF</span>
+        <span class="badge">BUIDL RWA</span>
+        <span class="badge">771K BTC custodied</span>
+      </div>
+    </header>
+
+    <!-- Priority Box -->
+    <div class="priority-box" id="summary">
+      <h2>&#9200; 速览摘要 — 60秒理解 Larry Fink</h2>
+      <ol>
+        <li><strong>180° 转向</strong>：从 2017 年 "BTC is money laundering index" 到 2024 年 "digital gold"，完成了华尔街最具影响力的认知翻转</li>
+        <li><strong>IBIT 历史速度</strong>：BlackRock iShares Bitcoin Trust (IBIT) 成为史上最快达到 $50B AUM 的 ETF，重新定义机构资金入场通道</li>
+        <li><strong>BUIDL 代币化</strong>：BlackRock 推出 BUIDL 代币化国债基金，打通 TradFi &rarr; DeFi 的 RWA 桥梁</li>
+        <li><strong>托管规模</strong>：BlackRock 代客户持有约 771K BTC，成为全球最大机构 BTC 持仓方之一</li>
+        <li><strong>核心判断</strong>："Bitcoin is legitimate. Tokenization is the next evolution of markets."</li>
+      </ol>
+    </div>
+
+    <!-- Section 1: The Pivot -->
+    <section id="pivot">
+      <div class="section-header">
+        <h2>1. 180° BTC 转向时间线</h2>
+      </div>
+      <p>Larry Fink 的 BTC 认知翻转是加密行业制度化进程的标志性事件。</p>
+
+      <div class="pivot-box">
+        <h3>认知翻转 Cognitive Pivot</h3>
+        <p style="font-size:1.1rem;text-align:center;margin:0.5rem 0;">
+          <strong style="color:#f44336;">"BTC is a money laundering index"</strong>
+          <span class="pivot-arrow">&rarr;</span>
+          <strong style="color:#4caf50;">"Digital Gold &mdash; legitimate asset class"</strong>
+        </p>
+        <p style="text-align:center;font-size:0.82rem;color:var(--text-tertiary);margin-bottom:0;">2017 &rarr; 2024 &nbsp;|&nbsp; 7年完成Overton Window位移</p>
+      </div>
+
+      <figure>
+        <table>
+          <thead><tr><th>日期</th><th>言论/行动</th><th>意义</th></tr></thead>
+          <tbody>
+            <tr><td><strong>2017</strong></td><td>"Bitcoin just shows you how much demand for money laundering there is"</td><td>公开否定 BTC 合法性</td></tr>
+            <tr><td><strong>2022</strong></td><td>BlackRock 与 Coinbase 达成机构合作</td><td>认知转向的第一个信号</td></tr>
+            <tr><td><strong>2023 Jun</strong></td><td>提交 IBIT Spot BTC ETF 申请</td><td>全球最大资管正式入场</td></tr>
+            <tr><td><strong>2024 Jan</strong></td><td>IBIT 获 SEC 批准上市</td><td>BTC ETF 时代开启</td></tr>
+            <tr><td><strong>2024 H1</strong></td><td>"I believe bitcoin is a legitimate financial instrument"</td><td>从否定到全面肯定</td></tr>
+            <tr><td><strong>2024 Jul</strong></td><td>推动 ETH ETF 申请</td><td>扩展到第二大加密资产</td></tr>
+            <tr><td><strong>2025 Mar</strong></td><td>BUIDL 代币化国债基金上线</td><td>RWA 赛道切入</td></tr>
+            <tr><td><strong>2025</strong></td><td>IBIT AUM 突破 $50B &mdash; 史上最快</td><td>验证机构需求假说</td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </section>
+
+    <!-- Section 2: Action Evidence -->
+    <section id="actions">
+      <div class="section-header">
+        <h2>2. 行动证据 Action Evidence</h2>
+      </div>
+
+      <h3>2.1 IBIT BTC ETF 发行</h3>
+      <p>BlackRock 的 iShares Bitcoin Trust 在获得 SEC 批准后迅速成长为全球最大的 BTC ETF，AUM 以史上最快速度突破 $50B。IBIT 的成功证明了机构资金对 BTC 的需求远超市场预期。</p>
+
+      <h3>2.2 ETH ETF 推动</h3>
+      <p>在 BTC ETF 成功后，Fink 立即推动 ETH Spot ETF 申请，将制度化扩展至第二大加密资产。这显示 BlackRock 的加密战略不是单一产品试水，而是系统性布局。</p>
+
+      <h3>2.3 BUIDL 代币化国债基金</h3>
+      <p>BUIDL (BlackRock USD Institutional Digital Liquidity Fund) 是 BlackRock 在 Ethereum 上发行的代币化国债基金，代表 TradFi 巨头首次在公链上部署 RWA 产品。这是 Fink "tokenization is the next evolution" 论断的行动证明。</p>
+
+      <h3>2.4 771K BTC 托管</h3>
+      <p>BlackRock 通过 IBIT 和机构账户累计托管约 771,000 枚 BTC。这使 BlackRock 成为全球最大的机构 BTC 持仓方之一，其买卖行为对市场有直接价格影响。</p>
+
+      <h3>2.5 制度合法化 Institutional Legitimization</h3>
+      <p>Fink 的转向本身就是最重要的行动证据。当管理 $11.5T 的全球最大资管 CEO 公开称 BTC 为"数字黄金"和"合法金融工具"，这为所有传统金融机构打开了配置加密资产的 Overton Window。</p>
+    </section>
+
+    <!-- Section 3: Framework -->
+    <section id="framework">
+      <div class="section-header">
+        <h2>3. 核心认知框架</h2>
+      </div>
+
+      <div class="callout insight">
+        <div class="callout-title">Fink 的加密认知模型</div>
+        <div class="callout-body">
+          <p><strong>Layer 1 — BTC 作为数字黄金</strong>：BTC 的稀缺性和去中心化使其成为类黄金的价值存储工具。在全球货币超发和地缘不确定性下，BTC 是对冲工具。</p>
+          <p><strong>Layer 2 — ETF 作为入场通道</strong>：传统投资者不需要理解钱包和私钥，ETF 提供了合规、简单的配置方式。降低门槛 = 释放需求。</p>
+          <p><strong>Layer 3 — 代币化是市场进化</strong>：所有金融资产最终将被代币化。BUIDL 只是第一步。债券、股票、房地产都会上链。</p>
+        </div>
+      </div>
+
+      <blockquote>
+        "Bitcoin is legitimate. Every asset &mdash; every stock, every bond &mdash; can be tokenized. If we can tokenize them, it will revolutionize finance."<br>
+        <span style="color:var(--text-quaternary);font-size:0.82rem;">&mdash; Larry Fink, BlackRock Annual Letter, 2024</span>
+      </blockquote>
+    </section>
+
+    <!-- Section 4: KPIs -->
+    <section id="kpi">
+      <div class="section-header">
+        <h2>4. 关键数据 Key Metrics</h2>
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-label">BlackRock AUM</div>
+          <div class="kpi-value">$11.5T</div>
+          <div class="kpi-subtitle">全球最大资产管理公司</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">IBIT AUM</div>
+          <div class="kpi-value">$50B+</div>
+          <div class="kpi-change positive">&#9650; 史上最快ETF达此规模</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">BTC 托管量</div>
+          <div class="kpi-value">~771K</div>
+          <div class="kpi-subtitle">BTC 枚数 (IBIT + 机构)</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">BUIDL 基金</div>
+          <div class="kpi-value">RWA</div>
+          <div class="kpi-subtitle">Ethereum 上代币化国债</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Judgment -->
+    <section id="judgment">
+      <div class="section-header">
+        <h2>5. 判断与立场 Judgment</h2>
+      </div>
+
+      <div class="callout">
+        <div class="callout-title">核心判断 Core Thesis</div>
+        <div class="callout-body">
+          <p>"Bitcoin is legitimate. Tokenization is the next evolution of markets."</p>
+          <p>Fink 的判断可以分解为两个独立假说：</p>
+          <ul>
+            <li><strong>BTC 合法性假说</strong>：BTC 已经从边缘资产变为制度认可的金融工具。IBIT 的 $50B AUM 和 SEC 批准是证据。<span class="verified">&#9989; 已验证</span></li>
+            <li><strong>代币化假说</strong>：金融资产代币化将是下一个十年的结构性变革。BUIDL 是初步验证。<span class="pending">&#8987; 待验证</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>偏见分析 Bias Assessment</h3>
+      <ul>
+        <li><strong>卖方偏见</strong>：BlackRock 从 IBIT 收取管理费 (0.25%)，对 BTC 价格上涨有直接利益。Fink 的乐观言论需要打折。</li>
+        <li><strong>滞后偏见</strong>：7年后才转向说明 Fink 不是先知而是跟随者。但他的跟随本身就是催化剂 &mdash; 当最大玩家入场，市场结构就改变了。</li>
+        <li><strong>监管捕获</strong>：BlackRock 与 SEC 的关系网络使 IBIT 获批的概率从一开始就远高于其他申请者。</li>
+      </ul>
+    </section>
+
+    <!-- Section 6: Trading -->
+    <section id="trading">
+      <div class="section-header">
+        <h2>6. 交易含义 Trading Implications</h2>
+      </div>
+
+      <figure>
+        <table>
+          <thead><tr><th>标的</th><th>逻辑</th><th>信号类型</th><th>时间框架</th></tr></thead>
+          <tbody>
+            <tr><td><strong>BLK</strong></td><td>低beta加密敞口，通过传统金融渠道。ETF管理费 = 稳定收入流</td><td><span class="signal signal-bull">BULL</span></td><td>中长期</td></tr>
+            <tr><td><strong>IBIT</strong></td><td>最大BTC现货ETF，流入/流出数据是市场情绪晴雨表</td><td><span class="signal signal-watch">WATCH</span></td><td>短中期</td></tr>
+            <tr><td><strong>BUIDL/RWA</strong></td><td>代币化国债 = RWA赛道optionality。若代币化趋势验证，BLK有先发优势</td><td><span class="signal signal-bull">BULL</span></td><td>长期</td></tr>
+            <tr><td><strong>BTC</strong></td><td>IBIT持续净流入 = BTC结构性需求。BlackRock的买入是价格支撑</td><td><span class="signal signal-bull">BULL</span></td><td>结构性</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <div class="callout">
+        <div class="callout-title">交易者视角</div>
+        <div class="callout-body">
+          BLK 是低beta的加密敞口 &mdash; 通过传统金融获得加密收益。ETF管理费收入稳定，不受BTC价格波动的直接冲击（只是AUM缩水影响费率收入）。BUIDL代表RWA赛道的optionality &mdash; 如果代币化真的是下一个十年的趋势，BLK已经在桌上。
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 7: Risk -->
+    <section id="risk">
+      <div class="section-header">
+        <h2>7. 风险信号 Risk Signals</h2>
+      </div>
+
+      <div class="callout risk">
+        <div class="callout-title">风险监控</div>
+        <div class="callout-body">
+          <ul>
+            <li><strong>监管逆转</strong>：SEC 政策方向如果转向限制性（新一届政府换人），IBIT 可能面临额外合规成本</li>
+            <li><strong>ETF 费率竞争</strong>：Fidelity (FBTC)、ARK 等竞争者持续压低费率，IBIT 的 0.25% 可能被迫下调</li>
+            <li><strong>BTC 剧烈回调</strong>：BTC 大幅下跌 &rarr; IBIT AUM缩水 &rarr; 管理费收入下降 &rarr; BLK加密业务线受压</li>
+            <li><strong>代币化落地慢</strong>：BUIDL 如果未能扩展到更多资产类别，代币化叙事会被质疑为概念大于实质</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 8: Provenance -->
+    <section id="provenance">
+      <div class="section-header">
+        <h2>8. Provenance 来源溯源</h2>
+      </div>
+      <figure>
+        <table>
+          <thead><tr><th>来源</th><th>类型</th><th>时间</th><th>可信度</th></tr></thead>
+          <tbody>
+            <tr><td>BlackRock Annual Letter 2024</td><td><span class="prov-badge prov-primary">一手</span></td><td>2024</td><td><span class="tier-high">高</span></td></tr>
+            <tr><td>CNBC Interview &mdash; Fink on BTC</td><td><span class="prov-badge prov-media">媒体</span></td><td>2024</td><td><span class="tier-high">高</span></td></tr>
+            <tr><td>SEC IBIT Filing &amp; Approval</td><td><span class="prov-badge prov-primary">一手</span></td><td>2024 Jan</td><td><span class="tier-high">高</span></td></tr>
+            <tr><td>BUIDL Fund Documentation</td><td><span class="prov-badge prov-primary">一手</span></td><td>2025</td><td><span class="tier-high">高</span></td></tr>
+            <tr><td>Bloomberg ETF Flow Data</td><td><span class="prov-badge prov-industry">行业</span></td><td>2025</td><td><span class="tier-high">高</span></td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </section>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+      <p>Larry Fink 认知代理人报告 &mdash; Blockchain Research System &middot; 2026-03-22<br>
+      <a href="../blockchain_hub.html">&larr; Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ═══════════ RIGHT SIDEBAR: Notes ═══════════ -->
+  <aside class="notes-sidebar" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn" aria-label="Close notes">&#10005;</button>
+      <h4>&#129504; 注解 Notes</h4>
+    </div>
+
+    <!-- Note 1: Overton Window -->
+    <div class="anno meta-note open" data-section="pivot" id="n1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Institutional Overton Window Shift</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>Fink 的转向不只是一个人的观点变化 &mdash; 它是<strong>机构界 Overton Window 的位移</strong>。当 $11.5T AUM 的掌门人公开说 BTC 合法，所有"我们不能碰加密"的合规借口就消失了。</p>
+        <p>这是<strong>许可信号 (permission signal)</strong>：养老金、主权基金、保险公司现在可以说"BlackRock 都做了，我们也可以"。</p>
+        <p><strong>类比</strong>：类似于 2020 年 Paul Tudor Jones 说 BTC 是"最快的马"，但影响力大 100 倍。</p>
+      </div>
+    </div>
+
+    <!-- Note 2: Crypto Kingmaker -->
+    <div class="anno meta-note open" data-section="actions" id="n2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">BlackRock as Crypto Kingmaker</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>BlackRock 不只是参与者，它正在成为加密市场的<strong>造王者</strong>：</p>
+        <p>&bull; IBIT 的日均交易量经常超过 SPDR Gold (GLD)<br>
+        &bull; BlackRock 选择 Coinbase 做托管 = 给 COIN 背书<br>
+        &bull; 提交 ETH ETF 申请 = 信号 ETH 是"下一个"</p>
+        <p><span style="color:var(--accent);font-weight:590;">警惕</span>：BlackRock 的权力集中度本身就是系统风险。如果 BlackRock 单方面决定抛售，市场冲击不可忽视。</p>
+      </div>
+    </div>
+
+    <!-- Note 3: RWA Bridge -->
+    <div class="anno meta-note open" data-section="framework" id="n3">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">RWA Bridge: TradFi &rarr; DeFi</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>BUIDL 是 RWA 赛道的<strong>概念验证</strong>。如果 BlackRock 能成功将国债代币化，接下来就是：</p>
+        <p>&bull; 企业债券 &rarr; 公链上交易<br>
+        &bull; 房地产 &rarr; 分份化代币<br>
+        &bull; 私募股权 &rarr; 二级市场流动性</p>
+        <p>这不是"加密原住民"的叙事 &mdash; 这是<strong>传统金融巨头用区块链重构自身基础设施</strong>的战略。对 DeFi 协议（Aave、MakerDAO 等接入 RWA 的项目）意义重大。</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+(function() {
+  // 1. Sidebar toggle
+  var hamburger = document.getElementById('hamburgerBtn');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('sidebarOverlay');
+  hamburger.addEventListener('click', function() { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', function() { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+  sidebar.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() { if (window.innerWidth <= 900) { sidebar.classList.remove('open'); overlay.classList.remove('open'); } });
+  });
+
+  // 2. Note toggle
+  window.toggleNote = function(head) { head.parentElement.classList.toggle('open'); };
+
+  // 3. Right sidebar toggle
+  var notesSidebarEl = document.getElementById('notesSidebar');
+  var notesToggleBtn = document.getElementById('notesToggleBtn');
+  var notesOverlayEl = document.getElementById('notesOverlay');
+  var notesCloseBtn = document.getElementById('notesCloseBtn');
+  function toggleNotesSidebar() {
+    var willClose = !notesSidebarEl.classList.contains('ns-closed');
+    notesSidebarEl.classList.toggle('ns-closed', willClose);
+    notesToggleBtn.style.display = willClose ? 'flex' : 'none';
+    notesOverlayEl.classList.toggle('open', !willClose);
+  }
+  if (notesToggleBtn) notesToggleBtn.addEventListener('click', toggleNotesSidebar);
+  if (notesOverlayEl) notesOverlayEl.addEventListener('click', toggleNotesSidebar);
+  if (notesCloseBtn) notesCloseBtn.addEventListener('click', toggleNotesSidebar);
+
+  // 4. Resize handler
+  if (window.innerWidth > 1200) {
+    notesSidebarEl.classList.remove('ns-closed');
+    notesToggleBtn.style.display = 'none';
+  } else {
+    notesSidebarEl.classList.add('ns-closed');
+    notesToggleBtn.style.display = 'flex';
+  }
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 1200) { notesSidebarEl.classList.remove('ns-closed'); notesToggleBtn.style.display = 'none'; notesOverlayEl.classList.remove('open'); }
+  });
+
+  // 5. Expand all notes on load
+  document.querySelectorAll('.anno').forEach(function(n) { n.classList.add('open'); });
+
+  // 6. Active TOC
+  var navLinks = document.querySelectorAll('.sidebar nav ul li a[href^="#"]');
+  var tocObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        navLinks.forEach(function(link) { link.classList.remove('active'); if (link.getAttribute('href') === '#' + entry.target.id) link.classList.add('active'); });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  document.querySelectorAll('[id="summary"],[id="pivot"],[id="actions"],[id="framework"],[id="kpi"],[id="judgment"],[id="trading"],[id="risk"],[id="provenance"]').forEach(function(s) { tocObserver.observe(s); });
+})();
+</script>
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+</body>
+</html>

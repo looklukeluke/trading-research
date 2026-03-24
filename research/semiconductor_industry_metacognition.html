@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI+半导体行业 — 28轮元思考</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <style>
+    :root {
+      --bg-base: #08090a; --bg-elevated: #0f1011; --bg-surface: #141516; --bg-overlay: #191a1b;
+      --border-subtle: #23252a; --border-default: #34343a; --border-strong: #3e3e44;
+      --text-primary: #f7f8f8; --text-secondary: #d0d6e0; --text-tertiary: #8a8f98; --text-quaternary: #62666d;
+      --accent: #f8a848; --accent-dim: rgba(248, 168, 72, 0.12); --accent-hover: rgba(248, 168, 72, 0.08);
+      --knowledge: #5b9bd5; --knowledge-dim: rgba(91, 155, 213, 0.12);
+      --green: #4caf50; --red: #f44336; --orange: #ffa726; --purple: #ab47bc;
+      --font-sans: 'Inter', 'Inter Variable', -apple-system, system-ui, sans-serif;
+      --radius-sm: 8px; --radius-md: 12px; --sidebar-width: 230px;
+    }
+    * { box-sizing: border-box; }
+    html { font-family: var(--font-sans); font-feature-settings: 'liga' 1, 'calt' 1; letter-spacing: -0.012em; -webkit-font-smoothing: antialiased; }
+    body { margin: 0; background: var(--bg-base); color: var(--text-primary); font-size: 15px; line-height: 1.65; }
+    .page-wrapper { display: flex; min-height: 100vh; }
+    .sidebar { position: sticky; top: 0; height: 100vh; width: var(--sidebar-width); min-width: var(--sidebar-width); overflow-y: auto; padding: 1.25rem 0.75rem; border-right: 1px solid var(--border-subtle); background: var(--bg-elevated); z-index: 100; }
+    .sidebar h4 { margin-bottom: 0.5rem; padding: 0 0.5rem; font-size: 0.68rem; font-weight: 590; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-quaternary); }
+    .sidebar nav ul { list-style: none; padding: 0; margin: 0 0 0.75rem 0; }
+    .sidebar nav ul li a { display: block; padding: 0.2rem 0.5rem; font-size: 0.75rem; color: var(--text-tertiary); text-decoration: none; border-radius: var(--radius-sm); line-height: 1.35; }
+    .sidebar nav ul li a:hover { background: var(--accent-hover); color: var(--text-primary); }
+    .sidebar nav ul li a .toc-num { color: var(--text-quaternary); margin-right: 0.15rem; font-size: 0.6rem; font-weight: 510; }
+    .main-content { flex: 1; min-width: 0; max-width: 980px; padding: 2.5rem 2.5rem 5rem; }
+    .page-header { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-default); }
+    .page-header h1 { margin-bottom: 0.3rem; font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 680; letter-spacing: -0.025em; }
+    .page-header .subtitle { color: var(--text-tertiary); margin-bottom: 1rem; font-size: 0.92rem; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .badge { display: inline-block; padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.72rem; font-weight: 510; background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(248, 168, 72, 0.25); }
+    .role-badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; background: rgba(171,71,188,0.12); color: var(--purple); }
+    .section-header { margin-top: 3.5rem; margin-bottom: 1.25rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border-subtle); }
+    .section-header h2 { font-size: 1.2rem; font-weight: 590; letter-spacing: -0.015em; margin-bottom: 0; }
+    h3 { font-size: 1.05rem; font-weight: 590; margin-top: 1.5rem; }
+    p { color: var(--text-secondary); margin-bottom: 1rem; }
+    strong { color: var(--text-primary); font-weight: 590; }
+    ul, ol { color: var(--text-secondary); padding-left: 1.2rem; }
+    li { margin-bottom: 0.3rem; line-height: 1.55; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    details { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.8rem 1rem; margin: 0.8rem 0; background: var(--bg-elevated); }
+    details summary { cursor: pointer; font-weight: 510; font-size: 0.88rem; color: var(--text-primary); }
+    details[open] summary { margin-bottom: 0.6rem; color: var(--accent); }
+    .priority-box { border: 1px solid rgba(248,168,72,0.3); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin-bottom: 2rem; background: var(--bg-surface); }
+    .priority-box h2 { color: var(--accent); margin-top: 0; font-size: 1.05rem; font-weight: 590; }
+    .arc-item { margin-bottom: 0.8rem; padding: 0.7rem 0.8rem; border-left: 3px solid var(--accent); background: rgba(66,165,245,0.03); border-radius: 0 6px 6px 0; }
+    .arc-item strong { color: var(--accent); }
+    .question-box { border: 2px solid var(--knowledge); border-radius: 8px; padding: 1.25rem; margin: 1.5rem 0; background: rgba(91,155,213,0.05); }
+    .question-box h4 { color: var(--knowledge); margin-top: 0; font-size: 0.95rem; }
+    figure { margin: 1rem 0; overflow-x: auto; }
+    table { font-size: 0.8rem; border-collapse: collapse; width: 100%; }
+    th, td { padding: 0.45rem 0.7rem; border-bottom: 1px solid var(--border-subtle); text-align: left; }
+    th { white-space: nowrap; font-weight: 510; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-quaternary); border-bottom: 1px solid var(--border-default); }
+    td { color: var(--text-secondary); }
+    tr:hover td { background: var(--bg-elevated); }
+    blockquote { border-left: 3px solid var(--accent); padding: 0.5rem 1rem; margin: 0.8rem 0; font-style: italic; background: var(--bg-surface); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-secondary); font-size: 0.92rem; }
+    .signal { display: inline-block; font-size: 0.72rem; padding: 0.1rem 0.4rem; border-radius: 3px; font-weight: 590; margin-right: 0.2rem; }
+    .signal-bull { background: rgba(76,175,80,0.15); color: var(--green); }
+    .signal-bear { background: rgba(244,67,54,0.15); color: var(--red); }
+    .signal-watch { background: rgba(255,167,38,0.15); color: var(--orange); }
+    .phase-tag { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+    .phase-explore { background: rgba(91,155,213,0.12); color: var(--knowledge); }
+    .phase-diagnose { background: rgba(255,167,38,0.12); color: var(--orange); }
+    .phase-build { background: rgba(76,175,80,0.12); color: var(--green); }
+    .phase-verify { background: rgba(244,67,54,0.12); color: var(--red); }
+    .phase-synth { background: rgba(171,71,188,0.12); color: var(--purple); }
+    .page-footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 2px solid var(--border-default); text-align: center; font-size: 0.82rem; color: var(--text-tertiary); }
+    .node-tag { display: inline-block; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.65rem; font-weight: 590; background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-tertiary); margin-right: 0.2rem; }
+    ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+    .hamburger-btn { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 200; background: var(--bg-surface); color: var(--text-primary); border: none; border-radius: 6px; width: 44px; height: 44px; font-size: 1.4rem; cursor: pointer; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+    @media (max-width: 900px) { .sidebar { position: fixed; left: -280px; top: 0; transition: left 0.3s ease; } .sidebar.open { left: 0; } .sidebar-overlay.open { display: block; } .hamburger-btn { display: block; } .main-content { padding: 2rem 1rem 4rem; } }
+  </style>
+</head>
+<body>
+<nav style="position:sticky;top:0;z-index:999;background:rgba(8,9,10,0.95);backdrop-filter:blur(8px);padding:0.5rem 1.5rem;border-bottom:1px solid #23252a;font-size:0.78rem;display:flex;gap:1rem;align-items:center;">
+  <a href="semiconductor_hub.html" style="color:#f8a848;">&larr; Semiconductor Hub</a>
+  <span style="color:#62666d;">&middot;</span>
+  <a href="cognitive_agents_2026-03-20/overview.html" style="color:#8a8f98;">Agents Overview</a>
+  <span style="color:#62666d;">&middot;</span>
+  <a href="cognitive_agents_2026-03-20/01_jensen_huang_metacognition.html" style="color:#5b9bd5;">Jensen元思考</a>
+  <span style="color:#62666d;">&middot;</span>
+  <a href="cognitive_agents_2026-03-20/12_elon_musk_metacognition.html" style="color:#5b9bd5;">Musk元思考</a>
+</nav>
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="page-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <h4>行业元思考</h4>
+    <nav><ul>
+      <li><a href="#overview"><span class="toc-num">&#9733;</span>核心结论</a></li>
+      <li><a href="#p1"><span class="toc-num">I</span>我在做什么？</a></li>
+      <li><a href="#p2"><span class="toc-num">II</span>20人告诉我们什么</a></li>
+      <li><a href="#p3"><span class="toc-num">III</span>供应链权力地图</a></li>
+      <li><a href="#p4"><span class="toc-num">IV</span>周期位置</a></li>
+      <li><a href="#p5"><span class="toc-num">V</span>交叉验证网络</a></li>
+      <li><a href="#p6"><span class="toc-num">VI</span>投资链条</a></li>
+      <li><a href="#p7"><span class="toc-num">VII</span>风险地图</a></li>
+      <li><a href="#p8"><span class="toc-num">VIII</span>地缘政治</a></li>
+      <li><a href="#p9"><span class="toc-num">IX</span>方法论</a></li>
+      <li><a href="#p10"><span class="toc-num">X</span>中国认知盲区</a></li>
+    </ul></nav>
+    <h4 style="margin-top:0.75rem;">素材基础</h4>
+    <nav><ul>
+      <li><a href="semiconductor_hub.html" style="color:var(--accent);font-size:0.72rem;">Hub (20 agents) &rarr;</a></li>
+    </ul></nav>
+  </aside>
+
+  <main class="main-content">
+    <header class="page-header">
+      <div class="role-badge">INDUSTRY METACOGNITION</div>
+      <h1>AI+半导体行业 — 28轮元思考</h1>
+      <p class="subtitle">20个认知代理人 &times; 380+份素材 &times; 8个产业节点 → 行业级投资认知<br>
+      <span style="color:var(--text-quaternary);font-size:0.85em;">从"Jensen一个人的信号"到"整条供应链的交叉验证网络"</span></p>
+      <div class="badge-row">
+        <span class="badge">20个代理人 (16供给侧+4需求侧)</span>
+        <span class="badge">8个产业节点</span>
+        <span class="badge">380+份素材</span>
+        <span class="badge">3条投资链</span>
+        <span class="badge">5个kill switches</span>
+      </div>
+    </header>
+
+    <!-- Overview -->
+    <div class="priority-box" id="overview">
+      <h2>&#129504; 28轮行业元思考的核心结论</h2>
+      <ol>
+        <li><strong>AI+半导体不是一个股票，是一条8节点供应链</strong>（含需求侧+AI Lab）。投资逻辑不是"买哪个"，而是"链上的权力在哪里、正在往哪里移动"</li>
+        <li><strong>权力集中在两个chokepoint</strong>：TSMC(代工封装) + ASML(光刻设备)。20个代理人中，这两个节点的信号最先反映行业方向</li>
+        <li><strong>20人的共识vs分歧才是投资地图</strong>。当Jensen+Wei+Lisa Su+Mehrotra+Altman+Nadella都说"需求insatiable"→ 95%可信（含买方验证）。当Jensen说"CUDA不可替代"但5个独立源矛盾→ 15%可信</li>
+        <li><strong>"不管谁赢都赚"的位置</strong>：AVGO(两条链交叉点) + TSM(所有芯片经过) + ASML(不关心谁的芯片)。NVDA只有bull case才赢大</li>
+        <li><strong>最大风险不是技术失败，是共识拥挤</strong>。供给侧16人无一bearish，需求侧4人(Altman/Nadella/Pichai/Hassabis)新增但深度尚浅。当所有人都同意时最危险——这是2000年电信泡沫的共识结构</li>
+      </ol>
+    </div>
+
+
+    <!-- Phase I -->
+    <section id="p1">
+      <div class="section-header">
+        <span class="phase-tag phase-explore">PHASE I &mdash; EXPLORE</span>
+        <h2>我到底在做什么？</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#1 表面任务 vs 真正任务</strong></summary>
+        <p><strong>表面</strong>：整合20个认知代理人的洞察为一份行业研究。</p>
+        <p><strong>真正</strong>：为趋势交易者回答一个问题——<strong>"AI+半导体这条链上，权力在哪里，正在往哪里移动，我该在哪个节点布局？"</strong></p>
+        <p>这不是stock-picking报告，是<strong>产业链权力分析</strong>。个股只是权力位置的表达。</p>
+      </details>
+
+      <details>
+        <summary><strong>#2 素材盘点：我们有什么</strong></summary>
+        <p><strong>380+文件</strong>，20个认知代理人（16供给侧+4需求侧），每人10+文件（Profile+V4素材地图+4份专项+元思考）。覆盖8个产业节点。</p>
+        <p>这可能是<strong>全球最详细的AI半导体认知画像数据库</strong>——不是财务数据，是<strong>关键决策者的认知模型</strong>。没有卖方研报有这个。</p>
+        <p><strong>关键优势</strong>：我们不只知道"他们说了什么"，还知道"他们的偏见是什么"以及"他们说的和做的是否一致"。</p>
+      </details>
+
+      <details>
+        <summary><strong>#3 用户需要什么</strong></summary>
+        <p>趋势交易者的核心能力是"选品+周期匹配"。他需要：</p>
+        <ul>
+          <li><strong>周期位置</strong>：AI+半导体大周期在哪？还有多少空间？</li>
+          <li><strong>品种筛选</strong>：链上7个节点，哪几个最有alpha？</li>
+          <li><strong>风险信号</strong>：什么时候该警惕？什么是kill switch？</li>
+          <li><strong>信号源分级</strong>：20个人谁最可信？怎么交叉验证？</li>
+        </ul>
+      </details>
+    </section>
+
+
+    <!-- Phase II -->
+    <section id="p2">
+      <div class="section-header">
+        <span class="phase-tag phase-explore">PHASE II &mdash; EXPLORE</span>
+        <h2>20个人集体告诉我们什么？</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#4 20人的共识：AI基建需求是真实的（含买方验证）</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>代理人</th><th>节点</th><th>关于AI需求说了什么</th><th>可信度</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Jensen Huang</strong></td><td><span class="node-tag">GPU</span></td><td>"$1T订单可见性"，三个Scaling Law</td><td>8/10</td></tr>
+              <tr><td><strong>Lisa Su</strong></td><td><span class="node-tag">GPU</span></td><td>"Insatiable AI chip demand"，35%年增长</td><td>7/10</td></tr>
+              <tr><td><strong>C.C. Wei</strong></td><td><span class="node-tag">代工</span></td><td>"Demand surprises us on the upside every quarter"</td><td>9/10</td></tr>
+              <tr><td><strong>Kwak Noh Jung</strong></td><td><span class="node-tag">HBM</span></td><td>HBM需求远超产能，供不应求持续至2027</td><td>8/10</td></tr>
+              <tr><td><strong>Sanjay Mehrotra</strong></td><td><span class="node-tag">Memory</span></td><td>"AI is driving unprecedented memory demand"</td><td>8/10</td></tr>
+              <tr><td><strong>Fouquet</strong></td><td><span class="node-tag">光刻</span></td><td>EUV订单满载，High-NA需求加速</td><td>8/10</td></tr>
+              <tr><td><strong>Gary Dickerson</strong></td><td><span class="node-tag">设备</span></td><td>ICAPS+先进封装双轮驱动</td><td>7/10</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>结论</strong>：7个不同节点的7个独立偏见源<strong>全部确认</strong>AI基建需求是真实的。这不是一个人的叙事，是整条链的共振。<strong>概率：95%+</strong>。</p>
+      </details>
+
+      <details open>
+        <summary><strong>#5 20人的分歧：护城河和替代</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>分歧话题</th><th>一方</th><th>另一方</th><th>投资含义</th></tr></thead>
+            <tbody>
+              <tr><td><strong>CUDA是否不可替代？</strong></td><td>Jensen: "1.5M models on CUDA"</td><td>Anthropic/Google在TPU训练；Jim Keller: RISC-V可替代</td><td><span class="signal signal-bear">BEAR</span> NVDA护城河在侵蚀</td></tr>
+              <tr><td><strong>自研芯片是否可行？</strong></td><td>Jensen: "doesn't make sense"</td><td>Musk建Terafab；Google TPU 10年；Hock Tan的AVGO在帮所有人自研</td><td><span class="signal signal-bear">BEAR</span> 结构性替代正在发生</td></tr>
+              <tr><td><strong>物理AI时间表</strong></td><td>Jensen: "ChatGPT时刻已到"</td><td>Musk: "差5-6年"；Waymo不加入NVIDIA生态</td><td><span class="signal signal-watch">WATCH</span> Q1 2026 Alpamayo是决定性验证</td></tr>
+              <tr><td><strong>中国追赶速度</strong></td><td>Chang: "差距在扩大到5-6年"</td><td>Jensen: "出口管制失败了"，95%→50%份额</td><td><span class="signal signal-watch">WATCH</span> 两人都对，但角度不同</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>投资方法论</strong>：<strong>共识=高置信度行动</strong>（AI需求真实→做多链条）。<strong>分歧=最有价值的信号</strong>（CUDA护城河→监控侵蚀速度）。</p>
+      </details>
+
+      <details>
+        <summary><strong>#6 可信度分层：谁的话最值钱？</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>层次</th><th>代理人</th><th>为什么可信</th><th>核心偏见</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Tier 1 (9/10)</strong></td><td>C.C. Wei, Morris Chang, Johny Srouji</td><td>执行力验证+保守预测(实际超预期)</td><td>低估竞争威胁</td></tr>
+              <tr><td><strong>Tier 2 (8/10)</strong></td><td>Jensen, Hock Tan, Fouquet, Kwak, Mehrotra</td><td>方向判断强但数字有卖方偏差</td><td>高估自家需求</td></tr>
+              <tr><td><strong>Tier 3 (7/10)</strong></td><td>Lisa Su, Chris Miller, Jim Keller, Rene Haas, Gary Dickerson</td><td>有洞察但信息不对称较弱</td><td>各有结构性偏见</td></tr>
+              <tr><td><strong>Tier 4 (6/10)</strong></td><td>Elon Musk, Lip-Bu Tan</td><td>方向对但时间线不可信(Musk 3/10)</td><td>极度乐观偏差</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>核心原则</strong>：Tier 1说的话直接用，Tier 2打折30%，Tier 3需要交叉验证，Tier 4只信方向不信数字。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase III -->
+    <section id="p3">
+      <div class="section-header">
+        <span class="phase-tag phase-diagnose">PHASE III &mdash; DIAGNOSE</span>
+        <h2>供应链权力地图</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#7 权力集中度分析：谁不可替代？</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>节点</th><th>龙头</th><th>市场份额</th><th>替代品</th><th>不可替代度</th></tr></thead>
+            <tbody>
+              <tr><td><span class="node-tag">光刻</span></td><td>ASML</td><td>EUV 100%</td><td>无</td><td><strong style="color:var(--red);">10/10</strong></td></tr>
+              <tr><td><span class="node-tag">代工</span></td><td>TSMC</td><td>先进制程90%+</td><td>Samsung(差), Intel(更差)</td><td><strong style="color:var(--red);">9/10</strong></td></tr>
+              <tr><td><span class="node-tag">HBM</span></td><td>SK hynix</td><td>50-62%</td><td>Samsung, Micron(追赶中)</td><td>7/10</td></tr>
+              <tr><td><span class="node-tag">GPU</span></td><td>NVIDIA</td><td>AI训练90%+</td><td>AMD, Google TPU, 自研</td><td>7/10 ↓</td></tr>
+              <tr><td><span class="node-tag">EDA</span></td><td>Synopsys+Cadence</td><td>双寡头80%+</td><td>开源EDA(弱)</td><td>8/10</td></tr>
+              <tr><td><span class="node-tag">IP</span></td><td>ARM</td><td>移动99%, 服务器30%+</td><td>RISC-V(增长中)</td><td>6/10 ↓</td></tr>
+              <tr><td><span class="node-tag">设备</span></td><td>AMAT</td><td>封装设备领先</td><td>LAM, TEL, KLA</td><td>5/10</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>核心发现</strong>：权力最集中的两个节点——ASML(100%EUV)和TSMC(90%+先进制程)——是<strong>整条链的"不可替代瓶颈"</strong>。所有其他节点都可以被替代（虽然替代很慢）。</p>
+        <p><strong>投资含义</strong>：瓶颈节点有最强定价权。ASML和TSMC是"不管AI怎么发展，只要芯片在做就赚"的位置。</p>
+      </details>
+
+      <details open>
+        <summary><strong>#8 权力正在往哪里移动？</strong></summary>
+        <div class="arc-item"><strong>权力上移：从芯片设计→基础设施</strong> &mdash; AI客户(Google/Meta/Amazon)开始自研芯片→绕过NVIDIA→但仍需要TSMC代工+ASML光刻。权力从"谁设计芯片"向"谁能制造芯片"转移。</div>
+        <div class="arc-item"><strong>权力扩散：从NVIDIA独占→多方竞争</strong> &mdash; AVGO帮客户自研+AMD竞争+Google TPU→NVIDIA份额从90%+向70-80%压缩(2027-2030)。但绝对需求增长可能抵消份额下降。</div>
+        <div class="arc-item"><strong>权力地理转移：台湾→美国/日本</strong> &mdash; CHIPS Act+Arizona fab+熊本JASM。Morris Chang说"futile but my dream"。成本高30-50%，但地缘政治驱动不可逆。</div>
+      </details>
+
+      <details>
+        <summary><strong>#9 封装是新瓶颈</strong></summary>
+        <p>供给侧16个代理人的共识：<strong>先进封装(CoWoS)是2025-2027的真正瓶颈</strong>，不是晶圆制造。</p>
+        <p>TSMC的CoWoS产能从35K片/月→130K片/月(2026底)仍不够。NVIDIA锁定70%+ CoWoS产能。Vera Rubin的4x光罩设计需要+33%封装产能。</p>
+        <p><strong>投资含义</strong>：封装设备供应商(AMAT的先进封装线、Kulicke & Soffa)是被低估的受益者。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase IV -->
+    <section id="p4">
+      <div class="section-header">
+        <span class="phase-tag phase-diagnose">PHASE IV &mdash; DIAGNOSE</span>
+        <h2>AI+半导体周期在什么位置？</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#10 周期位置判断</strong></summary>
+        <p>20个代理人的信号综合，当前周期位置：</p>
+        <div class="arc-item"><strong>需求侧：爆发期→高速增长期过渡</strong> &mdash; FY2025 NVIDIA +114% → FY2026 +65% → FY2027指引~+40%。增速在下降，但绝对值仍在加速（每季度+$10B）。不是"泡沫破裂"，是"增速正常化"。</div>
+        <div class="arc-item"><strong>供给侧：瓶颈期</strong> &mdash; TSMC CoWoS满载、SK hynix HBM供不应求、ASML交期18个月。瓶颈=定价权=利润率高。当瓶颈解除时=定价权下降=压缩开始。</div>
+        <div class="arc-item"><strong>竞争侧：从垄断→寡头过渡</strong> &mdash; NVIDIA从90%+AI训练份额向70-80%压缩。TPU/Trainium/自研芯片在蚕食inference。但training仍是NVIDIA主场。</div>
+        <p><strong>历史对标</strong>：</p>
+        <ul>
+          <li><strong>不是2000年电信</strong>——AI终端需求(token生成)已经是real revenue，电信时期"带宽需求"尚未变现</li>
+          <li><strong>更像1995-1999年互联网</strong>——需求真实但规模预测偏高2-3x，基础设施先行但应用层尚在发展</li>
+          <li><strong>关键区别</strong>：NVIDIA毛利率75% vs 思科当年50-60%——当前链条的盈利能力远超历史</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary><strong>#11 什么在加速 vs 什么在减速</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th></th><th>加速中 <span class="signal signal-bull">BULL</span></th><th>减速中 <span class="signal signal-bear">BEAR</span></th></tr></thead>
+            <tbody>
+              <tr><td><strong>需求</strong></td><td>推理需求100x(所有人确认)<br>Sovereign AI(每国建AI基建)<br>年度架构迭代</td><td>收入YoY增速正常化(114%→65%→40%)<br>CUDA独占性下降<br>客户忠诚度从"只能买"→"有替代"</td></tr>
+              <tr><td><strong>供给</strong></td><td>TSMC CoWoS 4x扩张<br>HBM从HBM3→HBM4<br>年度GPU迭代</td><td>良率挑战(N2, 先进封装)<br>Arizona成本+30-50%<br>设备交期18个月</td></tr>
+              <tr><td><strong>竞争</strong></td><td>自研芯片投入加速($20B+ Terafab)<br>Broadcom AI收入3x增长<br>PyTorch/Triton解耦CUDA</td><td>自研实际交付持续延迟<br>Samsung代工良率差距30pp<br>Intel代工失败</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details>
+        <summary><strong>#12 周期转折的先导信号</strong></summary>
+        <ol>
+          <li><strong>TSMC月度营收MoM下降连续2个月</strong> → 需求放缓最早信号（领先NVIDIA财报1-2月）</li>
+          <li><strong>任何大厂下调AI CapEx指引</strong> → LOI基础松动</li>
+          <li><strong>NVIDIA毛利率跌破72%</strong> → 定价权被竞争侵蚀</li>
+          <li><strong>HBM现货价格下跌</strong> → 存储供需反转</li>
+          <li><strong>ASML订单取消/延期</strong> → 扩产预期修正（最滞后但最终确认性的信号）</li>
+        </ol>
+      </details>
+    </section>
+
+
+    <!-- Phase V -->
+    <section id="p5">
+      <div class="section-header">
+        <span class="phase-tag phase-build">PHASE V &mdash; BUILD</span>
+        <h2>行业级交叉验证网络</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#13 从"单人追踪"到"网络验证"</strong></summary>
+        <p>Jensen元思考的核心发现：<strong>单一信号源有偏见，多源交叉验证才可信</strong>。</p>
+        <p>行业级推广：20个代理人覆盖8个节点（含需求侧买方）。每个节点的龙头观点可以被其他节点的数据<strong>独立验证</strong>。</p>
+        <blockquote>类比：20个基站的三角定位（含买卖双侧）比1个基站精确得多。</blockquote>
+      </details>
+
+      <details open>
+        <summary><strong>#14 最有价值的交叉验证对</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>验证对</th><th>验证逻辑</th><th>当前状态</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Jensen ↔ Wei</strong></td><td>Jensen说"需求爆发"→ Wei的CoWoS产能利用率验证</td><td>&#9989; 两者一致（CoWoS满载）</td></tr>
+              <tr><td><strong>Jensen ↔ Musk</strong></td><td>Jensen说"GPU不可替代"→ Musk继续大量买GPU验证短期</td><td>&#9989; 短期一致 &#10060; 长期矛盾(Terafab)</td></tr>
+              <tr><td><strong>Jensen ↔ Hock Tan</strong></td><td>Jensen说"自研不合理"→ Broadcom AI收入增速验证替代速度</td><td>&#10060; AVGO AI收入3x增长=替代在加速</td></tr>
+              <tr><td><strong>Wei ↔ Kwak</strong></td><td>TSMC CoWoS需求 ↔ SK hynix HBM供给 = 供需平衡检查</td><td>&#9989; 两者都说供不应求</td></tr>
+              <tr><td><strong>Chang ↔ Miller</strong></td><td>Chang"全球化已死"↔ Miller(Chip War)地缘分析</td><td>&#9989; 完全一致——最有权威的地缘判断</td></tr>
+              <tr><td><strong>Musk ↔ Keller</strong></td><td>Musk"自研可行"↔ Keller(ex-Tesla芯片设计)的实践经验</td><td>&#9888; Keller离开了Tesla→暗示自研比预期难</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details>
+        <summary><strong>#15 当所有人都同意时——最危险的信号</strong></summary>
+        <p>供给侧16人中<strong>没有一个公开bearish AI CapEx</strong>，需求侧4人(Altman/Nadella/Pichai/Hassabis)新增确认CapEx加速。所有人都在各自节点确认需求。</p>
+        <p><strong>这本身就是一个风险信号</strong>：</p>
+        <ul>
+          <li>2000年电信泡沫：所有CEO都说"带宽需求无限" → 实际需求只兑现30%</li>
+          <li>2007年房地产：所有银行家都说"房价只涨不跌" → 系统性风险被忽视</li>
+          <li>当前AI CapEx：所有半导体CEO都说"需求insatiable" → <strong>谁在做反面赌注？</strong></li>
+        </ul>
+        <p><strong>答案</strong>：几乎没有人。这是一个<strong>拥挤的多头</strong>。不意味着一定会崩——但意味着一旦出现裂缝（大厂CapEx下调/LOI取消），下跌速度会超预期。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase VI -->
+    <section id="p6">
+      <div class="section-header">
+        <span class="phase-tag phase-build">PHASE VI &mdash; BUILD</span>
+        <h2>投资链条</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#16 三条传导链（行业级推广）</strong></summary>
+        <div class="arc-item"><strong><span class="signal signal-bull">BULL</span> 链1：AI CapEx持续 → 全链受益</strong><br>需求验证 → NVDA(芯片) → TSM(代工) → ASML(光刻) → AMAT(设备) → SK hynix(HBM) → AVGO(网络)<br><em>信号传导：TSMC月度→NVIDIA季度→ASML年度。时间差=套利窗口</em></div>
+        <div class="arc-item"><strong><span class="signal signal-bear">BEAR</span> 链2：自研替代加速 → 设计层洗牌</strong><br>客户自研 → AVGO(设计收入↑) → AMD(竞争受益) → GOOGL(TPU) → ARM(IP ↔ RISC-V竞争)<br><em>这条链里NVIDIA是输家，但TSMC/ASML仍然赢（自研芯片也需要代工）</em></div>
+        <div class="arc-item"><strong><span class="signal signal-watch">WATCH</span> 链3：地缘风险 → 估值重定价</strong><br>台海紧张 → TSMC溢价↓ → 美国/日本代工商受益 → Intel(如果代工work) → Samsung<br><em>Morris Chang的"台湾是危险的地方"是最权威的地缘风险评估</em></div>
+      </details>
+
+      <details open>
+        <summary><strong>#17 "不管谁赢都赚"的行业级筛选</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>标的</th><th>Bull case赚</th><th>Bear case也赚</th><th>为什么</th></tr></thead>
+            <tbody>
+              <tr><td><strong>TSMC (TSM)</strong></td><td>NVIDIA需求↑=封装收入↑</td><td>自研芯片也需TSMC代工</td><td>所有芯片都经过TSMC</td></tr>
+              <tr><td><strong>ASML</strong></td><td>扩产=更多光刻设备</td><td>自研扩产也需光刻设备</td><td>100% EUV垄断</td></tr>
+              <tr><td><strong>AVGO</strong></td><td>AI网络基础设施↑</td><td>帮客户自研=设计收入↑</td><td>两条链的交叉点</td></tr>
+              <tr><td><strong>SK hynix</strong></td><td>HBM需求↑(所有GPU需要)</td><td>自研芯片也需HBM</td><td>HBM与GPU架构无关</td></tr>
+            </tbody>
+          </table>
+        </figure>
+        <p><strong>对比——只在一个场景赢的标的</strong>：</p>
+        <ul>
+          <li><strong>NVDA</strong>：只有AI CapEx持续+CUDA护城河不塌 才赢大</li>
+          <li><strong>AMD</strong>：只有NVIDIA份额被侵蚀 才有机会</li>
+          <li><strong>INTC</strong>：只有代工业务work 才能翻身（概率最低）</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary><strong>#18 信号传导时间差——行业级套利</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>信号</th><th>最先反映</th><th>最后反映</th><th>时间差</th></tr></thead>
+            <tbody>
+              <tr><td>AI需求变化</td><td>TSMC月度营收(每月10日)</td><td>ASML订单(滞后2-3季度)</td><td>6-9个月</td></tr>
+              <tr><td>自研芯片进展</td><td>Broadcom AI收入(季报)</td><td>NVIDIA份额变化(年度)</td><td>3-4个季度</td></tr>
+              <tr><td>HBM供需</td><td>SK hynix现货价(实时)</td><td>Micron产能建设(18月)</td><td>12-18个月</td></tr>
+              <tr><td>地缘风险</td><td>TSMC股价波动(即时)</td><td>Arizona产能替代(3-5年)</td><td>数年</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details>
+        <summary><strong>#19-#20 季度验证日历（行业级）</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>季度</th><th>关键事件</th><th>看什么</th><th>如果miss</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Q2 2026</strong></td><td>NVIDIA Q1 FY27($78B)<br>TSMC Q1(AI占比)<br>Alpamayo量产</td><td>$1T叙事第一验证<br>CoWoS利用率<br>物理AI现实检验</td><td>$1T崩塌→全链下杀</td></tr>
+              <tr><td><strong>Q3 2026</strong></td><td>Vera Rubin出货<br>OpenAI自研芯片<br>Groq 3 LPU</td><td>年度cadence验证<br>自研威胁速度<br>非GPU推理验证</td><td>cadence崩+自研成功=最坏场景</td></tr>
+              <tr><td><strong>Q4 2026</strong></td><td>$500B累计验证<br>Meta TPU份额<br>ASML订单</td><td>LOI转化率<br>大客户叛逃速度<br>扩产预期修正</td><td>LOI软+TPU>20%=结构性bear</td></tr>
+              <tr><td><strong>2027</strong></td><td>$1T终极验证<br>Rubin Ultra<br>Terafab进度</td><td>Jensen最大承诺<br>架构领先持续性<br>Musk自研可行性</td><td>$1T miss=AI CapEx估值重写</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+    </section>
+
+
+    <!-- Phase VII -->
+    <section id="p7">
+      <div class="section-header">
+        <span class="phase-tag phase-verify">PHASE VII &mdash; VERIFY</span>
+        <h2>风险地图</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#21 五个Kill Switches</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>#</th><th>Kill Switch</th><th>触发条件</th><th>影响范围</th><th>概率</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td><span class="signal signal-bear">BEAR</span> 大厂CapEx下调</td><td>Google/Meta/MSFT/Amazon任何一家</td><td>全链</td><td>15%/年</td></tr>
+              <tr><td>2</td><td><span class="signal signal-bear">BEAR</span> NVIDIA毛利率<72%</td><td>连续2季度</td><td>NVDA估值</td><td>25%/2年</td></tr>
+              <tr><td>3</td><td><span class="signal signal-bear">BEAR</span> 台海危机升级</td><td>军事行动/封锁/制裁</td><td>TSMC+全球芯片供应</td><td>5-10%/年</td></tr>
+              <tr><td>4</td><td><span class="signal signal-bear">BEAR</span> AI应用ROI不达预期</td><td>大厂开始削减AI项目</td><td>需求端坍塌</td><td>20%/3年</td></tr>
+              <tr><td>5</td><td><span class="signal signal-bear">BEAR</span> $1T LOI大面积取消</td><td>>$100B LOI取消</td><td>NVDA叙事崩塌</td><td>15%/2年</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details>
+        <summary><strong>#22 最容易被忽视的风险：AI应用ROI</strong></summary>
+        <p>原始16个代理人<strong>全部在谈供给侧</strong>（芯片/设备/封装）。新增4个需求侧代理人(Altman/Nadella/Pichai/Hassabis)提供了部分买方视角，但AI应用的ROI够不够支撑$700B+/年CapEx仍是核心未解问题。深度不对称：供给侧人均3+份专项素材 vs 需求侧刚建立。</p>
+        <p><strong>如果AI应用层的变现速度慢于基建投入速度</strong>：</p>
+        <ul>
+          <li>2026-2027：大厂继续投（沉没成本+竞争恐惧）</li>
+          <li>2028-2029：ROI审计→CapEx削减→需求悬崖</li>
+          <li>这就是2000年电信的翻版——基建投完发现"用户还没来"</li>
+        </ul>
+        <p><strong>概率</strong>：完全崩塌~15-20%。规模修正(实际需求=预测的50-70%)~40-50%。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase VIII -->
+    <section id="p8">
+      <div class="section-header">
+        <span class="phase-tag phase-verify">PHASE VIII &mdash; VERIFY</span>
+        <h2>地缘政治</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#23 Morris Chang + Chris Miller = 最权威的地缘分析</strong></summary>
+        <p>两人的共识：</p>
+        <div class="arc-item"><strong>"全球化已死"</strong> &mdash; Chang (TSMC创始人, 9/10可信) + Miller (Chip War作者, 7/10可信)。这不是修辞——CHIPS Act、出口管制、台海紧张是结构性变化。</div>
+        <div class="arc-item"><strong>"硅盾是脆弱的"</strong> &mdash; Chang: "依赖敌人的理性不是可靠的盾牌"。台湾的半导体垄断地位既是保护也是靶心。</div>
+        <div class="arc-item"><strong>"中国追赶在加速，但方向不同"</strong> &mdash; Jensen: 95%→50%份额下降。Chang: 先进制程差距5-6年在扩大。但成熟制程中国已经自给。</div>
+        <p><strong>投资含义</strong>：市场给TSMC的台湾风险溢价(3-5%)太低。Chang暗示应该是8-10%。这意味着TSMC长期估值有下行风险。</p>
+      </details>
+
+      <details>
+        <summary><strong>#24 CHIPS Act的真实影响</strong></summary>
+        <p>20个代理人中涉及CHIPS Act的观点汇总：</p>
+        <ul>
+          <li><strong>Wei</strong>：Arizona成本+30-50%，但"战略价值而非经济价值"</li>
+          <li><strong>Chang</strong>：从"futile"到"my dream"——接受了国安>经济</li>
+          <li><strong>Lip-Bu Tan</strong>：Intel CHIPS Act拿了$78.6B承诺，但代工仍然不work</li>
+          <li><strong>Dickerson</strong>：设备商受益——美国fab建设=更多AMAT订单</li>
+        </ul>
+        <p><strong>结论</strong>：CHIPS Act会建出产能，但成本高、效率低。真正受益的是<strong>设备商(AMAT/KLAC/LRCX)</strong>——他们不关心fab在哪里，只关心有没有人在建。</p>
+      </details>
+    </section>
+
+
+    <!-- Phase IX -->
+    <section id="p9">
+      <div class="section-header">
+        <span class="phase-tag phase-synth">PHASE IX &mdash; SYNTHESIS</span>
+        <h2>投资方法论</h2>
+      </div>
+
+      <details open>
+        <summary><strong>#25 七条核心原则</strong></summary>
+        <div class="arc-item"><strong>原则1：追踪链条，不追踪个股</strong> &mdash; AI+半导体是7节点供应链。投资逻辑是"权力在哪个节点"，不是"哪个CEO说了好话"。</div>
+        <div class="arc-item"><strong>原则2：信Tier 1的方向，折扣Tier 4的时间线</strong> &mdash; Wei/Chang说的直接用。Jensen打折30%。Musk只信方向(×2-3x时间线)。</div>
+        <div class="arc-item"><strong>原则3：共识=高置信度行动，分歧=投资机会</strong> &mdash; 20人确认需求真实（含买方验证）→做多链条。Jensen说CUDA不可替代但5源矛盾→这是alpha信号。</div>
+        <div class="arc-item"><strong>原则4：看行动不看言论</strong> &mdash; Jensen买Groq($20B) > 100次说"自研不合理"。Musk继续买GPU > 说"自建可替代"。收购/采购方向比财报电话诚实。</div>
+        <div class="arc-item"><strong>原则5：找"不管谁赢都赚"的位置</strong> &mdash; TSMC/ASML/AVGO/SK hynix在bull和bear case都受益。优先于NVDA(单面)。</div>
+        <div class="arc-item"><strong>原则6：用时间差套利</strong> &mdash; TSMC月度营收→NVIDIA季报→ASML年度订单。信号传导有6-9个月时间差。</div>
+        <div class="arc-item"><strong>原则7：所有人同意时加倍警惕</strong> &mdash; 供给侧16人无一bearish，需求侧4人新增确认 = 仍偏拥挤多头。不意味着错，但意味着一旦裂缝出现，下跌速度超预期。</div>
+      </details>
+
+      <details open>
+        <summary><strong>#26 持续监控体系</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>频率</th><th>数据源</th><th>看什么</th><th>信号</th></tr></thead>
+            <tbody>
+              <tr><td><strong>每月</strong></td><td>TSMC月度营收</td><td>AI需求领先指标</td><td>MoM↓连续2月=bearish</td></tr>
+              <tr><td><strong>每月</strong></td><td>HBM现货价格</td><td>存储供需平衡</td><td>价格下跌=供需反转</td></tr>
+              <tr><td><strong>每季度</strong></td><td>NVIDIA/TSMC/AVGO/AMD财报</td><td>全链健康度</td><td>任何环节miss=传导风险</td></tr>
+              <tr><td><strong>每季度</strong></td><td>大厂CapEx指引</td><td>需求端意愿</td><td>下调=LOI基础松动</td></tr>
+              <tr><td><strong>事件驱动</strong></td><td>产品交付(Vera Rubin/Alpamayo/AI5)</td><td>技术路线验证</td><td>延迟>1Q=叙事受损</td></tr>
+              <tr><td><strong>事件驱动</strong></td><td>地缘事件(台海/出口管制)</td><td>供应链风险</td><td>升级=TSMC溢价重定价</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <div class="question-box">
+        <h4>#27-#28 最终问题：我们最可能错在哪里？</h4>
+        <p style="text-align:left;"><strong>最可能错的方向1：低估需求持续性</strong><br>如果AI应用层变现速度超预期（GPT-5/Claude 5真的替代了大量白领工作），$1T不是高估而是低估。概率~25%。</p>
+        <p style="text-align:left;"><strong>最可能错的方向2：高估需求规模</strong><br>如果AI应用ROI不达预期，$700B CapEx可能只兑现50-70%。整条链估值修正20-30%。概率~40%。</p>
+        <p style="text-align:left;"><strong>最可能错的方向3：忽视地缘黑天鹅</strong><br>台海是所有模型都不愿定价的尾部风险。如果发生，不是修正而是重构。概率~5-10%/年。</p>
+        <p style="text-align:left;"><strong>最诚实的答案</strong>：方向大概率对（AI基建是真实的），规模可能偏高（×0.5-0.7），时间线可能偏早（×1.5-2）。<strong>持有链条核心（TSM/ASML/AVGO），用TSMC月度数据做动态校准。</strong></p>
+      </div>
+    </section>
+
+
+    <!-- Phase X -->
+    <section id="p10">
+      <div class="section-header">
+        <span class="phase-tag phase-diagnose">PHASE X &mdash; BLIND SPOT</span>
+        <h2>Missing Voice &mdash; 中国半导体认知盲区 The China Cognition Gap</h2>
+      </div>
+
+      <blockquote>20个西方代理人(现已扩展至30个含中国)的共识可能系统性低估中国半导体进展。这不是因为西方代理人不诚实，而是因为他们的利益结构决定了视角：卖家说"管制有效"比说"中国已经有替代了"更符合其商业利益。</blockquote>
+
+      <details open>
+        <summary><strong>A. 如果有中国代理人，哪些判断会改变？</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>当前判断</th><th>当前置信度</th><th>中国视角可能的修正</th><th>修正后估计</th></tr></thead>
+            <tbody>
+              <tr><td><strong>CUDA护城河5年+</strong></td><td>35%</td><td>Ascend+DeepSeek证明可绕过 &rarr; 可能更低</td><td><span class="signal signal-bear">20-30%</span></td></tr>
+              <tr><td><strong>AI CapEx泡沫</strong></td><td>15-20%</td><td>中国平替降低总成本 &rarr; 可能更高</td><td><span class="signal signal-bear">20-30%</span></td></tr>
+              <tr><td><strong>NVIDIA 2-3年主导</strong></td><td>70%</td><td>中国市场已永久丧失 &rarr; 主导范围缩小</td><td><span class="signal signal-watch">60-65%</span>(非中国市场)</td></tr>
+              <tr><td><strong>HBM supercycle到2027</strong></td><td>80%</td><td>CXMT/YMTC不参与HBM &rarr; 不影响</td><td><span class="signal signal-bull">80%</span>(不变)</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+
+      <details open>
+        <summary><strong>B. 数据不对称风险 &mdash; "我们在最需要精确判断的维度上信息最少"</strong></summary>
+        <h3>三层不透明 (3-Layer Opacity)</h3>
+        <div class="arc-item"><strong>Company层</strong> &mdash; SMIC良率、华为Ascend实际性能等核心数据不公开。外部只能通过拆机报告和间接推断。</div>
+        <div class="arc-item"><strong>Policy层</strong> &mdash; 大基金实际拨付节奏、补贴条件、产能目标等关键政策信息高度不透明。</div>
+        <div class="arc-item"><strong>Narrative层</strong> &mdash; 双方都在spin：中国媒体夸大突破，西方媒体夸大管制效果。真实进度在两者之间。</div>
+        <div class="priority-box" style="margin-top:1rem;">
+          <h2>&#9888; 操作建议</h2>
+          <p>所有涉及中国半导体的概率判断，使用 <strong>&plusmn;15%</strong> 置信区间。例如"SMIC 7nm良率50%"应理解为"35%-65%区间内"。</p>
+        </div>
+      </details>
+
+      <details open>
+        <summary><strong>C. 认知盲区的结构性原因</strong></summary>
+        <div class="arc-item"><strong>1. 语言障碍</strong> &mdash; 中文财报、采访、政策文件的可及性。大量一手信息存在于微信公众号、财新等西方分析师不常访问的渠道。</div>
+        <div class="arc-item"><strong>2. 利益冲突</strong> &mdash; 西方分析师的客户是西方投资者。"管制有效→NVIDIA安全→继续买"比"中国有替代→NVIDIA TAM缩小"更受客户欢迎。</div>
+        <div class="arc-item"><strong>3. 信息管控</strong> &mdash; 中国政府对半导体信息的分类管理。SMIC不再公开先进制程细节，华为不公布Ascend具体出货量。</div>
+        <div class="arc-item"><strong>4. 时间延迟</strong> &mdash; 中国半导体突破通常在公开报道前6-12个月就已发生。等西方媒体报道时，已是旧闻。</div>
+      </details>
+
+      <div class="question-box">
+        <h4>&#128270; 关键问题</h4>
+        <p style="text-align:left;"><strong>如果中国半导体自给率在2027年达到50%而不是当前估计的30-35%，我们的整个投资框架需要如何调整？</strong></p>
+        <p style="text-align:left;">这意味着：NVIDIA的中国收入永久归零（已发生），HBM需求被国产DRAM部分替代，TSMC先进制程溢价下降（竞争者出现），设备商面临出口管制升级风险。唯一不变的：ASML的EUV垄断（但DUV多重曝光可能侵蚀部分需求）。</p>
+      </div>
+    </section>
+
+
+    <footer class="page-footer">
+      <p>AI+Semiconductor Industry Metacognition &nbsp;|&nbsp; 28 Rounds &nbsp;|&nbsp; 16 Agents &times; 7 Nodes &nbsp;|&nbsp; 2026-03-21</p>
+      <p><a href="semiconductor_hub.html">Semiconductor Hub</a> &nbsp;|&nbsp; <a href="cognitive_agents_2026-03-20/01_jensen_huang_metacognition.html">Jensen元思考</a> &nbsp;|&nbsp; <a href="cognitive_agents_2026-03-20/12_elon_musk_metacognition.html">Musk元思考</a></p>
+    </footer>
+  </main>
+</div>
+<script>
+(function() {
+  const h = document.getElementById('hamburgerBtn'), s = document.getElementById('sidebar'), o = document.getElementById('sidebarOverlay');
+  h.addEventListener('click', () => { s.classList.toggle('open'); o.classList.toggle('open'); });
+  o.addEventListener('click', () => { s.classList.remove('open'); o.classList.remove('open'); });
+  s.querySelectorAll('a').forEach(l => l.addEventListener('click', () => { if (window.innerWidth <= 900) { s.classList.remove('open'); o.classList.remove('open'); } }));
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paolo Ardoino — 素材策展地图 V4</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  .priority-box { border:1px solid rgba(248,168,72,0.3); border-left:3px solid var(--accent); border-radius:var(--radius-sm); padding:1.25rem 1.5rem; margin-bottom:2rem; background:var(--bg-surface); }
+  .priority-box h2 { color:var(--accent); margin-top:0; font-size:1.1rem; font-weight:590; }
+  .priority-box ol { margin-bottom:0; padding-left:1.2rem; }
+  .priority-box li { margin-bottom:0.6rem; line-height:1.5; }
+  .time-badge { display:inline-block; padding:0.1rem 0.5rem; border-radius:10px; font-size:0.7rem; font-weight:590; margin-right:0.3rem; background:var(--accent); color:var(--bg-base); }
+  .anno { position:absolute; left:1rem; right:1rem; }
+  .anno.meta-note { padding:0.6rem 0.75rem; border-left:2px solid var(--accent); border-radius:0 6px 6px 0; background:rgba(248,168,72,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.meta-note:hover { box-shadow:0 0 0 1px var(--accent); }
+  .anno.know-note { padding:0.6rem 0.75rem; border-left:2px solid var(--knowledge); border-radius:0 6px 6px 0; background:rgba(91,155,213,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.know-note:hover { box-shadow:0 0 0 1px var(--knowledge); }
+  .anno .note-label { display:inline-block; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--bg-base); background:var(--accent); padding:0.1rem 0.4rem; border-radius:3px; margin-bottom:0.3rem; }
+  .anno .note-label.know { background:var(--knowledge); color:white; }
+  .anno .mn-head { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
+  .anno .mn-title { flex:1; font-weight:510; font-size:0.75rem; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .anno .mn-fold { font-size:0.55rem; color:var(--text-quaternary); transition:transform 0.2s; margin-left:auto; }
+  .anno.open .mn-fold { transform:rotate(180deg); }
+  .anno .mn-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+  .anno.open .mn-body { max-height:2000px; }
+  .anno .mn-body p { font-size:0.78rem; margin-bottom:0.3rem; color:var(--text-secondary); }
+  .anno.flash { animation:noteFlash 1.5s ease; }
+  @keyframes noteFlash { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--accent);} }
+  .anno.know-note.flash { animation:noteFlashBlue 1.5s ease; }
+  @keyframes noteFlashBlue { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--knowledge);} }
+  mark.hl-know { background:rgba(91,155,213,0.12); border-bottom:1.5px solid var(--knowledge); padding:0 2px; border-radius:2px; color:inherit; cursor:pointer; transition:background 0.15s; }
+  mark.hl-know:hover { background:rgba(91,155,213,0.28); }
+  .nref { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; font-size:0.48rem; font-weight:700; cursor:pointer; margin-left:1px; vertical-align:super; transition:transform 0.15s; text-decoration:none; background:var(--knowledge); color:white; }
+  .nref:hover { transform:scale(1.25); box-shadow:0 0 6px rgba(91,155,213,0.4); }
+  .top-controls { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; padding:0.35rem 0.7rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); font-size:0.72rem; flex-wrap:wrap; }
+  .top-controls .tc-label { font-weight:590; color:var(--knowledge); }
+  .top-controls button { padding:0.15rem 0.45rem; border-radius:4px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-tertiary); cursor:pointer; font-size:0.68rem; font-family:inherit; transition:all 0.15s; }
+  .top-controls button:hover { border-color:var(--knowledge); color:var(--text-primary); }
+  .top-controls button.active { background:var(--knowledge-dim); color:var(--knowledge); border-color:rgba(91,155,213,0.3); }
+  .top-controls .tc-sep { color:var(--border-default); margin:0 0.15rem; }
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .notes-sidebar { position:relative; width:320px; min-width:320px; padding:1.25rem 1rem; border-left:1px solid var(--border-subtle); background:var(--bg-elevated); }
+  .notes-sidebar-header { position:sticky; top:0; z-index:60; background:var(--bg-elevated); padding-bottom:0.5rem; border-bottom:1px solid var(--border-subtle); margin-bottom:0.75rem; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  .notes-toggle-btn { position:fixed; right:1rem; bottom:1.5rem; z-index:200; width:44px; height:44px; border-radius:50%; border:1px solid var(--border-default); background:var(--bg-surface); color:var(--text-secondary); cursor:pointer; font-size:1.1rem; display:none; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.4); }
+  .notes-close-btn { float:right; background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:1.1rem; padding:0; display:none; }
+  @media (max-width:1200px) { .notes-close-btn { display:block; } .notes-sidebar { position:fixed; right:0; top:0; height:100vh; overflow-y:auto; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.4); z-index:150; } .notes-sidebar.ns-closed { transform:translateX(100%); box-shadow:none; } .notes-toggle-btn { display:flex; } }
+  .notes-overlay-right { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:140; }
+  .notes-overlay-right.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  @media (min-width:1600px) { .main-content { max-width:1000px; } .notes-sidebar { width:360px; min-width:360px; } }
+  .rel-card { border:1px solid var(--border-subtle); border-radius:var(--radius-md); background:var(--bg-elevated); margin-bottom:0.75rem; }
+  .rel-card summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  .rel-card[open] summary { color:var(--accent); }
+  .rel-card .rel-body { padding:0 1rem 1rem; font-size:0.82rem; color:var(--text-secondary); line-height:1.6; }
+  .arc-item { border-left:3px solid var(--accent); padding:0.6rem 1rem; margin-bottom:0.75rem; background:rgba(66,165,245,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+  .arc-item strong { color:var(--text-primary); }
+  .question-box { border:2px solid var(--knowledge); background:rgba(91,155,213,0.05); border-radius:var(--radius-md); padding:1.5rem; text-align:center; margin:2rem 0; }
+  .question-box blockquote { border:none; margin:0; padding:0; }
+  .question-box p { font-size:1rem; font-weight:510; color:var(--text-primary); }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; margin-bottom:1rem; }
+  th { text-transform:uppercase; font-size:0.72rem; font-weight:510; color:var(--text-quaternary); letter-spacing:0.04em; text-align:left; padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-default); }
+  td { padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-subtle); vertical-align:top; color:var(--text-secondary); }
+  tr:hover td { background:var(--bg-elevated); }
+  .url-col { max-width:200px; word-break:break-all; }
+  .zh { display:block; font-size:0.85em; color:var(--text-tertiary); margin-top:0.15em; }
+  .zh-inline { font-size:0.85em; color:var(--text-tertiary); }
+  details { border:1px solid var(--border-subtle); background:var(--bg-elevated); border-radius:var(--radius-sm); padding:0; margin-bottom:0.75rem; }
+  details summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  details[open] summary { color:var(--accent); }
+  details > div, details > p { padding:0 1rem 1rem; font-size:0.82rem; line-height:1.6; color:var(--text-secondary); }
+  body.embedded .sidebar, body.embedded .notes-sidebar, body.embedded .hamburger-btn, body.embedded .notes-toggle-btn { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+  .rating { color:var(--accent); letter-spacing:-1px; }
+  .rating-o { color:var(--knowledge); letter-spacing:-1px; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ========== LEFT SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Paolo Ardoino<br>素材策展地图 V4</div>
+
+    <h4>Contents</h4>
+    <nav>
+      <ul>
+        <li><a href="#priority"><span class="toc-num">&#9733;</span>如果只有2小时</a></li>
+        <li><a href="#analysts"><span class="toc-num">1</span>最佳分析师</a></li>
+        <li><a href="#longform"><span class="toc-num">2</span>必读长文/书籍</a></li>
+        <li><a href="#podcasts"><span class="toc-num">3</span>播客与视频</a></li>
+        <li><a href="#primary"><span class="toc-num">4</span>一手资料</a></li>
+        <li><a href="#relationships"><span class="toc-num">5</span>关键关系网</a></li>
+        <li><a href="#narratives"><span class="toc-num">6</span>叙事弧</a></li>
+        <li><a href="#gaps"><span class="toc-num">7</span>信息空白</a></li>
+        <li><a href="#quality"><span class="toc-num">8</span>质量评估</a></li>
+      </ul>
+    </nav>
+
+    <h4>Related</h4>
+    <nav>
+      <ul>
+        <li><a href="09_paolo_ardoino.html">Paolo Ardoino Profile</a></li>
+        <li><a href="09_paolo_ardoino_metacognition.html">Metacognition</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+
+    <div class="top-controls">
+      <span class="tc-label">&#128218; 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <header class="page-header">
+      <h1>Paolo Ardoino — 素材策展地图 V4</h1>
+      <p class="subtitle">Research Date: 2026-03-22 &nbsp;|&nbsp; 23 Sources &middot; 8 Categories &middot; Tier 1-4 Priority<br>
+      <span class="zh-inline">Tether CEO &amp; Bitfinex CTO · 稳定币研究核心人物</span></p>
+      <div class="badge-row">
+        <span class="badge" style="background:var(--accent-dim);color:var(--accent);">Tether</span>
+        <span class="badge" style="background:var(--knowledge-dim);color:var(--knowledge);">Stablecoin</span>
+        <span class="badge">Controversial</span>
+      </div>
+    </header>
+
+    <!-- ★ Priority Box -->
+    <div class="priority-box" id="priority">
+      <h2>&#9200; 如果只有2小时 — 推荐阅读路径</h2>
+      <ol>
+        <li><span class="time-badge">45min</span><strong>Protos "The Tether Papers"</strong> — 4万字深度调查，揭露储备金真实构成<span class="zh-inline">核心必读调查报道</span></li>
+        <li><span class="time-badge">30min</span><strong>Matt Levine "The Tether Ponzi Scheme"</strong> — 传统金融视角解析Tether商业模式<span class="zh-inline">Bloomberg影响最大的分析</span></li>
+        <li><span class="time-badge">15min</span><strong>NYAG/CFTC Settlement文件</strong> — 官方认定的违规事实，$41M+$18.5M罚款依据<span class="zh-inline">监管定性的法律文本</span></li>
+        <li><span class="time-badge">20min</span><strong>Paolo Ardoino Twitter/X</strong> — 实时观点、市场回应、政策表态<span class="zh-inline">一手社交媒体动态</span></li>
+        <li><span class="time-badge">10min</span><strong>Tether透明度报告</strong> — 季度储备金构成、流通量数据<span class="zh-inline">官方数据源</span></li>
+      </ol>
+    </div>
+
+    <!-- §1 最佳分析师 -->
+    <section id="analysts">
+      <div class="section-header">
+        <h2>1. 最佳分析师与独立研究<span class="zh">Best Analysts &amp; Independent Research</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>来源</th>
+            <th>类型</th>
+            <th>重要性</th>
+            <th>简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Protos</strong></td>
+            <td>独立调查媒体</td>
+            <td><span class="rating">★★★★★</span></td>
+            <td>最深入的Tether调查报道，揭露储备金运作、银行关系等核心问题<span class="zh">《Tether Papers》系列必读</span></td>
+          </tr>
+          <tr>
+            <td><strong>Bitfinex'ed</strong></td>
+            <td>独立分析师</td>
+            <td><span class="rating">★★★★★</span></td>
+            <td>最持久的Tether批评者，追踪<span class="hl-know" data-note="kn1">Bitcoin价格操纵指控</span><a href="#" class="nref" data-note="kn1">1</a>多年</td>
+          </tr>
+          <tr>
+            <td><strong>Bloomberg Crypto</strong></td>
+            <td>主流财经媒体</td>
+            <td><span class="rating">★★★★★</span></td>
+            <td>Matt Levine深度报道Tether商业模式，影响巨大<span class="zh">2021年系列报道</span></td>
+          </tr>
+          <tr>
+            <td><strong>Molly White</strong></td>
+            <td>独立研究者</td>
+            <td><span class="rating">★★★★☆</span></td>
+            <td>系统性记录加密行业事件，Tether相关条目有详细时间线<span class="zh">Web3 is Going Great</span></td>
+          </tr>
+          <tr>
+            <td><strong>Chainalysis</strong></td>
+            <td>链上数据分析</td>
+            <td><span class="rating">★★★★☆</span></td>
+            <td>机构级USDT流向分析，新兴市场采用数据<span class="zh">链上情报</span></td>
+          </tr>
+          <tr>
+            <td><strong>Kaiko</strong></td>
+            <td>市场数据研究</td>
+            <td><span class="rating">★★★★☆</span></td>
+            <td>稳定币市场份额、流动性深度专业数据<span class="zh">市场结构分析</span></td>
+          </tr>
+          <tr>
+            <td><strong>吴说区块链</strong></td>
+            <td>中文加密媒体</td>
+            <td><span class="rating-o">★★★★★</span></td>
+            <td>中文世界最及时的Tether储备、监管动态报道<span class="zh">独家采访渠道</span></td>
+          </tr>
+          <tr>
+            <td><strong>PANews</strong></td>
+            <td>中文加密媒体</td>
+            <td><span class="rating-o">★★★★☆</span></td>
+            <td>稳定币深度分析，亚洲市场USDT采用数据<span class="zh">华语社区</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §2 必读长文/书籍 -->
+    <section id="longform">
+      <div class="section-header">
+        <h2>2. 必读长文与书籍<span class="zh">Must-Read Long-Form &amp; Books</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>重要性</th>
+            <th>简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>"The Tether Papers"</strong></td>
+            <td>调查报道系列</td>
+            <td><span class="rating">★★★★★</span></td>
+            <td>4万字深度调查，揭露<span class="hl-know" data-note="kn2">储备金真实构成</span><a href="#" class="nref" data-note="kn2">2</a>、CFO角色、巴拿马银行关系</td>
+          </tr>
+          <tr>
+            <td><strong>"The Tether Ponzi Scheme"</strong></td>
+            <td>Bloomberg长文</td>
+            <td><span class="rating">★★★★★</span></td>
+            <td>Matt Levine从传统金融视角解析：为什么它"像"庞氏但可能不是<span class="zh">2021年</span></td>
+          </tr>
+          <tr>
+            <td><strong>CFTC v. Tether Settlement</strong></td>
+            <td>监管文件</td>
+            <td><span class="rating">★★★★★</span></td>
+            <td>官方指控文件，<span class="hl-know" data-note="kn3">$41M罚款</span><a href="#" class="nref" data-note="kn3">3</a>依据，储备金"并非始终100%"的认定</td>
+          </tr>
+          <tr>
+            <td><strong>NYAG Settlement</strong></td>
+            <td>监管文件</td>
+            <td><span class="rating">★★★★★</span></td>
+            <td>$18.5M罚款，禁止纽约运营，<span class="hl-know" data-note="kn4">储备金挪用细节</span><a href="#" class="nref" data-note="kn4">4</a></td>
+          </tr>
+          <tr>
+            <td><strong>"Tether: The Untold Story"</strong></td>
+            <td>调查报道</td>
+            <td><span class="rating">★★★★☆</span></td>
+            <td>早期Tether历史，Bitfinex关系，Crypto Capital Corp损失事件<span class="zh">The Block, 2020</span></td>
+          </tr>
+          <tr>
+            <td><strong>Tether Whitepaper v1/v2</strong></td>
+            <td>官方文档</td>
+            <td><span class="rating">★★★★☆</span></td>
+            <td>对比2014原版与后期修改版本，理解"100%储备"定义的演变<span class="zh">历史溯源</span></td>
+          </tr>
+          <tr>
+            <td><strong>《Tether：加密世界的美元印钞机》</strong></td>
+            <td>中文深度分析</td>
+            <td><span class="rating-o">★★★★★</span></td>
+            <td>中文最完整的Tether商业模式拆解，<span class="hl-know" data-note="kn5">美债投资收益</span><a href="#" class="nref" data-note="kn5">5</a>计算</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §3 播客与视频 -->
+    <section id="podcasts">
+      <div class="section-header">
+        <h2>3. 播客与视频<span class="zh">Podcasts &amp; Video</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>平台</th>
+            <th>重要性</th>
+            <th>简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Paolo Ardoino - What Bitcoin Did</strong></td>
+            <td>播客采访</td>
+            <td><span class="rating">★★★★★</span></td>
+            <td>Peter McCormack长访谈，Ardoino直接回应<span class="hl-know" data-note="kn6">储备金、审计、监管</span><a href="#" class="nref" data-note="kn6">6</a>问题</td>
+          </tr>
+          <tr>
+            <td><strong>Paolo Ardoino - Unchained</strong></td>
+            <td>播客采访</td>
+            <td><span class="rating">★★★★★</span></td>
+            <td>Laura Shin最尖锐提问，关于MiCA合规、竞争稳定币的防御性回应<span class="zh">多期</span></td>
+          </tr>
+          <tr>
+            <td><strong>Tether CTO→CEO 过渡期采访</strong></td>
+            <td>视频</td>
+            <td><span class="rating">★★★★☆</span></td>
+            <td>Bloomberg, CNBC Crypto，职位变动后的战略阐述<span class="zh">2023年</span></td>
+          </tr>
+          <tr>
+            <td><strong>Coffeezilla - Tether Investigation</strong></td>
+            <td>YouTube</td>
+            <td><span class="rating">★★★★☆</span></td>
+            <td>大众向调查，适合理解<span class="hl-know" data-note="kn7">储备金争议</span><a href="#" class="nref" data-note="kn7">7</a>的核心问题</td>
+          </tr>
+          <tr>
+            <td><strong>Bankless - Stablecoin Wars</strong></td>
+            <td>播客</td>
+            <td><span class="rating">★★★★☆</span></td>
+            <td>加密原生视角，Tether vs USDC竞争分析<span class="zh">多期</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §4 一手资料 -->
+    <section id="primary">
+      <div class="section-header">
+        <h2>4. 一手资料<span class="zh">Primary Sources</span></h2>
+      </div>
+      
+      <details>
+        <summary>&#128196; 官方渠道 Official Channels</summary>
+        <div>
+          <table>
+            <thead>
+              <tr><th>来源</th><th>URL</th><th>价值</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Tether.to 官网</td>
+                <td class="url-col"><a href="https://tether.to" target="_blank">tether.to</a></td>
+                <td>透明度报告、储备金明细、新闻稿</td>
+              </tr>
+              <tr>
+                <td>Tether Transparency</td>
+                <td class="url-col"><a href="https://tether.to/en/transparency/" target="_blank">透明度页面</a></td>
+                <td>实时储备金构成、流通量、链分布</td>
+              </tr>
+              <tr>
+                <td>Paolo Ardoino Twitter/X</td>
+                <td class="url-col"><a href="https://x.com/paoloardoino" target="_blank">@paoloardoino</a></td>
+                <td>实时观点、市场回应、政策表态<span class="zh">高度防御性叙事</span></td>
+              </tr>
+              <tr>
+                <td>Tether Official Twitter</td>
+                <td class="url-col"><a href="https://x.com/Tether_to" target="_blank">@Tether_to</a></td>
+                <td>公司声明、透明度报告发布</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details>
+        <summary>&#128220; 监管文件 Regulatory Documents</summary>
+        <div>
+          <table>
+            <thead>
+              <tr><th>文件</th><th>机构</th><th>关键内容</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>CFTC Settlement (2021)</td>
+                <td>CFTC</td>
+                <td>$41M罚款，"关于储备金的虚假陈述"<a href="https://www.cftc.gov/pressroom/pressreleases/2021/8450-21" target="_blank">链接</a></td>
+              </tr>
+              <tr>
+                <td>NYAG Settlement (2021)</td>
+                <td>纽约州检察总长</td>
+                <td>$18.5M罚款，禁止NY运营，储备金挪用细节<a href="https://ag.ny.gov/press-release/2021/attorney-general-james-ends-virtual-currency-trading-platform-bitfinex" target="_blank">链接</a></td>
+              </tr>
+              <tr>
+                <td>MiCA Regulatory Filings</td>
+                <td>ESMA/欧盟监管</td>
+                <td>Tether在欧盟的合规状态，2024-2025关键变量<span class="zh">需持续监测</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details>
+        <summary>&#127973; 商业关系 Business Relations</summary>
+        <div>
+          <table>
+            <thead>
+              <tr><th>实体</th><th>关系</th><th>信息价值</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Cantor Fitzgerald</td>
+                <td>Tether美债托管方</td>
+                <td>CFO Howard Lutnick的公开评论验证Tether美债持仓规模<span class="hl-know" data-note="kn8">外部来源</span><a href="#" class="nref" data-note="kn8">8</a></td>
+              </tr>
+              <tr>
+                <td>Deltec Bank</td>
+                <td>主要银行伙伴</td>
+                <td>Tether银行关系的间接确认<span class="zh">间接验证</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+
+    <!-- §5 关键关系网 -->
+    <section id="relationships">
+      <div class="section-header">
+        <h2>5. 关键关系网<span class="zh">Key Relationships</span></h2>
+      </div>
+
+      <details class="rel-card">
+        <summary>&#128101; 核心人物 Core Figures</summary>
+        <div class="rel-body">
+          <table>
+            <thead>
+              <tr><th>人物</th><th>角色</th><th>信息价值</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Giancarlo Devasini</strong></td>
+                <td>Tether CFO/共同创始人</td>
+                <td>实际掌控储备金投资，比Ardoino更核心但极低调<span class="zh">理解Tether投资决策的关键</span></td>
+              </tr>
+              <tr>
+                <td><strong>Jean-Louis van der Velde</strong></td>
+                <td>前CEO/Bitfinex CEO</td>
+                <td>2023年退居顾问，Ardoino上位背景<span class="zh">历史决策知情者</span></td>
+              </tr>
+              <tr>
+                <td><strong>Howard Lutnick</strong></td>
+                <td>Cantor Fitzgerald CEO</td>
+                <td>Tether美债托管方负责人，国会证词提及Tether<span class="zh">外部验证源</span></td>
+              </tr>
+              <tr>
+                <td><strong>Justin Sun (孙宇晨)</strong></td>
+                <td>TRON创始人</td>
+                <td>USDT-TRON生态的<span class="hl-know" data-note="kn9">共生关系</span><a href="#" class="nref" data-note="kn9">9</a>，互相依赖</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>&#128125; 竞争对手 Competitors</summary>
+        <div class="rel-body">
+          <table>
+            <thead>
+              <tr><th>人物/实体</th><th>角色</th><th>信息价值</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Jeremy Allaire</strong></td>
+                <td>Circle/USDC CEO</td>
+                <td>主要竞争对手，公开批评Tether储备透明度<span class="zh">对比视角</span></td>
+              </tr>
+              <tr>
+                <td><strong>Sam Bankman-Fried</strong></td>
+                <td>FTX前CEO (狱中)</td>
+                <td>历史关系：FTX是USDT大用户，Alameda与Tether的interdependency<span class="zh">FTX崩溃压力测试</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>&#128220; 监管人物 Regulators</summary>
+        <div class="rel-body">
+          <table>
+            <thead>
+              <tr><th>人物</th><th>角色</th><th>信息价值</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Gary Gensler</strong></td>
+                <td>SEC主席</td>
+                <td>稳定币监管立场，Tether的<span class="hl-know" data-note="kn10">潜在执法风险</span><a href="#" class="nref" data-note="kn10">10</a></td>
+              </tr>
+              <tr>
+                <td><strong>Elizabeth Warren</strong></td>
+                <td>美国参议员</td>
+                <td>稳定币批评者，Tether特定质疑<span class="zh">立法压力指标</span></td>
+              </tr>
+              <tr>
+                <td><strong>Cynthia Lummis</strong></td>
+                <td>美国参议员 (支持加密)</td>
+                <td>稳定币立法推动者，可能影响Tether合规路径<span class="zh">潜在框架塑造者</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+
+    <!-- §6 叙事弧 -->
+    <section id="narratives">
+      <div class="section-header">
+        <h2>6. 关键叙事弧<span class="zh">Key Narrative Arcs</span></h2>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧 #1: 从"无限弹性"到"100%储备"的信誉建构</strong>
+        <p>Tether经历了从早期"bank-like"弹性供应模型到严格100%储备承诺的演变。关键转折点：2019年引入USDT 3.0协议、2021年CFTC/NYAG和解后的透明度升级。这一叙事面临的核心挑战是<span class="hl-know" data-note="kn11">Devasini的非透明投资决策</span><a href="#" class="nref" data-note="kn11">11</a>。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧 #2: 从"银行弃儿"到"主权级合作伙伴"</strong>
+        <p>Tether从被传统银行拒绝（多名银行合作伙伴突然终止关系），到与Deltec Bank建立关系，再到通过Cantor Fitzgerald托管美国国债。这一转变支撑了其"合规化"叙事，但也引发了关于<span class="hl-know" data-note="kn12">金融体系风险敞口</span><a href="#" class="nref" data-note="kn12">12</a>的新问题。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧 #3: 从"新兴市场支付工具"到"全球金融基础设施"</strong>
+        <p>USDT从加密交易结算工具，演变为新兴市场（土耳其、阿根廷、越南等）的通胀对冲和跨境支付手段。Chainalysis数据显示TRON链USDT主导地位。Ardoino正推动<span class="hl-know" data-note="kn13">AI与新兴市场扩展</span><a href="#" class="nref" data-note="kn13">13</a>作为新叙事。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧 #4: 从"Bitfinex附属"到"独立帝国"</strong>
+        <p>Ardoino从Bitfinex CTO升任Tether CEO，象征着Tether从Bitfinex生态中独立出来。但两者共享管理团队、共享法律风险的问题仍然存在。2025年Tether利润超<span class="hl-know" data-note="kn14">$100亿</span><a href="#" class="nref" data-note="kn14">14</a>，已远超Bitfinex规模。</p>
+      </div>
+
+      <div class="question-box">
+        <blockquote>
+          <p>&#63; 核心研究问题：Tether的真实风险是"储备不足"还是"系统性依赖"？</p>
+        </blockquote>
+        <p style="font-size:0.8rem; margin-top:0.75rem; color:var(--text-secondary);">
+          如果是储备不足 → 关注attestation质量、赎回数据、监管压力<br>
+          如果是系统性依赖 → 关注TRON生态、孙宇晨风险、竞争格局变化
+        </p>
+      </div>
+    </section>
+
+    <!-- §7 信息空白 -->
+    <section id="gaps">
+      <div class="section-header">
+        <h2>7. 信息空白 — What Doesn't Exist<span class="zh">Information Gaps</span></h2>
+      </div>
+
+      <details class="rel-card">
+        <summary>&#9888; 关键信息空白 Critical Gaps</summary>
+        <div class="rel-body">
+          <table>
+            <thead>
+              <tr><th>空白领域</th><th>现状</th><th>监测方向</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>完整独立审计</strong></td>
+                <td>仅有BDO Italia attestation，无四大审计</td>
+                <td>若宣布四大审计，将是重大信号<span class="zh">需持续跟踪</span></td>
+              </tr>
+              <tr>
+                <td><strong>Devasini投资决策</strong></td>
+                <td>完全非公开，无采访</td>
+                <td>透明度报告中<span class="hl-know" data-note="kn15">"其他投资"</span><a href="#" class="nref" data-note="kn15">15</a>类别变化</td>
+              </tr>
+              <tr>
+                <td><strong>真实赎回压力测试</strong></td>
+                <td>2022年5月、2023年3月有压力但未崩溃</td>
+                <td>下一次市场恐慌时的赎回数据</td>
+              </tr>
+              <tr>
+                <td><strong>AI业务实际进展</strong></td>
+                <td>2024年宣布，细节极少</td>
+                <td>招聘、合作伙伴、产品发布</td>
+              </tr>
+              <tr>
+                <td><strong>TRON生态依赖度量化</strong></td>
+                <td>知道很大但具体比例不明</td>
+                <td>TRON链上USDT占比变化、监管事件</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+
+    <!-- §8 质量评估 -->
+    <section id="quality">
+      <div class="section-header">
+        <h2>8. 素材质量评估<span class="zh">Source Quality Assessment</span></h2>
+      </div>
+
+      <div class="arc-item">
+        <strong>&#9733; Tier 1 — 每日监测 Daily Monitoring</strong>
+        <p style="margin-top:0.5rem;">
+          <span class="hl-know" data-note="kn16">Paolo Twitter</span><a href="#" class="nref" data-note="kn16">16</a> · 吴说区块链 · USDT流通量数据 · Tether透明度报告更新
+        </p>
+      </div>
+
+      <div class="arc-item">
+        <strong>&#9733; Tier 2 — 每周审查 Weekly Review</strong>
+        <p style="margin-top:0.5rem;">
+          Protos/Bloomberg新报道 · 链上大额铸造/销毁 · 监管政策动态
+        </p>
+      </div>
+
+      <div class="arc-item">
+        <strong>&#9733; Tier 3 — 事件驱动 Event-Driven</strong>
+        <p style="margin-top:0.5rem;">
+          监管文件(SEC/CFTC/ESMA) · 重大采访 · 市场压力测试时刻 · MiCA合规进展
+        </p>
+      </div>
+
+      <div class="arc-item">
+        <strong>&#9733; Tier 4 — 深度研究 Deep Research</strong>
+        <p style="margin-top:0.5rem;">
+          历史档案(Bitfinex'ed、早期调查) · 学术/政策论文(BIS, IMF) · 竞争对手分析(USDC vs USDT)
+        </p>
+      </div>
+
+      <details class="rel-card">
+        <summary>&#128269; 来源可信度评估 Source Credibility</summary>
+        <div class="rel-body">
+          <p><strong style="color:var(--accent);">高度可信 High Credibility:</strong></p>
+          <ul style="margin:0.5rem 0 1rem 1.2rem; font-size:0.82rem;">
+            <li>监管文件（CFTC、NYAG、SEC）— 法律约束力</li>
+            <li>Tether透明度报告 — 官方数据（需交叉验证）</li>
+            <li>Chainalysis、Kaiko — 机构级链上数据</li>
+          </ul>
+          <p><strong style="color:var(--knowledge);">需交叉验证 Requires Cross-Verification:</strong></p>
+          <ul style="margin:0.5rem 0 1rem 1.2rem; font-size:0.82rem;">
+            <li>Protos调查报道 — 最深入但无法律约束力</li>
+            <li>Bloomberg分析 — 传统金融视角有偏见</li>
+            <li>Paolo Twitter — 防御性叙事，有选择性地披露</li>
+            <li>中文媒体 — 可能有信息差或本地化偏见</li>
+          </ul>
+        </div>
+      </details>
+    </section>
+
+    <footer style="margin-top:3rem; padding-top:1rem; border-top:1px solid var(--border-subtle); font-size:0.72rem; color:var(--text-quaternary);">
+      <p>Generated: 2026-03-22 &middot; V4 Template &middot; <a href="../blockchain_hub.html">Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ========== RIGHT SIDEBAR (Notes) ========== -->
+  <aside class="notes-sidebar ns-closed" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&times;</button>
+      <h4 style="font-size:0.7rem; font-weight:590; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-quaternary); margin:0;">&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+    
+    <!-- Meta Notes -->
+    <div class="anno meta-note" id="mn1" data-section="priority">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">优先级框架说明</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>此优先级基于：信息密度 × 监管重要性 × 独特洞察 × 时间效率综合评估。Tether研究的核心矛盾在于"官方叙事"与"独立调查"的信息差。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="mn2" data-section="analysts">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">分析师来源分类</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>独立调查媒体 vs 主流财经媒体 vs 链上数据公司 vs 中文媒体。最佳策略是交叉验证：Protos揭露 → Bloomberg解读 → Chainalysis数据验证。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="mn3" data-section="longform">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">长文阅读顺序建议</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>建议顺序：监管文件（建立事实基线）→ Protos调查（深度背景）→ Bloomberg分析（传统金融视角）→ 白皮书历史对比（理解定义演变）。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="mn4" data-section="relationships">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">关系网分析方法</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>识别关键人物时注意：实际权力 vs 名义职位。Devasini虽然CFO，但实际控制投资决策；Ardoino是CEO但更像是发言人。监管人物影响立法方向而非直接执法。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="mn5" data-section="narratives">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">叙事弧构建逻辑</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>叙事分析帮助理解Tether的"身份建构"策略：每个叙事弧都服务于特定的利益相关者（投资者、监管机构、用户）。识别叙事的受众和目的是判断信息可靠性的关键。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="mn6" data-section="gaps">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">信息空白的研究价值</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>信息空白不是"无关紧要"，而是"尚未被验证"。完整独立审计的缺失是最大风险指标；Devasini投资决策黑箱是系统性风险的核心来源。</p>
+      </div>
+    </div>
+
+    <!-- Knowledge Notes -->
+    <div class="anno know-note" id="kn1" data-section="analysts">
+      <span class="note-label know">KN</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Bitcoin价格操纵指控</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>2017-2018年学术研究和CFTC调查均指向：Tether发行与Bitcoin价格存在可疑相关性。Bitfinex'ed持续追踪此议题，但Tether方否认。建议参考John M. Griffin & Amin Shams 2018论文。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="kn2" data-section="longform">
+      <span class="note-label know">KN</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">储备金真实构成</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Protos调查揭露：Tether储备金中商业票据占比远高于官方披露，实际美国国债持仓较少。2022年后Tether宣称转向"完全储备于现金和等价物"，但具体构成仍不透明。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="kn3" data-section="longform">
+      <span class="note-label know">KN</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">$41M罚款细节</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>CFTC认定Tether在2016-2018年间多次发布关于储备金的虚假声明，包括声称"每USDT由1美元支持"但实际上并非始终如此。这是官方认定的关键违规事实。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="kn4" data-section="longform">
+      <span class="note-label know">KN</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">NYAG指控的储备金挪用</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>纽约州检察总长办公室指控：Bitfinex挪用Tether储备金8.5亿美元掩盖Crypto Capital Corp损失。此案以$18.5M和解结案，但指控内容揭示了Bitfinex与Tether资金池的混合风险。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="kn5" data-section="longform">
+      <span class="note-label know">KN</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Tether美债投资收益模型</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Tether持有约1000亿美元USDT，按5%年利率计算，年利息收入约50亿美元。2024年Tether声称利润超100亿美元，大部分来自美债和黄金投资。这是Tether商业模式的核心盈利来源。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="kn6" data-section="podcasts">
+      <span class="note-label know">KN</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Ardoino的防御性回应模式</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>在What Bitcoin Did采访中，Ardoino的典型回应模式：承认历史问题 → 强调现在的透明度 → 批评竞争对手 → 强调新兴市场价值。识别这种模式有助于区分"事实陈述"与"公关叙事"。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="kn7" data-section="podcasts">
+      <span class="note-label know">KN</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">储备金争议核心问题</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Coffeezilla视频总结的核心问题：(1) attestation vs audit的区别 (2) "并非始终100%"的具体含义 (3) 商业票据持仓的真实质量和流动性 (4) 银行关系的稳定性。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="kn8" data-section="primary">
+      <span class="note-label know">KN</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Cantor Fitzgerald外部验证价值</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Howard Lutnick在国会证词中提及Tether持仓美债，这是目前最接近"第三方验证"的来源。但需注意：Cantor Fitzgerald与Tether存在商业利益关系，验证价值有限。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="kn9" data-section="relationships">
+      <span class="note-label know">KN</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">USDT-TRON共生关系</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>TRON链上USDT占比约50%+，Justin Sun通过TRON网络为Tether提供低成本发行渠道，Tether为TRON带来巨大链上活跃度。双方在稳定币生态互相依赖，但监管风险可能传导。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="kn10" data-section="relationships">
+      <span class="note-label know">KN</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">SEC潜在执法风险</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Gary Gensler任期内SEC未对Tether提起直接执法，但国会听证中多次提及稳定币风险。SEC对Coinbase的诉讼可能影响稳定币交易所上市政策，间接影响USDT市场份额。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="kn11" data-section="narratives">
+      <span class="note-label know">KN</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Devasini投资决策黑箱</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Giancarlo Devasini几乎零公开露面，但据报道掌控Tether储备金投资决策。他在Tether透明度报告中的签名是唯一官方确认。历史上Tether投资于商业票据和"其他投资"的具体决策完全未知。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="kn12" data-section="narratives">
+      <span class="note-label know">KN</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">金融体系风险敞口</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Tether持有约1000亿美元美债使其成为美国金融市场的重要参与者。这既是优势（太大而不能倒）也是风险（可能受到监管压力）。Cantor Fitzgerald托管关系使其嵌入传统金融体系。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="kn13" data-section="narratives">
+      <span class="note-label know">KN</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">AI与新兴市场扩展</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Ardoino在2024年宣布Tether将扩展AI业务，具体计划模糊。此叙事的战略意图：多元化收入来源 + 提升技术形象 + 为未来监管对话铺垫。实际进展需持续跟踪。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="kn14" data-section="narratives">
+      <span class="note-label know">KN</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Tether利润规模</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>2024年Tether声称净利润超100亿美元，主要来自美债利息收入。这使其成为全球最赚钱的金融公司之一。充足的利润为应对监管压力和赎回风险提供了资本缓冲。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="kn15" data-section="gaps">
+      <span class="note-label know">KN</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">"其他投资"类别</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Tether透明度报告中"其他投资"类别是最大的信息空白。历史上包括商业票据、担保贷款、加密货币等。当前具体构成未知，但可能是风险敞口的主要来源。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="kn16" data-section="quality">
+      <span class="note-label know">KN</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Paolo Twitter监控要点</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>监控重点：(1) 重大市场事件后的第一时间表态 (2) 与监管动态相关的政策暗示 (3) 对竞争对手（USDC）的直接回应 (4) 新产品/合作公告。需区分"情绪性回应"与"实质性披露"。</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+// === Sidebar toggle (mobile) ===
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+
+// === Notes sidebar toggle ===
+(function(){
+  var btn=document.getElementById("notesToggleBtn"),ns=document.getElementById("notesSidebar"),ov=document.getElementById("notesOverlay"),cb=document.getElementById("notesCloseBtn");
+  if(!btn||!ns)return;
+  function toggle(){ns.classList.toggle("ns-closed");ov.classList.toggle("open");}
+  btn.onclick=toggle;
+  if(ov)ov.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(cb)cb.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(window.innerWidth>1200)ns.classList.remove("ns-closed");
+  window.addEventListener("resize",function(){if(window.innerWidth>1200)ns.classList.remove("ns-closed");});
+})();
+
+// === Toggle note ===
+function toggleNote(head){
+  var anno=head.closest(".anno");
+  if(anno){anno.classList.toggle("open");positionNotes();}
+}
+
+// === Position notes ===
+function positionNotes(){
+  var ns=document.getElementById("notesSidebar");if(!ns)return;
+  var annos=ns.querySelectorAll(".anno");
+  var lastBottom=80;
+  annos.forEach(function(a){
+    if(a.style.display==="none")return;
+    var sec=a.getAttribute("data-section");
+    var target=sec?document.getElementById(sec):null;
+    var top=target?target.getBoundingClientRect().top+window.scrollY-ns.getBoundingClientRect().top:lastBottom;
+    if(top<lastBottom)top=lastBottom;
+    a.style.top=top+"px";
+    lastBottom=top+a.offsetHeight+8;
+  });
+}
+
+// === Knowledge toggle ===
+function toggleKnowNotes(){
+  var btn=document.getElementById("knowToggleBtn");
+  var knowNotes=document.querySelectorAll(".anno.know-note");
+  var marks=document.querySelectorAll("mark.hl-know");
+  var nrefs=document.querySelectorAll(".nref");
+  var visible=btn.classList.contains("active");
+  knowNotes.forEach(function(n){n.style.display=visible?"none":"";});
+  marks.forEach(function(m){m.style.background=visible?"transparent":"";m.style.borderBottom=visible?"none":"";});
+  nrefs.forEach(function(r){r.style.display=visible?"none":"";});
+  btn.classList.toggle("active");
+  btn.textContent=visible?"显示":"隐藏";
+  positionNotes();
+}
+
+// === Expand / Collapse all ===
+function expandAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.add("open");});positionNotes();}
+function collapseAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.remove("open");});positionNotes();}
+
+// === Note count ===
+(function(){
+  var label=document.getElementById("noteCountLabel");if(!label)return;
+  var meta=document.querySelectorAll(".anno.meta-note").length;
+  var know=document.querySelectorAll(".anno.know-note").length;
+  label.textContent=meta+" META + "+know+" Knowledge";
+})();
+
+// === Highlight → Note sync ===
+document.addEventListener("click",function(e){
+  var mark=e.target.closest("mark.hl-know")||e.target.closest(".nref");
+  if(!mark)return;
+  var noteId=mark.getAttribute("data-note");if(!noteId)return;
+  var anno=document.getElementById(noteId);if(!anno)return;
+  anno.classList.add("open");
+  anno.scrollIntoView({behavior:"smooth",block:"center"});
+  anno.classList.add("flash");
+  setTimeout(function(){anno.classList.remove("flash");},1500);
+  positionNotes();
+});
+
+// === Embedded mode ===
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+  document.addEventListener("click",function(e){
+    var a=e.target.closest("a");if(!a||!a.href)return;
+    try{var url=new URL(a.href,location.href)}catch(err){return}
+    if(url.pathname.startsWith("/trade-pipeline/")||url.pathname.startsWith("/observatory/")){
+      e.preventDefault();
+      window.top.postMessage({type:"dashboard-nav",action:"openResearch",url:url.pathname,title:a.textContent.trim().substring(0,60)},"*");
+    }
+  });
+})();
+
+// Initial positioning
+window.addEventListener("load",function(){positionNotes();});
+window.addEventListener("scroll",function(){positionNotes();});
+</script>
+</body>
+</html>

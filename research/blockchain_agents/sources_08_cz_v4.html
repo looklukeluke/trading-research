@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CZ (赵长鹏) — 素材策展地图 V4</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  /* Page-specific V4 extensions (~75 lines) */
+  .priority-box { border:1px solid rgba(248,168,72,0.3); border-left:3px solid var(--accent); border-radius:var(--radius-sm); padding:1.25rem 1.5rem; margin-bottom:2rem; background:var(--bg-surface); }
+  .priority-box h2 { color:var(--accent); margin-top:0; font-size:1.1rem; font-weight:590; }
+  .priority-box ol { margin-bottom:0; padding-left:1.2rem; }
+  .priority-box li { margin-bottom:0.6rem; line-height:1.5; }
+  .time-badge { display:inline-block; padding:0.1rem 0.5rem; border-radius:10px; font-size:0.7rem; font-weight:590; margin-right:0.3rem; background:var(--accent); color:var(--bg-base); }
+  .anno { position:absolute; left:1rem; right:1rem; }
+  .anno.meta-note { padding:0.6rem 0.75rem; border-left:2px solid var(--accent); border-radius:0 6px 6px 0; background:rgba(248,168,72,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.meta-note:hover { box-shadow:0 0 0 1px var(--accent); }
+  .anno.know-note { padding:0.6rem 0.75rem; border-left:2px solid var(--knowledge); border-radius:0 6px 6px 0; background:rgba(91,155,213,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.know-note:hover { box-shadow:0 0 0 1px var(--knowledge); }
+  .anno .note-label { display:inline-block; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--bg-base); background:var(--accent); padding:0.1rem 0.4rem; border-radius:3px; margin-bottom:0.3rem; }
+  .anno .note-label.know { background:var(--knowledge); color:white; }
+  .anno .mn-head { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
+  .anno .mn-title { flex:1; font-weight:510; font-size:0.75rem; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .anno .mn-fold { font-size:0.55rem; color:var(--text-quaternary); transition:transform 0.2s; margin-left:auto; }
+  .anno.open .mn-fold { transform:rotate(180deg); }
+  .anno .mn-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+  .anno.open .mn-body { max-height:2000px; }
+  .anno .mn-body p { font-size:0.78rem; margin-bottom:0.3rem; color:var(--text-secondary); }
+  .anno.flash { animation:noteFlash 1.5s ease; }
+  @keyframes noteFlash { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--accent);} }
+  .anno.know-note.flash { animation:noteFlashBlue 1.5s ease; }
+  @keyframes noteFlashBlue { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--knowledge);} }
+  mark.hl-know { background:rgba(91,155,213,0.12); border-bottom:1.5px solid var(--knowledge); padding:0 2px; border-radius:2px; color:inherit; cursor:pointer; transition:background 0.15s; }
+  mark.hl-know:hover { background:rgba(91,155,213,0.28); }
+  .nref { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; font-size:0.48rem; font-weight:700; cursor:pointer; margin-left:1px; vertical-align:super; transition:transform 0.15s; text-decoration:none; background:var(--knowledge); color:white; }
+  .nref:hover { transform:scale(1.25); box-shadow:0 0 6px rgba(91,155,213,0.4); }
+  .top-controls { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; padding:0.35rem 0.7rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); font-size:0.72rem; flex-wrap:wrap; }
+  .top-controls .tc-label { font-weight:590; color:var(--knowledge); }
+  .top-controls button { padding:0.15rem 0.45rem; border-radius:4px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-tertiary); cursor:pointer; font-size:0.68rem; font-family:inherit; transition:all 0.15s; }
+  .top-controls button:hover { border-color:var(--knowledge); color:var(--text-primary); }
+  .top-controls button.active { background:var(--knowledge-dim); color:var(--knowledge); border-color:rgba(91,155,213,0.3); }
+  .top-controls .tc-sep { color:var(--border-default); margin:0 0.15rem; }
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .notes-sidebar { position:relative; width:320px; min-width:320px; padding:1.25rem 1rem; border-left:1px solid var(--border-subtle); background:var(--bg-elevated); }
+  .notes-sidebar-header { position:sticky; top:0; z-index:60; background:var(--bg-elevated); padding-bottom:0.5rem; border-bottom:1px solid var(--border-subtle); margin-bottom:0.75rem; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  .notes-toggle-btn { position:fixed; right:1rem; bottom:1.5rem; z-index:200; width:44px; height:44px; border-radius:50%; border:1px solid var(--border-default); background:var(--bg-surface); color:var(--text-secondary); cursor:pointer; font-size:1.1rem; display:none; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.4); }
+  .notes-close-btn { float:right; background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:1.1rem; padding:0; display:none; }
+  @media (max-width:1200px) { .notes-close-btn { display:block; } .notes-sidebar { position:fixed; right:0; top:0; height:100vh; overflow-y:auto; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.4); z-index:150; } .notes-sidebar.ns-closed { transform:translateX(100%); box-shadow:none; } .notes-toggle-btn { display:flex; } }
+  .notes-overlay-right { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:140; }
+  .notes-overlay-right.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  @media (min-width:1600px) { .main-content { max-width:1000px; } .notes-sidebar { width:360px; min-width:360px; } }
+  .rel-card { border:1px solid var(--border-subtle); border-radius:var(--radius-md); background:var(--bg-elevated); margin-bottom:0.75rem; }
+  .rel-card summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  .rel-card[open] summary { color:var(--accent); }
+  .rel-card .rel-body { padding:0 1rem 1rem; font-size:0.82rem; color:var(--text-secondary); line-height:1.6; }
+  .arc-item { border-left:3px solid var(--accent); padding:0.6rem 1rem; margin-bottom:0.75rem; background:rgba(66,165,245,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+  .arc-item strong { color:var(--text-primary); }
+  .question-box { border:2px solid var(--knowledge); background:rgba(91,155,213,0.05); border-radius:var(--radius-md); padding:1.5rem; text-align:center; margin:2rem 0; }
+  .question-box blockquote { border:none; margin:0; padding:0; }
+  .question-box p { font-size:1rem; font-weight:510; color:var(--text-primary); }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; margin-bottom:1rem; }
+  th { text-transform:uppercase; font-size:0.72rem; font-weight:510; color:var(--text-quaternary); letter-spacing:0.04em; text-align:left; padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-default); }
+  td { padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-subtle); vertical-align:top; color:var(--text-secondary); }
+  tr:hover td { background:var(--bg-elevated); }
+  .url-col { max-width:200px; word-break:break-all; }
+  .zh { display:block; font-size:0.85em; color:var(--text-tertiary); margin-top:0.15em; }
+  .zh-inline { font-size:0.85em; color:var(--text-tertiary); }
+  details { border:1px solid var(--border-subtle); background:var(--bg-elevated); border-radius:var(--radius-sm); padding:0; margin-bottom:0.75rem; }
+  details summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  details[open] summary { color:var(--accent); }
+  details > div, details > p { padding:0 1rem 1rem; font-size:0.82rem; line-height:1.6; color:var(--text-secondary); }
+  body.embedded .sidebar, body.embedded .notes-sidebar, body.embedded .hamburger-btn, body.embedded .notes-toggle-btn { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+  .importance { color:var(--accent); letter-spacing:0.05em; }
+  .badge-row { display:flex; flex-wrap:wrap; gap:0.4rem; margin-top:0.75rem; }
+  .badge { font-size:0.65rem; padding:0.15rem 0.5rem; border-radius:4px; background:var(--bg-elevated); border:1px solid var(--border-subtle); color:var(--text-tertiary); }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ========== LEFT SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">CZ (赵长鹏)<br>素材策展地图 V4</div>
+
+    <h4>Contents</h4>
+    <nav>
+      <ul>
+        <li><a href="#priority"><span class="toc-num">&#9733;</span>如果只有2小时</a></li>
+        <li><a href="#analysts"><span class="toc-num">1</span>最佳分析师</a></li>
+        <li><a href="#longform"><span class="toc-num">2</span>必读长文/书籍</a></li>
+        <li><a href="#podcasts"><span class="toc-num">3</span>播客与视频</a></li>
+        <li><a href="#primary"><span class="toc-num">4</span>一手资料</a></li>
+        <li><a href="#relationships"><span class="toc-num">5</span>关键关系网</a></li>
+        <li><a href="#narratives"><span class="toc-num">6</span>叙事弧</a></li>
+        <li><a href="#gaps"><span class="toc-num">7</span>信息空白</a></li>
+        <li><a href="#quality"><span class="toc-num">8</span>质量评估</a></li>
+      </ul>
+    </nav>
+
+    <h4>Related</h4>
+    <nav>
+      <ul>
+        <li><a href="08_cz.html">CZ (赵长鹏) Profile</a></li>
+        <li><a href="08_cz_metacognition.html">Metacognition</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+
+    <div class="top-controls">
+      <span class="tc-label">&#128218; 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <header class="page-header">
+      <h1>CZ (赵长鹏) — 素材策展地图 V4</h1>
+      <p class="subtitle">Research Date: 2026-03-22 &nbsp;|&nbsp; 18信息源 · 9类别 · 10+关键人物<br>
+      <span class="zh-inline">Binance创始人 · 加密货币交易所 · 监管合规 · 投资研究</span></p>
+      <div class="badge-row">
+        <span class="badge">交易所</span>
+        <span class="badge">监管风险</span>
+        <span class="badge">BNB Chain</span>
+        <span class="badge">DOJ和解</span>
+        <span class="badge">中文关键源</span>
+      </div>
+    </header>
+
+    <!-- ★ Priority Box -->
+    <div class="priority-box" id="priority">
+      <h2>&#9200; 如果只有2小时 — 推荐阅读路径</h2>
+      <ol>
+        <li><span class="time-badge">30min</span><a href="https://x.com/cz_binance" target="_blank">CZ Twitter/X</a> — 实时观察其政策反应、个人立场、"我的错误"等关键帖子</li>
+        <li><span class="time-badge">45min</span><a href="https://www.theblock.co/research" target="_blank">The Block Research</a> — Binance交易量、市场份额、合规动态</li>
+        <li><span class="time-badge">30min</span><a href="https://wublock123.com" target="_blank">吴说区块链</a> — 最关键中文源，监管动态、人事变动的第一爆料</li>
+        <li><span class="time-badge">15min</span><a href="https://www.justice.gov" target="_blank">DOJ和解协议全文</a> — 理解43亿美元罚款与认罪协议细节</li>
+      </ol>
+    </div>
+
+    <!-- §1 最佳分析师 -->
+    <section id="analysts">
+      <div class="section-header">
+        <h2>1. 最佳分析师与独立研究<span class="zh">Best Analysts & Independent Research</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>The Block Research</strong></td>
+            <td>研究机构</td>
+            <td class="url-col"><a href="https://www.theblock.co/research" target="_blank">theblock.co/research</a></td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>最权威的加密交易所数据与研报，Binance交易量、市场份额、合规动态的首选来源</td>
+          </tr>
+          <tr>
+            <td><strong>CryptoQuant</strong></td>
+            <td>链上数据分析</td>
+            <td class="url-col"><a href="https://cryptoquant.com" target="_blank">cryptoquant.com</a></td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>实时监控Binance资金流向、储备金证明、鲸鱼异动，关键交易信号来源</td>
+          </tr>
+          <tr>
+            <td><strong>Nansen</strong></td>
+            <td>智能货币追踪</td>
+            <td class="url-col"><a href="https://www.nansen.ai" target="_blank">nansen.ai</a></td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>追踪BNB Chain上聪明钱流向、机构钱包标记，DeFi生态深度分析</td>
+          </tr>
+          <tr>
+            <td><strong>Kaiko</strong></td>
+            <td>市场数据机构</td>
+            <td class="url-col"><a href="https://www.kaiko.com" target="_blank">kaiko.com</a></td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>机构级交易所流动性数据，Binance市场深度、价差分析的行业标准</td>
+          </tr>
+          <tr>
+            <td><strong>0xScope</strong></td>
+            <td>链上情报</td>
+            <td class="url-col"><a href="https://0xscope.com" target="_blank">0xscope.com</a></td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>中文团队，擅长交易所地址聚类、储备金分析，Binance钱包追踪</td>
+          </tr>
+          <tr>
+            <td><strong>吴说区块链 (Wu Blockchain)</strong></td>
+            <td>中文独立媒体</td>
+            <td class="url-col"><a href="https://wublock123.com" target="_blank">wublock123.com</a></td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td><mark class="hl-know" data-note="know-01">最关键中文源</mark>，Colin Wu是Binance监管动态、人事变动的第一爆料人</td>
+          </tr>
+          <tr>
+            <td><strong>Odaily 星球日报</strong></td>
+            <td>中文加密媒体</td>
+            <td class="url-col"><a href="https://www.odaily.news" target="_blank">odaily.news</a></td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>中文世界Binance新闻最快，CZ动态、BNB Chain生态跟踪</td>
+          </tr>
+          <tr>
+            <td><strong>链捕手 (ChainCatcher)</strong></td>
+            <td>中文深度报道</td>
+            <td class="url-col"><a href="https://www.chaincatcher.com" target="_blank">chaincatcher.com</a></td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>长文分析Binance战略、CZ演讲解读，适理解<a href="#narratives">决策逻辑</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §2 必读长文/书籍 -->
+    <section id="longform">
+      <div class="section-header">
+        <h2>2. 必读长文与书籍<span class="zh">Must-Read Long-Form & Books</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL/来源</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>《CZ口述历史：从零到币安》</strong></td>
+            <td>官方传记</td>
+            <td class="url-col">Binance博客/官方Medium</td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>CZ亲自撰写的创业历程，2017-2021关键决策的第一手叙述</td>
+          </tr>
+          <tr>
+            <td><strong>The Cryptopians</strong></td>
+            <td>书籍 (Laura Shin)</td>
+            <td class="url-col"><a href="https://www.amazon.com/Cryptopians-Idealism-Greed-Making-Cryptocurrency/dp" target="_blank">Amazon/audible</a></td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>以太坊早期历史，含CZ在OKCoin时期及创立Binance的背景</td>
+          </tr>
+          <tr>
+            <td><strong>"The Fall of FTX, The Survival of Binance"</strong></td>
+            <td>长文 (Bloomberg)</td>
+            <td class="url-col"><a href="https://www.bloomberg.com" target="_blank">bloomberg.com</a></td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>2022-2023对比分析，理解Binance为何在同类危机中存活</td>
+          </tr>
+          <tr>
+            <td><strong>"Inside the DOJ's Binance Investigation"</strong></td>
+            <td>调查报道 (Reuters)</td>
+            <td class="url-col"><a href="https://www.reuters.com" target="_blank">reuters.com</a> 2023系列</td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>2023年认罪前的深度调查，<mark class="hl-know" data-note="know-02">监管视角理解CZ模式的代价</mark></td>
+          </tr>
+          <tr>
+            <td><strong>CZ Twitter/X 长文合集</strong></td>
+            <td>一手言论</td>
+            <td class="url-col"><a href="https://x.com/cz_binance" target="_blank">x.com/cz_binance</a></td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>最重要一手源，"我的错误"等关键帖子，直接观察其沟通风格</td>
+          </tr>
+          <tr>
+            <td><strong>《数字资产：从比特币到央行数字货币》</strong></td>
+            <td>学术书籍</td>
+            <td class="url-col">姚前著/中国金融出版社</td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>理解中国监管视角下CZ/币安的位置</td>
+          </tr>
+          <tr>
+            <td><strong>Binance Research Reports</strong></td>
+            <td>官方研报</td>
+            <td class="url-col"><a href="https://binance.com/en/research" target="_blank">binance.com/en/research</a></td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>官方机构观点，注意利益相关，但了解其叙事框架必备</td>
+          </tr>
+          <tr>
+            <td><strong>BNB Chain Whitepaper & 路线图</strong></td>
+            <td>技术文档</td>
+            <td class="url-col"><a href="https://docs.bnbchain.org" target="_blank">docs.bnbchain.org</a></td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>理解BNB从"交易所积分"到"L1公链"的战略转型</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §3 播客与视频 -->
+    <section id="podcasts">
+      <div class="section-header">
+        <h2>3. 播客与视频<span class="zh">Podcasts & Video</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Bankless - CZ Interview (2021, 2023)</strong></td>
+            <td>播客/视频</td>
+            <td class="url-col"><a href="https://youtube.com/@Bankless" target="_blank">youtube.com/@Bankless</a></td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>最深入的英文长篇采访，2021年谈扩张、2023年谈监管危机，<mark class="hl-know" data-note="know-03">对比看态度转变</mark></td>
+          </tr>
+          <tr>
+            <td><strong>Unchained - Laura Shin 采访CZ系列</strong></td>
+            <td>播客</td>
+            <td class="url-col"><a href="https://unchainedcrypto.com" target="_blank">unchainedcrypto.com</a></td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>调查记者Laura Shin的尖锐提问，CZ回应监管质疑的高压力场景</td>
+          </tr>
+          <tr>
+            <td><strong>Bloomberg Crypto Summit - CZ Keynote</strong></td>
+            <td>演讲视频</td>
+            <td class="url-col">Bloomberg Live/YouTube</td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>2021-2022年峰会演讲，观察其对机构投资者的正式叙事</td>
+          </tr>
+          <tr>
+            <td><strong>中文：CZ 与 火星财经/金色财经 对话</strong></td>
+            <td>视频采访</td>
+            <td class="url-col"><a href="https://www.marsbit.co" target="_blank">marsbit.co</a> / <a href="https://www.jinse.com" target="_blank">jinse.com</a></td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>关键中文源，CZ对华语社区的特殊沟通，常透露未在英文渠道表达的观点</td>
+          </tr>
+          <tr>
+            <td><strong>"CZ: The Full Story" - Coin Bureau</strong></td>
+            <td>YouTube纪录片</td>
+            <td class="url-col"><a href="https://youtube.com/@CoinBureau" target="_blank">youtube.com/@CoinBureau</a></td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>第三方梳理，信息密度高，适合快速建立完整认知框架</td>
+          </tr>
+          <tr>
+            <td><strong>TechCrunch Disrupt - CZ Fireside Chat</strong></td>
+            <td>演讲视频</td>
+            <td class="url-col"><a href="https://techcrunch.com" target="_blank">techcrunch.com</a></td>
+            <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+            <td>2018-2019年早期，理解"快速行动"哲学的原始表达</td>
+          </tr>
+          <tr>
+            <td><strong>CZ出狱后首次公开访谈 (2024)</strong></td>
+            <td>视频</td>
+            <td class="url-col">多平台搜索</td>
+            <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+            <td>最新关键源，观察其从"交易所CEO"到"教育者/投资者"身份转型</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §4 一手资料 -->
+    <section id="primary">
+      <div class="section-header">
+        <h2>4. 一手资料<span class="zh">Primary Sources</span></h2>
+      </div>
+      
+      <details>
+        <summary>监管法律文件 (Regulatory & Legal Documents)</summary>
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>名称</th>
+                <th>URL</th>
+                <th>重要性</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>DOJ Press Release - Binance Settlement (Nov 2023)</strong></td>
+                <td class="url-col"><a href="https://www.justice.gov" target="_blank">justice.gov</a> 搜索 "Binance CZ"</td>
+                <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+              </tr>
+              <tr>
+                <td><strong>CFTC Complaint against Binance (March 2023)</strong></td>
+                <td class="url-col"><a href="https://www.cftc.gov" target="_blank">cftc.gov</a></td>
+                <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+              </tr>
+              <tr>
+                <td><strong>SEC Complaint against Binance (June 2023)</strong></td>
+                <td class="url-col"><a href="https://www.sec.gov" target="_blank">sec.gov</a></td>
+                <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+              </tr>
+              <tr>
+                <td><strong>FinCEN Consent Order</strong></td>
+                <td class="url-col"><a href="https://www.fincen.gov" target="_blank">fincen.gov</a></td>
+                <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details>
+        <summary>官方与社交媒体 (Official & Social Media)</summary>
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>名称</th>
+                <th>URL</th>
+                <th>重要性</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Binance Proof of Reserves</strong></td>
+                <td class="url-col"><a href="https://binance.com/en/proof-of-reserves" target="_blank">binance.com/en/proof-of-reserves</a></td>
+                <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+              </tr>
+              <tr>
+                <td><strong>CZ个人Twitter/X账号</strong></td>
+                <td class="url-col"><a href="https://x.com/cz_binance" target="_blank">x.com/cz_binance</a></td>
+                <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+              </tr>
+              <tr>
+                <td><strong>Richard Teng (现任CEO) Twitter/X</strong></td>
+                <td class="url-col"><a href="https://x.com/RichardTeng" target="_blank">x.com/RichardTeng</a></td>
+                <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+              </tr>
+              <tr>
+                <td><strong>BNB Chain官方治理论坛</strong></td>
+                <td class="url-col"><a href="https://forum.bnbchain.org" target="_blank">forum.bnbchain.org</a></td>
+                <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details>
+        <summary>Paxos/BUSD相关文件 (Stablecoin Documents)</summary>
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>名称</th>
+                <th>URL</th>
+                <th>重要性</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Paxos/BUSD相关SEC文件</strong></td>
+                <td class="url-col"><a href="https://www.sec.gov" target="_blank">sec.gov</a> 搜索Paxos</td>
+                <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="margin-top:0.5rem;"><mark class="hl-know" data-note="know-04">BUSD稳定币被叫停事件</mark>，理解Binance美元渠道脆弱性的关键文件。</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- §5 关键关系网 -->
+    <section id="relationships">
+      <div class="section-header">
+        <h2>5. 关键关系网<span class="zh">Key Relationships</span></h2>
+      </div>
+
+      <details class="rel-card" open>
+        <summary>🔗 Binance 内部核心人物</summary>
+        <div class="rel-body">
+          <table>
+            <thead>
+              <tr>
+                <th>人物</th>
+                <th>关系</th>
+                <th>信息价值</th>
+                <th>追踪渠道</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Richard Teng</strong></td>
+                <td>继任CEO</td>
+                <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+                <td><a href="https://x.com/RichardTeng" target="_blank">@RichardTeng</a> — 理解Binance合规转型的核心</td>
+              </tr>
+              <tr>
+                <td><strong>何一 (Yi He)</strong></td>
+                <td>联合创始人/CZ伴侣</td>
+                <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+                <td>币安Labs负责人，实际影响力极大，华语社区动态关键</td>
+              </tr>
+              <tr>
+                <td><strong>Gang Yi</strong></td>
+                <td>前首席合规官</td>
+                <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+                <td>DOJ起诉书中关键证人，其证词揭示内部合规文化</td>
+              </tr>
+              <tr>
+                <td><strong>Samuel Lim</strong></td>
+                <td>前首席合规官 (被起诉)</td>
+                <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+                <td>个人被DOJ起诉，与CZ切割，其案件进展反映责任边界</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>⚔️ 竞争对手与同类案例</summary>
+        <div class="rel-body">
+          <table>
+            <thead>
+              <tr>
+                <th>人物</th>
+                <th>关系</th>
+                <th>信息价值</th>
+                <th>追踪渠道</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Brian Armstrong (Coinbase CEO)</strong></td>
+                <td>竞争对手/对照组</td>
+                <td><span class="importance">⭐⭐⭐⭐⭐</span></td>
+                <td>Twitter/X, Coinbase财报 — 理解"合规优先"vs"快速行动"模式对比</td>
+              </tr>
+              <tr>
+                <td><strong>Arthur Hayes (BitMEX)</strong></td>
+                <td>同类案例/参照</td>
+                <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+                <td>同样因AML违规被DOJ起诉，对比其复出路径可预测CZ轨迹</td>
+              </tr>
+              <tr>
+                <td><strong>Vitalik Buterin</strong></td>
+                <td>生态互动/偶尔批评</td>
+                <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+                <td>对BNB Chain中心化的公开批评，理解技术社区立场</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>🌍 外部关系与监管层</summary>
+        <div class="rel-body">
+          <table>
+            <thead>
+              <tr>
+                <th>人物/实体</th>
+                <th>关系</th>
+                <th>信息价值</th>
+                <th>追踪渠道</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>CZ家族成员</strong></td>
+                <td>股权/受益人</td>
+                <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+                <td>监管文件中提及的信托结构，理解CZ个人财富与Binance的法律隔离</td>
+              </tr>
+              <tr>
+                <td><strong>中东主权财富基金</strong></td>
+                <td>潜在投资者/关系</td>
+                <td><span class="importance">⭐⭐⭐⭐☆</span></td>
+                <td>阿布扎比、迪拜动态，Binance合规总部迁移的关键关系</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="margin-top:0.5rem;"><mark class="hl-know" data-note="know-05">Richard Teng的阿布扎比金融监管局背景</mark>是理解Binance当前合规战略的关键线索。</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- §6 叙事弧 -->
+    <section id="narratives">
+      <div class="section-header">
+        <h2>6. 关键叙事弧<span class="zh">Key Narrative Arcs</span></h2>
+      </div>
+
+      <div class="arc-item">
+        <strong>从"快速行动"到"合规优先"的范式转变</strong>
+        <p style="margin:0.5rem 0 0; font-size:0.82rem; color:var(--text-secondary);">2017-2022年的"快速行动"扩张模式 → 2023年DOJ和解 → 2024年后Richard Teng时代的"合规优先"叙事。<mark class="hl-know" data-note="know-06">这一转变是理解Binance当前战略的核心框架</mark>。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>CZ个人身份转型：从创业者到"教育者"</strong>
+        <p style="margin:0.5rem 0 0; font-size:0.82rem; color:var(--text-secondary);">认罪后出狱 → Giggle Academy项目 → 出狱后首次访谈中表达的"教育者"定位。这一转型对BNB代币价值、投资者情绪有深远影响。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>BNB：从"交易所积分"到"生态代币"的合法性建构</strong>
+        <p style="margin:0.5rem 0 0; font-size:0.82rem; color:var(--text-secondary);">SEC将BNB定性为证券是核心法律争议。<mark class="hl-know" data-note="know-07">理解Binance如何构建BNB的"去中心化治理"叙事</mark>是预测监管走向的关键。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>交易所竞争格局： Binance vs Coinbase vs 中心化竞争对手</strong>
+        <p style="margin:0.5rem 0 0; font-size:0.82rem; color:var(--text-secondary);">FTX崩塌后的市场份额重分配、Coinbase的"合规溢价"、以及Bybit、OKX等竞争对手的动态。</p>
+      </div>
+
+      <div class="question-box">
+        <blockquote>
+          <p>❓ 核心研究问题： CZ出狱后，Binance能否在"后CZ时代"成功实现从"快速行动"到"合规优先"的软着陆？</p>
+        </blockquote>
+      </div>
+    </section>
+
+    <!-- §7 信息空白 -->
+    <section id="gaps">
+      <div class="section-header">
+        <h2>7. 信息空白 — What Doesn't Exist<span class="zh">Information Gaps</span></h2>
+      </div>
+
+      <details>
+        <summary>🔴 高优先级信息空白</summary>
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>空白领域</th>
+                <th>风险/影响</th>
+                <th>替代追踪方法</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Binance真实财务数据</strong></td>
+                <td>非上市公司，无审计财报；43亿罚款支付能力、现金流健康度不明</td>
+                <td>追踪储备金证明变化、BNB销毁数据、招聘/裁员动态</td>
+              </tr>
+              <tr>
+                <td><strong>CZ个人持股结构</strong></td>
+                <td>通过复杂离岸信托持有，投票权与收益权分离程度未知</td>
+                <td>关注监管文件中的披露、离婚/遗产相关诉讼</td>
+              </tr>
+              <tr>
+                <td><strong>何一的实际角色与权力</strong></td>
+                <td>公开信息极少，与CZ关系对治理影响不透明</td>
+                <td>追踪币安Labs投资动向、华语社区独家消息</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details>
+        <summary>🟡 中优先级信息空白</summary>
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>空白领域</th>
+                <th>风险/影响</th>
+                <th>替代追踪方法</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Binance.US的真实独立性</strong></td>
+                <td>与母公司资金、技术、人员流动情况，SEC质疑其"独立"</td>
+                <td>追踪Binance.US高管流动、诉讼文件中的事实认定</td>
+              </tr>
+              <tr>
+                <td><strong>BNB Chain验证者实际关系</strong></td>
+                <td>21个验证者的真实控制方，与Binance的关联程度</td>
+                <td>链上数据分析、验证者地址聚类、治理投票模式</td>
+              </tr>
+              <tr>
+                <td><strong>CZ出狱后的具体限制</strong></td>
+                <td>认罪协议中的合规官任命、访问限制等细节未完全公开</td>
+                <td>关注Binance官方公告中治理结构变化</td>
+              </tr>
+              <tr>
+                <td><strong>Giggle Academy的真实进展</strong></td>
+                <td>教育项目是否为"退休"掩护，资金与人员配置</td>
+                <td>追踪招聘动态、域名/商标注册、CZ推文细节</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details>
+        <summary>🟢 低优先级但值得追踪</summary>
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>空白领域</th>
+                <th>风险/影响</th>
+                <th>替代追踪方法</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Binance在俄语区的真实地位</strong></td>
+                <td>制裁规避指控后的实际业务状态，俄罗斯用户数据</td>
+                <td>俄语加密媒体、链上地址标签分析</td>
+              </tr>
+              <tr>
+                <td><strong>CZ与华人监管层的沟通</strong></td>
+                <td>香港牌照申请背后的政治考量</td>
+                <td>香港证监会公告、内地政策风向、CZ对华语社区的措辞变化</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+
+    <!-- §8 质量评估 -->
+    <section id="quality">
+      <div class="section-header">
+        <h2>8. 素材质量评估<span class="zh">Source Quality Assessment</span></h2>
+      </div>
+
+      <details>
+        <summary>📊 信息源可信度矩阵</summary>
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>评级</th>
+                <th>特征</th>
+                <th>代表信息源</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span style="color:#4caf50;">🟢 高可信度</span></td>
+                <td>监管文件、链上数据、官方公告</td>
+                <td>DOJ/CFTC/SEC文件、CryptoQuant、Nansen、The Block</td>
+              </tr>
+              <tr>
+                <td><span style="color:#ff9800;">🟡 中等可信度</span></td>
+                <td>知名媒体、分析师报告、口述历史</td>
+                <td>Bloomberg、Reuters、Wu Blockchain、Bankless采访</td>
+              </tr>
+              <tr>
+                <td><span style="color:#f44336;">🔴 需谨慎</span></td>
+                <td>官方自述、社交媒体揣测、未经证实爆料</td>
+                <td>Binance官方研报、Telegram群组传言、CZ推文解读</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details>
+        <summary>⚠️ 关键偏见与盲点</summary>
+        <div>
+          <ul style="padding-left:1.2rem;">
+            <li><strong>英文源偏见</strong>：多数英文分析来自"外部视角"，对华语社区动态、CZ与监管层沟通了解有限</li>
+            <li><strong>监管文件滞后</strong>：DOJ和解协议可能存在未公开细节，部分事实认定存在时间差</li>
+            <li><strong>Binance公关能力</strong>：官方叙事框架影响媒体框架，投资者需独立验证</li>
+            <li><strong>竞争对手信息</strong>：OKX、Bybit等竞争对手的内部信息极难获取，影响格局判断</li>
+            <li><strong>链上数据局限性</strong>：混币器、跨链桥等工具使得资金流向追踪存在盲区</li>
+          </ul>
+        </div>
+      </details>
+
+      <details>
+        <summary>🔄 研究更新节奏建议</summary>
+        <div>
+          <p><strong>第一优先级（每日）</strong>：CZ Twitter/X、吴说区块链、CryptoQuant资金监控</p>
+          <p><strong>第二优先级（每周）</strong>：The Block Research、BNB Chain治理动态、DOJ/SEC案件进展</p>
+          <p><strong>第三优先级（每月）</strong>：深度研报、竞争对手对比、关键人物关系变化</p>
+          <p><strong>季度复盘</strong>：储备金证明趋势、市场份额变化、监管地图更新</p>
+        </div>
+      </details>
+    </section>
+
+    <footer style="margin-top:3rem; padding-top:1rem; border-top:1px solid var(--border-subtle); font-size:0.72rem; color:var(--text-quaternary);">
+      <p>Generated: 2026-03-22 &middot; V4 Template &middot; <a href="../blockchain_hub.html">Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ========== RIGHT SIDEBAR (Notes) ========== -->
+  <aside class="notes-sidebar ns-closed" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&times;</button>
+      <h4 style="font-size:0.7rem; font-weight:590; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-quaternary); margin:0;">&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+
+    <!-- META Notes -->
+    <div class="anno meta-note" id="meta-01" data-section="analysts" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">中文源权重分析</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>CZ/Binance研究必须重视中文源。多数英文分析是"外部视角"，吴说区块链、链捕手等中文媒体往往掌握第一手监管动态、人事变动信息。英文源的"时差"可达12-48小时。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="meta-02" data-section="primary" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">监管文件优先级框架</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>DOJ和解协议 > CFTC投诉 > SEC投诉 > FinCEN文件。DOJ文件的"事实认定"部分最具权威性，其他监管机构的指控可能存在法律策略性表述差异。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="meta-03" data-section="quality" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">信息源验证流程</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>对于关键信息（如市场份额、储备金数据），建议采用"三角验证法"：①链上数据（CryptoQuant/Nansen）② 第三方研究（The Block）③ 官方公告（Binance博客）三个来源交叉验证。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="meta-04" data-section="relationships" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">Richard Teng 跟踪方法</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Richard Teng的Twitter/X是理解"后CZ时代"Binance战略的核心窗口。注意其发言频率、内容类型（技术升级？合规公告？生态推广？）的变化趋势。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="meta-05" data-section="narratives" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">叙事弧研究价值</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>叙事弧分析帮助识别"市场叙事"与"基本面"的偏离。当CZ公开表达"教育者"定位时，市场是否定价了这一身份转型的长期影响？</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="meta-06" data-section="gaps" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">何一信息追踪策略</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>何一是研究CZ/Binance的最大盲点。公开信息极少但实际影响力极大。建议追踪：① 币安Labs投资公告 ② 华语媒体独家采访 ③ Binance高管团队变动</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="meta-07" data-section="quality" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">数据新鲜度标注</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>本地图研究日期2026-03-22。部分监管文件为2023年历史数据，需注意：DOJ和解后Binance合规结构可能已发生重大变化，建议定期更新。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="meta-08" data-section="longform" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">The Cryptopians阅读顺序</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>建议先读《CZ口述历史》建立情感连接，再读The Cryptopians理解行业历史背景。两书结合可形成"CZ视角"与"外部视角"的对照。</p>
+      </div>
+    </div>
+
+    <!-- Knowledge Notes -->
+    <div class="anno know-note" id="know-01" data-section="analysts" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">吴说区块链 - Colin Wu</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Colin Wu是加密行业最可靠的中文独立记者。其报道特点是：① 监管动态第一手 ② 人事变动内幕 ③ 少有公开争议。追踪方式：微信公众号、Twitter @WuBlockchain</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="know-02" data-section="longform" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">CZ模式的监管代价</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Reuters调查揭示：43亿美元罚款背后是多年"故意的"AML违规。关键发现包括：① 允许高风险用户继续交易 ② 内部文件显示"明知故犯" ③ CZ个人参与部分决策。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="know-03" data-section="podcasts" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">Bankless采访态度转变</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>2021年采访：CZ谈"全球扩张"、"用户增长"、"创新vs监管"。2023年采访：谈"合规转型"、"错误承认"、"治理结构"。态度从"进攻"转为"防守"，是观察其心态变化的关键素材。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="know-04" data-section="primary" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">BUSD事件的核心教训</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>2023年2月SEC指控Paxos发行未注册证券 → BUSD稳定币被叫停。这一事件暴露了Binance对"美元通道"的脆弱依赖，是理解其寻求阿布扎比/迪拜合规落脚点的关键背景。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="know-05" data-section="relationships" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">Richard Teng监管背景</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Richard Teng曾任阿布扎比国际金融中心金融服务监管局首席执行官。这一背景使其成为Binance"合规转型"的理想代言人，也是Binance获得阿联酋监管认可的战略棋子。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="know-06" data-section="narratives" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">范式转变的市场含义</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>"快速行动"模式 = 市场份额优先、合规风险容忍度高 → 增长快但监管风险累积。"合规优先"模式 = 合规成本增加、某些市场退出 → 增长放缓但风险降低。市场尚未充分定价这一转变。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="know-07" data-section="narratives" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">BNB证券定性争议</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>SEC将BNB定性为"证券"的核心论据：① 原始发行通过ICO融资 ② Binance Labs持续投资孵化 ③ BNB价值与Binance生态系统紧密绑定。去中心化治理叙事能否成功抗辩是BNB法律地位的关键。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="know-08" data-section="gaps" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">Giggle Academy跟踪信号</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>如果Giggle Academy是"退休掩护"，则会看到：① 招聘停滞 ② 无实质产品发布 ③ CZ关注点仍在Binance。如果是真项目，会有持续的产品更新、技术博客、合作伙伴公告。</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+// === Sidebar toggle (mobile) ===
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+
+// === Notes sidebar toggle ===
+(function(){
+  var btn=document.getElementById("notesToggleBtn"),ns=document.getElementById("notesSidebar"),ov=document.getElementById("notesOverlay"),cb=document.getElementById("notesCloseBtn");
+  if(!btn||!ns)return;
+  function toggle(){ns.classList.toggle("ns-closed");ov.classList.toggle("open");}
+  btn.onclick=toggle;
+  if(ov)ov.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(cb)cb.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(window.innerWidth>1200)ns.classList.remove("ns-closed");
+  window.addEventListener("resize",function(){if(window.innerWidth>1200)ns.classList.remove("ns-closed");});
+})();
+
+// === Toggle note ===
+function toggleNote(head){
+  var anno=head.closest(".anno");
+  if(anno){anno.classList.toggle("open");positionNotes();}
+}
+
+// === Position notes ===
+function positionNotes(){
+  var ns=document.getElementById("notesSidebar");if(!ns)return;
+  var annos=ns.querySelectorAll(".anno");
+  var lastBottom=80;
+  annos.forEach(function(a){
+    if(a.style.display==="none")return;
+    var sec=a.getAttribute("data-section");
+    var target=sec?document.getElementById(sec):null;
+    var top=target?target.getBoundingClientRect().top+window.scrollY-ns.getBoundingClientRect().top:lastBottom;
+    if(top<lastBottom)top=lastBottom;
+    a.style.top=top+"px";
+    lastBottom=top+a.offsetHeight+8;
+  });
+}
+
+// === Knowledge toggle ===
+function toggleKnowNotes(){
+  var btn=document.getElementById("knowToggleBtn");
+  var knowNotes=document.querySelectorAll(".anno.know-note");
+  var marks=document.querySelectorAll("mark.hl-know");
+  var nrefs=document.querySelectorAll(".nref");
+  var visible=btn.classList.contains("active");
+  knowNotes.forEach(function(n){n.style.display=visible?"none":"";});
+  marks.forEach(function(m){m.style.background=visible?"transparent":"";m.style.borderBottom=visible?"none":"";});
+  nrefs.forEach(function(r){r.style.display=visible?"none":"";});
+  btn.classList.toggle("active");
+  btn.textContent=visible?"显示":"隐藏";
+  positionNotes();
+}
+
+// === Expand / Collapse all ===
+function expandAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.add("open");});positionNotes();}
+function collapseAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.remove("open");});positionNotes();}
+
+// === Note count ===
+(function(){
+  var label=document.getElementById("noteCountLabel");if(!label)return;
+  var meta=document.querySelectorAll(".anno.meta-note").length;
+  var know=document.querySelectorAll(".anno.know-note").length;
+  label.textContent=meta+" META + "+know+" Knowledge";
+})();
+
+// === Highlight → Note sync ===
+document.addEventListener("click",function(e){
+  var mark=e.target.closest("mark.hl-know")||e.target.closest(".nref");
+  if(!mark)return;
+  var noteId=mark.getAttribute("data-note");if(!noteId)return;
+  var anno=document.getElementById(noteId);if(!anno)return;
+  anno.classList.add("open");
+  anno.scrollIntoView({behavior:"smooth",block:"center"});
+  anno.classList.add("flash");
+  setTimeout(function(){anno.classList.remove("flash");},1500);
+  positionNotes();
+});
+
+// === Embedded mode ===
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+  document.addEventListener("click",function(e){
+    var a=e.target.closest("a");if(!a||!a.href)return;
+    try{var url=new URL(a.href,location.href)}catch(err){return}
+    if(url.pathname.startsWith("/trade-pipeline/")||url.pathname.startsWith("/observatory/")){
+      e.preventDefault();
+      window.top.postMessage({type:"dashboard-nav",action:"openResearch",url:url.pathname,title:a.textContent.trim().substring(0,60)},"*");
+    }
+  });
+})();
+
+// Initial positioning
+window.addEventListener("load",function(){positionNotes();});
+window.addEventListener("scroll",function(){positionNotes();});
+</script>
+</body>
+</html>

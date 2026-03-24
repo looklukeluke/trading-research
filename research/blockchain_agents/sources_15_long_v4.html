@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caitlin Long — 素材策展地图 V4</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  .priority-box { border:1px solid rgba(248,168,72,0.3); border-left:3px solid var(--accent); border-radius:var(--radius-sm); padding:1.25rem 1.5rem; margin-bottom:2rem; background:var(--bg-surface); }
+  .priority-box h2 { color:var(--accent); margin-top:0; font-size:1.1rem; font-weight:590; }
+  .priority-box ol { margin-bottom:0; padding-left:1.2rem; }
+  .priority-box li { margin-bottom:0.6rem; line-height:1.5; }
+  .time-badge { display:inline-block; padding:0.1rem 0.5rem; border-radius:10px; font-size:0.7rem; font-weight:590; margin-right:0.3rem; background:var(--accent); color:var(--bg-base); }
+  .anno { position:absolute; left:1rem; right:1rem; }
+  .anno.meta-note { padding:0.6rem 0.75rem; border-left:2px solid var(--accent); border-radius:0 6px 6px 0; background:rgba(248,168,72,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.meta-note:hover { box-shadow:0 0 0 1px var(--accent); }
+  .anno.know-note { padding:0.6rem 0.75rem; border-left:2px solid var(--knowledge); border-radius:0 6px 6px 0; background:rgba(91,155,213,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.know-note:hover { box-shadow:0 0 0 1px var(--knowledge); }
+  .anno .note-label { display:inline-block; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--bg-base); background:var(--accent); padding:0.1rem 0.4rem; border-radius:3px; margin-bottom:0.3rem; }
+  .anno .note-label.know { background:var(--knowledge); color:white; }
+  .anno .mn-head { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
+  .anno .mn-title { flex:1; font-weight:510; font-size:0.75rem; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .anno .mn-fold { font-size:0.55rem; color:var(--text-quaternary); transition:transform 0.2s; margin-left:auto; }
+  .anno.open .mn-fold { transform:rotate(180deg); }
+  .anno .mn-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+  .anno.open .mn-body { max-height:2000px; }
+  .anno .mn-body p { font-size:0.78rem; margin-bottom:0.3rem; color:var(--text-secondary); }
+  .anno.flash { animation:noteFlash 1.5s ease; }
+  @keyframes noteFlash { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--accent);} }
+  .anno.know-note.flash { animation:noteFlashBlue 1.5s ease; }
+  @keyframes noteFlashBlue { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--knowledge);} }
+  mark.hl-know { background:rgba(91,155,213,0.12); border-bottom:1.5px solid var(--knowledge); padding:0 2px; border-radius:2px; color:inherit; cursor:pointer; transition:background 0.15s; }
+  mark.hl-know:hover { background:rgba(91,155,213,0.28); }
+  .nref { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; font-size:0.48rem; font-weight:700; cursor:pointer; margin-left:1px; vertical-align:super; transition:transform 0.15s; text-decoration:none; background:var(--knowledge); color:white; }
+  .nref:hover { transform:scale(1.25); box-shadow:0 0 6px rgba(91,155,213,0.4); }
+  .top-controls { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; padding:0.35rem 0.7rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); font-size:0.72rem; flex-wrap:wrap; }
+  .top-controls .tc-label { font-weight:590; color:var(--knowledge); }
+  .top-controls button { padding:0.15rem 0.45rem; border-radius:4px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-tertiary); cursor:pointer; font-size:0.68rem; font-family:inherit; transition:all 0.15s; }
+  .top-controls button:hover { border-color:var(--knowledge); color:var(--text-primary); }
+  .top-controls button.active { background:var(--knowledge-dim); color:var(--knowledge); border-color:rgba(91,155,213,0.3); }
+  .top-controls .tc-sep { color:var(--border-default); margin:0 0.15rem; }
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .notes-sidebar { position:relative; width:320px; min-width:320px; padding:1.25rem 1rem; border-left:1px solid var(--border-subtle); background:var(--bg-elevated); }
+  .notes-sidebar-header { position:sticky; top:0; z-index:60; background:var(--bg-elevated); padding-bottom:0.5rem; border-bottom:1px solid var(--border-subtle); margin-bottom:0.75rem; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  .notes-toggle-btn { position:fixed; right:1rem; bottom:1.5rem; z-index:200; width:44px; height:44px; border-radius:50%; border:1px solid var(--border-default); background:var(--bg-surface); color:var(--text-secondary); cursor:pointer; font-size:1.1rem; display:none; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.4); }
+  .notes-close-btn { float:right; background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:1.1rem; padding:0; display:none; }
+  @media (max-width:1200px) { .notes-close-btn { display:block; } .notes-sidebar { position:fixed; right:0; top:0; height:100vh; overflow-y:auto; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.4); z-index:150; } .notes-sidebar.ns-closed { transform:translateX(100%); box-shadow:none; } .notes-toggle-btn { display:flex; } }
+  .notes-overlay-right { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:140; }
+  .notes-overlay-right.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  @media (min-width:1600px) { .main-content { max-width:1000px; } .notes-sidebar { width:360px; min-width:360px; } }
+  .rel-card { border:1px solid var(--border-subtle); border-radius:var(--radius-md); background:var(--bg-elevated); margin-bottom:0.75rem; }
+  .rel-card summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  .rel-card[open] summary { color:var(--accent); }
+  .rel-card .rel-body { padding:0 1rem 1rem; font-size:0.82rem; color:var(--text-secondary); line-height:1.6; }
+  .arc-item { border-left:3px solid var(--accent); padding:0.6rem 1rem; margin-bottom:0.75rem; background:rgba(66,165,245,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+  .arc-item strong { color:var(--text-primary); }
+  .question-box { border:2px solid var(--knowledge); background:rgba(91,155,213,0.05); border-radius:var(--radius-md); padding:1.5rem; text-align:center; margin:2rem 0; }
+  .question-box blockquote { border:none; margin:0; padding:0; }
+  .question-box p { font-size:1rem; font-weight:510; color:var(--text-primary); }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; margin-bottom:1rem; }
+  th { text-transform:uppercase; font-size:0.72rem; font-weight:510; color:var(--text-quaternary); letter-spacing:0.04em; text-align:left; padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-default); }
+  td { padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-subtle); vertical-align:top; color:var(--text-secondary); }
+  tr:hover td { background:var(--bg-elevated); }
+  .url-col { max-width:200px; word-break:break-all; }
+  .zh { display:block; font-size:0.85em; color:var(--text-tertiary); margin-top:0.15em; }
+  .zh-inline { font-size:0.85em; color:var(--text-tertiary); }
+  details { border:1px solid var(--border-subtle); background:var(--bg-elevated); border-radius:var(--radius-sm); padding:0; margin-bottom:0.75rem; }
+  details summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  details[open] summary { color:var(--accent); }
+  details > div, details > p { padding:0 1rem 1rem; font-size:0.82rem; line-height:1.6; color:var(--text-secondary); }
+  body.embedded .sidebar, body.embedded .notes-sidebar, body.embedded .hamburger-btn, body.embedded .notes-toggle-btn { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ========== LEFT SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Caitlin Long<br>素材策展地图 V4</div>
+
+    <h4>Contents</h4>
+    <nav>
+      <ul>
+        <li><a href="#priority"><span class="toc-num">&#9733;</span>如果只有2小时</a></li>
+        <li><a href="#analysts"><span class="toc-num">1</span>最佳分析师</a></li>
+        <li><a href="#longform"><span class="toc-num">2</span>必读长文/书籍</a></li>
+        <li><a href="#podcasts"><span class="toc-num">3</span>播客与视频</a></li>
+        <li><a href="#primary"><span class="toc-num">4</span>一手资料</a></li>
+        <li><a href="#relationships"><span class="toc-num">5</span>关键关系网</a></li>
+        <li><a href="#narratives"><span class="toc-num">6</span>叙事弧</a></li>
+        <li><a href="#gaps"><span class="toc-num">7</span>信息空白</a></li>
+        <li><a href="#quality"><span class="toc-num">8</span>质量评估</a></li>
+      </ul>
+    </nav>
+
+    <h4>Related</h4>
+    <nav>
+      <ul>
+        <li><a href="15_caitlin_long.html">Caitlin Long Profile</a></li>
+        <li><a href="15_caitlin_long_metacognition.html">Metacognition</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+
+    <div class="top-controls">
+      <span class="tc-label">&#128218; 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <header class="page-header">
+      <h1>Caitlin Long — 素材策展地图 V4</h1>
+      <p class="subtitle">Research Date: 2026-03-22 &nbsp;|&nbsp; 8 Categories &middot; 45+ Sources &middot; 双语<br>
+      <span class="zh-inline">美国加密银行监管政策与Custodia Bank生态</span></p>
+      <div class="badge-row">
+        <span class="badge" style="background:rgba(248,168,72,0.15);color:#f8a848;">Policy Research</span>
+        <span class="badge" style="background:rgba(91,155,213,0.15);color:#5b9bd5;">Regulatory Intelligence</span>
+        <span class="badge" style="background:rgba(76,175,80,0.15);color:#4caf50;">Institutional Bitcoin</span>
+      </div>
+    </header>
+
+    <!-- ★ Priority Box -->
+    <div class="priority-box" id="priority">
+      <h2>&#9200; 如果只有2小时 — 推荐阅读路径</h2>
+      <ol>
+        <li><span class="time-badge">30m</span>阅读 <strong>Bitcoin Magazine</strong> "<a href="https://bitcoinmagazine.com" target="_blank">Operation Chokepoint 2.0: The Untold Story</a>" 理解核心叙事框架<span class="nref" data-note="note-k1">1</span></li>
+        <li><span class="time-badge">45m</span>观看 <strong>What Bitcoin Did</strong> Podcast 中 <mark class="hl-know" data-note="note-k2">Long的深度专访</mark>，建立对SPDI模式的直观理解</li>
+        <li><span class="time-badge">20m</span>查阅 <strong>FDIC OIG Report</strong> on Chokepoint 2.0，获取官方背书的一手证据<span class="nref" data-note="note-k3">3</span></li>
+        <li><span class="time-badge">25m</span>梳理 <strong>Custodia v. Fed</strong> 诉讼核心文件，掌握法律争议焦点</li>
+      </ol>
+    </div>
+
+    <!-- §1 最佳分析师 -->
+    <section id="analysts">
+      <div class="section-header">
+        <h2>1. 最佳分析师与独立研究<span class="zh">Best Analysts & Independent Research</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称 Name</th>
+            <th>类型 Type</th>
+            <th>URL</th>
+            <th>重要性</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Marty Bent (TFTC)</strong></td>
+            <td>独立分析师/Newsletter</td>
+            <td class="url-col"><a href="https://tftc.io" target="_blank">tftc.io</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong>Nic Carter (Castle Island)</strong></td>
+            <td>风投分析师</td>
+            <td class="url-col"><a href="https://niccarter.info" target="_blank">niccarter.info</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong>Tomio Geron</strong></td>
+            <td>科技金融记者 (The Information)</td>
+            <td class="url-col"><a href="https://theinformation.com" target="_blank">The Information</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+          <tr>
+            <td><strong>J.P. Koning</strong></td>
+            <td>独立货币银行学家</td>
+            <td class="url-col"><a href="https://jpkoning.blogspot.com" target="_blank">jpkoning.blogspot.com</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+          <tr>
+            <td><strong>Blockchain Association</strong></td>
+            <td>行业研究组织</td>
+            <td class="url-col"><a href="https://theblockchainassociation.org" target="_blank">theblockchainassociation.org</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+          <tr>
+            <td><strong>Coin Center</strong></td>
+            <td>政策研究智库</td>
+            <td class="url-col"><a href="https://www.coincenter.org" target="_blank">coincenter.org</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+          <tr>
+            <td><strong>BitMEX Research</strong></td>
+            <td>交易所研究部门</td>
+            <td class="url-col"><a href="https://blog.bitmex.com" target="_blank">blog.bitmex.com</a></td>
+            <td>⭐⭐⭐☆☆</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.5rem;">
+        <strong>中文来源补充：</strong><a href="https://www.8btc.com/author/wushuo" target="_blank">吴说区块链</a> · <a href="https://www.chaincatcher.com" target="_blank">链捕手ChainCatcher</a>
+      </p>
+    </section>
+
+    <!-- §2 必读长文/书籍 -->
+    <section id="longform">
+      <div class="section-header">
+        <h2>2. 必读长文与书籍<span class="zh">Must-Read Long-Form & Books</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称 Name</th>
+            <th>类型 Type</th>
+            <th>重要性</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>"Operation Chokepoint 2.0: The Untold Story"</strong></td>
+            <td>长文 · Bitcoin Magazine (2023)</td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong>Custodia Bank v. Federal Reserve 诉讼文件</strong></td>
+            <td>法律文件 · CourtListener/PACER</td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong>FDIC Inspector General Report on Chokepoint 2.0</strong></td>
+            <td>政府报告 · FDIC OIG (2024)<span class="nref" data-note="note-k4">4</span></td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong>"Digital Asset Banking" 系列长文</strong></td>
+            <td>长文 · CoinDesk/Cointelegraph 2020-2023</td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong>"The Bitcoin Standard" (Saifedean Ammous)</strong></td>
+            <td>书籍 · 已有中文版</td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+          <tr>
+            <td><strong>Wyoming SPDI Act 立法记录</strong></td>
+            <td>立法文件 · Wyoming Legislature</td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §3 播客与视频 -->
+    <section id="podcasts">
+      <div class="section-header">
+        <h2>3. 播客与视频<span class="zh">Podcasts & Video</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称 Name</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>What Bitcoin Did (Peter McCormack)</strong></td>
+            <td>播客</td>
+            <td class="url-col"><a href="https://www.whatbitcoindid.com" target="_blank">whatbitcoindid.com</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong>TFTC (Tales from the Crypt)</strong></td>
+            <td>播客</td>
+            <td class="url-col"><a href="https://tftc.io/martys-bent" target="_blank">tftc.io/martys-bent</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong>Congressional Testimony Videos</strong></td>
+            <td>官方视频 · C-SPAN</td>
+            <td class="url-col">众议院金融服务委员会</td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong>Bankless</strong></td>
+            <td>播客/视频</td>
+            <td class="url-col"><a href="https://www.bankless.com" target="_blank">bankless.com</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+          <tr>
+            <td><strong>Unchained (Laura Shin)</strong></td>
+            <td>播客</td>
+            <td class="url-col"><a href="https://unchainedcrypto.com" target="_blank">unchainedcrypto.com</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+          <tr>
+            <td><strong>Real Vision Crypto</strong></td>
+            <td>视频</td>
+            <td class="url-col"><a href="https://www.realvision.com" target="_blank">realvision.com</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §4 一手资料 -->
+    <section id="primary">
+      <div class="section-header">
+        <h2>4. 一手资料<span class="zh">Primary Sources</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称 Name</th>
+            <th>类型</th>
+            <th>重要性</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Caitlin Long Twitter/X (@CaitlinLong_)</strong><span class="nref" data-note="note-k5">5</span></td>
+            <td>社交媒体</td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong>Custodia Bank Official Website</strong></td>
+            <td>官网</td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong>Custodia Bank v. Fed 诉讼文档库</strong></td>
+            <td>法律文件</td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong>FOIA Documents (Long个人发布)</strong></td>
+            <td>政府文件</td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong>Federal Reserve Board Decisions</strong></td>
+            <td>监管机构</td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong>Wyoming Division of Banking</strong></td>
+            <td>监管机构</td>
+            <td>⭐⭐⭐⭐☆</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §5 关键关系网 -->
+    <section id="relationships">
+      <div class="section-header">
+        <h2>5. 关键关系网<span class="zh">Key Relationships</span></h2>
+      </div>
+      
+      <details class="rel-card" open>
+        <summary>🗳️ 政治关系 Political Relations</summary>
+        <div class="rel-body">
+          <table>
+            <thead>
+              <tr><th>关系方</th><th>类型</th><th>关联性质</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Sen. Cynthia Lummis (R-WY)</strong></td><td>政治</td><td>"比特币参议员"，Lummis-Gillibrand法案核心推手</td></tr>
+              <tr><td><strong>Sen. Kirsten Gillibrand (D-NY)</strong></td><td>政治</td><td>跨党派联盟，Long担任技术顾问</td></tr>
+              <tr><td><strong>Wyoming州政府</strong></td><td>政治/监管</td><td>SPDI法的创造者与守护者，州长Mark Gordon、州银行专员Albert Forkner</td></tr>
+              <tr><td><strong>Rep. Patrick McHenry</strong></td><td>政治</td><td>众议院金融服务委员会前主席，Chokepoint 2.0调查主导者</td></tr>
+              <tr><td><strong>Trump 2.0 政府</strong></td><td>政治</td><td>David Sacks, Paul Atkins (SEC Chair) — Custodia命运的潜在转折点<span class="nref" data-note="note-k6">6</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>🔬 研究与舆论 Research & Narrative</summary>
+        <div class="rel-body">
+          <table>
+            <thead>
+              <tr><th>关系方</th><th>类型</th><th>关联性质</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Nic Carter (Castle Island)</strong></td><td>研究/舆论</td><td>共同曝光Chokepoint 2.0，区块链数据+监管政策交叉分析</td></tr>
+              <tr><td><strong>Marty Bent (TFTC)</strong></td><td>独立分析师</td><td>深度采访Long的比特币原教旨主义视角</td></tr>
+              <tr><td><strong>J.P. Koning</strong></td><td>货币银行学</td><td>传统银行学角度分析SPDI模式和Fed主账户机制</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>🏦 行业网络 Industry Network</summary>
+        <div class="rel-body">
+          <table>
+            <thead>
+              <tr><th>关系方</th><th>类型</th><th>关联性质</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Signature Bank/Silvergate 前高管</strong></td><td>行业</td><td>Chokepoint 2.0受害者联盟，信息共享网络</td></tr>
+              <tr><td><strong>Kraken/Coinbase 合规团队</strong></td><td>行业</td><td>Custodia的潜在客户基础</td></tr>
+              <tr><td><strong>Fed Futures (Mercatus Center)</strong></td><td>智库</td><td>George Mason大学智库，为SPDI模式提供学术合法性</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>⚖️ 监管对抗 Legal Opposition</summary>
+        <div class="rel-body">
+          <p><strong>Federal Reserve Board</strong> — 拒绝Custodia主账户申请的核心监管机构，其决定代表美国加密银行准入的政策边界。</p>
+          <p><strong>FDIC / OCC</strong> — Chokepoint 2.0的主要执行机构，Long通过FOIA诉讼获取其内部通信记录。</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- §6 叙事弧 -->
+    <section id="narratives">
+      <div class="section-header">
+        <h2>6. 关键叙事弧<span class="zh">Key Narrative Arcs</span></h2>
+      </div>
+
+      <div class="question-box">
+        <blockquote>
+          <p>&#128161; 核心投资命题：<strong>Caitlin Long/Custodia</strong> 不是可投资标的，而是<mark class="hl-know" data-note="note-k7">美国加密银行基础设施开放度的实时指数</mark>。</p>
+        </blockquote>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧1: 监管压制 vs 制度接纳</strong><br>
+        <span style="font-size:0.8rem;color:var(--text-secondary);">
+          Custodia的最终命运（获得Fed主账户 vs 持续被拒 vs 诉讼和解）将是判断美国加密市场"制度成熟度"的关键里程碑。
+        </span>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧2: 去银行化危机叙事</strong><br>
+        <span style="font-size:0.8rem;color:var(--text-secondary);">
+          从Silvergate到Signature Bank到Custodia，一个连贯的"传统银行系统性排斥加密客户"的叙事正在形成，Long是这一叙事的主要建构者。
+        </span>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧3: 联邦 vs 州的权力博弈</strong><br>
+        <span style="font-size:0.8rem;color:var(--text-secondary);">
+          Wyoming SPDI法的成功与Fed主账户拒绝之间的张力，代表了美国联邦制下监管权力争夺的微观案例。<span class="nref" data-note="note-k8">8</span>
+        </span>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧4: Trump 2.0 政策逆转可能</strong><br>
+        <span style="font-size:0.8rem;color:var(--text-secondary);">
+          新政府人事任命（Paul Atkins, David Sacks）可能改变Custodia诉讼走向，这是当前最关键的"政策期权"叙事。
+        </span>
+      </div>
+    </section>
+
+    <!-- §7 信息空白 -->
+    <section id="gaps">
+      <div class="section-header">
+        <h2>7. 信息空白 — What Doesn't Exist<span class="zh">Information Gaps</span></h2>
+      </div>
+
+      <details class="rel-card" open>
+        <summary>⚠️ 关键信息缺口 Critical Gaps</summary>
+        <div class="rel-body">
+          <table>
+            <thead>
+              <tr><th>空白领域</th><th>说明</th><th>投资影响</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Custodia财务数据</strong></td>
+                <td>作为私有银行，无公开财报</td>
+                <td>无法评估商业模式可行性</td>
+              </tr>
+              <tr>
+                <td><strong>Fed主账户申请的内部审议记录</strong></td>
+                <td>是否存在政治干预的直接证据</td>
+                <td>诉讼和解概率难以量化</td>
+              </tr>
+              <tr>
+                <td><strong>Long个人财务利益</strong></td>
+                <td>Custodia股权结构未知</td>
+                <td>难以判断利益一致性<span class="nref" data-note="note-k9">9</span></td>
+              </tr>
+              <tr>
+                <td><strong>Trump政府内部对Custodia的具体立场</strong></td>
+                <td>新政府是全面支持还是选择性偏好</td>
+                <td>Custodia能否实际受益存在不确定性</td>
+              </tr>
+              <tr>
+                <td><strong>中文世界的深度分析</strong></td>
+                <td>国内多为编译，缺乏原创分析</td>
+                <td>中文投资者存在理解断层</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>📋 弥补建议 Mitigation Strategies</summary>
+        <div class="rel-body">
+          <ul style="padding-left:1.2rem;font-size:0.82rem;color:var(--text-secondary);line-height:1.6;">
+            <li>关注<strong>招聘动态</strong>、LinkedIn员工增长 — 间接推断业务健康度</li>
+            <li>持续跟踪<strong>FOIA诉讼</strong>进展，关注Long的Twitter预告</li>
+            <li>监控<strong>新Fed理事提名</strong>人参议院确认听证会表态</li>
+            <li>关注<strong>Wyoming银行监管部门</strong>的聚合报告</li>
+            <li>依赖英文一手源，或关注<strong>香港/新加坡</strong>监管机构的类似案例</li>
+          </ul>
+        </div>
+      </details>
+    </section>
+
+    <!-- §8 质量评估 -->
+    <section id="quality">
+      <div class="section-header">
+        <h2>8. 素材质量评估<span class="zh">Source Quality Assessment</span></h2>
+      </div>
+
+      <details class="rel-card" open>
+        <summary>📊 快速监控清单 Quick Monitoring Checklist</summary>
+        <div class="rel-body">
+          <table>
+            <thead>
+              <tr><th>频率</th><th>动作</th><th>信号价值</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>每日</strong></td><td>检查 @CaitlinLong_ Twitter</td><td>诉讼进展、监管动态最早信号</td></tr>
+              <tr><td><strong>每周</strong></td><td>搜索 "Custodia" + "Federal Reserve"</td><td>市场认知程度指标</td></tr>
+              <tr><td><strong>每月</strong></td><td>查阅 CourtListener 案件更新</td><td>法律程序客观记录</td></tr>
+              <tr><td><strong>季度</strong></td><td>回顾 Wyoming Division of Banking</td><td>SPDI生态整体健康度</td></tr>
+              <tr><td><strong>事件驱动</strong></td><td>国会听证会日程 + 法案进展</td><td>政策窗口期领先指标</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>⭐ 信息源可信度评级 Source Credibility Ratings</summary>
+        <div class="rel-body">
+          <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6;margin-bottom:1rem;">
+            <strong style="color:var(--accent);">Tier 1 (直接一手):</strong> Long的Twitter、诉讼文件、FOIA文档、Congressional Testimony
+          </p>
+          <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6;margin-bottom:1rem;">
+            <strong style="color:var(--knowledge);">Tier 2 (深度分析):</strong> What Bitcoin Did、TFTC、Bitcoin Magazine长文、FDIC OIG报告
+          </p>
+          <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6;margin-bottom:1rem;">
+            <strong style="color:var(--text-tertiary);">Tier 3 (补充验证):</strong> The Information、Coin Center、Blockchain Association报告
+          </p>
+          <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6;">
+            <strong style="color:var(--text-quaternary);">Tier 4 (背景参考):</strong> 中文媒体编译、主流财经媒体报道
+          </p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>🎯 研究优先级 Research Priority Matrix</summary>
+        <div class="rel-body">
+          <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6;">
+            <strong>事件驱动型交易者：</strong>Twitter监控 > 诉讼文件 > 新闻报道
+          </p>
+          <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6;">
+            <strong>长期趋势投资者：</strong>国会证词 > FDIC OIG报告 > 法案进展
+          </p>
+          <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6;">
+            <strong>基本面分析师：</strong>财务数据(缺失) > 员工增长 > 合作方声明
+          </p>
+        </div>
+      </details>
+    </section>
+
+    <footer style="margin-top:3rem; padding-top:1rem; border-top:1px solid var(--border-subtle); font-size:0.72rem; color:var(--text-quaternary);">
+      <p>Generated: 2026-03-22 &middot; V4 Template &middot; <a href="../blockchain_hub.html">Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ========== RIGHT SIDEBAR (Notes) ========== -->
+  <aside class="notes-sidebar ns-closed" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&times;</button>
+      <h4 style="font-size:0.7rem; font-weight:590; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-quaternary); margin:0;">&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+
+    <!-- META ANNOTATIONS -->
+    <div class="anno meta-note" id="note-m1" data-section="analysts" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">分析师选择逻辑</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>选择Marty Bent和Nic Carter为最高优先级，因两人均直接参与Chokepoint 2.0的曝光，与Long有深度信任关系。这是区别于一般新闻源的关键。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m2" data-section="longform" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">长文优先级判断依据</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>将"Operation Chokepoint 2.0"列为最高优先级，因这是Long作为主要信息源的叙事构建载体，理解她如何定义问题框架至关重要。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m3" data-section="podcasts" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">播客选择偏见提示</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Bankless和Unchained偏向以太坊社区视角，与Long的比特币原教旨主义存在张力，阅读时需注意框架差异。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m4" data-section="relationships" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">关系网络投资价值</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>关系网络的价值在于信号代理：Lummis的政治命运=Long联邦影响力晴雨表；Trump政府人事=Custodia逆转概率指标。关注公开互动频率。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m5" data-section="narratives" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">叙事构建者偏见</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Long是叙事的主要建构者。她的信息发布节奏、措辞选择都服务于"监管压制"的总体叙事。需交叉验证叙事框架的中立性。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m6" data-section="gaps" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">信息空白的重要性</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Custodia财务数据的缺失意味着我们无法独立评估其商业可行性，必须依赖间接信号。这限制了我们分析的质量上限。</p>
+      </div>
+    </div>
+
+    <!-- KNOWLEDGE ANNOTATIONS -->
+    <div class="anno know-note" id="note-k1" data-section="priority" onclick="toggleNote(this)">
+      <span class="note-label know">知识</span>
+      <div class="mn-head">
+        <span class="mn-title">Chokepoint 2.0 定义</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Operation Chokepoint 2.0</strong> 是指2018-2023年间，美国银行监管机构（FDIC、OCC、Fed）系统性地协调行动，通过拒绝服务、撤销银行关系等方式，将加密货币企业从传统银行体系中排除的非正式政策。</p>
+        <p>与2013年的"Operation Chokepoint"（针对色情、赌博等"高风险"行业）不同，2.0版本针对加密行业，且以"反洗钱"、"消费者保护"为名义。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-k2" data-section="priority" onclick="toggleNote(this)">
+      <span class="note-label know">知识</span>
+      <div class="mn-head">
+        <span class="mn-title">SPDI银行模式</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>SPDI (Special Purpose Depository Institution)</strong> 是Wyoming州2019年创建的专门针对加密资产银行的牌照类别。</p>
+        <p>关键特征：可持有客户资产、可进行加密托管、但存取款必须通过已授权的"接受存款机构"（即需要传统银行的"过道"）。这就是为什么<mark class="hl-know" data-note="note-k10">Fed主账户</mark>如此关键——没有它，Custodia仍需依赖传统银行。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-k3" data-section="priority" onclick="toggleNote(this)">
+      <span class="note-label know">知识</span>
+      <div class="mn-head">
+        <span class="mn-title">FDIC OIG报告的意义</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>FDIC监察长办公室于2024年发布的报告首次官方确认Chokepoint 2.0的存在。Long通过FOIA诉讼获取了这些内部邮件，是监管透明度的重大突破。</p>
+        <p>这是"一手证据"级别的来源，对于验证Long叙事框架的准确性至关重要。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-k4" data-section="longform" onclick="toggleNote(this)">
+      <span class="note-label know">知识</span>
+      <div class="mn-head">
+        <span class="mn-title">Fed主账户机制</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Fed主账户(Main Master Account)允许机构直接在美联储持有储备金，无需通过代理银行。这对于银行机构来说是核心基础设施。</p>
+        <p>Custodia申请被拒的理由是"风险管理不足"，但批评者认为真正原因是政治压力。这是法律争议的核心。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-k5" data-section="primary" onclick="toggleNote(this)">
+      <span class="note-label know">知识</span>
+      <div class="mn-head">
+        <span class="mn-title">Long Twitter的信息价值</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>@CaitlinLong_ 是Chokepoint 2.0文档的首发地，也是诉讼进展的第一时间披露平台。她经常在法院文件公开前数小时预告重大进展。</p>
+        <p>此外，关注她转发/互动的账号，可以映射出加密银行监管的核心关系网络。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-k6" data-section="relationships" onclick="toggleNote(this)">
+      <span class="note-label know">知识</span>
+      <div class="mn-head">
+        <span class="mn-title">Trump 2.0 影响分析</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>David Sacks担任AI/Crypto Czar，Paul Atkins被提名为SEC主席（他是加密友好派）。这两项人事任命可能改变Custodia诉讼走向。</p>
+        <p>但需注意：新政府是否全面支持加密银行，还是有选择性偏好，目前仍不确定。这是最大的信息空白之一。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-k7" data-section="narratives" onclick="toggleNote(this)">
+      <span class="note-label know">知识</span>
+      <div class="mn-head">
+        <span class="mn-title">"实时指数"概念</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Custodia不是可投资的股票或代币，但其命运可以作为美国加密市场制度成熟度的代理指标。</p>
+        <p>三个情景：①获得主账户=监管开放信号；②持续被拒=制度性排斥延续；③诉讼和解=模糊地带。</p>
+        <p>这建议将Long/Custodia纳入<strong>监管政策监控框架</strong>，而非传统基本面分析。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-k8" data-section="narratives" onclick="toggleNote(this)">
+      <span class="note-label know">知识</span>
+      <div class="mn-head">
+        <span class="mn-title">联邦制博弈案例</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Wyoming州通过了允许SPDI银行运营的法律，但Fed拒绝了这些银行的主账户申请。这代表联邦制下州权与联邦权的直接冲突。</p>
+        <p>Long站在州权一侧，推动通过州级立法创建"监管沙盒"，同时对抗联邦机构的否决。这是理解其政治立场的关键。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-k9" data-section="gaps" onclick="toggleNote(this)">
+      <span class="note-label know">知识</span>
+      <div class="mn-head">
+        <span class="mn-title">利益一致性风险</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Custodia的股权结构、Long的个人投资敞口、薪酬安排均未知。需假设其利益与Custodia成功高度绑定。</p>
+        <p>这可能导致"传教士偏见"(missionary bias)：其公开言论可能强化有利于Custodia的叙事。</p>
+        <p>缓解措施：交叉验证多源信息，关注反向观点（如传统银行学者的批评）。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-k10" data-section="gaps" onclick="toggleNote(this)">
+      <span class="note-label know">知识</span>
+      <div class="mn-head">
+        <span class="mn-title">为什么主账户是核心</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>没有Fed主账户，Custodia即使持有SPDI牌照，仍必须通过传统银行（如Kraken Bank或客户自己的银行）来接入支付系统。</p>
+        <p>这意味着：①交易对手风险；②成本增加；③监管套利空间受限。主账户是Custodia真正"去银行依赖"的关键。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-k11" data-section="quality" onclick="toggleNote(this)">
+      <span class="note-label know">知识</span>
+      <div class="mn-head">
+        <span class="mn-title">信息不对称机会</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>中文世界对SPDI法律结构和Chokepoint 2.0机制的原创分析几乎空白。英文熟练的投资者可能存在信息优势。</p>
+        <p>但这也意味着：①翻译/传播延迟；②本地化解读缺失；③可能的翻译错误风险。</p>
+        <p>建议：直接阅读英文一手源，或关注香港/新加坡监管机构的类似案例（作为类比参考）。</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+// === Sidebar toggle (mobile) ===
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+
+// === Notes sidebar toggle ===
+(function(){
+  var btn=document.getElementById("notesToggleBtn"),ns=document.getElementById("notesSidebar"),ov=document.getElementById("notesOverlay"),cb=document.getElementById("notesCloseBtn");
+  if(!btn||!ns)return;
+  function toggle(){ns.classList.toggle("ns-closed");ov.classList.toggle("open");}
+  btn.onclick=toggle;
+  if(ov)ov.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(cb)cb.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(window.innerWidth>1200)ns.classList.remove("ns-closed");
+  window.addEventListener("resize",function(){if(window.innerWidth>1200)ns.classList.remove("ns-closed");});
+})();
+
+// === Toggle note ===
+function toggleNote(head){
+  var anno=head.closest(".anno");
+  if(anno){anno.classList.toggle("open");positionNotes();}
+}
+
+// === Position notes ===
+function positionNotes(){
+  var ns=document.getElementById("notesSidebar");if(!ns)return;
+  var annos=ns.querySelectorAll(".anno");
+  var lastBottom=80;
+  annos.forEach(function(a){
+    if(a.style.display==="none")return;
+    var sec=a.getAttribute("data-section");
+    var target=sec?document.getElementById(sec):null;
+    var top=target?target.getBoundingClientRect().top+window.scrollY-ns.getBoundingClientRect().top:lastBottom;
+    if(top<lastBottom)top=lastBottom;
+    a.style.top=top+"px";
+    lastBottom=top+a.offsetHeight+8;
+  });
+}
+
+// === Knowledge toggle ===
+function toggleKnowNotes(){
+  var btn=document.getElementById("knowToggleBtn");
+  var knowNotes=document.querySelectorAll(".anno.know-note");
+  var marks=document.querySelectorAll("mark.hl-know");
+  var nrefs=document.querySelectorAll(".nref");
+  var visible=btn.classList.contains("active");
+  knowNotes.forEach(function(n){n.style.display=visible?"none":"";});
+  marks.forEach(function(m){m.style.background=visible?"transparent":"";m.style.borderBottom=visible?"none":"";});
+  nrefs.forEach(function(r){r.style.display=visible?"none":"";});
+  btn.classList.toggle("active");
+  btn.textContent=visible?"显示":"隐藏";
+  positionNotes();
+}
+
+// === Expand / Collapse all ===
+function expandAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.add("open");});positionNotes();}
+function collapseAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.remove("open");});positionNotes();}
+
+// === Note count ===
+(function(){
+  var label=document.getElementById("noteCountLabel");if(!label)return;
+  var meta=document.querySelectorAll(".anno.meta-note").length;
+  var know=document.querySelectorAll(".anno.know-note").length;
+  label.textContent=meta+" META + "+know+" Knowledge";
+})();
+
+// === Highlight → Note sync ===
+document.addEventListener("click",function(e){
+  var mark=e.target.closest("mark.hl-know")||e.target.closest(".nref");
+  if(!mark)return;
+  var noteId=mark.getAttribute("data-note");if(!noteId)return;
+  var anno=document.getElementById(noteId);if(!anno)return;
+  anno.classList.add("open");
+  anno.scrollIntoView({behavior:"smooth",block:"center"});
+  anno.classList.add("flash");
+  setTimeout(function(){anno.classList.remove("flash");},1500);
+  positionNotes();
+});
+
+// === Embedded mode ===
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+  document.addEventListener("click",function(e){
+    var a=e.target.closest("a");if(!a||!a.href)return;
+    try{var url=new URL(a.href,location.href)}catch(err){return}
+    if(url.pathname.startsWith("/trade-pipeline/")||url.pathname.startsWith("/observatory/")){
+      e.preventDefault();
+      window.top.postMessage({type:"dashboard-nav",action:"openResearch",url:url.pathname,title:a.textContent.trim().substring(0,60)},"*");
+    }
+  });
+})();
+
+// Initial positioning
+window.addEventListener("load",function(){positionNotes();});
+window.addEventListener("scroll",function(){positionNotes();});
+</script>
+</body>
+</html>

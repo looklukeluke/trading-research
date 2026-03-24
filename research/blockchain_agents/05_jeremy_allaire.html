@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jeremy Allaire — 认知代理人报告</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="../blockchain_shared.css">
+  <style>
+/* === Agent-specific extensions (keep under 80 lines) === */
+/* KPI Cards */
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+.kpi-card { background: var(--bg-surface); border-radius: var(--radius-md); padding: 1.25rem; border: 1px solid var(--border-subtle); }
+.kpi-label { font-size: 0.72rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.kpi-value { font-size: 1.5rem; font-weight: 680; font-feature-settings: 'tnum' 1; margin-bottom: 4px; }
+.kpi-change { font-size: 0.78rem; font-weight: 600; }
+.kpi-change.positive { color: #4caf50; }
+.kpi-change.negative { color: #f44336; }
+.kpi-subtitle { font-size: 0.72rem; color: var(--text-quaternary); margin-top: 4px; }
+/* Callout Boxes */
+.callout { background: var(--bg-surface); border-radius: var(--radius-sm); padding: 1rem 1.25rem; margin: 1rem 0; border-left: 3px solid var(--accent); }
+.callout-title { font-size: 0.8rem; font-weight: 590; color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+.callout-body { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; }
+.callout.risk { border-left-color: #f44336; }
+.callout.risk .callout-title { color: #f44336; }
+.callout.insight { border-left-color: var(--knowledge); }
+.callout.insight .callout-title { color: var(--knowledge); }
+/* Competition bar */
+.comp-bar { display: flex; height: 20px; border-radius: 4px; overflow: hidden; margin: 0.5rem 0; }
+.comp-bar .usdc { background: var(--knowledge); }
+.comp-bar .usdt { background: var(--accent); }
+/* Agent Role Badges */
+.agent-role-badge { font-size: 0.68rem; font-weight: 510; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+.agent-role-badge.builder { background: rgba(76,175,80,0.15); color: #4caf50; }
+/* Provenance */
+.prov-badge { font-size: 0.65rem; padding: 1px 6px; border-radius: 3px; font-weight: 600; }
+.prov-primary { background: rgba(76,175,80,0.12); color: #4caf50; }
+.prov-industry { background: rgba(91,155,213,0.12); color: var(--knowledge); }
+.prov-media { background: rgba(248,168,72,0.12); color: var(--accent); }
+/* Chart Frames */
+.chart-frame { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); margin: 1rem 0; overflow: hidden; }
+.chart-frame-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-subtle); }
+.chart-frame-title { font-size: 0.82rem; font-weight: 590; color: var(--text-secondary); letter-spacing: 0.02em; }
+.chart-frame-body { padding: 0; }
+.chart-source { padding: 0.5rem 1rem; font-size: 0.7rem; color: var(--text-quaternary); border-top: 1px solid var(--border-subtle); }
+/* Embedded + Reading mode */
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+body.embedded .hamburger-btn { display: none !important; }
+body.embedded .sidebar-overlay { display: none !important; }
+.reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+.reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+.reading-mode .hamburger-btn { display: none !important; }
+.reading-mode .sidebar-overlay { display: none !important; }
+  </style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes sidebar">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ═══════════ LEFT SIDEBAR ═══════════ -->
+  <aside class="sidebar" id="sidebar">
+    <a class="back-link" href="../blockchain_hub.html">&larr; Blockchain Hub</a>
+
+    <h4>Jeremy Allaire</h4>
+    <div class="project-meta">
+      CEO, Circle (USDC)<br>
+      N5 稳定币 &middot; A档 4/5
+    </div>
+
+    <h4>目录导航</h4>
+    <nav>
+      <ul>
+        <li><a href="#summary"><span class="toc-num">&#9733;</span>速览摘要</a></li>
+        <li><a href="#thesis"><span class="toc-num">1</span>核心命题</a></li>
+        <li><a href="#actions"><span class="toc-num">2</span>行动证据</a></li>
+        <li><a href="#framework"><span class="toc-num">3</span>认知框架</a></li>
+        <li><a href="#kpi"><span class="toc-num">4</span>关键数据</a></li>
+        <li><a href="#judgment"><span class="toc-num">5</span>判断与立场</a></li>
+        <li><a href="#trading"><span class="toc-num">6</span>交易含义</a></li>
+        <li><a href="#risk"><span class="toc-num">7</span>风险信号</a></li>
+        <li><a href="#provenance"><span class="toc-num">8</span>Provenance</a></li>
+      </ul>
+    </nav>
+
+    <h4 style="margin-top:1rem;">相关文件</h4>
+    <nav>
+      <ul>
+        <li><a href="../blockchain_hub.html">Blockchain Hub &rarr;</a></li>
+        <li><a href="../blockchain_hub.html#agents" style="color:var(--accent);">All Agents &rarr;</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ═══════════ MAIN CONTENT ═══════════ -->
+  <main class="main-content">
+
+    <!-- Header -->
+    <header class="page-header">
+      <div class="role-badge">STABLECOIN BUILDER</div>
+      <h1>Jeremy Allaire</h1>
+      <p class="subtitle">CEO &amp; Co-Founder, Circle &nbsp;|&nbsp; USDC Issuer &nbsp;|&nbsp; 2026-03-22<br>
+      <span style="color:var(--text-quaternary);font-size:0.85em;">认知代理人报告 — Cognitive Agent Profile</span></p>
+      <div class="badge-row">
+        <span class="badge">N5 稳定币</span>
+        <span class="badge">A档 4/5</span>
+        <span class="badge">USDC</span>
+        <span class="badge">Circle IPO (2025)</span>
+        <span class="badge">CCTP 跨链</span>
+        <span class="badge">GENIUS Act</span>
+      </div>
+    </header>
+
+    <!-- Priority Box -->
+    <div class="priority-box" id="summary">
+      <h2>&#9200; 速览摘要 — 60秒理解 Jeremy Allaire</h2>
+      <ol>
+        <li><strong>合规稳定币标准</strong>：USDC 是最大的合规稳定币，月度审计、100%储备透明，对标 USDT 的"信任黑箱"模式</li>
+        <li><strong>IPO 里程碑</strong>：Circle 于 2025 年成功 IPO，成为首个上市的主要稳定币发行商，标志稳定币行业从灰色地带走向主流金融</li>
+        <li><strong>跨链基础设施</strong>：Cross-Chain Transfer Protocol (CCTP) 实现 USDC 在多链间原生转移，解决碎片化问题</li>
+        <li><strong>立法推手</strong>：积极倡导 GENIUS Act 等稳定币立法框架，将合规优势转化为竞争护城河</li>
+        <li><strong>核心判断</strong>："Stablecoins are the internet upgrade for money."</li>
+      </ol>
+    </div>
+
+    <!-- Section 1: Core Thesis -->
+    <section id="thesis">
+      <div class="section-header">
+        <h2>1. 核心命题 Core Thesis</h2>
+      </div>
+      <p>Allaire 的核心信念是：互联网已经革命了信息传播，但<strong>金钱的互联网层</strong>还未建成。稳定币 &mdash; 特别是合规的、受监管的稳定币 &mdash; 就是这个缺失的层。</p>
+
+      <blockquote>
+        "Stablecoins are the internet upgrade for money. Just as email made communication instant and free, stablecoins will make value transfer instant and nearly free."<br>
+        <span style="color:var(--text-quaternary);font-size:0.82rem;">&mdash; Jeremy Allaire, Circle IPO Roadshow, 2025</span>
+      </blockquote>
+    </section>
+
+    <!-- Section 2: Action Evidence -->
+    <section id="actions">
+      <div class="section-header">
+        <h2>2. 行动证据 Action Evidence</h2>
+      </div>
+
+      <h3>2.1 月度储备审计</h3>
+      <p>Circle 是唯一坚持<strong>每月由 Grant Thornton 出具储备证明</strong>的主要稳定币发行商。每枚 USDC 背后有等值的现金和短期国债。这在 Terra/LUNA 崩盘后成为关键差异化因素。</p>
+
+      <h3>2.2 Circle IPO 成功 (2025)</h3>
+      <p>Circle 成功在纽约证券交易所上市，估值反映了市场对合规稳定币赛道的认可。IPO 使 Circle 获得了传统资本市场的永久融资通道和品牌背书。</p>
+
+      <h3>2.3 Coinbase 战略合作</h3>
+      <p>Circle 与 Coinbase 共同创立了 Centre Consortium（USDC 治理实体）。Coinbase 作为最大的合规交易所，为 USDC 提供了分发网络和流动性基础。</p>
+
+      <h3>2.4 CCTP 跨链协议</h3>
+      <p>Cross-Chain Transfer Protocol 解决了 USDC 在不同区块链间的碎片化问题。CCTP 允许 USDC 在 Ethereum、Solana、Avalanche、Arbitrum 等链间<strong>原生燃烧-铸造</strong>，而非依赖桥接（减少桥接攻击风险）。</p>
+
+      <h3>2.5 GENIUS Act 立法倡导</h3>
+      <p>Allaire 积极推动美国稳定币立法框架 (GENIUS Act)。该法案将为合规稳定币创造明确的监管环境，同时<strong>事实上提高了不合规竞争者（USDT）的准入壁垒</strong>。这是"用合规做护城河"的经典战略。</p>
+    </section>
+
+    <!-- Section 3: Framework -->
+    <section id="framework">
+      <div class="section-header">
+        <h2>3. 认知框架 Cognitive Framework</h2>
+      </div>
+
+      <div class="callout insight">
+        <div class="callout-title">Allaire 的稳定币三层模型</div>
+        <div class="callout-body">
+          <p><strong>Layer 1 — 价值存储层</strong>：USDC = 数字美元，100%储备支持。不是加密货币的波动性赌注，而是区块链上的美元等价物。</p>
+          <p><strong>Layer 2 — 支付铁路层</strong>：USDC 在链上的转移成本远低于 SWIFT/银行电汇。7x24全球即时到账。这是对传统支付基础设施的降维打击。</p>
+          <p><strong>Layer 3 — 可编程金融层</strong>：USDC 作为 DeFi 的基础货币，支撑借贷、做市、收益协议。这是传统美元做不到的 &mdash; 智能合约使金钱可编程。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: KPIs -->
+    <section id="kpi">
+      <div class="section-header">
+        <h2>4. 关键数据 Key Metrics</h2>
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-label">USDC 市值</div>
+          <div class="kpi-value">~$60B</div>
+          <div class="kpi-subtitle">第二大稳定币</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">USDT 市值</div>
+          <div class="kpi-value">~$145B</div>
+          <div class="kpi-subtitle">最大稳定币 (Tether)</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">USDC 市场份额</div>
+          <div class="kpi-value">~25%</div>
+          <div class="kpi-change negative">&#9660; vs USDT ~60%</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Circle IPO</div>
+          <div class="kpi-value">2025</div>
+          <div class="kpi-subtitle">NYSE 上市</div>
+        </div>
+      </div>
+
+      <h3>USDC vs USDT 市场份额</h3>
+      <div class="comp-bar">
+        <div class="usdc" style="width:25%;"></div>
+        <div class="usdt" style="width:60%;"></div>
+        <div style="flex:1;background:var(--border-subtle);"></div>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text-tertiary);">
+        <span style="color:var(--knowledge);">&#9632; USDC ~25%</span> &nbsp;
+        <span style="color:var(--accent);">&#9632; USDT ~60%</span> &nbsp;
+        <span style="color:var(--text-quaternary);">&#9632; Others ~15%</span>
+      </p>
+    </section>
+
+    <!-- Section 5: Judgment -->
+    <section id="judgment">
+      <div class="section-header">
+        <h2>5. 判断与立场 Judgment</h2>
+      </div>
+
+      <div class="callout">
+        <div class="callout-title">核心判断 Core Thesis</div>
+        <div class="callout-body">
+          <p>"Stablecoins are the internet upgrade for money."</p>
+          <ul>
+            <li><strong>合规溢价假说</strong>：在监管明确化后，合规稳定币将获得"合规溢价" &mdash; 银行、企业、政府只会用受监管的稳定币。USDC 将蚕食 USDT 的市场份额。<span class="pending">&#8987; 待验证</span></li>
+            <li><strong>网络效应假说</strong>：IPO + Coinbase 分发 + CCTP 跨链 = USDC 的网络效应将在监管窗口打开后加速。<span class="pending">&#8987; 待验证</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>偏见分析 Bias Assessment</h3>
+      <ul>
+        <li><strong>创始人偏见</strong>：Allaire 是 Circle CEO，天然高估 USDC 的前景。他的"稳定币是互联网金钱升级"的叙事服务于 Circle 的估值故事。</li>
+        <li><strong>合规乐观偏见</strong>：假设监管最终会偏向合规玩家。但现实中 USDT 在监管灰色地带运营了多年，市场份额反而扩大。</li>
+        <li><strong>美国中心偏见</strong>：GENIUS Act 是美国立法。全球市场（特别是亚洲、中东）可能不买账 &mdash; USDT 在这些市场的渗透率更高。</li>
+      </ul>
+    </section>
+
+    <!-- Section 6: Trading -->
+    <section id="trading">
+      <div class="section-header">
+        <h2>6. 交易含义 Trading Implications</h2>
+      </div>
+
+      <figure>
+        <table>
+          <thead><tr><th>标的</th><th>逻辑</th><th>信号类型</th><th>催化剂</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Circle (IPO stock)</strong></td><td>直接敞口：USDC市值增长 &rarr; Circle收入增长（储备利息收入）</td><td><span class="signal signal-bull">BULL</span></td><td>稳定币立法通过</td></tr>
+            <tr><td><strong>COIN</strong></td><td>Coinbase 是 USDC 联合创始方，从 USDC 分发中获得收入分成</td><td><span class="signal signal-bull">BULL</span></td><td>USDC 市值增长</td></tr>
+            <tr><td><strong>USDC 市场份额</strong></td><td>监控 USDC vs USDT 市场份额变化 = 合规溢价是否兑现的领先指标</td><td><span class="signal signal-watch">WATCH</span></td><td>GENIUS Act 进展</td></tr>
+            <tr><td><strong>DeFi 协议</strong></td><td>USDC 扩张利好以 USDC 为基础货币的 DeFi 协议 (Aave, MakerDAO)</td><td><span class="signal signal-watch">WATCH</span></td><td>CCTP 扩展</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <div class="callout">
+        <div class="callout-title">交易者视角</div>
+        <div class="callout-body">
+          Circle IPO 股票是稳定币赛道最直接的交易标的。关键催化剂是<strong>稳定币立法</strong> &mdash; GENIUS Act 通过将明确利好合规发行商。USDC 市场份额 vs USDT 的变化是核心跟踪指标。短期风险在于利率下降会压缩 Circle 的储备利息收入。
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 7: Risk -->
+    <section id="risk">
+      <div class="section-header">
+        <h2>7. 风险信号 Risk Signals</h2>
+      </div>
+
+      <div class="callout risk">
+        <div class="callout-title">风险监控</div>
+        <div class="callout-body">
+          <ul>
+            <li><strong>USDT 韧性</strong>：尽管透明度低，USDT 市场份额持续扩大。"合规溢价"可能是幻觉 &mdash; 用户选择便利性而非合规性</li>
+            <li><strong>利率敏感</strong>：Circle 收入主要来自储备资产的利息（国债收益）。降息周期 &rarr; 收入下降</li>
+            <li><strong>立法风险</strong>：GENIUS Act 可能不通过或大幅修改。如果法案纳入 CBDC 优先条款，私人稳定币可能被边缘化</li>
+            <li><strong>竞争加剧</strong>：PayPal (PYUSD)、Ripple (RLUSD) 等新进入者分食市场，USDC 未必能维持第二的位置</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 8: Provenance -->
+    <section id="provenance">
+      <div class="section-header">
+        <h2>8. Provenance 来源溯源</h2>
+      </div>
+      <figure>
+        <table>
+          <thead><tr><th>来源</th><th>类型</th><th>时间</th><th>可信度</th></tr></thead>
+          <tbody>
+            <tr><td>Circle IPO Prospectus (SEC Filing)</td><td><span class="prov-badge prov-primary">一手</span></td><td>2025</td><td><span class="tier-high">高</span></td></tr>
+            <tr><td>USDC Monthly Reserve Reports</td><td><span class="prov-badge prov-primary">一手</span></td><td>月度</td><td><span class="tier-high">高</span></td></tr>
+            <tr><td>GENIUS Act Legislative Text</td><td><span class="prov-badge prov-primary">一手</span></td><td>2025</td><td><span class="tier-high">高</span></td></tr>
+            <tr><td>Jeremy Allaire Congressional Testimony</td><td><span class="prov-badge prov-primary">一手</span></td><td>2024-2025</td><td><span class="tier-high">高</span></td></tr>
+            <tr><td>DefiLlama Stablecoin Dashboard</td><td><span class="prov-badge prov-industry">行业</span></td><td>实时</td><td><span class="tier-high">高</span></td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </section>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+      <p>Jeremy Allaire 认知代理人报告 &mdash; Blockchain Research System &middot; 2026-03-22<br>
+      <a href="../blockchain_hub.html">&larr; Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ═══════════ RIGHT SIDEBAR: Notes ═══════════ -->
+  <aside class="notes-sidebar" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn" aria-label="Close notes">&#10005;</button>
+      <h4>&#129504; 注解 Notes</h4>
+    </div>
+
+    <!-- Note 1: USDC vs USDT -->
+    <div class="anno meta-note open" data-section="kpi" id="n1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">USDC vs USDT 市场份额之争</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>USDC 和 USDT 的市场份额争夺是稳定币赛道最核心的叙事线。</p>
+        <p><strong>USDT 的优势</strong>：先发优势、全球渗透（特别是亚洲/中东）、不受美国监管束缚反而更灵活。</p>
+        <p><strong>USDC 的赌注</strong>：监管明确化后，银行/企业/政府只用合规稳定币 &rarr; USDC 市场份额反转。</p>
+        <p><span style="color:var(--accent);font-weight:590;">关键问题</span>：合规溢价是否真的存在？还是市场永远选择最方便的选项？历史案例（MP3/正版音乐）暗示合规最终会赢，但过程可能很长。</p>
+      </div>
+    </div>
+
+    <!-- Note 2: Compliance Premium -->
+    <div class="anno meta-note open" data-section="judgment" id="n2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Compliance Premium 合规溢价</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>Allaire 的整个商业模式建立在<strong>合规溢价假说</strong>之上：监管清晰化后，机构资金只流向合规稳定币。</p>
+        <p>验证指标：</p>
+        <p>&bull; GENIUS Act 是否通过 &rarr; 合规壁垒是否形成<br>
+        &bull; USDC 在机构 DeFi 中的占比是否上升<br>
+        &bull; 传统银行是否选择 USDC 作为结算层</p>
+        <p>反面论证：Tether 在 2024-2025 年利润超过 $10B，证明"不合规"也能活得很好。合规溢价可能是一厢情愿。</p>
+      </div>
+    </div>
+
+    <!-- Note 3: Stablecoin Legislation -->
+    <div class="anno meta-note open" data-section="trading" id="n3">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Stablecoin Legislation Impact 立法冲击</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>稳定币立法是 2025-2026 年加密行业最大的结构性催化剂之一。</p>
+        <p><strong>正面场景</strong>：GENIUS Act 通过 &rarr; 合规框架明确 &rarr; 银行被允许发行/持有稳定币 &rarr; USDC 需求暴增 &rarr; Circle 股价上涨。</p>
+        <p><strong>负面场景</strong>：法案被推迟/否决 &rarr; 监管不确定性持续 &rarr; USDT 继续在灰色地带扩张 &rarr; USDC 合规成本成为纯负担。</p>
+        <p><strong>黑天鹅</strong>：法案包含 CBDC 优先条款 &rarr; 联储发行数字美元 &rarr; 私人稳定币全部边缘化。</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+(function() {
+  // 1. Sidebar toggle
+  var hamburger = document.getElementById('hamburgerBtn');
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('sidebarOverlay');
+  hamburger.addEventListener('click', function() { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', function() { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+  sidebar.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() { if (window.innerWidth <= 900) { sidebar.classList.remove('open'); overlay.classList.remove('open'); } });
+  });
+
+  // 2. Note toggle
+  window.toggleNote = function(head) { head.parentElement.classList.toggle('open'); };
+
+  // 3. Right sidebar toggle
+  var notesSidebarEl = document.getElementById('notesSidebar');
+  var notesToggleBtn = document.getElementById('notesToggleBtn');
+  var notesOverlayEl = document.getElementById('notesOverlay');
+  var notesCloseBtn = document.getElementById('notesCloseBtn');
+  function toggleNotesSidebar() {
+    var willClose = !notesSidebarEl.classList.contains('ns-closed');
+    notesSidebarEl.classList.toggle('ns-closed', willClose);
+    notesToggleBtn.style.display = willClose ? 'flex' : 'none';
+    notesOverlayEl.classList.toggle('open', !willClose);
+  }
+  if (notesToggleBtn) notesToggleBtn.addEventListener('click', toggleNotesSidebar);
+  if (notesOverlayEl) notesOverlayEl.addEventListener('click', toggleNotesSidebar);
+  if (notesCloseBtn) notesCloseBtn.addEventListener('click', toggleNotesSidebar);
+
+  // 4. Resize handler
+  if (window.innerWidth > 1200) {
+    notesSidebarEl.classList.remove('ns-closed');
+    notesToggleBtn.style.display = 'none';
+  } else {
+    notesSidebarEl.classList.add('ns-closed');
+    notesToggleBtn.style.display = 'flex';
+  }
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 1200) { notesSidebarEl.classList.remove('ns-closed'); notesToggleBtn.style.display = 'none'; notesOverlayEl.classList.remove('open'); }
+  });
+
+  // 5. Expand all notes on load
+  document.querySelectorAll('.anno').forEach(function(n) { n.classList.add('open'); });
+
+  // 6. Active TOC
+  var navLinks = document.querySelectorAll('.sidebar nav ul li a[href^="#"]');
+  var tocObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        navLinks.forEach(function(link) { link.classList.remove('active'); if (link.getAttribute('href') === '#' + entry.target.id) link.classList.add('active'); });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  document.querySelectorAll('[id="summary"],[id="thesis"],[id="actions"],[id="framework"],[id="kpi"],[id="judgment"],[id="trading"],[id="risk"],[id="provenance"]').forEach(function(s) { tocObserver.observe(s); });
+})();
+</script>
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+</body>
+</html>

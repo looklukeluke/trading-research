@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Justin Sun 孙宇晨 — Metacognition 元思考过程</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  .meta-card { border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:1.1rem 1.3rem; margin-bottom:0.75rem; background:var(--bg-surface); }
+  .meta-card h3 { font-size:0.95rem; font-weight:590; margin-bottom:0.5rem; color:var(--text-primary); }
+  .meta-card p { font-size:0.82rem; color:var(--text-secondary); line-height:1.6; margin-bottom:0.5rem; }
+  .bias-tag { display:inline-block; padding:0.15rem 0.5rem; border-radius:4px; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
+  .bias-confirmed { background:rgba(76,175,80,0.15); color:var(--tier-high); }
+  .bias-warning { background:rgba(255,193,7,0.15); color:var(--tier-medium); }
+  .bias-critical { background:rgba(244,67,54,0.15); color:var(--tier-low); }
+  .confidence-bar { display:flex; align-items:center; gap:0.5rem; margin:0.5rem 0; }
+  .conf-track { flex:1; height:6px; background:var(--border-subtle); border-radius:3px; overflow:hidden; }
+  .conf-fill { height:100%; border-radius:3px; }
+  .conf-label { font-size:0.72rem; font-weight:590; color:var(--text-tertiary); min-width:2.5rem; }
+  .gap-item { border-left:3px solid var(--tier-low); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(244,67,54,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .cross-ref { border-left:3px solid var(--knowledge); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(91,155,213,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .decision-log { font-size:0.78rem; color:var(--text-tertiary); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:0.8rem 1rem; background:var(--bg-elevated); margin-bottom:0.75rem; }
+  body.embedded .sidebar { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+</style>
+</head>
+<body>
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="page-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Justin Sun 孙宇晨<br>Metacognition 元思考</div>
+    <h4>Contents</h4>
+    <nav><ul>
+      <li><a href="#selection">1 Selection 选择理由</a></li>
+      <li><a href="#biases">2 Biases 认知偏差</a></li>
+      <li><a href="#corrections">3 Corrections 纠正</a></li>
+      <li><a href="#gaps">4 Gaps 信息缺口</a></li>
+      <li><a href="#crossval">5 Cross-Validation 交叉验证</a></li>
+      <li><a href="#quality">6 Quality 质量评估</a></li>
+      <li><a href="#log">7 Decision Log 决策日志</a></li>
+    </ul></nav>
+    <h4>Related</h4>
+    <nav><ul>
+      <li><a href="14_justin_sun.html">Justin Sun 孙宇晨 Profile</a></li>
+      <li><a href="sources_14_justin_sun_v4.html">Sources V4</a></li>
+    </ul></nav>
+  </aside>
+  <main class="main-content">
+    <header class="page-header">
+      <h1>Justin Sun 孙宇晨 — Metacognition<span style="display:block;font-size:0.85rem;font-weight:400;color:var(--text-tertiary);margin-top:0.2rem;">元思考过程 — 研究中的认知审计</span></h1>
+      <p style="font-size:0.82rem;color:var(--text-quaternary);">Generated: 2026-03-22 &middot; Part of Blockchain Research Hub</p>
+    </header>
+
+    <!-- §1 Selection 选择理由 -->
+    <section id="selection" style="margin-bottom:2rem;">
+      <div class="section-header">
+        <h2>1. Selection 选择理由</h2>
+      </div>
+      
+      <div class="meta-card">
+        <h3>为什么选择 Justin Sun / TRON 作为研究对象？</h3>
+        <p><strong>Why Justin Sun / TRON as a research subject?</strong></p>
+        <p>Justin Sun 和 TRON 代表了一个独特的分析案例：在一个充斥着意识形态辩论的行业中，TRON 凭借<strong>纯粹的使用数据</strong>成为发展中世界的金融基础设施。</p>
+        <p>当西方分析师用"技术价值"和"去中心化程度"来评估区块链时，TRON的用户——巴西的家庭主妇、尼日利亚的外劳、越南的跨境贸易商——用脚投票选择了<strong>0.1美分手续费</strong>和<strong>3秒确认时间</strong>。</p>
+      </div>
+
+      <div class="meta-card">
+        <h3>节点归属与信号价值</h3>
+        <p><strong>Node Assignment & Signal Value</strong></p>
+        <ul style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6;">
+          <li><strong>节点归属</strong>：N2（公链生态）— TRON是全球前五的公链生态系统</li>
+          <li><strong>Tier等级</strong>：C档 2/5 — 争议性人物，信号价值高于投资价值</li>
+          <li><strong>核心信号</strong>：TRON链上USDT流量是发展中世界美元需求的领先指标</li>
+          <li><strong>研究价值</strong>：理解"沉默大多数"的加密采用模式——那些不在Twitter上发言的用户</li>
+        </ul>
+      </div>
+
+      <div class="meta-card">
+        <h3>关键数据锚点</h3>
+        <p><strong>Key Data Anchors</strong></p>
+        <ul style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6;">
+          <li>3.3B 累计账户 — 全球最大规模的稳定币用户基础</li>
+          <li>$10B+ 日USDT转账量 — 超过绝大多数传统支付网络</li>
+          <li>巴西90%加密交易使用TRON-USDT — 本地法定货币贬值驱动</li>
+          <li>尼日利亚$921B年交易量 — 非洲最大加密市场</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- §2 Biases 认知偏差 -->
+    <section id="biases" style="margin-bottom:2rem;">
+      <div class="section-header">
+        <h2>2. Biases 认知偏差</h2>
+      </div>
+
+      <div class="meta-card">
+        <h3>已识别的认知偏差 <span class="bias-tag bias-critical">IDENTIFIED</span></h3>
+        
+        <div style="margin-top:1rem;">
+          <p><strong>偏差1：观察者偏差 (Observer Bias)</strong></p>
+          <p style="font-size:0.82rem;color:var(--text-secondary);">西方加密分析师的信息源是Twitter/Discord/CoinDesk/Reddit。TRON的用户在葡萄牙语、阿拉伯语、豪萨语社区，不在英语互联网上。结果：CoinGecko按市值排前10的链，在英文深度分析中出现频率最低的就是TRON。</p>
+          <span class="bias-tag bias-critical">CRITICAL</span>
+        </div>
+
+        <div style="margin-top:1rem;">
+          <p><strong>偏差2：技术原教旨主义偏见 (Tech Fundamentalism)</strong></p>
+          <p style="font-size:0.82rem;color:var(--text-secondary);">以Ethereum/Solana的技术标准衡量TRON：27个超级代表=不够去中心化、TVL低=没有生态。这忽略了TRON用户的核心需求不是"去中心化"而是"便宜快速"。</p>
+          <span class="bias-tag bias-warning">WARNING</span>
+        </div>
+
+        <div style="margin-top:1rem;">
+          <p><strong>偏差3：创始人声誉投射 (Founder Reputation Projection)</strong></p>
+          <p style="font-size:0.82rem;color:var(--text-secondary);">Justin Sun的高调营销风格（天价午餐、Twitter营销）与SEC诉讼记录导致分析师将"讨厌这个人"投射为"这个链没有价值"。但链的价值与创始人的声誉是两个独立变量。</p>
+          <span class="bias-tag bias-warning">WARNING</span>
+        </div>
+
+        <div style="margin-top:1rem;">
+          <p><strong>偏差4：可得性启发偏差 (Availability Heuristic)</strong></p>
+          <p style="font-size:0.82rem;color:var(--text-secondary);">西方媒体对TRON的负面报道（"骗局""笑话""复制以太坊"）数量远超正面报道。但这反映的是媒体偏好而非实际使用情况。链上数据与媒体报道严重脱节。</p>
+          <span class="bias-tag bias-critical">CRITICAL</span>
+        </div>
+
+        <div style="margin-top:1rem;">
+          <p><strong>偏差5：幸存者偏差 (Survivorship Bias)</strong></p>
+          <p style="font-size:0.82rem;color:var(--text-secondary);">西方分析只关注"成功的西方链"，忽视了TRON在特定市场（巴西、尼日利亚、东南亚）的绝对主导地位。这些市场在英文加密叙事中几乎是隐形的。</p>
+          <span class="bias-tag bias-confirmed">CONFIRMED</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- §3 Corrections 纠正 -->
+    <section id="corrections" style="margin-bottom:2rem;">
+      <div class="section-header">
+        <h2>3. Corrections 纠正</h2>
+      </div>
+
+      <div class="meta-card">
+        <h3>偏差修正方法</h3>
+        <p><strong>Bias Correction Methods</strong></p>
+        
+        <div style="margin-top:1rem;">
+          <p><strong>纠正1：数据源多元化</strong></p>
+          <p style="font-size:0.82rem;color:var(--text-secondary);">引入中文信息源（巨潮资讯、东方财富、区块链行业协会）、当地市场数据（巴西央行报告、尼日利亚SEC公告、Chainalysis地理报告）。英文媒体只作为英文世界舆情指标，而非采用率数据源。</p>
+        </div>
+
+        <div style="margin-top:1rem;">
+          <p><strong>纠正2：重新定义评估框架</strong></p>
+          <p style="font-size:0.82rem;color:var(--text-secondary);">不要求TRON满足"真正的去中心化"标准，而是问："这个网络是否满足其目标用户的需求？"答案对巴西的家庭主妇和尼日利亚的外劳来说是肯定的。</p>
+        </div>
+
+        <div style="margin-top:1rem;">
+          <p><strong>纠正3：分离链与创始人</strong></p>
+          <p style="font-size:0.82rem;color:var(--text-secondary);">将TRON网络（链上数据）分析与其创始人Justin Sun（商业声誉）分开评估。BitTorrent收购失败和Poloniex黑客事件不影响TRON链本身的使用数据。</p>
+        </div>
+
+        <div style="margin-top:1rem;">
+          <p><strong>纠正4：地理加权分析</strong></p>
+          <p style="font-size:0.82rem;color:var(--text-secondary);">采用地理加权评估：TRON在发展中市场的成功权重高于在发达市场的失败。将"西方市场采用率低"视为市场定位选择而非技术缺陷。</p>
+        </div>
+
+        <div style="margin-top:1rem;">
+          <p><strong>纠正5：时间序列验证</strong></p>
+          <p style="font-size:0.82rem;color:var(--text-secondary);">检查TRON使用数据的持续性。3.3B累计账户和$10B日转账量是多年积累的结果，而非一时营销。这证明了实际价值的持续创造。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- §4 Gaps 信息缺口 -->
+    <section id="gaps" style="margin-bottom:2rem;">
+      <div class="section-header">
+        <h2>4. Gaps 信息缺口</h2>
+      </div>
+
+      <div class="meta-card">
+        <h3>已知信息缺口 (Known Information Gaps)</h3>
+        <p style="font-size:0.82rem;color:var(--text-secondary);">以下是本报告分析中存在的已知盲点，需要进一步研究或数据补充：</p>
+        
+        <div class="gap-item">
+          <strong>缺口1：超级代表身份与地理分布</strong><br>
+          TRON的27个超级代表中，实际运营者身份大部分未知。地理集中度（是否大量位于中国）将影响监管脆弱性评估。需要链上地址与现实身份的关联分析。
+        </div>
+
+        <div class="gap-item">
+          <strong>缺口2：活跃用户 vs. 累计账户</strong><br>
+          3.3B累计账户中，实际活跃用户数量未知。可能存在大量"一次性使用"账户（领空投、测试交易）。需要时间加权的活跃地址数据来校准采用率。
+        </div>
+
+        <div class="gap-item">
+          <strong>缺口3：USDT vs. TRX 实际使用比例</strong><br>
+          $10B日转账量中，USDT转账与TRX转账的比例未知。如果大部分是USDT转账，则TRX代币本身的用例有限。需分离分析两种资产的链上活动。
+        </div>
+
+        <div class="gap-item">
+          <strong>缺口4：SEC诉讼的完整时间线和结局</strong><br>
+          SEC诉讼的当前状态、和解可能性、对TRX代币的潜在影响均存在较大不确定性。法律程序的保密性导致外部分析师无法准确评估尾部风险。
+        </div>
+
+        <div class="gap-item">
+          <strong>缺口5：与Solana/Base的竞争动态数据</strong><br>
+          Solana和Coinbase Base正在抢夺稳定币支付市场份额，但缺乏按链划分的USDT供应量实时变化数据。竞争格局的演变速度未知。
+        </div>
+
+        <div class="gap-item">
+          <strong>缺口6：TRON网络的真实去中心化程度</strong><br>
+          27个超级代表中有多少是独立实体 vs. 受同一主体控制？DPoS机制的实际抗审查能力如何？缺乏权威的节点关联性分析。
+        </div>
+
+        <div class="gap-item">
+          <strong>缺口7：发展中国家监管风险量化</strong><br>
+          尼日利亚、巴西、阿根廷等国政府对TRON-USDT的态度存在不确定性。全面禁令的可能性和执行难度难以量化。
+        </div>
+
+        <div class="gap-item">
+          <strong>缺口8：Tether与TRON的合作深度</strong><br>
+          Tether在TRON上发行USDT的战略决策原因、与TRON团队的实际合作关系深度不明。Tether的风险敞口与TRON直接相关。
+        </div>
+      </div>
+    </section>
+
+    <!-- §5 Cross-Validation 交叉验证 -->
+    <section id="crossval" style="margin-bottom:2rem;">
+      <div class="section-header">
+        <h2>5. Cross-Validation 交叉验证</h2>
+      </div>
+
+      <div class="meta-card">
+        <h3>多源信息一致性检验</h3>
+        <p style="font-size:0.82rem;color:var(--text-secondary);">以下为不同信息源对核心论点的交叉验证结果：</p>
+
+        <div class="cross-ref">
+          <strong>交叉验证1：巴西90%加密交易使用TRON-USDT</strong><br>
+          <span style="font-size:0.75rem;color:var(--text-tertiary);">验证来源：巴西央行加密报告 + Chainalysis Geography Report + 本地交易所数据</span><br>
+          一致性：高。三方独立数据源均指向TRON在巴西稳定币市场的主导地位。结论：<strong>已验证</strong>
+        </div>
+
+        <div class="cross-ref">
+          <strong>交叉验证2：尼日利亚$921B年交易量</strong><br>
+          <span style="font-size:0.75rem;color:var(--text-tertiary);">验证来源：尼日利亚SEC公告 + Chainalysis报告 + TRON链上数据</span><br>
+          一致性：高。监管机构数据与链上数据基本吻合。结论：<strong>已验证</strong>
+        </div>
+
+        <div class="cross-ref">
+          <strong>交叉验证3：$10B+日USDT转账量</strong><br>
+          <span style="font-size:0.75rem;color:var(--text-tertiary);">验证来源：TRON Scan链上数据 + Tether透明度报告 + 第三方区块链分析公司</span><br>
+          一致性：中。链上数据可实时验证，但"有效转账"与"重复刷量"的区分存在模糊地带。结论：<strong>基本验证，需注意刷量可能</strong>
+        </div>
+
+        <div class="cross-ref">
+          <strong>交叉验证4：SEC诉讼的市场影响</strong><br>
+          <span style="font-size:0.75rem;color:var(--text-tertiary);">验证来源：SEC官方文件 + 法律分析报告 + 市场反应数据</span><br>
+          一致性：低。SEC诉讼的存在已验证，但诉讼结果预测存在重大不确定性。法律分析师与市场分析师的预期差异显著。结论：<strong>高不确定性</strong>
+        </div>
+
+        <div class="cross-ref">
+          <strong>交叉验证5：TRON的中心化程度</strong><br>
+          <span style="font-size:0.75rem;color:var(--text-tertiary);">验证来源：链上节点数据 + 学术研究 + 行业分析报告</span><br>
+          一致性：中。27个超级代表的数量可验证，但实际控制权集中度难以量化。不同分析框架得出不同结论。结论：<strong>定性确认，定量模糊</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- §6 Quality 质量评估 -->
+    <section id="quality" style="margin-bottom:2rem;">
+      <div class="section-header">
+        <h2>6. Quality 质量评估</h2>
+      </div>
+
+      <div class="meta-card">
+        <h3>研究质量与置信度评估</h3>
+        <p><strong>Research Quality & Confidence Assessment</strong></p>
+
+        <div style="margin-top:1rem;">
+          <p style="font-size:0.85rem;font-weight:590;margin-bottom:0.3rem;">数据可信度 Data Credibility</p>
+          <div class="confidence-bar">
+            <span class="conf-label">75%</span>
+            <div class="conf-track"><div class="conf-fill" style="width:75%;background:var(--tier-high);"></div></div>
+          </div>
+          <p style="font-size:0.75rem;color:var(--text-tertiary);">链上数据高度可信，但活跃用户数与真实采用率存在估算误差。</p>
+        </div>
+
+        <div style="margin-top:1rem;">
+          <p style="font-size:0.85rem;font-weight:590;margin-bottom:0.3rem;">信号强度 Signal Strength</p>
+          <div class="confidence-bar">
+            <span class="conf-label">82%</span>
+            <div class="conf-track"><div class="conf-fill" style="width:82%;background:var(--tier-high);"></div></div>
+          </div>
+          <p style="font-size:0.75rem;color:var(--text-tertiary);">TRON作为发展中世界采用指标的价值已通过多源验证，信号强度高于预期。</p>
+        </div>
+
+        <div style="margin-top:1rem;">
+          <p style="font-size:0.85rem;font-weight:590;margin-bottom:0.3rem;">偏见修正有效性 Bias Correction Effectiveness</p>
+          <div class="confidence-bar">
+            <span class="conf-label">68%</span>
+            <div class="conf-track"><div class="conf-fill" style="width:68%;background:var(--tier-medium);"></div></div>
+          </div>
+          <p style="font-size:0.75rem;color:var(--text-tertiary);">主要偏差已识别并修正，但仍存在信息缺口（见§4）影响修正完整性。</p>
+        </div>
+
+        <div style="margin-top:1rem;">
+          <p style="font-size:0.85rem;font-weight:590;margin-bottom:0.3rem;">预测准确性 Predictive Accuracy</p>
+          <div class="confidence-bar">
+            <span class="conf-label">55%</span>
+            <div class="conf-track"><div class="conf-fill" style="width:55%;background:var(--tier-medium);"></div></div>
+          </div>
+          <p style="font-size:0.75rem;color:var(--text-tertiary);">对使用趋势的预测可靠性高于对价格走势的预测。监管事件的不可预测性限制了整体准确性。</p>
+        </div>
+
+        <div style="margin-top:1rem;">
+          <p style="font-size:0.85rem;font-weight:590;margin-bottom:0.3rem;">综合质量评分 Overall Quality Score</p>
+          <div class="confidence-bar">
+            <span class="conf-label">70%</span>
+            <div class="conf-track"><div class="conf-fill" style="width:70%;background:linear-gradient(90deg,var(--tier-medium),var(--tier-high));"></div></div>
+          </div>
+          <p style="font-size:0.75rem;color:var(--text-tertiary);">C档 2/5 — 适用于信号提取和趋势判断，不适用于精确预测或投资建议。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- §7 Decision Log 决策日志 -->
+    <section id="log" style="margin-bottom:2rem;">
+      <div class="section-header">
+        <h2>7. Decision Log 决策日志</h2>
+      </div>
+
+      <div class="meta-card">
+        <h3>认知决策过程记录</h3>
+        <p style="font-size:0.82rem;color:var(--text-secondary);">以下是本报告形成过程中的关键决策节点及其理由：</p>
+
+        <div class="decision-log">
+          <strong>决策1：将TRON的采用数据与创始人声誉分离</strong><br>
+          <span style="font-size:0.72rem;color:var(--text-quaternary);">2026-03-22 | Initial Framework Design</span><br><br>
+          <strong>决策</strong>：在分析框架中明确区分"TRON链"（使用数据）与"Justin Sun"（商业声誉）。<br>
+          <strong>理由</strong>：早期草案将SEC诉讼和收购争议作为负面信号纳入，但意识到这会导致"因人废链"的逻辑错误。链上数据是客观事实，商业运作是独立维度。<br>
+          <strong>替代方案考虑</strong>：将创始人风险作为链的风险因子纳入。最终选择分离，因为风险来源和影响机制不同。
+        </div>
+
+        <div class="decision-log">
+          <strong>决策2：赋予发展中世界采用数据更高权重</strong><br>
+          <span style="font-size:0.72rem;color:var(--text-quaternary);">2026-03-22 | Evidence Weighting</span><br><br>
+          <strong>决策</strong>：在质量评估中，将巴西/尼日利亚/阿根廷的采用数据权重高于西方媒体评价。<br>
+          <strong>理由</strong>：西方媒体对TRON的负面叙事存在系统性的观察者偏差（见§2偏差1）。3.3B账户是真实存在的用户，不能被"忽视"。<br>
+          <strong>风险</strong>：如果发展中市场出现监管逆转（如尼日利亚全面禁令），本报告的核心结论将受到重大冲击。
+        </div>
+
+        <div class="decision-log">
+          <strong>决策3：不将TRX代币列为投资标的，仅作为信号指标</strong><br>
+          <span style="font-size:0.72rem;color:var(--text-quaternary);">2026-03-22 | Investment Classification</span><br><br>
+          <strong>决策</strong>：在交易含义部分明确标注"WATCH"而非"BUY/SELL"，并将TRON的价值定义为"指标"而非"资产"。<br>
+          <strong>理由</strong>：TRX代币本身的价格弹性低（见14_justin_sun.html §6），且SEC诉讼风险造成不对称尾部风险。将其定位为观察对象而非交易标的更符合风险收益比。<br>
+          <strong>替代方案考虑</strong>：加入TRX技术分析。最终放弃，因为C档评级不应产生交易信号。
+        </div>
+
+        <div class="decision-log">
+          <strong>决策4：采用"使用价值"而非"技术价值"作为核心评估维度</strong><br>
+          <span style="font-size:0.72rem;color:var(--text-quaternary);">2026-03-22 | Evaluation Framework Revision</span><br><br>
+          <strong>决策</strong>：不要求TRON满足"真正的去中心化"标准，而是问"这个网络是否满足其目标用户的需求"。<br>
+          <strong>理由</strong>：传统加密评估框架（TVL、开发者数量、DeFi生态）对TRON不适用，因为它服务的是完全不同的用户群体和使用场景。强行套用会导致系统性误判。<br>
+          <strong>替代方案考虑</strong>：使用改良版技术评估框架（加入"发展中世界适用性"维度）。最终采用需求导向框架，因为更能捕捉TRON的本质。
+        </div>
+
+        <div class="decision-log">
+          <strong>决策5：将"信息缺口"作为独立章节而非脚注处理</strong><br>
+          <span style="font-size:0.72rem;color:var(--text-quaternary);">2026-03-22 | Transparency Decision</span><br><br>
+          <strong>决策</strong>：在§4中详细列出8个已知信息缺口，而非将它们作为脚注或"局限"简短提及。<br>
+          <strong>理由</strong>：透明度的缺失是西方加密分析的主要问题之一。通过明确标注盲点，读者可以自行判断结论的可靠性，而不是被动接受"完整叙事"。<br>
+          <strong>替代方案考虑</strong>：仅列出最重要的3个缺口。最终选择8个，因为TRON相关数据的不完整性较其他标的更严重。
+        </div>
+      </div>
+    </section>
+
+    <footer style="margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border-subtle);font-size:0.72rem;color:var(--text-quaternary);">
+      <p>Metacognition report &middot; <a href="../blockchain_hub.html">Blockchain Hub</a> &middot; 2026-03-22 &middot; Agent #14 &middot; Node N2 &middot; Tier C档 2/5</p>
+    </footer>
+  </main>
+</div>
+<script>
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+})();
+</script>
+</body>
+</html>

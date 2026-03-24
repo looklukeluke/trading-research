@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jihan Wu — 素材策展地图 V4</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  /* Page-specific V4 extensions (~75 lines) */
+  .priority-box { border:1px solid rgba(248,168,72,0.3); border-left:3px solid var(--accent); border-radius:var(--radius-sm); padding:1.25rem 1.5rem; margin-bottom:2rem; background:var(--bg-surface); }
+  .priority-box h2 { color:var(--accent); margin-top:0; font-size:1.1rem; font-weight:590; }
+  .priority-box ol { margin-bottom:0; padding-left:1.2rem; }
+  .priority-box li { margin-bottom:0.6rem; line-height:1.5; }
+  .time-badge { display:inline-block; padding:0.1rem 0.5rem; border-radius:10px; font-size:0.7rem; font-weight:590; margin-right:0.3rem; background:var(--accent); color:var(--bg-base); }
+  .anno { position:absolute; left:1rem; right:1rem; }
+  .anno.meta-note { padding:0.6rem 0.75rem; border-left:2px solid var(--accent); border-radius:0 6px 6px 0; background:rgba(248,168,72,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.meta-note:hover { box-shadow:0 0 0 1px var(--accent); }
+  .anno.know-note { padding:0.6rem 0.75rem; border-left:2px solid var(--knowledge); border-radius:0 6px 6px 0; background:rgba(91,155,213,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.know-note:hover { box-shadow:0 0 0 1px var(--knowledge); }
+  .anno .note-label { display:inline-block; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--bg-base); background:var(--accent); padding:0.1rem 0.4rem; border-radius:3px; margin-bottom:0.3rem; }
+  .anno .note-label.know { background:var(--knowledge); color:white; }
+  .anno .mn-head { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
+  .anno .mn-title { flex:1; font-weight:510; font-size:0.75rem; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .anno .mn-fold { font-size:0.55rem; color:var(--text-quaternary); transition:transform 0.2s; margin-left:auto; }
+  .anno.open .mn-fold { transform:rotate(180deg); }
+  .anno .mn-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+  .anno.open .mn-body { max-height:2000px; }
+  .anno .mn-body p { font-size:0.78rem; margin-bottom:0.3rem; color:var(--text-secondary); }
+  .anno.flash { animation:noteFlash 1.5s ease; }
+  @keyframes noteFlash { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--accent);} }
+  .anno.know-note.flash { animation:noteFlashBlue 1.5s ease; }
+  @keyframes noteFlashBlue { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--knowledge);} }
+  mark.hl-know { background:rgba(91,155,213,0.12); border-bottom:1.5px solid var(--knowledge); padding:0 2px; border-radius:2px; color:inherit; cursor:pointer; transition:background 0.15s; }
+  mark.hl-know:hover { background:rgba(91,155,213,0.28); }
+  .nref { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; font-size:0.48rem; font-weight:700; cursor:pointer; margin-left:1px; vertical-align:super; transition:transform 0.15s; text-decoration:none; background:var(--knowledge); color:white; }
+  .nref:hover { transform:scale(1.25); box-shadow:0 0 6px rgba(91,155,213,0.4); }
+  .top-controls { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; padding:0.35rem 0.7rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); font-size:0.72rem; flex-wrap:wrap; }
+  .top-controls .tc-label { font-weight:590; color:var(--knowledge); }
+  .top-controls button { padding:0.15rem 0.45rem; border-radius:4px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-tertiary); cursor:pointer; font-size:0.68rem; font-family:inherit; transition:all 0.15s; }
+  .top-controls button:hover { border-color:var(--knowledge); color:var(--text-primary); }
+  .top-controls button.active { background:var(--knowledge-dim); color:var(--knowledge); border-color:rgba(91,155,213,0.3); }
+  .top-controls .tc-sep { color:var(--border-default); margin:0 0.15rem; }
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .notes-sidebar { position:relative; width:320px; min-width:320px; padding:1.25rem 1rem; border-left:1px solid var(--border-subtle); background:var(--bg-elevated); }
+  .notes-sidebar-header { position:sticky; top:0; z-index:60; background:var(--bg-elevated); padding-bottom:0.5rem; border-bottom:1px solid var(--border-subtle); margin-bottom:0.75rem; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  .notes-toggle-btn { position:fixed; right:1rem; bottom:1.5rem; z-index:200; width:44px; height:44px; border-radius:50%; border:1px solid var(--border-default); background:var(--bg-surface); color:var(--text-secondary); cursor:pointer; font-size:1.1rem; display:none; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.4); }
+  .notes-close-btn { float:right; background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:1.1rem; padding:0; display:none; }
+  @media (max-width:1200px) { .notes-close-btn { display:block; } .notes-sidebar { position:fixed; right:0; top:0; height:100vh; overflow-y:auto; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.4); z-index:150; } .notes-sidebar.ns-closed { transform:translateX(100%); box-shadow:none; } .notes-toggle-btn { display:flex; } }
+  .notes-overlay-right { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:140; }
+  .notes-overlay-right.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  @media (min-width:1600px) { .main-content { max-width:1000px; } .notes-sidebar { width:360px; min-width:360px; } }
+  .rel-card { border:1px solid var(--border-subtle); border-radius:var(--radius-md); background:var(--bg-elevated); margin-bottom:0.75rem; }
+  .rel-card summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  .rel-card[open] summary { color:var(--accent); }
+  .rel-card .rel-body { padding:0 1rem 1rem; font-size:0.82rem; color:var(--text-secondary); line-height:1.6; }
+  .arc-item { border-left:3px solid var(--accent); padding:0.6rem 1rem; margin-bottom:0.75rem; background:rgba(66,165,245,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+  .arc-item strong { color:var(--text-primary); }
+  .question-box { border:2px solid var(--knowledge); background:rgba(91,155,213,0.05); border-radius:var(--radius-md); padding:1.5rem; text-align:center; margin:2rem 0; }
+  .question-box blockquote { border:none; margin:0; padding:0; }
+  .question-box p { font-size:1rem; font-weight:510; color:var(--text-primary); }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; margin-bottom:1rem; }
+  th { text-transform:uppercase; font-size:0.72rem; font-weight:510; color:var(--text-quaternary); letter-spacing:0.04em; text-align:left; padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-default); }
+  td { padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-subtle); vertical-align:top; color:var(--text-secondary); }
+  tr:hover td { background:var(--bg-elevated); }
+  .url-col { max-width:200px; word-break:break-all; }
+  .zh { display:block; font-size:0.85em; color:var(--text-tertiary); margin-top:0.15em; }
+  .zh-inline { font-size:0.85em; color:var(--text-tertiary); }
+  details { border:1px solid var(--border-subtle); background:var(--bg-elevated); border-radius:var(--radius-sm); padding:0; margin-bottom:0.75rem; }
+  details summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  details[open] summary { color:var(--accent); }
+  details > div, details > p { padding:0 1rem 1rem; font-size:0.82rem; line-height:1.6; color:var(--text-secondary); }
+  body.embedded .sidebar, body.embedded .notes-sidebar, body.embedded .hamburger-btn, body.embedded .notes-toggle-btn { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+  .section-header { margin-bottom:1rem; }
+  .section-header h2 { font-size:1.15rem; font-weight:600; color:var(--text-primary); border-left:3px solid var(--accent); padding-left:0.75rem; }
+  .badge-row { display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.75rem; }
+  .badge { display:inline-block; padding:0.2rem 0.6rem; border-radius:20px; font-size:0.65rem; font-weight:590; background:var(--bg-elevated); border:1px solid var(--border-subtle); color:var(--text-tertiary); }
+  .badge.accent { background:rgba(248,168,72,0.15); border-color:rgba(248,168,72,0.3); color:var(--accent); }
+  .badge.knowledge { background:rgba(91,155,213,0.15); border-color:rgba(91,155,213,0.3); color:var(--knowledge); }
+  .subtitle { color:var(--text-secondary); font-size:0.9rem; margin-bottom:0.5rem; }
+  .quality-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:0.75rem; }
+  .quality-item { background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:0.75rem; }
+  .quality-item h4 { margin:0 0 0.3rem; font-size:0.78rem; color:var(--text-primary); }
+  .quality-item p { margin:0; font-size:0.72rem; color:var(--text-tertiary); }
+  .gap-item { border-left:3px solid var(--text-quaternary); padding:0.5rem 0.75rem; margin-bottom:0.5rem; background:var(--bg-surface); border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+  .gap-item h4 { margin:0 0 0.25rem; font-size:0.8rem; color:var(--text-primary); font-weight:590; }
+  .gap-item p { margin:0; font-size:0.72rem; color:var(--text-secondary); }
+  .gap-meta { display:flex; gap:0.5rem; margin-top:0.3rem; }
+  .difficulty { display:inline-block; padding:0.1rem 0.4rem; border-radius:4px; font-size:0.6rem; background:var(--bg-elevated); color:var(--text-tertiary); }
+  .difficulty.high { background:rgba(239,83,80,0.2); color:#ef5350; }
+  .difficulty.medium { background:rgba(255,202,40,0.2); color:#ffca28; }
+  .primary-links { display:flex; flex-direction:column; gap:0.5rem; }
+  .primary-link { display:flex; align-items:center; gap:0.5rem; padding:0.6rem 0.75rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); text-decoration:none; transition:all 0.15s; }
+  .primary-link:hover { border-color:var(--accent); background:var(--bg-surface); }
+  .primary-link .pl-icon { font-size:1.1rem; }
+  .primary-link .pl-content { flex:1; }
+  .primary-link .pl-title { font-size:0.8rem; font-weight:510; color:var(--text-primary); }
+  .primary-link .pl-desc { font-size:0.7rem; color:var(--text-tertiary); }
+  .primary-link .pl-badge { font-size:0.6rem; padding:0.1rem 0.4rem; background:var(--accent); color:var(--bg-base); border-radius:4px; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ========== LEFT SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Jihan Wu<br>素材策展地图 V4</div>
+
+    <h4>Contents</h4>
+    <nav>
+      <ul>
+        <li><a href="#priority"><span class="toc-num">&#9733;</span>如果只有2小时</a></li>
+        <li><a href="#analysts"><span class="toc-num">1</span>最佳分析师</a></li>
+        <li><a href="#longform"><span class="toc-num">2</span>必读长文/书籍</a></li>
+        <li><a href="#podcasts"><span class="toc-num">3</span>播客与视频</a></li>
+        <li><a href="#primary"><span class="toc-num">4</span>一手资料</a></li>
+        <li><a href="#relationships"><span class="toc-num">5</span>关键关系网</a></li>
+        <li><a href="#narratives"><span class="toc-num">6</span>叙事弧</a></li>
+        <li><a href="#gaps"><span class="toc-num">7</span>信息空白</a></li>
+        <li><a href="#quality"><span class="toc-num">8</span>质量评估</a></li>
+      </ul>
+    </nav>
+
+    <h4>Related</h4>
+    <nav>
+      <ul>
+        <li><a href="17_jihan_wu.html">Jihan Wu Profile</a></li>
+        <li><a href="17_jihan_wu_metacognition.html">Metacognition</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+
+    <div class="top-controls">
+      <span class="tc-label">&#128218; 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <header class="page-header">
+      <h1>Jihan Wu — 素材策展地图 V4</h1>
+      <p class="subtitle">Research Date: 2026-03-22 &nbsp;|&nbsp; 6 Categories &middot; 25+ Sources &middot; 15+ Annotations<br>
+      <span class="zh-inline">吴忌寒 / 比特大陆高质量信息源策展</span></p>
+      <div class="badge-row">
+        <span class="badge accent">ASIC Mining</span>
+        <span class="badge">Bitmain</span>
+        <span class="badge knowledge">BCH History</span>
+        <span class="badge">China Crypto</span>
+        <span class="badge">Corporate Governance</span>
+      </div>
+    </header>
+
+    <!-- ★ Priority Box -->
+    <div class="priority-box" id="priority">
+      <h2>&#9200; 如果只有2小时 — 推荐阅读路径</h2>
+      <ol>
+        <li><span class="time-badge">60min</span><strong>《The Bitmain IPO》</strong> — BitMEX Research 2018深度报告，拆解财务结构、BCH持仓风险<span class="nref" data-note="note-k1">1</span></li>
+        <li><span class="time-badge">45min</span><strong>吴说区块链内斗系列</strong> — 中文最详尽的吴忌寒vs詹克团权力斗争记录<span class="nref" data-note="note-k2">2</span></li>
+        <li><span class="time-badge">30min</span><strong>天眼查工商变更</strong> — 实时追踪比特大陆股权结构、法人变更<span class="nref" data-note="note-k3">3</span></li>
+        <li><span class="time-badge">30min</span><strong>CoinShares矿业报告</strong> — 季度算力分布、Bitmain市占率变化<span class="nref" data-note="note-k4">4</span></li>
+        <li><span class="time-badge">15min</span><strong>Matrixport融资材料</strong> — 吴忌寒"二次创业"战略文档<span class="nref" data-note="note-k5">5</span></li>
+      </ol>
+    </div>
+
+    <!-- §1 最佳分析师 -->
+    <section id="analysts">
+      <div class="section-header">
+        <h2>1. 最佳分析师与独立研究<span class="zh">Best Analysts &amp; Independent Research</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>BitMEX Research</strong></td>
+            <td>交易所研究部门</td>
+            <td class="url-col"><a href="https://blog.bitmex.com/research/" target="_blank" rel="noopener">blog.bitmex.com/research/</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>最权威的矿机产业分析，2018年发布《The Bitmain IPO》深度报告，拆解比特大陆财务结构、矿机成本、BCH持仓风险<span class="nref" data-note="note-1">1</span></td>
+          </tr>
+          <tr>
+            <td><strong>CoinShares Research</strong></td>
+            <td>资管机构研究</td>
+            <td class="url-col"><a href="https://coinshares.com/research" target="_blank" rel="noopener">coinshares.com/research</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>季度矿业报告估算全球算力分布、Bitmain市占率变化。2021年后重点追踪中国矿企出海（含比特大陆新加坡迁移）</td>
+          </tr>
+          <tr>
+            <td><strong>The Block Research</strong></td>
+            <td>媒体研究部门</td>
+            <td class="url-col"><a href="https://www.theblock.co/research" target="_blank" rel="noopener">theblock.co/research</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>Larry Cermak团队对矿机供应链、IPO失败内幕有独家报道。付费内容含Bitmain估值模型<span class="nref" data-note="note-2">2</span></td>
+          </tr>
+          <tr>
+            <td><strong>Miner's Compass (Arcane Research)</strong></td>
+            <td>矿业专项研究</td>
+            <td class="url-col"><a href="https://arcane.no/research" target="_blank" rel="noopener">arcane.no/research</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>北欧背景，专注能源-矿业经济学。对比特大陆S19/S21迭代周期、定价策略有量化分析</td>
+          </tr>
+          <tr>
+            <td><strong>摩根士丹利 (Morgan Stanley)</strong></td>
+            <td>投行研究</td>
+            <td class="url-col">内部渠道/Bloomberg Terminal</td>
+            <td>⭐⭐⭐☆☆</td>
+            <td>2018年香港IPO承销商之一，有未公开尽调资料。后续SPAC尝试中也有覆盖<span class="nref" data-note="note-3">3</span></td>
+          </tr>
+          <tr>
+            <td><strong>吴说区块链 (Wu Blockchain)</strong></td>
+            <td>中文独立媒体</td>
+            <td class="url-col"><a href="https://www.wublock123.com/" target="_blank" rel="noopener">wublock123.com</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>前比特大陆员工背景，中文世界最可靠的矿业信源。创始人Colin Wu与吴忌寒有间接人脉网络<span class="nref" data-note="note-4">4</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §2 必读长文/书籍 -->
+    <section id="longform">
+      <div class="section-header">
+        <h2>2. 必读长文与书籍<span class="zh">Must-Read Long-Form &amp; Books</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>来源</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>《The Bitmain IPO》</strong></td>
+            <td>研究报告</td>
+            <td class="url-col">BitMEX Blog, 2018-09</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>投资研究"圣杯"。从泄露的招股说明书还原：2018H1营收28亿美元、BCH持仓占比12%、毛利率36%→26%的崩塌。揭示"矿机公司"实为"加密货币对冲基金"的风险结构<span class="nref" data-note="note-k1">1</span></td>
+          </tr>
+          <tr>
+            <td><strong>《ASIC Resistance is Futile》</strong></td>
+            <td>长文</td>
+            <td class="url-col">IEEE Spectrum</td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>技术史视角，记录吴忌寒如何从FPGA矿工转型ASIC霸主，以及"矿机去中心化"理想的破灭</td>
+          </tr>
+          <tr>
+            <td><strong>《数字黄金》Digital Gold</strong></td>
+            <td>书籍</td>
+            <td class="url-col">Nathaniel Popper, 2015/2019</td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>英文比特币正史，第15-16章记录吴忌寒早期活动、与烤猫(Friedcat)的竞争、蚂蚁矿机崛起<span class="nref" data-note="note-5">5</span></td>
+          </tr>
+          <tr>
+            <td><strong>《区块链十年》</strong></td>
+            <td>中文书籍</td>
+            <td class="url-col">徐明星等, 2019</td>
+            <td>⭐⭐⭐☆☆</td>
+            <td>国内出版的行业史，第7章"矿机战争"有吴忌寒vs詹克团权力斗争的简化版叙述。史料价值一般</td>
+          </tr>
+          <tr>
+            <td><strong>《比特大陆内斗全记录》系列</strong></td>
+            <td>调查报道</td>
+            <td class="url-col">吴说区块链, 2019-2021</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>中文最详尽的权力斗争记录：2019年10月吴忌寒"政变"夺章、2020年詹克团反攻、2021年和解分家。含内部邮件、法院文件<span class="nref" data-note="note-k2">2</span></td>
+          </tr>
+          <tr>
+            <td><strong>Matrixport白皮书/融资材料</strong></td>
+            <td>商业计划书</td>
+            <td class="url-col">Crunchbase/PitchBook</td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>吴忌寒"二次创业"的公开战略文档。显示其从硬件向金融服务的转型逻辑<span class="nref" data-note="note-k5">5</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §3 播客与视频 -->
+    <section id="podcasts">
+      <div class="section-header">
+        <h2>3. 播客与视频<span class="zh">Podcasts &amp; Video</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>平台</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>《比特大陆内战》Ep. 40</strong></td>
+            <td>播客</td>
+            <td class="url-col">CoinDesk Podcast</td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>2019-2020年跟踪报道内斗，采访接近双方的人士。关键细节：吴忌寒如何通过控制北京公章切断詹克团对公司的法律控制<span class="nref" data-note="note-6">6</span></td>
+          </tr>
+          <tr>
+            <td><strong>Token2049 Singapore 2023/2024</strong></td>
+            <td>会议视频</td>
+            <td class="url-col">YouTube官方频道</td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>吴忌寒罕见公开露面（Matrixport展位/闭门圆桌）。观察其当前姿态、对ETF后矿业格局的判断</td>
+          </tr>
+          <tr>
+            <td><strong>《矿业圆桌》系列</strong></td>
+            <td>中文播客</td>
+            <td class="url-col">吴说区块链 喜马拉雅/小宇宙</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>中文矿业从业者内部对话，多次提及比特大陆定价策略、售后政策变化。2022年后讨论"吴忌寒时代vs詹克团时代"产品差异<span class="nref" data-note="note-7">7</span></td>
+          </tr>
+          <tr>
+            <td><strong>Bankless/ Unchained 矿业专题</strong></td>
+            <td>英文播客</td>
+            <td class="url-col">Unchained Podcast</td>
+            <td>⭐⭐⭐☆☆</td>
+            <td>Laura Shin 2021-2022年多次邀请矿业CEO，间接涉及比特大陆市场地位。适合理解西方视角</td>
+          </tr>
+          <tr>
+            <td><strong>Antminer官方发布会</strong></td>
+            <td>产品视频</td>
+            <td class="url-col">YouTube/Bilibili</td>
+            <td>⭐⭐⭐☆☆</td>
+            <td>S19 XP、S21等新品发布。观察产品迭代节奏、定价策略、能效比竞争（vs MicroBT Whatsminer）<span class="nref" data-note="note-8">8</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §4 一手资料 -->
+    <section id="primary">
+      <div class="section-header">
+        <h2>4. 一手资料<span class="zh">Primary Sources</span></h2>
+      </div>
+      <div class="primary-links">
+        <a href="https://www.hkexnews.hk" target="_blank" rel="noopener" class="primary-link">
+          <span class="pl-icon">📄</span>
+          <div class="pl-content">
+            <div class="pl-title">比特大陆港股招股书 (2018) <span class="pl-badge">核心</span></div>
+            <div class="pl-desc">HKEX披露易 · 唯一官方财务披露：2017年营收25亿美元，BCH持仓102万枚</div>
+          </div>
+        </a>
+        <a href="https://www.tianyancha.com" target="_blank" rel="noopener" class="primary-link">
+          <span class="pl-icon">🏛️</span>
+          <div class="pl-content">
+            <div class="pl-title">北京比特大陆工商变更记录 <span class="pl-badge">核心</span></div>
+            <div class="pl-desc">天眼查/企查查 · 实时追踪股权结构、法人变更、诉讼信息<span class="nref" data-note="note-k3">3</span></div>
+          </div>
+        </a>
+        <a href="https://wensou.court.gov.cn" target="_blank" rel="noopener" class="primary-link">
+          <span class="pl-icon">⚖️</span>
+          <div class="pl-content">
+            <div class="pl-title">福建省法院判决书</div>
+            <div class="pl-desc">中国裁判文书网 · 詹克团起诉吴忌寒的股东资格确认纠纷<span class="nref" data-note="note-9">9</span></div>
+          </div>
+        </a>
+        <a href="https://www.matrixport.com/" target="_blank" rel="noopener" class="primary-link">
+          <span class="pl-icon">💹</span>
+          <div class="pl-content">
+            <div class="pl-title">Matrixport融资新闻稿</div>
+            <div class="pl-desc">2021年C轮1亿美元融资、2022年估值15亿美元。吴忌寒作为创始人的间接信息披露</div>
+          </div>
+        </a>
+        <a href="https://bitcointalk.org" target="_blank" rel="noopener" class="primary-link">
+          <span class="pl-icon">🗨️</span>
+          <div class="pl-content">
+            <div class="pl-title">吴忌寒早期Bitcointalk发言</div>
+            <div class="pl-desc">用户"Jihan" · 2011-2013年技术讨论，显示其从翻译中本聪白皮书到矿机创业的认知演进</div>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- §5 关键关系网 -->
+    <section id="relationships">
+      <div class="section-header">
+        <h2>5. 关键关系网<span class="zh">Key Relationships</span></h2>
+      </div>
+      
+      <details class="rel-card" open>
+        <summary>詹克团 (Micree Zhan) — 联合创始人/死敌 <span class="zh-inline">Co-founder / Adversary</span></summary>
+        <div class="rel-body">
+          <p><strong>关系类型：</strong>技术合伙人 → 权力斗争对手 → 和解分家</p>
+          <p><strong>关键事件：</strong>2019年10月吴忌寒"政变"夺章驱逐詹克团；2020年詹克团反攻；2021年和解分家（吴：海外/金融；詹：国内/AI芯片）</p>
+          <p><strong>信息源：</strong>吴说区块链内斗系列、法院文件</p>
+          <p><strong>重要性：</strong>⭐⭐⭐⭐⭐ 直接影响公司治理稳定性<span class="nref" data-note="note-10">10</span></p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>杨作兴/神鱼 (F2Pool) — 竞争对手/盟友 <span class="zh-inline">Competitor / Ally</span></summary>
+        <div class="rel-body">
+          <p><strong>杨作兴：</strong>前比特大陆芯片工程师，创立MicroBT（Whatsminer），直接竞品</p>
+          <p><strong>神鱼：</strong>全球最大矿池之一，蚂蚁矿机大客户</p>
+          <p><strong>关系意义：</strong>反映行业权力结构与人才流动<span class="nref" data-note="note-11">11</span></p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>Roger Ver / Craig Wright — BCH盟友与对手 <span class="zh-inline">BCH Alliance & Adversary</span></summary>
+        <div class="rel-body">
+          <p><strong>Roger Ver：</strong>BCH分叉核心推手，吴忌寒提供算力支持。BCH失败后关系淡化</p>
+          <p><strong>Craig Wright (CSW)：</strong>2018年BSV分叉的"哈希战争"对手。吴忌寒投入大量算力，最终惨胜但元气大伤<span class="nref" data-note="note-12">12</span></p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>新加坡政府/ GIC — 监管/潜在投资者 <span class="zh-inline">Regulator / Potential Investor</span></summary>
+        <div class="rel-body">
+          <p>2021年后比特大陆注册地迁移核心。Matrixport获新加坡牌照。理解吴忌寒的"监管套利"基地选择逻辑<span class="nref" data-note="note-13">13</span></p>
+        </div>
+      </details>
+    </section>
+
+    <!-- §6 叙事弧 -->
+    <section id="narratives">
+      <div class="section-header">
+        <h2>6. 关键叙事弧<span class="zh">Key Narrative Arcs</span></h2>
+      </div>
+      
+      <div class="arc-item">
+        <strong>叙事弧1：ASIC霸主的崛起 (2013-2017)</strong>
+        <p>从翻译中本聪白皮书 → 烤猫竞争对手 → 蚂蚁矿机垄断市场。吴忌寒展现出"时机敏感度"与"资本运作能力"的结合</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧2：BCH豪赌与代价 (2017-2020)</strong>
+        <p>吴忌寒将公司命运押注BCH：持仓102万枚、支持大区块、哈希战争。牛市是战略，熊市是教训。揭示<mark class="hl-know" data-note="note-k6">"矿机公司≠科技公司"</mark>的本质风险</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧3：内斗与分家 (2019-2021)</strong>
+        <p>"政变夺章"暴露中国民营科技公司治理缺陷。两位创始人的技术vs资本路线之争，最终以地域分治收场<span class="nref" data-note="note-14">14</span></p>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧4：Matrixport二次创业 (2021-)</strong>
+        <p>从硬件霸主向金融服务转型。Crypto.com前高管加入、获新加坡牌照。吴忌寒试图复制"Coinbase式"合规路径</p>
+      </div>
+
+      <div class="question-box">
+        <blockquote>
+          <p>❓ 核心问题：比特大陆是矿机公司、加密货币对冲基金、还是AI芯片初创公司？<br>
+          <span class="zh">What is Bitmain really? A mining rig manufacturer, a crypto hedge fund, or an AI chip startup?</span></p>
+        </blockquote>
+      </div>
+    </section>
+
+    <!-- §7 信息空白 -->
+    <section id="gaps">
+      <div class="section-header">
+        <h2>7. 信息空白 — What Doesn't Exist<span class="zh">Information Gaps</span></h2>
+      </div>
+      
+      <div class="gap-item">
+        <h4>当前真实财务数据</h4>
+        <p>无法估值、无法评估债务风险。2018年招股书已过去6年，经历3次牛熊周期</p>
+        <div class="gap-meta"><span class="difficulty high">获取难度：极高</span></div>
+      </div>
+
+      <div class="gap-item">
+        <h4>BCH持仓现状</h4>
+        <p>2018年持有102万枚，是否已抛售？巨额浮亏/盈影响现金流。链上分析可部分填补<span class="nref" data-note="note-k7">7</span></p>
+        <div class="gap-meta"><span class="difficulty high">获取难度：极高</span></div>
+      </div>
+
+      <div class="gap-item">
+        <h4>吴忌寒 vs 詹克团当前股权比例</h4>
+        <p>控制权稳定性、分红能力。香港IPO招股书为基线，叠加工商变更记录推测</p>
+        <div class="gap-meta"><span class="difficulty high">获取难度：高</span></div>
+      </div>
+
+      <div class="gap-item">
+        <h4>AI芯片业务 (算丰Sophon) 归属与业绩</h4>
+        <p>比特大陆"第二曲线"，估值关键。詹克团公开活动、国内AI芯片行业报道间接推断</p>
+        <div class="gap-meta"><span class="difficulty high">获取难度：高</span></div>
+      </div>
+
+      <div class="gap-item">
+        <h4>Matrixport与比特大陆的关联交易</h4>
+        <p>利益输送风险、吴忌寒个人财富</p>
+        <div class="gap-meta"><span class="difficulty high">获取难度：高</span></div>
+      </div>
+    </section>
+
+    <!-- §8 质量评估 -->
+    <section id="quality">
+      <div class="section-header">
+        <h2>8. 素材质量评估<span class="zh">Source Quality Assessment</span></h2>
+      </div>
+      
+      <div class="quality-grid">
+        <div class="quality-item">
+          <h4>📊 财务数据</h4>
+          <p>2018年后无官方披露。依赖二手估算与链上推断</p>
+        </div>
+        <div class="quality-item">
+          <h4>📰 中文媒体</h4>
+          <p>吴说区块链质量较高，但存在潜在利益冲突（前员工）</p>
+        </div>
+        <div class="quality-item">
+          <h4>🌍 英文媒体</h4>
+          <p>CoinDesk/The Block有独家信源，但对中国内部动态滞后</p>
+        </div>
+        <div class="quality-item">
+          <h4>⚖️ 法律文件</h4>
+          <p>工商变更实时可用；法院文件部分公开但完整度有限</p>
+        </div>
+        <div class="quality-item">
+          <h4>⛓️ 链上数据</h4>
+          <p>BCH持仓可通过地址聚类追踪，但无法100%确认所有权</p>
+        </div>
+        <div class="quality-item">
+          <h4>🎙️ 公开发言</h4>
+          <p>吴忌寒极少公开露面，2023 Token2049为近年最重要参考<span class="nref" data-note="note-15">15</span></p>
+        </div>
+      </div>
+
+      <div class="question-box">
+        <blockquote>
+          <p>⚠️ 关键认知陷阱<br>
+          避免将2018年招股书数据直接用于当前估值 | 警惕"比特大陆即将上市"的反复传闻 | 区分"吴忌寒个人"与"比特大陆公司"</p>
+        </blockquote>
+      </div>
+    </section>
+
+    <footer style="margin-top:3rem; padding-top:1rem; border-top:1px solid var(--border-subtle); font-size:0.72rem; color:var(--text-quaternary);">
+      <p>Generated: 2026-03-22 &middot; V4 Template &middot; <a href="../blockchain_hub.html">Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ========== RIGHT SIDEBAR (Notes) ========== -->
+  <aside class="notes-sidebar ns-closed" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&times;</button>
+      <h4 style="font-size:0.7rem; font-weight:590; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-quaternary); margin:0;">&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+    
+    <!-- Meta Annotations -->
+    <div class="anno meta-note" id="note-m1" data-section="priority" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">研究优先级说明</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>本策展基于"C-tier档案"定位——适合初步扫描后深度下潜。BitMEX报告是事实基线，吴说系列是中文语境补充。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m2" data-section="analysts" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">分析师信源分类逻辑</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>分为"机构研究"(CoinShares/MS)和"独立研究"(BitMEX/Wu Blockchain)。前者适合定量，后者适合定性洞察。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m3" data-section="longform" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">书籍vs报告的时间价值</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Digital Gold (2015) 记录早期历史但已过时；《Bitmain IPO》(2018) 虽老但仍是最佳财务解剖。建议交叉阅读。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m4" data-section="primary" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">一手资料的访问门槛</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>工商数据公开但需要代理访问；港交所文件已失效需从档案馆获取；Bitcointalk存档是稀缺历史资源。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m5" data-section="relationships" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">关系网络的权力动态</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>詹克团代表技术路线，吴忌寒代表资本/战略路线。杨作兴出走后创立MicroBT，形成双寡头竞争格局。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m6" data-section="narratives" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">叙事弧的内在逻辑</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>从"技术布道者"到"资本操盘手"的身份转变。早期比特币理想主义 vs 后期商业现实主义。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m7" data-section="gaps" onclick="toggleNote(this)">
+      <span class="note-label">META</span>
+      <div class="mn-head">
+        <span class="mn-title">信息空白的投资意义</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>BCH持仓和真实财务是最关键的两个未知数。无法定价源于信息不对称，而非市场无效率。</p>
+      </div>
+    </div>
+
+    <!-- Knowledge Annotations -->
+    <div class="anno know-note" id="note-k1" data-section="analysts" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">BitMEX IPO报告核心发现</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>报告揭示比特大陆本质是"加密货币对冲基金伪装成矿机公司"：</p>
+        <p>• BCH持仓占净资产12%，熊市浮亏巨大</p>
+        <p>• 毛利率从36%崩塌至26%，反映定价权丧失</p>
+        <p>• 客户集中度高(前五占40%+)，渠道风险大</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-k2" data-section="longform" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">内斗事件时间线</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>• 2019-10-28: 吴忌寒主导"政变"，夺走北京比特大陆公章</p>
+        <p>• 2019-11-07: 詹克团在媒体放风反击</p>
+        <p>• 2020-06-03: 詹克团再次成为法定代表人</p>
+        <p>• 2021-01-15: 法院裁定分家框架</p>
+        <p>• 2021-03: 正式和解，吴忌寒获海外业务</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-k3" data-section="primary" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">工商变更追踪方法论</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>通过天眼查API或企查查监控"北京比特大陆科技有限公司"的：</p>
+        <p>• 法定代表人变更记录</p>
+        <p>• 注册资本变动</p>
+        <p>• 股东穿透结构</p>
+        <p>• 司法协助信息</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-k4" data-section="priority" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">CoinShares报告的价值定位</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>每季度发布的《Mining Report》提供：</p>
+        <p>• 全球算力分布热力图</p>
+        <p>• Bitmain vs MicroBT市占率估算</p>
+        <p>• 中国矿企出海进度追踪</p>
+        <p>• 电力成本与矿业经济学分析</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-k5" data-section="priority" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">Matrixport战略定位</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>C轮1亿美元融资后估值15亿美元：</p>
+        <p>• CEO葛越晟前比特大陆投资总监</p>
+        <p>• 获新加坡CMS牌照</p>
+        <p>• 提供托管/借贷/结构化产品</p>
+        <p>• 吴忌寒"退路"与"第二曲线"</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-k6" data-section="narratives" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">比特大陆商业模式本质</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>三种业务叠加产生估值复杂性：</p>
+        <p>1. 矿机硬件：高单价、高波动、重资产</p>
+        <p>2. 加密持仓：对冲基金属性，币价敏感</p>
+        <p>3. AI芯片：长期故事，短期无法贡献营收</p>
+        <p>三种业务适用不同估值逻辑，无法简单加总。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-k7" data-section="gaps" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">BCH持仓追踪方法</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>2018招股书显示持仓102万枚BCH，可通过：</p>
+        <p>• 链上地址聚类分析（如BitMEX报告方法）</p>
+        <p>• BCH大户转账监控</p>
+        <p>• 吴忌寒公开钱包地址（如果有）</p>
+        <p>但即使确认地址，也无法证明当前所有权。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-1" data-section="analysts" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">BitMEX研究团队背景</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>BitMEX是Arthur Hayes创立的衍生品交易所，其研究团队以深度技术分析闻名。2018年发布的《The Bitmain IPO》是行业标杆。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-2" data-section="analysts" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">The Block的独家信源优势</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Larry Cermak专注加密市场数据分析，对矿机供应链有深入研究。其付费报告含Bitmain估值模型。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-3" data-section="analysts" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">投行研究的访问限制</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>摩根士丹利作为2018年IPO承销商有尽调资料，但属内部文件。Bloomberg Terminal可部分访问。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-4" data-section="analysts" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">吴说区块链的独特价值</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>创始人Colin Wu前比特大陆员工转型媒体，在中文圈有独家信源。但需注意潜在利益冲突。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-5" data-section="longform" onclick="toggleNote(this)">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head">
+        <span class="mn-title">Digital Gold的历史价值</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Nathaniel Popper的比特币史书，记录了烤猫与吴忌寒的早期竞争。但2015年初版已过时，需参考2019年修订版。</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+// === Sidebar toggle (mobile) ===
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+
+// === Notes sidebar toggle ===
+(function(){
+  var btn=document.getElementById("notesToggleBtn"),ns=document.getElementById("notesSidebar"),ov=document.getElementById("notesOverlay"),cb=document.getElementById("notesCloseBtn");
+  if(!btn||!ns)return;
+  function toggle(){ns.classList.toggle("ns-closed");ov.classList.toggle("open");}
+  btn.onclick=toggle;
+  if(ov)ov.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(cb)cb.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(window.innerWidth>1200)ns.classList.remove("ns-closed");
+  window.addEventListener("resize",function(){if(window.innerWidth>1200)ns.classList.remove("ns-closed");});
+})();
+
+// === Toggle note ===
+function toggleNote(head){
+  var anno=head.closest(".anno");
+  if(anno){anno.classList.toggle("open");positionNotes();}
+}
+
+// === Position notes ===
+function positionNotes(){
+  var ns=document.getElementById("notesSidebar");if(!ns)return;
+  var annos=ns.querySelectorAll(".anno");
+  var lastBottom=80;
+  annos.forEach(function(a){
+    if(a.style.display==="none")return;
+    var sec=a.getAttribute("data-section");
+    var target=sec?document.getElementById(sec):null;
+    var top=target?target.getBoundingClientRect().top+window.scrollY-ns.getBoundingClientRect().top:lastBottom;
+    if(top<lastBottom)top=lastBottom;
+    a.style.top=top+"px";
+    lastBottom=top+a.offsetHeight+8;
+  });
+}
+
+// === Knowledge toggle ===
+function toggleKnowNotes(){
+  var btn=document.getElementById("knowToggleBtn");
+  var knowNotes=document.querySelectorAll(".anno.know-note");
+  var marks=document.querySelectorAll("mark.hl-know");
+  var nrefs=document.querySelectorAll(".nref");
+  var visible=btn.classList.contains("active");
+  knowNotes.forEach(function(n){n.style.display=visible?"none":"";});
+  marks.forEach(function(m){m.style.background=visible?"transparent":"";m.style.borderBottom=visible?"none":"";});
+  nrefs.forEach(function(r){r.style.display=visible?"none":"";});
+  btn.classList.toggle("active");
+  btn.textContent=visible?"显示":"隐藏";
+  positionNotes();
+}
+
+// === Expand / Collapse all ===
+function expandAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.add("open");});positionNotes();}
+function collapseAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.remove("open");});positionNotes();}
+
+// === Note count ===
+(function(){
+  var label=document.getElementById("noteCountLabel");if(!label)return;
+  var meta=document.querySelectorAll(".anno.meta-note").length;
+  var know=document.querySelectorAll(".anno.know-note").length;
+  label.textContent=meta+" META + "+know+" Knowledge";
+})();
+
+// === Highlight → Note sync ===
+document.addEventListener("click",function(e){
+  var mark=e.target.closest("mark.hl-know")||e.target.closest(".nref");
+  if(!mark)return;
+  var noteId=mark.getAttribute("data-note");if(!noteId)return;
+  var anno=document.getElementById(noteId);if(!anno)return;
+  anno.classList.add("open");
+  anno.scrollIntoView({behavior:"smooth",block:"center"});
+  anno.classList.add("flash");
+  setTimeout(function(){anno.classList.remove("flash");},1500);
+  positionNotes();
+});
+
+// === Embedded mode ===
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+  document.addEventListener("click",function(e){
+    var a=e.target.closest("a");if(!a||!a.href)return;
+    try{var url=new URL(a.href,location.href)}catch(err){return}
+    if(url.pathname.startsWith("/trade-pipeline/")||url.pathname.startsWith("/observatory/")){
+      e.preventDefault();
+      window.top.postMessage({type:"dashboard-nav",action:"openResearch",url:url.pathname,title:a.textContent.trim().substring(0,60)},"*");
+    }
+  });
+})();
+
+// Initial positioning
+window.addEventListener("load",function(){positionNotes();});
+window.addEventListener("scroll",function(){positionNotes();});
+</script>
+</body>
+</html>

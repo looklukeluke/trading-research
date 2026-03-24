@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>周小川/穆长春 — Metacognition 元思考过程</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  .meta-card { border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:1.1rem 1.3rem; margin-bottom:0.75rem; background:var(--bg-surface); }
+  .meta-card h3 { font-size:0.95rem; font-weight:590; margin-bottom:0.5rem; color:var(--text-primary); }
+  .meta-card p { font-size:0.82rem; color:var(--text-secondary); line-height:1.6; margin-bottom:0.5rem; }
+  .bias-tag { display:inline-block; padding:0.15rem 0.5rem; border-radius:4px; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
+  .bias-confirmed { background:rgba(76,175,80,0.15); color:var(--tier-high); }
+  .bias-warning { background:rgba(255,193,7,0.15); color:var(--tier-medium); }
+  .bias-critical { background:rgba(244,67,54,0.15); color:var(--tier-low); }
+  .confidence-bar { display:flex; align-items:center; gap:0.5rem; margin:0.5rem 0; }
+  .conf-track { flex:1; height:6px; background:var(--border-subtle); border-radius:3px; overflow:hidden; }
+  .conf-fill { height:100%; border-radius:3px; }
+  .conf-label { font-size:0.72rem; font-weight:590; color:var(--text-tertiary); min-width:2.5rem; }
+  .gap-item { border-left:3px solid var(--tier-low); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(244,67,54,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .cross-ref { border-left:3px solid var(--knowledge); padding:0.5rem 1rem; margin-bottom:0.5rem; background:rgba(91,155,213,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.82rem; color:var(--text-secondary); }
+  .decision-log { font-size:0.78rem; color:var(--text-tertiary); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:0.8rem 1rem; background:var(--bg-elevated); margin-bottom:0.75rem; }
+  body.embedded .sidebar { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+</style>
+</head>
+<body>
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="page-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">周小川/穆长春<br>Metacognition 元思考</div>
+    <h4>Contents</h4>
+    <nav><ul>
+      <li><a href="#selection">1 Selection 选择理由</a></li>
+      <li><a href="#biases">2 Biases 认知偏差</a></li>
+      <li><a href="#corrections">3 Corrections 纠正</a></li>
+      <li><a href="#gaps">4 Gaps 信息缺口</a></li>
+      <li><a href="#crossval">5 Cross-Validation 交叉验证</a></li>
+      <li><a href="#quality">6 Quality 质量评估</a></li>
+      <li><a href="#log">7 Decision Log 决策日志</a></li>
+    </ul></nav>
+    <h4>Related</h4>
+    <nav><ul>
+      <li><a href="21_zhou_xiaochuan.html">周小川/穆长春 Profile</a></li>
+      <li><a href="sources_21_ecny_v4.html">Sources V4</a></li>
+    </ul></nav>
+  </aside>
+  <main class="main-content">
+    <header class="page-header">
+      <h1>周小川/穆长春 — Metacognition<span style="display:block;font-size:0.85rem;font-weight:400;color:var(--text-tertiary);margin-top:0.2rem;">元思考过程 — 研究中的认知审计</span></h1>
+      <p style="font-size:0.82rem;color:var(--text-quaternary);">Generated: 2026-03-22 &middot; C档 Node8 数字人民币 &middot; Blockchain Research Hub</p>
+    </header>
+
+    <!-- §1 SELECTION -->
+    <section id="selection">
+      <div class="meta-card">
+        <h3>§1 Selection 选择理由 <span class="bias-tag bias-warning" style="margin-left:0.5rem;">RATIONALE</span></h3>
+        <p><strong>Why track Zhou Xiaochuan & Mu Changchun (Digital Yuan Architects)?</strong></p>
+        <p>数字人民币（e-CNY）是全球最大规模的CBDC实验，具有重要的地缘政治意义。作为PBoC数字货币研究所的核心人物，周小川（前任行长）和穆长春（现任所长）代表了"国家控制数字货币"路径，与去中心化加密货币形成根本对立。</p>
+        <p>e-CNY的3.5亿笔交易和2.4万亿美元流通量，加上mBridge跨境CBDC实验，构成了对现有国际金融体系的潜在挑战。追踪这一节点对于理解加密货币面临的政策环境至关重要。</p>
+        <p style="margin-top:0.75rem;color:var(--text-tertiary);font-size:0.78rem;"><strong>Rationale:</strong> e-CNY is the world's largest CBDC experiment with geopolitical implications. Zhou Xiaochuan and Mu Changchun represent the "state-controlled digital currency" path, fundamentally opposed to decentralized crypto. Tracking this node is essential for understanding the regulatory environment facing cryptocurrencies.</p>
+      </div>
+    </section>
+
+    <!-- §2 BIASES -->
+    <section id="biases">
+      <div class="meta-card">
+        <h3>§2 Biases 认知偏差 <span class="bias-tag bias-critical" style="margin-left:0.5rem;">COGNITIVE BIASES</span></h3>
+        
+        <p><strong>Identified cognitive biases in processing information about this agent:</strong></p>
+        
+        <p style="margin-top:0.75rem;"><span class="bias-tag bias-critical" style="margin-right:0.5rem;">SOURCE BIAS</span><strong>Source Bias 消息来源偏差</strong></p>
+        <p>Primary reliance on official PBoC communications and Chinese government press releases creates systematic positivity bias. All statistics (3.5B transactions, $2.4T circulation) originate from entities with vested interest in presenting e-CNY as successful.</p>
+        <p style="font-size:0.78rem;color:var(--text-tertiary);">主要依赖官方PBoC通讯和中国政府新闻稿，造成系统性正面偏差。所有数据（35亿笔交易、2.4万亿美元流通）都来自有既得利益展示e-CNY成功的机构。</p>
+
+        <p style="margin-top:0.75rem;"><span class="bias-tag bias-warning" style="margin-right:0.5rem;">CONFIRMATION BIAS</span><strong>Confirmation Bias 确认偏差</strong></p>
+        <p>Pre-existing narrative of "CBDC as crypto threat" may lead to over-weighting evidence supporting this view while discounting contradictory data on low organic adoption or user resistance.</p>
+        <p style="font-size:0.78rem;color:var(--text-tertiary);">预先存在的"CBDC作为加密货币威胁"叙事可能导致过度重视支持这一观点的证据，同时忽略低有机采用率或用户抵触的矛盾数据。</p>
+
+        <p style="margin-top:0.75rem;"><span class="bias-tag bias-warning" style="margin-right:0.5rem;">POLITICAL FRAMING</span><strong>Political Framing 政治框架偏差</strong></p>
+        <p>Western media coverage of China's CBDC often oscillates between "dystopian surveillance" and "technological innovation" narratives, with limited neutral analytical coverage.</p>
+        <p style="font-size:0.78rem;color:var(--text-tertiary);">西方媒体对中国CBDC的报道往往在"反乌托邦监控"和"技术创新"叙事之间摇摆，缺乏中立的分析性报道。</p>
+
+        <p style="margin-top:0.75rem;"><span class="bias-tag bias-warning" style="margin-right:0.5rem;">SURVIVORSHIP</span><strong>Survivorship Bias 幸存者偏差</strong></p>
+        <p>Focus on successful metrics (pilot expansions, transaction counts) while ignoring failed pilots, abandoned features, or user adoption challenges that may never be publicly disclosed.</p>
+        <p style="font-size:0.78rem;color:var(--text-tertiary);">关注成功指标（试点扩张、交易数量），而忽略可能从未公开的失败试点、放弃的功能或用户采用挑战。</p>
+
+        <p style="margin-top:0.75rem;"><span class="bias-tag bias-warning" style="margin-right:0.5rem;">ANTHROPOMORPHISM</span><strong>Group Attribution Error 群体归因偏差</strong></p>
+        <p>Treating Zhou Xiaochuan and Mu Changchun as a unified agent may obscure divergent views within China's monetary policy apparatus regarding CBDC design choices and pace.</p>
+        <p style="font-size:0.78rem;color:var(--text-tertiary);">将周小川和穆长春作为统一代理处理，可能掩盖中国货币政策机构内部对CBDC设计选择和步伐的不同观点。</p>
+      </div>
+    </section>
+
+    <!-- §3 CORRECTIONS -->
+    <section id="corrections">
+      <div class="meta-card">
+        <h3>§3 Corrections 纠正 <span class="bias-tag bias-confirmed" style="margin-left:0.5rem;">MITIGATION STRATEGIES</span></h3>
+        
+        <p><strong>Strategies applied to mitigate identified biases:</strong></p>
+
+        <p style="margin-top:0.75rem;"><strong>1. Source Triangulation 来源三角验证</strong></p>
+        <p>Cross-reference official Chinese data with independent sources: academic research, international institution reports (BIS, IMF, World Bank), and on-the-ground user experience accounts where available.</p>
+        <p style="font-size:0.78rem;color:var(--text-tertiary);">将官方中国数据与独立来源交叉验证：学术研究、国际机构报告（BIS、IMF、世界银行）以及可用的实地用户体验accounts。</p>
+
+        <p style="margin-top:0.75rem;"><strong>2. Balanced Framing 平衡框架</strong></p>
+        <p>Acknowledge both legitimate financial inclusion benefits (rural banking, cross-border remittances) and valid surveillance/control concerns, without defaulting to either extreme narrative.</p>
+        <p style="font-size:0.78rem;color:var(--text-tertiary);">承认合法的普惠金融优势（农村银行、跨境汇款）和有效的监控/控制担忧，不偏向任何极端叙事。</p>
+
+        <p style="margin-top:0.75rem;"><strong>3. Adoption Verification 采用验证</strong></p>
+        <p>Separate government-mandated distributions (red packets, salary payments) from organic adoption. Question transaction count metrics that may include one-time government stimulus distributions.</p>
+        <p style="font-size:0.78rem;color:var(--text-tertiary);">区分政府强制分配（红包、工资支付）与有机采用。质疑可能包含一次性政府刺激分配的的交易数量指标。</p>
+
+        <p style="margin-top:0.75rem;"><strong>4. Technical Scrutiny 技术审查</strong></p>
+        <p>Examine privacy claims vs. technical architecture. e-CNY's "controllable anonymity" requires independent technical analysis beyond official statements.</p>
+        <p style="font-size:0.78rem;color:var(--text-tertiary);">审查隐私声明与技术架构的对比。e-CNY的"可控匿名"需要超出官方声明的独立技术分析。</p>
+
+        <p style="margin-top:0.75rem;"><strong>5. Uncertainty Acknowledgment 不确定性承认</strong></p>
+        <p>Clearly flag information gaps and distinguish between verified facts and government claims. Apply appropriate uncertainty margins to all statistics.</p>
+        <p style="font-size:0.78rem;color:var(--text-tertiary);">明确标注信息缺口，区分已验证事实与政府声明。对所有统计数据应用适当的不确定性余量。</p>
+      </div>
+    </section>
+
+    <!-- §4 GAPS -->
+    <section id="gaps">
+      <div class="meta-card">
+        <h3>§4 Gaps 信息缺口 <span class="bias-tag bias-critical" style="margin-left:0.5rem;">7 CRITICAL GAPS</span></h3>
+        <p><strong>Key information gaps in current understanding:</strong></p>
+
+        <div class="gap-item">
+          <strong>[Gap 1] Daily Active Users</strong><br>
+          Official transaction counts (3.5B) likely include one-time government distributions. True daily active user base remains unknown. Real organic adoption rate disputed.
+          <br><span style="font-size:0.75rem;color:var(--text-tertiary);">官方交易数量（35亿）可能包含一次性政府分配。真正的日常活跃用户基础仍然未知。有机采用率存在争议。</span>
+        </div>
+
+        <div class="gap-item">
+          <strong>[Gap 2] Government-Mandated vs. Organic Adoption</strong><br>
+          No clear breakdown between government-compelled usage (salary payments, tax collection, subsidies) and voluntary user adoption. True market demand unmeasurable.
+          <br><span style="font-size:0.75rem;color:var(--text-tertiary);">政府强制使用（工资支付、税收、补贴）和自愿用户采用之间没有明确区分。真正的市场需求无法衡量。</span>
+        </div>
+
+        <div class="gap-item">
+          <strong>[Gap 3] Transaction Type Distribution</strong><br>
+          Unknown what percentage of "3.5B transactions" represents actual commerce vs. government stimulus red packets, which inflate metrics without indicating genuine adoption.
+          <br><span style="font-size:0.75rem;color:var(--text-tertiary);">未知"35亿笔交易"中有多少比例代表实际商业 vs. 政府刺激红包，后者夸大了指标但未表明真正的采用。</span>
+        </div>
+
+        <div class="gap-item">
+          <strong>[Gap 4] Privacy Architecture Details</strong><br>
+          "Controllable anonymity" mechanism not fully disclosed. Technical implementation of tiered identity verification and data access protocols for authorities remain opaque.
+          <br><span style="font-size:0.75rem;color:var(--text-tertiary);">"可控匿名"机制未完全披露。分层身份验证和机构数据访问协议的技术实施仍然不透明。</span>
+        </div>
+
+        <div class="gap-item">
+          <strong>[Gap 5] mBridge Pilot Outcomes</strong><br>
+          Limited public data on actual mBridge transaction volumes, settlement success rates, or participant satisfaction. Geopolitical implications largely theoretical.
+          <br><span style="font-size:0.75rem;color:var(--text-tertiary);">关于实际mBridge交易量、结算成功率或参与者满意度的公开数据有限。地缘政治影响在很大程度上是理论性的。</span>
+        </div>
+
+        <div class="gap-item">
+          <strong>[Gap 6] User Satisfaction & Rejection Rates</strong><br>
+          No independent surveys on user satisfaction with e-CNY vs. existing payment systems (Alipay/WeChat Pay). Cancellation/dormancy rates for e-CNY wallets unpublished.
+          <br><span style="font-size:0.75rem;color:var(--text-tertiary);">没有关于用户对e-CNY vs. 现有支付系统（支付宝/微信支付）满意度的独立调查。e-CNY钱包的取消/休眠率未公布。</span>
+        </div>
+
+        <div class="gap-item">
+          <strong>[Gap 7] Banking System Disruption Data</strong><br>
+          Economic impact on traditional banking sector unknown. No public data on deposit displacement, lending patterns changes, or bank revenue impacts from e-CNY adoption.
+          <br><span style="font-size:0.75rem;color:var(--text-tertiary);">对传统银行业 sector 的经济影响未知。没有关于 e-CNY 采用导致存款转移、贷款模式变化或银行收入影响的公开数据。</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- §5 CROSS-VALIDATION -->
+    <section id="crossval">
+      <div class="meta-card">
+        <h3>§5 Cross-Validation 交叉验证 <span class="bias-tag bias-warning" style="margin-left:0.5rem;">5 SOURCES</span></h3>
+        <p><strong>Independent sources used to verify/refute primary claims:</strong></p>
+
+        <div class="cross-ref">
+          <strong>[Cross-Ref 1] U.S. Congressional Research Service — "Central Bank Digital Currency"</strong><br>
+          Provides objective analysis of CBDC global trends, including e-CNY implementation. Confirms mBridge as potential SWIFT alternative but notes limited transaction data. Validates geopolitical significance while flagging adoption uncertainty.
+          <br><span style="font-size:0.75rem;color:var(--text-tertiary);">美国国会研究服务处 — "央行数字货币"。提供CBDC全球趋势的客观分析，包括e-CNY实施。确认mBridge作为潜在SWIFT替代方案，但指出交易数据有限。在标注采用不确定性的同时验证地缘政治重要性。</span>
+        </div>
+
+        <div class="cross-ref">
+          <strong>[Cross-Ref 2] BIS Innovation Hub — mBridge Project Documentation</strong><br>
+          Technical documentation on multi-CBDC cross-border settlement. Confirms project scope and participant nations. Limited outcome data but validates architectural approach and interoperability challenges.
+          <br><span style="font-size:0.75rem;color:var(--text-tertiary);">BIS创新中心 — mBridge项目文档。关于多CBDC跨境结算的技术文档。确认项目范围和参与国。有限的结果数据但验证了架构方法和互操作性挑战。</span>
+        </div>
+
+        <div class="cross-ref">
+          <strong>[Cross-Ref 3] Academic Research — "China's Digital Currency Electronic Payment (DCEP)"</strong><br>
+          Peer-reviewed analysis of e-CNY technical architecture. Confirms two-tier distribution system design. Raises questions about scalability and privacy trade-offs not addressed in official materials.
+          <br><span style="font-size:0.75rem;color:var(--text-tertiary);">学术研究 — "中国数字货币电子支付（DCEP）"。经同行评审的e-CNY技术架构分析。确认双层分销系统设计。提出官方材料未解决的扩展性和隐私权衡问题。</span>
+        </div>
+
+        <div class="cross-ref">
+          <strong>[Cross-Ref 4] Radio Free Asia / User Reports — e-CNY Adoption Reality</strong><br>
+          Anecdotal reports suggesting limited merchant acceptance outside government-mandated contexts. User complaints about complexity vs. existing Alipay/WeChat Pay. Not statistically representative but indicative of adoption challenges.
+          <br><span style="font-size:0.75rem;color:var(--text-tertiary);">自由亚洲电台/用户报告 — e-CNY采用现实。趣闻报告表明政府强制背景之外的商户接受有限。用户抱怨复杂性 vs. 现有支付宝/微信支付。虽非统计代表但表明采用挑战。</span>
+        </div>
+
+        <div class="cross-ref">
+          <strong>[Cross-Ref 5] IMF Working Paper — "CBDC and Financial Stability"</strong><br>
+          Models potential financial stability implications of large-scale CBDC adoption. Provides theoretical framework for assessing e-CNY's long-term impact on banking sector, though specific China data limited.
+          <br><span style="font-size:0.75rem;color:var(--text-tertiary);">IMF工作论文 — "CBDC与金融稳定"。模拟大规模CBDC采用的潜在金融稳定影响。为评估e-CNY对银行业 long-term 影响提供理论框架，尽管具体中国数据有限。</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- §6 QUALITY ASSESSMENT -->
+    <section id="quality">
+      <div class="meta-card">
+        <h3>§6 Quality 质量评估 <span class="bias-tag bias-warning" style="margin-left:0.5rem;">CONFIDENCE LEVELS</span></h3>
+        <p><strong>Confidence assessment for key claims and data points:</strong></p>
+
+        <div style="margin-top:1rem;">
+          <div class="confidence-bar">
+            <span class="conf-label">2/5</span>
+            <div class="conf-track"><div class="conf-fill" style="width:40%; background:var(--tier-low);"></div></div>
+            <span style="font-size:0.75rem;color:var(--text-tertiary);">Official Transaction Stats 官方交易数据</span>
+          </div>
+          <p style="font-size:0.78rem;color:var(--text-tertiary);margin-left:3rem;margin-bottom:0.75rem;">3.5B transactions, $2.4T circulation — unverifiable, likely includes government distributions</p>
+
+          <div class="confidence-bar">
+            <span class="conf-label">4/5</span>
+            <div class="conf-track"><div class="conf-fill" style="width:80%; background:var(--tier-high);"></div></div>
+            <span style="font-size:0.75rem;color:var(--text-tertiary);">Pilot City Count 试点城市数量</span>
+          </div>
+          <p style="font-size:0.78rem;color:var(--text-tertiary);margin-left:3rem;margin-bottom:0.75rem;">27 pilot cities — publicly announced, independently confirmed</p>
+
+          <div class="confidence-bar">
+            <span class="conf-label">2/5</span>
+            <div class="conf-track"><div class="conf-fill" style="width:40%; background:var(--tier-low);"></div></div>
+            <span style="font-size:0.75rem;color:var(--text-tertiary);">Organic Adoption Rate 有机采用率</span>
+          </div>
+          <p style="font-size:0.78rem;color:var(--text-tertiary);margin-left:3rem;margin-bottom:0.75rem;">Cannot be separated from government-mandated usage</p>
+
+          <div class="confidence-bar">
+            <span class="conf-label">3/5</span>
+            <div class="conf-track"><div class="conf-fill" style="width:60%; background:var(--tier-medium);"></div></div>
+            <span style="font-size:0.75rem;color:var(--text-tertiary);">mBridge Progress mBridge进展</span>
+          </div>
+          <p style="font-size:0.78rem;color:var(--text-tertiary);margin-left:3rem;margin-bottom:0.75rem;">Project existence confirmed, limited outcome data</p>
+
+          <div class="confidence-bar">
+            <span class="conf-label">3/5</span>
+            <div class="conf-track"><div class="conf-fill" style="width:60%; background:var(--tier-medium);"></div></div>
+            <span style="font-size:0.75rem;color:var(--text-tertiary);">Technical Architecture 技术架构</span>
+          </div>
+          <p style="font-size:0.78rem;color:var(--text-tertiary);margin-left:3rem;margin-bottom:0.75rem;">Two-tier system confirmed, smart contract details limited</p>
+
+          <div class="confidence-bar">
+            <span class="conf-label">4/5</span>
+            <div class="conf-track"><div class="conf-fill" style="width:80%; background:var(--tier-high);"></div></div>
+            <span style="font-size:0.75rem;color:var(--text-tertiary);">Crypto Ban Policy 加密禁令政策</span>
+          </div>
+          <p style="font-size:0.78rem;color:var(--text-tertiary);margin-left:3rem;margin-bottom:0.75rem;">Well-documented, multiple independent sources confirm</p>
+
+          <div class="confidence-bar">
+            <span class="conf-label">2/5</span>
+            <div class="conf-track"><div class="conf-fill" style="width:40%; background:var(--tier-low);"></div></div>
+            <span style="font-size:0.75rem;color:var(--text-tertiary);">User Satisfaction 用户满意度</span>
+          </div>
+          <p style="font-size:0.78rem;color:var(--text-tertiary);margin-left:3rem;">No independent surveys, anecdotal evidence only</p>
+        </div>
+
+        <div style="margin-top:1.25rem;padding:0.75rem;background:var(--bg-elevated);border-radius:var(--radius-sm);border:1px solid var(--border-subtle);">
+          <p style="font-size:0.8rem;margin-bottom:0.5rem;"><strong>Overall Data Credibility Score 总体数据可信度评分:</strong></p>
+          <div class="confidence-bar">
+            <span class="conf-label" style="color:var(--tier-low);">低</span>
+            <div class="conf-track"><div class="conf-fill" style="width:35%; background:var(--tier-low);"></div></div>
+            <span style="font-size:0.75rem;color:var(--text-tertiary);">35% — Heavy reliance on unverifiable official sources</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- §7 DECISION LOG -->
+    <section id="log">
+      <div class="meta-card">
+        <h3>§7 Decision Log 决策日志 <span class="bias-tag bias-warning" style="margin-left:0.5rem;">4 DECISIONS</span></h3>
+        <p><strong>Key decisions and reasoning during agent analysis:</strong></p>
+
+        <div class="decision-log">
+          <strong>[2026-03-22] Classification as C-tier Agent</strong><br>
+          <strong>Decision:</strong> Assigned C-tier 2/5 rating despite high transaction volumes.<br>
+          <strong>Reasoning:</strong> Official government data is independently unverifiable. The agent represents the "state-controlled digital currency" paradigm fundamentally opposed to decentralized crypto. Data credibility is low, warranting C-tier despite nominal scale.
+          <br><span style="font-size:0.75rem;color:var(--text-quaternary);">尽管交易量高，但 Assigned C-tier 2/5 rating。Official government data is independently unverifiable. 分类为C-tier，尽管名义规模较大。</span>
+        </div>
+
+        <div class="decision-log">
+          <strong>[2026-03-22] Excluding USDT/USDC from Competitive Analysis</strong><br>
+          <strong>Decision:</strong> Declined to frame e-CNY as competitor to USDT/USDC.<br>
+          <strong>Reasoning:</strong> They serve fundamentally different use cases. e-CNY enables state surveillance and monetary control; USDT/USDC enable permissionless capital movement. Framing them as competitors would misrepresent both technologies' purposes and user bases.
+          <br><span style="font-size:0.75rem;color:var(--text-quaternary);">Declined 将 e-CNY 定性为竞争对手。They serve fundamentally different use cases. 将它们框定为竞争对手会歪曲两种技术的目的和用户群。</span>
+        </div>
+
+        <div class="decision-log">
+          <strong>[2026-03-22] Including mBridge Despite Limited Data</strong><br>
+          <strong>Decision:</strong> Listed mBridge as significant action despite sparse outcome data.<br>
+          <strong>Reasoning:</strong> Geopolitical significance of cross-border CBDC settlement potential justifies inclusion. Even if current volumes are low, the strategic direction represents a fundamental challenge to USD-dominated settlement infrastructure.
+          <br><span style="font-size:0.75rem;color:var(--text-quaternary);">尽管数据稀疏，但仍列出 mBridge 作为重要行动。Geopolitical significance justifies inclusion. 即使当前交易量较低，战略方向也代表着对美元主导结算基础设施的根本挑战。</span>
+        </div>
+
+        <div class="decision-log">
+          <strong>[2026-03-22] Flagging "3.5B Transactions" with Low Confidence</strong><br>
+          <strong>Decision:</strong> Accepted official transaction count but flagged low confidence.<br>
+          <strong>Reasoning:</strong> Transaction count is verifiable only through official sources. Cannot confirm what percentage represents actual commerce vs. government stimulus distributions. Transparency requires accepting data while explicitly flagging uncertainty.
+          <br><span style="font-size:0.75rem;color:var(--text-quaternary);">接受官方交易数量但标注低可信度。Transaction count is verifiable only through official sources. 透明度要求接受数据同时明确标注不确定性。</span>
+        </div>
+
+        <div class="decision-log">
+          <strong>[2026-03-22] Bilingual Presentation Decision</strong><br>
+          <strong>Decision:</strong> Maintained bilingual format for all content sections.<br>
+          <strong>Reasoning:</strong> Chinese policymakers and researchers are primary sources; English-language coverage often filtered through translation delays and political framing. Direct access to Chinese-language materials improves data accuracy.
+          <br><span style="font-size:0.75rem;color:var(--text-quaternary);">Maintain bilingual format for all content sections. Chinese policymakers are primary sources; English-language coverage often filtered. Direct access to Chinese-language materials improves data accuracy.</span>
+        </div>
+      </div>
+    </section>
+
+    <footer style="margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border-subtle);font-size:0.72rem;color:var(--text-quaternary);">
+      <p>Metacognition Report &middot; 周小川/穆长春 C档 Node8 &middot; <a href="../blockchain_hub.html">Blockchain Hub</a> &middot; 2026-03-22</p>
+    </footer>
+  </main>
+</div>
+<script>
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+})();
+</script>
+</body>
+</html>

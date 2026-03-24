@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI+半导体行业深度研究 V3-Final</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <style>
+    :root {
+      --bg-base: #08090a; --bg-elevated: #0f1011; --bg-surface: #141516; --bg-overlay: #191a1b;
+      --border-subtle: #23252a; --border-default: #34343a; --border-strong: #3e3e44;
+      --text-primary: #f7f8f8; --text-secondary: #d0d6e0; --text-tertiary: #8a8f98; --text-quaternary: #62666d;
+      --accent: #f8a848; --accent-dim: rgba(248, 168, 72, 0.12); --accent-hover: rgba(248, 168, 72, 0.08);
+      --knowledge: #5b9bd5; --knowledge-dim: rgba(91, 155, 213, 0.12);
+      --green: #4caf50; --red: #f44336; --orange: #ffa726; --purple: #ab47bc;
+      --font-sans: 'Inter', 'Inter Variable', -apple-system, system-ui, sans-serif;
+      --radius-sm: 8px; --radius-md: 12px; --sidebar-width: 230px;
+    }
+    * { box-sizing: border-box; }
+    html { font-family: var(--font-sans); font-feature-settings: 'liga' 1, 'calt' 1; letter-spacing: -0.012em; -webkit-font-smoothing: antialiased; }
+    body { margin: 0; background: var(--bg-base); color: var(--text-primary); font-size: 15px; line-height: 1.65; }
+    .page-wrapper { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { position: sticky; top: 0; height: 100vh; width: var(--sidebar-width); min-width: var(--sidebar-width); overflow-y: auto; padding: 1.25rem 0.75rem; border-right: 1px solid var(--border-subtle); background: var(--bg-elevated); z-index: 100; }
+    .sidebar h4 { margin-bottom: 0.5rem; padding: 0 0.5rem; font-size: 0.68rem; font-weight: 590; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-quaternary); }
+    .sidebar nav ul { list-style: none; padding: 0; margin: 0 0 0.75rem 0; }
+    .sidebar nav ul li a { display: block; padding: 0.2rem 0.5rem; font-size: 0.75rem; color: var(--text-tertiary); text-decoration: none; border-radius: var(--radius-sm); line-height: 1.35; }
+    .sidebar nav ul li a:hover { background: var(--accent-hover); color: var(--text-primary); }
+    .sidebar nav ul li a .toc-num { color: var(--text-quaternary); margin-right: 0.15rem; font-size: 0.6rem; font-weight: 510; }
+
+    /* Main + Notes */
+    .main-content { flex: 1; min-width: 0; max-width: 900px; padding: 2.5rem 2.5rem 5rem; }
+    .notes-sidebar { position: relative; width: 300px; min-width: 300px; padding: 1.25rem 0.75rem; border-left: 1px solid var(--border-subtle); background: var(--bg-elevated); z-index: 50; }
+    .notes-sidebar h4 { margin-bottom: 0.75rem; padding: 0 0.25rem; font-size: 0.68rem; font-weight: 590; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-quaternary); }
+    .notes-sidebar-header { position: sticky; top: 0; z-index: 60; background: var(--bg-elevated); padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-subtle); margin-bottom: 0.75rem; }
+
+    /* Annotations */
+    .anno { position: absolute; left: 0.75rem; right: 0.75rem; }
+    .anno.meta-note { padding: 0.5rem 0.65rem; border-left: 2px solid var(--accent); border-radius: 0 6px 6px 0; background: rgba(248,168,72,0.04); font-size: 0.75rem; line-height: 1.45; color: var(--text-secondary); cursor: pointer; transition: box-shadow 0.2s, top 0.3s ease; }
+    .anno.meta-note:hover { box-shadow: 0 0 0 1px var(--accent); }
+    .anno.know-note { padding: 0.5rem 0.65rem; border-left: 2px solid var(--knowledge); border-radius: 0 6px 6px 0; background: rgba(91,155,213,0.04); font-size: 0.75rem; line-height: 1.45; color: var(--text-secondary); cursor: pointer; transition: box-shadow 0.2s, top 0.3s ease; }
+    .anno.know-note:hover { box-shadow: 0 0 0 1px var(--knowledge); }
+    .anno .note-label { display: inline-block; font-size: 0.55rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bg-base); background: var(--accent); padding: 0.08rem 0.35rem; border-radius: 3px; margin-bottom: 0.2rem; }
+    .anno .note-label.know { background: var(--knowledge); color: white; }
+    .anno .mn-head { display: flex; align-items: center; gap: 0.3rem; flex-wrap: wrap; }
+    .anno .mn-title { flex: 1; font-weight: 510; font-size: 0.7rem; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .anno .mn-fold { font-size: 0.5rem; color: var(--text-quaternary); transition: transform 0.2s; margin-left: auto; }
+    .anno.open .mn-fold { transform: rotate(180deg); }
+    .anno .mn-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+    .anno.open .mn-body { max-height: 2000px; }
+    .anno .mn-body p { font-size: 0.73rem; margin-bottom: 0.25rem; color: var(--text-secondary); }
+    .anno .trap-tag { display: inline-block; font-size: 0.55rem; padding: 0.04rem 0.3rem; border-radius: 3px; background: rgba(244,67,54,0.15); color: var(--red); font-weight: 590; margin-right: 0.2rem; }
+    .anno .method-tag { display: inline-block; font-size: 0.55rem; padding: 0.04rem 0.3rem; border-radius: 3px; background: rgba(76,175,80,0.15); color: var(--green); font-weight: 590; margin-right: 0.2rem; }
+    .anno.flash { animation: noteFlash 1.5s ease; }
+    @keyframes noteFlash { 0%,100% { box-shadow: none; } 15%,85% { box-shadow: 0 0 0 3px var(--accent); } }
+
+    /* Standard Components */
+    .page-header { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-default); }
+    .page-header h1 { margin-bottom: 0.3rem; font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 680; letter-spacing: -0.025em; }
+    .page-header .subtitle { color: var(--text-tertiary); margin-bottom: 1rem; font-size: 0.92rem; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .badge { display: inline-block; padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.72rem; font-weight: 510; background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(248,168,72,0.25); }
+    .role-badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; background: rgba(171,71,188,0.12); color: var(--purple); }
+    .section-header { margin-top: 3.5rem; margin-bottom: 1.25rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border-subtle); }
+    .section-header h2 { font-size: 1.2rem; font-weight: 590; letter-spacing: -0.015em; margin-bottom: 0; }
+    h3 { font-size: 1.02rem; font-weight: 590; margin-top: 1.5rem; }
+    p { color: var(--text-secondary); margin-bottom: 1rem; }
+    strong { color: var(--text-primary); font-weight: 590; }
+    ul, ol { color: var(--text-secondary); padding-left: 1.2rem; }
+    li { margin-bottom: 0.3rem; line-height: 1.55; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    details { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.7rem 0.9rem; margin: 0.7rem 0; background: var(--bg-elevated); }
+    details summary { cursor: pointer; font-weight: 510; font-size: 0.88rem; color: var(--text-primary); }
+    details[open] summary { margin-bottom: 0.5rem; color: var(--accent); }
+    .priority-box { border: 1px solid rgba(248,168,72,0.3); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin-bottom: 2rem; background: var(--bg-surface); }
+    .priority-box h2 { color: var(--accent); margin-top: 0; font-size: 1.05rem; font-weight: 590; }
+    .arc-item { margin-bottom: 0.7rem; padding: 0.65rem 0.75rem; border-left: 3px solid var(--accent); background: rgba(66,165,245,0.03); border-radius: 0 6px 6px 0; font-size: 0.92rem; }
+    .arc-item strong { color: var(--accent); }
+    .question-box { border: 2px solid var(--knowledge); border-radius: 8px; padding: 1.25rem; margin: 1.5rem 0; background: rgba(91,155,213,0.05); }
+    .question-box h4 { color: var(--knowledge); margin-top: 0; font-size: 0.92rem; }
+    figure { margin: 1rem 0; overflow-x: auto; }
+    table { font-size: 0.8rem; border-collapse: collapse; width: 100%; }
+    th, td { padding: 0.45rem 0.65rem; border-bottom: 1px solid var(--border-subtle); text-align: left; }
+    th { white-space: nowrap; font-weight: 510; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-quaternary); border-bottom: 1px solid var(--border-default); }
+    td { color: var(--text-secondary); }
+    tr:hover td { background: var(--bg-elevated); }
+    blockquote { border-left: 3px solid var(--accent); padding: 0.5rem 1rem; margin: 0.8rem 0; font-style: italic; background: var(--bg-surface); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-secondary); font-size: 0.9rem; }
+    .signal { display: inline-block; font-size: 0.7rem; padding: 0.08rem 0.35rem; border-radius: 3px; font-weight: 590; margin-right: 0.2rem; }
+    .signal-bull { background: rgba(76,175,80,0.15); color: var(--green); }
+    .signal-bear { background: rgba(244,67,54,0.15); color: var(--red); }
+    .signal-watch { background: rgba(255,167,38,0.15); color: var(--orange); }
+    .node-tag { display: inline-block; padding: 0.08rem 0.35rem; border-radius: 3px; font-size: 0.62rem; font-weight: 590; background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-tertiary); margin-right: 0.15rem; }
+    mark.hl-know { background: rgba(91,155,213,0.12); border-bottom: 1.5px solid var(--knowledge); padding: 0 2px; border-radius: 2px; color: inherit; cursor: pointer; }
+    .nref { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 50%; font-size: 0.45rem; font-weight: 700; cursor: pointer; margin-left: 1px; vertical-align: super; background: var(--knowledge); color: white; text-decoration: none; }
+    .page-footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 2px solid var(--border-default); text-align: center; font-size: 0.82rem; color: var(--text-tertiary); }
+    .rel-card { border: 1px solid var(--border-subtle); border-radius: var(--radius-md); margin: 0.8rem 0; background: var(--bg-elevated); }
+    .rel-card summary { padding: 0.7rem 0.9rem; font-size: 0.9rem; }
+    .rel-card .rel-body { padding: 0 0.9rem 0.9rem; }
+
+    /* Responsive */
+    .hamburger-btn { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 200; background: var(--bg-surface); color: var(--text-primary); border: none; border-radius: 6px; width: 44px; height: 44px; font-size: 1.4rem; cursor: pointer; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+    .notes-toggle-btn { position: fixed; right: 1rem; bottom: 1.5rem; z-index: 200; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border-default); background: var(--bg-surface); color: var(--text-secondary); cursor: pointer; font-size: 1.1rem; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(0,0,0,0.4); }
+    .notes-close-btn { float: right; background: none; border: none; color: var(--text-tertiary); cursor: pointer; font-size: 1rem; padding: 0; display: none; }
+    @media (max-width: 900px) { .sidebar { position: fixed; left: -280px; top: 0; transition: left 0.3s ease; } .sidebar.open { left: 0; } .sidebar-overlay.open { display: block; } .hamburger-btn { display: block; } .main-content { padding: 2rem 1rem 4rem; } }
+    @media (max-width: 1200px) { .notes-sidebar { position: fixed; right: 0; top: 0; height: 100vh; overflow-y: auto; transition: transform 0.3s; box-shadow: -4px 0 20px rgba(0,0,0,0.4); z-index: 150; } .notes-sidebar.ns-closed { transform: translateX(100%); } .notes-toggle-btn { display: flex; } .notes-close-btn { display: block; } }
+    @media (min-width: 1600px) { .main-content { max-width: 1000px; } .notes-sidebar { width: 340px; min-width: 340px; } }
+    ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+  </style>
+</head>
+<body>
+<nav style="position:sticky;top:0;z-index:999;background:rgba(8,9,10,0.95);backdrop-filter:blur(8px);padding:0.5rem 1.5rem;border-bottom:1px solid #23252a;font-size:0.78rem;display:flex;gap:1rem;align-items:center;">
+  <a href="semiconductor_hub.html" style="color:#f8a848;">&larr; Semiconductor Hub</a>
+  <span style="color:#62666d;">&middot;</span>
+  <a href="semiconductor_industry_metacognition.html" style="color:#ab47bc;">28轮行业元思考</a>
+  <span style="color:#62666d;">&middot;</span>
+  <a href="cognitive_agents_2026-03-20/overview.html" style="color:#8a8f98;">Agents Overview</a>
+</nav>
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn">&#129504;</button>
+
+<div class="page-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <h4>行业深度研究</h4>
+    <nav><ul>
+      <li><a href="#summary"><span class="toc-num">&#9733;</span>投资论点</a></li>
+      <li><a href="#chain"><span class="toc-num">1</span>供应链权力地图</a></li>
+      <li><a href="#cycle"><span class="toc-num">2</span>周期位置判断</a></li>
+      <li><a href="#agents"><span class="toc-num">3</span>20人信号网络</a></li>
+      <li><a href="#crossval"><span class="toc-num">4</span>交叉验证矩阵</a></li>
+      <li><a href="#invest"><span class="toc-num">5</span>投资链条</a></li>
+      <li><a href="#calendar"><span class="toc-num">6</span>季度验证日历</a></li>
+      <li><a href="#risk"><span class="toc-num">7</span>风险仪表盘</a></li>
+      <li><a href="#geo"><span class="toc-num">8</span>地缘政治</a></li>
+      <li><a href="#china"><span class="toc-num">9</span>中国自主路线图</a></li>
+      <li><a href="#method"><span class="toc-num">10</span>投资方法论</a></li>
+      <li><a href="#provenance"><span class="toc-num">11</span>Provenance</a></li>
+    </ul></nav>
+    <h4 style="margin-top:0.75rem;">入口</h4>
+    <nav><ul>
+      <li><a href="semiconductor_hub.html" style="color:var(--accent);font-size:0.72rem;">Hub (20 agents) &rarr;</a></li>
+      <li><a href="semiconductor_industry_metacognition.html" style="color:#ab47bc;font-size:0.72rem;">28轮元思考 &rarr;</a></li>
+    </ul></nav>
+  </aside>
+
+  <!-- ========== MAIN ========== -->
+  <main class="main-content">
+    <header class="page-header">
+      <div class="role-badge">INDUSTRY DEEP RESEARCH V3-FINAL</div>
+      <h1>AI+半导体行业深度研究</h1>
+      <p class="subtitle">20个认知代理人 &times; 8个产业节点 &times; 28轮元思考 → 行业投资认知框架<br>
+      <span style="color:var(--text-quaternary);font-size:0.85em;">V3-Final &nbsp;|&nbsp; 2026-03-21 &nbsp;|&nbsp; 基于320+份素材的策展研究</span></p>
+      <div class="badge-row">
+        <span class="badge">19个代理人</span>
+        <span class="badge">8个产业节点</span>
+        <span class="badge">320+份素材</span>
+        <span class="badge">3条投资链</span>
+        <span class="badge">5个kill switches</span>
+        <span class="badge">7条方法论原则</span>
+      </div>
+    </header>
+
+    <!-- Summary -->
+    <div class="priority-box" id="summary">
+      <h2>&#9200; 投资论点 — 60秒理解AI+半导体</h2>
+      <ol>
+        <li><strong>需求是真实的</strong>：<mark class="hl-know" data-note="n1">8个节点20个代理人确认(含4个需求侧)</mark><sup class="nref" data-note="n1">K</sup>AI基建需求。可信度95%+。<span style="color:var(--orange);font-size:0.85em;">&#9888; 需求侧现有4人(#17 Altman/#18 Nadella/#19 Pichai/#20 Hassabis)，但深度仍低于供给侧16人——不对称验证</span></li>
+        <li><strong>权力在chokepoint</strong>：TSMC(先进制程90%+) + ASML(EUV 100%) 是不可替代的瓶颈节点。其他节点都可以被替代（虽然慢）</li>
+        <li><strong>NVIDIA的护城河在侵蚀</strong>：CUDA"不可替代"只有15%可信度——Anthropic/Google在TPU训练前沿模型，OpenAI凭威胁拿30%折扣。但侵蚀以年计不是季度计</li>
+        <li><strong>"不管谁赢都赚"</strong>：<mark class="hl-know" data-note="n2">TSM/ASML/AVGO/SK hynix</mark><sup class="nref" data-note="n2">K</sup>在bull和bear case都受益。NVDA只有bull case才赢大</li>
+        <li><strong>最大风险：共识拥挤</strong>：供给侧16人无一公开bearish AI CapEx，需求侧4人视角新增但尚浅 = 仍偏拥挤多头。不意味着错，但意味着裂缝出现时下跌速度超预期</li>
+      </ol>
+    </div>
+
+
+    <!-- 1. Supply Chain Power Map -->
+    <section id="chain">
+      <div class="section-header">
+        <h2>1. 供应链权力地图</h2>
+      </div>
+      <p>AI+半导体不是一个股票，是一条<strong>8节点供应链</strong>（含需求侧+AI Lab）。投资逻辑是"权力在哪个节点"，不是"哪个CEO说了好话"。</p>
+
+      <figure>
+        <table>
+          <thead><tr><th>节点</th><th>龙头</th><th>份额</th><th>替代品</th><th>不可替代度</th><th>代理人</th></tr></thead>
+          <tbody>
+            <tr><td><span class="node-tag">光刻</span></td><td><strong>ASML</strong></td><td>EUV 100%</td><td>无</td><td><strong style="color:var(--red);">10/10</strong></td><td>Fouquet 8/10</td></tr>
+            <tr><td><span class="node-tag">代工</span></td><td><strong>TSMC</strong></td><td>先进制程90%+</td><td>Samsung(差), Intel(更差)</td><td><strong style="color:var(--red);">9/10</strong></td><td>Wei 9/10, Chang 9/10</td></tr>
+            <tr><td><span class="node-tag">EDA</span></td><td><strong>Synopsys+Cadence</strong></td><td>双寡头80%+</td><td>开源EDA(弱)</td><td>8/10</td><td>Ghazi 8/10</td></tr>
+            <tr><td><span class="node-tag">HBM</span></td><td><strong>SK hynix</strong></td><td>50-62%</td><td>Samsung, Micron</td><td>7/10</td><td>Kwak 8/10, Mehrotra 8/10</td></tr>
+            <tr><td><span class="node-tag">GPU</span></td><td><strong>NVIDIA</strong></td><td>AI训练90%+</td><td>AMD, TPU, 自研</td><td>7/10 <span style="color:var(--red);">&#8595;</span></td><td>Jensen 8/10, Lisa Su 7/10</td></tr>
+            <tr><td><span class="node-tag">IP</span></td><td><strong>ARM</strong></td><td>移动99%</td><td>RISC-V(增长中)</td><td>6/10 <span style="color:var(--red);">&#8595;</span></td><td>Haas 7/10</td></tr>
+            <tr><td><span class="node-tag">设备</span></td><td><strong>AMAT</strong></td><td>封装设备领先</td><td>LAM, TEL, KLA</td><td>5/10</td><td>Dickerson 7/10</td></tr>
+            <tr style="background:rgba(76,175,80,0.03);"><td><span class="node-tag" style="border-color:var(--green);color:var(--green);">需求侧</span></td><td><strong>MSFT/GOOGL/OpenAI</strong></td><td>AI CapEx 60%+</td><td>互为替代</td><td>N/A</td><td><span style="color:var(--green);">&#10003; Altman #17 / Nadella #18 / Pichai #19 / Hassabis #20</span></td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <h3>权力正在往哪里移动？</h3>
+      <div class="arc-item"><strong>上移：从设计→制造</strong> &mdash; AI客户开始自研芯片→绕过NVIDIA→但仍需TSMC代工+ASML光刻。权力从"谁设计"向"谁能造"转移。</div>
+      <div class="arc-item"><strong>扩散：从NVIDIA独占→多方竞争</strong> &mdash; AVGO帮客户自研 + AMD竞争 + Google TPU → NVIDIA份额从90%+向70-80%压缩(2027-2030)。但绝对需求增长可能抵消份额下降。</div>
+      <div class="arc-item"><strong>地理转移：台湾→美国/日本</strong> &mdash; CHIPS Act + Arizona fab + 熊本JASM。成本+30-50%，但地缘政治驱动不可逆。</div>
+
+      <details>
+        <summary><strong>封装是新瓶颈 — 被低估的投资机会</strong></summary>
+        <p>供给侧16个代理人的共识：<strong>先进封装(CoWoS)是2025-2027的真正瓶颈</strong>，不是晶圆制造。</p>
+        <p>TSMC CoWoS从35K片/月→130K片/月(2026底)仍不够。NVIDIA锁定70%+产能。Vera Rubin 4x光罩需+33%封装产能。</p>
+        <p><strong>投资含义</strong>：封装设备供应商(AMAT先进封装线)是被市场低估的受益者。</p>
+      </details>
+    </section>
+
+
+    <!-- 2. Cycle Position -->
+    <section id="cycle">
+      <div class="section-header">
+        <h2>2. 周期位置判断</h2>
+      </div>
+
+      <div class="arc-item"><strong>需求侧：爆发期→高速增长期过渡</strong> &mdash; NVIDIA YoY增速：+114%(FY2025)→+65%(FY2026)→~+40%(FY2027E)。增速下降但绝对值仍加速(季度+$10B)。不是泡沫破裂，是增速正常化。</div>
+      <div class="arc-item"><strong>供给侧：瓶颈期</strong> &mdash; TSMC CoWoS满载 + SK hynix HBM供不应求 + ASML交期18月。瓶颈=定价权=高利润。当瓶颈解除=定价权↓=压缩开始。</div>
+      <div class="arc-item"><strong>竞争侧：垄断→寡头过渡</strong> &mdash; NVIDIA从90%+向70-80%压缩。TPU/Trainium蚕食inference。但training仍是NVIDIA主场。</div>
+
+      <h3>历史对标</h3>
+      <figure>
+        <table>
+          <thead><tr><th>对标</th><th>相似点</th><th>不同点</th><th>结论</th></tr></thead>
+          <tbody>
+            <tr><td><strong>2000年电信</strong></td><td>万亿级基建承诺 + LOI驱动 + 供应商高估值</td><td>AI终端需求已有real revenue；电信时期未变现</td><td>崩塌概率15-20%</td></tr>
+            <tr><td><strong>1995-99互联网</strong></td><td>需求真实但规模预测偏高 + 基础设施先行</td><td>NVIDIA毛利率75% vs 思科50-60%</td><td><span class="signal signal-watch">最接近</span> 方向对但规模偏高2-3x</td></tr>
+            <tr><td><strong>2010s移动</strong></td><td>TSMC+ARM主导 + 全行业受益</td><td>AI CapEx集中度更高(4大客户60%+)</td><td>客户集中风险更高</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <details>
+        <summary><strong>周期转折的5个先导信号</strong></summary>
+        <ol>
+          <li><strong>TSMC月度营收MoM↓连续2月</strong> → 需求放缓最早信号（领先NVIDIA财报1-2月）</li>
+          <li><strong>任何大厂下调AI CapEx指引</strong> → LOI基础松动</li>
+          <li><strong>NVIDIA毛利率跌破72%</strong> → 定价权被竞争侵蚀</li>
+          <li><strong>HBM现货价格下跌</strong> → 存储供需反转</li>
+          <li><strong>ASML订单取消/延期</strong> → 扩产预期修正（最滞后但最终确认）</li>
+        </ol>
+      </details>
+    </section>
+
+
+    <!-- 3. 16 Agent Signal Network -->
+    <section id="agents">
+      <div class="section-header">
+        <h2>3. 20人信号网络</h2>
+      </div>
+      <p>20个认知代理人覆盖8个节点（含4个需求侧买方）。他们不是等权重的——<mark class="hl-know" data-note="n3">可信度分4个层次</mark><sup class="nref" data-note="n3">K</sup>。</p>
+
+      <figure>
+        <table>
+          <thead><tr><th>层次</th><th>代理人</th><th>特征</th><th>使用方式</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Tier 1 (9/10)</strong></td><td>C.C. Wei, Morris Chang, Johny Srouji</td><td>执行力验证 + 保守预测(实际超预期)</td><td>直接用</td></tr>
+            <tr><td><strong>Tier 2 (8/10)</strong></td><td>Jensen, Hock Tan, Fouquet, Kwak, Mehrotra</td><td>方向强但数字有卖方偏差</td><td>打折30%</td></tr>
+            <tr><td><strong>Tier 3 (7/10)</strong></td><td>Lisa Su, Miller, Keller, Haas, Dickerson</td><td>有洞察但信息不对称较弱</td><td>需交叉验证</td></tr>
+            <tr><td><strong>Tier 4 (6/10)</strong></td><td>Elon Musk, Lip-Bu Tan</td><td>方向对但时间线不可信</td><td>只信方向，时间线×2-3</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <details>
+        <summary><strong>每个节点的"最有价值信号"</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>节点</th><th>龙头代理人</th><th>他的最有价值信号</th><th>怎么用</th></tr></thead>
+            <tbody>
+              <tr><td><span class="node-tag">代工</span></td><td>Wei</td><td>CoWoS "tight"→"easing"的转变日</td><td>easing=需求减速最早信号</td></tr>
+              <tr><td><span class="node-tag">GPU</span></td><td>Jensen</td><td>定性判断(方向)比定量判断(数字)更可信</td><td>信"推理爆发"，折扣"$1T"</td></tr>
+              <tr><td><span class="node-tag">HBM</span></td><td>Kwak</td><td>HBM供需平衡点的预期变化</td><td>供不应求延续=SK hynix定价权</td></tr>
+              <tr><td><span class="node-tag">光刻</span></td><td>Fouquet</td><td>High-NA EUV订单节奏</td><td>加速=2nm ramp on track</td></tr>
+              <tr><td><span class="node-tag">终端</span></td><td>Musk</td><td>GPU采购量同比变化</td><td>减少=自研开始替代NVIDIA</td></tr>
+              <tr><td><span class="node-tag">EDA</span></td><td>Ghazi</td><td>AI芯片设计开工数量</td><td>领先芯片产能18-24个月</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+    </section>
+
+
+    <!-- 4. Cross-Validation -->
+    <section id="crossval">
+      <div class="section-header">
+        <h2>4. 交叉验证矩阵</h2>
+      </div>
+      <p>单一信号源有偏见。<strong>多源交叉验证</strong>才可信。20人覆盖8节点——每个claims可以被2-3个独立源验证（含需求侧买方视角）。</p>
+
+      <figure>
+        <table>
+          <thead><tr><th>行业论点</th><th>验证源</th><th>结果</th><th>可信度</th></tr></thead>
+          <tbody>
+            <tr><td><strong>AI基建需求真实</strong></td><td>Jensen+Wei+Lisa Su+Kwak+Mehrotra+Fouquet+Dickerson<br>+ <span style="color:var(--green);font-size:0.85em;">&#10003; 买方: Altman #17 + Nadella #18 + Pichai #19 确认CapEx加速</span></td><td><span class="signal signal-bull">10源确认</span><br><span class="signal signal-watch">深度不对称</span></td><td><strong style="color:var(--green);">95%</strong><br><span style="font-size:0.75rem;color:var(--green);">买方已部分验证</span></td></tr>
+            <tr><td><strong>推理需求100x</strong></td><td>Jensen+DeepSeek R1+OpenAI o1+SemiAnalysis</td><td><span class="signal signal-bull">全确认</span></td><td><strong style="color:var(--green);">90%</strong></td></tr>
+            <tr><td><strong>$1T订单可见性</strong></td><td>Jensen说$1T / CFO Kress: LOI未签 / xAI真金白银</td><td><span class="signal signal-watch">带警告确认</span></td><td><strong style="color:var(--orange);">60%</strong></td></tr>
+            <tr><td><strong>CUDA不可替代</strong></td><td>Jensen / Anthropic TPU / Google TPU / OpenAI 30%折扣 / Jensen自己买Groq</td><td><span class="signal signal-bear">5源矛盾+自我矛盾</span></td><td><strong style="color:var(--red);">15%</strong></td></tr>
+            <tr><td><strong>自研芯片不合理</strong></td><td>Jensen / Google/Amazon/Meta/Tesla全在做+Jensen买Groq</td><td><span class="signal signal-bear">5源矛盾+自我矛盾</span></td><td><strong style="color:var(--red);">5%</strong></td></tr>
+            <tr><td><strong>物理AI ChatGPT时刻</strong></td><td>Jensen / Musk"差5-6年" / Waymo不参与</td><td><span class="signal signal-bear">多方矛盾</span></td><td><strong style="color:var(--orange);">40%</strong></td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <div class="question-box">
+        <h4>交叉验证的核心原则</h4>
+        <p style="text-align:left;"><strong>多源确认 = 高置信度行动</strong>。7个独立偏见源都确认AI需求→可以作为投资决策基础。</p>
+        <p style="text-align:left;"><strong>Jensen与行业矛盾 = 最有价值的信号</strong>。"CUDA不可替代"但5源矛盾→矛盾本身是投资信号。</p>
+        <p style="text-align:left;"><strong>看行动不看言论</strong>。Jensen买Groq($20B) > 100次说"自研不合理"。</p>
+        <p style="text-align:left;"><strong>所有人同意时最危险</strong>。供给侧16人无一bearish，需求侧4人尚浅 = 仍偏拥挤多头。</p>
+      </div>
+    </section>
+
+
+    <!-- 5. Investment Chains -->
+    <section id="invest">
+      <div class="section-header">
+        <h2>5. 投资链条</h2>
+      </div>
+
+      <h3>三条传导链</h3>
+      <div class="arc-item"><strong><span class="signal signal-bull">BULL</span> 链1：AI CapEx持续 → 全链受益</strong><br>NVDA(芯片) → TSM(代工) → ASML(光刻) → AMAT(设备) → SK hynix(HBM) → AVGO(网络)<br><em style="color:var(--text-tertiary);font-size:0.85rem;">信号传导：TSMC月度(最快) → NVIDIA季度 → ASML年度(最慢)。时间差6-9个月=套利窗口</em></div>
+      <div class="arc-item"><strong><span class="signal signal-bear">BEAR</span> 链2：自研替代加速 → 设计层洗牌</strong><br>AVGO(自研设计↑) → AMD(竞争受益) → GOOGL(TPU) → ARM↔RISC-V竞争<br><em style="color:var(--text-tertiary);font-size:0.85rem;">NVIDIA是输家，但TSM/ASML仍赢（自研也需代工）。AVGO在两条链都赢</em></div>
+      <div class="arc-item"><strong><span class="signal signal-watch">WATCH</span> 链3：地缘风险 → 估值重定价</strong><br>台海紧张 → TSM溢价↓ → 美国/日本代工商受益 → 设备商中性<br><em style="color:var(--text-tertiary);font-size:0.85rem;">Morris Chang: "台湾是危险的地方"。市场给3-5%溢价，Chang暗示应8-10%</em></div>
+
+      <h3>"不管谁赢都赚"标的</h3>
+      <figure>
+        <table>
+          <thead><tr><th>标的</th><th>Bull case赚</th><th>Bear case也赚</th><th>逻辑</th></tr></thead>
+          <tbody>
+            <tr><td><strong>TSM</strong></td><td>NVIDIA封装需求↑</td><td>自研芯片也需TSMC</td><td>所有芯片都经过TSMC</td></tr>
+            <tr><td><strong>ASML</strong></td><td>扩产需光刻设备</td><td>自研扩产也需光刻</td><td>100% EUV垄断</td></tr>
+            <tr><td><strong>AVGO</strong></td><td>AI网络基础设施↑</td><td>帮客户自研=设计收入↑</td><td>两条链的交叉点</td></tr>
+            <tr><td><strong>SK hynix</strong></td><td>HBM需求↑</td><td>自研芯片也需HBM</td><td>HBM与GPU架构无关</td></tr>
+          </tbody>
+        </table>
+      </figure>
+      <p style="font-size:0.85rem;color:var(--text-tertiary);"><strong>对比</strong>：NVDA只有bull case才赢大。AMD只有bear case才有机会。INTC只有代工work才能翻身（概率最低）。</p>
+
+      <details>
+        <summary><strong>信号传导时间差 — 套利窗口</strong></summary>
+        <figure>
+          <table>
+            <thead><tr><th>信号</th><th>最先反映</th><th>最后反映</th><th>时间差</th></tr></thead>
+            <tbody>
+              <tr><td>AI需求变化</td><td>TSMC月度营收</td><td>ASML订单</td><td>6-9个月</td></tr>
+              <tr><td>自研芯片进展</td><td>Broadcom AI收入</td><td>NVIDIA份额变化</td><td>3-4个季度</td></tr>
+              <tr><td>HBM供需</td><td>SK hynix现货价</td><td>Micron产能建设</td><td>12-18个月</td></tr>
+              <tr><td>地缘风险</td><td>TSMC股价波动</td><td>Arizona产能替代</td><td>数年</td></tr>
+            </tbody>
+          </table>
+        </figure>
+      </details>
+    </section>
+
+
+    <!-- 6. Quarterly Calendar -->
+    <section id="calendar">
+      <div class="section-header">
+        <h2>6. 季度验证日历</h2>
+      </div>
+      <figure>
+        <table>
+          <thead><tr><th>季度</th><th>关键事件</th><th>看什么</th><th>如果miss</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Q2 2026</strong></td><td>NVIDIA Q1 FY27 ($78B)<br>TSMC Q1 AI占比<br>Mercedes Alpamayo量产</td><td>$1T叙事第一验证<br>CoWoS利用率<br>物理AI现实检验</td><td><span class="signal signal-bear">BEAR</span> $1T崩塌→全链下杀</td></tr>
+            <tr><td><strong>Q3 2026</strong></td><td>Vera Rubin出货<br>OpenAI自研芯片<br>Groq 3 LPU</td><td>年度cadence验证<br>自研威胁速度<br>非GPU推理验证</td><td>cadence崩+自研成功=最坏场景</td></tr>
+            <tr><td><strong>Q4 2026</strong></td><td>$500B累计验证<br>Meta TPU份额<br>ASML订单</td><td>LOI转化率<br>大客户叛逃速度<br>扩产预期修正</td><td>LOI软+TPU>20%=结构性bear</td></tr>
+            <tr><td><strong>2027</strong></td><td>$1T终极验证<br>Rubin Ultra<br>Terafab进度</td><td>Jensen最大承诺<br>架构领先持续性<br>Musk自研可行性</td><td>$1T miss=AI CapEx估值重写</td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </section>
+
+
+    <!-- 7. Risk Dashboard -->
+    <section id="risk">
+      <div class="section-header">
+        <h2>7. 风险仪表盘</h2>
+      </div>
+
+      <figure>
+        <table>
+          <thead><tr><th>#</th><th>Kill Switch</th><th>触发条件</th><th>影响</th><th>概率</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td><span class="signal signal-bear">BEAR</span> 大厂CapEx下调</td><td>Google/Meta/MSFT/Amazon任一家</td><td>全链</td><td>15%/年</td></tr>
+            <tr><td>2</td><td><span class="signal signal-bear">BEAR</span> NVIDIA毛利率&lt;72%</td><td>连续2季度</td><td>NVDA估值</td><td>25%/2年</td></tr>
+            <tr><td>3</td><td><span class="signal signal-bear">BEAR</span> 台海危机升级</td><td>军事行动/封锁/制裁</td><td>全球芯片供应</td><td>5-10%/年</td></tr>
+            <tr><td>4</td><td><span class="signal signal-bear">BEAR</span> AI应用ROI不达预期</td><td>大厂削减AI项目</td><td>需求端坍塌</td><td>20%/3年</td></tr>
+            <tr><td>5</td><td><span class="signal signal-bear">BEAR</span> $1T LOI大面积取消</td><td>&gt;$100B LOI取消</td><td>NVDA叙事崩塌</td><td>15%/2年</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <details>
+        <summary><strong>最容易被忽视的风险：AI应用ROI</strong></summary>
+        <p>原始16个代理人<strong>全部在谈供给侧</strong>。新增4个需求侧代理人(Altman/Nadella/Pichai/Hassabis)提供了部分买方视角，但AI应用的ROI够不够支撑$700B+/年CapEx仍是核心未解问题。</p>
+        <p>如果变现速度慢于基建投入：2026-2027继续投（沉没成本+竞争恐惧）→ 2028-2029 ROI审计→CapEx削减→需求悬崖。</p>
+        <p><strong>概率</strong>：完全崩塌~15-20%。规模修正(实际=预测×0.5-0.7)~40-50%。</p>
+      </details>
+    </section>
+
+
+    <!-- 8. Geopolitics -->
+    <section id="geo">
+      <div class="section-header">
+        <h2>8. 地缘政治</h2>
+      </div>
+      <p><strong>Morris Chang + Chris Miller</strong> = 最权威的地缘分析组合（TSMC创始人9/10 + Chip War作者7/10）。</p>
+
+      <div class="arc-item"><strong>"全球化已死"</strong> &mdash; Chang+Miller共识。CHIPS Act、出口管制、台海紧张是结构性变化，不是周期性的。</div>
+      <div class="arc-item"><strong>"硅盾是脆弱的"</strong> &mdash; Chang: "依赖敌人的理性不是可靠的盾牌"。台湾的垄断地位既是保护也是靶心。市场给TSM的台湾风险溢价(3-5%)太低——Chang暗示应8-10%。</div>
+      <div class="arc-item"><strong>CHIPS Act真实影响</strong> &mdash; 会建出产能但成本高效率低。真正受益的是设备商(AMAT/KLAC/LRCX)——不关心fab在哪，只关心有人在建。</div>
+
+      <details>
+        <summary><strong>中国追赶的两面性</strong></summary>
+        <p><strong>Jensen</strong>：中国份额从95%→50%，"出口管制失败了"。<strong>Chang</strong>：先进制程差距5-6年在扩大。</p>
+        <p><strong>两人都对</strong>，但角度不同：中国在成熟制程已自给（Chang认可），但先进制程追赶在放慢（Jensen的市场份额下降是因为管制，不是因为中国追上来了）。</p>
+        <p><strong>投资含义</strong>：中国成熟制程自给 = TSMC在legacy节点面临价格竞争。中国先进制程落后 = TSMC在AI芯片节点的垄断不受威胁。</p>
+      </details>
+    </section>
+
+
+    <!-- 9. China Self-Sufficiency Roadmap -->
+    <section id="china">
+      <div class="section-header">
+        <h2>9. 中国半导体自主路线图 China Self-Sufficiency Roadmap</h2>
+      </div>
+      <p>§8地缘政治揭示了"全球化已死"的结构性变化。本章深入分析中国半导体自主替代的<strong>真实进展</strong>，而非叙事。核心发现：成熟制程已追上，先进制程差距在<strong>扩大而非缩小</strong>——因为EUV依赖无法绕过。</p>
+
+      <h3>9.1 SMIC竞争力分析 SMIC vs TSMC</h3>
+      <figure>
+        <table>
+          <thead><tr><th>制程节点</th><th>TSMC</th><th>SMIC</th><th>差距</th></tr></thead>
+          <tbody>
+            <tr><td><span class="node-tag">3nm</span></td><td><span class="signal signal-bull">量产</span></td><td>N/A</td><td><strong style="color:var(--red);">&infin;</strong></td></tr>
+            <tr><td><span class="node-tag">5nm</span></td><td><span class="signal signal-bull">量产</span></td><td><span class="signal signal-watch">研发中(多重曝光)</span></td><td>3-5年</td></tr>
+            <tr><td><span class="node-tag">7nm</span></td><td><span class="signal signal-bull">成熟</span></td><td><span class="signal signal-watch">有限量产(麒麟9010)</span></td><td>2-3年</td></tr>
+            <tr><td><span class="node-tag">14nm</span></td><td><span class="signal signal-bull">成熟</span></td><td><span class="signal signal-bull">量产</span></td><td><strong style="color:var(--green);">已追上</strong></td></tr>
+            <tr><td><span class="node-tag">28nm</span></td><td>Commodity</td><td><span class="signal signal-bull">量产</span></td><td><strong style="color:var(--green);">已追上</strong></td></tr>
+          </tbody>
+        </table>
+      </figure>
+      <div class="arc-item"><strong>关键洞察</strong> &mdash; SMIC在成熟制程(14nm/28nm)已追上TSMC，但先进制程差距正在<strong>扩大而非缩小</strong>。原因：EUV光刻机是不可绕过的物理瓶颈。多重曝光DUV可以勉强做到7nm，但良率低、成本高、无法规模化。3nm/5nm没有EUV根本不可能。</div>
+
+      <h3>9.2 华为Ascend对CUDA护城河的影响</h3>
+      <div class="arc-item"><strong>DeepSeek R1 on Ascend</strong> &mdash; 首次证明前沿模型可以在非NVIDIA硬件上训练。这不是"替代"CUDA，而是证明了<strong>可行性</strong>。</div>
+      <div class="arc-item"><strong>性能差距</strong> &mdash; 昇腾910C vs H100：训练性能约<strong>60-70%</strong>，推理性能约<strong>70-80%</strong>。差距显著但非不可用。</div>
+      <div class="arc-item"><strong>CANN生态</strong> &mdash; 华为CANN(Compute Architecture for Neural Networks)生态小但在增长。开发者规模未公开。与CUDA的12年生态积累相比，仍处于早期阶段。</div>
+
+      <div class="question-box">
+        <h4>对NVIDIA护城河的重新评估</h4>
+        <p>CUDA的定位从 <strong>&ldquo;不可替代&rdquo;</strong> 转向 <strong>&ldquo;最佳选择&rdquo;</strong>。这两个表述的区别至关重要：</p>
+        <ul>
+          <li><strong>不可替代</strong> = 定价权无上限，客户无选择</li>
+          <li><strong>最佳选择</strong> = 定价权受限，客户有备选但不愿切换</li>
+        </ul>
+        <p>Ascend + TPU + Trainium 的存在已经改变了谈判格局。OpenAI凭此威胁拿到30%折扣就是证据。</p>
+      </div>
+
+      <h3>9.3 SMEE光刻机进展时间表</h3>
+      <figure>
+        <table>
+          <thead><tr><th>型号</th><th>目标制程</th><th>状态</th><th>时间线</th></tr></thead>
+          <tbody>
+            <tr><td><strong>SSA800/10</strong></td><td><span class="node-tag">28nm DUV</span></td><td><span class="signal signal-bull">交付中</span></td><td>2024-2025</td></tr>
+            <tr><td><strong>SSA800/20</strong></td><td><span class="node-tag">14nm DUV目标</span></td><td><span class="signal signal-watch">研发中</span></td><td>2027-2028(乐观)</td></tr>
+            <tr><td>EUV</td><td><span class="node-tag">7nm及以下</span></td><td><span class="signal signal-bear">未启动</span></td><td>vs ASML差距: <strong>15年+</strong></td></tr>
+          </tbody>
+        </table>
+      </figure>
+      <div class="arc-item"><strong>供应链依赖</strong> &mdash; 即使SMEE突破整机，关键子系统仍依赖国产替代：<strong>光源</strong>(科益虹源)、<strong>镜头</strong>(国望光学)、<strong>光刻胶</strong>(多家)。每个环节都是独立的追赶战线。</div>
+
+      <h3>9.4 投资影响 Investment Implications</h3>
+      <figure>
+        <table>
+          <thead><tr><th>时间维度</th><th>判断</th><th>投资含义</th></tr></thead>
+          <tbody>
+            <tr><td><strong>短期(1-2年)</strong></td><td>出口管制有效，西方设备商中国营收已调整</td><td><span class="signal signal-watch">中性</span> ASML/AMAT/LRCX中国收入已在财报中消化</td></tr>
+            <tr><td><strong>中期(3-5年)</strong></td><td>中国成熟制程自给 &rarr; 全球产能过剩风险</td><td><span class="signal signal-bear">利空</span> 28nm/14nm产品全球价格下行压力，legacy fab盈利受压</td></tr>
+            <tr><td><strong>长期(5-10年)</strong></td><td>若SMEE突破14nm &rarr; 永久性供应链分裂</td><td><span class="signal signal-bear">结构性变化</span> 形成中美两套独立半导体生态，设备商需二选一</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <blockquote>
+        <strong>核心判断：</strong>中国半导体自主替代的真实进度是"成熟制程已成功，先进制程遥遥无期"。市场常犯的错误是把两者混为一谈——要么过度乐观（28nm成功=全面追上），要么过度悲观（没有EUV=全面失败）。投资者需分节点、分制程评估。
+      </blockquote>
+    </section>
+
+
+    <!-- 10. Methodology -->
+    <section id="method">
+      <div class="section-header">
+        <h2>10. 投资方法论 — 七条原则</h2>
+      </div>
+
+      <div class="arc-item"><strong>原则1：追踪链条，不追踪个股</strong> &mdash; 投资逻辑是"权力在哪个节点"。个股只是权力位置的表达。</div>
+      <div class="arc-item"><strong>原则2：按Tier分级信任</strong> &mdash; Tier 1(Wei/Chang)直接用。Tier 2(Jensen)打折30%。Tier 4(Musk)只信方向×2-3。</div>
+      <div class="arc-item"><strong>原则3：共识=行动，分歧=机会</strong> &mdash; 20人确认需求→做多。Jensen独家说CUDA不可替代但5源矛盾→这是alpha信号。</div>
+      <div class="arc-item"><strong>原则4：看行动不看言论</strong> &mdash; $20B收购 > 100次否认。收购/采购方向比财报电话诚实。</div>
+      <div class="arc-item"><strong>原则5：找"不管谁赢都赚"</strong> &mdash; TSM/ASML/AVGO/SK hynix在bull和bear都受益。优先于NVDA(单面)。</div>
+      <div class="arc-item"><strong>原则6：用时间差套利</strong> &mdash; TSMC月度→NVIDIA季度→ASML年度。信号传导6-9个月。</div>
+      <div class="arc-item"><strong>原则7：共识时加倍警惕</strong> &mdash; 供给侧16人无一bearish，需求侧4人视角新增但尚浅 = 仍偏拥挤多头。裂缝出现时下跌超预期。</div>
+
+      <h3>持续监控体系</h3>
+      <figure>
+        <table>
+          <thead><tr><th>频率</th><th>数据源</th><th>看什么</th><th>信号</th></tr></thead>
+          <tbody>
+            <tr><td><strong>每月</strong></td><td>TSMC月度营收(每月10日)</td><td>AI需求领先指标</td><td>MoM↓连续2月=bearish</td></tr>
+            <tr><td><strong>每月</strong></td><td>HBM现货价格</td><td>存储供需平衡</td><td>价格下跌=供需反转</td></tr>
+            <tr><td><strong>每季度</strong></td><td>NVIDIA/TSMC/AVGO/AMD财报</td><td>全链健康度</td><td>任何环节miss=传导风险</td></tr>
+            <tr><td><strong>每季度</strong></td><td>大厂CapEx指引</td><td>需求端意愿</td><td>下调=LOI基础松动</td></tr>
+            <tr><td><strong>事件驱动</strong></td><td>产品交付(Vera Rubin/AI5/Alpamayo)</td><td>技术路线验证</td><td>延迟>1Q=叙事受损</td></tr>
+            <tr><td><strong>事件驱动</strong></td><td>地缘事件(台海/出口管制)</td><td>供应链风险</td><td>升级=TSM溢价重定价</td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </section>
+
+
+    <!-- 10. Provenance -->
+    <section id="provenance">
+      <div class="section-header">
+        <h2>11. Provenance</h2>
+      </div>
+      <figure>
+        <table>
+          <thead><tr><th>来源</th><th>类型</th><th>规模</th><th>可信度</th></tr></thead>
+          <tbody>
+            <tr><td>20个认知代理人档案</td><td>Profile HTML + MD</td><td>40文件</td><td>策展研究</td></tr>
+            <tr><td>20个V4素材策展地图</td><td>综合HTML</td><td>20文件, ~1.6MB</td><td>一手策展</td></tr>
+            <tr><td>64份专项素材(Primary/Interview/Relationship/DeepAnalysis)</td><td>MD + HTML</td><td>128文件</td><td>一手研究</td></tr>
+            <tr><td>20个元思考报告</td><td>HTML</td><td>20文件</td><td>元认知分析</td></tr>
+            <tr><td>Jensen Huang深度元思考</td><td>HTML (28轮)</td><td>527行</td><td>深度策展</td></tr>
+            <tr><td>Elon Musk深度元思考</td><td>HTML</td><td>389行</td><td>深度策展</td></tr>
+            <tr><td>行业级元思考</td><td>HTML (28轮)</td><td>565行</td><td>行业综合</td></tr>
+            <tr><td>Semiconductor Hub</td><td>主页HTML</td><td>1文件</td><td>导航索引</td></tr>
+          </tbody>
+        </table>
+      </figure>
+      <p style="font-size:0.85rem;color:var(--text-tertiary);">总计<strong>320+文件</strong>，覆盖2024-2026年3月的公开素材（财报、演讲、采访、SEC文件、独立分析）。所有claims均可追溯至具体来源文件。</p>
+    </section>
+
+    <footer class="page-footer">
+      <p>AI+Semiconductor Deep Research V3-Final &nbsp;|&nbsp; 16 Agents &times; 7 Nodes &nbsp;|&nbsp; 2026-03-21</p>
+      <p>
+        <a href="semiconductor_hub.html">Hub</a> &nbsp;|&nbsp;
+        <a href="semiconductor_industry_metacognition.html">28轮元思考</a> &nbsp;|&nbsp;
+        <a href="cognitive_agents_2026-03-20/01_jensen_huang.html">Jensen报告</a> &nbsp;|&nbsp;
+        <a href="cognitive_agents_2026-03-20/12_elon_musk.html">Musk报告</a> &nbsp;|&nbsp;
+        <a href="cognitive_agents_2026-03-20/overview.html">Agents Overview</a>
+      </p>
+    </footer>
+  </main>
+
+  <!-- ========== RIGHT SIDEBAR ========== -->
+  <aside class="notes-sidebar" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&#10005;</button>
+      <h4>&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+
+    <div class="anno know-note open" data-section="summary" id="n1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">知识</span>
+        <span class="mn-title">8节点20人确认=三角定位</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>8个不同节点的20个独立偏见源确认AI需求（含4个需求侧买方）。每个人都有自己的偏见，但<strong>方向一致</strong>。</p>
+        <p>类比：20个基站的三角定位比1个基站精确得多。需求侧加入让定位从"卖方单侧"升级为"买卖双侧"。这不是consensus trade——是<strong>独立验证后的高置信度判断</strong>。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note open" data-section="summary" id="n2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">知识</span>
+        <span class="mn-title">"不管谁赢都赚"的筛选逻辑</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>TSM/ASML/AVGO/SK hynix在<strong>bull case(NVIDIA继续主导)</strong>和<strong>bear case(自研替代加速)</strong>都受益——因为它们在供应链更底层，不关心谁设计芯片。</p>
+        <p>NVDA只有bull case才赢大。AMD只有bear case才有机会。</p>
+        <p><span class="method-tag">原则</span>先找双赢位置，再找单面alpha。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note open" data-section="chain" id="n3a">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">权力=定价权=利润率</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>供应链分析的核心：<strong>不可替代度=定价权=利润率</strong>。</p>
+        <p>ASML(10/10)可以每台EUV收$3.8亿。TSMC(9/10)可以年年涨价5-8%。NVIDIA(7/10↓)开始被客户威胁拿折扣。</p>
+        <p><span class="trap-tag">注意</span>不可替代度在下降的节点(NVIDIA, ARM)是最需要监控的。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note open" data-section="agents" id="n3">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">知识</span>
+        <span class="mn-title">可信度4层分级</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Tier 1 (Wei/Chang/Srouji)</strong>：预测偏保守，实际常超预期。直接用。</p>
+        <p><strong>Tier 2 (Jensen/Hock Tan/Fouquet)</strong>：方向强但数字有卖方偏差。打折30%。</p>
+        <p><strong>Tier 3 (Lisa Su/Miller/Keller)</strong>：有洞察但信息优势弱。需交叉验证。</p>
+        <p><strong>Tier 4 (Musk/Lip-Bu Tan)</strong>：方向对但时间线不可信。Musk时间线×2-3。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note open" data-section="crossval" id="n4">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Jensen最不诚实的两个claim</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>"CUDA不可替代"(15%可信)</strong>：Anthropic/Google在TPU训练前沿模型。OpenAI拿30%折扣。<strong>Jensen自己买Groq</strong>。所有独立源矛盾。</p>
+        <p><strong>"自研芯片不合理"(5%可信)</strong>：Google/Amazon/Meta/Tesla/OpenAI全在做。Jensen自己$20B买Groq。<strong>这是Jensen最不诚实的claim</strong>。</p>
+        <p><span class="trap-tag">行动>言论</span>看CEO做什么，不看说什么。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note open" data-section="risk" id="n5">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">拥挤多头=最大隐藏风险</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>供给侧16人<strong>无一公开bearish</strong> AI CapEx，需求侧4人(Altman/Nadella/Pichai/Hassabis)新加入确认CapEx加速。所有CEO都在各自节点确认需求。</p>
+        <p>2000年电信：所有CEO说"带宽无限"→只兑现30%。2007年房地产：所有银行家说"只涨不跌"。</p>
+        <p>不意味着一定会崩——但<strong>一旦裂缝出现，下跌速度超预期</strong>，因为没有人做了对冲。</p>
+        <p><span class="method-tag">对冲思路</span>持有链条核心(TSM/ASML)同时留意kill switch信号。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note open" data-section="method" id="n6">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">最诚实的结论</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p>方向大概率对（AI基建是真实的）。</p>
+        <p>规模可能偏高（×0.5-0.7）。</p>
+        <p>时间线可能偏早（×1.5-2）。</p>
+        <p><strong>持有链条核心（TSM/ASML/AVGO），用TSMC月度数据做动态校准。</strong></p>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- JavaScript -->
+<script>
+(function() {
+  const h = document.getElementById('hamburgerBtn'), s = document.getElementById('sidebar'), o = document.getElementById('sidebarOverlay');
+  h.addEventListener('click', () => { s.classList.toggle('open'); o.classList.toggle('open'); });
+  o.addEventListener('click', () => { s.classList.remove('open'); o.classList.remove('open'); });
+  s.querySelectorAll('a').forEach(l => l.addEventListener('click', () => { if (window.innerWidth <= 900) { s.classList.remove('open'); o.classList.remove('open'); } }));
+
+  window.toggleNote = function(head) { head.parentElement.classList.toggle('open'); requestAnimationFrame(positionNotes); };
+
+  function positionNotes() {
+    const sb = document.getElementById('notesSidebar'); if (!sb) return;
+    const notes = [...sb.querySelectorAll('.anno')];
+    const scrollY = window.scrollY, sbTop = sb.getBoundingClientRect().top + scrollY;
+    const hdr = sb.querySelector('.notes-sidebar-header'), hH = hdr ? hdr.offsetHeight + 12 : 40;
+    notes.sort((a,b) => { const sA = document.getElementById(a.dataset.section), sB = document.getElementById(b.dataset.section); if (!sA||!sB) return 0; return sA.getBoundingClientRect().top - sB.getBoundingClientRect().top; });
+    let last = hH;
+    notes.forEach(n => { if (n.style.display==='none') return; const sec = document.getElementById(n.dataset.section); if (!sec) { n.style.display='none'; return; }
+      let t = sec.getBoundingClientRect().top + scrollY - sbTop; if (t < last+6) t = last+6; n.style.top = t+'px'; last = t + n.offsetHeight; });
+    sb.style.minHeight = (last+40)+'px';
+  }
+  window.addEventListener('load', () => { positionNotes(); document.querySelectorAll('details').forEach(d => d.addEventListener('toggle', () => setTimeout(positionNotes,50))); });
+  window.addEventListener('resize', positionNotes);
+  let st; window.addEventListener('scroll', () => { clearTimeout(st); st = setTimeout(positionNotes,100); }, {passive:true});
+
+  document.querySelectorAll('.nref, mark.hl-know').forEach(el => { el.addEventListener('click', e => { e.preventDefault(); const n = document.getElementById(el.dataset.note); if (!n) return; n.classList.add('open'); requestAnimationFrame(() => { positionNotes(); n.scrollIntoView({behavior:'smooth',block:'center'}); n.classList.add('flash'); setTimeout(()=>n.classList.remove('flash'),1500); }); }); });
+
+  var nsb = document.getElementById('notesSidebar'), ntb = document.getElementById('notesToggleBtn'), ncb = document.getElementById('notesCloseBtn');
+  function toggleNS() { var c = !nsb.classList.contains('ns-closed'); nsb.classList.toggle('ns-closed',c); ntb.style.display = c?'flex':'none'; if(!c) requestAnimationFrame(positionNotes); }
+  if(ntb) ntb.addEventListener('click', toggleNS);
+  if(ncb) ncb.addEventListener('click', toggleNS);
+  window.addEventListener('resize', () => { if(window.innerWidth>1200) { nsb.classList.remove('ns-closed'); ntb.style.display='none'; } });
+})();
+</script>
+</body>
+</html>

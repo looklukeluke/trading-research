@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>宋治亨 (Song Chi-Hyung) — 素材策展地图 V4</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  /* Page-specific V4 extensions (~75 lines) */
+  .priority-box { border:1px solid rgba(248,168,72,0.3); border-left:3px solid var(--accent); border-radius:var(--radius-sm); padding:1.25rem 1.5rem; margin-bottom:2rem; background:var(--bg-surface); }
+  .priority-box h2 { color:var(--accent); margin-top:0; font-size:1.1rem; font-weight:590; }
+  .priority-box ol { margin-bottom:0; padding-left:1.2rem; }
+  .priority-box li { margin-bottom:0.6rem; line-height:1.5; }
+  .time-badge { display:inline-block; padding:0.1rem 0.5rem; border-radius:10px; font-size:0.7rem; font-weight:590; margin-right:0.3rem; background:var(--accent); color:var(--bg-base); }
+  .anno { position:absolute; left:1rem; right:1rem; }
+  .anno.meta-note { padding:0.6rem 0.75rem; border-left:2px solid var(--accent); border-radius:0 6px 6px 0; background:rgba(248,168,72,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.meta-note:hover { box-shadow:0 0 0 1px var(--accent); }
+  .anno.know-note { padding:0.6rem 0.75rem; border-left:2px solid var(--knowledge); border-radius:0 6px 6px 0; background:rgba(91,155,213,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.know-note:hover { box-shadow:0 0 0 1px var(--knowledge); }
+  .anno .note-label { display:inline-block; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--bg-base); background:var(--accent); padding:0.1rem 0.4rem; border-radius:3px; margin-bottom:0.3rem; }
+  .anno .note-label.know { background:var(--knowledge); color:white; }
+  .anno .mn-head { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
+  .anno .mn-title { flex:1; font-weight:510; font-size:0.75rem; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .anno .mn-fold { font-size:0.55rem; color:var(--text-quaternary); transition:transform 0.2s; margin-left:auto; }
+  .anno.open .mn-fold { transform:rotate(180deg); }
+  .anno .mn-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+  .anno.open .mn-body { max-height:2000px; }
+  .anno .mn-body p { font-size:0.78rem; margin-bottom:0.3rem; color:var(--text-secondary); }
+  .anno.flash { animation:noteFlash 1.5s ease; }
+  @keyframes noteFlash { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--accent);} }
+  .anno.know-note.flash { animation:noteFlashBlue 1.5s ease; }
+  @keyframes noteFlashBlue { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--knowledge);} }
+  mark.hl-know { background:rgba(91,155,213,0.12); border-bottom:1.5px solid var(--knowledge); padding:0 2px; border-radius:2px; color:inherit; cursor:pointer; transition:background 0.15s; }
+  mark.hl-know:hover { background:rgba(91,155,213,0.28); }
+  .nref { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; font-size:0.48rem; font-weight:700; cursor:pointer; margin-left:1px; vertical-align:super; transition:transform 0.15s; text-decoration:none; background:var(--knowledge); color:white; }
+  .nref:hover { transform:scale(1.25); box-shadow:0 0 6px rgba(91,155,213,0.4); }
+  .top-controls { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; padding:0.35rem 0.7rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); font-size:0.72rem; flex-wrap:wrap; }
+  .top-controls .tc-label { font-weight:590; color:var(--knowledge); }
+  .top-controls button { padding:0.15rem 0.45rem; border-radius:4px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-tertiary); cursor:pointer; font-size:0.68rem; font-family:inherit; transition:all 0.15s; }
+  .top-controls button:hover { border-color:var(--knowledge); color:var(--text-primary); }
+  .top-controls button.active { background:var(--knowledge-dim); color:var(--knowledge); border-color:rgba(91,155,213,0.3); }
+  .top-controls .tc-sep { color:var(--border-default); margin:0 0.15rem; }
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .notes-sidebar { position:relative; width:320px; min-width:320px; padding:1.25rem 1rem; border-left:1px solid var(--border-subtle); background:var(--bg-elevated); }
+  .notes-sidebar-header { position:sticky; top:0; z-index:60; background:var(--bg-elevated); padding-bottom:0.5rem; border-bottom:1px solid var(--border-subtle); margin-bottom:0.75rem; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  .notes-toggle-btn { position:fixed; right:1rem; bottom:1.5rem; z-index:200; width:44px; height:44px; border-radius:50%; border:1px solid var(--border-default); background:var(--bg-surface); color:var(--text-secondary); cursor:pointer; font-size:1.1rem; display:none; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.4); }
+  .notes-close-btn { float:right; background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:1.1rem; padding:0; display:none; }
+  @media (max-width:1200px) { .notes-close-btn { display:block; } .notes-sidebar { position:fixed; right:0; top:0; height:100vh; overflow-y:auto; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.4); z-index:150; } .notes-sidebar.ns-closed { transform:translateX(100%); box-shadow:none; } .notes-toggle-btn { display:flex; } }
+  .notes-overlay-right { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:140; }
+  .notes-overlay-right.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  @media (min-width:1600px) { .main-content { max-width:1000px; } .notes-sidebar { width:360px; min-width:360px; } }
+  .rel-card { border:1px solid var(--border-subtle); border-radius:var(--radius-md); background:var(--bg-elevated); margin-bottom:0.75rem; }
+  .rel-card summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  .rel-card[open] summary { color:var(--accent); }
+  .rel-card .rel-body { padding:0 1rem 1rem; font-size:0.82rem; color:var(--text-secondary); line-height:1.6; }
+  .arc-item { border-left:3px solid var(--accent); padding:0.6rem 1rem; margin-bottom:0.75rem; background:rgba(66,165,245,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+  .arc-item strong { color:var(--text-primary); }
+  .question-box { border:2px solid var(--knowledge); background:rgba(91,155,213,0.05); border-radius:var(--radius-md); padding:1.5rem; text-align:center; margin:2rem 0; }
+  .question-box blockquote { border:none; margin:0; padding:0; }
+  .question-box p { font-size:1rem; font-weight:510; color:var(--text-primary); }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; margin-bottom:1rem; }
+  th { text-transform:uppercase; font-size:0.72rem; font-weight:510; color:var(--text-quaternary); letter-spacing:0.04em; text-align:left; padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-default); }
+  td { padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-subtle); vertical-align:top; color:var(--text-secondary); }
+  tr:hover td { background:var(--bg-elevated); }
+  .url-col { max-width:200px; word-break:break-all; }
+  .zh { display:block; font-size:0.85em; color:var(--text-tertiary); margin-top:0.15em; }
+  .zh-inline { font-size:0.85em; color:var(--text-tertiary); }
+  details { border:1px solid var(--border-subtle); background:var(--bg-elevated); border-radius:var(--radius-sm); padding:0; margin-bottom:0.75rem; }
+  details summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  details[open] summary { color:var(--accent); }
+  details > div, details > p { padding:0 1rem 1rem; font-size:0.82rem; line-height:1.6; color:var(--text-secondary); }
+  body.embedded .sidebar, body.embedded .notes-sidebar, body.embedded .hamburger-btn, body.embedded .notes-toggle-btn { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+  .gap-tag { display:inline-block; padding:0.1rem 0.4rem; border-radius:3px; font-size:0.65rem; font-weight:590; margin-left:0.3rem; }
+  .gap-high { background:rgba(244,67,54,0.2); color:#ff6b6b; }
+  .gap-medium { background:rgba(255,193,7,0.2); color:#ffc107; }
+  .gap-low { background:rgba(76,175,80,0.2); color:#66bb6a; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ========== LEFT SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">宋治亨 (Song Chi-Hyung)<br>素材策展地图 V4</div>
+
+    <h4>Contents</h4>
+    <nav>
+      <ul>
+        <li><a href="#priority"><span class="toc-num">&#9733;</span>如果只有2小时</a></li>
+        <li><a href="#analysts"><span class="toc-num">1</span>最佳分析师</a></li>
+        <li><a href="#longform"><span class="toc-num">2</span>必读长文/书籍</a></li>
+        <li><a href="#podcasts"><span class="toc-num">3</span>播客与视频</a></li>
+        <li><a href="#primary"><span class="toc-num">4</span>一手资料</a></li>
+        <li><a href="#relationships"><span class="toc-num">5</span>关键关系网</a></li>
+        <li><a href="#narratives"><span class="toc-num">6</span>叙事弧</a></li>
+        <li><a href="#gaps"><span class="toc-num">7</span>信息空白</a></li>
+        <li><a href="#quality"><span class="toc-num">8</span>质量评估</a></li>
+      </ul>
+    </nav>
+
+    <h4>Related</h4>
+    <nav>
+      <ul>
+        <li><a href="20_song_chi_hyung.html">宋治亨 Profile</a></li>
+        <li><a href="20_song_metacognition.html">Metacognition</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+
+    <div class="top-controls">
+      <span class="tc-label">&#128218; 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <header class="page-header">
+      <h1>宋治亨 (Song Chi-Hyung) — 素材策展地图 V4</h1>
+      <p class="subtitle">Research Date: 2026-03-22 &nbsp;|&nbsp; 5 Categories · 18 Sources · 7 Gaps<br>
+      <span class="zh-inline">韩国加密隐形冠军 · Upbit/Dunamu幕后操盘手</span></p>
+      <div class="badge-row">
+        <span class="badge" style="background:var(--accent);color:var(--bg-base);">Korean Crypto</span>
+        <span class="badge" style="background:var(--knowledge);color:white;">Hidden Champion</span>
+        <span class="badge" style="background:var(--bg-surface);color:var(--text-secondary);border:1px solid var(--border-subtle);">Low Transparency</span>
+      </div>
+    </header>
+
+    <!-- ★ Priority Box -->
+    <div class="priority-box" id="priority">
+      <h2>&#9200; 如果只有2小时 — 推荐阅读路径</h2>
+      <ol>
+        <li><span class="time-badge">45min</span> <strong>韩国金融研究院(KIF)政策报告</strong> — 理解韩国VASP监管框架与Upbit合规基础 <a href="https://kif.re.kr" class="nref" data-note="kn-1" style="display:none;">1</a></li>
+        <li><span class="time-badge">40min</span> <strong>朝鲜日报/中央日报商业版</strong> — 韩语深度报道，Dunamu IPO相关内幕 <a href="https://chosun.com" class="nref" data-note="kn-2" style="display:none;">2</a></li>
+        <li><span class="time-badge">35min</span> <strong>FSC VASP注册公示</strong> — 官方合规状态确认与牌照信息 <a href="https://fsc.go.kr" class="nref" data-note="kn-3" style="display:none;">3</a></li>
+      </ol>
+    </div>
+
+    <!-- §1 最佳分析师 -->
+    <section id="analysts">
+      <div class="section-header">
+        <h2>1. 最佳分析师与独立研究<span class="zh">Best Analysts &amp; Independent Research</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称 / Name</th>
+            <th>类型 / Type</th>
+            <th>重要性 / Importance</th>
+            <th>备注 / Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>韩国金融研究院(KIF)</strong></td>
+            <td>政策研究机构</td>
+            <td><span style="color:var(--accent);">★★★★★</span></td>
+            <td>韩语一手政策分析，FSC监管框架研究<span class="zh">韩语一手政策分析，FSC监管框架研究</span></td>
+          </tr>
+          <tr>
+            <td><strong>The Block (Korea)</strong></td>
+            <td>加密媒体研究</td>
+            <td><span style="color:var(--accent);">★★★★</span></td>
+            <td>英文世界对韩国加密市场最深入报道，偶有Upbit/Dunamu分析<span class="zh">英文世界对韩国加密市场最深入报道</span></td>
+          </tr>
+          <tr>
+            <td><strong>CoinGecko Exchange Report</strong></td>
+            <td>数据研究</td>
+            <td><span style="color:var(--accent);">★★★★</span></td>
+            <td>提供Upbit交易量、市场份额数据(但为交易所自报)<mark class="hl-know" data-note="kn-4" style="display:none;">Kimchi Premium数据</mark></td>
+          </tr>
+          <tr>
+            <td><strong>Kaiko</strong></td>
+            <td>链上数据分析</td>
+            <td><span style="color:var(--accent);">★★★</span></td>
+            <td>韩国交易所溢价(Kimchi premium)的量化研究<span class="zh">韩国交易所溢价(Kimchi premium)的量化研究</span></td>
+          </tr>
+          <tr>
+            <td><strong>Messari</strong></td>
+            <td>行业研究</td>
+            <td><span style="color:var(--accent);">★★★</span></td>
+            <td>偶有韩国市场概览，但Song个人coverage极少<span class="zh">偶有韩国市场概览，但Song个人coverage极少</span></td>
+          </tr>
+          <tr>
+            <td><mark class="hl-know" data-note="kn-5" style="display:none;"><strong>信息空白</strong></mark></td>
+            <td>—</td>
+            <td><span style="color:#ff6b6b;">⚠</span></td>
+            <td>无专门研究Song个人商业策略的英文分析师；无投行覆盖(Dunamu未上市)<span class="zh">无专门研究Song个人商业策略的英文分析师</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §2 必读长文/书籍 -->
+    <section id="longform">
+      <div class="section-header">
+        <h2>2. 必读长文与书籍<span class="zh">Must-Read Long-Form &amp; Books</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称 / Name</th>
+            <th>类型 / Type</th>
+            <th>重要性 / Importance</th>
+            <th>备注 / Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>朝鲜日报/中央日报 商业版</strong></td>
+            <td>韩媒深度报道</td>
+            <td><span style="color:var(--accent);">★★★★★</span></td>
+            <td>韩语深度商业报道主要来源，Dunamu IPO相关报道<span class="zh">韩语深度商业报道主要来源</span></td>
+          </tr>
+          <tr>
+            <td><strong>彭博社特写 Bloomberg Profile</strong></td>
+            <td>长报道</td>
+            <td><span style="color:var(--accent);">★★★★</span></td>
+            <td>2018年、2021年两次聚焦韩国加密狂热，Song被引用但未深度采访<span class="zh">2018年、2021年两次聚焦韩国加密狂热</span></td>
+          </tr>
+          <tr>
+            <td><strong>Forbes Korea 富豪榜</strong></td>
+            <td>榜单报道</td>
+            <td><span style="color:var(--accent);">★★★</span></td>
+            <td>Song因Dunamu估值上榜，但为财富估算而非商业分析<span class="zh">Song因Dunamu估值上榜，但为财富估算而非商业分析</span></td>
+          </tr>
+          <tr>
+            <td><strong>《韩国加密货币革命》</strong></td>
+            <td>行业书籍(韩语)</td>
+            <td><span style="color:var(--accent);">★★★</span></td>
+            <td>韩国加密发展史，Song/Upbit作为案例出现，非传记深度<span class="zh">韩国加密发展史</span></td>
+          </tr>
+          <tr>
+            <td><mark class="hl-know" data-note="kn-6" style="display:none;"><strong>信息空白</strong></mark></td>
+            <td>—</td>
+            <td><span style="color:#ff6b6b;">⚠</span></td>
+            <td>无英文传记；无授权书籍；无深度创业历程回顾<span class="zh">无英文传记，无授权书籍</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §3 播客与视频 -->
+    <section id="podcasts">
+      <div class="section-header">
+        <h2>3. 播客与视频<span class="zh">Podcasts &amp; Video</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称 / Name</th>
+            <th>类型 / Type</th>
+            <th>重要性 / Importance</th>
+            <th>备注 / Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Upbit Developer Conference (UDC)</strong></td>
+            <td>官方会议视频</td>
+            <td><span style="color:var(--accent);">★★★★★</span></td>
+            <td>Song极少公开演讲，但UDC年度大会偶有致辞；韩语为主<span class="zh">Song极少公开演讲，但UDC偶有致辞</span></td>
+          </tr>
+          <tr>
+            <td><strong>韩国国会听证会录像</strong></td>
+            <td>政府视频</td>
+            <td><span style="color:var(--accent);">★★★★</span></td>
+            <td>Song作为行业代表出席FSC听证会，2021-2023年关键监管节点<span class="zh">2021-2023年关键监管节点</span></td>
+          </tr>
+          <tr>
+            <td><strong>韩国经济TV / SBS Biz</strong></td>
+            <td>韩语电视</td>
+            <td><span style="color:var(--accent);">★★★★</span></td>
+            <td>偶有Dunamu相关新闻，Song本人出镜极少<span class="zh">偶有Dunamu相关新闻</span></td>
+          </tr>
+          <tr>
+            <td><strong>CoinDesk TV / Forkast.News</strong></td>
+            <td>英文媒体采访</td>
+            <td><span style="color:var(--accent);">★★★</span></td>
+            <td>Song<strong>从未</strong>接受英文视频专访；报道多为二手引用<span class="zh">Song从未接受英文视频专访</span></td>
+          </tr>
+          <tr>
+            <td><mark class="hl-know" data-note="kn-7" style="display:none;"><strong>信息空白</strong></mark></td>
+            <td>—</td>
+            <td><span style="color:#ff6b6b;">⚠</span></td>
+            <td>无英文播客专访；无Bankless/Unchained级别深度对话；无公开AMA<span class="zh">无英文播客专访，无公开AMA</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §4 一手资料 -->
+    <section id="primary">
+      <div class="section-header">
+        <h2>4. 一手资料<span class="zh">Primary Sources</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称 / Name</th>
+            <th>类型 / Type</th>
+            <th>重要性 / Importance</th>
+            <th>备注 / Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>FSC VASP 注册公示</strong></td>
+            <td>监管文件</td>
+            <td><span style="color:var(--accent);">★★★★★</span></td>
+            <td>韩国金融委员会交易所牌照信息，合规状态官方确认<span class="zh">合规状态官方确认</span></td>
+          </tr>
+          <tr>
+            <td><strong>法院诉讼记录</strong></td>
+            <td>司法文件</td>
+            <td><span style="color:var(--accent);">★★★★</span></td>
+            <td>2020年Upbit涉嫌洗钱调查、员工内幕交易案等公开记录<span class="zh">2020年Upbit涉嫌洗钱调查</span></td>
+          </tr>
+          <tr>
+            <td><strong>Dunamu 官网/投资者关系</strong></td>
+            <td>公司官方</td>
+            <td><span style="color:var(--accent);">★★★★</span></td>
+            <td>韩语为主，披露有限；IR页面极简<span class="zh">韩语为主，披露有限</span></td>
+          </tr>
+          <tr>
+            <td><strong>Dunamu 税务/雇佣公示</strong></td>
+            <td>韩国政府公开数据</td>
+            <td><span style="color:var(--accent);">★★★</span></td>
+            <td>通过韩国企业信息可推算规模，非直接披露<span class="zh">可推算规模</span></td>
+          </tr>
+          <tr>
+            <td><strong>专利/商标数据库</strong></td>
+            <td>知识产权</td>
+            <td><span style="color:var(--accent);">★★★</span></td>
+            <td>Dunamu技术专利，反映产品方向<span class="zh">Dunamu技术专利</span></td>
+          </tr>
+          <tr>
+            <td><mark class="hl-know" data-note="kn-8" style="display:none;"><strong>信息空白</strong></mark></td>
+            <td>—</td>
+            <td><span style="color:#ff6b6b;">⚠</span></td>
+            <td>无IPO招股书；无审计财报；无股东结构披露；Song个人无Twitter/X、无LinkedIn活动<span class="zh">无IPO招股书，无审计财报</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §5 关键关系网 -->
+    <section id="relationships">
+      <div class="section-header">
+        <h2>5. 关键关系网<span class="zh">Key Relationships</span></h2>
+      </div>
+      
+      <details class="rel-card" open>
+        <summary>🟣 Kakao Corp (金范洙/Kim Beom-su) — 战略投资者+平台伙伴</summary>
+        <div class="rel-body">
+          <p>Kakao是Dunamu早期投资方；Upbit嵌入KakaoTalk钱包；金范洙与Song为韩国科技圈"双巨头"但公开互动极少。</p>
+          <p><strong>重要性：</strong><span style="color:var(--accent);">★★★★★</span></p>
+          <p><strong>Type:</strong> Strategic Investor + Platform Partnership</p>
+        </div>
+      </details>
+      
+      <details class="rel-card">
+        <summary>🔵 Kim Hyung-nyun (金炯伦) — Dunamu联合创办人/CEO</summary>
+        <div class="rel-body">
+          <p>实际运营负责人，Song更偏战略/股东角色；金炯伦公开露面更多。研究Kim Hyung-nyun的公开活动，可间接推断Song的战略方向。</p>
+          <p><strong>重要性：</strong><span style="color:var(--accent);">★★★★★</span></p>
+          <p><strong>Note:</strong> 研究金炯伦 = 研究Song的影子</p>
+        </div>
+      </details>
+      
+      <details class="rel-card">
+        <summary>⚖️ 韩国FSC/金融监督院 — 监管关系</summary>
+        <div class="rel-body">
+          <p>2021年VASP法后核心利益相关方；Song代表行业参与政策对话。这是Song少数"被迫公开"的场景之一。</p>
+          <p><strong>重要性：</strong><span style="color:var(--accent);">★★★★★</span></p>
+          <p><strong>Key Events:</strong> 2021-2023 FSC Hearings</p>
+        </div>
+      </details>
+      
+      <details class="rel-card">
+        <summary>⚔️ Bithumb/Coinone/Korbit — 竞争对手</summary>
+        <div class="rel-body">
+          <p>韩国四大交易所其他三家；Upbit垄断地位的行业对立面。市场份额争夺与监管游说是关键博弈点。</p>
+          <p><strong>重要性：</strong><span style="color:var(--accent);">★★★★</span></p>
+        </div>
+      </details>
+      
+      <details class="rel-card">
+        <summary>💼 Hashed (韩国加密VC) — 生态关系</summary>
+        <div class="rel-body">
+          <p>韩国最大加密基金，与Upbit上币、流动性深度绑定。韩国Token上市生态的核心节点。</p>
+          <p><strong>重要性：</strong><span style="color:var(--accent);">★★★★</span></p>
+        </div>
+      </details>
+      
+      <details class="rel-card">
+        <summary>💥 Terraform Labs (Do Kwon) — 复杂关联</summary>
+        <div class="rel-body">
+          <p>UST/Luna崩溃前为Upbit重要交易对；崩溃后监管关系紧张。涉及韩国投资者保护与交易所责任讨论。</p>
+          <p><strong>重要性：</strong><span style="color:var(--accent);">★★★★</span></p>
+        </div>
+      </details>
+
+      <div class="question-box">
+        <blockquote>
+          <p>🤔 核心研究问题：宋治亨的"隐形垄断者"模式与币安(CZ)、Coinbase(Armstrong)的"超级明星"模式有何本质差异？</p>
+        </blockquote>
+      </div>
+    </section>
+
+    <!-- §6 叙事弧 -->
+    <section id="narratives">
+      <div class="section-header">
+        <h2>6. 关键叙事弧<span class="zh">Key Narrative Arcs</span></h2>
+      </div>
+      
+      <div class="arc-item">
+        <strong>🎯 叙事弧 #1: Kimchi Premium背后的韩国特殊性</strong>
+        <p>韩国加密市场的地理封闭性与监管特殊性创造了全球最独特的溢价现象。Song的战略核心在于利用而非对抗这种特殊性。Kimchi Premium从套利机会演变为韩国交易所垄断的护城河。</p>
+      </div>
+      
+      <div class="arc-item">
+        <strong>🎯 叙事弧 #2: 从Kakao生态到独立帝国</strong>
+        <p>Dunamu与Kakao的深度绑定是Upbit快速崛起的核心引擎——KakaoTalk 4500万用户的流量导入无可复制。但Song如何从"生态玩家"演变为独立控制者，涉及复杂的股权博弈。</p>
+      </div>
+      
+      <div class="arc-item">
+        <strong>🎯 叙事弧 #3: Luna崩溃后的监管重置</strong>
+        <p>Terraform Labs的UST/Luna崩溃对韩国投资者冲击巨大，Song作为头部交易所代表面临前所未有的监管压力。这标志着韩国加密从"自律时代"进入"合规时代"。</p>
+      </div>
+      
+      <div class="arc-item">
+        <strong>🎯 叙事弧 #4: 隐形冠军的国际化悖论</strong>
+        <p>Song在国内的成功依赖于韩国特殊的市场结构（Kimchi Premium、Kakao生态、监管保护）。但这种成功模式能否复制到海外？新加坡、印尼的Upbit扩张面临完全不同的竞争格局。</p>
+      </div>
+      
+      <div class="arc-item">
+        <strong>🎯 叙事弧 #5: 个人IP缺失的策略性选择</strong>
+        <p>对比CZ的Twitter活跃度、Armstrong的国会证词，Song的极度低调是性格还是策略？无个人社交媒体、无公开AMA、无传记——这在"个人IP即护城河"的加密行业极为罕见。</p>
+      </div>
+    </section>
+
+    <!-- §7 信息空白 -->
+    <section id="gaps">
+      <div class="section-header">
+        <h2>7. 信息空白 — What Doesn't Exist<span class="zh">Information Gaps</span></h2>
+      </div>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>空白领域 / Gap Area</th>
+            <th>影响 / Impact</th>
+            <th>补充难度 / Difficulty</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Song个人背景 (pre-2012)</strong><br><span class="zh-inline">创业前经历、教育、早期职业完全未知</span></td>
+            <td>无法理解其决策风格形成</td>
+            <td><span class="gap-tag gap-high">极高</span></td>
+          </tr>
+          <tr>
+            <td><strong>Dunamu真实财务数据</strong><br><span class="zh-inline">收入、利润、成本结构均为估算</span></td>
+            <td>无法评估商业模式可持续性</td>
+            <td><span class="gap-tag gap-high">高</span></td>
+          </tr>
+          <tr>
+            <td><strong>Kakao-Dunamu股权协议细节</strong><br><span class="zh-inline">控制结构、董事会席位、战略条款</span></td>
+            <td>无法理解权力结构真实现状</td>
+            <td><span class="gap-tag gap-high">极高</span></td>
+          </tr>
+          <tr>
+            <td><strong>上币决策机制</strong><br><span class="zh-inline">Upbit上币标准、内部流程、利益冲突</span></td>
+            <td>无法评估生态健康度</td>
+            <td><span class="gap-tag gap-high">高</span></td>
+          </tr>
+          <tr>
+            <td><strong>Song个人政治立场/政策影响力</strong><br><span class="zh-inline">在韩国政商网络中的实际角色</span></td>
+            <td>无法理解监管博弈本质</td>
+            <td><span class="gap-tag gap-high">高</span></td>
+          </tr>
+          <tr>
+            <td><strong>国际化战略细节</strong><br><span class="zh-inline">新加坡、印尼等海外扩张真实进展</span></td>
+            <td>无法判断第二曲线可能性</td>
+            <td><span class="gap-tag gap-medium">中高</span></td>
+          </tr>
+          <tr>
+            <td><strong>中文世界认知</strong><br><span class="zh-inline">中国加密社区对其了解几乎为零</span></td>
+            <td>研究覆盖不完整</td>
+            <td><span class="gap-tag gap-low">中等</span></td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="question-box">
+        <blockquote>
+          <p>🎯 元问题：为什么宋治亨选择"隐形"？这是被动选择（性格/隐私）还是主动策略（降低监管风险/避免个人品牌化）？</p>
+        </blockquote>
+      </div>
+    </section>
+
+    <!-- §8 质量评估 -->
+    <section id="quality">
+      <div class="section-header">
+        <h2>8. 素材质量评估<span class="zh">Source Quality Assessment</span></h2>
+      </div>
+      
+      <details open>
+        <summary>📊 数据可信度矩阵</summary>
+        <div>
+          <p><strong>高可信度 (Primary):</strong> FSC监管文件、国会听证会录像、法院判决记录</p>
+          <p><strong>中高可信度 (Verified):</strong> 朝鲜日报/中央日报商业版、韩国金融研究院报告</p>
+          <p><strong>中可信度 (Secondary):</strong> The Block、CoinGecko、Kakao官方公告</p>
+          <p><strong>低可信度 (Speculative):</strong> Forbes财富估算、非官方传言、Twitter crypto community讨论</p>
+        </div>
+      </details>
+      
+      <details>
+        <summary>⚠️ 主要偏见风险</summary>
+        <div>
+          <p><strong>韩语语言壁垒:</strong> 核心一手资料均为韩语，非韩语研究者天然处于信息劣势。</p>
+          <p><strong>低透明度偏见:</strong> 由于Song极度低调，公开信息往往是"被迫披露"（监管、诉讼），而非主动分享。</p>
+          <p><strong>竞争性信息:</strong> Bithumb、Coinone等竞争对手可能有抹黑动机；投行因Dunamu未上市而无覆盖压力。</p>
+          <p><strong>时间滞后性:</strong> 英文报道往往基于数月前的韩语报道翻译，深度和时效性双重损失。</p>
+        </div>
+      </details>
+      
+      <details>
+        <summary>📋 研究优先级建议</summary>
+        <div>
+          <p><strong>Tier 1 (必做):</strong> 韩语原生资料优先——朝鲜日报、中央日报、韩国经济日报商业版</p>
+          <p><strong>Tier 2 (重要):</strong> 监管文件追踪——FSC公示、国会听证会录像</p>
+          <p><strong>Tier 3 (辅助):</strong> 关系网络替代研究——研究Kim Hyung-nyun公开活动</p>
+          <p><strong>Tier 4 (对比):</strong> 与币安、Coinbase的"超级明星"模式对比研究</p>
+        </div>
+      </details>
+
+      <div class="question-box">
+        <blockquote>
+          <p>🔍 核心发现：英文世界对宋治亨的认知存在系统性空白，信息的"稀缺性"本身可能就是最有价值的信号。</p>
+        </blockquote>
+      </div>
+    </section>
+
+    <footer style="margin-top:3rem; padding-top:1rem; border-top:1px solid var(--border-subtle); font-size:0.72rem; color:var(--text-quaternary);">
+      <p>Generated: 2026-03-22 &middot; V4 Template &middot; <a href="../blockchain_hub.html">Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ========== RIGHT SIDEBAR (Notes) ========== -->
+  <aside class="notes-sidebar ns-closed" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&times;</button>
+      <h4 style="font-size:0.7rem; font-weight:590; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-quaternary); margin:0;">&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+    
+    <!-- Knowledge Notes -->
+    <div class="anno know-note" id="kn-1" data-section="priority" style="display:none;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">K</span>
+        <span class="mn-title">KIF = 韩国金融研究院</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>KIF (Korea Institute of Finance) 是韩国最权威的金融政策研究机构。其报告虽为韩语，但通常有英文摘要，且代表FSC的官方政策方向。</p>
+        <p>推荐报告：韩国虚拟资产监管框架分析、VASP法实施影响评估。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="kn-2" data-section="priority" style="display:none;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">K</span>
+        <span class="mn-title">朝鲜日报 vs 中央日报</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>韩国两大保守派媒体，读者群为韩国商界精英。其商业版深度报道通常包含内幕信息，但需注意维护现有秩序的保守立场。</p>
+        <p>朝鲜日报：更偏宏观政策；中央日报：更偏企业动态。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="kn-3" data-section="priority" style="display:none;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">K</span>
+        <span class="mn-title">FSC VASP公示 = 官方合规状态</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>韩国金融委员会(FSC)的VASP(虚拟资产服务提供商)注册公示是最权威的合规状态确认。任何交易所的合法运营都必须在此备案。</p>
+        <p>URL: fsc.go.kr → 업허가정보 → 암호화폐사업자</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="kn-4" data-section="analysts" style="display:none;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">K</span>
+        <span class="mn-title">Kimchi Premium = 韩国溢价</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Kimchi Premium指韩国交易所比特币价格高于全球均价的现象，通常维持在5-20%。</p>
+        <p>成因：韩元出入金管制、散户主导市场、Kakao生态封闭性。</p>
+        <p>Song的商业帝国建立在对这种特殊性的深度理解和利用之上。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="kn-5" data-section="analysts" style="display:none;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">K</span>
+        <span class="mn-title">Dunamu未上市 = 无投行覆盖</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Dunamu是私有公司，无需公开财务数据，也无投行分析师撰写研报。这使得研究者获取内部数据的难度大幅提升。</p>
+        <p>唯一的公开数据来源是韩国政府的企业公示系统( darts.庶务大臣 )。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="kn-6" data-section="longform" style="display:none;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">K</span>
+        <span class="mn-title">"Coinbase效应" 缺失</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Crypto领域有"Brian Armstrong效应"——CEO个人品牌与公司品牌深度绑定。Song的刻意缺席创造了完全不同的叙事结构。</p>
+        <p>这种"隐形冠军"模式在公开资料中极度稀缺，为比较研究提供独特价值。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="kn-7" data-section="podcasts" style="display:none;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">K</span>
+        <span class="mn-title">Bankless/Unchained = 英文Crypto主流播客</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Bankless、Unchained、The Breakdown是英文Crypto社区最核心的深度对话节目。Song从未出现——这与CZ、Brian Armstrong的频繁曝光形成鲜明对比。</p>
+        <p>这不仅是个人选择，更可能反映了韩国市场的封闭性。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="kn-8" data-section="primary" style="display:none;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">K</span>
+        <span class="mn-title">Kim Hyung-nyun = Song的"影子"</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>由于Song本人极少公开露面，研究Kim Hyung-nyun(金炯伦，Dunamu CEO)的公开活动成为推断Song战略方向的唯一有效替代路径。</p>
+        <p>金炯伦在UDC、国会听证会、媒体采访中的表态，往往反映Dunamu/Song的决策。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="kn-9" data-section="relationships" style="display:none;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">K</span>
+        <span class="mn-title">KakaoTalk = Upbit的增长引擎</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>KakaoTalk在韩国的渗透率>90%，相当于微信在中国的地位。Upbit接入KakaoTalk钱包意味着：</p>
+        <p>1. 4500万潜在用户</p>
+        <p>2. 零成本的信任背书</p>
+        <p>3. 天然的法币出入金场景</p>
+        <p>这是Upbit能在Bithumb之后居上的核心优势。</p>
+      </div>
+    </div>
+    
+    <div class="anno know-note" id="kn-10" data-section="relationships" style="display:none;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">K</span>
+        <span class="mn-title">Luna崩盘 → 韩国监管重置</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>2022年5月UST/Luna崩盘中，韩国投资者损失惨重，部分交易所(包括Upbit)上线了Luna相关交易对。这引发了对交易所审核责任的激烈讨论。</p>
+        <p>结果：韩国监管收紧，VASP合规要求更严格，交易所必须证明上币审核流程。</p>
+      </div>
+    </div>
+    
+    <div class="anno meta-note" id="mn-1" data-section="narratives" style="display:none;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">M</span>
+        <span class="mn-title">叙事弧 vs 事实链</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>本节列出的是"叙事弧"而非"事实链"。叙事弧是研究者的解读框架，可能存在偏差。</p>
+        <p>关键在于：这些叙事弧能否被后续研究证实或证伪？</p>
+      </div>
+    </div>
+    
+    <div class="anno meta-note" id="mn-2" data-section="narratives" style="display:none;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">M</span>
+        <span class="mn-title">"隐形"的三种解释</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>解释1：性格内向，隐私偏好（被动）</p>
+        <p>解释2：降低监管风险，避免成为目标（主动防御）</p>
+        <p>解释3：将个人品牌风险转移给公司/生态（主动进攻）</p>
+        <p>三种解释导向不同的研究假设。</p>
+      </div>
+    </div>
+    
+    <div class="anno meta-note" id="mn-3" data-section="gaps" style="display:none;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">M</span>
+        <span class="mn-title">信息空白 = 研究机会</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>信息空白不是研究失败，而是研究起点。每个空白都对应一个可验证的假设或不可逾越的壁垒。</p>
+        <p>Gap #1-5属于"不可逾越"；Gap #6-7属于"可补充"。</p>
+      </div>
+    </div>
+    
+    <div class="anno meta-note" id="mn-4" data-section="gaps" style="display:none;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">M</span>
+        <span class="mn-title">研究局限性声明</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>本策展地图基于公开资料整理，存在以下系统性局限：</p>
+        <p>1. 韩语语言壁垒（核心一手资料无法直接阅读）</p>
+        <p>2. 低透明度偏差（公开信息多为"被迫披露"）</p>
+        <p>3. 时间滞后性（英文报道通常滞后数月）</p>
+        <p>建议与韩语研究者合作以提升信息质量。</p>
+      </div>
+    </div>
+    
+    <div class="anno meta-note" id="mn-5" data-section="quality" style="display:none;">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">M</span>
+        <span class="mn-title">信任度校准框架</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>高可信度：多方独立确认的监管文件</p>
+        <p>中高可信度：有据可查的新闻报道（含内部信息源）</p>
+        <p>中可信度：单一来源或推测性分析</p>
+        <p>低可信度：社区传言或未证实报告</p>
+        <p>研究结论应标注信息来源的信任度级别。</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+// === Sidebar toggle (mobile) ===
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+
+// === Notes sidebar toggle ===
+(function(){
+  var btn=document.getElementById("notesToggleBtn"),ns=document.getElementById("notesSidebar"),ov=document.getElementById("notesOverlay"),cb=document.getElementById("notesCloseBtn");
+  if(!btn||!ns)return;
+  function toggle(){ns.classList.toggle("ns-closed");ov.classList.toggle("open");}
+  btn.onclick=toggle;
+  if(ov)ov.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(cb)cb.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(window.innerWidth>1200)ns.classList.remove("ns-closed");
+  window.addEventListener("resize",function(){if(window.innerWidth>1200)ns.classList.remove("ns-closed");});
+})();
+
+// === Toggle note ===
+function toggleNote(head){
+  var anno=head.closest(".anno");
+  if(anno){anno.classList.toggle("open");positionNotes();}
+}
+
+// === Position notes ===
+function positionNotes(){
+  var ns=document.getElementById("notesSidebar");if(!ns)return;
+  var annos=ns.querySelectorAll(".anno");
+  var lastBottom=80;
+  annos.forEach(function(a){
+    if(a.style.display==="none")return;
+    var sec=a.getAttribute("data-section");
+    var target=sec?document.getElementById(sec):null;
+    var top=target?target.getBoundingClientRect().top+window.scrollY-ns.getBoundingClientRect().top:lastBottom;
+    if(top<lastBottom)top=lastBottom;
+    a.style.top=top+"px";
+    lastBottom=top+a.offsetHeight+8;
+  });
+}
+
+// === Knowledge toggle ===
+function toggleKnowNotes(){
+  var btn=document.getElementById("knowToggleBtn");
+  var knowNotes=document.querySelectorAll(".anno.know-note");
+  var marks=document.querySelectorAll("mark.hl-know");
+  var nrefs=document.querySelectorAll(".nref");
+  var visible=btn.classList.contains("active");
+  knowNotes.forEach(function(n){n.style.display=visible?"none":"";});
+  marks.forEach(function(m){m.style.background=visible?"transparent":"";m.style.borderBottom=visible?"none":"";});
+  nrefs.forEach(function(r){r.style.display=visible?"none":"";});
+  btn.classList.toggle("active");
+  btn.textContent=visible?"显示":"隐藏";
+  positionNotes();
+}
+
+// === Expand / Collapse all ===
+function expandAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.add("open");});positionNotes();}
+function collapseAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.remove("open");});positionNotes();}
+
+// === Note count ===
+(function(){
+  var label=document.getElementById("noteCountLabel");if(!label)return;
+  var meta=document.querySelectorAll(".anno.meta-note").length;
+  var know=document.querySelectorAll(".anno.know-note").length;
+  label.textContent=meta+" META + "+know+" Knowledge";
+})();
+
+// === Highlight → Note sync ===
+document.addEventListener("click",function(e){
+  var mark=e.target.closest("mark.hl-know")||e.target.closest(".nref");
+  if(!mark)return;
+  var noteId=mark.getAttribute("data-note");if(!noteId)return;
+  var anno=document.getElementById(noteId);if(!anno)return;
+  anno.classList.add("open");
+  anno.scrollIntoView({behavior:"smooth",block:"center"});
+  anno.classList.add("flash");
+  setTimeout(function(){anno.classList.remove("flash");},1500);
+  positionNotes();
+});
+
+// === Embedded mode ===
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+  document.addEventListener("click",function(e){
+    var a=e.target.closest("a");if(!a||!a.href)return;
+    try{var url=new URL(a.href,location.href)}catch(err){return}
+    if(url.pathname.startsWith("/trade-pipeline/")||url.pathname.startsWith("/observatory/")){
+      e.preventDefault();
+      window.top.postMessage({type:"dashboard-nav",action:"openResearch",url:url.pathname,title:a.textContent.trim().substring(0,60)},"*");
+    }
+  });
+})();
+
+// Initial positioning
+window.addEventListener("load",function(){positionNotes();});
+window.addEventListener("scroll",function(){positionNotes();});
+</script>
+</body>
+</html>

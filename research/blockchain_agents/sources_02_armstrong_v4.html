@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brian Armstrong — 素材策展地图 V4</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  /* Page-specific V4 extensions (~75 lines) */
+  .priority-box { border:1px solid rgba(248,168,72,0.3); border-left:3px solid var(--accent); border-radius:var(--radius-sm); padding:1.25rem 1.5rem; margin-bottom:2rem; background:var(--bg-surface); }
+  .priority-box h2 { color:var(--accent); margin-top:0; font-size:1.1rem; font-weight:590; }
+  .priority-box ol { margin-bottom:0; padding-left:1.2rem; }
+  .priority-box li { margin-bottom:0.6rem; line-height:1.5; }
+  .time-badge { display:inline-block; padding:0.1rem 0.5rem; border-radius:10px; font-size:0.7rem; font-weight:590; margin-right:0.3rem; background:var(--accent); color:var(--bg-base); }
+  .anno { position:absolute; left:1rem; right:1rem; }
+  .anno.meta-note { padding:0.6rem 0.75rem; border-left:2px solid var(--accent); border-radius:0 6px 6px 0; background:rgba(248,168,72,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.meta-note:hover { box-shadow:0 0 0 1px var(--accent); }
+  .anno.know-note { padding:0.6rem 0.75rem; border-left:2px solid var(--knowledge); border-radius:0 6px 6px 0; background:rgba(91,155,213,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.know-note:hover { box-shadow:0 0 0 1px var(--knowledge); }
+  .anno .note-label { display:inline-block; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--bg-base); background:var(--accent); padding:0.1rem 0.4rem; border-radius:3px; margin-bottom:0.3rem; }
+  .anno .note-label.know { background:var(--knowledge); color:white; }
+  .anno .mn-head { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
+  .anno .mn-title { flex:1; font-weight:510; font-size:0.75rem; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .anno .mn-fold { font-size:0.55rem; color:var(--text-quaternary); transition:transform 0.2s; margin-left:auto; }
+  .anno.open .mn-fold { transform:rotate(180deg); }
+  .anno .mn-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+  .anno.open .mn-body { max-height:2000px; }
+  .anno .mn-body p { font-size:0.78rem; margin-bottom:0.3rem; color:var(--text-secondary); }
+  .anno.flash { animation:noteFlash 1.5s ease; }
+  @keyframes noteFlash { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--accent);} }
+  .anno.know-note.flash { animation:noteFlashBlue 1.5s ease; }
+  @keyframes noteFlashBlue { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--knowledge);} }
+  mark.hl-know { background:rgba(91,155,213,0.12); border-bottom:1.5px solid var(--knowledge); padding:0 2px; border-radius:2px; color:inherit; cursor:pointer; transition:background 0.15s; }
+  mark.hl-know:hover { background:rgba(91,155,213,0.28); }
+  .nref { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; font-size:0.48rem; font-weight:700; cursor:pointer; margin-left:1px; vertical-align:super; transition:transform 0.15s; text-decoration:none; background:var(--knowledge); color:white; }
+  .nref:hover { transform:scale(1.25); box-shadow:0 0 6px rgba(91,155,213,0.4); }
+  .top-controls { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; padding:0.35rem 0.7rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); font-size:0.72rem; flex-wrap:wrap; }
+  .top-controls .tc-label { font-weight:590; color:var(--knowledge); }
+  .top-controls button { padding:0.15rem 0.45rem; border-radius:4px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-tertiary); cursor:pointer; font-size:0.68rem; font-family:inherit; transition:all 0.15s; }
+  .top-controls button:hover { border-color:var(--knowledge); color:var(--text-primary); }
+  .top-controls button.active { background:var(--knowledge-dim); color:var(--knowledge); border-color:rgba(91,155,213,0.3); }
+  .top-controls .tc-sep { color:var(--border-default); margin:0 0.15rem; }
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .notes-sidebar { position:relative; width:320px; min-width:320px; padding:1.25rem 1rem; border-left:1px solid var(--border-subtle); background:var(--bg-elevated); }
+  .notes-sidebar-header { position:sticky; top:0; z-index:60; background:var(--bg-elevated); padding-bottom:0.5rem; border-bottom:1px solid var(--border-subtle); margin-bottom:0.75rem; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  .notes-toggle-btn { position:fixed; right:1rem; bottom:1.5rem; z-index:200; width:44px; height:44px; border-radius:50%; border:1px solid var(--border-default); background:var(--bg-surface); color:var(--text-secondary); cursor:pointer; font-size:1.1rem; display:none; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.4); }
+  .notes-close-btn { float:right; background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:1.1rem; padding:0; display:none; }
+  @media (max-width:1200px) { .notes-close-btn { display:block; } .notes-sidebar { position:fixed; right:0; top:0; height:100vh; overflow-y:auto; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.4); z-index:150; } .notes-sidebar.ns-closed { transform:translateX(100%); box-shadow:none; } .notes-toggle-btn { display:flex; } }
+  .notes-overlay-right { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:140; }
+  .notes-overlay-right.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  @media (min-width:1600px) { .main-content { max-width:1000px; } .notes-sidebar { width:360px; min-width:360px; } }
+  .rel-card { border:1px solid var(--border-subtle); border-radius:var(--radius-md); background:var(--bg-elevated); margin-bottom:0.75rem; }
+  .rel-card summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  .rel-card[open] summary { color:var(--accent); }
+  .rel-card .rel-body { padding:0 1rem 1rem; font-size:0.82rem; color:var(--text-secondary); line-height:1.6; }
+  .arc-item { border-left:3px solid var(--accent); padding:0.6rem 1rem; margin-bottom:0.75rem; background:rgba(66,165,245,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+  .arc-item strong { color:var(--text-primary); }
+  .question-box { border:2px solid var(--knowledge); background:rgba(91,155,213,0.05); border-radius:var(--radius-md); padding:1.5rem; text-align:center; margin:2rem 0; }
+  .question-box blockquote { border:none; margin:0; padding:0; }
+  .question-box p { font-size:1rem; font-weight:510; color:var(--text-primary); }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; margin-bottom:1rem; }
+  th { text-transform:uppercase; font-size:0.72rem; font-weight:510; color:var(--text-quaternary); letter-spacing:0.04em; text-align:left; padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-default); }
+  td { padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-subtle); vertical-align:top; color:var(--text-secondary); }
+  tr:hover td { background:var(--bg-elevated); }
+  .url-col { max-width:200px; word-break:break-all; }
+  .zh { display:block; font-size:0.85em; color:var(--text-tertiary); margin-top:0.15em; }
+  .zh-inline { font-size:0.85em; color:var(--text-tertiary); }
+  details { border:1px solid var(--border-subtle); background:var(--bg-elevated); border-radius:var(--radius-sm); padding:0; margin-bottom:0.75rem; }
+  details summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  details[open] summary { color:var(--accent); }
+  details > div, details > p { padding:0 1rem 1rem; font-size:0.82rem; line-height:1.6; color:var(--text-secondary); }
+  body.embedded .sidebar, body.embedded .notes-sidebar, body.embedded .hamburger-btn, body.embedded .notes-toggle-btn { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+  .badge-row { margin-top:0.5rem; }
+  .badge { display:inline-block; padding:0.2rem 0.6rem; border-radius:4px; font-size:0.65rem; font-weight:590; margin-right:0.4rem; margin-bottom:0.3rem; }
+  .badge-primary { background:rgba(248,168,72,0.15); color:var(--accent); border:1px solid rgba(248,168,72,0.3); }
+  .badge-knowledge { background:rgba(91,155,213,0.15); color:var(--knowledge); border:1px solid rgba(91,155,213,0.3); }
+  .section-header { margin-bottom:1rem; }
+  .section-header h2 { font-size:1.25rem; font-weight:620; color:var(--text-primary); margin-bottom:0.25rem; }
+  .section-header h2 .zh { font-size:0.75rem; font-weight:400; color:var(--text-tertiary); }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ========== LEFT SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Brian Armstrong<br>素材策展地图 V4</div>
+
+    <h4>Contents</h4>
+    <nav>
+      <ul>
+        <li><a href="#priority"><span class="toc-num">&#9733;</span>如果只有2小时</a></li>
+        <li><a href="#analysts"><span class="toc-num">1</span>最佳分析师</a></li>
+        <li><a href="#longform"><span class="toc-num">2</span>必读长文/书籍</a></li>
+        <li><a href="#podcasts"><span class="toc-num">3</span>播客与视频</a></li>
+        <li><a href="#primary"><span class="toc-num">4</span>一手资料</a></li>
+        <li><a href="#relationships"><span class="toc-num">5</span>关键关系网</a></li>
+        <li><a href="#narratives"><span class="toc-num">6</span>叙事弧</a></li>
+        <li><a href="#gaps"><span class="toc-num">7</span>信息空白</a></li>
+        <li><a href="#quality"><span class="toc-num">8</span>质量评估</a></li>
+      </ul>
+    </nav>
+
+    <h4>Related</h4>
+    <nav>
+      <ul>
+        <li><a href="02_brian_armstrong.html">Brian Armstrong Profile</a></li>
+        <li><a href="02_brian_armstrong_metacognition.html">Metacognition</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+
+    <div class="top-controls">
+      <span class="tc-label">&#128218; 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <header class="page-header">
+      <h1>Brian Armstrong — 素材策展地图 V4</h1>
+      <p class="subtitle">Research Date: 2026-03-22 &nbsp;|&nbsp; 12 Sources · 8 Analysts · 5 Relationships<br>
+      <span class="zh-inline">加密交易所 Coinbase 创始人 · 合规战略 · Base L2 · 机构采用</span></p>
+      <div class="badge-row">
+        <span class="badge badge-primary">Coinbase</span>
+        <span class="badge badge-primary">COIN Stock</span>
+        <span class="badge badge-knowledge">Base L2</span>
+        <span class="badge badge-knowledge">SEC Regulation</span>
+        <span class="badge badge-knowledge">Institutional Crypto</span>
+      </div>
+    </header>
+
+    <!-- ★ Priority Box -->
+    <div class="priority-box" id="priority">
+      <h2>&#9200; 如果只有2小时 — 推荐阅读路径</h2>
+      <ol>
+        <li><span class="time-badge">60分钟</span><strong>Coinbase S-1 + 最新10-K</strong> — 理解<span class="hl-know" data-note="note-k1">交易所商业模式</span><sup class="nref" data-note="note-k1">K1</sup>的基石，2021年IPO法定披露文件</li>
+        <li><span class="time-badge">45分钟</span><strong>Lex Fridman Podcast #307</strong> — Armstrong最坦诚的公开表达，<span class="hl-know" data-note="note-k2">监管哲学</span><sup class="nref" data-note="note-k2">K2</sup>与长期愿景的完整呈现</li>
+        <li><span class="time-badge">45分钟</span><strong>SEC v. Coinbase 案卷</strong> — 理解从监管风险转化为<span class="hl-know" data-note="note-k3">合规护城河</span><sup class="nref" data-note="note-k3">K3</sup>的战略路径</li>
+        <li><span class="time-badge">30分钟</span><strong>The Block Research</strong> — <span class="hl-know" data-note="note-k4">Base链</span><sup class="nref" data-note="note-k4">K4</sup>数据与ETF资金流向的实时追踪</li>
+        <li><span class="time-badge">30分钟</span><strong>Paul Grewal / Jesse Pollak Twitter</strong> — 监管战与技术路线的第一手信息源</li>
+      </ol>
+    </div>
+
+    <!-- §1 最佳分析师 -->
+    <section id="analysts">
+      <div class="section-header">
+        <h2>1. 最佳分析师与独立研究<span class="zh">Best Analysts & Independent Research</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>MoffettNathanson</strong></td>
+            <td>卖方研究</td>
+            <td class="url-col">需通过券商获取</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>覆盖<span class="hl-know" data-note="note-k5">COIN</span><sup class="nref" data-note="note-k5">K5</sup>最深入的华尔街分析师，Lisa Ellis的季度报告是机构必读物</td>
+          </tr>
+          <tr>
+            <td><strong>Bernstein Research</strong></td>
+            <td>卖方研究</td>
+            <td class="url-col">需通过券商获取</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>Gautam Chhugani团队，对Coinbase机构业务和<span class="hl-know" data-note="note-k4">Base L2</span><sup class="nref" data-note="note-k4">K4</sup>有前瞻性分析</td>
+          </tr>
+          <tr>
+            <td><strong>The Block Research</strong></td>
+            <td>独立研究</td>
+            <td class="url-col"><a href="https://theblock.co/research" target="_blank">theblock.co/research</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>加密原生数据平台，Base链上数据、ETF资金流向等一手数据不可替代</td>
+          </tr>
+          <tr>
+            <td><strong>Messari</strong></td>
+            <td>独立研究</td>
+            <td class="url-col"><a href="https://messari.io" target="_blank">messari.io</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>COIN详细协议/公司分析，季度收益拆解和估值模型</td>
+          </tr>
+          <tr>
+            <td><strong>Glassnode</strong></td>
+            <td>链上数据</td>
+            <td class="url-col"><a href="https://glassnode.com" target="_blank">glassnode.com</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>可追踪Coinbase冷钱包余额变化，预判机构资金流动</td>
+          </tr>
+          <tr>
+            <td><strong>CoinMetrics</strong></td>
+            <td>链上数据</td>
+            <td class="url-col"><a href="https://coinmetrics.io" target="_blank">coinmetrics.io</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>机构级链上数据，对Base网络活动和Coinbase托管地址有深度覆盖</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §2 必读长文/书籍 -->
+    <section id="longform">
+      <div class="section-header">
+        <h2>2. 必读长文与书籍<span class="zh">Must-Read Long-Form & Books</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Coinbase S-1 Filing (2021)</strong></td>
+            <td>SEC招股书</td>
+            <td class="url-col"><a href="https://www.sec.gov/Archives/edgar/data/1679788" target="_blank">sec.gov/Archives/edgar</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>最权威的业务全景，收入结构、风险因素、竞争格局的法定披露，所有分析的基础</td>
+          </tr>
+          <tr>
+            <td><strong>Coinbase 10-K/10-Q 季报</strong></td>
+            <td>SEC文件</td>
+            <td class="url-col"><a href="https://investor.coinbase.com" target="_blank">investor.coinbase.com</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>唯一经审计的加密交易所财务数据，订阅收入拆分、Base收入、客户集中度等关键信息</td>
+          </tr>
+          <tr>
+            <td><strong>"The Infinite Machine" by Camila Russo</strong></td>
+            <td>书籍</td>
+            <td class="url-col">亚马逊/Goodreads</td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>以太坊历史，理解Armstrong早期选择以太坊生态而非纯比特币的战略背景</td>
+          </tr>
+          <tr>
+            <td><strong>"Out of the Ether" by Matthew Leising</strong></td>
+            <td>书籍</td>
+            <td class="url-col">亚马逊/Goodreads</td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>The DAO事件和以太坊分叉，Coinbase在ETH/ETC决策中的角色</td>
+          </tr>
+          <tr>
+            <td><strong>Coinbase Ventures Investment Thesis</strong></td>
+            <td>官方博客</td>
+            <td class="url-col"><a href="https://coinbase.com/blog" target="_blank">coinbase.com/blog</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>Coinbase风投的投资逻辑，反映Armstrong对加密生态演进的判断</td>
+          </tr>
+          <tr>
+            <td><strong>Base L2 Technical Documentation</strong></td>
+            <td>技术文档</td>
+            <td class="url-col"><a href="https://docs.base.org" target="_blank">docs.base.org</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>Base架构、排序器机制、费用结构的官方说明，评估L2期权价值的核心</td>
+          </tr>
+          <tr>
+            <td><strong>"Stand with Crypto" PAC Filings</strong></td>
+            <td>政治披露</td>
+            <td class="url-col"><a href="https://fec.gov" target="_blank">fec.gov</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>Armstrong政治行动的官方记录，250万+会员的政治动员能力量化</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §3 播客与视频 -->
+    <section id="podcasts">
+      <div class="section-header">
+        <h2>3. 播客与视频<span class="zh">Podcasts & Video</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Lex Fridman Podcast #307</strong></td>
+            <td>长访谈</td>
+            <td class="url-col"><a href="https://www.youtube.com/watch?v=0m4迦" target="_blank">youtube.com</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>3小时深度对话，Armstrong最坦诚的公开表达，监管哲学、长期愿景的完整呈现</td>
+          </tr>
+          <tr>
+            <td><strong>Coinbase Q4 Earnings Calls</strong></td>
+            <td>财报电话会</td>
+            <td class="url-col"><a href="https://investor.coinbase.com" target="_blank">investor.coinbase.com</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>季度战略更新，Alesia Haas(CFO)和Armstrong的问答是业务健康度的最佳指标</td>
+          </tr>
+          <tr>
+            <td><strong>All-In Podcast</strong></td>
+            <td>播客</td>
+            <td class="url-col"><a href="https://allinpodcast.co" target="_blank">allinpodcast.co</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>Armstrong偶尔做客，硅谷精英圈对加密监管和政治的insider视角</td>
+          </tr>
+          <tr>
+            <td><strong>Bankless Podcast</strong></td>
+            <td>加密播客</td>
+            <td class="url-col"><a href="https://banklesshq.com" target="_blank">banklesshq.com</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>Base相关技术讨论，Armstrong/Base团队偶尔深度参与</td>
+          </tr>
+          <tr>
+            <td><strong>Bloomberg Studio 1.0</strong></td>
+            <td>电视访谈</td>
+            <td class="url-col"><a href="https://bloomberg.com" target="_blank">bloomberg.com</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>主流媒体访谈，观察Armstrong如何向非加密受众解释Coinbase战略</td>
+          </tr>
+          <tr>
+            <td><strong>a16z Podcast</strong></td>
+            <td>VC播客</td>
+            <td class="url-col"><a href="https://a16z.com/podcasts" target="_blank">a16z.com</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>Marc Andreessen与Armstrong的对话，理解硅谷加密正统派的思维框架</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §4 一手资料 -->
+    <section id="primary">
+      <div class="section-header">
+        <h2>4. 一手资料<span class="zh">Primary Sources</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>SEC EDGAR - Coinbase Global Inc</strong></td>
+            <td>监管文件</td>
+            <td class="url-col"><a href="https://sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001679788" target="_blank">sec.gov EDGAR</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>所有SEC文件中枢：10-K年报、10-Q季报、8-K重大事件、Proxy Statement、内幕交易披露</td>
+          </tr>
+          <tr>
+            <td><strong>Coinbase Investor Relations</strong></td>
+            <td>官方IR</td>
+            <td class="url-col"><a href="https://investor.coinbase.com" target="_blank">investor.coinbase.com</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>财报、演示文稿、SEC文件归档、股东大会材料，最完整的官方信息源</td>
+          </tr>
+          <tr>
+            <td><strong>SEC v. Coinbase Case Docket</strong></td>
+            <td>法庭文件</td>
+            <td class="url-col"><a href="https://courtlistener.com/docket" target="_blank">courtlistener.com</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>2023-2025年诉讼的全部法律文件，理解监管风险和Coinbase法律策略的核心</td>
+          </tr>
+          <tr>
+            <td><strong>CFTC/SEC Joint Statement on Crypto</strong></td>
+            <td>监管声明</td>
+            <td class="url-col"><a href="https://sec.gov/news/statement" target="_blank">sec.gov/news</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>监管框架演变的官方信号，直接影响Coinbase合规优势的价值</td>
+          </tr>
+          <tr>
+            <td><strong>FINRA BrokerCheck - Coinbase</strong></td>
+            <td>牌照信息</td>
+            <td class="url-col"><a href="https://brokercheck.finra.org" target="_blank">brokercheck.finra.org</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>Coinbase作为经纪商的注册状态、历史合规记录、仲裁案例</td>
+          </tr>
+          <tr>
+            <td><strong>NYDFS - Coinbase BitLicense</strong></td>
+            <td>州级监管</td>
+            <td class="url-col"><a href="https://dfs.ny.gov" target="_blank">dfs.ny.gov</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>纽约BitLicense状态，州级监管合规的关键证明</td>
+          </tr>
+          <tr>
+            <td><strong>Base Network Explorer</strong></td>
+            <td>链上数据</td>
+            <td class="url-col"><a href="https://basescan.org" target="_blank">basescan.org</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>Base链的实时数据：TVL、交易量、Gas费用、合约部署，评估L2业务健康度</td>
+          </tr>
+          <tr>
+            <td><strong>Coinbase Prime Institutional Portal</strong></td>
+            <td>机构服务</td>
+            <td class="url-col"><a href="https://prime.coinbase.com" target="_blank">prime.coinbase.com</a></td>
+            <td>⭐⭐⭐☆☆</td>
+            <td>机构产品说明，理解Prime业务的具体服务内容和定价模式</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §5 关键关系网 -->
+    <section id="relationships">
+      <div class="section-header">
+        <h2>5. 关键关系网<span class="zh">Key Relationships</span></h2>
+      </div>
+      
+      <details class="rel-card">
+        <summary>🤝 核心团队成员 <span class="zh-inline">Core Team Members</span></summary>
+        <div class="rel-body">
+          <table>
+            <thead>
+              <tr>
+                <th>关系方</th>
+                <th>角色</th>
+                <th>追踪渠道</th>
+                <th>重要性</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Fred Ehrsam</strong></td>
+                <td>Coinbase联合创始人</td>
+                <td>Twitter/X @FEhrsam, Paradigm博客</td>
+                <td>⭐⭐⭐⭐⭐</td>
+              </tr>
+              <tr>
+                <td><strong>Alesia Haas</strong></td>
+                <td>CFO</td>
+                <td>财报电话会、SEC文件</td>
+                <td>⭐⭐⭐⭐⭐</td>
+              </tr>
+              <tr>
+                <td><strong>Paul Grewal</strong></td>
+                <td>首席法务官</td>
+                <td>Twitter/X @iampaulgrewal</td>
+                <td>⭐⭐⭐⭐⭐</td>
+              </tr>
+              <tr>
+                <td><strong>Jesse Pollak</strong></td>
+                <td>Base负责人</td>
+                <td>Twitter/X @jessepollak</td>
+                <td>⭐⭐⭐⭐⭐</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>⚖️ 监管层关系 <span class="zh-inline">Regulatory Relationships</span></summary>
+        <div class="rel-body">
+          <table>
+            <thead>
+              <tr>
+                <th>关系方</th>
+                <th>角色</th>
+                <th>追踪渠道</th>
+                <th>重要性</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Gary Gensler (SEC)</strong></td>
+                <td>前监管对手</td>
+                <td>SEC公开声明、国会证词</td>
+                <td>⭐⭐⭐⭐⭐</td>
+              </tr>
+              <tr>
+                <td><strong>Paul Atkins (SEC)</strong></td>
+                <td>现任SEC主席</td>
+                <td>SEC公开声明</td>
+                <td>⭐⭐⭐⭐⭐</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>🏦 机构与生态关系 <span class="zh-inline">Institutional & Ecosystem Relations</span></summary>
+        <div class="rel-body">
+          <table>
+            <thead>
+              <tr>
+                <th>关系方</th>
+                <th>角色</th>
+                <th>追踪渠道</th>
+                <th>重要性</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Larry Fink (BlackRock)</strong></td>
+                <td>关键客户</td>
+                <td>BlackRock财报、CNBC访谈</td>
+                <td>⭐⭐⭐⭐⭐</td>
+              </tr>
+              <tr>
+                <td><strong>Michael Saylor</strong></td>
+                <td>生态盟友</td>
+                <td>Twitter/X @saylor, MSTR财报</td>
+                <td>⭐⭐⭐⭐☆</td>
+              </tr>
+              <tr>
+                <td><strong>Cathie Wood (ARK)</strong></td>
+                <td>机构客户/股东</td>
+                <td>ARK持仓披露、访谈</td>
+                <td>⭐⭐⭐⭐☆</td>
+              </tr>
+              <tr>
+                <td><strong>Changpeng Zhao (Binance)</strong></td>
+                <td>竞争对手</td>
+                <td>历史对比分析</td>
+                <td>⭐⭐⭐☆☆</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+
+    <!-- §6 叙事弧 -->
+    <section id="narratives">
+      <div class="section-header">
+        <h2>6. 关键叙事弧<span class="zh">Key Narrative Arcs</span></h2>
+      </div>
+      
+      <div class="arc-item">
+        <strong>🏢 从交易所到基础设施</strong> — Coinbase的战略演进轨迹
+        <p>从单一的加密货币交易所演变为涵盖<span class="hl-know" data-note="note-k6">机构托管</span><sup class="nref" data-note="note-k6">K6</sup>、L2公链(<span class="hl-know" data-note="note-k4">Base</span><sup class="nref" data-note="note-k4">K4</sup>)、风投(Coins Ventures)的加密生态系统核心。这一转型的核心逻辑是什么？</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>⚖️ 监管对抗 → 合规护城河</strong> — SEC诉讼的战略价值
+        <p>2023-2025年SEC诉讼战将Coinbase从"监管风险"转化为"合规优势"。当<span class="hl-know" data-note="note-k7">Paul Atkins</span><sup class="nref" data-note="note-k7">K7</sup>就任SEC主席后，这一叙事如何重塑？追踪SEC v. Coinbase案卷是关键。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>📈 机构采用浪潮</strong> — BlackRock ETF改变游戏规则
+        <p>iShares BTC ETF选择Coinbase作为托管人，标志着<span class="hl-know" data-note="note-k8">传统金融</span><sup class="nref" data-note="note-k8">K8</sup>对加密市场的正式接纳。Larry Fink的加密态度转变是这一叙事的关键催化剂。</p>
+      </div>
+
+      <div class="question-box">
+        <blockquote>
+          <p>❓ 核心研究问题：Coinbase的估值逻辑究竟是基于交易所手续费收入，还是基于作为<span class="hl-know" data-note="note-k4">Base L2</span><sup class="nref" data-note="note-k4">K4</sup>生态系统的长期价值？</p>
+        </blockquote>
+      </div>
+    </section>
+
+    <!-- §7 信息空白 -->
+    <section id="gaps">
+      <div class="section-header">
+        <h2>7. 信息空白 — What Doesn't Exist<span class="zh">Information Gaps</span></h2>
+      </div>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>空白领域</th>
+            <th>为何重要</th>
+            <th>可尝试的弥补来源</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>国际收入地理拆分</strong></td>
+            <td>评估地域多元化</td>
+            <td>财报电话会问答、分析师追问</td>
+            <td> Coinbase不披露非美收入占比，无法判断对单一市场的依赖度</td>
+          </tr>
+          <tr>
+            <td><strong>Base L2详细单位经济</strong></td>
+            <td>评估L2业务真实利润率</td>
+            <td>The Block Research链上建模</td>
+            <td>排序器收入vs L1成本的具体拆分不透明，EIP-4844后的真实毛利率未知</td>
+          </tr>
+          <tr>
+            <td><strong>USDC-Circle协议条款</strong></td>
+            <td>评估稳定币收入可持续性</td>
+            <td>Circle IPO文件（若上市）</td>
+            <td>USDC利息收入的具体分成比例、期限、终止条款完全不透明</td>
+          </tr>
+          <tr>
+            <td><strong>机构客户集中度</strong></td>
+            <td>评估BlackRock等单客户风险</td>
+            <td>财报风险披露、分析师估算</td>
+            <td>BlackRock/Fidelity等前几大客户占Prime收入比例未知</td>
+          </tr>
+          <tr>
+            <td><strong>员工期权稀释节奏</strong></td>
+            <td>评估股东稀释风险</td>
+            <td>Proxy Statement详细阅读</td>
+            <td>SBC（股票薪酬）在加密公司的稀释效应被低估</td>
+          </tr>
+          <tr>
+            <td><strong>Armstrong个人持股变动</strong></td>
+            <td>评估创始人信心</td>
+            <td>Form 4内幕交易披露、13D/13G</td>
+            <td>需手动追踪其个人卖出/捐赠节奏，非自动汇总</td>
+          </tr>
+          <tr>
+            <td><strong>竞争情报：Goldman/JPM加密进展</strong></td>
+            <td>评估TradFi威胁时间线</td>
+            <td>投行财报、监管牌照申请</td>
+            <td>传统金融自建加密托管的进度是COIN估值的最大变量</td>
+          </tr>
+          <tr>
+            <td><strong>Base去中心化路线图</strong></td>
+            <td>评估L2控制权的长期变化</td>
+            <td>Optimism基金会文档</td>
+            <td>Coinbase承诺最终将Base排序器去中心化，但时间表模糊</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §8 质量评估 -->
+    <section id="quality">
+      <div class="section-header">
+        <h2>8. 素材质量评估<span class="zh">Source Quality Assessment</span></h2>
+      </div>
+      
+      <details class="rel-card" open>
+        <summary>📊 分析师报告可信度评级 <span class="zh-inline">Analyst Report Credibility</span></summary>
+        <div class="rel-body">
+          <p><strong>顶级（直接引用）：</strong>MoffettNathanson、Bernstein Research — 华尔街顶级加密分析师，报告结构严谨，覆盖全面。</p>
+          <p><strong>可靠（交叉验证）：</strong>The Block Research、Messari、Glassnode — 加密原生数据平台，方法论透明，数据可验证。</p>
+          <p><strong>补充（背景参考）：</strong>CoinMetrics — 机构级链上数据，适合深度建模。</p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary>📋 SEC文件使用指南 <span class="zh-inline">SEC Document Usage Guide</span></summary>
+        <div class="rel-body">
+          <p><strong>10-K（年报）：</strong>最全面的年度经营分析，包括风险因素、业务描述、财务报表，是基本面分析的核心。</p>
+          <p><strong>10-Q（季报）：</strong>未经审计的季度数据，关注收入拆分和用户指标趋势。</p>
+          <p><strong>8-K（重大事件）：</strong>即时披露，任何重大业务、法律、财务事件均需关注。</p>
+          <p><strong>Proxy Statement：</strong>股东投票材料，高管薪酬、股权激励计划详情。</p>
+          <p><strong>Forms 3/4/5：</strong>内幕交易披露，追踪内部人买卖节奏。</p>
+        </div>
+      </details>
+
+      <div class="arc-item">
+        <strong>⚠️ 关键注意事项</strong> — 研究中的常见陷阱
+        <p>1. <strong>卖方偏见：</strong>华尔街券商报告普遍看多，需交叉验证估值模型假设。</p>
+        <p>2. <strong>数据滞后：</strong>SEC文件通常滞后45天，链上数据更及时。</p>
+        <p>3. <strong>叙事操纵：</strong>官方博客和社交媒体是叙事管理工具，需辨别事实与营销。</p>
+        <p>4. <strong>竞争信息不对称：</strong>Binance等竞争对手的信息透明度较低，对比分析需谨慎。</p>
+      </div>
+    </section>
+
+    <footer style="margin-top:3rem; padding-top:1rem; border-top:1px solid var(--border-subtle); font-size:0.72rem; color:var(--text-quaternary);">
+      <p>Generated: 2026-03-22 &middot; V4 Template &middot; <a href="../blockchain_hub.html">Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ========== RIGHT SIDEBAR (Notes) ========== -->
+  <aside class="notes-sidebar ns-closed" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&times;</button>
+      <h4 style="font-size:0.7rem; font-weight:590; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-quaternary); margin:0;">&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+
+    <!-- META NOTES -->
+    <div class="anno meta-note" id="note-m1" data-section="analysts">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">卖方研究 vs 独立研究：可信度差异</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>华尔街卖方研究（如MoffettNathanson）受限于佣金商业模式，往往看多；独立研究（如Messari）可能存在代币持仓偏见。</p>
+        <p><strong>交叉验证策略：</strong>对比3家以上机构的估值模型，关注假设差异。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m2" data-section="longform">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">SEC文件结构解析方法论</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>S-1/10-K文件的阅读优先级：</p>
+        <p>1. <strong>风险因素（Risk Factors）</strong> — 管理层最担忧的事项</p>
+        <p>2. <strong>业务描述（Business）</strong> — 商业模式全景</p>
+        <p>3. <strong>财务报表附注</strong> — 会计政策细节</p>
+        <p>4. <strong>管理层讨论（MD&A）</strong> — 战略解读</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m3" data-section="podcasts">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">播客信息的验证层级</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Lex Fridman等长访谈价值高，但存在美化风险。验证层级：</p>
+        <p>1. 事实性陈述 → 对照SEC文件</p>
+        <p>2. 战略意图 → 对照财报电话会</p>
+        <p>3. 个人信念 → 参考独立研究</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m4" data-section="primary">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">一手资料的时效性管理</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>SEC文件通常滞后45天，但法律文件（案卷）是即时源。</p>
+        <p><strong>实时追踪清单：</strong></p>
+        <p>• SEC EDGAR RSS订阅</p>
+        <p>• CourtListener案件更新</p>
+        <p>• Twitter/X关键人物监控</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m5" data-section="relationships">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">关系网信息的信号解读</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>追踪人物时应区分：</p>
+        <p>• <strong>正式声明</strong>（财报/采访）— 最可信但可能经过公关过滤</p>
+        <p>• <strong>社交媒体</strong>（Twitter/X）— 即时但碎片化</p>
+        <p>• <strong>第三方报道</strong> — 需验证原始来源</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m6" data-section="narratives">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">叙事弧分析的认知偏见</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>分析师和媒体倾向于构建单一叙事框架，可能忽略复杂性。</p>
+        <p><strong>批判性质疑清单：</strong></p>
+        <p>• 谁从该叙事中受益？</p>
+        <p>• 相反证据在哪里？</p>
+        <p>• 时间线是否合理？</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m7" data-section="gaps">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">信息空白的研究优先级排序</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>并非所有信息空白同等重要。评估框架：</p>
+        <p>1. <strong>对估值的影响程度</strong> — 越大越优先</p>
+        <p>2. <strong>可弥补性</strong> — 是否存在替代信息源</p>
+        <p>3. <strong>信息不对称优势</strong> — 若能获取则构成Alpha</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-m8" data-section="quality">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">来源可信度的动态评估</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>分析师声誉随时间变化。跟踪机制：</p>
+        <p>• 历史预测准确率（如CoinDesk/Bloomberg）</p>
+        <p>• 利益冲突披露更新</p>
+        <p>• 同行评议和引用量</p>
+        <p>• 独立第三方审计记录</p>
+      </div>
+    </div>
+
+    <!-- KNOWLEDGE NOTES -->
+    <div class="anno know-note" id="note-k1" data-section="priority">
+      <span class="note-label know">知识</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Coinbase 交易所商业模式</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>三大收入支柱：</p>
+        <p>1. <strong>交易手续费</strong>（约60%营收）— 散户交易为主要来源</p>
+        <p>2. <strong>订阅与服务</strong>（约15%）— Coinbase Prime、托管费、USDC利息</p>
+        <p>3. <strong>加密资产收益</strong>（约25%）— 客户资产的 staking、借贷收益分成</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-k2" data-section="priority">
+      <span class="note-label know">知识</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Coinbase 监管哲学</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Armstrong的核心立场："加密货币应该是合法的，就像互联网是合法的一样。"</p>
+        <p>• 主张明确的监管框架而非模糊执法</p>
+        <p>• 投入大量资源进行合规建设（BitLicense等）</p>
+        <p>• 通过"Stand with Crypto"政治行动委员会推动立法</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-k3" data-section="priority">
+      <span class="note-label know">知识</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">合规护城河的战略价值</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>SEC诉讼后 Coinbase 的竞争优势：</p>
+        <p>• 已在SEC注册，成为"合规可信"的标准</p>
+        <p>• 监管合规成本已发生，竞争对手难以复制</p>
+        <p>• 获得监管明确性后，机构客户更倾向合作</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-k4" data-section="analysts">
+      <span class="note-label know">知识</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Base L2 技术架构</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Base是基于Optimism OP Stack的Layer 2网络：</p>
+        <p>• <strong>排序器</strong>：Base自行运营，交易批处理后提交至以太坊L1</p>
+        <p>• <strong>EIP-4844</strong>：2024年升级，大幅降低L2交易费用</p>
+        <p>• <strong>目标</strong>：最终完全去中心化排序器</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-k5" data-section="analysts">
+      <span class="note-label know">知识</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">COIN 股票代码含义</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>COIN是Coinbase Global Inc.在NASDAQ的股票代码：</p>
+        <p>• 2021年4月14日直接上市（DPO）</p>
+        <p>• 不通过传统IPO，无新股发行</p>
+        <p>• 现有股份直接在二级市场交易</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-k6" data-section="narratives">
+      <span class="note-label know">知识</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">机构托管业务详情</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Coinbase Prime提供：</p>
+        <p>• <strong>冷存储</strong>：离线钱包，机构级安全</p>
+        <p>• <strong>热钱包API</strong>：即时交易接入</p>
+        <p>• <strong>合规报告</strong>：审计追踪、税务文档</p>
+        <p>• <strong>托管费率</strong>：通常0.1%-0.5%/年</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-k7" data-section="narratives">
+      <span class="note-label know">知识</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Paul Atkins SEC主席背景</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>2025年就任的SEC主席：</p>
+        <p>• 前SEC专员（2002-2008）</p>
+        <p>• 加密友好立场，明确表示支持数字资产创新</p>
+        <p>• Coinbase案件的潜在和解催化剂</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-k8" data-section="narratives">
+      <span class="note-label know">知识</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">传统金融(TradFi)加密采用</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>主要玩家的加密布局：</p>
+        <p>• <strong>BlackRock</strong>：BTC ETF托管、代币化资产研究</p>
+        <p>• <strong>Fidelity</strong>：BTC ETF托管、加密交易平台</p>
+        <p>• <strong>Goldman Sachs</strong>：加密衍生品、托管服务申请</p>
+        <p>• <strong>JPMorgan</strong>：Onyx区块链、Quorum私链</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+// === Sidebar toggle (mobile) ===
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+
+// === Notes sidebar toggle ===
+(function(){
+  var btn=document.getElementById("notesToggleBtn"),ns=document.getElementById("notesSidebar"),ov=document.getElementById("notesOverlay"),cb=document.getElementById("notesCloseBtn");
+  if(!btn||!ns)return;
+  function toggle(){ns.classList.toggle("ns-closed");ov.classList.toggle("open");}
+  btn.onclick=toggle;
+  if(ov)ov.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(cb)cb.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(window.innerWidth>1200)ns.classList.remove("ns-closed");
+  window.addEventListener("resize",function(){if(window.innerWidth>1200)ns.classList.remove("ns-closed");});
+})();
+
+// === Toggle note ===
+function toggleNote(head){
+  var anno=head.closest(".anno");
+  if(anno){anno.classList.toggle("open");positionNotes();}
+}
+
+// === Position notes ===
+function positionNotes(){
+  var ns=document.getElementById("notesSidebar");if(!ns)return;
+  var annos=ns.querySelectorAll(".anno");
+  var lastBottom=80;
+  annos.forEach(function(a){
+    if(a.style.display==="none")return;
+    var sec=a.getAttribute("data-section");
+    var target=sec?document.getElementById(sec):null;
+    var top=target?target.getBoundingClientRect().top+window.scrollY-ns.getBoundingClientRect().top:lastBottom;
+    if(top<lastBottom)top=lastBottom;
+    a.style.top=top+"px";
+    lastBottom=top+a.offsetHeight+8;
+  });
+}
+
+// === Knowledge toggle ===
+function toggleKnowNotes(){
+  var btn=document.getElementById("knowToggleBtn");
+  var knowNotes=document.querySelectorAll(".anno.know-note");
+  var marks=document.querySelectorAll("mark.hl-know");
+  var nrefs=document.querySelectorAll(".nref");
+  var visible=btn.classList.contains("active");
+  knowNotes.forEach(function(n){n.style.display=visible?"none":"";});
+  marks.forEach(function(m){m.style.background=visible?"transparent":"";m.style.borderBottom=visible?"none":"";});
+  nrefs.forEach(function(r){r.style.display=visible?"none":"";});
+  btn.classList.toggle("active");
+  btn.textContent=visible?"显示":"隐藏";
+  positionNotes();
+}
+
+// === Expand / Collapse all ===
+function expandAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.add("open");});positionNotes();}
+function collapseAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.remove("open");});positionNotes();}
+
+// === Note count ===
+(function(){
+  var label=document.getElementById("noteCountLabel");if(!label)return;
+  var meta=document.querySelectorAll(".anno.meta-note").length;
+  var know=document.querySelectorAll(".anno.know-note").length;
+  label.textContent=meta+" META + "+know+" Knowledge";
+})();
+
+// === Highlight → Note sync ===
+document.addEventListener("click",function(e){
+  var mark=e.target.closest("mark.hl-know")||e.target.closest(".nref");
+  if(!mark)return;
+  var noteId=mark.getAttribute("data-note");if(!noteId)return;
+  var anno=document.getElementById(noteId);if(!anno)return;
+  anno.classList.add("open");
+  anno.scrollIntoView({behavior:"smooth",block:"center"});
+  anno.classList.add("flash");
+  setTimeout(function(){anno.classList.remove("flash");},1500);
+  positionNotes();
+});
+
+// === Embedded mode ===
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+  document.addEventListener("click",function(e){
+    var a=e.target.closest("a");if(!a||!a.href)return;
+    try{var url=new URL(a.href,location.href)}catch(err){return}
+    if(url.pathname.startsWith("/trade-pipeline/")||url.pathname.startsWith("/observatory/")){
+      e.preventDefault();
+      window.top.postMessage({type:"dashboard-nav",action:"openResearch",url:url.pathname,title:a.textContent.trim().substring(0,60)},"*");
+    }
+  });
+})();
+
+// Initial positioning
+window.addEventListener("load",function(){positionNotes();});
+window.addEventListener("scroll",function(){positionNotes();});
+</script>
+</body>
+</html>

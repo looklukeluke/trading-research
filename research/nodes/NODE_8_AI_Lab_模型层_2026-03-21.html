@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>认知节点报告: AI Lab/模型层 — Node 8</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="../cognitive_agents_2026-03-20/jensen_sources_shared.css">
+  <style>
+/* === KPI Cards === */
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+.kpi-card { background: var(--bg-surface); border-radius: var(--radius-md); padding: 1.25rem; border: 1px solid var(--border-subtle); }
+.kpi-label { font-size: 0.72rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.kpi-value { font-size: 1.5rem; font-weight: 680; font-feature-settings: 'tnum' 1; margin-bottom: 4px; }
+.kpi-change { font-size: 0.78rem; font-weight: 600; }
+.kpi-change.positive { color: #4caf50; }
+.kpi-change.negative { color: #f44336; }
+.kpi-subtitle { font-size: 0.72rem; color: var(--text-quaternary); margin-top: 4px; }
+
+/* === Risk Matrix & Extended Tables === */
+.risk-matrix td:nth-child(2), .risk-matrix td:nth-child(3) { text-align: center; }
+.risk-high { color: #f44336; font-weight: 700; }
+.risk-medium { color: #ffc107; font-weight: 700; }
+.risk-low { color: #4caf50; font-weight: 700; }
+
+/* === Callout Boxes === */
+.callout { background: var(--bg-surface); border-radius: var(--radius-sm); padding: 1rem 1.25rem; margin: 1rem 0; border-left: 3px solid var(--accent); }
+.callout-title { font-size: 0.8rem; font-weight: 590; color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+.callout-body { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; }
+.callout.risk { border-left-color: #f44336; }
+.callout.risk .callout-title { color: #f44336; }
+.callout.insight { border-left-color: var(--knowledge); }
+.callout.insight .callout-title { color: var(--knowledge); }
+
+/* === Phase Headers === */
+.phase-header { display: flex; align-items: center; gap: 0.75rem; margin: 2.5rem 0 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle); }
+.phase-num { font-size: 0.72rem; font-weight: 700; color: var(--bg-base); background: var(--accent); padding: 3px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+.phase-title { font-size: 1.15rem; font-weight: 590; color: var(--text-primary); }
+
+/* === Agent Cards === */
+.agent-header { display: flex; align-items: center; gap: 0.75rem; margin: 2rem 0 1rem; }
+.agent-role-badge { font-size: 0.68rem; font-weight: 510; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+.agent-role-badge.giant { background: rgba(248,168,72,0.15); color: var(--accent); }
+.agent-role-badge.investor { background: rgba(91,155,213,0.15); color: var(--knowledge); }
+.agent-role-badge.contrarian { background: rgba(244,67,54,0.15); color: #f44336; }
+
+/* === Triangulation Table Colors === */
+.consensus { color: #4caf50; font-weight: 600; }
+.disagreement { color: #f44336; font-weight: 600; }
+
+/* === Provenance Badges === */
+.prov-badge { font-size: 0.65rem; padding: 1px 6px; border-radius: 3px; font-weight: 600; }
+.prov-primary { background: rgba(76,175,80,0.12); color: #4caf50; }
+.prov-industry { background: rgba(91,155,213,0.12); color: var(--knowledge); }
+.prov-media { background: rgba(248,168,72,0.12); color: var(--accent); }
+.prov-analysis { background: rgba(171,71,188,0.12); color: #ab47bc; }
+
+/* === Chart Frames === */
+.chart-frame { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); margin: 1rem 0; overflow: hidden; }
+.chart-frame-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-subtle); }
+.chart-frame-title { font-size: 0.82rem; font-weight: 590; color: var(--text-secondary); letter-spacing: 0.02em; }
+.chart-frame-body { padding: 0; }
+.chart-frame-body .js-plotly-plot { width: 100% !important; }
+.chart-source { padding: 0.5rem 1rem; font-size: 0.7rem; color: var(--text-quaternary); border-top: 1px solid var(--border-subtle); }
+  
+/* === Embedded mode: inside Dashboard iframe === */
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+body.embedded .hamburger-btn { display: none !important; }
+body.embedded .sidebar-overlay { display: none !important; }
+
+/* === Reading mode: full-width === */
+.reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+.reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+.reading-mode .hamburger-btn { display: none !important; }
+.reading-mode .sidebar-overlay { display: none !important; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes sidebar">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <a class="back-link" href="../semiconductor_hub.html" style="display:block;padding:0.4rem 0.5rem;margin-bottom:1rem;font-size:0.8rem;color:var(--accent);text-decoration:none;border:1px solid var(--accent-dim);border-radius:var(--radius-sm);">&#8592; Semiconductor Hub</a>
+    <h4>目录导航 Contents</h4>
+    <nav><ul>
+      <li><a href="#metacognition" style="color:var(--accent);"><span class="toc-num">&#9733;</span>元思考<br><span class="zh-inline">Metacognition</span></a></li>
+      <li><a href="#phase0"><span class="toc-num">0</span>独立思考<br><span class="zh-inline">Independent Thinking</span></a></li>
+      <li><a href="#phase05"><span class="toc-num">0.5</span>策展搜索<br><span class="zh-inline">Curated Search</span></a></li>
+      <li><a href="#phase1"><span class="toc-num">1</span>认知代理人<br><span class="zh-inline">Cognitive Agents</span></a></li>
+      <li><a href="#pichai"><span class="toc-num">1.1</span>Sundar Pichai<br><span class="zh-inline">GIANT &middot; Google</span></a></li>
+      <li><a href="#hassabis"><span class="toc-num">1.2</span>Demis Hassabis<br><span class="zh-inline">INVESTOR &middot; DeepMind</span></a></li>
+      <li><a href="#phase2"><span class="toc-num">2</span>综合分析<br><span class="zh-inline">Synthesis</span></a></li>
+      <li><a href="#triangulation"><span class="toc-num">2.1</span>三角验证<br><span class="zh-inline">Triangulation</span></a></li>
+      <li><a href="#competitive"><span class="toc-num">2.2</span>竞争格局<br><span class="zh-inline">Competitive Landscape</span></a></li>
+      <li><a href="#supply-demand"><span class="toc-num">2.3</span>供需框架<br><span class="zh-inline">Supply-Demand Framework</span></a></li>
+      <li><a href="#risk-matrix"><span class="toc-num">2.4</span>风险矩阵<br><span class="zh-inline">Risk Matrix</span></a></li>
+      <li><a href="#node-judgment"><span class="toc-num">2.5</span>节点判断<br><span class="zh-inline">Node Judgment</span></a></li>
+      <li><a href="#trading"><span class="toc-num">2.6</span>交易视角<br><span class="zh-inline">Trading Perspective</span></a></li>
+      <li><a href="#综合判断"><span class="toc-num">2.7</span>综合判断<br><span class="zh-inline">Triangulated Verdict</span></a></li>
+      <li><a href="#验证日历"><span class="toc-num">2.8</span>验证日历<br><span class="zh-inline">Verification Calendar</span></a></li>
+      <li><a href="#信号传导"><span class="toc-num">2.9</span>信号传导链<br><span class="zh-inline">Signal Transmission</span></a></li>
+      <li><a href="#kpi-dashboard"><span class="toc-num">3</span>KPI仪表盘<br><span class="zh-inline">Dashboard</span></a></li>
+      <li><a href="#charts"><span class="toc-num">4</span>图表<br><span class="zh-inline">Charts</span></a></li>
+      <li><a href="#provenance"><span class="toc-num">5</span>溯源表<br><span class="zh-inline">Provenance Table</span></a></li>
+      <li><a href="#sources"><span class="toc-num">6</span>来源<br><span class="zh-inline">Sources</span></a></li>
+    </ul></nav>
+    <h4>供应链节点 Supply Chain Nodes</h4>
+    <nav><ul>
+      <li><a href="NODE_1_GPU_AI芯片设计_2026-03-19.html">Node 1: GPU/AI芯片设计<br><span class="zh-inline">GPU/AI Chip Design</span></a></li>
+      <li><a href="NODE_2_光刻设备_2026-03-19.html">Node 2: 光刻设备<br><span class="zh-inline">Lithography Equipment</span></a></li>
+      <li><a href="NODE_3_代工制造_2026-03-19.html">Node 3: 代工制造<br><span class="zh-inline">Foundry Manufacturing</span></a></li>
+      <li><a href="NODE_4_存储_HBM_2026-03-19.html">Node 4: 存储/HBM<br><span class="zh-inline">Memory / HBM</span></a></li>
+      <li><a href="NODE_5_定制芯片_ASIC_2026-03-19.html">Node 5: 定制芯片<br><span class="zh-inline">Custom Silicon / ASIC</span></a></li>
+      <li><a href="NODE_6_EDA_IP授权_2026-03-19.html">Node 6: EDA/IP授权<br><span class="zh-inline">EDA / IP Licensing</span></a></li>
+      <li><a href="NODE_7_需求侧_Demand_2026-03-21.html">Node 7: 需求侧/超大规模<br><span class="zh-inline">Demand / Hyperscaler</span></a></li>
+      <li><a href="NODE_8_AI_Lab_模型层_2026-03-21.html" class="active">Node 8: AI Lab/模型层<br><span class="zh-inline">AI Lab / Model Layer</span></a></li>
+    </ul></nav>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <header class="page-header">
+      <h1>认知节点报告: AI Lab/模型层<span class="zh">Cognitive Node Report: AI Lab / Model Layer</span></h1>
+      <div class="subtitle">Node 8 of 8 &middot; Phase 0&rarr;2 + 2 Cognitive Agents &middot; 2026-03-21</div>
+      <div class="badge-row">
+        <span class="badge">Google TPU v6e</span>
+        <span class="badge">DeepMind AlphaFold</span>
+        <span class="badge">Claude on TPU</span>
+        <span class="badge">2 Agents</span>
+        <span class="badge">25+ Sources</span>
+      </div>
+    </header>
+
+    <!-- METACOGNITIVE SUMMARY -->
+    <div class="priority-box" id="metacognition">
+      <h2 style="margin-top:0; font-size:1.1rem; font-weight:680; color:var(--accent);">&#9733; 元思考: 这份报告的核心发现<span class="zh" style="font-weight:400; font-size:0.85rem;"> Metacognitive Summary</span></h2>
+
+      <div style="margin:1rem 0; padding:1rem 1.25rem; background:var(--bg-overlay); border-radius:var(--radius-sm); border-left:3px solid var(--accent);">
+        <p style="font-size:0.92rem; font-weight:590; color:var(--text-primary); margin:0 0 0.75rem;">&#128270; 核心分析焦点</p>
+        <p style="color:var(--text-secondary); font-size:0.88rem; line-height:1.65; margin:0;">This node answers the most critical question for NVIDIA&rsquo;s future: <strong>Is CUDA truly irreplaceable?</strong> Supply-side Jensen says yes (15% credibility per Node 1 analysis). This node provides the AI lab perspective&mdash;the people actually choosing between CUDA GPUs and TPUs for frontier model training.<br><br>
+        <strong>Pichai和Hassabis从需求侧提供了关键反证</strong>：Google TPU训练了AlphaFold（诺贝尔奖级成果）、Gemini系列、以及Anthropic Claude&mdash;&mdash;CUDA并非前沿AI的唯一路径。但CUDA生态系统的深度（库、工具、人才池）意味着TPU替代是以年为单位的渐进过程，不是季度级的突变。</p>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin:1rem 0;">
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid #4caf50;">
+          <p style="font-size:0.72rem; font-weight:510; color:#4caf50; text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#10003; 双代理共识</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;">AI计算需求呈指数级增长。Scaling laws依然成立。前沿模型每一代需要10-100x更多计算。这对<strong>所有计算硬件都是利好</strong>&mdash;&mdash;不仅仅是NVIDIA。Pichai确认TPU训练state-of-art模型具有竞争力。Hassabis的AlphaFold突破完全基于TPU。</p>
+        </div>
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid #f44336;">
+          <p style="font-size:0.72rem; font-weight:510; color:#f44336; text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#10007; 关键分歧与风险</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;">CUDA锁定评估与供给侧叙事尖锐分歧。Pichai: TPU训练前沿模型具有竞争力。Hassabis: AlphaFold突破完全使用TPU。Anthropic Claude主要在TPU上训练。<strong>实际的CUDA绕行已经在前沿发生。</strong>但Google有巨大的动机推广TPU作为竞争对手（这是他们的产品）。</p>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin:1rem 0;">
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid var(--knowledge);">
+          <p style="font-size:0.72rem; font-weight:510; color:var(--knowledge); text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#128200; 交易指引</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;">CUDA侵蚀是真实的，但以年为单位而非季度。NVIDIA训练份额可能从90%+压缩至70-80%（2028-2030）。但<strong>推理市场</strong>（远大于训练的TAM）是替代方案增长最快的领域。GOOGL受益于TPU变现。ARM无论GPU/TPU都受益（ISA中立）。NVDA的5年bull case需要下调但3年仍intact。</p>
+        </div>
+        <div style="padding:0.85rem 1rem; background:var(--bg-surface); border-radius:var(--radius-sm); border-left:2px solid var(--accent);">
+          <p style="font-size:0.72rem; font-weight:510; color:var(--accent); text-transform:uppercase; letter-spacing:0.04em; margin:0 0 0.35rem;">&#9888; 认知陷阱预警</p>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin:0; line-height:1.55;"><strong>利益冲突</strong>: Google有巨大动机推广TPU作为NVIDIA竞争对手&mdash;&mdash;这是他们的产品。Hassabis的研究硬件选择可能反映内部mandate而非纯技术优劣。<strong>幸存者偏差</strong>: 我们只看到TPU成功案例（AlphaFold、Gemini），不知道有多少项目因TPU限制而放弃或迁移回GPU。<strong>叙事vs数据</strong>: "CUDA不可替代"是叙事；TPU实际训练出诺贝尔奖级成果是数据。</p>
+        </div>
+      </div>
+
+      <details style="margin-top:0.75rem;">
+        <summary style="font-size:0.82rem; font-weight:510; color:var(--text-tertiary); cursor:pointer;">&#128214; 两位代理人一句话摘要</summary>
+        <div style="padding:0.75rem 0; font-size:0.82rem; color:var(--text-secondary); line-height:1.65;">
+          <p><strong>Sundar Pichai (GIANT, 8/10)</strong>: "TPU是CUDA唯一的存在性威胁&mdash;&mdash;10年生态+Meta TPU交易(数十亿美元)+Trillium v6e性能翻倍。" &mdash; Google TPU路线图（v5/v6/v7）决定CUDA侵蚀速度。CEO推销偏差需打折，但$数十亿Meta交易是行动证据。</p>
+          <p><strong>Demis Hassabis (INVESTOR, 7/10)</strong>: "DeepMind的计算选择揭示了哪种硬件真正适合前沿AI&mdash;&mdash;AlphaFold诺贝尔奖+AGI研究领导者+TPU架构决策者。" &mdash; Claude Opus 4.5 + Gemini 3主要在TPU上训练=前沿模型不需要CUDA。但内部mandate可能影响硬件选择。</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="top-controls">
+      <span class="tc-label">&#128218; 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <!-- PHASE 0: INDEPENDENT THINKING -->
+    <div class="section-header" id="phase0">
+      <h2>&sect;0 Phase 0: 独立思考<span class="zh">Independent Thinking (Before Search)</span></h2>
+    </div>
+
+    <div class="callout" style="border-left-color:#ffc107; margin-bottom:1.5rem;">
+      <div class="callout-title" style="color:#ffc107;">&#9888; 诚实标注 Honesty Disclosure</div>
+      <div class="callout-body">本Phase 0标题为"搜索前独立思考"，但实际撰写时已读完两位代理人的完整MD文件。这是<strong>事后重构</strong>，不是真正的搜索前独立思考。其价值在于：明确标记预判偏差方向（如Phase 0低估了TPU在前沿模型训练中的实际渗透程度），而非假装"猜对了"。</div>
+    </div>
+
+    <h3>1. 节点解决什么问题？</h3>
+    <p>AI Lab/模型层节点解决的核心问题是：<strong>模型层是否决定硬件需求，还是硬件供给塑造模型架构？</strong>这是整条半导体供应链的终端需求信号源。如果AI lab选择TPU而非GPU训练前沿模型，这个信号会沿供应链逆向传导：NVIDIA训练收入&darr; &rarr; HBM需求结构变化 &rarr; <mark class="hl-know" data-note="k1">代工制造订单重组</mark><sup class="nref" data-note="k1">1</sup>。反过来，如果CUDA生态不可替代，NVIDIA的定价权将持续。</p>
+
+    <h3>2. 关键动态</h3>
+    <ul>
+      <li><strong><mark class="hl-know" data-note="k2">计算Scaling Laws</mark><sup class="nref" data-note="k2">2</sup>驱动无限需求</strong>: 前沿模型每一代需要10-100x更多计算&mdash;&mdash;Chinchilla/Kaplan研究确认</li>
+      <li><strong>模型架构选择影响硬件需求</strong>: Transformer主导意味着密集矩阵运算=GPU/TPU都擅长。如果MoE或稀疏架构成为主流，硬件需求特征可能改变</li>
+      <li><strong>TPU vs GPU不仅是速度</strong>: 这是编程生态、库支持、人才池的全面竞争。<mark class="hl-know" data-note="k3">CUDA生态的深度</mark><sup class="nref" data-note="k3">3</sup>（PyTorch/JAX/cuDNN）是真正的护城河</li>
+      <li><strong>推理vs训练</strong>: 训练集中度高（少数大型集群），推理分散度高（边缘+云端）&mdash;&mdash;替代方案在推理端增长最快</li>
+    </ul>
+
+    <h3>3. 搜索前预测</h3>
+    <ul>
+      <li><strong>CUDA侵蚀是真实的但缓慢</strong>: TPU在特定工作负载（大规模训练）具有竞争力，但通用性不如GPU</li>
+      <li><strong>GPU在多样化、小规模推理中仍然主导</strong>: 开发者生态偏好CUDA</li>
+      <li><strong><mark class="hl-know" data-note="k4">TPU的实际渗透</mark><sup class="nref" data-note="k4">4</sup>可能被低估</strong>: 因为Google内部使用不公开报告，Anthropic的TPU使用直到最近才被广泛认知</li>
+    </ul>
+
+    <!-- PHASE 0.5: CURATED SEARCH -->
+    <div class="section-header" id="phase05">
+      <h2>&sect;1 Phase 0.5: 策展搜索<span class="zh">Curated Search</span></h2>
+    </div>
+
+    <h3>最佳分析源</h3>
+    <figure>
+      <table>
+        <thead>
+          <tr><th>Source 来源</th><th>Type 类型</th><th>Value 价值</th><th>Credibility 可信度</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Google Cloud TPU Documentation</strong></td><td>Primary source</td><td>TPU v5e/v6e/v7 specs, benchmarks, pricing</td><td><span class="tier-high">Primary</span></td></tr>
+          <tr><td><strong>DeepMind Research Publications</strong></td><td>Primary source</td><td>AlphaFold 3, Gemini architecture, compute requirements</td><td><span class="tier-high">Primary</span></td></tr>
+          <tr><td><strong>SemiAnalysis</strong><br><small>Dylan Patel</small></td><td>Deep analysis</td><td>TPU vs GPU: The Real Comparison, cost-per-FLOP analysis</td><td><span class="tier-medium-high">High</span></td></tr>
+          <tr><td><strong>Anthropic Engineering Blog</strong></td><td>Primary source</td><td>TPU training infrastructure, Claude scaling details</td><td><span class="tier-medium-high">High</span></td></tr>
+          <tr><td><strong>Scaling Laws Papers</strong><br><small>Chinchilla, Kaplan et al.</small></td><td>Research</td><td>Compute-optimal training, scaling predictions</td><td><span class="tier-high">Primary</span></td></tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <h3>Key Curated Findings</h3>
+
+    <div class="callout">
+      <div class="callout-title">CURATED-1 &mdash; Google TPU Technical Specs (v5e/v6e/v7)</div>
+      <div class="callout-body"><mark class="hl-know" data-note="k5">TPU v6e (Trillium)</mark><sup class="nref" data-note="k5">5</sup>: 2x performance over v5e, 67% energy efficiency improvement. TPU v5p: 459 TFLOPS BF16. TPU v7 (expected 2026-2027): targeting another 2-3x improvement. Pod-level interconnect (ICI) enables 100,000+ chip training clusters without InfiniBand dependency.<br><small class="zh-inline">Source: Google Cloud Documentation, 2025-2026</small></div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">CURATED-2 &mdash; DeepMind Research: AlphaFold 3 + Gemini Architecture</div>
+      <div class="callout-body">AlphaFold 3 trained entirely on TPU v4 pods&mdash;no NVIDIA GPU involved in the Nobel Prize-winning protein structure prediction system. Gemini 1.5/2.0/3.0 series trained on TPU v5p superpods. DeepMind&rsquo;s internal compute cluster is 100% TPU. <strong>Practical demonstration that CUDA is not required for frontier scientific AI.</strong><br><small class="zh-inline">Source: Nature, DeepMind Blog, 2024-2026</small></div>
+    </div>
+
+    <div class="callout insight">
+      <div class="callout-title">CURATED-3 &mdash; Anthropic Claude on TPU</div>
+      <div class="callout-body">Anthropic&rsquo;s Claude series (including Opus 4.5) trained primarily on Google TPU infrastructure via Google Cloud partnership. This is the <strong>strongest external validation</strong> of TPU competitiveness&mdash;a company with no loyalty to Google chose TPU for its most critical workload. Anthropic reportedly uses a mix of TPU and AWS GPU instances, but TPU is the primary training platform.<br><small class="zh-inline">Source: Anthropic Engineering Blog, Google Cloud Partnership Announcements, 2024-2026</small></div>
+    </div>
+
+    <div class="callout insight">
+      <div class="callout-title">CURATED-4 &mdash; SemiAnalysis: TPU vs GPU Cost Analysis</div>
+      <div class="callout-body">SemiAnalysis analysis shows TPU v5e achieves <strong>comparable cost-per-FLOP</strong> to NVIDIA H100 for large-scale Transformer training when accounting for Google Cloud pricing. Key advantage: TPU pod-level interconnect avoids InfiniBand bottleneck. Key disadvantage: narrower software ecosystem (JAX/XLA vs CUDA/PyTorch). <mark class="hl-know" data-note="k6">TCO comparison</mark><sup class="nref" data-note="k6">6</sup> favors TPU at >1000 chip scale, GPU at <100 chip scale.<br><small class="zh-inline">Source: SemiAnalysis, 2025</small></div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">CURATED-5 &mdash; Google Cloud Next AI Announcements</div>
+      <div class="callout-body">Google Cloud AI revenue estimated at <strong>$10B+ run-rate</strong> (2026). TPU as a Service is growing faster than GPU-based offerings. Meta signed multi-billion dollar deal for TPU access (2025). Google offering TPU v6e to external customers at competitive pricing vs NVIDIA DGX Cloud.<br><small class="zh-inline">Source: Google Cloud Next, Financial Times, 2025-2026</small></div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">CURATED-6 &mdash; Scaling Laws Research (Chinchilla, Kaplan et al.)</div>
+      <div class="callout-body">Compute-optimal training requires <strong>4-10x more compute per generation</strong> for equivalent quality improvement. GPT-4 estimated ~1.8T parameters &rarr; GPT-5 estimated ~10T+ parameters. Inference compute demand growing even faster than training (100x by 2028 estimates). <strong>Demand growth is hardware-agnostic&mdash;bullish for all compute.</strong><br><small class="zh-inline">Source: Hoffmann et al. 2022, Kaplan et al. 2020, industry estimates</small></div>
+    </div>
+
+    <!-- PHASE 1: COGNITIVE AGENTS -->
+    <div class="section-header" id="phase1">
+      <h2>&sect;2 Phase 1: 认知代理人<span class="zh">Cognitive Agents</span></h2>
+    </div>
+
+    <!-- Agent 1: Sundar Pichai -->
+    <div id="pichai">
+      <div class="agent-header">
+        <span class="agent-role-badge giant">GIANT</span>
+        <h3>Sundar Pichai (#19) &mdash; CEO Google / Alphabet</h3>
+      </div>
+
+      <p><strong>选择理由</strong>: Pichai掌控Google TPU&mdash;&mdash;NVIDIA CUDA唯一的存在性威胁。10年TPU生态建设+Meta TPU交易（数十亿美元）+Trillium v6e性能翻倍。TPU v5/v6/v7路线图决定CUDA侵蚀速度。<strong>可信度: 4/5</strong>。CEO推销偏差显著&mdash;&mdash;TPU是Google产品，Pichai有巨大动机夸大TPU竞争力。但行动证据（Meta交易、Anthropic选择TPU）提供独立验证。</p>
+
+      <h4>行动证据（重于言论）</h4>
+      <ol>
+        <li><strong>TPU v6e (Trillium) 量产部署（2025-2026）</strong>: 2x性能提升，67%能效改进。Google Cloud大规模提供给外部客户。性能对标NVIDIA H100且成本竞争力增强。</li>
+        <li><strong>Meta TPU交易（2025年，数十亿美元）</strong>: Meta&mdash;&mdash;全球最大AI训练用户之一&mdash;&mdash;签署多年TPU使用协议。这是NVIDIA训练垄断被打破的最强信号。</li>
+        <li><strong>Anthropic战略投资+TPU基础设施</strong>: Google向Anthropic投资数十亿美元，Anthropic在Google Cloud TPU上训练Claude系列。外部AI lab选择TPU = TPU竞争力的独立验证。</li>
+        <li><strong>Google内部100% TPU</strong>: Google Search、YouTube、Gmail、Google Maps全部运行在TPU上。DeepMind研究集群100% TPU。全球最大的非NVIDIA AI计算基础设施。</li>
+        <li><strong>$75B+ 2026年CapEx计划</strong>: Google 2026年资本支出$750亿+，其中大部分用于AI基础设施（TPU集群+数据中心）。这一投资规模仅次于Microsoft。</li>
+      </ol>
+
+      <h4>核心判断</h4>
+      <blockquote>"We have been building TPU for over a decade. It is the foundation of everything we do in AI."<span class="zh">我们建设TPU已超过10年。它是我们AI一切工作的基础</span></blockquote>
+      <ul>
+        <li><mark class="hl-know" data-note="k7">TPU是CUDA唯一的真正替代品</mark><sup class="nref" data-note="k7">7</sup>&mdash;&mdash;10年积累的软件栈（JAX/XLA/TensorFlow）+ 定制硬件 + 垂直整合</li>
+        <li>Meta交易证明TPU已突破Google内部使用&mdash;&mdash;外部客户愿意为TPU付费（而非免费）</li>
+        <li>TPU路线图（v5&rarr;v6&rarr;v7）每代2-3x改进，与NVIDIA Blackwell&rarr;Rubin节奏匹配</li>
+        <li>Google的优势不是单芯片性能，而是<strong>垂直整合</strong>: 芯片+互连+软件栈+云平台一体化</li>
+      </ul>
+
+      <details>
+        <summary>TPU生态与财务影响</summary>
+        <p><strong>TPU代际路线图</strong>: v4 (2022) &rarr; v5e (2023) &rarr; v5p (2024) &rarr; v6e Trillium (2025) &rarr; v7 (2026-2027E)。每代2-3x性能提升，芯片间互连（ICI）持续优化。</p>
+        <p><strong>Google Cloud AI收入</strong>: 估计$10B+ run-rate (2026)。TPU as a Service是Google Cloud增长最快的产品线。</p>
+        <p><strong>竞争定位</strong>: TPU在大规模训练（>1000芯片集群）成本效率优于NVIDIA。但在<100芯片的中小规模和多样化工作负载中，NVIDIA GPU仍具优势。</p>
+      </details>
+    </div>
+
+    <hr>
+
+    <!-- Agent 2: Demis Hassabis -->
+    <div id="hassabis">
+      <div class="agent-header">
+        <span class="agent-role-badge investor">INVESTOR</span>
+        <h3>Demis Hassabis (#20) &mdash; CEO Google DeepMind</h3>
+      </div>
+
+      <p><strong>选择理由</strong>: Hassabis是全球最前沿AI研究的领导者&mdash;&mdash;AlphaFold诺贝尔化学奖（2024）、Gemini系列、AGI研究。他的计算硬件选择直接反映<strong>哪种硬件真正适合前沿AI</strong>。DeepMind 100% TPU集群 + Claude/Gemini都在TPU训练 = CUDA对于前沿模型非必需的活证据。<strong>可信度: 4/5</strong>。但Hassabis作为Google员工，硬件选择可能反映内部mandate而非纯技术优劣。</p>
+
+      <h4>行动证据（重于言论）</h4>
+      <ol>
+        <li><strong>AlphaFold 3完全在TPU上训练（2024）</strong>: 诺贝尔化学奖级别的突破，100%使用TPU v4。零NVIDIA GPU参与。这是TPU能力的最高级别证明&mdash;&mdash;科学突破级别，而非仅仅商业模型训练。</li>
+        <li><strong>Gemini系列全TPU训练</strong>: Gemini 1.0/1.5/2.0/3.0全部在TPU v5p superpods上训练。参数量从百亿级到万亿级，证明TPU在不同规模都有竞争力。</li>
+        <li><strong>DeepMind研究集群100% TPU</strong>: DeepMind内部所有研究项目（不仅是旗舰产品）都运行在TPU上。这意味着TPU能满足从小规模探索到大规模训练的全谱系需求。</li>
+        <li><strong><mark class="hl-know" data-note="k8">AGI研究方向选择</mark><sup class="nref" data-note="k8">8</sup></strong>: Hassabis的研究路线（AlphaFold &rarr; AlphaGeometry &rarr; Gemini &rarr; 通用智能）全部基于TPU。如果TPU是制约因素，他不可能追求如此雄心的研究目标。</li>
+        <li><strong>诺贝尔奖对叙事的影响</strong>: AlphaFold获诺贝尔奖 = "TPU训练出了改变世界的AI系统"。这一叙事对CUDA不可替代论是最有力的反证。</li>
+      </ol>
+
+      <h4>核心判断</h4>
+      <blockquote>"The compute requirements for the next generation of AI systems will be orders of magnitude beyond what we have today."<span class="zh">下一代AI系统的计算需求将比今天高出几个数量级</span></blockquote>
+      <ul>
+        <li>DeepMind的计算选择揭示TPU在前沿AI训练中的实际竞争力&mdash;&mdash;不是理论，是已验证的事实</li>
+        <li>Scaling laws对所有计算硬件利好&mdash;&mdash;需求增长远超任何单一供应商的产能</li>
+        <li>模型架构演进（MoE、稀疏注意力、多模态）可能改变硬件需求特征&mdash;&mdash;不一定有利于GPU</li>
+        <li>前沿研究的硬件选择是<strong>最诚实的信号</strong>&mdash;&mdash;研究者选择能最快产出结果的硬件，不受采购政治影响</li>
+      </ul>
+
+      <div class="callout risk">
+        <div class="callout-title">对NVIDIA叙事的结构性挑战</div>
+        <div class="callout-body">Hassabis的行动证据对Jensen"CUDA不可替代"叙事构成最强挑战：(1) AlphaFold诺贝尔奖 = TPU可以产出人类知识巅峰级成果，无需CUDA。(2) Claude Opus 4.5在TPU上训练 = 即使是非Google公司也选择TPU。(3) Gemini在多个benchmark超越GPT-4 = TPU训练的模型在质量上不输GPU训练的模型。<strong>但这些证据都来自Google生态内部或与Google有深度合作关系的公司，独立性需打折。</strong></div>
+      </div>
+
+      <details>
+        <summary>DeepMind研究路线与计算需求</summary>
+        <p><strong>AlphaFold系列</strong>: AF1 (2018) &rarr; AF2 (2020, Nature) &rarr; AF3 (2024, 诺贝尔奖)。计算需求每代~10x增长。全部TPU训练。</p>
+        <p><strong>Gemini系列</strong>: 1.0 (2023) &rarr; 1.5 (2024) &rarr; 2.0 (2025) &rarr; 3.0 (2026E)。多模态架构，参数量从数百亿到数万亿。TPU v5p superpods。</p>
+        <p><strong>AGI研究</strong>: Hassabis的终极目标是通用人工智能。他的计算需求预测（"orders of magnitude"）意味着即使TPU+GPU全部产能也不够&mdash;&mdash;这对所有计算硬件都是利好。</p>
+      </details>
+    </div>
+
+    <!-- PHASE 2: SYNTHESIS -->
+    <div class="section-header" id="phase2">
+      <h2>&sect;3 Phase 2: 综合分析<span class="zh">Synthesis</span></h2>
+    </div>
+
+    <!-- Triangulation -->
+    <div id="triangulation">
+      <h3>&sect;3.1 三角验证: 行动 vs 言论 vs 数据</h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Dimension 维度</th><th>Pichai (Google/Alphabet)</th><th>Hassabis (DeepMind)</th><th>Consistency 一致性</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>AI计算需求方向</strong></td><td>指数增长，$75B+ CapEx</td><td>Orders of magnitude increase</td><td><span class="consensus">&#10003; 共识</span></td></tr>
+            <tr><td><strong>TPU竞争力</strong></td><td>10年积累，对标NVIDIA</td><td>100%用TPU，诺贝尔奖验证</td><td><span class="consensus">&#10003; 共识（但同一生态）</span></td></tr>
+            <tr><td><strong>CUDA可替代性</strong></td><td>TPU+JAX/XLA是完整替代</td><td>前沿AI不需要CUDA</td><td><span class="consensus">&#10003; 共识（利益一致）</span></td></tr>
+            <tr><td><strong>Scaling Laws持续性</strong></td><td>持续投入，无减速信号</td><td>计算需求每代10-100x</td><td><span class="consensus">&#10003; 共识</span></td></tr>
+            <tr><td><strong>NVIDIA训练垄断</strong></td><td>Meta TPU交易打破垄断</td><td>AlphaFold/Gemini证明替代</td><td><span class="disagreement">&#10007; 与供给侧（Jensen）分歧</span></td></tr>
+            <tr><td><strong>推理市场竞争</strong></td><td>TPU推理成本竞争力强</td><td>未直接评论</td><td><span class="disagreement">&#10007; 数据不足（Hassabis聚焦研究）</span></td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <div class="callout insight">
+        <div class="callout-title">Key Insight 关键洞察</div>
+        <div class="callout-body">两位代理人在<strong>AI计算需求指数增长</strong>和<strong>TPU前沿竞争力</strong>上完全共识。但核心问题：这两位代理人来自同一家公司（Google），他们的"共识"部分反映<strong>组织一致性</strong>而非独立验证。真正的三角验证需要对比Node 1（Jensen的CUDA不可替代论）和本节点（Pichai/Hassabis的TPU替代论）。<strong>Cross-node triangulation: CUDA irreplaceability = 15% credible。</strong></div>
+      </div>
+    </div>
+
+    <!-- Competition -->
+    <div id="competitive">
+      <h3>&sect;3.2 竞争格局<span class="zh">Competitive Landscape</span></h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Platform</th><th>Approach</th><th>Training Share</th><th>Strength 优势</th><th>Weakness 劣势</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>NVIDIA GPU (CUDA)</strong></td><td>通用GPU + CUDA生态</td><td>~90%</td><td>生态系统深度、开发者社区、PyTorch原生</td><td>价格溢价高、单一供应商风险</td></tr>
+            <tr><td><strong>Google TPU</strong></td><td>定制ASIC + JAX/XLA</td><td>~5-8%</td><td>大规模训练成本效率、垂直整合、Pod互连</td><td>软件生态窄、仅Google Cloud可用</td></tr>
+            <tr><td><strong>AMD MI300X</strong></td><td>GPU + ROCm</td><td>~2-3%</td><td>性价比、HBM容量领先</td><td>ROCm生态不成熟、软件迁移成本</td></tr>
+            <tr><td><strong><mark class="hl-know" data-note="k9">AWS Trainium</mark><sup class="nref" data-note="k9">9</sup></strong></td><td>定制ASIC + Neuron SDK</td><td>~1-2%</td><td>AWS集成、成本优化</td><td>性能落后TPU、生态最小</td></tr>
+            <tr><td><strong>其他定制芯片</strong><br><small>Meta MTIA, Microsoft Maia</small></td><td>内部ASIC</td><td>&lt;1%</td><td>自用成本控制</td><td>不对外销售、规模有限</td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </div>
+
+    <!-- Supply-Demand -->
+    <div id="supply-demand">
+      <h3>&sect;3.3 供需框架<span class="zh">Supply-Demand Framework</span></h3>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;">
+        <div class="callout" style="border-left-color: #4caf50;">
+          <div class="callout-title" style="color: #4caf50;">需求侧 Demand</div>
+          <div class="callout-body">
+            <ul style="margin:0; padding-left:1.2rem;">
+              <li>训练计算需求<strong>每年4-10x增长</strong>&mdash;&mdash;Scaling Laws持续验证</li>
+              <li>GPT-4 ~1.8T params &rarr; GPT-5 ~10T+ estimated &rarr; 计算需求5-10x</li>
+              <li>推理需求增长更快&mdash;&mdash;模型部署数量指数增长</li>
+              <li>多模态（视觉+音频+视频）训练需要10x+更多计算</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout risk">
+          <div class="callout-title">供给侧 Supply</div>
+          <div class="callout-body">
+            <ul style="margin:0; padding-left:1.2rem;">
+              <li>NVIDIA Blackwell/Rubin + Google TPU v6/v7 + AMD MI300/MI400</li>
+              <li>TPU + GPU <strong>合计产能仍不足</strong>以满足前沿训练需求</li>
+              <li>电力和数据中心成为新瓶颈&mdash;&mdash;不再是芯片本身</li>
+              <li>推理效率每年提升50-80%&mdash;&mdash;缓解部分需求压力</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout insight">
+        <div class="callout-title">供需缺口判断</div>
+        <div class="callout-body">AI模型层的核心供需状态是<strong>持续性供不应求</strong>&mdash;&mdash;前沿训练需求增长速度（4-10x/年）远超硬件供给增长（~2x/年）。这意味着<strong>所有AI计算硬件都有市场</strong>&mdash;&mdash;TPU增长不等于NVIDIA萎缩。这是一个增量市场，不是零和博弈。确定性<strong>9/10</strong>。但NVIDIA的份额被<mark class="hl-know" data-note="k10">份额侵蚀</mark><sup class="nref" data-note="k10">10</sup>的风险确实在上升（从>90%到70-80%的可能）。</div>
+      </div>
+    </div>
+
+    <!-- Risk Matrix -->
+    <div id="risk-matrix">
+      <h3>&sect;3.4 风险矩阵<span class="zh">Risk Matrix</span></h3>
+
+      <figure class="table-responsive">
+        <table class="risk-matrix">
+          <thead>
+            <tr><th>Risk 风险</th><th>Probability</th><th>Impact</th><th>Timeframe</th><th>Monitoring 监控指标</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>TPU快速改进侵蚀NVIDIA训练份额</strong></td><td><span class="risk-medium">Medium</span></td><td><span class="risk-high">High (NVDA)</span></td><td>2026-2028</td><td>TPU外部客户数、Meta/Anthropic使用量</td></tr>
+            <tr><td><strong>CUDA生态系统加深护城河</strong></td><td><span class="risk-high">High</span></td><td><span class="risk-medium">Medium (TPU)</span></td><td>持续</td><td>PyTorch vs JAX开发者份额</td></tr>
+            <tr><td><strong>模型架构转向（非Transformer）</strong></td><td><span class="risk-low">Low</span></td><td><span class="risk-high">High</span></td><td>2027+</td><td>State-space models、稀疏架构论文</td></tr>
+            <tr><td><strong>AI冬天 / CapEx泡沫破裂</strong></td><td><span class="risk-low">Low</span></td><td><span class="risk-high">High</span></td><td>2027+</td><td>Hyperscaler CapEx指引、AI应用ROI</td></tr>
+            <tr><td><strong>推理市场替代方案爆发</strong><br><small>Groq LPU, Cerebras, 定制ASIC</small></td><td><span class="risk-medium">Medium</span></td><td><span class="risk-medium">Medium (NVDA)</span></td><td>2026-2027</td><td>推理成本/token下降速度</td></tr>
+            <tr><td><strong>Google Cloud市场份额停滞</strong></td><td><span class="risk-medium">Low-Med</span></td><td><span class="risk-medium">Medium (GOOGL)</span></td><td>2026+</td><td>Google Cloud revenue vs AWS/Azure</td></tr>
+            <tr><td><strong>电力/数据中心瓶颈</strong></td><td><span class="risk-high">High</span></td><td><span class="risk-medium">Medium</span></td><td>2026-2028</td><td>数据中心建设进度、电力PPA签约</td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </div>
+
+    <!-- Node Judgment -->
+    <div id="node-judgment">
+      <h3>&sect;3.5 节点判断<span class="zh">Node Judgment</span></h3>
+
+      <div class="callout" style="border-left-color: var(--knowledge);">
+        <div class="callout-body" style="font-size: 0.92rem;">
+          <p><strong>CUDA不可替代性评估</strong>: <strong>15% credible</strong>&mdash;&mdash;本节点确认了Node 1的初步判断。CUDA不是"不可替代"的，而是"切换成本高且缓慢"的。TPU已证明前沿AI不需要CUDA。</p>
+          <p><strong>NVIDIA仍然主导的原因</strong>: 不是技术不可替代，而是<strong>生态系统+安装基座+推理多样性</strong>。CUDA的PyTorch整合、开发者社区、和第三方库支持远超TPU/JAX。</p>
+          <p><strong>侵蚀时间线</strong>: <strong>以年为单位，不是季度</strong>。训练份额: 90%+ &rarr; 70-80% (2028-2030)。推理份额侵蚀更快（替代方案在推理端增长最快）。</p>
+          <p><strong>最大确定性</strong>: AI计算需求指数增长 = 所有计算硬件受益。这是增量市场，不是零和博弈。</p>
+          <p><strong>最大分歧</strong>: NVIDIA的5年bull case需要CUDA锁定持续。本节点证据表明5年太长&mdash;&mdash;3年更安全。</p>
+          <p style="margin-bottom:0;"><strong>核心结论</strong>: 本节点主要是<strong>NVIDIA bear signal</strong>。影响NVDA估值窗口（3年 vs 5年bull case）。对GOOGL利好（TPU变现）。ARM无论GPU/TPU都受益（ISA中立）。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trading -->
+    <div id="trading">
+      <h3>&sect;3.6 交易视角<span class="zh">Trading Perspective</span></h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Dimension 维度</th><th>NVDA</th><th>GOOGL</th><th>ARM</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Node 8影响</strong></td><td>Bear signal (份额侵蚀)</td><td>Bull signal (TPU变现)</td><td>Neutral-Bull (ISA中立)</td></tr>
+            <tr><td><strong>时间窗口</strong></td><td>3年bull case intact, 5年存疑</td><td>TPU收入加速2026-2028</td><td>无论GPU/TPU都用ARM</td></tr>
+            <tr><td><strong>份额影响</strong></td><td>训练90%+ &rarr; 70-80%</td><td>Cloud AI $10B+ &rarr; $30B+</td><td>DC版税随总量增长</td></tr>
+            <tr><td><strong>估值影响</strong></td><td>5年DCF需下调TPU侵蚀</td><td>TPU变现未充分定价</td><td>PE 169x已充分定价</td></tr>
+            <tr><td><strong>催化剂</strong></td><td>Blackwell/Rubin benchmark</td><td>TPU v7发布、Cloud AI收入</td><td>数据中心版税增速</td></tr>
+            <tr><td><strong>最大风险</strong></td><td>TPU + AMD + AWS Trainium三面夹击</td><td>Cloud市场份额落后AWS/Azure</td><td>RISC-V侵蚀（Node 6分析）</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <div class="callout">
+        <div class="callout-title">Luke交易视角</div>
+        <div class="callout-body">
+          <p><strong>NVDA</strong>: 本节点是bear signal但不是sell signal。CUDA侵蚀以年计，NVIDIA的Blackwell/Rubin周期仍然强劲。3年bull case intact（推理爆发+训练份额虽下降但绝对量增长）。5年bull case需要重新评估。月线趋势看是否做head-and-shoulders或持续上升。</p>
+          <p><strong>GOOGL</strong>: TPU变现是最被低估的增长引擎。Google Cloud AI $10B+ run-rate且加速。Meta TPU交易验证外部需求。如果TPU v7缩小与Rubin的性能差距，Google Cloud市场份额可能加速提升。月线形态确认后可考虑。</p>
+          <p style="margin-bottom:0;"><strong>ARM</strong>: ISA中立受益者&mdash;&mdash;NVIDIA Grace用ARM，Google TPU控制面用ARM，AWS Graviton用ARM。无论GPU还是TPU赢，ARM都收版税。但PE 169x的问题在Node 6已分析，不在本节点重复。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 综合判断 -->
+    <div id="综合判断">
+      <h3>&sect;3.7 综合判断<span class="zh">Triangulated Verdict</span></h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead><tr><th>Claim</th><th>交叉验证</th><th>综合可信度</th></tr></thead>
+          <tbody>
+            <tr><td><strong>AI计算需求指数增长</strong></td><td>双代理共识 + Scaling Laws论文 + Hyperscaler CapEx计划</td><td><strong style="color:#4caf50;">98%</strong></td></tr>
+            <tr><td><strong>CUDA不可替代（Jensen论点）</strong></td><td>Pichai/Hassabis行动证据反驳 + AlphaFold诺贝尔奖 + Claude on TPU</td><td><strong style="color:#f44336;">15%</strong></td></tr>
+            <tr><td><strong>TPU训练前沿模型具有竞争力</strong></td><td>AlphaFold/Gemini/Claude全TPU + Meta交易 + SemiAnalysis成本分析</td><td><strong style="color:#4caf50;">85%</strong></td></tr>
+            <tr><td><strong>NVIDIA训练份额3年内维持80%+</strong></td><td>生态系统惯性 + PyTorch主导 + 开发者习惯 + 但TPU/AMD加速</td><td><strong style="color:#ffa726;">60%</strong></td></tr>
+            <tr><td><strong>NVIDIA训练份额5年后维持80%+</strong></td><td>TPU v7/v8 + AMD MI400 + AWS Trainium v3 + 模型架构演变</td><td><strong style="color:#f44336;">25%</strong></td></tr>
+            <tr><td><strong>推理市场NVIDIA主导地位被侵蚀</strong></td><td>成本压力 + 替代方案多样化 + 定制ASIC经济性 + 边缘推理不需要CUDA</td><td><strong style="color:#4caf50;">80%</strong></td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </div>
+
+    <!-- 验证日历 -->
+    <div id="验证日历">
+      <h3>&sect;3.8 验证日历<span class="zh">Verification Calendar</span></h3>
+
+      <figure class="table-responsive">
+        <table>
+          <thead><tr><th>日期</th><th>事件</th><th>如果成功</th><th>如果失败</th></tr></thead>
+          <tbody>
+            <tr><td><strong>2026年5月</strong></td><td>Google I/O &mdash; TPU v7发布?</td><td style="color:#4caf50;">TPU缩小与Rubin差距，CUDA侵蚀加速</td><td style="color:#f44336;">TPU v7延迟，NVIDIA呼吸空间</td></tr>
+            <tr><td><strong>2026年H2</strong></td><td>Google Cloud Next &mdash; TPU外部客户数据</td><td style="color:#4caf50;">TPU外部采用加速，GOOGL Cloud增长</td><td style="color:#f44336;">TPU仍主要内部使用，护城河有限</td></tr>
+            <tr><td><strong>2026年Q3-Q4</strong></td><td>Gemini 3.0 / GPT-5发布</td><td style="color:#4caf50;">如Gemini 3超GPT-5，证明TPU训练质量</td><td style="color:#f44336;">GPT-5大幅领先，CUDA训练仍有质量优势</td></tr>
+            <tr><td><strong>2027年</strong></td><td>Anthropic下一代Claude训练硬件选择</td><td style="color:#4caf50;">继续TPU = TPU竞争力持续验证</td><td style="color:#f44336;">迁移至NVIDIA = TPU竞争力退步</td></tr>
+            <tr><td><strong>2027-2028年</strong></td><td>NVIDIA Rubin vs TPU v7 benchmark对比</td><td style="color:#f44336;">Rubin大幅领先 = CUDA侵蚀减速</td><td style="color:#4caf50;">TPU v7接近Rubin = CUDA侵蚀加速</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <p style="font-size:0.85rem; color:var(--text-tertiary);"><strong>监控频率</strong>: 每季度 &mdash; Google/NVDA财报中AI compute收入 | 事件驱动 &mdash; TPU新品发布、前沿模型训练硬件披露、Hyperscaler CapEx指引变化</p>
+    </div>
+
+    <!-- 信号传导链 -->
+    <div id="信号传导">
+      <h3>&sect;3.9 信号传导链<span class="zh">Signal Transmission Chains</span></h3>
+
+      <div class="callout" style="border-left-color:#4caf50;">
+        <div class="callout-title" style="color:#4caf50;">&#9650; BULL链: Scaling Laws持续 &rarr; 所有计算硬件受益</div>
+        <div class="callout-body">前沿模型参数量10x&uarr; &rarr; 训练计算需求10-100x&uarr; &rarr; NVDA + GOOGL(TPU) + AMD全受益 &rarr; HBM需求&uarr; &rarr; TSM/Samsung订单&uarr;<br><em>信号最先在AI lab训练计划披露（论文/blog）出现，然后传导到芯片订单（6-12月滞后）</em></div>
+      </div>
+      <div class="callout risk">
+        <div class="callout-title">&#9660; BEAR链: TPU持续改进 &rarr; NVIDIA训练份额压缩</div>
+        <div class="callout-body">TPU v7性能接近Rubin &rarr; 更多外部客户选择TPU &rarr; NVIDIA训练集群订单增速放缓 &rarr; GPU定价权下降 &rarr; NVDA利润率压缩<br><em>信号最先在TPU外部客户公告出现（Meta交易级别事件）。关键：<strong>份额下降 ≠ 收入下降</strong>（市场增长可弥补份额损失），但影响估值倍数</em></div>
+      </div>
+      <div class="callout" style="border-left-color:#ffc107;">
+        <div class="callout-title" style="color:#ffc107;">&#9888; 泡沫链: AI ROI不达预期 &rarr; CapEx周期崩塌</div>
+        <div class="callout-body">企业AI应用ROI不达预期 &rarr; Hyperscaler削减CapEx &rarr; NVDA + GOOGL(TPU)同时受冲击 &rarr; 芯片订单取消<br><em>但推理需求是粘性的&mdash;&mdash;已部署的AI应用不会停止使用推理算力。训练投资周期性更强。</em></div>
+      </div>
+
+      <figure class="table-responsive">
+        <table>
+          <caption style="text-align:left; font-size:0.78rem; font-weight:510; color:var(--text-tertiary); padding:0.5rem 0;">&#x23F1; 时间差套利机会</caption>
+          <thead><tr><th>事件</th><th>最先反映</th><th>滞后反映</th><th>时间差</th></tr></thead>
+          <tbody>
+            <tr><td>前沿模型训练硬件选择</td><td>AI lab公告/论文</td><td>芯片厂商收入</td><td>6-12个月</td></tr>
+            <tr><td>TPU外部客户拓展</td><td>Google Cloud客户公告</td><td>NVDA训练收入增速变化</td><td>2-4个季度</td></tr>
+            <tr><td>推理成本下降</td><td>API定价变化（$/M tokens）</td><td>推理芯片需求量</td><td>1-2个季度</td></tr>
+            <tr><td>模型架构范式转换</td><td>顶会论文趋势</td><td>硬件需求特征变化</td><td>1-3年</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <figure class="table-responsive">
+        <table>
+          <caption style="text-align:left; font-size:0.78rem; font-weight:510; color:var(--text-tertiary); padding:0.5rem 0;">&#128737; "不管谁赢都赚"标的</caption>
+          <thead><tr><th>标的</th><th>Scaling Laws持续 &rarr;</th><th>TPU侵蚀NVIDIA &rarr;</th><th>逻辑</th></tr></thead>
+          <tbody>
+            <tr><td><strong>ARM</strong></td><td style="color:#4caf50;">更多芯片=更多版税</td><td style="color:#4caf50;">TPU也用ARM ISA</td><td>ISA中立受益</td></tr>
+            <tr><td><strong>SNPS/CDNS</strong></td><td style="color:#4caf50;">更多芯片设计启动</td><td style="color:#4caf50;">TPU也需要EDA</td><td>Node 6确认的"卖铲人"</td></tr>
+            <tr><td><strong>TSM</strong></td><td style="color:#4caf50;">GPU+TPU都在TSM制造</td><td style="color:#4caf50;">TPU也用先进制程</td><td>制造端中立</td></tr>
+            <tr><td><strong>SK Hynix/Samsung</strong></td><td style="color:#4caf50;">HBM需求&uarr;</td><td style="color:#4caf50;">TPU也用HBM</td><td>存储端中立</td></tr>
+          </tbody>
+        </table>
+      </figure>
+      <p style="font-size:0.85rem; color:var(--text-tertiary);">结论：Node 8的核心交易启示 &mdash; <strong>供应链中游（ARM/SNPS/TSM/HBM）是真正的"无论谁赢都赚"</strong>。NVDA和GOOGL是方向性赌注（谁赢训练份额）。</p>
+    </div>
+
+    <hr style="border:none; border-top:1px solid var(--border-subtle); margin:2.5rem 0;">
+
+    <!-- KPI DASHBOARD -->
+    <div class="section-header" id="kpi-dashboard">
+      <h2>&sect;4 KPI仪表盘<span class="zh">KPI Dashboard</span></h2>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">TPU Cloud Revenue (est.)</div>
+        <div class="kpi-value" style="color: var(--accent);">$10B+</div>
+        <div class="kpi-change positive">&#9650; Run-rate 2026</div>
+        <div class="kpi-subtitle">Google Cloud AI收入</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">TPU Adoption</div>
+        <div class="kpi-value" style="color: var(--knowledge);">4+ Labs</div>
+        <div class="kpi-change positive">&#9650; DeepMind, Anthropic, Meta, Google</div>
+        <div class="kpi-subtitle">前沿AI lab使用TPU</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Model Parameter Growth</div>
+        <div class="kpi-value" style="color: #ab47bc;">1.8T&rarr;10T+</div>
+        <div class="kpi-change positive">&#9650; 5-10x per generation</div>
+        <div class="kpi-subtitle">GPT-4 &rarr; GPT-5 est.</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Inference Cost Decline</div>
+        <div class="kpi-value" style="color: #4caf50;">-50~80%</div>
+        <div class="kpi-change positive">&#9650; YoY cost reduction</div>
+        <div class="kpi-subtitle">推理成本每年下降</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">CUDA vs TPU Training</div>
+        <div class="kpi-value" style="color: #f44336;">Comparable</div>
+        <div class="kpi-change negative">&#9888; At scale (&gt;1000 chips)</div>
+        <div class="kpi-subtitle">大规模训练性能对比</div>
+      </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="section-header" id="charts">
+      <h2>&sect;5 图表<span class="zh">Charts</span></h2>
+    </div>
+
+    <div class="chart-frame">
+      <div class="chart-frame-header"><span class="chart-frame-title">AI Training Compute Market Share (Estimated)</span></div>
+      <div class="chart-frame-body" style="padding:2rem; text-align:center; color:var(--text-tertiary); font-size:0.85rem;">
+        <p>&#128202; Chart placeholder &mdash; NVIDIA GPU ~90% | Google TPU ~5-8% | AMD ~2-3% | Others ~2-3%</p>
+        <p style="font-size:0.75rem;">训练市场份额估计值。来源: SemiAnalysis, industry estimates, 2026</p>
+      </div>
+    </div>
+
+    <div class="chart-frame">
+      <div class="chart-frame-header"><span class="chart-frame-title">Frontier Model Training Hardware Choices (2023-2026)</span></div>
+      <div class="chart-frame-body" style="padding:2rem; text-align:center; color:var(--text-tertiary); font-size:0.85rem;">
+        <p>&#128202; Chart placeholder &mdash; Timeline of major model releases and their training hardware</p>
+        <p style="font-size:0.75rem;">GPT-4 (NVIDIA) | Gemini 1.5 (TPU) | Claude 3 (TPU) | Llama 3 (NVIDIA) | AlphaFold 3 (TPU) | GPT-5 (NVIDIA) | Gemini 3 (TPU)</p>
+      </div>
+    </div>
+
+    <!-- PROVENANCE TABLE -->
+    <div class="section-header" id="provenance">
+      <h2>&sect;6 溯源表<span class="zh">Provenance Table</span></h2>
+    </div>
+
+    <figure class="table-responsive">
+      <table>
+        <thead>
+          <tr><th>Claim 断言</th><th>Source 来源</th><th>Date 日期</th><th>Type 类型</th><th>Credibility</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>TPU v6e (Trillium) 2x performance over v5e</td><td><a href="https://cloud.google.com/blog/products/compute/introducing-trillium-6th-gen-tpu" target="_blank">Google Cloud Blog</a></td><td>2024-06</td><td><span class="prov-badge prov-primary">Primary</span></td><td>9/10</td></tr>
+          <tr><td>AlphaFold 3 trained entirely on TPU v4</td><td><a href="https://www.nature.com/articles/s41586-024-07487-w" target="_blank">Nature</a></td><td>2024-05</td><td><span class="prov-badge prov-primary">Primary</span></td><td>10/10</td></tr>
+          <tr><td>Hassabis Nobel Prize in Chemistry 2024</td><td><a href="https://www.nobelprize.org/prizes/chemistry/2024/" target="_blank">Nobel Foundation</a></td><td>2024-10</td><td><span class="prov-badge prov-primary">Primary</span></td><td>10/10</td></tr>
+          <tr><td>Anthropic Claude trained primarily on TPU</td><td><a href="https://www.anthropic.com" target="_blank">Anthropic Engineering Blog</a></td><td>2024-2026</td><td><span class="prov-badge prov-primary">Primary</span></td><td>8/10</td></tr>
+          <tr><td>Meta multi-billion dollar TPU deal</td><td><a href="https://www.ft.com" target="_blank">Financial Times</a></td><td>2025</td><td><span class="prov-badge prov-media">Report</span></td><td>8/10</td></tr>
+          <tr><td>Google 2026 CapEx $75B+</td><td><a href="https://abc.xyz/investor/" target="_blank">Alphabet IR</a></td><td>2026-02</td><td><span class="prov-badge prov-primary">Primary</span></td><td>10/10</td></tr>
+          <tr><td>Google Cloud AI $10B+ run-rate</td><td><a href="https://abc.xyz/investor/" target="_blank">Alphabet IR</a></td><td>2026-02</td><td><span class="prov-badge prov-primary">Primary</span></td><td>8/10</td></tr>
+          <tr><td>TPU v5p 459 TFLOPS BF16</td><td><a href="https://cloud.google.com/tpu/docs/v5p" target="_blank">Google Cloud Docs</a></td><td>2024</td><td><span class="prov-badge prov-primary">Primary</span></td><td>9/10</td></tr>
+          <tr><td>Scaling Laws: compute-optimal training</td><td><a href="https://arxiv.org/abs/2203.15556" target="_blank">Hoffmann et al. (Chinchilla)</a></td><td>2022-03</td><td><span class="prov-badge prov-primary">Primary</span></td><td>10/10</td></tr>
+          <tr><td>TPU cost-comparable to H100 at scale</td><td><a href="https://www.semianalysis.com" target="_blank">SemiAnalysis</a></td><td>2025</td><td><span class="prov-badge prov-analysis">Analysis</span></td><td>7/10</td></tr>
+          <tr><td>NVIDIA training market share ~90%</td><td><a href="https://www.semianalysis.com" target="_blank">SemiAnalysis</a></td><td>2025</td><td><span class="prov-badge prov-analysis">Analysis</span></td><td>7/10</td></tr>
+          <tr><td>Gemini series trained on TPU v5p superpods</td><td><a href="https://deepmind.google/technologies/gemini/" target="_blank">Google DeepMind</a></td><td>2024-2026</td><td><span class="prov-badge prov-primary">Primary</span></td><td>9/10</td></tr>
+          <tr><td>Inference cost declining 50-80% YoY</td><td><a href="https://www.semianalysis.com" target="_blank">SemiAnalysis / Industry estimates</a></td><td>2025-2026</td><td><span class="prov-badge prov-analysis">Analysis</span></td><td>7/10</td></tr>
+          <tr><td>GPT-4 ~1.8T parameters (estimate)</td><td><a href="https://www.semianalysis.com" target="_blank">SemiAnalysis</a></td><td>2023</td><td><span class="prov-badge prov-analysis">Analysis</span></td><td>6/10</td></tr>
+        </tbody>
+      </table>
+    </figure>
+
+    <!-- SOURCES -->
+    <div class="section-header" id="sources">
+      <h2>&sect;7 来源<span class="zh">Sources</span></h2>
+    </div>
+
+    <h4>认知代理人资料 Agent Profiles</h4>
+    <ul>
+      <li><a href="../cognitive_agents_2026-03-20/19_sundar_pichai.html">Sundar Pichai (#19) &mdash; CEO Google/Alphabet</a></li>
+      <li><a href="../cognitive_agents_2026-03-20/20_demis_hassabis.html">Demis Hassabis (#20) &mdash; CEO Google DeepMind</a></li>
+    </ul>
+
+    <h4>一手源 Primary</h4>
+    <ul>
+      <li><a href="https://cloud.google.com/blog/products/compute/introducing-trillium-6th-gen-tpu" target="_blank">Google Cloud &mdash; TPU v6e (Trillium) announcement</a></li>
+      <li><a href="https://cloud.google.com/tpu/docs/v5p" target="_blank">Google Cloud &mdash; TPU v5p documentation</a></li>
+      <li><a href="https://www.nature.com/articles/s41586-024-07487-w" target="_blank">Nature &mdash; AlphaFold 3 paper</a></li>
+      <li><a href="https://www.nobelprize.org/prizes/chemistry/2024/" target="_blank">Nobel Foundation &mdash; Chemistry Prize 2024</a></li>
+      <li><a href="https://deepmind.google/technologies/gemini/" target="_blank">Google DeepMind &mdash; Gemini technical reports</a></li>
+      <li><a href="https://abc.xyz/investor/" target="_blank">Alphabet IR &mdash; Quarterly earnings, CapEx guidance</a></li>
+      <li><a href="https://arxiv.org/abs/2203.15556" target="_blank">Hoffmann et al. &mdash; Chinchilla scaling laws</a></li>
+    </ul>
+
+    <h4>行业研究 Industry Research</h4>
+    <ul>
+      <li><a href="https://www.semianalysis.com" target="_blank">SemiAnalysis</a> &mdash; TPU vs GPU cost analysis, market share estimates</li>
+      <li><a href="https://www.anthropic.com" target="_blank">Anthropic Engineering Blog</a> &mdash; Claude training infrastructure</li>
+      <li><a href="https://arxiv.org/abs/2001.08361" target="_blank">Kaplan et al.</a> &mdash; Scaling laws for neural language models</li>
+    </ul>
+
+    <h4>深度分析 Analysis</h4>
+    <ul>
+      <li><a href="https://stratechery.com" target="_blank">Stratechery</a> &mdash; Google AI strategy analysis</li>
+      <li><a href="https://www.acquired.fm" target="_blank">Acquired FM</a> &mdash; Google/Alphabet deep dive</li>
+    </ul>
+
+    <h4>新闻报道 News</h4>
+    <ul>
+      <li><a href="https://www.ft.com" target="_blank">Financial Times</a> &mdash; Meta TPU deal</li>
+      <li><a href="https://www.cnbc.com" target="_blank">CNBC</a> &mdash; Google AI infrastructure investments</li>
+      <li><a href="https://www.theverge.com" target="_blank">The Verge</a> &mdash; AI hardware competition coverage</li>
+    </ul>
+
+    <h4>V4素材策展地图 V4 Maps</h4>
+    <ul>
+      <li><a href="../cognitive_agents_2026-03-20/jensen_sources_v4.html">Jensen Huang V4 Sources Map</a></li>
+    </ul>
+
+    <!-- FOOTER -->
+    <footer class="page-footer">
+      <p>认知节点报告 &middot; Node 8: AI Lab/模型层 &middot; Phase 0&rarr;2 + 2 Cognitive Agents &middot; 2026-03-21</p>
+      <p><a href="../semiconductor_hub.html">&larr; Semiconductor Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- RIGHT NOTES SIDEBAR -->
+  <aside class="notes-sidebar" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&#10005;</button>
+      <h4>&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+
+    <!-- META NOTES -->
+
+    <div class="anno meta-note" data-section="phase0" id="m1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Socratic Q1-Q5</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="method-tag">Q1</span> <strong>What am I doing?</strong> Evaluating the AI model layer&rsquo;s hardware choices to determine CUDA&rsquo;s true replaceability. This is the final node in the supply chain &mdash; the demand signal source that determines upstream hardware winners. The upgrade from generic market analysis to cognitive agent analysis is critical because hardware preference is revealed through actions (what labs actually train on), not through marketing claims.</p>
+        <p><span class="method-tag">Q2</span> <strong>Why?</strong> The trading question is not &ldquo;will AI grow?&rdquo; (yes, obviously) but &ldquo;does NVIDIA&rsquo;s CUDA monopoly justify its valuation premium?&rdquo; Node 1 (Jensen) claims yes. This node provides the counter-evidence from the people who actually choose the hardware.</p>
+        <p><span class="method-tag">Q3</span> <strong>Will the user approve?</strong> The user is a trend trader who needs to decide NVDA position sizing vs GOOGL vs ARM. Cross-referencing supply-side claims (Node 1) with demand-side evidence (Node 8) directly supports this decision.</p>
+        <p><span class="method-tag">Q4</span> <strong>Precedent check.</strong> Node 6&rsquo;s two-agent format (GIANT + INVESTOR) worked well. Node 8 uses the same pairing but both agents are from Google, which reduces independent triangulation value. This limitation is explicitly flagged.</p>
+        <p><span class="method-tag">Q5</span> <strong>Honesty disclosure.</strong> Phase 0 was written after reading both agent MDs. The biggest post-hoc surprise was the extent of TPU penetration at frontier labs &mdash; Phase 0 underestimated this, revealing a pro-CUDA anchoring bias from Node 1 analysis.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="phase1" id="m2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">同公司双代理的独立性问题</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="trap-tag">&#9888; Independence Risk</span> <strong>Both agents are Google employees.</strong> Pichai is Hassabis&rsquo;s boss. Their &ldquo;consensus&rdquo; on TPU competitiveness partially reflects organizational alignment, not independent verification. A truly independent triangulation would require an AI lab leader who has used BOTH GPU and TPU extensively (e.g., Dario Amodei of Anthropic, who chose TPU over GPU for Claude training).</p>
+        <p><strong>Mitigation:</strong> Anthropic&rsquo;s TPU choice serves as the independent third data point. Anthropic has no loyalty to Google &mdash; they chose TPU because it was the best option for their workload. Meta&rsquo;s TPU deal provides a second independent signal. Together, these external validations partially compensate for the internal-to-Google bias of our two agents.</p>
+        <p><strong>Remaining blind spot:</strong> We lack a cognitive agent who is bearish on TPU. Jim Keller (Node 1) argued that CUDA ecosystem depth is underestimated. Jensen (Node 1) claims CUDA is irreplaceable. Neither voice is represented in this node, creating a potential pro-TPU slant.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="pichai" id="m3">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Pichai的CEO推销偏差</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="trap-tag">&#9888; CEO Bias</span> <strong>Pichai&rsquo;s incentive structure:</strong> TPU is Google&rsquo;s product. Every statement about TPU competitiveness is partly genuine engineering achievement and partly product marketing. Google spends $50B+/year on R&amp;D and $75B+ on CapEx &mdash; Pichai <em>must</em> justify this investment to shareholders by positioning TPU as a viable NVIDIA alternative.</p>
+        <p><strong>Where to apply maximum skepticism:</strong> (1) &ldquo;TPU is the foundation of everything we do in AI&rdquo; &mdash; true but tautological (Google designed TPU for its own workloads). (2) External customer growth claims &mdash; Meta deal is real but we don&rsquo;t know the relative scale vs Meta&rsquo;s NVIDIA spend. (3) Performance comparisons &mdash; Google cherry-picks benchmarks where TPU excels (large Transformer training) vs where GPU excels (diverse workloads).</p>
+        <p><strong>Credibility-preserving signal:</strong> The Meta deal cannot be CEO spin &mdash; Meta paid billions for TPU access when they could have bought more NVIDIA GPUs. This is the single strongest action-evidence signal from Pichai&rsquo;s position.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="hassabis" id="m4">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Hassabis: 内部mandate vs 技术选择</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><span class="trap-tag">&#9888; Internal Mandate</span> <strong>The critical question:</strong> Does DeepMind use TPU because TPU is the best option, or because Google mandates internal TPU usage? As a Google subsidiary, DeepMind likely has strong organizational pressure to use Google&rsquo;s own hardware. If Hassabis wanted to use NVIDIA GPUs, would Google allow it?</p>
+        <p><strong>Evidence for genuine choice:</strong> (1) DeepMind was acquired in 2014 when TPU was immature &mdash; Hassabis stayed and continued using TPU through v2/v3/v4/v5, suggesting satisfaction. (2) AlphaFold&rsquo;s scientific success on TPU is unambiguous &mdash; if TPU was limiting, the science would suffer. (3) Hassabis has enough organizational power (Nobel Prize, DeepMind CEO) to demand GPU if needed.</p>
+        <p><strong>Evidence for mandate:</strong> (1) Google Cloud uses TPU usage data for marketing. (2) Internal TPU consumption justifies Google&rsquo;s custom silicon investment. (3) No Google subsidiary publicly uses competitor hardware.</p>
+        <p><strong>Net assessment:</strong> Probably 60% genuine choice, 40% organizational alignment. The AlphaFold result tips the balance &mdash; you don&rsquo;t win Nobel Prizes on suboptimal hardware.</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" data-section="triangulation" id="m5">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label">META</span>
+        <span class="mn-title">Cross-Node验证: Node 1 vs Node 8</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>The core tension across the supply chain:</strong> Node 1 (Jensen Huang) says CUDA is irreplaceable. Node 8 (Pichai/Hassabis) demonstrates that CUDA is replaceable for specific workloads. Both are partially right:</p>
+        <p>&bull; <strong>Jensen is right that</strong> CUDA ecosystem depth (PyTorch, cuDNN, developer community, third-party tools) creates massive switching costs for the general market. Most AI developers use CUDA by default.</p>
+        <p>&bull; <strong>Pichai/Hassabis are right that</strong> at the frontier of AI training (the top 5-10 organizations building the largest models), CUDA is not required. TPU + JAX is a complete alternative for large-scale Transformer training.</p>
+        <p>&bull; <strong>The trading implication:</strong> NVIDIA&rsquo;s moat is real for 95% of AI compute users. But the top 5% (who drive the most revenue per customer) have alternatives. This means NVIDIA&rsquo;s pricing power at the high end will erode before the mass market. The 5-year bull case that assumes 90%+ training share is wrong; the 3-year bull case that assumes absolute revenue growth despite share loss is defensible.</p>
+      </div>
+    </div>
+
+    <!-- KNOWLEDGE NOTES -->
+
+    <div class="anno know-note" data-section="phase0" id="k1">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">代工制造订单重组</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Supply chain signal transmission:</strong> If AI labs increasingly choose TPU over GPU, the signal propagates upstream: Google orders more TPU wafers from TSMC (Broadcom-designed) while NVIDIA&rsquo;s GPU wafer orders grow slower. Both use TSMC advanced nodes, so TSMC benefits either way. But the mix shift matters for NVIDIA&rsquo;s revenue and TSMC&rsquo;s customer concentration risk. Currently NVIDIA is TSMC&rsquo;s largest customer; if Google TPU wafer orders grow 50%+ while NVIDIA grows 20%, the power dynamic shifts.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="phase0" id="k2">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">计算Scaling Laws</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>What scaling laws say:</strong> Kaplan et al. (2020) and Hoffmann et al. (2022, &ldquo;Chinchilla&rdquo;) established that model performance improves predictably with more compute, data, and parameters. The key finding: for a fixed compute budget, there is an optimal model size and dataset size. To improve model quality by a fixed amount, you need roughly 10x more compute. This creates insatiable demand for AI compute &mdash; every lab wants the next quality improvement and is willing to pay 10x more compute for it.</p>
+        <p><strong>Hardware implications:</strong> Scaling laws are hardware-agnostic &mdash; they describe the relationship between total FLOPs and model quality, not which hardware delivers those FLOPs. This means the demand side is equally bullish for GPUs, TPUs, and any other accelerator that can deliver FLOPs cost-effectively. The question is not &ldquo;will demand grow?&rdquo; but &ldquo;which hardware captures the most value from this demand?&rdquo;</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="phase0" id="k3">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">CUDA生态深度</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>The real moat:</strong> CUDA&rsquo;s advantage is not just the programming language &mdash; it is the entire ecosystem: (1) <em>PyTorch</em>: ~85% of ML researchers use PyTorch, which is CUDA-native. JAX (Google&rsquo;s alternative) has ~10% share. (2) <em>cuDNN/cuBLAS</em>: Optimized libraries with 15+ years of tuning for every NVIDIA architecture. (3) <em>Third-party tools</em>: TensorRT, Triton Inference Server, NCCL for multi-GPU communication. (4) <em>Developer talent</em>: Millions of developers know CUDA; far fewer know XLA/JAX. (5) <em>University training</em>: CS curricula teach CUDA, not TPU programming.</p>
+        <p><strong>The counter-argument:</strong> At the frontier, frameworks like JAX abstract away hardware differences. Anthropic engineers write in JAX and the compiler handles TPU optimization. The CUDA ecosystem advantage diminishes as abstraction layers improve. But for the long tail of AI developers (startups, enterprises, researchers), CUDA remains the path of least resistance.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="phase0" id="k4">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">TPU的实际渗透</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Hidden TPU usage:</strong> TPU&rsquo;s market share appears small (~5-8% of training compute) but this understates its importance: (1) Google internal usage is massive but not reported as &ldquo;market share&rdquo; since it&rsquo;s captive. Google Search, YouTube recommendations, Gmail spam filtering, Maps, and all DeepMind research run on TPU. (2) Anthropic&rsquo;s TPU usage became public knowledge only recently. (3) Meta&rsquo;s TPU deal was not widely covered in mainstream tech media. (4) Smaller labs using Google Cloud TPU don&rsquo;t publicize their hardware choices.</p>
+        <p><strong>If you include Google internal:</strong> TPU&rsquo;s share of total AI compute (including inference) is likely 15-25%, not 5-8%. Google processes billions of AI inference requests daily on TPU. This captive demand alone makes TPU the second-largest AI compute platform after NVIDIA.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="phase05" id="k5">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">TPU v6e (Trillium) 详解</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Technical specs:</strong> TPU v6e (codename Trillium), announced mid-2024, deployed at scale in 2025. Key improvements over v5e: 2x training performance, 67% better energy efficiency, improved chip interconnect (ICI) bandwidth for larger pod configurations. Supports BF16, INT8, and FP8 data types. Designed for both training and inference workloads.</p>
+        <p><strong>Pod architecture:</strong> TPU v6e pods can scale to 256 chips with direct ICI connectivity (no InfiniBand required). For larger clusters (1000+ chips), Google uses custom optical interconnects. This vertical integration (chip + interconnect + software) is TPU&rsquo;s key structural advantage over NVIDIA, which depends on third-party InfiniBand (Mellanox/NVIDIA-owned) or Ethernet solutions for multi-node training.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="phase05" id="k6">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">TCO对比: TPU vs GPU</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Total Cost of Ownership analysis:</strong> SemiAnalysis and other industry analysts have compared TPU and GPU TCO for large-scale training. Key findings: (1) At >1000 chip scale, TPU v5e/v6e achieves comparable or better cost-per-FLOP vs NVIDIA H100. (2) TPU&rsquo;s integrated interconnect eliminates InfiniBand costs (~15-20% of cluster TCO). (3) Google Cloud offers reserved TPU capacity at significant discounts. (4) At <100 chip scale, NVIDIA GPUs are more cost-effective due to broader software support and easier setup.</p>
+        <p><strong>The scale threshold:</strong> This scale-dependent advantage explains the market segmentation: frontier labs (who need 10,000+ chips) find TPU compelling; smaller organizations (who need 8-64 GPUs) prefer NVIDIA. This is why TPU &ldquo;market share&rdquo; by customer count is tiny but by FLOP-hours is much larger.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="pichai" id="k7">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">TPU作为CUDA唯一替代</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Why TPU is unique among NVIDIA alternatives:</strong> AMD MI300 uses ROCm (a CUDA-compatible layer) &mdash; it competes within the CUDA paradigm. AWS Trainium is new and unproven at frontier scale. Meta MTIA and Microsoft Maia are internal-only. Google TPU is the only alternative with: (1) 10+ years of production deployment, (2) a mature software stack (JAX/XLA/TensorFlow), (3) demonstrated frontier model training (AlphaFold, Gemini, Claude), (4) external customer availability, and (5) a competitive interconnect solution.</p>
+        <p><strong>This uniqueness matters for trading:</strong> The question &ldquo;can NVIDIA be disrupted?&rdquo; has exactly one credible answer today: Google TPU. All other alternatives are either too early (Trainium), too dependent on CUDA compatibility (AMD), or too narrow (internal ASICs). If TPU fails to scale externally, NVIDIA&rsquo;s monopoly is safe for a decade. If TPU succeeds, it&rsquo;s the only platform with enough maturity to capture meaningful share.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="hassabis" id="k8">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">AGI研究与硬件选择</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Hassabis&rsquo;s research ambition as hardware signal:</strong> Hassabis has publicly stated his goal is Artificial General Intelligence. His research trajectory (game-playing AI &rarr; protein folding &rarr; mathematics &rarr; multimodal intelligence &rarr; AGI) requires exponentially increasing compute at each step. If TPU was a limiting factor, Hassabis would either: (a) slow his research timeline, (b) lobby for NVIDIA GPU access, or (c) leave Google. None of these has happened. Instead, he won a Nobel Prize on TPU and continues to scale his research ambitions.</p>
+        <p><strong>What this tells us:</strong> TPU is sufficient for the most ambitious AI research program in the world. This doesn&rsquo;t mean TPU is better than GPU in all cases &mdash; it means TPU is not a bottleneck for frontier research. For trading purposes, this eliminates the bull case that &ldquo;serious AI research requires NVIDIA.&rdquo;</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="competitive" id="k9">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">AWS Trainium</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Amazon&rsquo;s AI chip strategy:</strong> AWS Trainium (training) and Inferentia (inference) are Amazon&rsquo;s custom AI chips, designed by Annapurna Labs (acquired 2015). Trainium 2 (2024) targets competitive performance with NVIDIA H100 at lower cost. Key differences from TPU: (1) Newer &mdash; only 2 generations vs TPU&rsquo;s 6+. (2) Narrower software support &mdash; Neuron SDK is less mature than JAX/XLA. (3) AWS-only availability (like TPU is Google Cloud-only). (4) No frontier model training demonstrated at Gemini/Claude scale.</p>
+        <p><strong>Long-term significance:</strong> If both Google (TPU) and Amazon (Trainium) successfully develop NVIDIA alternatives, CUDA&rsquo;s moat faces pressure from two of the three largest cloud providers simultaneously. Microsoft (the third) is developing Maia but is also NVIDIA&rsquo;s closest cloud partner.</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" data-section="supply-demand" id="k10">
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="note-label know">KNOW</span>
+        <span class="mn-title">NVIDIA份额侵蚀的数学</span>
+        <span class="mn-fold">&#9662;</span>
+      </div>
+      <div class="mn-body">
+        <p><strong>Share loss vs revenue growth:</strong> If the AI training compute market grows 5x from 2025 to 2030, and NVIDIA&rsquo;s share drops from 90% to 75%, NVIDIA&rsquo;s training revenue still grows ~4.2x (0.75/0.90 * 5 = 4.17x). This is the critical nuance: <em>share loss does not equal revenue decline in a rapidly growing market</em>. NVIDIA can lose share and still grow rapidly.</p>
+        <p><strong>Where share loss matters:</strong> (1) Valuation multiples &mdash; the market pays premium P/E for monopoly positions. Share erosion = multiple compression. (2) Pricing power &mdash; with real alternatives, NVIDIA cannot maintain 70%+ gross margins indefinitely. (3) Narrative &mdash; &ldquo;NVIDIA monopoly&rdquo; is a simpler story than &ldquo;NVIDIA is the largest player in a competitive market.&rdquo; Narrative simplification drives retail flows.</p>
+        <p><strong>Net assessment:</strong> NVIDIA&rsquo;s revenue can double from here (3-year view) while its training share drops to 80%. The stock may underperform if the market re-rates the monopoly premium. This creates a scenario where NVDA is a good business but a mediocre stock &mdash; a distinction critical for a trend trader.</p>
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script>
+(function() {
+  // 1. Left sidebar hamburger
+  var sidebar = document.getElementById('sidebar');
+  var hamburger = document.getElementById('hamburgerBtn');
+  var overlay = document.getElementById('sidebarOverlay');
+  function toggleSidebar() { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); }
+  if (hamburger) hamburger.addEventListener('click', toggleSidebar);
+  if (overlay) overlay.addEventListener('click', toggleSidebar);
+
+  // 2. Note toggle
+  window.toggleNote = function(headEl) { headEl.closest('.anno').classList.toggle('open'); requestAnimationFrame(positionNotes); };
+
+  // 3. Position notes
+  function positionNotes() {
+    var sidebarEl = document.getElementById('notesSidebar');
+    if (!sidebarEl || window.innerWidth < 1200) return;
+    var notes = Array.from(sidebarEl.querySelectorAll('.anno'));
+    var scrollY = window.scrollY;
+    var sidebarAbsTop = sidebarEl.getBoundingClientRect().top + scrollY;
+    var headerEl = sidebarEl.querySelector('.notes-sidebar-header');
+    var headerHeight = headerEl ? headerEl.offsetHeight + 12 : 40;
+    notes.sort(function(a, b) {
+      var secA = document.getElementById(a.dataset.section);
+      var secB = document.getElementById(b.dataset.section);
+      if (!secA || !secB) return 0;
+      return secA.getBoundingClientRect().top - secB.getBoundingClientRect().top;
+    });
+    var lastBottom = headerHeight;
+    notes.forEach(function(note) {
+      if (note.style.display === 'none') return;
+      var section = document.getElementById(note.dataset.section);
+      if (!section) { note.style.display = 'none'; return; }
+      var sectionAbsTop = section.getBoundingClientRect().top + scrollY;
+      var targetY = sectionAbsTop - sidebarAbsTop;
+      if (targetY < lastBottom + 8) targetY = lastBottom + 8;
+      note.style.top = targetY + 'px';
+      lastBottom = targetY + note.offsetHeight;
+    });
+    sidebarEl.style.minHeight = (lastBottom + 40) + 'px';
+  }
+
+  // 4. Run positioning
+  window.addEventListener('load', function() {
+    positionNotes();
+    document.querySelectorAll('details').forEach(function(d) { d.addEventListener('toggle', function() { setTimeout(positionNotes, 50); }); });
+  });
+  window.addEventListener('resize', positionNotes);
+  var scrollTimer;
+  window.addEventListener('scroll', function() { clearTimeout(scrollTimer); scrollTimer = setTimeout(positionNotes, 100); }, { passive: true });
+
+  // 5. Highlight <-> Note sync
+  document.querySelectorAll('.nref, mark.hl-know').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      e.preventDefault();
+      var noteId = el.dataset.note;
+      var note = document.getElementById(noteId);
+      if (!note) return;
+      note.classList.add('open');
+      requestAnimationFrame(function() {
+        positionNotes();
+        note.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        note.classList.add('flash');
+        setTimeout(function() { note.classList.remove('flash'); }, 1500);
+      });
+    });
+  });
+
+  // 6. Hover bidirectional
+  document.querySelectorAll('.anno').forEach(function(note) {
+    note.addEventListener('mouseenter', function() { document.querySelectorAll('[data-note="' + note.id + '"]').forEach(function(el) { el.classList.add('hover'); }); });
+    note.addEventListener('mouseleave', function() { document.querySelectorAll('[data-note="' + note.id + '"]').forEach(function(el) { el.classList.remove('hover'); }); });
+    note.addEventListener('dblclick', function() { var section = document.getElementById(note.dataset.section); if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  });
+  document.querySelectorAll('[data-note]').forEach(function(el) {
+    if (el.classList.contains('anno')) return;
+    el.addEventListener('mouseenter', function() { var note = document.getElementById(el.dataset.note); if (note) note.classList.add('hover'); });
+    el.addEventListener('mouseleave', function() { var note = document.getElementById(el.dataset.note); if (note) note.classList.remove('hover'); });
+  });
+
+  // 7. Top controls
+  var allAnnos = document.querySelectorAll('.anno');
+  var knowNotes = document.querySelectorAll('.anno.know-note');
+  var knowMarks = document.querySelectorAll('mark.hl-know');
+  var knowRefs = document.querySelectorAll('.nref');
+  var metaNotes = document.querySelectorAll('.anno.meta-note');
+  document.getElementById('noteCountLabel').textContent = metaNotes.length + ' 元思考 + ' + knowNotes.length + ' 知识批注';
+  window.toggleKnowNotes = function() {
+    var btn = document.getElementById('knowToggleBtn');
+    var isActive = btn.classList.toggle('active');
+    btn.textContent = isActive ? '显示' : '隐藏';
+    knowNotes.forEach(function(n) { n.style.display = isActive ? '' : 'none'; });
+    knowMarks.forEach(function(m) { m.style.background = isActive ? '' : 'transparent'; m.style.borderBottom = isActive ? '' : 'none'; });
+    knowRefs.forEach(function(r) { r.style.display = isActive ? '' : 'none'; });
+    requestAnimationFrame(positionNotes);
+  };
+  window.expandAllNotes = function() { allAnnos.forEach(function(n) { n.classList.add('open'); }); requestAnimationFrame(positionNotes); };
+  window.collapseAllNotes = function() { allAnnos.forEach(function(n) { n.classList.remove('open'); }); requestAnimationFrame(positionNotes); };
+
+  // 8. Right sidebar toggle
+  var notesSidebarEl = document.getElementById('notesSidebar');
+  var notesToggleBtn = document.getElementById('notesToggleBtn');
+  var notesOverlayEl = document.getElementById('notesOverlay');
+  var notesCloseBtn = document.getElementById('notesCloseBtn');
+  function toggleNotesSidebar() {
+    var willClose = !notesSidebarEl.classList.contains('ns-closed');
+    notesSidebarEl.classList.toggle('ns-closed', willClose);
+    notesToggleBtn.style.display = willClose ? 'flex' : 'none';
+    notesOverlayEl.classList.toggle('open', !willClose);
+    if (!willClose) requestAnimationFrame(positionNotes);
+  }
+  if (notesToggleBtn) notesToggleBtn.addEventListener('click', toggleNotesSidebar);
+  if (notesOverlayEl) notesOverlayEl.addEventListener('click', toggleNotesSidebar);
+  if (notesCloseBtn) notesCloseBtn.addEventListener('click', toggleNotesSidebar);
+
+  // 9. Resize handler
+  if (window.innerWidth > 1200) {
+    notesSidebarEl.classList.remove('ns-closed');
+    notesToggleBtn.style.display = 'none';
+  } else {
+    notesSidebarEl.classList.add('ns-closed');
+    notesToggleBtn.style.display = 'flex';
+  }
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 1200) { notesSidebarEl.classList.remove('ns-closed'); notesToggleBtn.style.display = 'none'; notesOverlayEl.classList.remove('open'); }
+  });
+
+  // 10. Default: expand all annotations on load
+  expandAllNotes();
+
+  // Active TOC
+  var navLinks = document.querySelectorAll('.sidebar nav ul li a[href^="#"]');
+  var tocObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        navLinks.forEach(function(link) { link.classList.remove('active'); if (link.getAttribute('href') === '#' + entry.target.id) link.classList.add('active'); });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  document.querySelectorAll('.section-header[id], [id="pichai"], [id="hassabis"], [id="triangulation"], [id="competitive"], [id="supply-demand"], [id="risk-matrix"], [id="node-judgment"], [id="trading"]').forEach(function(s) { tocObserver.observe(s); });
+})();
+</script>
+<script src="../../../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../../lib/reading-mode.js"></script>
+</body>
+</html>

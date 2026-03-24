@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gracy Chen — 素材策展地图 V4</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  .priority-box { border:1px solid rgba(248,168,72,0.3); border-left:3px solid var(--accent); border-radius:var(--radius-sm); padding:1.25rem 1.5rem; margin-bottom:2rem; background:var(--bg-surface); }
+  .priority-box h2 { color:var(--accent); margin-top:0; font-size:1.1rem; font-weight:590; }
+  .priority-box ol { margin-bottom:0; padding-left:1.2rem; }
+  .priority-box li { margin-bottom:0.6rem; line-height:1.5; }
+  .time-badge { display:inline-block; padding:0.1rem 0.5rem; border-radius:10px; font-size:0.7rem; font-weight:590; margin-right:0.3rem; background:var(--accent); color:var(--bg-base); }
+  .anno { position:absolute; left:1rem; right:1rem; }
+  .anno.meta-note { padding:0.6rem 0.75rem; border-left:2px solid var(--accent); border-radius:0 6px 6px 0; background:rgba(248,168,72,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.meta-note:hover { box-shadow:0 0 0 1px var(--accent); }
+  .anno.know-note { padding:0.6rem 0.75rem; border-left:2px solid var(--knowledge); border-radius:0 6px 6px 0; background:rgba(91,155,213,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.know-note:hover { box-shadow:0 0 0 1px var(--knowledge); }
+  .anno .note-label { display:inline-block; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--bg-base); background:var(--accent); padding:0.1rem 0.4rem; border-radius:3px; margin-bottom:0.3rem; }
+  .anno .note-label.know { background:var(--knowledge); color:white; }
+  .anno .mn-head { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
+  .anno .mn-title { flex:1; font-weight:510; font-size:0.75rem; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .anno .mn-fold { font-size:0.55rem; color:var(--text-quaternary); transition:transform 0.2s; margin-left:auto; }
+  .anno.open .mn-fold { transform:rotate(180deg); }
+  .anno .mn-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+  .anno.open .mn-body { max-height:2000px; }
+  .anno .mn-body p { font-size:0.78rem; margin-bottom:0.3rem; color:var(--text-secondary); }
+  .anno.flash { animation:noteFlash 1.5s ease; }
+  @keyframes noteFlash { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--accent);} }
+  .anno.know-note.flash { animation:noteFlashBlue 1.5s ease; }
+  @keyframes noteFlashBlue { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--knowledge);} }
+  mark.hl-know { background:rgba(91,155,213,0.12); border-bottom:1.5px solid var(--knowledge); padding:0 2px; border-radius:2px; color:inherit; cursor:pointer; transition:background 0.15s; }
+  mark.hl-know:hover { background:rgba(91,155,213,0.28); }
+  .nref { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; font-size:0.48rem; font-weight:700; cursor:pointer; margin-left:1px; vertical-align:super; transition:transform 0.15s; text-decoration:none; background:var(--knowledge); color:white; }
+  .nref:hover { transform:scale(1.25); box-shadow:0 0 6px rgba(91,155,213,0.4); }
+  .top-controls { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; padding:0.35rem 0.7rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); font-size:0.72rem; flex-wrap:wrap; }
+  .top-controls .tc-label { font-weight:590; color:var(--knowledge); }
+  .top-controls button { padding:0.15rem 0.45rem; border-radius:4px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-tertiary); cursor:pointer; font-size:0.68rem; font-family:inherit; transition:all 0.15s; }
+  .top-controls button:hover { border-color:var(--knowledge); color:var(--text-primary); }
+  .top-controls button.active { background:var(--knowledge-dim); color:var(--knowledge); border-color:rgba(91,155,213,0.3); }
+  .top-controls .tc-sep { color:var(--border-default); margin:0 0.15rem; }
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .notes-sidebar { position:relative; width:320px; min-width:320px; padding:1.25rem 1rem; border-left:1px solid var(--border-subtle); background:var(--bg-elevated); }
+  .notes-sidebar-header { position:sticky; top:0; z-index:60; background:var(--bg-elevated); padding-bottom:0.5rem; border-bottom:1px solid var(--border-subtle); margin-bottom:0.75rem; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  .notes-toggle-btn { position:fixed; right:1rem; bottom:1.5rem; z-index:200; width:44px; height:44px; border-radius:50%; border:1px solid var(--border-default); background:var(--bg-surface); color:var(--text-secondary); cursor:pointer; font-size:1.1rem; display:none; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.4); }
+  .notes-close-btn { float:right; background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:1.1rem; padding:0; display:none; }
+  @media (max-width:1200px) { .notes-close-btn { display:block; } .notes-sidebar { position:fixed; right:0; top:0; height:100vh; overflow-y:auto; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.4); z-index:150; } .notes-sidebar.ns-closed { transform:translateX(100%); box-shadow:none; } .notes-toggle-btn { display:flex; } }
+  .notes-overlay-right { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:140; }
+  .notes-overlay-right.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  @media (min-width:1600px) { .main-content { max-width:1000px; } .notes-sidebar { width:360px; min-width:360px; } }
+  .rel-card { border:1px solid var(--border-subtle); border-radius:var(--radius-md); background:var(--bg-elevated); margin-bottom:0.75rem; }
+  .rel-card summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  .rel-card[open] summary { color:var(--accent); }
+  .rel-card .rel-body { padding:0 1rem 1rem; font-size:0.82rem; color:var(--text-secondary); line-height:1.6; }
+  .arc-item { border-left:3px solid var(--accent); padding:0.6rem 1rem; margin-bottom:0.75rem; background:rgba(66,165,245,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+  .arc-item strong { color:var(--text-primary); }
+  .question-box { border:2px solid var(--knowledge); background:rgba(91,155,213,0.05); border-radius:var(--radius-md); padding:1.5rem; text-align:center; margin:2rem 0; }
+  .question-box blockquote { border:none; margin:0; padding:0; }
+  .question-box p { font-size:1rem; font-weight:510; color:var(--text-primary); }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; margin-bottom:1rem; }
+  th { text-transform:uppercase; font-size:0.72rem; font-weight:510; color:var(--text-quaternary); letter-spacing:0.04em; text-align:left; padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-default); }
+  td { padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-subtle); vertical-align:top; color:var(--text-secondary); }
+  tr:hover td { background:var(--bg-elevated); }
+  .url-col { max-width:200px; word-break:break-all; }
+  .zh { display:block; font-size:0.85em; color:var(--text-tertiary); margin-top:0.15em; }
+  .zh-inline { font-size:0.85em; color:var(--text-tertiary); }
+  details { border:1px solid var(--border-subtle); background:var(--bg-elevated); border-radius:var(--radius-sm); padding:0; margin-bottom:0.75rem; }
+  details summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  details[open] summary { color:var(--accent); }
+  details > div, details > p { padding:0 1rem 1rem; font-size:0.82rem; line-height:1.6; color:var(--text-secondary); }
+  body.embedded .sidebar, body.embedded .notes-sidebar, body.embedded .hamburger-btn, body.embedded .notes-toggle-btn { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+  .section-header { margin-bottom:1.25rem; }
+  .section-header h2 { font-size:1.25rem; font-weight:610; color:var(--text-primary); }
+  .badge-row { margin-top:0.75rem; display:flex; gap:0.5rem; flex-wrap:wrap; }
+  .badge { display:inline-block; padding:0.2rem 0.6rem; border-radius:4px; font-size:0.68rem; font-weight:510; background:var(--bg-elevated); border:1px solid var(--border-subtle); color:var(--text-secondary); }
+  .badge.star { background:rgba(248,168,72,0.15); border-color:rgba(248,168,72,0.3); color:var(--accent); }
+  .source-link { color:var(--knowledge); text-decoration:none; transition:opacity 0.15s; }
+  .source-link:hover { opacity:0.75; text-decoration:underline; }
+  .gap-item { padding:0.75rem 1rem; border-left:3px solid; margin-bottom:0.5rem; background:var(--bg-elevated); border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+  .gap-item.high { border-color:#ef5350; }
+  .gap-item.medium { border-color:#ffca28; }
+  .quality-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:0.75rem; }
+  .quality-card { padding:1rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); }
+  .quality-card h4 { margin:0 0 0.5rem; font-size:0.85rem; color:var(--text-primary); }
+  .quality-card p { margin:0; font-size:0.78rem; color:var(--text-secondary); line-height:1.5; }
+  .stars { color:var(--accent); letter-spacing:-1px; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes">📝</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ========== LEFT SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">← Blockchain Hub</a>
+    <div class="project-meta">Gracy Chen / Bitget<br>素材策展地图 V4</div>
+
+    <h4>Contents</h4>
+    <nav>
+      <ul>
+        <li><a href="#priority"><span class="toc-num">★</span>如果只有2小时</a></li>
+        <li><a href="#analysts"><span class="toc-num">1</span>最佳分析师</a></li>
+        <li><a href="#longform"><span class="toc-num">2</span>必读长文/书籍</a></li>
+        <li><a href="#podcasts"><span class="toc-num">3</span>播客与视频</a></li>
+        <li><a href="#primary"><span class="toc-num">4</span>一手资料</a></li>
+        <li><a href="#relationships"><span class="toc-num">5</span>关键关系网</a></li>
+        <li><a href="#narratives"><span class="toc-num">6</span>叙事弧</a></li>
+        <li><a href="#gaps"><span class="toc-num">7</span>信息空白</a></li>
+        <li><a href="#quality"><span class="toc-num">8</span>质量评估</a></li>
+      </ul>
+    </nav>
+
+    <h4>Related</h4>
+    <nav>
+      <ul>
+        <li><a href="13_gracy_chen.html">Gracy Chen Profile</a></li>
+        <li><a href="13_gracy_chen_metacognition.html">Metacognition</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+
+    <div class="top-controls">
+      <span class="tc-label">📚 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <header class="page-header">
+      <h1>Gracy Chen — 素材策展地图 V4</h1>
+      <p class="subtitle">Research Date: 2026-03-22 | 交易所研究 · Bitget专项<br>
+      <span class="zh-inline">Bitget交易所CEO · 社交交易 · 亚洲散户市场</span></p>
+      <div class="badge-row">
+        <span class="badge star">CEX赛道</span>
+        <span class="badge">跟单交易</span>
+        <span class="badge">120M用户</span>
+        <span class="badge">新加坡</span>
+        <span class="badge">合规扩张</span>
+      </div>
+    </header>
+
+    <!-- ★ Priority Box -->
+    <div class="priority-box" id="priority">
+      <h2>⏰ 如果只有2小时 — 推荐阅读路径</h2>
+      <ol>
+        <li><span class="time-badge">45min</span> Gracy Chen Twitter/X <span class="zh-inline">(战略意图最直接窗口)</span></li>
+        <li><span class="time-badge">30min</span> Unchained播客专访 <span class="zh-inline">(2023年核心叙事)</span></li>
+        <li><span class="time-badge">20min</span> Bitget透明度报告 <span class="zh-inline">(官方数据自证)</span></li>
+        <li><span class="time-badge">15min</span> 吴说区块链相关报道 <span class="zh-inline">(华语独家消息)</span></li>
+        <li><span class="time-badge">10min</span> BGB代币经济白皮书 <span class="zh-inline">(唯一公开投资工具)</span></li>
+      </ol>
+    </div>
+
+    <!-- §1 最佳分析师 -->
+    <section id="analysts">
+      <div class="section-header">
+        <h2>1. 最佳分析师与独立研究<span class="zh">Best Analysts & Independent Research</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>The Block Research</td>
+            <td>机构研究</td>
+            <td class="url-col"><a href="https://theblock.co/research" class="source-link" target="_blank">theblock.co/research</a></td>
+            <td class="stars">★★★★★</td>
+            <td>交易所数据最权威的第三方来源，有Bitget专题分析和CEX市场份额追踪<a href="#note1" class="nref" id="nref1">1</a></td>
+          </tr>
+          <tr>
+            <td>Kaiko</td>
+            <td>数据研究</td>
+            <td class="url-col"><a href="https://kaiko.com" class="source-link" target="_blank">kaiko.com</a></td>
+            <td class="stars">★★★★★</td>
+            <td>机构级交易所流动性数据，可验证Bitget声称的交易量真实性<a href="#note2" class="nref" id="nref2">2</a></td>
+          </tr>
+          <tr>
+            <td>0xResearch (Messari)</td>
+            <td>独立研究</td>
+            <td class="url-col"><a href="https://messari.io/research" class="source-link" target="_blank">messari.io/research</a></td>
+            <td class="stars">★★★★☆</td>
+            <td>交易所赛道季度报告，对比Binance/Bybit/Bitget竞争格局</td>
+          </tr>
+          <tr>
+            <td>吴说区块链 (Colin Wu)</td>
+            <td>中文独立</td>
+            <td class="url-col"><a href="https://wublock123.com" class="source-link" target="_blank">wublock123.com</a></td>
+            <td class="stars">★★★★★</td>
+            <td>华语区最可靠的交易所独家消息源，多次首发Bitget融资/牌照信息<a href="#note3" class="nref" id="nref3">3</a></td>
+          </tr>
+          <tr>
+            <td>The Defiant</td>
+            <td>媒体研究</td>
+            <td class="url-col"><a href="https://thedefiant.io" class="source-link" target="_blank">thedefiant.io</a></td>
+            <td class="stars">★★★★☆</td>
+            <td>亚洲交易所生态深度报道，Gracy Chen曾接受采访</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.78rem; color:var(--text-tertiary); margin-top:0.5rem;"><strong>关键验证点：</strong>Bitget 120M用户数据 vs 实际链上活跃度/真实交易量</p>
+    </section>
+
+    <!-- §2 必读长文/书籍 -->
+    <section id="longform">
+      <div class="section-header">
+        <h2>2. 必读长文与书籍<span class="zh">Must-Read Long-Form & Books</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><em>The Cryptopians</em> by Laura Shin</td>
+            <td>书籍</td>
+            <td class="url-col"><a href="https://laurashin.com/book" class="source-link" target="_blank">laurashin.com/book</a></td>
+            <td class="stars">★★★★☆</td>
+            <td>理解交易所起源政治，Bitget作为"后Binance时代"交易所的参照系<a href="#note4" class="nref" id="nref4">4</a></td>
+          </tr>
+          <tr>
+            <td>Bitget 2024 Transparency Report</td>
+            <td>官方长文</td>
+            <td class="url-col"><a href="https://bitget.com/support/articles" class="source-link" target="_blank">bitget.com/support</a></td>
+            <td class="stars">★★★★★</td>
+            <td>用户数据、储备金证明、市场份额自证（需交叉验证）</td>
+          </tr>
+          <tr>
+            <td>"The Rise of Social Trading in Crypto"</td>
+            <td>行业长文</td>
+            <td class="url-col"><a href="https://theblock.co/post" class="source-link" target="_blank">theblock.co/post</a></td>
+            <td class="stars">★★★★★</td>
+            <td>跟单交易模式的经济学分析，Bitget核心差异化来源<a href="#note5" class="nref" id="nref5">5</a></td>
+          </tr>
+          <tr>
+            <td>交易所流动性战争系列 (Kaiko)</td>
+            <td>研究报告</td>
+            <td class="url-col"><a href="https://kaiko.com/research" class="source-link" target="_blank">kaiko.com/research</a></td>
+            <td class="stars">★★★★★</td>
+            <td>理解Bitget如何在衍生品赛道突围的技术分析</td>
+          </tr>
+          <tr>
+            <td>华语交易所史 (Odaily/PANews合集)</td>
+            <td>中文长文</td>
+            <td class="url-col"><a href="https://odaily.news" class="source-link" target="_blank">odaily.news</a></td>
+            <td class="stars">★★★★☆</td>
+            <td>从火币OK到Bitget/Bybit的代际更替，文化背景必读</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §3 播客与视频 -->
+    <section id="podcasts">
+      <div class="section-header">
+        <h2>3. 播客与视频<span class="zh">Podcasts & Video</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Unchained (Laura Shin)</td>
+            <td>播客</td>
+            <td class="url-col"><a href="https://unchainedcrypto.com" class="source-link" target="_blank">unchainedcrypto.com</a></td>
+            <td class="stars">★★★★★</td>
+            <td>Gracy Chen 2023年专访，直接阐述"亚洲散户模型"战略思维<a href="#note6" class="nref" id="nref6">6</a></td>
+          </tr>
+          <tr>
+            <td>The Scoop (The Block)</td>
+            <td>播客</td>
+            <td class="url-col"><a href="https://theblock.co/podcasts" class="source-link" target="_blank">theblock.co/podcasts</a></td>
+            <td class="stars">★★★★★</td>
+            <td>交易所CEO频繁出没，可比照Gracy Chen与Bybit/Binance CEO的叙事差异</td>
+          </tr>
+          <tr>
+            <td>Bankless</td>
+            <td>播客</td>
+            <td class="url-col"><a href="https://bankless.com" class="source-link" target="_blank">bankless.com</a></td>
+            <td class="stars">★★★★☆</td>
+            <td>交易所赛道宏观讨论，Bitget作为"二线突围"案例被提及</td>
+          </tr>
+          <tr>
+            <td>吴说区块链 YouTube</td>
+            <td>中文视频</td>
+            <td class="url-col"><a href="https://youtube.com/@wublockchain" class="source-link" target="_blank">youtube.com/@wublockchain</a></td>
+            <td class="stars">★★★★★</td>
+            <td>华语区交易所突发新闻最快视频解读</td>
+          </tr>
+          <tr>
+            <td>Token2049 演讲录像</td>
+            <td>会议视频</td>
+            <td class="url-col"><a href="https://token2049.com" class="source-link" target="_blank">token2049.com</a></td>
+            <td class="stars">★★★★☆</td>
+            <td>Gracy Chen 新加坡/迪拜演讲，观察其公开叙事演变</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.78rem; color:var(--text-tertiary); margin-top:0.5rem;"><strong>关键观察：</strong>Gracy Chen的公开表达从<span class="hl-know" data-note="note7" id="hl7">"女性CEO"身份叙事</span> → "产品创新"叙事 → "全球化合规"叙事的演变</p>
+    </section>
+
+    <!-- §4 一手资料 -->
+    <section id="primary">
+      <div class="section-header">
+        <h2>4. 一手资料<span class="zh">Primary Sources</span></h2>
+      </div>
+      
+      <details open>
+        <summary>📱 Gracy Chen Twitter/X <span class="zh-inline">社交一手</span></summary>
+        <div>
+          <p><strong>URL:</strong> <a href="https://x.com/gracybitget" class="source-link" target="_blank">x.com/gracybitget</a></p>
+          <p><strong>重要性:</strong> <span class="stars">★★★★★</span></p>
+          <p>战略意图最直接窗口，产品发布/市场观点/行业评论。<span class="hl-know" data-note="note8" id="hl8">建议追踪其2022-2024年推文时间线</span>，分析叙事重心转移。</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>📄 Bitget Official Blog <span class="zh-inline">官方一手</span></summary>
+        <div>
+          <p><strong>URL:</strong> <a href="https://bitget.com/support/articles" class="source-link" target="_blank">bitget.com/support/articles</a></p>
+          <p><strong>重要性:</strong> <span class="stars">★★★★★</span></p>
+          <p>产品更新、市场数据自报、合规进展。官方叙事与第三方叙事需对比分析。</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>🎓 Bitget Academy <span class="zh-inline">教育内容</span></summary>
+        <div>
+          <p><strong>URL:</strong> <a href="https://bitget.com/academy" class="source-link" target="_blank">bitget.com/academy</a></p>
+          <p><strong>重要性:</strong> <span class="stars">★★★★☆</span></p>
+          <p>用户教育策略反映目标客群定位（散户友好度），可推断产品优先级。</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>🪙 BGB代币经济白皮书 <span class="zh-inline">代币文档</span></summary>
+        <div>
+          <p><strong>URL:</strong> <a href="https://bitget.com/bgb" class="source-link" target="_blank">bitget.com/bgb</a></p>
+          <p><strong>重要性:</strong> <span class="stars">★★★★★</span></p>
+          <p>平台币是参与Bitget增长的唯一公开投资工具。<span class="hl-know" data-note="note9" id="hl9">关键验证：BGB代币解锁时间表、团队持仓比例、实际回购销毁数据</span>。</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>🏛️ 新加坡ACRA公司注册 <span class="zh-inline">监管一手</span></summary>
+        <div>
+          <p><strong>URL:</strong> <a href="https://acra.gov.sg" class="source-link" target="_blank">acra.gov.sg</a></p>
+          <p><strong>重要性:</strong> <span class="stars">★★★★★</span></p>
+          <p>验证Bitget实体结构、股东信息（非公开但可查）。</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>⛓️ 链上储备金证明 (PoR) <span class="zh-inline">链上数据</span></summary>
+        <div>
+          <p><strong>URL:</strong> <a href="https://bitget.com/proof-of-reserves" class="source-link" target="_blank">bitget.com/proof-of-reserves</a></td>
+          <p><strong>重要性:</strong> <span class="stars">★★★★★</span></p>
+          <p>第三方审计的托管资产透明度。需与<a href="#note10" class="nref" id="nref10">10</a>链上实际持仓交叉验证。</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- §5 关键关系网 -->
+    <section id="relationships">
+      <div class="section-header">
+        <h2>5. 关键关系网<span class="zh">Key Relationships</span></h2>
+      </div>
+
+      <!-- Relationship Card 1 -->
+      <details class="rel-card" open>
+        <summary>👤 Sandra Lou (Bitget COO) — 核心团队</summary>
+        <div class="rel-body">
+          <p><strong>信息源:</strong> LinkedIn / 公开演讲</p>
+          <p><strong>重要性:</strong> <span class="stars">★★★★★</span></p>
+          <p>Gracy Chen的搭档，共同创始人，理解权力结构关键。<span class="hl-know" data-note="note11" id="hl11">两人分工协作模式</span>决定Bitget战略执行方向。</p>
+        </div>
+      </details>
+
+      <!-- Relationship Card 2 -->
+      <details class="rel-card">
+        <summary>⚽ Lionel Messi / 迈阿密国际 — 品牌合作</summary>
+        <div class="rel-body">
+          <p><strong>信息源:</strong> 赞助合同 / ESPN报道</p>
+          <p><strong>重要性:</strong> <span class="stars">★★★★☆</span></p>
+          <p>2022年赞助金额未公开，估算$10-20M级，反映营销预算实力。可从赞助规模推断公司财务健康度。</p>
+        </div>
+      </details>
+
+      <!-- Relationship Card 3 -->
+      <details class="rel-card">
+        <summary>🌍 Turkey/Vietnam/Nigeria本地团队 — 新兴市场</summary>
+        <div class="rel-body">
+          <p><strong>信息源:</strong> 本地媒体报道</p>
+          <p><strong>重要性:</strong> <span class="stars">★★★★★</span></p>
+          <p>Bitget增长真正的"暗物质"，华语报道极少覆盖。<span class="hl-know" data-note="note12" id="hl12">本地化执行能力</span>是新兴市场成败关键。</p>
+        </div>
+      </details>
+
+      <!-- Relationship Card 4 -->
+      <details class="rel-card">
+        <summary>🔄 Bybit/Binance前员工 — 竞争情报</summary>
+        <div class="rel-body">
+          <p><strong>信息源:</strong> LinkedIn / 行业人脉</p>
+          <p><strong>重要性:</strong> <span class="stars">★★★★☆</span></p>
+          <p>Bitget团队大量来自竞品，文化和技术路径有延续性。LinkedIn可追踪人员流动趋势。</p>
+        </div>
+      </details>
+
+      <!-- Relationship Card 5 -->
+      <details class="rel-card">
+        <summary>💰 Fenbushi Capital / Dragonfly — 投资方</summary>
+        <div class="rel-body">
+          <p><strong>信息源:</strong> Crunchbase / 融资新闻</p>
+          <p><strong>重要性:</strong> <span class="stars">★★★★☆</span></p>
+          <p>2023年传闻融资，估值$3B，未完全确认。投资方背景影响战略资源获取。</p>
+        </div>
+      </details>
+
+      <!-- Relationship Card 6 -->
+      <details class="rel-card">
+        <summary>🏛️ 新加坡MAS / 迪拜VARA — 监管关系</summary>
+        <div class="rel-body">
+          <p><strong>信息源:</strong> 牌照公示</p>
+          <p><strong>重要性:</strong> <span class="stars">★★★★★</span></p>
+          <p>合规进展直接影响全球化天花板。<span class="hl-know" data-note="note13" id="hl13">牌照申请进度</span>是重要事件驱动因素。</p>
+        </div>
+      </details>
+
+      <div class="question-box">
+        <blockquote>
+          <p>❓ 关键空白：Bitget真实股权结构、早期投资者名单、Gracy Chen个人背景细节（教育/前雇主）</p>
+        </blockquote>
+      </div>
+    </section>
+
+    <!-- §6 叙事弧 -->
+    <section id="narratives">
+      <div class="section-header">
+        <h2>6. 关键叙事弧<span class="zh">Key Narrative Arcs</span></h2>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧 #1: 从"女性CEO"到"产品创新者"</strong>
+        <p style="margin:0.5rem 0 0; font-size:0.82rem;">Gracy Chen早期媒体曝光以"亚洲女性交易所CEO"身份为核心叙事，2023年后逐渐转向"社交交易产品创新者"叙事。<span class="hl-know" data-note="note14" id="hl14">叙事演变反映公司战略重心转移</span>——从品牌差异化到产品差异化。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧 #2: "二线突围"到"全球化合规"</strong>
+        <p style="margin:0.5rem 0 0; font-size:0.82rem;">早期叙事强调在Binance/Bybit夹缝中生存，强调跟单交易差异化；2023-2024年叙事重心转向<span class="hl-know" data-note="note15" id="hl15">"合规先行"</span>，强调新加坡MAS牌照、迪拜VARA合规。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧 #3: "120M用户"数字叙事</strong>
+        <p style="margin:0.5rem 0 0; font-size:0.82rem;">用户数从10M增长到120M是核心营销叙事，但<span class="hl-know" data-note="note16" id="hl16">"注册用户"vs"活跃用户"</span>的区分至关重要。需第三方数据验证真实活跃度。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>叙事弧 #4: "跟单交易"产品叙事</strong>
+        <p style="margin:0.5rem 0 0; font-size:0.82rem;">跟单交易是Bitget的<span class="hl-know" data-note="note17" id="hl17">核心差异化标签</span>，需验证：跟单交易真实盈利比例、交易员质量、社区活跃度、与其他CEX类似功能的对比。</p>
+      </div>
+
+    </section>
+
+    <!-- §7 信息空白 -->
+    <section id="gaps">
+      <div class="section-header">
+        <h2>7. 信息空白 — What Doesn't Exist<span class="zh">Information Gaps</span></h2>
+      </div>
+
+      <div class="gap-item high">
+        <strong>🔴 真实交易量 vs 报告交易量</strong>
+        <p style="margin:0.5rem 0 0; font-size:0.82rem;">所有二线交易所的通病，Bitget声称的衍生品排名需独立验证。<strong>补充策略:</strong> 对比Kaiko/Coingecko数据</p>
+      </div>
+
+      <div class="gap-item high">
+        <strong>🔴 用户质量与留存</strong>
+        <p style="margin:0.5rem 0 0; font-size:0.82rem;">120M注册用户 ≠ 活跃用户，跟单交易的真实盈利比例未知。<strong>补充策略:</strong> 寻找第三方用户调研</p>
+      </div>
+
+      <div class="gap-item high">
+        <strong>🔴 财务健康状况</strong>
+        <p style="margin:0.5rem 0 0; font-size:0.82rem;">非上市公司，无审计财报，平台币是唯一财务窗口。<strong>补充策略:</strong> 追踪BGB链上流动/回购数据</p>
+      </div>
+
+      <div class="gap-item medium">
+        <strong>🟡 Gracy Chen个人履历</strong>
+        <p style="margin:0.5rem 0 0; font-size:0.82rem;">公开信息极少，早期职业路径、如何进入Bitget unclear。<strong>补充策略:</strong> 华语行业人脉访谈</p>
+      </div>
+
+      <div class="gap-item medium">
+        <strong>🟡 与Bybit的直接竞争动态</strong>
+        <p style="margin:0.5rem 0 0; font-size:0.82rem;">两家新加坡-based、衍生品为主、社交化交易，差异化模糊。<strong>补充策略:</strong> 跟踪双方产品发布时间线</p>
+      </div>
+
+      <div class="gap-item high">
+        <strong>🔴 监管风险敞口</strong>
+        <p style="margin:0.5rem 0 0; font-size:0.82rem;">土耳其/尼日利亚等关键增长市场监管不确定性。<strong>补充策略:</strong> 监测各国牌照新闻</p>
+      </div>
+
+      <div class="gap-item medium">
+        <strong>🟡 技术基础设施</strong>
+        <p style="margin:0.5rem 0 0; font-size:0.82rem;">自研 vs 外包，撮合引擎性能，极端行情表现。<strong>补充策略:</strong> 寻找工程团队访谈</p>
+      </div>
+
+    </section>
+
+    <!-- §8 质量评估 -->
+    <section id="quality">
+      <div class="section-header">
+        <h2>8. 素材质量评估<span class="zh">Source Quality Assessment</span></h2>
+      </div>
+
+      <div class="quality-grid">
+        <div class="quality-card">
+          <h4>📊 定量数据源</h4>
+          <p>Kaiko、The Block提供机构级数据，质量高但需付费。建议组合使用免费+付费层级。</p>
+        </div>
+        <div class="quality-card">
+          <h4>📰 定性分析源</h4>
+          <p>吴说区块链在华语区独家性强，但需注意潜在立场偏差。</p>
+        </div>
+        <div class="quality-card">
+          <h4>🎙️ 直接访谈</h4>
+          <p>播客访谈信息密度高但经过剪辑，需交叉验证具体数据点。</p>
+        </div>
+        <div class="quality-card">
+          <h4>📄 官方文档</h4>
+          <p>透明度报告/白皮书自报数据，需第三方验证独立性。</p>
+        </div>
+        <div class="quality-card">
+          <h4>⛓️ 链上数据</h4>
+          <p>BGB代币、PoR储备金证明可交叉验证，但需技术分析能力。</p>
+        </div>
+        <div class="quality-card">
+          <h4>🔍 竞争情报</h4>
+          <p>LinkedIn人员流动、产品发布对比，可推断战略优先级。</p>
+        </div>
+      </div>
+
+      <div class="question-box">
+        <blockquote>
+          <p>❓ 研究优先级验证：2小时阅读路径是否覆盖了最高价值信息源？</p>
+        </blockquote>
+      </div>
+    </section>
+
+    <footer style="margin-top:3rem; padding-top:1rem; border-top:1px solid var(--border-subtle); font-size:0.72rem; color:var(--text-quaternary);">
+      <p>Generated: 2026-03-22 · V4 Template · <a href="../blockchain_hub.html">Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ========== RIGHT SIDEBAR (Notes) ========== -->
+  <aside class="notes-sidebar ns-closed" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">×</button>
+      <h4 style="font-size:0.7rem; font-weight:590; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-quaternary); margin:0;">📝 元思考 + 📚 知识</h4>
+    </div>
+    
+    <!-- Meta Notes -->
+    <div class="anno meta-note" id="note1" data-section="analysts">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">The Block数据交叉验证方法</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>The Block的CEX市场份额数据基于报告交易量，需与链上数据（DEX vs CEX比例）交叉验证。</p>
+        <p>建议：每月追踪Bitget市场份额变化趋势，而非单点数据。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note2" data-section="analysts">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Kaiko数据获取策略</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Kaiko提供免费tier（延迟数据）和付费tier（实时数据）。</p>
+        <p>投资研究建议：使用免费tier进行趋势分析，付费tier用于事件驱动验证。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note3" data-section="analysts">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">吴说区块链信源可靠性</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Colin Wu在华语区有较高可信度，但独家消息需注意发布时间与官方确认的时间差。</p>
+        <p>最佳实践：吴说首发 → 等待24-48小时 → 官方确认或否认。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note4" data-section="longform">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">《The Cryptopians》阅读框架</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>本书聚焦2014-2019年交易所战争，为理解当前CEX格局提供历史背景。</p>
+        <p>重点章节：Binance崛起、EOS Launchpad、IEO模式演变。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note5" data-section="longform">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">跟单交易经济学分析</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>理解跟单交易的商业模式：平台费 + 交易员分润 + 流动性贡献。</p>
+        <p>关键指标：交易员留存率、跟单者盈亏比、平台GMV中跟单占比。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note6" data-section="podcasts">
+      <span class="note-label">META</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Unchained访谈分析框架</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Laura Shin的访谈通常包含：1) 战略意图自述 2) 数据自报 3) 行业观点。</p>
+        <p>分析时需区分"事实陈述"与"叙事建构"。</p>
+      </div>
+    </div>
+
+    <!-- Knowledge Notes -->
+    <div class="anno know-note" id="note7" data-section="podcasts">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Gracy Chen叙事演变时间线</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>2021-2022: "亚洲女性CEO"身份叙事，强调多元化</p>
+        <p>2022-2023: "产品创新"叙事，跟单交易差异化</p>
+        <p>2023-2024: "全球化合规"叙事，新加坡/迪拜牌照</p>
+        <p>2024-现在: 叙事融合，但仍以"合规创新者"为核心</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note8" data-section="primary">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Twitter/X分析工具推荐</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>推荐工具：Nitter（无需登录）、TweetDeck（列表筛选）、SocialBlade（互动趋势）</p>
+        <p>分析维度：发布频率、互动率变化、转发来源、话题标签演变</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note9" data-section="primary">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">BGB代币监控关键指标</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>1. 解锁时间表：BGB代币分配比例、锁仓期</p>
+        <p>2. 回购销毁：季度回购数量、销毁频率</p>
+        <p>3. 大户持仓：Etherscan查看前10持仓地址</p>
+        <p>4. 链上流动：DEX交易量 vs CEX交易量对比</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note10" data-section="primary">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">PoR储备金验证方法</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>理论储备率 = 链上资产 / 用户资产声明</p>
+        <p>验证步骤：1) 获取官方PoR报告 2) 提取链上地址 3) 计算实际持仓 4) 对比差异</p>
+        <p>注意：不同审计标准（Merkle Tree vs ZK-SNARKs）可信度不同</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note11" data-section="relationships">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Sandra Lou背景信息</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Sandra Lou与Gracy Chen的分工通常为：</p>
+        <p>- Gracy Chen: 对外公关、战略制定、投资者关系</p>
+        <p>- Sandra Lou: 运营管理、产品执行、市场扩张</p>
+        <p>两人共同代表Bitget出席重要会议，公开表态一致性高。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note12" data-section="relationships">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">新兴市场本地化策略</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>土耳其：里拉波动大，本地交易所竞争激烈，Bitget需提供稳定币交易对</p>
+        <p>越南：年轻人口占比高，移动端需求强，KOL营销关键</p>
+        <p>尼日利亚：Naira贬值驱动稳定币需求，本地支付整合挑战大</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note13" data-section="relationships">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">MAS/VARA牌照时间线预测</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>新加坡MAS：2023年已获得MVP预备牌照，预计2024-2025年获得完整牌照</p>
+        <p>迪拜VARA：2023年获得最小可行产品牌照，逐步扩展业务范围</p>
+        <p>关键风险：监管收紧可能影响牌照审批进度</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note14" data-section="narratives">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">叙事演变驱动因素分析</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>叙事转变的触发因素：</p>
+        <p>1. 竞争格局变化：Bybit/Binance策略调整</p>
+        <p>2. 监管环境：合规要求提升</p>
+        <p>3. 产品成熟度：跟单交易成为稳定增长引擎</p>
+        <p>4. 品牌需求：全球化扩张需要更普世的叙事</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note15" data-section="narratives">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">"合规先行"叙事证据</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>支持证据：</p>
+        <p>- 主动配合监管调查（vs 被动应对）</p>
+        <p>- 透明度报告发布（行业少数）</p>
+        <p>- 多国牌照申请</p>
+        <p>- 合规团队扩张</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note16" data-section="narratives">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">120M用户数据拆解</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>用户数估算拆解：</p>
+        <p>- 注册用户：120M（2024年报告）</p>
+        <p>- KYC完成用户：估计30-40M</p>
+        <p>- 月活用户(MAU)：估计5-10M</p>
+        <p>- 日活用户(DAU)：估计1-2M</p>
+        <p>关键指标应关注MAU/DAU而非注册数</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note17" data-section="narratives">
+      <span class="note-label know">KNOW</span>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">跟单交易竞争格局</span>
+        <span class="mn-fold">▼</span>
+      </div>
+      <div class="mn-body">
+        <p>Bitget vs 竞品功能对比：</p>
+        <p>- Bybit: Copy Trading（对标功能）</p>
+        <p>- Binance: Futures Grid Trading</p>
+        <p>- OKX: Copy Trading</p>
+        <p>差异化要点：交易员激励机制、社区氛围、跟单者保护机制</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+// === Sidebar toggle (mobile) ===
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+
+// === Notes sidebar toggle ===
+(function(){
+  var btn=document.getElementById("notesToggleBtn"),ns=document.getElementById("notesSidebar"),ov=document.getElementById("notesOverlay"),cb=document.getElementById("notesCloseBtn");
+  if(!btn||!ns)return;
+  function toggle(){ns.classList.toggle("ns-closed");ov.classList.toggle("open");}
+  btn.onclick=toggle;
+  if(ov)ov.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(cb)cb.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(window.innerWidth>1200)ns.classList.remove("ns-closed");
+  window.addEventListener("resize",function(){if(window.innerWidth>1200)ns.classList.remove("ns-closed");});
+})();
+
+// === Toggle note ===
+function toggleNote(head){
+  var anno=head.closest(".anno");
+  if(anno){anno.classList.toggle("open");positionNotes();}
+}
+
+// === Position notes ===
+function positionNotes(){
+  var ns=document.getElementById("notesSidebar");if(!ns)return;
+  var annos=ns.querySelectorAll(".anno");
+  var lastBottom=80;
+  annos.forEach(function(a){
+    if(a.style.display==="none")return;
+    var sec=a.getAttribute("data-section");
+    var target=sec?document.getElementById(sec):null;
+    var top=target?target.getBoundingClientRect().top+window.scrollY-ns.getBoundingClientRect().top:lastBottom;
+    if(top<lastBottom)top=lastBottom;
+    a.style.top=top+"px";
+    lastBottom=top+a.offsetHeight+8;
+  });
+}
+
+// === Knowledge toggle ===
+function toggleKnowNotes(){
+  var btn=document.getElementById("knowToggleBtn");
+  var knowNotes=document.querySelectorAll(".anno.know-note");
+  var marks=document.querySelectorAll("mark.hl-know");
+  var nrefs=document.querySelectorAll(".nref");
+  var visible=btn.classList.contains("active");
+  knowNotes.forEach(function(n){n.style.display=visible?"none":"";});
+  marks.forEach(function(m){m.style.background=visible?"transparent":"";m.style.borderBottom=visible?"none":"";});
+  nrefs.forEach(function(r){r.style.display=visible?"none":"";});
+  btn.classList.toggle("active");
+  btn.textContent=visible?"显示":"隐藏";
+  positionNotes();
+}
+
+// === Expand / Collapse all ===
+function expandAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.add("open");});positionNotes();}
+function collapseAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.remove("open");});positionNotes();}
+
+// === Note count ===
+(function(){
+  var label=document.getElementById("noteCountLabel");if(!label)return;
+  var meta=document.querySelectorAll(".anno.meta-note").length;
+  var know=document.querySelectorAll(".anno.know-note").length;
+  label.textContent=meta+" META + "+know+" Knowledge";
+})();
+
+// === Highlight → Note sync ===
+document.addEventListener("click",function(e){
+  var mark=e.target.closest("mark.hl-know")||e.target.closest(".nref");
+  if(!mark)return;
+  var noteId=mark.getAttribute("data-note");if(!noteId)return;
+  var anno=document.getElementById(noteId);if(!anno)return;
+  anno.classList.add("open");
+  anno.scrollIntoView({behavior:"smooth",block:"center"});
+  anno.classList.add("flash");
+  setTimeout(function(){anno.classList.remove("flash");},1500);
+  positionNotes();
+});
+
+// === Embedded mode ===
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+  document.addEventListener("click",function(e){
+    var a=e.target.closest("a");if(!a||!a.href)return;
+    try{var url=new URL(a.href,location.href)}catch(err){return}
+    if(url.pathname.startsWith("/trade-pipeline/")||url.pathname.startsWith("/observatory/")){
+      e.preventDefault();
+      window.top.postMessage({type:"dashboard-nav",action:"openResearch",url:url.pathname,title:a.textContent.trim().substring(0,60)},"*");
+    }
+  });
+})();
+
+// Initial positioning
+window.addEventListener("load",function(){positionNotes();});
+window.addEventListener("scroll",function(){positionNotes();});
+</script>
+</body>
+</html>

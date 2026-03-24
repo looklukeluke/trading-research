@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V3 Final Report — BTC/Blockchain</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="blockchain_shared.css">
+<style>
+body.embedded .sidebar { display: none !important; }
+body.embedded main { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+<main style="max-width:700px;margin:0 auto;padding:4rem 2rem;text-align:center;">
+<div style="font-size:2rem;margin-bottom:1rem;">🚧</div>
+<h1 style="font-size:1.3rem;font-weight:590;margin-bottom:0.5rem;">V3 Final Report — BTC/Blockchain</h1>
+<p style="color:var(--text-tertiary);font-size:0.88rem;margin-bottom:2rem;">此页面待创建 — This page is pending creation</p>
+<a href="blockchain_hub.html" style="display:inline-block;padding:0.4rem 1rem;border-radius:6px;font-size:0.82rem;font-weight:510;background:var(--accent-dim);color:var(--accent);border:1px solid rgba(248,168,72,0.25);text-decoration:none;">← Blockchain Hub</a>
+</main>
+</div>
+<script>
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+  document.addEventListener("click",function(e){
+    var a=e.target.closest("a");if(!a||!a.href)return;
+    try{var url=new URL(a.href,location.href)}catch(err){return}
+    if(url.pathname.startsWith("/trade-pipeline/")||url.pathname.startsWith("/observatory/")||url.pathname.startsWith("/research/")){
+      e.preventDefault();
+      window.top.postMessage({type:"dashboard-nav",action:"openResearch",url:url.pathname,title:a.textContent.trim().substring(0,60)},"*");
+    }
+  });
+})();
+</script>
+</body>
+</html>

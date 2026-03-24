@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carlos Domingo — 素材策展地图 V4</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../blockchain_shared.css">
+<style>
+  /* Page-specific V4 extensions */
+  .priority-box { border:1px solid rgba(248,168,72,0.3); border-left:3px solid var(--accent); border-radius:var(--radius-sm); padding:1.25rem 1.5rem; margin-bottom:2rem; background:var(--bg-surface); }
+  .priority-box h2 { color:var(--accent); margin-top:0; font-size:1.1rem; font-weight:590; }
+  .priority-box ol { margin-bottom:0; padding-left:1.2rem; }
+  .priority-box li { margin-bottom:0.6rem; line-height:1.5; }
+  .time-badge { display:inline-block; padding:0.1rem 0.5rem; border-radius:10px; font-size:0.7rem; font-weight:590; margin-right:0.3rem; background:var(--accent); color:var(--bg-base); }
+  .anno { position:absolute; left:1rem; right:1rem; }
+  .anno.meta-note { padding:0.6rem 0.75rem; border-left:2px solid var(--accent); border-radius:0 6px 6px 0; background:rgba(248,168,72,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.meta-note:hover { box-shadow:0 0 0 1px var(--accent); }
+  .anno.know-note { padding:0.6rem 0.75rem; border-left:2px solid var(--knowledge); border-radius:0 6px 6px 0; background:rgba(91,155,213,0.04); font-size:0.78rem; line-height:1.5; color:var(--text-secondary); cursor:pointer; transition:box-shadow 0.2s, top 0.3s ease; }
+  .anno.know-note:hover { box-shadow:0 0 0 1px var(--knowledge); }
+  .anno .note-label { display:inline-block; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--bg-base); background:var(--accent); padding:0.1rem 0.4rem; border-radius:3px; margin-bottom:0.3rem; }
+  .anno .note-label.know { background:var(--knowledge); color:white; }
+  .anno .mn-head { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
+  .anno .mn-title { flex:1; font-weight:510; font-size:0.75rem; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .anno .mn-fold { font-size:0.55rem; color:var(--text-quaternary); transition:transform 0.2s; margin-left:auto; }
+  .anno.open .mn-fold { transform:rotate(180deg); }
+  .anno .mn-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+  .anno.open .mn-body { max-height:2000px; }
+  .anno .mn-body p { font-size:0.78rem; margin-bottom:0.3rem; color:var(--text-secondary); }
+  .anno.flash { animation:noteFlash 1.5s ease; }
+  @keyframes noteFlash { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--accent);} }
+  .anno.know-note.flash { animation:noteFlashBlue 1.5s ease; }
+  @keyframes noteFlashBlue { 0%,100%{box-shadow:none;} 15%,85%{box-shadow:0 0 0 3px var(--knowledge);} }
+  mark.hl-know { background:rgba(91,155,213,0.12); border-bottom:1.5px solid var(--knowledge); padding:0 2px; border-radius:2px; color:inherit; cursor:pointer; transition:background 0.15s; }
+  mark.hl-know:hover { background:rgba(91,155,213,0.28); }
+  .nref { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; font-size:0.48rem; font-weight:700; cursor:pointer; margin-left:1px; vertical-align:super; transition:transform 0.15s; text-decoration:none; background:var(--knowledge); color:white; }
+  .nref:hover { transform:scale(1.25); box-shadow:0 0 6px rgba(91,155,213,0.4); }
+  .top-controls { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; padding:0.35rem 0.7rem; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); font-size:0.72rem; flex-wrap:wrap; }
+  .top-controls .tc-label { font-weight:590; color:var(--knowledge); }
+  .top-controls button { padding:0.15rem 0.45rem; border-radius:4px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-tertiary); cursor:pointer; font-size:0.68rem; font-family:inherit; transition:all 0.15s; }
+  .top-controls button:hover { border-color:var(--knowledge); color:var(--text-primary); }
+  .top-controls button.active { background:var(--knowledge-dim); color:var(--knowledge); border-color:rgba(91,155,213,0.3); }
+  .top-controls .tc-sep { color:var(--border-default); margin:0 0.15rem; }
+  .main-content { flex:1; min-width:0; max-width:900px; padding:2.5rem 2.5rem 5rem; }
+  .notes-sidebar { position:relative; width:320px; min-width:320px; padding:1.25rem 1rem; border-left:1px solid var(--border-subtle); background:var(--bg-elevated); }
+  .notes-sidebar-header { position:sticky; top:0; z-index:60; background:var(--bg-elevated); padding-bottom:0.5rem; border-bottom:1px solid var(--border-subtle); margin-bottom:0.75rem; }
+  .hamburger-btn { display:none; position:fixed; top:1rem; left:1rem; z-index:200; background:var(--bg-surface); color:var(--text-primary); border:none; border-radius:6px; width:44px; height:44px; font-size:1.4rem; cursor:pointer; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+  .sidebar-overlay.open { display:block; }
+  .notes-toggle-btn { position:fixed; right:1rem; bottom:1.5rem; z-index:200; width:44px; height:44px; border-radius:50%; border:1px solid var(--border-default); background:var(--bg-surface); color:var(--text-secondary); cursor:pointer; font-size:1.1rem; display:none; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.4); }
+  .notes-close-btn { float:right; background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:1.1rem; padding:0; display:none; }
+  @media (max-width:1200px) { .notes-close-btn { display:block; } .notes-sidebar { position:fixed; right:0; top:0; height:100vh; overflow-y:auto; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.4); z-index:150; } .notes-sidebar.ns-closed { transform:translateX(100%); box-shadow:none; } .notes-toggle-btn { display:flex; } }
+  .notes-overlay-right { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:140; }
+  .notes-overlay-right.open { display:block; }
+  @media (max-width:900px) { .sidebar { position:fixed; left:-320px; top:0; transition:left 0.3s ease; box-shadow:4px 0 20px rgba(0,0,0,0.3); } .sidebar.open { left:0; } .hamburger-btn { display:block; } .main-content { padding:2rem 1rem 4rem; } }
+  @media (min-width:1600px) { .main-content { max-width:1000px; } .notes-sidebar { width:360px; min-width:360px; } }
+  .rel-card { border:1px solid var(--border-subtle); border-radius:var(--radius-md); background:var(--bg-elevated); margin-bottom:0.75rem; }
+  .rel-card summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  .rel-card[open] summary { color:var(--accent); }
+  .rel-card .rel-body { padding:0 1rem 1rem; font-size:0.82rem; color:var(--text-secondary); line-height:1.6; }
+  .arc-item { border-left:3px solid var(--accent); padding:0.6rem 1rem; margin-bottom:0.75rem; background:rgba(66,165,245,0.03); border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+  .arc-item strong { color:var(--text-primary); }
+  .question-box { border:2px solid var(--knowledge); background:rgba(91,155,213,0.05); border-radius:var(--radius-md); padding:1.5rem; text-align:center; margin:2rem 0; }
+  .question-box blockquote { border:none; margin:0; padding:0; }
+  .question-box p { font-size:1rem; font-weight:510; color:var(--text-primary); }
+  .page-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-default); }
+  .page-header h1 { margin-bottom:0.3rem; font-size:clamp(1.5rem,4vw,2.25rem); font-weight:680; letter-spacing:-0.025em; }
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; margin-bottom:1rem; }
+  th { text-transform:uppercase; font-size:0.72rem; font-weight:510; color:var(--text-quaternary); letter-spacing:0.04em; text-align:left; padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-default); }
+  td { padding:0.5rem 0.6rem; border-bottom:1px solid var(--border-subtle); vertical-align:top; color:var(--text-secondary); }
+  tr:hover td { background:var(--bg-elevated); }
+  .url-col { max-width:200px; word-break:break-all; }
+  .zh { display:block; font-size:0.85em; color:var(--text-tertiary); margin-top:0.15em; }
+  .zh-inline { font-size:0.85em; color:var(--text-tertiary); }
+  details { border:1px solid var(--border-subtle); background:var(--bg-elevated); border-radius:var(--radius-sm); padding:0; margin-bottom:0.75rem; }
+  details summary { cursor:pointer; padding:0.8rem 1rem; font-size:0.9rem; font-weight:510; color:var(--text-secondary); }
+  details[open] summary { color:var(--accent); }
+  details > div, details > p { padding:0 1rem 1rem; font-size:0.82rem; line-height:1.6; color:var(--text-secondary); }
+  .badge-row { display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.75rem; }
+  .badge { display:inline-block; padding:0.25rem 0.6rem; border-radius:12px; font-size:0.7rem; font-weight:510; background:var(--bg-elevated); border:1px solid var(--border-subtle); color:var(--text-secondary); }
+  .badge.highlight { background:rgba(248,168,72,0.1); border-color:rgba(248,168,72,0.3); color:var(--accent); }
+  body.embedded .sidebar, body.embedded .notes-sidebar, body.embedded .hamburger-btn, body.embedded .notes-toggle-btn { display:none!important; }
+  body.embedded .main-content { max-width:100%; padding:1.5rem; }
+</style>
+</head>
+<body>
+
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="notes-toggle-btn" id="notesToggleBtn" aria-label="Toggle notes">&#129504;</button>
+<div class="notes-overlay-right" id="notesOverlay"></div>
+
+<div class="page-wrapper">
+
+  <!-- ========== LEFT SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <a href="../blockchain_hub.html" class="back-link">&larr; Blockchain Hub</a>
+    <div class="project-meta">Carlos Domingo<br>素材策展地图 V4</div>
+
+    <h4>Contents</h4>
+    <nav>
+      <ul>
+        <li><a href="#priority"><span class="toc-num">&#9733;</span>如果只有2小时</a></li>
+        <li><a href="#analysts"><span class="toc-num">1</span>最佳分析师</a></li>
+        <li><a href="#longform"><span class="toc-num">2</span>必读长文/书籍</a></li>
+        <li><a href="#podcasts"><span class="toc-num">3</span>播客与视频</a></li>
+        <li><a href="#primary"><span class="toc-num">4</span>一手资料</a></li>
+        <li><a href="#relationships"><span class="toc-num">5</span>关键关系网</a></li>
+        <li><a href="#narratives"><span class="toc-num">6</span>叙事弧</a></li>
+        <li><a href="#gaps"><span class="toc-num">7</span>信息空白</a></li>
+        <li><a href="#quality"><span class="toc-num">8</span>质量评估</a></li>
+      </ul>
+    </nav>
+
+    <h4>Related</h4>
+    <nav>
+      <ul>
+        <li><a href="18_carlos_domingo.html">Carlos Domingo Profile</a></li>
+        <li><a href="18_carlos_domingo_metacognition.html">Metacognition</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+
+    <div class="top-controls">
+      <span class="tc-label">&#128218; 知识批注</span>
+      <button class="active" id="knowToggleBtn" onclick="toggleKnowNotes()">显示</button>
+      <span class="tc-sep">|</span>
+      <button onclick="expandAllNotes()">全部展开</button>
+      <button onclick="collapseAllNotes()">全部收起</button>
+      <span style="color:var(--text-quaternary); margin-left:auto; font-size:0.65rem;" id="noteCountLabel"></span>
+    </div>
+
+    <header class="page-header">
+      <h1>Carlos Domingo — 素材策展地图 V4</h1>
+      <p class="subtitle">Research Date: 2026-03-22 &nbsp;|&nbsp; 7 Categories · 35+ Sources<br>
+      <span class="zh-inline">RWA赛道核心标的 · Securitize创始人/CEO</span></p>
+      <div class="badge-row">
+        <span class="badge highlight">RWA</span>
+        <span class="badge">Securitize</span>
+        <span class="badge">BlackRock BUIDL</span>
+        <span class="badge">RegTech</span>
+        <span class="badge">代币化国债</span>
+      </div>
+    </header>
+
+    <!-- ★ Priority Box -->
+    <div class="priority-box" id="priority">
+      <h2>&#9200; 如果只有2小时 — 推荐阅读路径</h2>
+      <ol>
+        <li><span class="time-badge">30min</span><strong>Messari RWA Sector Report</strong> — 建立赛道全局观，确认Securitize市场份额定位</li>
+        <li><span class="time-badge">20min</span><strong>21.co Dune Dashboard</strong> — 实时验证BUIDL链上AUM，感受业务真实规模</li>
+        <li><span class="time-badge">45min</span><strong>Unchained播客专访</strong> — 听Domingo亲述战略愿景和创始人视角</li>
+        <li><span class="time-badge">15min</span><strong>SEC EDGAR Filings</strong> — 核查经纪人-交易商合规状态，评估监管风险</li>
+        <li><span class="time-badge">10min</span>浏览 <strong>Domingo Twitter/X</strong> — 捕捉最新动态和行业观点即时信号</li>
+      </ol>
+    </div>
+
+    <!-- §1 最佳分析师 -->
+    <section id="analysts">
+      <div class="section-header">
+        <h2>1. 最佳分析师与独立研究<span class="zh">Best Analysts & Independent Research</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Messari RWA Sector Report</strong></td>
+            <td>加密研究机构</td>
+            <td class="url-col"><a href="https://messari.io/research" target="_blank">messari.io/research</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>最权威的RWA赛道分析，定期更新Securitize市场份额和竞争格局 <a href="#note-kn-1" class="nref" id="nref-1">1</a></td>
+          </tr>
+          <tr>
+            <td><strong>21.co Dune Dashboard</strong></td>
+            <td>链上数据分析</td>
+            <td class="url-col"><a href="https://dune.com/21co" target="_blank">dune.com/21co</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>实时追踪BUIDL等代币化国债基金的链上AUM数据，可验证Securitize业务量</td>
+          </tr>
+          <tr>
+            <td><strong>The Block Research</strong></td>
+            <td>行业研究</td>
+            <td class="url-col"><a href="https://www.theblock.co/research" target="_blank">theblock.co/research</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>机构级RWA报告，有Securitize与竞争对手的详细对比</td>
+          </tr>
+          <tr>
+            <td><strong>Binance Research RWA Report</strong></td>
+            <td>交易所研究</td>
+            <td class="url-col"><a href="https://www.binance.com/en/research" target="_blank">binance.com/en/research</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>2024年RWA深度报告，涵盖Securitize技术架构和监管路径</td>
+          </tr>
+          <tr>
+            <td><strong>K33 Research (原Arcane)</strong></td>
+            <td>北欧加密研究</td>
+            <td class="url-col"><a href="https://k33.com/research" target="_blank">k33.com/research</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>欧洲视角的RWA分析，关注Securitize的MiCA合规策略</td>
+          </tr>
+          <tr>
+            <td><strong>M6 Labs</strong></td>
+            <td>独立研究</td>
+            <td class="url-col"><a href="https://m6labs.substack.com" target="_blank">m6labs.substack.com</a></td>
+            <td>⭐⭐⭐☆☆</td>
+            <td>Substack上的RWA专题，有Securitize商业模式拆解</td>
+          </tr>
+          <tr>
+            <td><strong>DeFiLlama RWA Dashboard</strong></td>
+            <td>数据聚合</td>
+            <td class="url-col"><a href="https://defillama.com/rwa" target="_blank">defillama.com/rwa</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>实时追踪各平台代币化资产规模，Securitize/BUIDL数据一目了然 <a href="#note-kn-2" class="nref" id="nref-2">2</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §2 必读长文/书籍 -->
+    <section id="longform">
+      <div class="section-header">
+        <h2>2. 必读长文与书籍<span class="zh">Must-Read Long-Form & Books</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>"Tokenized: The Future of Finance"</strong></td>
+            <td>书籍</td>
+            <td class="url-col">Amazon/各大平台</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>由Securitize参与撰写的RWA权威著作，理解行业框架必读</td>
+          </tr>
+          <tr>
+            <td><strong>Securitize官方白皮书系列</strong></td>
+            <td>技术文档</td>
+            <td class="url-col"><a href="https://securitize.io/resources" target="_blank">securitize.io/resources</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>代币化流程、法律结构、技术架构的完整说明</td>
+          </tr>
+          <tr>
+            <td><strong>BlackRock BUIDL Prospectus</strong></td>
+            <td>监管文件</td>
+            <td class="url-col">SEC EDGAR</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>理解Securitize作为基金管理人的具体职责和费用结构 <a href="#note-kn-3" class="nref" id="nref-3">3</a></td>
+          </tr>
+          <tr>
+            <td><strong>"The Tokenization of Everything" (BIS)</strong></td>
+            <td>央行报告</td>
+            <td class="url-col"><a href="https://www.bis.org/publ/work1061.htm" target="_blank">bis.org/publ/work1061</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>国际清算银行2023年报告，从货币政策角度分析RWA影响</td>
+          </tr>
+          <tr>
+            <td><strong>a16z "State of Crypto 2024"</strong></td>
+            <td>行业报告</td>
+            <td class="url-col"><a href="https://a16zcrypto.com/state-of-crypto" target="_blank">a16zcrypto.com</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>含RWA专门章节，提及Securitize作为基础设施案例</td>
+          </tr>
+          <tr>
+            <td><strong>Coinbase Institute RWA Report</strong></td>
+            <td>机构研究</td>
+            <td class="url-col"><a href="https://www.coinbase.com/institutional" target="_blank">coinbase.com/institutional</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>2024年报告详细分析代币化国债市场，BUIDL为案例</td>
+          </tr>
+          <tr>
+            <td><strong>"RWA: The Bridge Between TradFi and DeFi" (Delphi Digital)</strong></td>
+            <td>深度长文</td>
+            <td class="url-col"><a href="https://members.delphidigital.io" target="_blank">members.delphidigital.io</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>付费内容，但常有公开摘要，分析Securitize竞争壁垒 <a href="#note-kn-4" class="nref" id="nref-4">4</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §3 播客与视频 -->
+    <section id="podcasts">
+      <div class="section-header">
+        <h2>3. 播客与视频<span class="zh">Podcasts & Video</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Unchained: Carlos Domingo专访</strong></td>
+            <td>播客</td>
+            <td class="url-col"><a href="https://unchainedcrypto.com" target="_blank">unchainedcrypto.com</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>Laura Shin的深度访谈，Domingo亲自阐述战略愿景 <a href="#note-kn-5" class="nref" id="nref-5">5</a></td>
+          </tr>
+          <tr>
+            <td><strong>Bankless RWA专题</strong></td>
+            <td>播客/YouTube</td>
+            <td class="url-col"><a href="https://www.bankless.com" target="_blank">bankless.com</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>多次邀请Securitize高管，技术细节讲解最清晰</td>
+          </tr>
+          <tr>
+            <td><strong>The Scoop by The Block</strong></td>
+            <td>播客</td>
+            <td class="url-col"><a href="https://www.theblock.co/podcasts" target="_blank">theblock.co/podcasts</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>机构视角，有Securitize与BlackRock合作的幕后故事</td>
+          </tr>
+          <tr>
+            <td><strong>Real Vision Crypto</strong></td>
+            <td>视频</td>
+            <td class="url-col"><a href="https://www.realvision.com" target="_blank">realvision.com</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>高端金融视频平台，RWA专题制作精良</td>
+          </tr>
+          <tr>
+            <td><strong>Token2049/Consensus 演讲</strong></td>
+            <td>会议视频</td>
+            <td class="url-col">YouTube官方频道</td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>Domingo历年演讲，观察其叙事演变和重点转移</td>
+          </tr>
+          <tr>
+            <td><strong>Blockworks RWA峰会</strong></td>
+            <td>会议录像</td>
+            <td class="url-col"><a href="https://blockworks.co" target="_blank">blockworks.co</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>2024年新加坡/迪拜峰会，有Securitize技术演示</td>
+          </tr>
+          <tr>
+            <td><strong>《财新》/《第一财经》区块链专栏</strong></td>
+            <td>中文媒体</td>
+            <td class="url-col">财新网/一财APP</td>
+            <td>⭐⭐⭐☆☆</td>
+            <td>偶有RWA和资产代币化的中文深度报道</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §4 一手资料 -->
+    <section id="primary">
+      <div class="section-header">
+        <h2>4. 一手资料<span class="zh">Primary Sources</span></h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>URL</th>
+            <th>重要性</th>
+            <th>中文简述</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>SEC EDGAR - Securitize filings</strong></td>
+            <td>监管文件</td>
+            <td class="url-col"><a href="https://www.sec.gov/cgi-bin/browse-edgar" target="_blank">sec.gov/cgi-bin/browse-edgar</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>经纪人-交易商注册信息、Form BD等法定披露 <a href="#note-kn-6" class="nref" id="nref-6">6</a></td>
+          </tr>
+          <tr>
+            <td><strong>FINRA BrokerCheck</strong></td>
+            <td>监管查询</td>
+            <td class="url-col"><a href="https://brokercheck.finra.org" target="_blank">brokercheck.finra.org</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>验证Securitize Markets LLC的注册状态和合规历史</td>
+          </tr>
+          <tr>
+            <td><strong>Securitize官方博客/公告</strong></td>
+            <td>公司官方</td>
+            <td class="url-col"><a href="https://securitize.io/blog" target="_blank">securitize.io/blog</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>产品更新、合作伙伴宣布、AUM里程碑的一手信息</td>
+          </tr>
+          <tr>
+            <td><strong>BlackRock BUIDL官方页面</strong></td>
+            <td>资产管理人</td>
+            <td class="url-col"><a href="https://www.blackrock.com" target="_blank">blackrock.com</a></td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>基金净值、持仓、费用比率等关键数据</td>
+          </tr>
+          <tr>
+            <td><strong>Ethereum/Polygon链上合约</strong></td>
+            <td>链上数据</td>
+            <td class="url-col">Etherscan/Polygonscan</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>BUIDL代币合约地址，可直接验证铸造/赎回活动</td>
+          </tr>
+          <tr>
+            <td><strong>Carlos Domingo Twitter/X</strong></td>
+            <td>社交媒体</td>
+            <td class="url-col"><a href="https://x.com/carlosdomingo" target="_blank">x.com/carlosdomingo</a></td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>个人观点、行业评论、公司动态的第一时间发布 <a href="#note-kn-7" class="nref" id="nref-7">7</a></td>
+          </tr>
+          <tr>
+            <td><strong>Securitize LinkedIn</strong></td>
+            <td>企业动态</td>
+            <td class="url-col">LinkedIn公司页</td>
+            <td>⭐⭐⭐☆☆</td>
+            <td>招聘、团队扩张、企业文化信号</td>
+          </tr>
+          <tr>
+            <td><strong>西班牙CNMV注册信息</strong></td>
+            <td>欧盟监管</td>
+            <td class="url-col"><a href="https://www.cnmv.es" target="_blank">cnmv.es</a></td>
+            <td>⭐⭐⭐☆☆</td>
+            <td>验证Securitize在欧洲的合规布局</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §5 关键关系网 -->
+    <section id="relationships">
+      <div class="section-header">
+        <h2>5. 关键关系网<span class="zh">Key Relationships</span></h2>
+      </div>
+
+      <details class="rel-card" open>
+        <summary><strong>BlackRock & Larry Fink</strong> — 核心客户/验证者</summary>
+        <div class="rel-body">
+          <p>全球最大资管选择Securitize，是其最大的信誉背书。Fink多次公开提及代币化战略，并在2024年度信件中明确将代币化列为<mark class="hl-know" data-note="note-kn-8">"下一代金融市场"</mark>的核心方向。</p>
+          <p><strong>监测方法：</strong>关注BlackRock财报中"技术合作伙伴"支出变化、Larry Fink公开演讲</p>
+          <p><strong>信息源：</strong><a href="https://www.blackrock.com/corporate" target="_blank">blackrock.com/corporate</a></p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary><strong>Hamilton Lane</strong> — 早期机构客户</summary>
+        <div class="rel-body">
+          <p>私募市场代币化先驱，与Securitize合作多年，是验证其技术能力的重要案例。</p>
+          <p><strong>监测方法：</strong>联合公告、SEC文件更新</p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary><strong>Circle (USDC)</strong> — 基础设施伙伴</summary>
+        <div class="rel-body">
+          <p>BUIDL支持USDC即时赎回，稳定币与RWA的关键连接点。<mark class="hl-know" data-note="note-kn-9">Circle-USDC的流动性支持是BUIDL成功的关键基础设施</mark>。</p>
+          <p><strong>监测方法：</strong>技术集成公告、Circle季度报告</p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary><strong>Fireblocks</strong> — 技术安全伙伴</summary>
+        <div class="rel-body">
+          <p>机构级托管集成，影响Securitize的安全架构和机构入场门槛。</p>
+          <p><strong>监测方法：</strong>联合解决方案发布、Fireblocks客户列表</p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary><strong>Aptos / Polygon / Solana Foundation</strong> — 公链生态合作</summary>
+        <div class="rel-body">
+          <p>多链部署策略的具体执行方，展现Securitize的<mark class="hl-know" data-note="note-kn-10">区块链无关性(blockchain-agnostic)技术架构</mark>。</p>
+          <p><strong>监测方法：</strong>各链官方公告、技术合作新闻</p>
+        </div>
+      </details>
+
+      <details class="rel-card">
+        <summary><strong>DTCC & 欧盟监管机构</strong> — 传统金融基础设施</summary>
+        <div class="rel-body">
+          <p>若Securitize与DTCC建立连接，将是重大里程碑。ESMA、CNMV的MiCA实施进度直接影响欧洲扩张。</p>
+          <p><strong>监测方法：</strong>行业会议、监管文件、新闻报道</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- §6 叙事弧 -->
+    <section id="narratives">
+      <div class="section-header">
+        <h2>6. 关键叙事弧<span class="zh">Key Narrative Arcs</span></h2>
+      </div>
+
+      <div class="arc-item">
+        <strong>从合规技术提供商到RWA基础设施</strong>
+        <p>Domingo的核心叙事演变：从强调"证券代币化技术"转向"现实世界资产数字化基础设施"。这反映了RWA赛道的成熟和Securitize的战略聚焦调整。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>BlackRock BUIDL作为"监管合规性"背书</strong>
+        <p>BUIDL的成功不仅是业务里程碑，更是对Securitize技术栈和合规能力的<mark class="hl-know" data-note="note-kn-11">机构级认证</mark>。这为吸引更多传统金融机构客户提供了最强说服力。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>从代币化证券到代币化国债的战略重心转移</strong>
+        <p>早期Securitize聚焦私募股权代币化，但BUIDL的爆发式增长显示<mark class="hl-know" data-note="note-kn-12">代币化国债</mark>才是当前RWA最大的用例和现金流来源。</p>
+      </div>
+
+      <div class="arc-item">
+        <strong>全球化合规扩张叙事</strong>
+        <p> Domingo强调Securitize是"全球唯一同时拥有美国SEC经纪商资格和欧盟MiCA授权的代币化平台"，这是其差异化竞争壁垒的核心叙事。</p>
+      </div>
+    </section>
+
+    <!-- Question Box -->
+    <div class="question-box" id="key-question">
+      <blockquote>
+        <p>❓ 核心研究问题：Securitize能否在RWA从"代币化国债"扩展到私募股权、房地产等更复杂资产类别时，保持技术领先地位？</p>
+      </blockquote>
+    </div>
+
+    <!-- §7 信息空白 -->
+    <section id="gaps">
+      <div class="section-header">
+        <h2>7. 信息空白 — What Doesn't Exist<span class="zh">Information Gaps</span></h2>
+      </div>
+
+      <details open>
+        <summary><strong>公司财务数据</strong></summary>
+        <div>
+          <p><strong>现状：</strong>未上市，无公开财报</p>
+          <p><strong>影响：</strong>无法评估真实盈利能力、烧钱速度、估值合理性</p>
+          <p><strong>监测方法：</strong>追踪融资公告（Crunchbase）、间接从员工规模推算</p>
+        </div>
+      </details>
+
+      <details>
+        <summary><strong>BlackRock BUIDL合同条款</strong></summary>
+        <div>
+          <p><strong>现状：</strong>保密协议保护</p>
+          <p><strong>影响：</strong>不知晓费用分成、最低期限、排他性条款</p>
+          <p><strong>监测方法：</strong>关注BlackRock财报中"技术合作伙伴"支出变化</p>
+        </div>
+      </details>
+
+      <details>
+        <summary><strong>客户集中度风险</strong></summary>
+        <div>
+          <p><strong>现状：</strong>BUIDL占AUM比例极高</p>
+          <p><strong>影响：</strong>若BlackRock更换供应商，Securitize业务崩塌</p>
+          <p><strong>监测方法：</strong>监测新机构客户公告、AUM分布变化</p>
+        </div>
+      </details>
+
+      <details>
+        <summary><strong>技术栈自主程度</strong></summary>
+        <div>
+          <p><strong>现状：</strong>依赖Fireblocks等第三方</p>
+          <p><strong>影响：</strong>核心技术壁垒可能被质疑</p>
+          <p><strong>监测方法：</strong>追踪专利申请、技术博客深度、工程师招聘JD</p>
+        </div>
+      </details>
+
+      <details>
+        <summary><strong>Carlos Domingo股权/退出路径</strong></summary>
+        <div>
+          <p><strong>现状：</strong>创始人动机不明</p>
+          <p><strong>影响：</strong>影响长期承诺判断</p>
+          <p><strong>监测方法：</strong>关注SEC文件中beneficial ownership披露</p>
+        </div>
+      </details>
+
+      <details>
+        <summary><strong>竞争对手真实市场份额</strong></summary>
+        <div>
+          <p><strong>现状：</strong>各平台数据口径不一</p>
+          <p><strong>影响：</strong>难以判断Securitize的可持续领先优势</p>
+          <p><strong>监测方法：</strong>交叉比对21.co、DeFiLlama、公司自述数据</p>
+        </div>
+      </details>
+
+      <details>
+        <summary><strong>中文市场布局</strong></summary>
+        <div>
+          <p><strong>现状：</strong>公开信息极少</p>
+          <p><strong>影响：</strong>全球最大储蓄市场是否可进入</p>
+          <p><strong>监测方法：</strong>监测香港证监会牌照申请、新加坡MAS互动</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- §8 质量评估 -->
+    <section id="quality">
+      <div class="section-header">
+        <h2>8. 素材质量评估<span class="zh">Source Quality Assessment</span></h2>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>信息类型</th>
+            <th>可获取性</th>
+            <th>可信度</th>
+            <th>更新频率</th>
+            <th>评估</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>链上数据 (AUM, 交易量)</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>实时</td>
+            <td>最可靠的第一手验证数据</td>
+          </tr>
+          <tr>
+            <td>SEC/FINRA监管文件</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>定期</td>
+            <td>法定披露，法律约束</td>
+          </tr>
+          <tr>
+            <td>BlackRock官方数据</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>每日</td>
+            <td>BUIDL净值/持仓权威来源</td>
+          </tr>
+          <tr>
+            <td> Domingo Twitter/X</td>
+            <td>⭐⭐⭐⭐⭐</td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>实时</td>
+            <td>第一时间但可能有偏差</td>
+          </tr>
+          <tr>
+            <td>行业研究报告</td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>定期</td>
+            <td>高质量但可能存在利益冲突</td>
+          </tr>
+          <tr>
+            <td>播客专访</td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>⭐⭐⭐⭐☆</td>
+            <td>不定期</td>
+            <td>深度洞察，需交叉验证</td>
+          </tr>
+          <tr>
+            <td>公司财务数据</td>
+            <td>⭐☆☆☆☆</td>
+            <td>—</td>
+            <td>—</td>
+            <td><strong>关键空白</strong>：无法独立验证盈利模型</td>
+          </tr>
+          <tr>
+            <td>合同条款/费用结构</td>
+            <td>⭐☆☆☆☆</td>
+            <td>—</td>
+            <td>—</td>
+            <td><strong>关键空白</strong>：商业机密保护</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <footer style="margin-top:3rem; padding-top:1rem; border-top:1px solid var(--border-subtle); font-size:0.72rem; color:var(--text-quaternary);">
+      <p>Generated: 2026-03-22 &middot; V4 Template &middot; <a href="../blockchain_hub.html">Blockchain Hub</a></p>
+    </footer>
+
+  </main>
+
+  <!-- ========== RIGHT SIDEBAR (Notes) ========== -->
+  <aside class="notes-sidebar ns-closed" id="notesSidebar">
+    <div class="notes-sidebar-header">
+      <button class="notes-close-btn" id="notesCloseBtn">&times;</button>
+      <h4 style="font-size:0.7rem; font-weight:590; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-quaternary); margin:0;">&#129504; 元思考 + &#128218; 知识</h4>
+    </div>
+
+    <!-- Meta Notes -->
+    <div class="anno meta-note" id="note-meta-1" data-section="analysts">
+      <div class="note-label">META</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">分析师数据时效性警告</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Messari、DeFiLlama等第三方数据通常有1-4周滞后。建议每周固定时间复核一次链上数据（Dune/Polygonscan）以获得最新AUM数字。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-meta-2" data-section="longform">
+      <div class="note-label">META</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">BIS报告阅读优先级</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>BIS论文适合建立宏观框架，但阅读门槛较高。建议优先阅读Executive Summary和Section 1-2，再决定是否深入技术细节。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-meta-3" data-section="podcasts">
+      <div class="note-label">META</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">播客信息提取策略</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>建议使用Sniply或Notta等工具提取音频要点。重点关注： Domingo对竞争格局的看法、提到的新合作伙伴、对监管趋势的评论。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-meta-4" data-section="relationships">
+      <div class="note-label">META</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">关系图谱维护方法</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>建议使用Notion或Obsidian维护动态关系图谱。每当发现新关系时，更新节点和边的权重。关键问题：该关系是"战术合作"还是"战略绑定"？</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-meta-5" data-section="gaps">
+      <div class="note-label">META</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">信息空白验证优先级</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>财务数据和合同条款属于"结构性盲区"，不应过度投入。建议将精力集中在"可验证信号"：链上数据、监管文件、公开演讲。</p>
+      </div>
+    </div>
+
+    <div class="anno meta-note" id="note-meta-6" data-section="quality">
+      <div class="note-label">META</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">置信度评估框架</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>对于Securitize这类非上市公司，信息的"可验证性"比"数量"更重要。建议采用"三角验证法"：至少2个独立信息源交叉印证才能提升置信度。</p>
+      </div>
+    </div>
+
+    <!-- Knowledge Notes -->
+    <div class="anno know-note" id="note-kn-1" data-section="analysts">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Messari报告覆盖范围</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Messari通常每季度发布RWA赛道报告，包含市场份额估算、头部项目对比、监管进展综述。建议关注其"Tokenization Tracker"专题。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-kn-2" data-section="analysts">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">DeFiLlama vs Dune数据差异</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>两个平台数据可能有30-50%差异，原因包括：统计口径不同（TVL vs AUM）、合约地址覆盖不全、时间滞后。建议同时监控并关注趋势而非绝对值。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-kn-3" data-section="longform">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">BUIDL招募说明书关键条款</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>招募说明书（Prospectus）包含：基金管理费结构（通常20bps）、最低认购额、赎回机制（通常T+1）、SEC注册信息。可推断Securitize作为"transfer agent"的角色和收入模式。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-kn-4" data-section="longform">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Delphi Digital研究价值</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Delphi Digital是加密领域最顶尖的研究机构之一，其RWA报告常包含独家数据和深度竞争分析。虽然是付费内容，但其Twitter和公开摘要通常包含核心结论。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-kn-5" data-section="podcasts">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Unchained访谈特点</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Laura Shin是加密领域最资深的播客主持人之一，其采访以深入追问著称。Domingo的访谈通常会涉及：与其他RWA平台的竞争、技术护城河、监管策略。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-kn-6" data-section="primary">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">SEC EDGAR检索技巧</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>搜索"Securitize"或"Securitize Markets LLC"。关键文件类型：Form BD（经纪商注册）、ADV（投资顾问）、S-1/10-K（如有公开募股）。注意CIK编号以追踪所有关联实体。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-kn-7" data-section="primary">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Domingo Twitter信号解读</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Domingo的Twitter是观察行业趋势和公司动态的实时窗口。注意：转发vs原创比例、互动对象（同行vs机构）、对行业事件的快速反应。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-kn-8" data-section="relationships">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">Fink代币化叙事演变</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Larry Fink从2017年怀疑比特币，到2024年将代币化列为战略重点，这一转变本身就是RWA赛道合法化的最强信号。其年度信件是追踪这一叙事演变的关键文献。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-kn-9" data-section="relationships">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">USDC即时赎回机制</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>BUIDL支持USDC即时赎回（通常几秒内完成）是其相对传统基金的重大优势。这一机制使BUIDL投资者可随时退出而不损失流动性，是吸引机构的关键特性。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-kn-10" data-section="relationships">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">区块链无关性战略意义</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>Securitize支持多链部署（Aptos、Polygon、Solana）意味着其技术架构不依赖特定L1。这降低了"链上风险"，对机构客户更具吸引力，但也增加了工程复杂度。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-kn-11" data-section="narratives">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">机构认证的商业价值</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>BlackRock选择Securitize作为BUIDL的技术合作伙伴，等同于传统金融领域的"系统重要性认证"。这种背书效应远超合同本身的价值，是Securitize销售其他客户的最佳案例。</p>
+      </div>
+    </div>
+
+    <div class="anno know-note" id="note-kn-12" data-section="narratives">
+      <div class="note-label know">KNOW</div>
+      <div class="mn-head" onclick="toggleNote(this)">
+        <span class="mn-title">代币化国债市场规模</span>
+        <span class="mn-fold">&#9660;</span>
+      </div>
+      <div class="mn-body">
+        <p>截至2024年底，代币化国债市场规模已突破10亿美元，其中BUIDL占据绝对主导地位。这个市场仍处于早期，但增长速度远超行业预期。</p>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+// === Sidebar toggle (mobile) ===
+(function(){
+  var btn=document.getElementById("hamburgerBtn"),sb=document.getElementById("sidebar"),ov=document.getElementById("sidebarOverlay");
+  if(!btn||!sb)return;
+  btn.onclick=function(){sb.classList.toggle("open");ov.classList.toggle("open");};
+  ov.onclick=function(){sb.classList.remove("open");ov.classList.remove("open");};
+})();
+
+// === Notes sidebar toggle ===
+(function(){
+  var btn=document.getElementById("notesToggleBtn"),ns=document.getElementById("notesSidebar"),ov=document.getElementById("notesOverlay"),cb=document.getElementById("notesCloseBtn");
+  if(!btn||!ns)return;
+  function toggle(){ns.classList.toggle("ns-closed");ov.classList.toggle("open");}
+  btn.onclick=toggle;
+  if(ov)ov.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(cb)cb.onclick=function(){ns.classList.add("ns-closed");ov.classList.remove("open");};
+  if(window.innerWidth>1200)ns.classList.remove("ns-closed");
+  window.addEventListener("resize",function(){if(window.innerWidth>1200)ns.classList.remove("ns-closed");});
+})();
+
+// === Toggle note ===
+function toggleNote(head){
+  var anno=head.closest(".anno");
+  if(anno){anno.classList.toggle("open");positionNotes();}
+}
+
+// === Position notes ===
+function positionNotes(){
+  var ns=document.getElementById("notesSidebar");if(!ns)return;
+  var annos=ns.querySelectorAll(".anno");
+  var lastBottom=80;
+  annos.forEach(function(a){
+    if(a.style.display==="none")return;
+    var sec=a.getAttribute("data-section");
+    var target=sec?document.getElementById(sec):null;
+    var top=target?target.getBoundingClientRect().top+window.scrollY-ns.getBoundingClientRect().top:lastBottom;
+    if(top<lastBottom)top=lastBottom;
+    a.style.top=top+"px";
+    lastBottom=top+a.offsetHeight+8;
+  });
+}
+
+// === Knowledge toggle ===
+function toggleKnowNotes(){
+  var btn=document.getElementById("knowToggleBtn");
+  var knowNotes=document.querySelectorAll(".anno.know-note");
+  var marks=document.querySelectorAll("mark.hl-know");
+  var nrefs=document.querySelectorAll(".nref");
+  var visible=btn.classList.contains("active");
+  knowNotes.forEach(function(n){n.style.display=visible?"none":"";});
+  marks.forEach(function(m){m.style.background=visible?"transparent":"";m.style.borderBottom=visible?"none":"";});
+  nrefs.forEach(function(r){r.style.display=visible?"none":"";});
+  btn.classList.toggle("active");
+  btn.textContent=visible?"显示":"隐藏";
+  positionNotes();
+}
+
+// === Expand / Collapse all ===
+function expandAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.add("open");});positionNotes();}
+function collapseAllNotes(){document.querySelectorAll(".anno").forEach(function(a){a.classList.remove("open");});positionNotes();}
+
+// === Note count ===
+(function(){
+  var label=document.getElementById("noteCountLabel");if(!label)return;
+  var meta=document.querySelectorAll(".anno.meta-note").length;
+  var know=document.querySelectorAll(".anno.know-note").length;
+  label.textContent=meta+" META + "+know+" Knowledge";
+})();
+
+// === Highlight → Note sync ===
+document.addEventListener("click",function(e){
+  var mark=e.target.closest("mark.hl-know")||e.target.closest(".nref");
+  if(!mark)return;
+  var noteId=mark.getAttribute("data-note");if(!noteId)return;
+  var anno=document.getElementById(noteId);if(!anno)return;
+  anno.classList.add("open");
+  anno.scrollIntoView({behavior:"smooth",block:"center"});
+  anno.classList.add("flash");
+  setTimeout(function(){anno.classList.remove("flash");},1500);
+  positionNotes();
+});
+
+// === Embedded mode ===
+(function(){
+  if(window===window.top)return;
+  document.body.classList.add("embedded");
+  document.addEventListener("click",function(e){
+    var a=e.target.closest("a");if(!a||!a.href)return;
+    try{var url=new URL(a.href,location.href)}catch(err){return}
+    if(url.pathname.startsWith("/trade-pipeline/")||url.pathname.startsWith("/observatory/")){
+      e.preventDefault();
+      window.top.postMessage({type:"dashboard-nav",action:"openResearch",url:url.pathname,title:a.textContent.trim().substring(0,60)},"*");
+    }
+  });
+})();
+
+// Initial positioning
+window.addEventListener("load",function(){positionNotes();});
+window.addEventListener("scroll",function(){positionNotes();});
+</script>
+</body>
+</html>

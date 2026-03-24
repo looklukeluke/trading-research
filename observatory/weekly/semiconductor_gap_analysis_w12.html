@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>半导体研究素材审计 — 完整性诊断 W12</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="../../trade-pipeline/output/reports/semiconductor_shared.css">
+  <style>
+    /* :root variables inherited from semiconductor_shared.css */
+    :root { --sidebar-width: 230px; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-size: 15px; line-height: 1.65; }
+    .page-wrapper { display: flex; min-height: 100vh; }
+    .sidebar { position: sticky; top: 0; height: 100vh; width: var(--sidebar-width); min-width: var(--sidebar-width); overflow-y: auto; padding: 1.25rem 0.75rem; border-right: 1px solid var(--border-subtle); background: var(--bg-elevated); z-index: 100; }
+    .sidebar h4 { margin-bottom: 0.5rem; padding: 0 0.5rem; font-size: 0.68rem; font-weight: 590; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-quaternary); }
+    .sidebar nav ul { list-style: none; padding: 0; margin: 0 0 0.75rem 0; }
+    .sidebar nav ul li a { display: block; padding: 0.2rem 0.5rem; font-size: 0.75rem; color: var(--text-tertiary); text-decoration: none; border-radius: var(--radius-sm); line-height: 1.35; }
+    .sidebar nav ul li a:hover { background: rgba(248,168,72,0.08); color: var(--text-primary); }
+    .sidebar nav ul li a .toc-num { color: var(--text-quaternary); margin-right: 0.15rem; font-size: 0.6rem; font-weight: 510; }
+    .main-content { flex: 1; min-width: 0; max-width: 980px; padding: 2.5rem 2.5rem 5rem; }
+    .page-header { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-default); }
+    .page-header h1 { margin-bottom: 0.3rem; font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 680; letter-spacing: -0.025em; }
+    .page-header .subtitle { color: var(--text-tertiary); margin-bottom: 1rem; font-size: 0.92rem; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .badge { display: inline-block; padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.72rem; font-weight: 510; background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(248,168,72,0.25); }
+    .role-badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; background: rgba(244,67,54,0.12); color: var(--red); }
+    .section-header { margin-top: 3.5rem; margin-bottom: 1.25rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border-subtle); }
+    .section-header h2 { font-size: 1.2rem; font-weight: 590; letter-spacing: -0.015em; margin-bottom: 0; }
+    h3 { font-size: 1.05rem; font-weight: 590; margin-top: 1.5rem; }
+    h4 { font-size: 0.95rem; font-weight: 590; margin-top: 1.25rem; color: var(--text-primary); }
+    p { color: var(--text-secondary); margin-bottom: 1rem; }
+    strong { color: var(--text-primary); font-weight: 590; }
+    ul, ol { color: var(--text-secondary); padding-left: 1.2rem; }
+    li { margin-bottom: 0.3rem; line-height: 1.55; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    details { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.8rem 1rem; margin: 0.8rem 0; background: var(--bg-elevated); }
+    details summary { cursor: pointer; font-weight: 510; font-size: 0.88rem; color: var(--text-primary); }
+    details[open] summary { margin-bottom: 0.6rem; color: var(--accent); }
+    .priority-box { border: 1px solid rgba(248,168,72,0.3); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin-bottom: 2rem; background: var(--bg-surface); }
+    .priority-box h2 { color: var(--accent); margin-top: 0; font-size: 1.05rem; font-weight: 590; }
+    .arc-item { margin-bottom: 0.8rem; padding: 0.7rem 0.8rem; border-left: 3px solid var(--accent); background: rgba(66,165,245,0.03); border-radius: 0 6px 6px 0; font-size: 0.92rem; }
+    .arc-item strong { color: var(--accent); }
+    .question-box { border: 2px solid var(--knowledge); border-radius: 8px; padding: 1.25rem; margin: 1.5rem 0; background: rgba(91,155,213,0.05); }
+    .question-box h4 { color: var(--knowledge); margin-top: 0; font-size: 0.92rem; }
+    figure { margin: 1rem 0; overflow-x: auto; }
+    table { font-size: 0.8rem; border-collapse: collapse; width: 100%; }
+    th, td { padding: 0.45rem 0.7rem; border-bottom: 1px solid var(--border-subtle); text-align: left; }
+    th { white-space: nowrap; font-weight: 510; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-quaternary); border-bottom: 1px solid var(--border-default); }
+    td { color: var(--text-secondary); }
+    tr:hover td { background: var(--bg-elevated); }
+    blockquote { border-left: 3px solid var(--accent); padding: 0.5rem 1rem; margin: 0.8rem 0; font-style: italic; background: var(--bg-surface); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-secondary); font-size: 0.9rem; }
+    .signal { display: inline-block; font-size: 0.72rem; padding: 0.1rem 0.4rem; border-radius: 3px; font-weight: 590; margin-right: 0.2rem; }
+    .signal-bull { background: rgba(76,175,80,0.15); color: var(--green); }
+    .signal-bear { background: rgba(244,67,54,0.15); color: var(--red); }
+    .signal-watch { background: rgba(255,167,38,0.15); color: var(--orange); }
+    .signal-critical { background: rgba(244,67,54,0.25); color: var(--red); font-weight: 700; }
+    .node-tag { display: inline-block; padding: 0.08rem 0.35rem; border-radius: 3px; font-size: 0.62rem; font-weight: 590; background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-tertiary); margin-right: 0.15rem; }
+    .phase-tag { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+    .phase-audit { background: rgba(244,67,54,0.12); color: var(--red); }
+    .phase-gap { background: rgba(255,167,38,0.12); color: var(--orange); }
+    .phase-fix { background: rgba(76,175,80,0.12); color: var(--green); }
+    .page-footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 2px solid var(--border-default); text-align: center; font-size: 0.82rem; color: var(--text-tertiary); }
+
+    /* OBS-VIZ Chart Frame */
+    .obs-chart-frame { background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); overflow: hidden; margin: 1.5rem 0; }
+    .obs-chart-frame-header { padding: 0.6rem 1rem; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; }
+    .obs-chart-frame-title { font-size: 0.9rem; font-weight: 590; color: var(--accent); }
+    .obs-chart-frame-badge { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.1rem 0.45rem; border-radius: 3px; background: var(--accent-dim); color: var(--accent); }
+    .obs-chart-frame-body { padding: 0; }
+    .obs-chart-annotation { padding: 0.6rem 1rem; background: var(--bg-surface); border-top: 1px solid var(--border-subtle); font-size: 0.78rem; color: var(--text-secondary); line-height: 1.55; }
+    .obs-chart-annotation strong { color: var(--accent); }
+    .obs-chart-source { padding: 0.35rem 1rem; font-size: 0.65rem; color: var(--text-quaternary); border-top: 1px solid var(--border-subtle); }
+
+    ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+    .hamburger-btn { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 200; background: var(--bg-surface); color: var(--text-primary); border: none; border-radius: 6px; width: 44px; height: 44px; font-size: 1.4rem; cursor: pointer; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+    @media (max-width: 900px) { .sidebar { position: fixed; left: -280px; top: 0; transition: left 0.3s ease; } .sidebar.open { left: 0; } .sidebar-overlay.open { display: block; } .hamburger-btn { display: block; } .main-content { padding: 2rem 1rem 4rem; } }
+
+/* Reading Mode */
+#readingModeBtn { position: fixed; top: 1rem; right: 1rem; z-index: 9999; width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--border-default, #34343a); background: var(--bg-surface, #141516); color: var(--text-secondary, #d0d6e0); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.7; transition: opacity 0.2s; }
+#readingModeBtn:hover { opacity: 1; }
+.reading-mode .sidebar, .reading-mode .notes-sidebar { display: none !important; }
+.reading-mode .main-content { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+.reading-mode .hamburger-btn { display: none !important; }
+.reading-mode .sidebar-overlay { display: none !important; }
+  
+/* === Embedded mode: inside Dashboard iframe === */
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded .main-content { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+body.embedded .hamburger-btn { display: none !important; }
+body.embedded .sidebar-overlay { display: none !important; }
+</style>
+</head>
+<body>
+<nav style="position:sticky;top:0;z-index:999;background:rgba(8,9,10,0.95);backdrop-filter:blur(8px);padding:0.5rem 1.5rem;border-bottom:1px solid #23252a;font-size:0.78rem;display:flex;gap:1rem;align-items:center;">
+  <a href="2026-W12-v3.html" style="color:#f8a848;">&larr; Week 12</a>
+  <span style="color:#62666d;">&middot;</span>
+  <a href="../../trade-pipeline/output/reports/semiconductor_hub.html" style="color:#8a8f98;">Semiconductor Hub</a>
+  <span style="color:#62666d;">&middot;</span>
+  <a href="../../trade-pipeline/output/reports/semiconductor_deep_research_v3.html" style="color:#8a8f98;">行业深度研究V3</a>
+  <span style="color:#62666d;">&middot;</span>
+  <a href="../../trade-pipeline/output/reports/semiconductor_industry_metacognition.html" style="color:#ab47bc;">28轮行业元思考</a>
+</nav>
+<button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="page-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <h4>审计导航</h4>
+    <nav><ul>
+      <li><a href="#verdict"><span class="toc-num">&#9733;</span>核心结论</a></li>
+      <li><a href="#current"><span class="toc-num">1</span>当前状态盘点</a></li>
+      <li><a href="#blind"><span class="toc-num">2</span>结构性盲点</a></li>
+      <li><a href="#tier-a"><span class="toc-num">3</span>TIER A ✓ 已完成</a></li>
+      <li><a href="#tier-b"><span class="toc-num">4</span>TIER B 缺失</a></li>
+      <li><a href="#nodes"><span class="toc-num">5</span>节点覆盖分析</a></li>
+      <li><a href="#reclass"><span class="toc-num">6</span>重新分类建议</a></li>
+      <li><a href="#companies"><span class="toc-num">7</span>被提及但无代理人</a></li>
+      <li><a href="#impact"><span class="toc-num">8</span>投资决策影响</a></li>
+      <li><a href="#next"><span class="toc-num">9</span>下一步路径</a></li>
+    </ul></nav>
+  </aside>
+
+  <main class="main-content">
+    <header class="page-header">
+      <div class="role-badge">GAP ANALYSIS</div>
+      <h1>半导体研究素材 — 完整性审计</h1>
+      <p class="subtitle">380+文件 &times; 20代理人 &times; 8节点的系统性缺失诊断<br>
+      <span style="color:var(--text-quaternary);font-size:0.85em;">Week 12 元思考产出 &nbsp;|&nbsp; 2026-03-21</span></p>
+      <div class="badge-row">
+        <span class="badge">供给侧覆盖 80%</span>
+        <span class="badge" style="background:rgba(76,175,80,0.12);color:#4caf50;border-color:rgba(76,175,80,0.25);">需求侧覆盖 40% ✓ Altman+Nadella+Musk</span>
+        <span class="badge" style="background:rgba(76,175,80,0.12);color:#4caf50;border-color:rgba(76,175,80,0.25);">AI Lab覆盖 30% ✓ Pichai+Hassabis</span>
+        <span class="badge" style="background:rgba(244,67,54,0.12);color:#f44336;border-color:rgba(244,67,54,0.25);">中国生态覆盖 0%</span>
+      </div>
+    </header>
+
+    <!-- Verdict -->
+    <div class="priority-box" id="verdict">
+      <h2>✓ 核心结论更新：买方视角已部分补充（16→20代理人）</h2>
+      <ol>
+        <li><strong>20个认知代理人中4个是需求侧</strong>（#17 Altman, #18 Nadella, #19 Pichai, #20 Hassabis）。<strong style="color:var(--orange);">供需不对称已改善但仍存在</strong>——供给侧16人 vs 需求侧4人，买方声音仍需加强（Jassy/Zuckerberg/Amodei待补）</li>
+        <li><strong>$1T订单的"硬度"已有部分独立验证</strong>。Altman(#17)和Nadella(#18)的代理人已建立，LOI→合同的转化率可从买方视角交叉验证。Jensen的$1T叙事有了买方对照</li>
+        <li><strong>CUDA侵蚀速度有了直接评估视角</strong>。Pichai(#19)和Hassabis(#20)的代理人提供TPU路线图和模型训练架构选择的第一手视角，"CUDA不可替代"判断有了买方反证</li>
+        <li><strong>中国半导体生态仍然是黑盒</strong>。Jensen说市场份额95%→50%，但SMIC/华为海思的视角=0</li>
+        <li><strong>定量完整度：供给侧80% / 需求侧40% / AI Lab 30% / 整体约65%</strong>。从"结构性缺陷"改善为"不对称但可用"——剩余缺口集中在TIER B(Jassy/Zuckerberg/Amodei)和中国</li>
+      </ol>
+    </div>
+
+
+    <!-- 1. Current State -->
+    <section id="current">
+      <div class="section-header">
+        <span class="phase-tag phase-audit">AUDIT</span>
+        <h2>1. 当前状态盘点</h2>
+      </div>
+
+      <h3>20个代理人 &times; 8个节点</h3>
+      <figure>
+        <table>
+          <thead><tr><th>节点</th><th>#</th><th>代理人</th><th>公司</th><th>角色</th><th>评分</th><th>素材数</th></tr></thead>
+          <tbody>
+            <tr><td rowspan="3"><span class="node-tag">GPU/AI设计</span></td><td>01</td><td><strong>Jensen Huang</strong></td><td>NVIDIA</td><td>Giant</td><td>5/5</td><td>17文件+元思考</td></tr>
+            <tr><td>02</td><td>Lisa Su</td><td>AMD</td><td>Investor</td><td>4/5</td><td>10文件+元思考</td></tr>
+            <tr><td>03</td><td>Hock Tan</td><td>Broadcom</td><td>Contrarian</td><td>4/5</td><td>10文件+元思考</td></tr>
+            <tr><td rowspan="2"><span class="node-tag">光刻设备</span></td><td>04</td><td>Christophe Fouquet</td><td>ASML</td><td>Giant</td><td>4/5</td><td>10文件+元思考</td></tr>
+            <tr><td>05</td><td>Gary Dickerson</td><td>AMAT</td><td>Investor</td><td>3/5</td><td>10文件+元思考</td></tr>
+            <tr><td rowspan="2"><span class="node-tag">代工制造</span></td><td>07</td><td><strong>C.C. Wei</strong></td><td>TSMC</td><td>Giant</td><td>4/5</td><td>10文件+元思考</td></tr>
+            <tr><td>08</td><td><strong>Morris Chang</strong></td><td>TSMC</td><td>Investor</td><td>5/5</td><td>10文件+元思考</td></tr>
+            <tr><td rowspan="2"><span class="node-tag">存储/HBM</span></td><td>10</td><td>Kwak Noh Jung</td><td>SK hynix</td><td>Giant</td><td>3/5</td><td>10文件+元思考</td></tr>
+            <tr><td>11</td><td>Sanjay Mehrotra</td><td>Micron</td><td>Investor</td><td>3/5</td><td>10文件+元思考</td></tr>
+            <tr><td rowspan="3"><span class="node-tag">终端/Custom</span></td><td>09</td><td>Lip-Bu Tan</td><td>Intel</td><td>Contrarian</td><td>4/5</td><td>10文件+元思考</td></tr>
+            <tr><td>13</td><td>Johny Srouji</td><td>Apple</td><td>Investor</td><td>3/5</td><td>10文件+元思考</td></tr>
+            <tr><td>14</td><td>Jim Keller</td><td>Tenstorrent</td><td>Contrarian</td><td>4/5</td><td>10文件+元思考</td></tr>
+            <tr><td rowspan="2"><span class="node-tag">EDA/IP</span></td><td>15</td><td>Sassine Ghazi</td><td>Synopsys</td><td>Giant</td><td>3/5</td><td>10文件+元思考</td></tr>
+            <tr><td>16</td><td>Rene Haas</td><td>ARM</td><td>Investor</td><td>3/5</td><td>10文件+元思考</td></tr>
+            <tr><td><span class="node-tag">跨领域</span></td><td>06</td><td>Chris Miller</td><td>学术/Chip War</td><td>Contrarian</td><td>4/5</td><td>10文件+元思考</td></tr>
+            <tr style="background:rgba(76,175,80,0.03);"><td rowspan="3"><span class="node-tag" style="border-color:var(--green);color:var(--green);">需求侧 NEW</span></td><td>12</td><td>Elon Musk ↑</td><td>Tesla/xAI</td><td>Contrarian</td><td>2/5</td><td>10文件+元思考 (从NODE3移入)</td></tr>
+            <tr style="background:rgba(76,175,80,0.03);"><td>17</td><td><strong>Sam Altman</strong></td><td>OpenAI</td><td>Giant</td><td>4/5</td><td>10文件+元思考+V4 ✓</td></tr>
+            <tr style="background:rgba(76,175,80,0.03);"><td>18</td><td><strong>Satya Nadella</strong></td><td>Microsoft</td><td>Giant</td><td>4/5</td><td>10文件+元思考+V4 ✓</td></tr>
+            <tr style="background:rgba(76,175,80,0.03);"><td rowspan="2"><span class="node-tag" style="border-color:var(--green);color:var(--green);">AI Lab NEW</span></td><td>19</td><td><strong>Sundar Pichai</strong></td><td>Google</td><td>Giant</td><td>4/5</td><td>10文件+元思考+V4 ✓</td></tr>
+            <tr style="background:rgba(76,175,80,0.03);"><td>20</td><td><strong>Demis Hassabis</strong></td><td>DeepMind</td><td>Investor</td><td>4/5</td><td>10文件+元思考+V4 ✓</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <!-- OBS-VIZ: Agent-Node Heatmap -->
+      <div class="obs-chart-frame">
+        <div class="obs-chart-frame-header">
+          <span class="obs-chart-frame-title">Agent × Node Quality Heatmap 代理人×节点质量热力图</span>
+          <span class="obs-chart-frame-badge">INTERACTIVE</span>
+        </div>
+        <div class="obs-chart-frame-body">
+          <div id="chart-heatmap" style="height:500px;"></div>
+        </div>
+        <div class="obs-chart-annotation">
+          <strong>Reading:</strong> 深绿 = 高质量覆盖(5/5)。黄/红 = 需要改进。暗色 = 不属于该节点。★ = TIER A新增代理人。Musk已从代工节点移至需求侧(NODE 7)。右侧两列(需求侧/AI Lab)为新增NODE 7/8。
+        </div>
+      </div>
+
+      <h3>素材总量</h3>
+      <ul>
+        <li><strong>380+文件</strong>：20个Profile(HTML+MD) + 20个V4素材地图 + 80份专项(Primary/Interviews/Relationships/DeepAnalysis各20) + 20个元思考报告</li>
+        <li><strong>行业级产出</strong>：semiconductor_hub.html + overview.html + deep_research_v3.html + industry_metacognition.html</li>
+        <li><strong>深度元思考</strong>：Jensen 28轮(527行) + Musk(389行) + 行业级28轮(565行)</li>
+        <li><strong>播客</strong>：英文完整版(116MB) + 中文版(36MB) + 英文压缩版(29MB) + 英文随性版(92MB)</li>
+      </ul>
+
+      <p><strong>素材量不是问题——问题是视角单一</strong>。380+文件中大部分聚焦供给侧，需求侧4个代理人(Altman/Nadella/Pichai/Hassabis)已建立但深度不对称。</p>
+    </section>
+
+
+    <!-- 2. Structural Blind Spot -->
+    <section id="blind">
+      <div class="section-header">
+        <span class="phase-tag phase-audit">AUDIT</span>
+        <h2>2. 结构性盲点：卖方回音室</h2>
+      </div>
+
+      <blockquote>当供给侧16个卖方代理人都说"需求insatiable"时，我们听到的不是"市场真相"，而是<strong>卖方回音室</strong>。每个人都有动机高估自己产品的需求。</blockquote>
+
+      <h3>回音室效应的具体表现</h3>
+
+      <div class="arc-item">
+        <strong>Jensen说"$1T订单可见性"</strong> &mdash; 但他的CFO Kress承认OpenAI $100B "still at LOI"。没有Altman的视角，我们无法判断LOI→合同的转化率。Jensen的$1T可能需要打折30-40%——但我们没有独立证据来确定打折多少。
+      </div>
+
+      <div class="arc-item">
+        <strong>Wei说"demand surprises us on the upside every quarter"</strong> &mdash; 但这是TSMC作为独家供应商的视角。如果Google/Amazon的自研芯片在2027年替代了20%的NVIDIA订单，Wei看到的"需求"会下降——但他不会提前告诉我们，因为自研芯片也需要TSMC代工。
+      </div>
+
+      <div class="arc-item">
+        <strong>Lisa Su说"insatiable AI chip demand"</strong> &mdash; 她是GPU竞争者，确认需求存在——但也有动机高估TAM来吸引投资者。AMD的MI350能拿到多少份额，取决于Google/Meta是否愿意从NVIDIA切换——但我们没有Google/Meta的视角。
+      </div>
+
+      <div class="arc-item">
+        <strong>所有人都确认需求→共识可能是拥挤多头</strong> &mdash; 2000年电信泡沫：所有CEO说"带宽无限"→实际只兑现30%。当前没有任何一个代理人公开bearish AI CapEx。<strong>这本身是一个风险信号</strong>。
+      </div>
+
+      <h3>定量覆盖度评估</h3>
+      <figure>
+        <table>
+          <thead><tr><th>维度</th><th>覆盖度</th><th>代理人数</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>供给侧-制造</td><td><strong style="color:var(--green);">85%</strong></td><td>5人</td><td>TSMC(2) + ASML + AMAT + SK hynix。Samsung代工缺失</td></tr>
+            <tr><td>供给侧-设计</td><td><strong style="color:#8bc34a;">75%</strong></td><td>5人</td><td>NVIDIA + AMD + ARM + Broadcom + Tenstorrent。缺inference ASIC(Groq/Cerebras)</td></tr>
+            <tr><td>供给侧-EDA/工具</td><td><strong style="color:#8bc34a;">70%</strong></td><td>2人</td><td>Synopsys + ARM(IP)。Cadence有Lip-Bu Tan覆盖(兼Intel)</td></tr>
+            <tr><td>供给侧-设备</td><td><strong style="color:var(--orange);">50%</strong></td><td>1人</td><td>AMAT only。缺KLAC(良率) + LRCX(刻蚀) + TEL</td></tr>
+            <tr><td><strong>需求侧-超大规模</strong></td><td><strong style="color:var(--orange);">40%</strong></td><td>3人</td><td>Musk(2/5) + Altman(4/5) + Nadella(4/5) ✓ NODE 7报告已建</td></tr>
+            <tr><td><strong>需求侧-AI Lab</strong></td><td><strong style="color:var(--orange);">30%</strong></td><td>2人</td><td>Pichai(4/5) + Hassabis(4/5) ✓ NODE 8报告已建</td></tr>
+            <tr><td><strong>地缘政策</strong></td><td><strong style="color:var(--orange);">30%</strong></td><td>1.5人</td><td>Miller(历史学家) + Chang(退休创始人)。缺活跃政策制定者</td></tr>
+            <tr><td><strong>中国半导体</strong></td><td><strong style="color:var(--red);">0%</strong></td><td>0人</td><td>SMIC/华为海思/长江存储零覆盖</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <!-- OBS-VIZ: Coverage Bar Chart -->
+      <div class="obs-chart-frame">
+        <div class="obs-chart-frame-header">
+          <span class="obs-chart-frame-title">Research Coverage Gap 研究覆盖缺口</span>
+          <span class="obs-chart-frame-badge">INTERACTIVE</span>
+        </div>
+        <div class="obs-chart-frame-body">
+          <div id="chart-coverage" style="height:340px;"></div>
+        </div>
+        <div class="obs-chart-annotation">
+          <strong>Updated:</strong> 黄色虚线 = 60% 最低充分线。供给侧（上4条）全部达标。需求侧已从0%/5%提升至30%/40%（TIER A完成），但仍低于60%阈值。中国半导体仍为0% — 是最大剩余盲点。
+        </div>
+      </div>
+
+      <!-- OBS-VIZ: Echo Chamber Diagram -->
+      <div class="obs-chart-frame">
+        <div class="obs-chart-frame-header">
+          <span class="obs-chart-frame-title">Seller Echo Chamber 卖方回音室效应</span>
+          <span class="obs-chart-frame-badge">CONCEPT</span>
+        </div>
+        <div class="obs-chart-frame-body" style="padding:1.5rem;">
+          <svg viewBox="0 0 500 320" xmlns="http://www.w3.org/2000/svg">
+            <!-- Outer ring: Demand side (empty) -->
+            <circle cx="250" cy="160" r="145" fill="none" stroke="#ffa726" stroke-width="2" stroke-dasharray="8"/>
+            <text x="250" y="25" fill="#ffa726" font-size="11" font-weight="590" text-anchor="middle" font-family="Inter,sans-serif">DEMAND SIDE 需求侧 — 40% COVERAGE (TIER A DONE)</text>
+            <!-- Demand labels around the outer ring -->
+            <text x="430" y="100" fill="#4caf50" font-size="9" font-weight="590" text-anchor="end" font-family="Inter,sans-serif">Sam Altman (OpenAI) ✓</text>
+            <text x="440" y="160" fill="#4caf50" font-size="9" font-weight="590" text-anchor="end" font-family="Inter,sans-serif">Sundar Pichai (Google) ✓</text>
+            <text x="430" y="220" fill="#4caf50" font-size="9" font-weight="590" text-anchor="end" font-family="Inter,sans-serif">Satya Nadella (MSFT) ✓</text>
+            <text x="70" y="100" fill="#62666d" font-size="9" text-anchor="start" font-family="Inter,sans-serif">Andy Jassy (AWS)</text>
+            <text x="60" y="160" fill="#62666d" font-size="9" text-anchor="start" font-family="Inter,sans-serif">Mark Zuckerberg (META)</text>
+            <text x="70" y="220" fill="#4caf50" font-size="9" font-weight="590" text-anchor="start" font-family="Inter,sans-serif">Demis Hassabis (DeepMind) ✓</text>
+            <!-- Status markers: green checkmarks for TIER A done, red ? for remaining -->
+            <text x="395" y="105" fill="#4caf50" font-size="12" font-weight="700" font-family="Inter,sans-serif">✓</text>
+            <text x="405" y="165" fill="#4caf50" font-size="12" font-weight="700" font-family="Inter,sans-serif">✓</text>
+            <text x="395" y="225" fill="#4caf50" font-size="12" font-weight="700" font-family="Inter,sans-serif">✓</text>
+            <text x="100" y="105" fill="#f44336" font-size="12" font-weight="700" font-family="Inter,sans-serif">?</text>
+            <text x="90" y="165" fill="#f44336" font-size="12" font-weight="700" font-family="Inter,sans-serif">?</text>
+            <text x="100" y="225" fill="#4caf50" font-size="12" font-weight="700" font-family="Inter,sans-serif">✓</text>
+            <!-- Inner circle: Supply side (filled) -->
+            <circle cx="250" cy="160" r="80" fill="rgba(248,168,72,0.08)" stroke="#f8a848" stroke-width="2"/>
+            <text x="250" y="125" fill="#f8a848" font-size="11" font-weight="590" text-anchor="middle" font-family="Inter,sans-serif">SUPPLY SIDE</text>
+            <text x="250" y="140" fill="#f8a848" font-size="10" text-anchor="middle" font-family="Inter,sans-serif">供给侧</text>
+            <text x="250" y="160" fill="#d0d6e0" font-size="10" text-anchor="middle" font-family="Inter,sans-serif">16 Supply Agents</text>
+            <text x="250" y="175" fill="#d0d6e0" font-size="10" text-anchor="middle" font-family="Inter,sans-serif">80% Coverage</text>
+            <text x="250" y="195" fill="#8a8f98" font-size="8" text-anchor="middle" font-family="Inter,sans-serif">Jensen · Lisa Su · Hock Tan</text>
+            <text x="250" y="207" fill="#8a8f98" font-size="8" text-anchor="middle" font-family="Inter,sans-serif">C.C. Wei · Morris Chang · ...</text>
+            <!-- Bottom label -->
+            <text x="250" y="310" fill="#62666d" font-size="9" text-anchor="middle" font-family="Inter,sans-serif">实心圆 = 供给侧(16人) | 虚线圆 = 需求侧(4人已建 ✓ / 2人待补 ?)</text>
+          </svg>
+        </div>
+        <div class="obs-chart-annotation">
+          <strong>Progress:</strong> TIER A已完成 — Altman/Nadella/Pichai/Hassabis四个需求侧代理人已建立（绿色 ✓）。剩余缺口：Jassy(AWS) + Zuckerberg(Meta) 仍为红色 ?。回音室效应已部分打破，但供需比仍为16:4。
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 3. TIER A -->
+    <section id="tier-a">
+      <div class="section-header">
+        <span class="phase-tag phase-fix">TIER A — ✓ COMPLETED</span>
+        <h2>3. 会改变投资决策的缺失 — ✓ 已补充</h2>
+      </div>
+      <p><strong style="color:var(--green);">TIER A 三组代理人已全部完成。</strong>以下3组人的认知代理人已建立（#17-#20），$1T叙事、CUDA护城河、需求持续性的判断已有买方视角交叉验证。剩余缺口为TIER B + 中国。</p>
+
+      <details open>
+        <summary><strong>✓ DONE — Sam Altman (OpenAI CEO) — 最大客户 + 最大威胁 + "硬度"验证者</strong></summary>
+        <h4>为什么是TIER A</h4>
+        <ul>
+          <li><strong>$100B LOI的签约方</strong>——只有他知道这个LOI多"硬"。Jensen说$1T，但Altman手上的Broadcom自研芯片(40人团队)是Plan B</li>
+          <li><strong>NVIDIA定价权的精确测量器</strong>——Altman仅凭<em>威胁</em>转TPU就拿到30%折扣。这意味着替代品的<em>存在</em>本身就是武器</li>
+          <li><strong>自研芯片时间表的第一手信息</strong>——OpenAI-Broadcom芯片原计划Q2 2026→推迟至Q3。只有Altman知道真实进度</li>
+          <li>在Jensen报告中被引用<strong>35+次</strong>——是被提及最多但没有自己代理人的人</li>
+        </ul>
+        <h4>不补的影响</h4>
+        <p><span class="signal signal-critical">CRITICAL</span> $1T订单可信度无法从需求侧独立验证。当前只有Jensen的卖方叙事。如果Altman在2026年H2削减GPU采购→$1T叙事崩塌的最早信号我们会错过。</p>
+        <h4>应覆盖的素材</h4>
+        <ul>
+          <li>OpenAI历次融资声明 + DevDay演讲 + 国会听证</li>
+          <li>与Jensen/Nadella/Pichai的关系动态（竞合+依赖）</li>
+          <li>Broadcom自研芯片进度（Q3 2026交付是关键节点）</li>
+          <li>OpenAI IPO时间表（2026？）及其对NVIDIA采购承诺的影响</li>
+        </ul>
+      </details>
+
+      <details open>
+        <summary><strong>✓ DONE — Sundar Pichai / Demis Hassabis (Google Cloud + DeepMind) — NVIDIA的真正竞争者</strong></summary>
+        <h4>为什么是TIER A</h4>
+        <ul>
+          <li><strong>Google TPU有10年积累</strong>——没有任何其他竞争者有这个先发优势。Ben Thompson(Stratechery)认为Google是唯一有head start的NVIDIA威胁</li>
+          <li><strong>Claude Opus 4.5和Gemini 3主要在TPU训练</strong>——前沿AI模型已经可以完全绕过NVIDIA。这是"CUDA不可替代"(15%可信)的最强反证</li>
+          <li><strong>Google开始向客户数据中心部署TPU</strong>——不再只是Google Cloud出租，而是直接卖给客户。这是从"内部工具"到"外部竞品"的战略转折</li>
+          <li><strong>Meta-Google TPU交易（数十亿美元）</strong>——NVIDIA最大客户之一开始分散到Google</li>
+        </ul>
+        <h4>不补的影响</h4>
+        <p><span class="signal signal-critical">CRITICAL</span> CUDA侵蚀速度无法准确评估。当前判断"15%可信"是基于间接证据——如果有Pichai/Hassabis的直接视角，可以精确到"侵蚀以年计还是季度计"，这决定了NVDA的估值时间窗口。</p>
+        <h4>应覆盖的素材</h4>
+        <ul>
+          <li>Google Cloud AI财报数据（TPU vs GPU收入占比）</li>
+          <li>TPU v5/v6/v7技术路线图 + 与Broadcom的芯片合作</li>
+          <li>Hassabis的AGI时间表判断（他的预测能力可能比Jensen更强——DeepMind的AlphaFold等突破验证率极高）</li>
+          <li>Google对NVIDIA的公开回应 + 内部芯片战略</li>
+        </ul>
+      </details>
+
+      <details open>
+        <summary><strong>✓ DONE — Satya Nadella (Microsoft CEO) — 需求侧最大支出方</strong></summary>
+        <h4>为什么是TIER A</h4>
+        <ul>
+          <li><strong>Azure是#1 AI CapEx买家</strong>——Microsoft的AI基础设施支出可能是全球最大。Nadella的CapEx决策直接影响NVIDIA收入的25%+</li>
+          <li><strong>Project Maia自研芯片</strong>——Microsoft也在开发自己的AI芯片。如果Maia成功→又一个客户逃生通道</li>
+          <li><strong>OpenAI的实际运营方</strong>——Microsoft拥有OpenAI 49%，运营着OpenAI的基础设施。Nadella的视角=OpenAI真实需求的窗口</li>
+          <li><strong>Copilot商业化=AI应用ROI的最佳指标</strong>——如果Copilot的企业采用率不达预期，AI CapEx的投入回报比就存疑</li>
+        </ul>
+        <h4>不补的影响</h4>
+        <p><span class="signal signal-critical">CRITICAL</span> 需求侧最大支出方是完全黑盒。如果Nadella在2027年下调Azure AI CapEx指引→$1T叙事丧失25%基础。我们目前没有任何方式提前感知这个风险。</p>
+        <h4>应覆盖的素材</h4>
+        <ul>
+          <li>Microsoft财报中Azure AI CapEx数据（季度级跟踪）</li>
+          <li>Copilot企业采用率（AI应用ROI的代理指标）</li>
+          <li>Project Maia自研芯片进度</li>
+          <li>与Jensen/Altman的关系三角（Microsoft-OpenAI-NVIDIA）</li>
+        </ul>
+      </details>
+    </section>
+
+
+    <!-- 4. TIER B -->
+    <section id="tier-b">
+      <div class="section-header">
+        <span class="phase-tag phase-gap">TIER B — IMPORTANT</span>
+        <h2>4. 提升完整度的缺失</h2>
+      </div>
+
+      <details>
+        <summary><strong>Andy Jassy (Amazon/AWS CEO) — "从分销商变成最大替代案例"</strong></summary>
+        <p>AWS Trainium/Inferentia已经运行Bedrock大部分推理token。AWS从NVIDIA GPU的最大分销商变成了最大替代案例——这个转变过程本身是CUDA侵蚀的实时案例研究。</p>
+        <p>Jassy的CapEx决策（AWS是否继续大量采购NVIDIA vs 内部Trainium）直接影响NVIDIA的收入集中度。</p>
+      </details>
+
+      <details>
+        <summary><strong>Mark Zuckerberg (Meta CEO) — PyTorch控制着真正的锁定层</strong></summary>
+        <p>SemiAnalysis的核心论点：<strong>真正的AI锁定不在CUDA层，在PyTorch层——而PyTorch由Meta控制</strong>。PyTorch 2.0的torch.compile()正在创建硬件无关的编译层，使代码可以自动适配不同硬件。</p>
+        <p>Meta-Google TPU交易（数十亿美元）+ Meta内部MTIA芯片研发 = Meta正在从NVIDIA最大客户变成NVIDIA护城河的最大侵蚀者。</p>
+        <p>Zuckerberg同时控制着需求侧(GPU采购) + 软件锁定层(PyTorch) + 替代路径(TPU采购+MTIA自研)——这是整个AI芯片博弈中最复杂的多面角色。</p>
+      </details>
+
+      <details>
+        <summary><strong>Dario Amodei (Anthropic CEO) — "CUDA已被绕过"的活证据</strong></summary>
+        <p>Anthropic的Claude Opus 4.5<strong>主要在Google TPU上训练</strong>，不是NVIDIA GPU。NVIDIA投资了Anthropic $10B——但Anthropic的模型跑在Google的芯片上。</p>
+        <p>这是"CUDA不可替代"(Jensen claim, 15%可信)的<strong>最强单一反证</strong>。</p>
+        <p>Amodei还公开将"卖AI芯片给中国"比作"卖核武器给朝鲜"——与Jensen的中国战略产生直接冲突。Jensen说Anthropic投资"可能是最后一次"——言外之意明确。</p>
+      </details>
+    </section>
+
+
+    <!-- 5. Node Coverage -->
+    <section id="nodes">
+      <div class="section-header">
+        <span class="phase-tag phase-audit">AUDIT</span>
+        <h2>5. 供应链节点覆盖分析</h2>
+      </div>
+
+      <h3>现有8节点 + 缺失节点</h3>
+      <figure>
+        <table>
+          <thead><tr><th>节点</th><th>代理人数</th><th>覆盖度</th><th>缺失严重度</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td><span class="node-tag">GPU/AI设计</span></td><td>3</td><td>80%</td><td><span class="signal signal-watch">LOW</span></td><td>缺inference ASIC(Groq/Cerebras/Graphcore)</td></tr>
+            <tr><td><span class="node-tag">光刻设备</span></td><td>2</td><td>70%</td><td><span class="signal signal-watch">MEDIUM</span></td><td>ASML+AMAT，缺substrate(ONTO)、刻蚀(LRCX)</td></tr>
+            <tr><td><span class="node-tag">代工制造</span></td><td>3</td><td>60%</td><td><span class="signal signal-watch">MEDIUM</span></td><td>TSMC(2人)好，Samsung代工/Intel GFS零覆盖。Musk错位</td></tr>
+            <tr><td><span class="node-tag">存储/HBM</span></td><td>2</td><td>50%</td><td><span class="signal signal-bear">HIGH</span></td><td>HBM供应危机是关键约束，但SK hynix(3/5)不够深。Samsung Memory缺失</td></tr>
+            <tr><td><span class="node-tag">终端/Custom</span></td><td>3</td><td>40%</td><td><span class="signal signal-bear">HIGH</span></td><td>Broadcom好，Apple低(3/5)，Synopsys是工具不是设计</td></tr>
+            <tr><td><span class="node-tag">EDA/IP</span></td><td>3</td><td>55%</td><td><span class="signal signal-watch">MEDIUM</span></td><td>Lip-Bu好(Intel+Cadence双视角)，Miller是参考不是决策者</td></tr>
+            <tr style="background:rgba(76,175,80,0.05);"><td><span class="node-tag" style="border-color:var(--green);color:var(--green);">需求/超大规模 NODE 7</span></td><td><strong>3</strong></td><td><strong style="color:var(--orange);">40%</strong></td><td><span class="signal signal-watch">MEDIUM</span></td><td>✓ Musk(2/5) + Altman(4/5) + Nadella(4/5)。缺Jassy(AWS) + Zuckerberg(Meta)</td></tr>
+            <tr style="background:rgba(76,175,80,0.05);"><td><span class="node-tag" style="border-color:var(--green);color:var(--green);">AI Lab/模型层 NODE 8</span></td><td><strong>2</strong></td><td><strong style="color:var(--orange);">30%</strong></td><td><span class="signal signal-watch">MEDIUM</span></td><td>✓ Pichai(4/5) + Hassabis(4/5)。缺Amodei(Anthropic)</td></tr>
+            <tr style="background:rgba(244,67,54,0.05);"><td><span class="node-tag" style="border-color:var(--red);color:var(--red);">中国半导体</span></td><td><strong>0</strong></td><td><strong style="color:var(--red);">0%</strong></td><td><span class="signal signal-bear">HIGH</span></td><td>SMIC/华为海思=对标+地缘风险参数，完全缺失</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <p><strong>进展</strong>：从7节点扩展到8节点（+NODE 7需求侧 +NODE 8 AI Lab）。需求侧和AI Lab已有TIER A覆盖，但深度不对称（供给侧人均10+文件积累多轮，需求侧刚建立）。中国半导体仍然是完全空白。</p>
+
+      <!-- OBS-VIZ: Node Coverage Stacked Bar -->
+      <div class="obs-chart-frame">
+        <div class="obs-chart-frame-header">
+          <span class="obs-chart-frame-title">Node Coverage: Current vs Gap 节点覆盖：已有 vs 缺口</span>
+          <span class="obs-chart-frame-badge">INTERACTIVE</span>
+        </div>
+        <div class="obs-chart-frame-body">
+          <div id="chart-node-stack" style="height:400px;"></div>
+        </div>
+        <div class="obs-chart-annotation">
+          <strong>Reading:</strong> 绿色 = 已覆盖。红色透明 = 缺口。需求侧和AI Lab已有绿色覆盖（TIER A完成），但仍有红色缺口（TIER B待补）。中国半导体仍为完全空白。
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 6. Reclassification -->
+    <section id="reclass">
+      <div class="section-header">
+        <span class="phase-tag phase-fix">RECLASS</span>
+        <h2>6. 现有代理人重新分类建议</h2>
+      </div>
+
+      <figure>
+        <table>
+          <thead><tr><th>代理人</th><th>当前归类</th><th>问题</th><th>建议</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Elon Musk (#12)</strong></td><td>NODE 3 代工制造, 2/5分</td><td>Musk不造芯片(Terafab还没开工)，他是<strong>最大GPU买家</strong></td><td><strong style="color:var(--green);">✓ DONE</strong> 已移到 NODE 7 "需求侧"</td></tr>
+            <tr><td><strong>Chris Miller (#06)</strong></td><td>NODE 2 光刻, 4/5分</td><td>他是<strong>历史学家</strong>，不是运营决策者。不能提供实时business insights</td><td><strong style="color:var(--green);">✓ DONE</strong> 已添加 Reference 标注</td></tr>
+            <tr><td><strong>Sassine Ghazi (#15)</strong></td><td>NODE 5 Custom Silicon, 3/5分</td><td>Synopsys是<strong>EDA工具</strong>公司，不设计芯片。放在"Custom Silicon"是分类错误</td><td><strong style="color:var(--green);">✓ DONE</strong> 已归入 NODE 6 "EDA/工具"</td></tr>
+            <tr><td><strong>Lip-Bu Tan (#09)</strong></td><td>NODE 3 代工(Intel), 4/5分</td><td>他同时是Cadence(EDA)创始人+Intel CEO，双重身份</td><td>保留但标注双重视角(EDA+代工)</td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </section>
+
+
+    <!-- 7. Mentioned but no agent -->
+    <section id="companies">
+      <div class="section-header">
+        <span class="phase-tag phase-gap">GAP</span>
+        <h2>7. 被频繁提及但无代理人的公司</h2>
+      </div>
+      <p>通过grep分析Jensen报告和深度研究V3，以下公司/人物被反复引用但没有自己的认知代理人：</p>
+
+      <figure>
+        <table>
+          <thead><tr><th>公司/人物</th><th>被引用次数</th><th>在报告中的角色</th><th>缺失影响</th></tr></thead>
+          <tbody>
+            <tr style="background:rgba(76,175,80,0.03);"><td><strong>OpenAI / Sam Altman</strong></td><td>35+</td><td>最大客户+自研威胁+30%折扣</td><td><span class="signal signal-bull">✓ #17</span></td></tr>
+            <tr style="background:rgba(76,175,80,0.03);"><td><strong>Google / Pichai+Hassabis</strong></td><td>20+</td><td>CUDA的真正竞争者</td><td><span class="signal signal-bull">✓ #19/#20</span></td></tr>
+            <tr><td><strong>Anthropic / Amodei</strong></td><td>7+</td><td>Claude在TPU训练=CUDA被绕过</td><td><span class="signal signal-bear">HIGH</span></td></tr>
+            <tr><td><strong>Meta / Zuckerberg</strong></td><td>10+</td><td>PyTorch控制者+TPU买家</td><td><span class="signal signal-bear">HIGH</span></td></tr>
+            <tr style="background:rgba(76,175,80,0.03);"><td><strong>Microsoft / Nadella</strong></td><td>5+</td><td>#1 AI CapEx买家</td><td><span class="signal signal-bull">✓ #18</span></td></tr>
+            <tr><td><strong>Amazon / Jassy</strong></td><td>5+</td><td>Trainium替代GPU的案例</td><td><span class="signal signal-bear">HIGH</span></td></tr>
+            <tr><td><strong>Groq</strong></td><td>5+</td><td>Jensen $20B收购的非GPU推理芯片</td><td><span class="signal signal-watch">MEDIUM</span></td></tr>
+            <tr><td><strong>Samsung代工</strong></td><td>3+</td><td>"TSMC的弱竞争者"但零分析</td><td><span class="signal signal-watch">MEDIUM</span></td></tr>
+            <tr><td><strong>SMIC / 华为海思</strong></td><td>2+</td><td>中国半导体替代生态</td><td><span class="signal signal-bear">HIGH</span></td></tr>
+          </tbody>
+        </table>
+      </figure>
+    </section>
+
+
+    <!-- 8. Investment Impact -->
+    <section id="impact">
+      <div class="section-header">
+        <span class="phase-tag phase-audit">IMPACT</span>
+        <h2>8. 缺失对投资决策的影响</h2>
+      </div>
+
+      <div class="question-box">
+        <h4>为什么这个缺失很危险？</h4>
+        <p style="text-align:left;">研究的核心投资论点是<strong>"AI CapEx持续增长 → 整条半导体链受益"</strong>。这个论点的前提是4个超大规模客户（Microsoft/Google/Amazon/Meta）持续增加AI投入。</p>
+        <p style="text-align:left;">但这4个客户的视角<strong>完全缺失</strong>。如果Altman/Nadella/Jassy/Zuckerberg任何一人削减AI CapEx，$1T叙事就失去25%基础。</p>
+        <p style="text-align:left;">我们的16个卖方代理人<strong>不会提前告诉我们这个</strong>——他们只会在下个季度财报中报告"需求低于预期"。到那时市场已经反应了。</p>
+        <p style="text-align:left;"><strong>核心问题</strong>：我们在用卖方的嘴巴来预测买方的行为。</p>
+      </div>
+
+      <h3>具体的投资判断偏差</h3>
+
+      <div class="arc-item">
+        <strong>偏差1：$1T订单可信度被高估</strong> &mdash; 当前判断"60%可信"是基于Jensen说的+Musk的行为推断。如果有Altman的视角（他是$100B LOI的签约方），可以精确到LOI→合同的转化比例。差异可能是$600B vs $1T——这是40%的估值差异。
+      </div>
+
+      <div class="arc-item">
+        <strong>偏差2：CUDA侵蚀时间表不确定</strong> &mdash; 当前判断"以年计不是季度计"是基于间接证据。如果有Pichai/Hassabis的视角（TPU路线图+客户采用率），可以精确到"2027年TPU占Google推理的X%"。这决定了NVDA的估值窗口——3年 vs 5年差距巨大。
+      </div>
+
+      <div class="arc-item">
+        <strong>偏差3：AI应用ROI被忽视</strong> &mdash; 16个代理人全在谈供给侧。没有人在量化"AI应用到底赚不赚钱"。Nadella的Copilot企业采用率是最好的代理指标——但我们没有追踪。如果Copilot ROI不达预期→AI CapEx的投入回报比存疑→需求悬崖风险上升。
+      </div>
+
+      <div class="arc-item">
+        <strong>偏差4：地缘风险被低估</strong> &mdash; Morris Chang说"台湾是危险的地方"（最权威的警告），但我们没有活跃的政策制定者视角。CHIPS Act执行进度、出口管制升级、台海紧张度——这些都需要比"历史学家"(Miller)和"退休创始人"(Chang)更实时的信号源。
+      </div>
+    </section>
+
+
+    <!-- 9. Next Steps -->
+    <section id="next">
+      <div class="section-header">
+        <span class="phase-tag phase-fix">ACTION</span>
+        <h2>9. 下一步路径</h2>
+      </div>
+
+      <h3>选项A：补充3个TIER A代理人 — <strong style="color:var(--green);">✓ COMPLETED</strong></h3>
+      <div class="arc-item">
+        <strong>✓ Altman(#17) → ✓ Pichai(#19)/Hassabis(#20) → ✓ Nadella(#18)</strong><br>
+        4个代理人已建立，NODE 7(需求侧) + NODE 8(AI Lab)已创建。$1T叙事和CUDA侵蚀判断已有买方视角交叉验证。<br>
+        <strong>下一步</strong>：深化现有4个需求侧代理人的素材深度，使其与供给侧代理人的积累程度匹配。
+      </div>
+
+      <h3>选项B：先标记盲点 — <strong style="color:var(--green);">✓ COMPLETED</strong></h3>
+      <div class="arc-item">
+        <strong>✓ 已在现有报告中标注需求侧验证状态</strong><br>
+        已完成。报告中的关键判断已标注买方视角来源。
+      </div>
+
+      <h3>选项C：重构节点分类 — <strong style="color:var(--green);">✓ COMPLETED</strong></h3>
+      <div class="arc-item">
+        <strong>✓ 7节点 → 8节点</strong>（+NODE 7需求侧 + NODE 8 AI Lab）<br>
+        已完成。Musk→NODE 7、Miller→Reference标注、Ghazi→NODE 6(EDA)。
+      </div>
+
+      <div class="question-box">
+        <h4>建议路径：TIER B → 中国 → 深化</h4>
+        <p style="text-align:left;"><strong style="color:var(--green);">✓ 已完成</strong>：TIER A(Altman/Pichai/Hassabis/Nadella) + 节点重构(7→8) + 盲点标注<br>
+        <strong>下一步1</strong>：TIER B代理人 — Jassy(AWS) + Zuckerberg(Meta) + Amodei(Anthropic) → 每人1-2 session<br>
+        <strong>下一步2</strong>：中国半导体生态 — 至少1个SMIC/华为海思代理人 → 1-2 session<br>
+        <strong>下一步3</strong>：深化需求侧 — 现有4个需求侧代理人素材深度与供给侧对齐<br><br>
+        <strong>优先级</strong>：Jassy(AWS替代路径) → Zuckerberg(PyTorch+MTIA) → Amodei(TPU实证)</p>
+      </div>
+    </section>
+
+
+    <footer class="page-footer">
+      <p>Semiconductor Research Gap Analysis &nbsp;|&nbsp; Week 12 &nbsp;|&nbsp; 2026-03-21</p>
+      <p>
+        <a href="2026-W12-v3.html">Week 12</a> &nbsp;|&nbsp;
+        <a href="../../trade-pipeline/output/reports/semiconductor_hub.html">Hub</a> &nbsp;|&nbsp;
+        <a href="../../trade-pipeline/output/reports/semiconductor_deep_research_v3.html">行业深度研究V3</a> &nbsp;|&nbsp;
+        <a href="../../trade-pipeline/output/reports/semiconductor_industry_metacognition.html">28轮行业元思考</a>
+      </p>
+    </footer>
+  </main>
+</div>
+<script>
+(function() {
+  const h = document.getElementById('hamburgerBtn'), s = document.getElementById('sidebar'), o = document.getElementById('sidebarOverlay');
+  h.addEventListener('click', () => { s.classList.toggle('open'); o.classList.toggle('open'); });
+  o.addEventListener('click', () => { s.classList.remove('open'); o.classList.remove('open'); });
+  s.querySelectorAll('a').forEach(l => l.addEventListener('click', () => { if (window.innerWidth <= 900) { s.classList.remove('open'); o.classList.remove('open'); } }));
+})();
+</script>
+
+<!-- OBS-VIZ: Plotly.js + Initialization -->
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<script src="../lib/obs-viz.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Chart 1: Coverage Bar with threshold
+  OBS.initCoverageBar('chart-coverage',
+    ['Supply: Manufacturing\n供给-制造', 'Supply: Design\n供给-设计', 'Supply: EDA/Tools\n供给-EDA', 'Supply: Equipment\n供给-设备', 'Demand: Hyperscaler\n需求-超大规模', 'Geopolitics\n地缘政策', 'Demand: AI Lab\n需求-AI Lab', 'China Semi\n中国半导体'],
+    [85, 75, 70, 50, 40, 30, 30, 0],
+    ['#4caf50', '#8bc34a', '#8bc34a', '#ffc107', '#ffa726', '#ffa726', '#ffa726', '#f44336'],
+    60,
+    { height: 340, thresholdLabel: 'Adequacy' }
+  );
+
+  // Chart 2: Agent-Node Heatmap
+  OBS.initHeatmap('chart-heatmap',
+    // z-data: rows=agents, cols=nodes. 0 = not in this node
+    [
+      [5, 0, 0, 0, 0, 0, 0, 0],  // Jensen Huang - GPU/AI
+      [4, 0, 0, 0, 0, 0, 0, 0],  // Lisa Su - GPU/AI
+      [4, 0, 0, 0, 0, 0, 0, 0],  // Hock Tan - GPU/AI
+      [0, 4, 0, 0, 0, 0, 0, 0],  // C. Fouquet - Lithography
+      [0, 3, 0, 0, 0, 0, 0, 0],  // G. Dickerson - Lithography
+      [0, 0, 4, 0, 0, 0, 0, 0],  // C.C. Wei - Foundry
+      [0, 0, 5, 0, 0, 0, 0, 0],  // Morris Chang - Foundry
+      [0, 0, 0, 3, 0, 0, 0, 0],  // Kwak Noh Jung - HBM
+      [0, 0, 0, 3, 0, 0, 0, 0],  // S. Mehrotra - HBM
+      [0, 0, 0, 0, 4, 0, 0, 0],  // Lip-Bu Tan - Custom
+      [0, 0, 0, 0, 3, 0, 0, 0],  // J. Srouji - Custom
+      [0, 0, 0, 0, 4, 0, 0, 0],  // Jim Keller - Custom
+      [0, 0, 0, 0, 0, 3, 0, 0],  // S. Ghazi - EDA
+      [0, 0, 0, 0, 0, 3, 0, 0],  // Rene Haas - EDA
+      [0, 4, 0, 0, 0, 0, 0, 0],  // Chris Miller - Cross
+      [0, 0, 0, 0, 0, 0, 2, 0],  // Elon Musk - Demand (reclassified)
+      [0, 0, 0, 0, 0, 0, 4, 0],  // Sam Altman - Demand NEW
+      [0, 0, 0, 0, 0, 0, 4, 0],  // Satya Nadella - Demand NEW
+      [0, 0, 0, 0, 0, 0, 0, 4],  // Sundar Pichai - AI Lab NEW
+      [0, 0, 0, 0, 0, 0, 0, 4],  // Demis Hassabis - AI Lab NEW
+    ],
+    ['GPU/AI\n设计', 'Litho\n光刻', 'Foundry\n代工', 'HBM\n存储', 'Custom\n自研', 'EDA\nIP', 'Demand\n需求侧', 'AI Lab\n实验室'],
+    ['Jensen Huang', 'Lisa Su', 'Hock Tan', 'C. Fouquet', 'G. Dickerson', 'C.C. Wei', 'Morris Chang', 'Kwak Noh Jung', 'S. Mehrotra', 'Lip-Bu Tan', 'J. Srouji', 'Jim Keller', 'S. Ghazi', 'Rene Haas', 'Chris Miller', 'Elon Musk ↑', 'Sam Altman ★', 'Satya Nadella ★', 'Sundar Pichai ★', 'Demis Hassabis ★'],
+    { height: 520 }
+  );
+
+  // Chart 3: Node Coverage Stacked Bar
+  OBS.initStackedBar('chart-node-stack',
+    ['GPU/AI Design', 'Lithography\n光刻', 'Foundry\n代工', 'EDA/IP', 'HBM/Memory\n存储', 'Custom/ASIC\n自研', 'Geopolitics\n地缘', 'Demand\n需求侧', 'AI Lab\nAI实验室', 'China Semi\n中国半导体'],
+    [80, 70, 60, 55, 50, 40, 30, 40, 30, 0],   // covered
+    [10, 15, 25, 15, 30, 40, 30, 40, 40, 60], // gap
+    { height: 420 }
+  );
+});
+</script>
+<script src="../lib/reading-mode.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+</body>
+</html>

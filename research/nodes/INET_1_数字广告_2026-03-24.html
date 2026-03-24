@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NODE 1: Digital Advertising 数字广告 — Internet Research Hub</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="../internet_shared.css">
+<style>
+body.embedded .sidebar { display: none !important; }
+body.embedded .notes-sidebar { display: none !important; }
+body.embedded main { max-width: none !important; width: 100%; padding: 1rem 1.5rem 3rem; }
+.reading-mode .sidebar { display: none !important; }
+.reading-mode .notes-sidebar { display: none !important; }
+.reading-mode main { max-width: none !important; width: 100%; margin: 0; padding-left: 2rem; padding-right: 2rem; }
+
+/* Digital Advertising specific */
+.ad-spend-card {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.ad-region-stat {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.ad-region-stat .region-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.ad-region-stat .region-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+.ad-region-stat .region-growth {
+    font-size: 0.75rem;
+    color: var(--green);
+    margin-top: 0.25rem;
+}
+
+.trend-timeline {
+    position: relative;
+    padding-left: 2rem;
+    margin: 1.5rem 0;
+}
+
+.trend-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.5rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+}
+
+.trend-item {
+    position: relative;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.trend-item::before {
+    content: attr(data-trend-num);
+    position: absolute;
+    left: -2rem;
+    top: 1rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    background: var(--accent);
+    color: var(--bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.moat-meter {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.moat-bar {
+    display: flex;
+    gap: 2px;
+}
+
+.moat-segment {
+    width: 12px;
+    height: 8px;
+    background: var(--border);
+    border-radius: 2px;
+}
+
+.moat-segment.filled {
+    background: var(--accent);
+}
+
+.signal-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.signal-status.expansion {
+    background: rgba(76, 175, 80, 0.15);
+    color: var(--green);
+}
+
+.signal-status.caution {
+    background: rgba(255, 193, 7, 0.15);
+    color: #ffc107;
+}
+
+.signal-status.contraction {
+    background: rgba(244, 67, 54, 0.15);
+    color: var(--tier-low);
+}
+
+.risk-matrix {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.risk-card {
+    padding: 1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    border-left: 3px solid var(--tier-low);
+}
+
+.risk-card.low-prob {
+    border-left-color: var(--green);
+}
+
+.risk-card.medium-prob {
+    border-left-color: #ffc107;
+}
+
+.node-relation-diagram {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin: 0.5rem 0;
+}
+
+.node-relation-item {
+    padding: 0.4rem 0.8rem;
+    background: var(--accent-dim);
+    color: var(--accent);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.node-relation-arrow {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+}
+
+.china-model-card {
+    background: linear-gradient(135deg, rgba(244, 67, 54, 0.05), rgba(244, 67, 54, 0.02));
+    border: 1px solid rgba(244, 67, 54, 0.2);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin: 1rem 0;
+}
+
+.compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+}
+
+.compare-table th {
+    background: var(--accent-dim);
+    color: var(--accent);
+    padding: 0.75rem;
+    text-align: left;
+    font-weight: 600;
+}
+
+.compare-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.compare-table tr:hover {
+    background: rgba(255,255,255,0.02);
+}
+</style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- ===== Left Sidebar ===== -->
+  <div class="sidebar">
+    <a class="back-link" href="../internet_hub.html">&larr; Internet Hub</a>
+
+    <h4>Internet Hub</h4>
+    <div class="project-meta">
+      互联网研究中枢<br>
+      Digital Advertising Node 1
+    </div>
+
+    <h4>Navigate</h4>
+    <nav>
+      <ul>
+        <li><a href="#overview">01 Industry Overview 行业概述</a></li>
+        <li><a href="#market-size">02 Market Size 市场规模</a></li>
+        <li><a href="#competitive">03 Competitive Landscape 竞争格局</a></li>
+        <li><a href="#trends">04 Key Trends 关键趋势</a></li>
+        <li><a href="#china">05 China Characteristics 中国特色</a></li>
+        <li><a href="#signals">06 Investment Signals 投资信号</a></li>
+        <li><a href="#risks">07 Risk Analysis 风险分析</a></li>
+        <li><a href="#node-relations">08 Node Relations 节点关系</a></li>
+      </ul>
+    </nav>
+
+    <h4>Other Internet Nodes</h4>
+    <nav>
+      <ul>
+        <li><a href="NODE_2_cloud_computing.html">NODE 2: Cloud Computing</a></li>
+        <li><a href="NODE_3_e-commerce.html">NODE 3: E-Commerce</a></li>
+        <li><a href="NODE_4_social_media.html">NODE 4: Social Media</a></li>
+        <li><a href="NODE_5_gaming_entertainment.html">NODE 5: Gaming & Entertainment</a></li>
+      </ul>
+    </nav>
+
+    <h4>Context 上下文</h4>
+    <nav>
+      <ul>
+        <li><a href="../../blockchain_hub.html" style="color:var(--accent);">Blockchain Hub 区块链</a></li>
+        <li><a href="../../../observatory/weekly/2026-W12-v3.html">W12 Weekly Synthesis</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- ===== Main Content ===== -->
+  <main>
+
+    <h1>NODE 1: Digital Advertising<span class="zh">数字广告 — 互联网经济的核心变现引擎</span></h1>
+    <div class="subtitle">Internet Value Chain Node 1 &middot; $740B Global Market &middot; Google/Meta/ByteDance/Tencent/Alibaba &rarr; 2026-03-25</div>
+    <div style="margin-top:0.75rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+      <a href="../internet_hub.html" style="display:inline-block;padding:0.35rem 0.85rem;border-radius:6px;font-size:0.82rem;font-weight:510;background:var(--accent-dim);color:var(--accent);border:1px solid rgba(248,168,72,0.25);text-decoration:none;">&#127760; Internet Hub &rarr;</a>
+      <a href="../internet_metacognition.html" style="display:inline-block;padding:0.35rem 0.85rem;border-radius:6px;font-size:0.82rem;font-weight:510;background:var(--purple-dim);color:#ab47bc;border:1px solid rgba(171,71,188,0.25);text-decoration:none;">&#129504; Internet Metacognition &rarr;</a>
+    </div>
+
+    <!-- Stats Strip -->
+    <div class="stats-strip">
+      <div class="stat-item"><span class="stat-value">$740B</span> <span class="stat-label">Global Ad Spend 2024</span></div>
+      <div class="stat-item"><span class="stat-value">72%</span> <span class="stat-label">Digital Share of Total</span></div>
+      <div class="stat-item"><span class="stat-value">5</span> <span class="stat-label">Key Players</span></div>
+      <div class="stat-item"><span class="stat-value">¥1.35T</span> <span class="stat-label">China Market 2024</span></div>
+      <div class="stat-item"><span class="stat-value">42%</span> <span class="stat-label">Short Video Ad Share</span></div>
+    </div>
+
+    <!-- Advisory -->
+    <div class="advisory-box">
+      <strong>Thinking Chain 思维链：</strong>数字广告是互联网价值链的「变现中枢」&rarr; 连接内容平台、用户注意力、广告主预算三大要素 &rarr; 全球$740B市场，72%广告份额已数字化 &rarr; Google/Meta双寡头受TikTok/Amazon挑战 &rarr; 中国市场独特：短视频+直播+私域三角结构 &rarr; AI正在重塑广告投放范式，Performance Max/Advantage+占主导。
+      <span class="zh">Digital advertising is the "monetization hub" of the internet value chain, connecting content platforms, user attention, and advertiser budgets.</span>
+    </div>
+
+    <div class="advisory-box" style="border-left-color: var(--tier-low); background: rgba(244,67,54,0.03); margin-top:0.75rem;">
+      <strong style="color:var(--tier-low);">&#9888; Key Structural Insight 关键结构性洞察</strong><br>
+      广告市场正在经历「范式转移」：从CPM/CPC按曝光/点击计费，向CPS/CLOSED-LOOP电商效果计费迁移。抖音电商GMV 3万亿+广告货币化率8%，意味着内容即交易。Google搜索广告的「意图变现」护城河正在被「算法推荐」的「兴趣变现」模式侵蚀。
+      <span class="zh">The market is shifting from CPM/CPC to CPS/closed-loop commerce. Douyin 3T GMV at 8% monetization signals "content is transaction." Google's intent-monetization moat is being eroded by algorithmic interest-monetization.</span>
+    </div>
+
+    <!-- ═══════════ §1 行业概述 ═══════════ -->
+    <div class="section-header" id="overview">
+      <h2><span class="section-num">01</span>Industry Overview<span class="zh">行业概述 &mdash; 数字广告的定义与定位</span></h2>
+    </div>
+
+    <div class="card" style="border-left: 3px solid var(--accent);">
+      <h3 style="margin:0 0 0.75rem;">数字广告本质 Digital Advertising Essence</h3>
+      <div class="card-desc">
+        <strong>定义</strong>：利用互联网、移动设备、 Connected TV 等数字渠道，向目标受众传递商业信息的营销活动。<br><br>
+        <strong>价值链位置</strong>：数字广告位于互联网产业链的「下游变现层」，承接上游流量（内容平台、社交媒体、搜索引擎），服务中游广告主（品牌商、电商、应用开发者），最终形成注意力→数据→收入的商业闭环。<br><br>
+        <strong>核心商业模式</strong>：平台提供用户注意力+定向能力，广告主购买「触达+转化」，双方通过实时竞价(RTB)、程序化购买等机制定价。
+        <span class="zh-inline">Digital advertising connects upstream traffic (content platforms) with midstream advertisers, forming the core monetization layer of the internet economy.</span>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:1rem;">
+      <div class="card">
+        <h4>广告形态演进 Ad Format Evolution</h4>
+        <table class="compare-table">
+          <tr><th>时代 Era</th><th>主导形态 Dominant Format</th></tr>
+          <tr><td>Web 1.0 (1995-2005)</td><td>Banner/展示广告 Display</td></tr>
+          <tr><td>Search Era (2005-2015)</td><td>搜索广告 Search Ads</td></tr>
+          <tr><td>Social Era (2015-2020)</td><td>信息流广告 Feed Ads</td></tr>
+          <tr><td>Video Era (2020-2025)</td><td>短视频/直播 Short-form + Live</td></tr>
+          <tr><td>AI Era (2025+)</td><td>AI生成+自动化投放 AI-Gen + Automation</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h4>计费模式演进 Pricing Model Evolution</h4>
+        <table class="compare-table">
+          <tr><th>模式 Model</th><th>指标 Metric</th><th>适用场景</th></tr>
+          <tr><td>CPM</td><td>每千次曝光 Cost per Mille</td><td>品牌曝光</td></tr>
+          <tr><td>CPC</td><td>每次点击 Cost per Click</td><td>效果广告</td></tr>
+          <tr><td>CPA/CPL</td><td>每行动/注册 Cost per Action/Lead</td><td>转化导向</td></tr>
+          <tr><td>CPS</td><td>每销售额 Cost per Sale</td><td>电商闭环</td></tr>
+          <tr><td>CPE</td><td>每参与 Cost per Engagement</td><td>互动导向</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════ §2 市场规模 ═══════════ -->
+    <div class="section-header" id="market-size">
+      <h2><span class="section-num">02</span>Market Size<span class="zh">市场规模 &mdash; 全球与中国数字广告全景</span></h2>
+    </div>
+
+    <div class="ad-spend-card">
+      <div class="ad-region-stat">
+        <div class="region-value">$740B</div>
+        <div class="region-label">Global Digital Ad Spend 2024E</div>
+        <div class="region-growth">↑ 13.2% YoY</div>
+      </div>
+      <div class="ad-region-stat">
+        <div class="region-value">$810B</div>
+        <div class="region-label">Global 2025E</div>
+        <div class="region-growth">↑ 9.5% YoY</div>
+      </div>
+      <div class="ad-region-stat">
+        <div class="region-value">72%</div>
+        <div class="region-label">Digital Share of Total Ads</div>
+        <div class="region-growth">→ 2024E</div>
+      </div>
+      <div class="ad-region-stat">
+        <div class="region-value">75%</div>
+        <div class="region-label">Digital Share 2025E</div>
+        <div class="region-growth">→ Traditional declining</div>
+      </div>
+    </div>
+
+    <h3 style="margin:1.5rem 0 1rem;">全球区域分布 Global Regional Distribution</h3>
+    <div class="grid-2">
+      <div class="card" style="border-left: 3px solid var(--accent);">
+        <h4>&#127468;&#127463; 北美 North America</h4>
+        <div style="font-size:2rem;font-weight:700;color:var(--accent);">$280B <span style="font-size:0.9rem;color:var(--text-muted);">(38%)</span></div>
+        <div class="card-desc">成熟市场，增速放缓至7-8%。Google/Meta双寡头格局稳定，TikTok加速抢占份额，CTV广告高增长。</div>
+      </div>
+      <div class="card" style="border-left: 3px solid #4caf50;">
+        <h4>&#127468;&#127463; 亚太 Asia Pacific</h4>
+        <div style="font-size:2rem;font-weight:700;color:#4caf50;">$260B <span style="font-size:0.9rem;color:var(--text-muted);">(35%)</span></div>
+        <div class="card-desc">最大增量市场，增速15%+。中国¥1.35万亿主导，印度/东南亚高增长，TikTok Shop驱动电商广告爆发。</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:1rem;">
+      <div class="card">
+        <h4>&#127466;&#127480; 欧洲 Europe</h4>
+        <div style="font-size:2rem;font-weight:700;color:#2196f3;">$120B <span style="font-size:0.9rem;color:var(--text-muted);">(16%)</span></div>
+        <div class="card-desc">GDPR严格约束，增速仅6%。隐私合规成本高，UK/德国/法国三大市场占70%。</div>
+      </div>
+      <div class="card">
+        <h4>&#127761; 拉美/中东非 LATAM & MEA</h4>
+        <div style="font-size:2rem;font-weight:700;color:#9c27b0;">$80B <span style="font-size:0.9rem;color:var(--text-muted);">(11%)</span></div>
+        <div class="card-desc">增速20%+，但基数小。巴西/墨西哥主导，沙特Vision 2030推动中东数字化广告起飞。</div>
+      </div>
+    </div>
+
+    <h3 style="margin:1.5rem 0 1rem;">中国市场 China Market</h3>
+    <div class="card" style="border-left: 3px solid #f44336;">
+      <h4 style="color:#f44336;">&#127463;&#127479; 中国网络广告规模</h4>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1rem 0;">
+        <div style="text-align:center;">
+          <div style="font-size:1.8rem;font-weight:700;color:#f44336;">¥1.35万亿</div>
+          <div style="font-size:0.8rem;color:var(--text-muted);">2024E (~$190B)</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:1.8rem;font-weight:700;color:#f44336;">¥1.48万亿</div>
+          <div style="font-size:0.8rem;color:var(--text-muted);">2025E</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:1.8rem;font-weight:700;color:#f44336;">42%</div>
+          <div style="font-size:0.8rem;color:var(--text-muted);">短视频广告占比</div>
+        </div>
+      </div>
+      <div class="card-desc">
+        <strong>关键数据</strong>：短视频广告收入首次突破¥5000亿，抖音+快手合计占比超80%。信息流广告被短视频超越，直播电商广告+短剧广告成为新增长极。
+        <span class="zh-inline">Short video ad revenue exceeded ¥500B for the first time. Douyin + Kuaishou account for 80%+.</span>
+      </div>
+      <div class="card-meta">数据来源：QuestMobile 2024年度报告; 艾瑞咨询; 36Kr《2024中国互联网广告数据报告》</div>
+    </div>
+
+    <h3 style="margin:1.5rem 0 1rem;">其他关键市场 Other Key Markets</h3>
+    <table class="compare-table">
+      <tr>
+        <th>市场 Market</th>
+        <th>规模 Size</th>
+        <th>增速 Growth</th>
+        <th>特点 Key Characteristics</th>
+      </tr>
+      <tr>
+        <td><strong>印度 India</strong></td>
+        <td>$8B</td>
+        <td style="color:#4caf50;">↑ 25%</td>
+        <td>Jio平台崛起，Google/Meta双垄断被挑战</td>
+      </tr>
+      <tr>
+        <td><strong>东南亚 SEA</strong></td>
+        <td>$18B</td>
+        <td style="color:#4caf50;">↑ 22%</td>
+        <td>Shopee/TikTok Shop驱动电商广告爆发</td>
+      </tr>
+      <tr>
+        <td><strong>日本 Japan</strong></td>
+        <td>$15B</td>
+        <td style="color:#ffc107;">↑ 3%</td>
+        <td>成熟市场，LINE/Yahoo Japan主导</td>
+      </tr>
+      <tr>
+        <td><strong>中东 Middle East</strong></td>
+        <td>$6B</td>
+        <td style="color:#4caf50;">↑ 20%</td>
+        <td>沙特Vision 2030推动数字化</td>
+      </tr>
+      <tr>
+        <td><strong>巴西 Brazil</strong></td>
+        <td>$12B</td>
+        <td style="color:#4caf50;">↑ 18%</td>
+        <td>稳定币+数字支付驱动广告效果归因</td>
+      </tr>
+    </table>
+
+    <!-- ═══════════ §3 竞争格局 ═══════════ -->
+    <div class="section-header" id="competitive">
+      <h2><span class="section-num">03</span>Competitive Landscape<span class="zh">竞争格局 &mdash; 全球Top 5与护城河分析</span></h2>
+    </div>
+
+    <div class="card" style="border-left: 3px solid var(--accent);">
+      <h3>全球Top 5广告收入排名 Global Top 5 by Ad Revenue (2024)</h3>
+      <table class="compare-table">
+        <tr>
+          <th style="width:60px;">Rank</th>
+          <th>Company 公司</th>
+          <th style="width:120px;">Ad Revenue<br>广告收入</th>
+          <th style="width:100px;">Market Share<br>市占率</th>
+          <th>Core Moat 核心护城河</th>
+          <th style="width:120px;">Moat Depth<br>护城河深度</th>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--accent);">#1</strong></td>
+          <td><strong>Google</strong> (Alphabet)</td>
+          <td><strong>$263B</strong></td>
+          <td>35.5%</td>
+          <td>搜索意图垄断(90%+份额)+YouTube视频+Android生态+广告工具矩阵</td>
+          <td>
+            <div class="moat-meter">
+              <div class="moat-bar">
+                <div class="moat-segment filled"></div>
+                <div class="moat-segment filled"></div>
+                <div class="moat-segment filled"></div>
+                <div class="moat-segment filled"></div>
+                <div class="moat-segment filled"></div>
+              </div>
+              <span style="color:var(--accent);font-weight:600;">⭐⭐⭐⭐⭐</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><strong style="color:#2196f3;">#2</strong></td>
+          <td><strong>Meta</strong> (Facebook/Instagram)</td>
+          <td><strong>$164B</strong></td>
+          <td>22.1%</td>
+          <td>30亿用户社交图谱+Reels短视频转型+AI广告优化引擎Advantage+</td>
+          <td>
+            <div class="moat-meter">
+              <div class="moat-bar">
+                <div class="moat-segment filled"></div>
+                <div class="moat-segment filled"></div>
+                <div class="moat-segment filled"></div>
+                <div class="moat-segment filled"></div>
+                <div class="moat-segment"></div>
+              </div>
+              <span style="color:#2196f3;font-weight:600;">⭐⭐⭐⭐☆</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><strong style="color:#ff9800;">#3</strong></td>
+          <td><strong>Amazon</strong></td>
+          <td><strong>$56B</strong></td>
+          <td>7.6%</td>
+          <td>电商闭环购物意图数据+Prime会员体系+AWS协同+广告技术基础设施</td>
+          <td>
+            <div class="moat-meter">
+              <div class="moat-bar">
+                <div class="moat-segment filled"></div>
+                <div class="moat-segment filled"></div>
+                <div class="moat-segment filled"></div>
+                <div class="moat-segment filled"></div>
+                <div class="moat-segment"></div>
+              </div>
+              <span style="color:#ff9800;font-weight:600;">⭐⭐⭐⭐☆</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><strong style="color:#e91e63;">#4</strong></td>
+          <td><strong>ByteDance</strong> (TikTok+Douyin)</td>
+          <td><strong>$38B</strong></td>
+          <td>5.1%</td>
+          <td>算法推荐技术+短视频/直播内容形态+全球创作者生态+中国本地化优势</td>
+          <td>
+            <div class="moat-meter">
+              <div class="moat-bar">
+                <div class="moat-segment filled"></div>
+                <div class="moat-segment filled"></div>
+                <div class="moat-segment filled"></div>
+                <div class="moat-segment"></div>
+                <div class="moat-segment"></div>
+              </div>
+              <span style="color:#e91e63;font-weight:600;">⭐⭐⭐★☆</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><strong style="color:#9c27b0;">#5</strong></td>
+          <td><strong>Microsoft</strong></td>
+          <td><strong>$14B</strong></td>
+          <td>1.9%</td>
+          <td>LinkedIn B2B广告+ Bing搜索+OpenAI技术整合+Copilot商业化</td>
+          <td>
+            <div class="moat-meter">
+              <div class="moat-bar">
+                <div class="moat-segment filled"></div>
+                <div class="moat-segment filled"></div>
+                <div class="moat-segment"></div>
+                <div class="moat-segment"></div>
+                <div class="moat-segment"></div>
+              </div>
+              <span style="color:#9c27b0;font-weight:600;">⭐⭐⭐☆☆</span>
+            </div>
+          </td>
+        </tr>
+      </table>
+      <div class="card-meta">数据来源：公司财报; eMarketer 2024. 注：字节跳动含TikTok+抖音，若合并中国区计算则跃居全球第三。</div>
+    </div>
+
+    <h3 style="margin:1.5rem 0 1rem;">护城河深度分析 Moat Deep Dive</h3>
+    <div class="grid-2">
+      <div class="card">
+        <h4>Google 搜索意图护城河 ⭐⭐⭐⭐⭐</h4>
+        <div class="card-desc">
+          <strong>核心逻辑</strong>：用户在Google表达「意图」(intent)，广告主精准匹配需求，转化路径最短。<br><br>
+          <strong>数据飞轮</strong>：搜索数据→广告优化→用户留存→更多搜索数据<br><br>
+          <strong>风险点</strong>：AI搜索(ChatGPT/Perplexity)可能颠覆「搜索-广告」范式；监管拆分威胁
+        </div>
+      </div>
+      <div class="card">
+        <h4>Meta 社交图谱护城河 ⭐⭐⭐⭐☆</h4>
+        <div class="card-desc">
+          <strong>核心逻辑</strong>：30亿用户社交关系图谱，精准人口属性+行为定向，ROI可量化<br><br>
+          <strong>转型成果</strong>：Reels短视频补足内容形态，AI优化引擎Advantage+提升转化率<br><br>
+          <strong>风险点</strong>：TikTok侵蚀Z世代用户，隐私政策(iOS ATT)影响定向精度
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:1rem;">
+      <div class="card">
+        <h4>Amazon 电商闭环护城河 ⭐⭐⭐⭐☆</h4>
+        <div class="card-desc">
+          <strong>核心逻辑</strong>：「购物意图」数据最强，用户已在购买漏斗底部，转化率最高<br><br>
+          <strong>独特优势</strong>：无Cookie依赖，第一方购物数据；DSP+零售媒体网络(RMN)扩张<br><br>
+          <strong>催化剂</strong>：Prime Day广告收入激增，品牌内化(Brand Internal)趋势
+        </div>
+      </div>
+      <div class="card">
+        <h4>ByteDance 算法推荐护城河 ⭐⭐⭐★☆</h4>
+        <div class="card-desc">
+          <strong>核心逻辑</strong>：「兴趣推荐」颠覆「搜索」，用户被动消费内容，停留时长超预期<br><br>
+          <strong>全球化挑战</strong>：美国禁令风险(TikTok剥离法案)，地缘政治压制估值<br><br>
+          <strong>增长瓶颈</strong>：抖音广告加载率已达15%上限，需探索「内容即广告」原生模式
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin:1.5rem 0 1rem;">中国平台格局 China Platform Landscape</h3>
+    <table class="compare-table">
+      <tr>
+        <th>平台 Platform</th>
+        <th>2024广告收入估算</th>
+        <th>增速</th>
+        <th>核心优势</th>
+        <th>商业化成熟度</th>
+      </tr>
+      <tr>
+        <td><strong>字节跳动 (抖音+TikTok)</strong></td>
+        <td>¥5000亿+ (~$70B)</td>
+        <td style="color:#4caf50;">↑ 20%</td>
+        <td>算法推荐+电商闭环</td>
+        <td>高度成熟，加载率逼近上限</td>
+      </tr>
+      <tr>
+        <td><strong>阿里巴巴</strong></td>
+        <td>¥2500亿</td>
+        <td style="color:#ffc107;">↑ 5%</td>
+        <td>电商搜索+品牌展示</td>
+        <td>成熟，但受抖音电商分流</td>
+      </tr>
+      <tr>
+        <td><strong>腾讯 (微信+视频号)</strong></td>
+        <td>¥1500亿</td>
+        <td style="color:#4caf50;">↑ 25%</td>
+        <td>私域+视频号增量</td>
+        <td>视频号商业化早期，空间大</td>
+      </tr>
+      <tr>
+        <td><strong>百度</strong></td>
+        <td>¥800亿</td>
+        <td style="color:#f44336;">↓ 3%</td>
+        <td>搜索+AI文心一言</td>
+        <td>成熟，面临字节搜索侵蚀</td>
+      </tr>
+      <tr>
+        <td><strong>小红书</strong></td>
+        <td>¥150亿</td>
+        <td style="color:#4caf50;">↑ 50%</td>
+        <td>种草+消费决策</td>
+        <td>快速增长，商业化加速</td>
+      </tr>
+      <tr>
+        <td><strong>快手</strong></td>
+        <td>¥700亿</td>
+        <td style="color:#4caf50;">↑ 15%</td>
+        <td>下沉市场+直播电商</td>
+        <td>成熟，变现效率提升</td>
+      </tr>
+      <tr>
+        <td><strong>B站</strong></td>
+        <td>¥250亿</td>
+        <td style="color:#4caf50;">↑ 20%</td>
+        <td>年轻用户+UP主营销</td>
+        <td>效果广告转型期</td>
+      </tr>
+    </table>
+
+    <!-- ═══════════ §4 关键趋势 ═══════════ -->
+    <div class="section-header" id="trends">
+      <h2><span class="section-num">04</span>Key Trends<span class="zh">关键趋势 (2024-2025) &mdash; 五大结构性变革</span></h2>
+    </div>
+
+    <div class="trend-timeline">
+      <div class="trend-item" data-trend-num="1">
+        <h4>Trend 1: AI原生广告 AI-Native Advertising</h4>
+        <div class="card-desc">
+          <strong>全球表现</strong>：Google Performance Max、Meta Advantage+ 自动化投放占比超70%，AI生成素材从5%提升至35%。<br><br>
+          <strong>中国响应</strong>：巨量引擎「智能放量」、腾讯广告「混元大模型」驱动全链路自动化，代理商价值被压缩。<br><br>
+          <strong>结构性影响</strong>：中小广告主门槛降低，但平台议价权增强，CPM透明度下降，广告主「黑箱焦虑」上升。<br><br>
+          <strong>关键数据</strong>：AI广告审核市场规模2024年达$3.2B，AIGC合规成为新战场。
+          <span class="zh-inline">AI-native advertising is compressing margins for agencies while strengthening platform pricing power.</span>
+        </div>
+        <div class="card-meta" style="margin-top:0.75rem;">来源：极客公园《2024 AI广告革命》(2024.11); 各公司财报</div>
+      </div>
+
+      <div class="trend-item" data-trend-num="2">
+        <h4>Trend 2: 闭环电商广告 Closed-Loop Commerce Ads</h4>
+        <div class="card-desc">
+          <strong>核心逻辑</strong>：「内容→种草→搜索→购买」一体化，广告效果可直接归因到GMV，ROI计算革命性提升。<br><br>
+          <strong>中国标杆</strong>：抖音电商GMV 2024年超¥3万亿(~$420B)，广告+佣金货币化率约8%，「内容即交易」模式验证。<br><br>
+          <strong>全球对标</strong>：TikTok Shop美国扩张，Amazon Sponsored Products品牌内化，Instagram Shop购物闭环。<br><br>
+          <strong>冲击</strong>：传统品牌广告预算向效果广告迁移，CPC/CPM体系被CPS挑战，广告主预算分配重构。
+          <span class="zh-inline">Closed-loop commerce is rewriting ROI math. Douyin 3T GMV at 8% monetization validates "content = transaction."</span>
+        </div>
+        <div class="card-meta" style="margin-top:0.75rem;">来源：LatePost《字节跳动2024年复盘》(2025.1); 公司财报</div>
+      </div>
+
+      <div class="trend-item" data-trend-num="3">
+        <h4>Trend 3: 隐私与第一方数据 Privacy & First-Party Data</h4>
+        <div class="card-desc">
+          <strong>背景</strong>：Cookie deprecation (Chrome 2024完成弃用)、iOS App Tracking Transparency (ATT) 持续压缩跨平台定向能力。<br><br>
+          <strong>Google Privacy Sandbox</strong>：推进缓慢，Topics API替代方案仍存争议，广告技术生态动荡。<br><br>
+          <strong>新兴替代</strong>：零售商媒体网络(RMN)崛起，Walmart Connect、Target Roundel利用购物数据提供精准定向，不依赖Cookie。<br><br>
+          <strong>中国情况</strong>：相对免疫（超级App闭环内数据），但《个人信息保护法》推动合规成本年均+15-20%。
+          <span class="zh-inline">Retail Media Networks (RMN) emerging as privacy-compliant alternative to cross-platform tracking.</span>
+        </div>
+        <div class="card-meta" style="margin-top:0.75rem;">来源：IAB; eMarketer Privacy Report 2024</div>
+      </div>
+
+      <div class="trend-item" data-trend-num="4">
+        <h4>Trend 4: 视频/CTV广告爆发 Video & CTV Surge</h4>
+        <div class="card-desc">
+          <strong>全球CTV</strong>：Connected TV广告2024年增长25%，YouTube TV、Netflix广告层、 Roku平台贡献主要增量。<br><br>
+          <strong>中国短剧</strong>：「小程序短剧+付费投流」模式爆发，2024年规模超¥200亿，成为新广告形态。芒果TV、爱奇艺效果广告增速反超品牌广告。<br><br>
+          <strong>格式演变</strong>：5-15秒短视频→60秒+短剧→互动广告，用户注意力争夺升级。
+          <span class="zh-inline">Short drama ads emerged as ¥20B market in China. CTV ads grew 25% globally.</span>
+        </div>
+      </div>
+
+      <div class="trend-item" data-trend-num="5">
+        <h4>Trend 5: 新兴平台分流 Emerging Platforms</h4>
+        <div class="card-desc">
+          <strong>Reddit</strong>：2024年广告收入$8.1B (+55% YoY)，IPO后加速商业化，高意向用户群体差异化定位。<br><br>
+          <strong>Pinterest</strong>：购物导向广告复苏，增速20%+，「发现→购买」漏斗天然短。<br><br>
+          <strong>中国B站</strong>：效果广告增速40%+，品牌广告承压，「花火平台」UP主营销成亮点。广告收入结构从70%品牌/30%效果，翻转至45%/55%。<br><br>
+          <strong>影响</strong>：广告主预算多元化，平台选择从「Google/Meta」双极向「N+1」分散。
+          <span class="zh-inline">Budget diversification from "Google/Meta duopoly" to "N+1" platform strategy.</span>
+        </div>
+        <div class="card-meta" style="margin-top:0.75rem;">来源：36Kr《B站2024商业化解题》(2024.12); Reddit IPO filing</div>
+      </div>
+    </div>
+
+    <!-- ═══════════ §5 中国特色 ═══════════ -->
+    <div class="section-header" id="china">
+      <h2><span class="section-num">05</span>China Characteristics<span class="zh">中国特色 &mdash; 与全球市场根本性差异</span></h2>
+    </div>
+
+    <div class="card" style="border-left: 3px solid #f44336;">
+      <h3>全球 vs 中国：核心维度对比 Global vs China: Key Differences</h3>
+      <table class="compare-table">
+        <tr>
+          <th>维度 Dimension</th>
+          <th style="background:rgba(33,150,243,0.1);">全球市场 Global</th>
+          <th style="background:rgba(244,67,54,0.1);">中国市场 China</th>
+        </tr>
+        <tr>
+          <td><strong>主导广告形态</strong></td>
+          <td>搜索广告 + 社交信息流</td>
+          <td>短视频 + 直播 + 私域三角</td>
+        </tr>
+        <tr>
+          <td><strong>数据基础</strong></td>
+          <td>跨平台追踪 (Cookie/Device ID)</td>
+          <td>超级App生态内闭环</td>
+        </tr>
+        <tr>
+          <td><strong>广告主结构</strong></td>
+          <td>品牌广告占比40%+</td>
+          <td>效果广告/电商广告主导70%+</td>
+        </tr>
+        <tr>
+          <td><strong>平台生态</strong></td>
+          <td>相对开放，跨平台可追踪</td>
+          <td>阿里/腾讯/字节互相封锁</td>
+        </tr>
+        <tr>
+          <td><strong>电商融合度</strong></td>
+          <td>电商广告占比~25%</td>
+          <td>电商广告占比~60%</td>
+        </tr>
+        <tr>
+          <td><strong>KOL生态</strong></td>
+          <td>Influencer marketing辅助</td>
+          <td>MCN+达人带货核心支柱</td>
+        </tr>
+        <tr>
+          <td><strong>隐私监管</strong></td>
+          <td>GDPR/CCPA严格约束</td>
+          <td>PIPL合规但超级App免疫</td>
+        </tr>
+      </table>
+    </div>
+
+    <h3 style="margin:1.5rem 0 1rem;">中国独特模式 China-Specific Models</h3>
+
+    <div class="china-model-card">
+      <h4>模式1: 全域兴趣电商 (抖音) Interest-Commerce (Douyin)</h4>
+      <div class="card-desc">
+        <strong>「货找人」逻辑</strong>：颠覆传统搜索电商「人找货」，算法主动推送潜在需求，用户被动发现式购物。<br><br>
+        <strong>千川投放系统</strong>：短视频广告+直播广告+搜索广告三合一，商家统一投放平台，ROI可实时优化。<br><br>
+        <strong>2024进化</strong>：FACT+S模型升级，强调「搜索+商城」货架场，「内容场」+「货架场」双轮驱动。<br><br>
+        <strong>关键指标</strong>：广告加载率已达15%上限，「内容即广告」原生模式探索中。
+        <span class="zh-inline">Douyin's "goods-finding-people" logic disrupts traditional search commerce. Qianchuan unified ad platform.</span>
+      </div>
+    </div>
+
+    <div class="china-model-card">
+      <h4>模式2: 微信私域广告 (腾讯) WeChat Private Traffic Ads</h4>
+      <div class="card-desc">
+        <strong>私域三角</strong>：朋友圈广告 + 视频号 + 小程序交易闭环，形成「触达→种草→转化→复购」全链路。<br><br>
+        <strong>视频号增量</strong>：2024年视频号广告收入预计超¥300亿，增速80%+，成为腾讯广告最大增量引擎。<br><br>
+        <strong>商业化克制</strong>：视频号广告加载率仅3%（对比抖音15%），牺牲短期收入换取用户体验和长期增长空间。<br><br>
+        <strong>adQ投放</strong>：整合微信全域流量（朋友圈+公众号+视频号+小程序），统一投放工具提升效率。
+        <span class="zh-inline">WeChat's private traffic trinity: Moments + Video Account + Mini Programs. Video Account at only 3% ad load vs Douyin's 15%.</span>
+      </div>
+      <div class="card-meta">来源：LatePost《腾讯广告2024年变革》(2024.10)</div>
+    </div>
+
+    <div class="china-model-card">
+      <h4>模式3: 小红书「种草」经济 Xiaohongshu "Seeding" Economy</h4>
+      <div class="card-desc">
+        <strong>反漏斗模型</strong>：KOL/KOC内容种草 → 搜索沉淀 → 转化购买，用户主动「搜索功课」决策路径独特。<br><br>
+        <strong>2024爆发</strong>：广告收入预计¥150亿 (+50% YoY)，「买手电商」尝试闭环，但交易效率仍低于抖音。<br><br>
+        <strong>用户价值</strong>：高线城市年轻女性主导，消费决策影响力强，品牌「口碑营销」必争之地。<br><br>
+        <strong>差异化</strong>：「生活方式」内容调性，竞品难以复制，用户信任壁垒高。
+        <span class="zh-inline">Xiaohongshu's anti-funnel model: content → search → purchase. "Lifestyle" content creates trust moat.</span>
+      </div>
+    </div>
+
+    <h3 style="margin:1.5rem 0 1rem;">中国监管影响 China Regulatory Impact</h3>
+    <table class="compare-table">
+      <tr>
+        <th>政策 Policy</th>
+        <th>内容 Content</th>
+        <th>影响 Impact</th>
+        <th>生效时间</th>
+      </tr>
+      <tr>
+        <td><strong>《互联网广告管理办法》</strong></td>
+        <td>弹窗广告规范、软文必须标注「广告」</td>
+        <td>违规弹窗减少，MCN软广成本上升</td>
+        <td>2023.5生效</td>
+      </tr>
+      <tr>
+        <td><strong>算法推荐管理规定</strong></td>
+        <td>平台需解释推荐逻辑，防止「信息茧房」</td>
+        <td>推荐透明度要求，合规成本增加</td>
+        <td>持续执行</td>
+      </tr>
+      <tr>
+        <td><strong>数据出境安全评估</strong></td>
+        <td>跨国平台数据本地化要求</td>
+        <td>外资平台运营成本上升</td>
+        <td>2024收紧</td>
+      </tr>
+      <tr>
+        <td><strong>直播电商税务规范</strong></td>
+        <td>达人带货收入合规纳税</td>
+        <td>中小MCN出清，头部主播税务规范化</td>
+        <td>2024-2025</td>
+      </tr>
+      <tr>
+        <td><strong>反垄断常态化执法</strong></td>
+        <td>平台「二选一」基本消除</td>
+        <td>商家多平台运营成为可能，竞争加剧</td>
+        <td>常态化</td>
+      </tr>
+    </table>
+    <div class="card-meta">来源：极客公园《2024平台经济监管复盘》(2025.1); 国家市场监管总局</div>
+
+    <!-- ═══════════ §6 投资信号 ═══════════ -->
+    <div class="section-header" id="signals">
+      <h2><span class="section-num">06</span>Investment Signals<span class="zh">投资信号 &mdash; 扩张/收缩状态监测</span></h2>
+    </div>
+
+    <div class="card" style="border-left: 3px solid var(--accent);">
+      <h3>扩张信号监测 Expansion Signal Dashboard</h3>
+      <table class="compare-table">
+        <tr>
+          <th>指标 Signal</th>
+          <th>阈值 Threshold</th>
+          <th>当前状态 Current</th>
+          <th>状态 Status</th>
+        </tr>
+        <tr>
+          <td><strong>广告收入增速 vs. GDP增速</strong></td>
+          <td>> 2x GDP growth</td>
+          <td>全球1.5x / 中国1.3x</td>
+          <td><span class="signal-status caution">⚠️ Caution 注意</span></td>
+        </tr>
+        <tr>
+          <td><strong>平台电商GMV增速</strong></td>
+          <td>> 20% YoY</td>
+          <td>TikTok Shop 100%+, 抖音15%</td>
+          <td><span class="signal-status expansion">✅ Expansion 扩张</span></td>
+        </tr>
+        <tr>
+          <td><strong>AI广告产品渗透率</strong></td>
+          <td>> 50% of spend</td>
+          <td>Google PMax 70%, Meta A+ 65%</td>
+          <td><span class="signal-status expansion">✅ Expansion 扩张</span></td>
+        </tr>
+        <tr>
+          <td><strong>视频广告占比提升</strong></td>
+          <td>每季度 +2%</td>
+          <td>符合趋势 (42% → 46%)</td>
+          <td><span class="signal-status expansion">✅ Expansion 扩张</span></td>
+        </tr>
+        <tr>
+          <td><strong>中小广告主数量增速</strong></td>
+          <td>> 15% YoY</td>
+          <td>⚠️ 全球收缩，中国稳定</td>
+          <td><span class="signal-status caution">⚠️ Caution 注意</span></td>
+        </tr>
+        <tr>
+          <td><strong>零售媒体网络增长</strong></td>
+          <td>> 25% YoY</td>
+          <td>Walmart Connect 40%, Target 30%</td>
+          <td><span class="signal-status expansion">✅ Expansion 扩张</span></td>
+        </tr>
+        <tr>
+          <td><strong>监管政策恶化指数</strong></td>
+          <td>负面政策频率</td>
+          <td>中国平稳 / 美国FCC关注TikTok</td>
+          <td><span class="signal-status caution">⚠️ Caution 注意</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <h3 style="margin:1.5rem 0 1rem;">交易信号级别 Trading Signal Levels</h3>
+    <div class="grid-3">
+      <div class="card" style="border-left: 3px solid #4caf50; background: rgba(76,175,80,0.03);">
+        <h4 style="color:#4caf50;">🟢 超配信号 Overweight</h4>
+        <div class="card-desc">
+          <strong>Alphabet (GOOGL)</strong><br>
+          搜索护城河稳固，YouTube CTV增量，AI整合提升广告效率。PE 22x，合理估值。<br><br>
+          <strong>Amazon Ads</strong><br>
+          电商闭环+RMN扩张，第一方数据不受隐私冲击。广告收入增速持续30%+。
+        </div>
+      </div>
+      <div class="card" style="border-left: 3px solid #ffc107; background: rgba(255,193,7,0.03);">
+        <h4 style="color:#ffc107;">🟡 中性信号 Neutral</h4>
+        <div class="card-desc">
+          <strong>Meta (META)</strong><br>
+          Reels转型成功，但TikTok竞争+隐私压制定向。AI投资回报待验证。<br><br>
+          <strong>腾讯 (0700.HK)</strong><br>
+          视频号增量空间大，但加载率克制+游戏监管压制整体营收。
+        </div>
+      </div>
+      <div class="card" style="border-left: 3px solid #f44336; background: rgba(244,67,54,0.03);">
+        <h4 style="color:#f44336;">🔴 低配/回避 Underweight/Avoid</h4>
+        <div class="card-desc">
+          <strong>百度 (9888.HK)</strong><br>
+          搜索份额被字节侵蚀，AI变现尚早，监管风险持续。<br><br>
+          <strong>Snap (SNAP)</strong><br>
+          用户增长停滞，广告技术落后，竞争格局恶化。
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ §7 风险分析 ═══════════ -->
+    <div class="section-header" id="risks">
+      <h2><span class="section-num">07</span>Risk Analysis<span class="zh">风险分析 &mdash; 七大结构性风险</span></h2>
+    </div>
+
+    <div class="risk-matrix">
+      <div class="risk-card">
+        <h4>风险1: 监管拆分风险 Regulatory Breakup Risk</h4>
+        <div class="card-desc">
+          <strong>描述</strong>：Google/Meta面临反垄断拆分威胁，搜索/社交广告双寡头格局可能被迫瓦解。<br><br>
+          <strong>概率</strong>：<span style="color:#ffc107;">中等 Medium</span><br>
+          <strong>影响</strong>：<span style="color:#f44336;">高 High</span>
+        </div>
+      </div>
+      <div class="risk-card">
+        <h4>风险2: AI颠覆搜索范式 AI Disruption of Search</h4>
+        <div class="card-desc">
+          <strong>描述</strong>：ChatGPT/Perplexity等AI搜索可能颠覆「搜索-广告」范式，Google核心业务受冲击。<br><br>
+          <strong>概率</strong>：<span style="color:#ffc107;">中等 Medium</span><br>
+          <strong>影响</strong>：<span style="color:#f44336;">高 High</span>
+        </div>
+      </div>
+      <div class="risk-card">
+        <h4>风险3: 地缘政治压制 Geopolitical Pressure</h4>
+        <div class="card-desc">
+          <strong>描述</strong>：TikTok剥离法案、中美数据安全审查可能压制字节跳动估值和中国平台出海。<br><br>
+          <strong>概率</strong>：<span style="color:#4caf50;">较低 Lower</span><br>
+          <strong>影响</strong>：<span style="color:#f44336;">高 High</span> (针对特定公司)
+        </div>
+      </div>
+      <div class="risk-card">
+        <h4>风险4: 隐私监管收紧 Privacy Regulation</h4>
+        <div class="card-desc">
+          <strong>描述</strong>：GDPR罚款上升，CCPA扩展，美国联邦隐私法可能出台，跨平台定向成本上升。<br><br>
+          <strong>概率</strong>：<span style="color:#f44336;">高 High</span><br>
+          <strong>影响</strong>：<span style="color:#ffc107;">中等 Medium</span>
+        </div>
+      </div>
+      <div class="risk-card medium-prob">
+        <h4>风险5: 广告主预算收缩 Ad Spend Recession</h4>
+        <div class="card-desc">
+          <strong>描述</strong>：宏观经济下行导致广告主预算削减，数字广告弹性高于传统媒体但仍受影响。<br><br>
+          <strong>概率</strong>：<span style="color:#ffc107;">中等 Medium</span><br>
+          <strong>影响</strong>：<span style="color:#ffc107;">中等 Medium</span>
+        </div>
+      </div>
+      <div class="risk-card medium-prob">
+        <h4>风险6: 平台间竞争加剧 Platform Competition</h4>
+        <div class="card-desc">
+          <strong>描述</strong>：TikTok/Amazon/Reddit等新势力分流广告预算，Google/Meta份额持续承压。<br><br>
+          <strong>概率</strong>：<span style="color:#f44336;">高 High</span><br>
+          <strong>影响</strong>：<span style="color:#4caf50;">较低 Lower</span> (行业整体)
+        </div>
+      </div>
+      <div class="risk-card">
+        <h4>风险7: 广告负载饱和 Ad Load Saturation</h4>
+        <div class="card-desc">
+          <strong>描述</strong>：抖音广告加载率15%已达上限，平台变现空间触顶，需探索新模式。<br><br>
+          <strong>概率</strong>：<span style="color:#4caf50;">已发生</span><br>
+          <strong>影响</strong>：<span style="color:#ffc107;">中等 Medium</span>
+        </div>
+      </div>
+      <div class="risk-card low-prob">
+        <h4>风险8: 中国市场增长放缓 China Slowdown</h4>
+        <div class="card-desc">
+          <strong>描述</strong>：中国经济下行压制广告主预算，短视频广告增速从30%回落至15%，低于预期。<br><br>
+          <strong>概率</strong>：<span style="color:#ffc107;">中等 Medium</span><br>
+          <strong>影响</strong>：<span style="color:#ffc107;">中等 Medium</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ §8 节点关系 ═══════════ -->
+    <div class="section-header" id="node-relations">
+      <h2><span class="section-num">08</span>Node Relations<span class="zh">节点关系 &mdash; 数字广告在互联网价值链中的位置</span></h2>
+    </div>
+
+    <div class="card" style="border-left: 3px solid var(--accent);">
+      <h3>互联网价值链映射 Internet Value Chain Mapping</h3>
+      <div class="card-desc">
+        数字广告节点位于互联网价值链的「下游变现层」，与上游流量供给和横向基础设施紧密关联。
+        <span class="zh-inline">Digital Advertising sits in the "downstream monetization layer" of the internet value chain.</span>
+      </div>
+
+      <div style="margin:1.5rem 0;">
+        <div class="node-relation-diagram">
+          <span class="node-relation-item">NODE 2: Cloud Computing 云基础设施</span>
+          <span class="node-relation-arrow">→</span>
+          <span class="node-relation-item" style="background:var(--accent);color:#111;">NODE 1: Digital Advertising 数字广告 (当前节点)</span>
+          <span class="node-relation-arrow">→</span>
+          <span class="node-relation-item">NODE 3: E-Commerce 电子商务</span>
+        </div>
+        <div style="text-align:center;margin:0.5rem 0;color:var(--text-muted);font-size:0.85rem;">↑ 流量基础设施支撑 ↑ 电商闭环转化 ↑</div>
+      </div>
+
+      <table class="compare-table" style="margin-top:1rem;">
+        <tr>
+          <th>上游依赖 Upstream Dependencies</th>
+          <th>关系描述 Relationship</th>
+        </tr>
+        <tr>
+          <td><strong>NODE 2: Cloud Computing</strong></td>
+          <td>广告技术(AdTech)依赖云基础设施进行实时竞价(RTB)、数据处理、AI模型训练。AWS/Azure/阿里云是广告投放的技术底座。</td>
+        </tr>
+        <tr>
+          <td><strong>NODE 4: Social Media 社交媒体</strong></td>
+          <td>社交平台是广告的核心流量来源之一。Facebook/Instagram/微信/抖音均依赖广告变现。社交数据强化广告定向能力。</td>
+        </tr>
+        <tr>
+          <td><strong>NODE 5: Gaming & Entertainment</strong></td>
+          <td>游戏/娱乐平台内广告(IA)成为新增长点。Unity Ads/Vungle/抖音小游戏广告蓬勃发展。</td>
+        </tr>
+      </table>
+
+      <table class="compare-table" style="margin-top:1rem;">
+        <tr>
+          <th>下游协同 Downstream Synergies</th>
+          <th>关系描述 Relationship</th>
+        </tr>
+        <tr>
+          <td><strong>NODE 3: E-Commerce</strong></td>
+          <td>电商广告是最直接的下游应用。阿里/京东/亚马逊广告业务本质是「电商平台的广告变现」。闭环归因推动广告-交易深度融合。</td>
+        </tr>
+        <tr>
+          <td><strong>Blockchain 区块链</strong></td>
+          <td>稳定币/USDT用于新兴市场广告支付；链上广告验证(婕斯项目)探索去中心化广告；RWA代币化可能用于广告资产证券化。</td>
+        </tr>
+        <tr>
+          <td><strong>Semiconductor 半导体</strong></td>
+          <td>GPU算力支撑AI广告创意生成、内容推荐模型；数据中心功耗与广告实时性需求正相关。</td>
+        </tr>
+      </table>
+    </div>
+
+    <h3 style="margin:1.5rem 0 1rem;">跨节点投资逻辑 Cross-Node Investment Logic</h3>
+    <div class="card">
+      <h4>数字广告驱动的跨节点配置策略</h4>
+      <div class="grid-2" style="margin-top:0.75rem;">
+        <div class="card-desc">
+          <strong>「广告受益」组合</strong>：<br>
+          • Alphabet (GOOGL) - 搜索广告+YouTube CTV<br>
+          • Meta (META) - 社交广告+AI优化<br>
+          • Amazon (AMZN) - 电商闭环+RMN<br>
+          • 腾讯 (0700.HK) - 微信生态+视频号增量
+        </div>
+        <div class="card-desc">
+          <strong>「广告技术」组合</strong>：<br>
+          • The Trade Desk (TTD) - 程序化广告DSP<br>
+          • PubMatic (PUBM) - Sell-Side平台<br>
+          • AppLovin (APP) - AI广告投放<br>
+          • 汇量科技 (1860.HK) - 移动广告技术
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="page-footer">
+      <a href="../internet_hub.html">&larr; Back to Internet Hub 返回中枢</a>
+      <div style="margin-top:0.5rem;">NODE 1: Digital Advertising &middot; Internet Research Hub &middot; 2026-03-25</div>
+    </div>
+
+  </main>
+
+  <!-- ===== Right Sidebar: Meta-cognitive ===== -->
+  <aside class="notes-sidebar">
+    <h4>Meta-cognitive 元思考</h4>
+
+    <div class="meta-note">
+      <div class="note-label strength">Strength</div>
+      <p>NODE 1数字广告完成了从宏观市场到微观投资信号的完整闭环。$740B全球市场+¥1.35万亿中国市场双视角，Top 5竞争格局+护城河量化评估，五大趋势+中国特色模式，覆盖全面。<span class="zh">Completed market-to-investment signal loop. $740B global + ¥1.35T China market, Top 5 moat analysis, 5 key trends + China-specific models.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label chain">Chain</div>
+      <p>数字广告是互联网价值链的「变现中枢」&rarr; 承接上游流量(社交/搜索/短视频)和下游电商闭环 &rarr; AI正在重塑广告投放范式 &rarr; 中国「内容即交易」模式领先全球2-3年 &rarr; 需与Cloud/E-commerce/Social节点协同分析。<span class="zh">Digital advertising is the monetization hub → AI reshaping ad targeting → China's "content=transaction" model 2-3 years ahead.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label pattern">Key Insight</div>
+      <p>广告市场正经历「范式转移」：从CPM/CPC按曝光/点击计费，向CPS/CLOSED-LOOP电商效果计费迁移。抖音电商GMV 3万亿+货币化率8%，意味着「内容即交易」已验证。Google搜索广告的「意图变现」护城河正在被「算法推荐」的「兴趣变现」侵蚀。<span class="zh">Paradigm shift: CPM/CPC → CPS/closed-loop. Douyin 3T GMV validates "content = transaction." Google's intent-moat eroding.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label risk">Data Quality</div>
+      <p>中国平台广告收入数据透明度低于美国上市公司。字节跳动非上市，数据估算误差大；小红书/B站等上市公司财报仅部分披露。交叉验证依赖：QuestMobile、艾瑞咨询、36Kr等第三方，但口径不一致。<span class="zh">China platform ad revenue data less transparent than US listed companies. ByteDance unlisted, estimates have large error margins.</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label suggestion">Next Step</div>
+      <p>NODE 1框架已就位。下一步：创建NODE 2 Cloud Computing报告，云基础设施是广告技术(AdTech)的算力底座。然后继续NODE 3 E-Commerce，因为电商广告是最大细分赛道。<span class="zh">Next: Create NODE 2 Cloud Computing (AdTech infrastructure), then NODE 3 E-Commerce (largest ad segment).</span></p>
+    </div>
+
+    <hr class="notes-divider">
+
+    <div class="meta-note">
+      <div class="note-label suggestion">Coverage Gap</div>
+      <p>缺失：AdTech中间件层(DSP/SSP/DMP)、独立广告代理商(Omnicom/WPP)、广告效果衡量标准(CtVR/ROAS)。零售媒体网络(RMN)需单独深化研究。<span class="zh">Missing: AdTech middleware (DSP/SSP/DMP), agencies (Omnicom/WPP), measurement standards (CTV/ROAS). RMN needs dedicated deep-dive.</span></p>
+    </div>
+  </aside>
+
+</div>
+
+<!-- Sidebar active state -->
+<script>
+const sections = document.querySelectorAll('.section-header[id]');
+const navLinks = document.querySelectorAll('.sidebar nav ul li a[href^="#"]');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + entry.target.id) link.classList.add('active');
+      });
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+
+<script src="../../../observatory/weekly/ctx-injector.js"></script>
+
+<script>
+(function() {
+  if (window === window.top) return;
+  document.body.classList.add('embedded');
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a || !a.href) return;
+    try { var url = new URL(a.href, location.href); } catch(err) { return; }
+    if (url.hostname === 'localhost' && url.port === '8080' && (url.pathname === '/' || url.pathname === '')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'showSection', section: 'overview' }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/observatory/') || url.pathname.startsWith('/research/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: url.pathname, title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.pathname.startsWith('/trade-pipeline/')) {
+      e.preventDefault();
+      window.top.postMessage({ type: 'dashboard-nav', action: 'openResearch', url: '/research/' + url.pathname.replace('/trade-pipeline/output/reports/',''), title: a.textContent.trim().substring(0,60) }, '*');
+      return;
+    }
+    if (url.hostname === location.hostname && url.hostname !== '') { a.removeAttribute('target'); return; }
+  });
+})();
+</script>
+<script src="../lib/reading-mode.js"></script>
+</body>
+</html>
