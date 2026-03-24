@@ -3,23 +3,12 @@
 <title>AI形态筛选台 — 形成中的形态</title>
 <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
 <style>
-:root{--b:#08090a;--e:#0f1011;--s:#141516;--bs:#23252a;--bd:#34343a;--tp:#f7f8f8;--ts:#d0d6e0;--tt:#8a8f98;--tq:#62666d;--a:#f8a848;--ad:rgba(248,168,72,.12);--f:'Inter','Inter Variable',-apple-system,sans-serif;--r:8px;--sw:220px}
+:root{--b:#08090a;--e:#0f1011;--s:#141516;--bs:#23252a;--bd:#34343a;--tp:#f7f8f8;--ts:#d0d6e0;--tt:#8a8f98;--tq:#62666d;--a:#f8a848;--ad:rgba(248,168,72,.12);--f:'Inter','Inter Variable',-apple-system,sans-serif;--r:8px}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-family:var(--f);-webkit-font-smoothing:antialiased}
 body{background:var(--b);color:var(--ts);font-size:14px;line-height:1.5}
 a{color:var(--a);text-decoration:none}
-.pw{display:flex;min-height:100vh}
-.sd{position:sticky;top:0;height:100vh;width:var(--sw);min-width:var(--sw);overflow-y:auto;padding:1.25rem .75rem;background:var(--e);border-right:1px solid var(--bs)}
-.sd::-webkit-scrollbar{width:5px}.sd::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
-.bl{display:inline-flex;align-items:center;gap:6px;padding:.3rem .5rem;border:1px solid var(--ad);border-radius:var(--r);color:var(--a);font-size:.8rem;font-weight:510;margin-bottom:1.25rem}
-.bl:hover{background:var(--ad)}
-.sd h4{font-size:.65rem;font-weight:590;text-transform:uppercase;letter-spacing:.06em;color:var(--tq);margin:1rem 0 .5rem .5rem}
-.sd nav ul{list-style:none}
-.sd nav li a{display:flex;align-items:center;gap:6px;padding:.3rem .5rem;border-radius:6px;color:var(--tt);font-size:.82rem;font-weight:510}
-.sd nav li a:hover{color:var(--tp);background:rgba(255,255,255,.04)}
-.tn{display:inline-flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:600;color:var(--a);background:var(--ad);border-radius:4px;min-width:22px;height:18px}
-.stb{font-size:.7rem;color:var(--tq);padding:.3rem .5rem;line-height:1.6}
-.mc{flex:1;min-width:0;max-width:1100px;padding:2rem}
+.pw{max-width:1100px;margin:0 auto;padding:2rem}
 .ph h1{font-size:1.6rem;font-weight:680;color:var(--tp);letter-spacing:-.025em}
 .ph .su{color:var(--tt);font-size:.85rem;margin-top:.25rem}
 .sr{display:flex;gap:8px;margin:.75rem 0 1.5rem;flex-wrap:wrap}
@@ -27,9 +16,9 @@ a{color:var(--a);text-decoration:none}
 .sh{margin-top:2.5rem;padding-bottom:.5rem;border-bottom:1px solid var(--bs);display:flex;justify-content:space-between;align-items:baseline}
 .sh h2{font-size:1.05rem;font-weight:590;color:var(--tp)}
 .ss{font-size:.72rem;color:var(--tt);background:var(--s);padding:2px 8px;border-radius:8px}
-.criteria{margin:.75rem 0;padding:8px 12px;background:var(--s);border-radius:var(--r);font-size:.75rem;color:var(--ts);border-left:3px solid var(--a);line-height:1.7}
+.ref{margin:1rem 0;padding:10px 14px;background:var(--s);border-radius:var(--r);font-size:.75rem;color:var(--ts);border-left:3px solid var(--a);line-height:1.7}
 .cl{color:var(--a);font-weight:600;margin-right:4px}
-.cg{display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:14px;margin:1rem 0}
+.cg{display:grid;grid-template-columns:1fr;gap:14px;margin:1rem 0;max-width:900px}
 .sc{background:var(--e);border:1px solid var(--bs);border-radius:12px;overflow:hidden;transition:border-color .15s}
 .sc:hover{border-color:var(--a)}
 .stage{padding:4px 12px;background:linear-gradient(135deg,rgba(76,175,80,.15),rgba(76,175,80,.05));color:#4caf50;font-size:.72rem;font-weight:600;border-bottom:1px solid var(--bs)}
@@ -39,45 +28,29 @@ a{color:var(--a);text-decoration:none}
 .cp{padding:2px}.cp svg{width:100%;height:auto;border-radius:6px;background:var(--s)}
 .ac{padding:6px 12px;border-top:1px solid var(--bs);font-size:.73rem}
 .ar{display:flex;gap:6px;margin-bottom:2px}.al{color:var(--tq);min-width:28px}.av{color:var(--ts)}.av.h{color:var(--a);font-weight:500}
-.af{color:var(--tt);font-size:.68rem;margin-top:3px;font-style:italic}
 .cf{display:flex;align-items:center;gap:8px;padding:6px 12px;border-top:1px solid var(--bs);flex-wrap:wrap}
 .sn{font-size:.9rem;font-weight:600;color:var(--tp)}.mt{font-size:.7rem;color:var(--tt)}
 .ca{margin-left:auto;display:flex;gap:6px}
 .ab{padding:3px 8px;border-radius:5px;font-size:.7rem;font-weight:510;color:var(--a);border:1px solid var(--ad)}
 .ab:hover{background:var(--ad)}
-@media(max-width:768px){.sd{display:none}.cg{grid-template-columns:1fr}}
+.notes{border-top:1px solid var(--bs);padding:10px 14px}
+.n-summary{font-size:.78rem;color:var(--ts);line-height:1.7;margin-bottom:8px}
+.n-summary b{color:var(--tp);font-weight:600}
+.n-grid{display:grid;grid-template-columns:42px 1fr;gap:2px 8px;font-size:.72rem;margin-bottom:8px}
+.n-label{color:var(--a);font-weight:600;padding:2px 0}
+.n-val{padding:2px 0}
+.n-val.rally{color:#4caf50}.n-val.flag{color:#5b9bd5}.n-val.now{color:var(--ts)}
+.n-analysis{font-size:.75rem;color:var(--tt);line-height:1.6;padding:8px 10px;background:var(--s);border-radius:6px;border-left:2px solid var(--a)}
+.empty{text-align:center;padding:4rem;color:var(--tq);font-size:1.1rem}
+@media(max-width:768px){.cg{grid-template-columns:1fr}}
 </style></head><body>
 <div class="pw">
-<aside class="sd">
-  <a class="bl" href="/strategy/ai_pattern_master.html">← 形态大师</a>
-  <h4>筛选结果 FORMING</h4>
-  <nav><ul>
-    <li><a href="#htf"><span class="tn">312</span>高紧旗形</a></li>
-    <li><a href="#cup_handle"><span class="tn">259</span>杯柄形</a></li>
-    <li><a href="#asc_triangle"><span class="tn">43</span>上升三角</a></li>
-    <li><a href="#rect_bottom"><span class="tn">12</span>矩形底</a></li>
-    <li><a href="#triple_bottom"><span class="tn">34</span>三重底</a></li>
-    <li><a href="#desc_triangle_up"><span class="tn">198</span>下降三角上破</a></li>
-    <li><a href="#double_bottom"><span class="tn">207</span>双底</a></li>
-    <li><a href="#head_shoulders_bottom"><span class="tn">166</span>头肩底</a></li>
-    <li><a href="#double_top"><span class="tn">234</span>双顶</a></li>
-    <li><a href="#head_shoulders_top"><span class="tn">244</span>头肩顶</a></li>
-  </ul></nav>
-  <h4>统计 STATS</h4>
-  <div class="stb">977标的扫描<br>94标的形成中<br>⚡ 未突破 = 可交易<br>更新: 2026-03-23</div>
-  <h4>工具 TOOLS</h4>
-  <nav><ul>
-    <li><a href="/chart" target="_blank"><span class="tn">📐</span>多周期对比</a></li>
-    <li><a href="/strategy/ai_pattern_master.html" target="_blank"><span class="tn">📊</span>形态大师</a></li>
-  </ul></nav>
-</aside>
-<main class="mc">
   <header class="ph"><h1>AI形态筛选台 — 形成中</h1><div class="su">977标的 × 14检测器 | 仅显示形态形成中、尚未突破的标的 | 2026-03-23</div></header>
   <div class="sr"><span class="sb">⚡ 仅显示"形成中"</span><span class="sb">未突破 = 可交易窗口</span><span class="sb">检测器 v2 Kimi审核</span></div>
   
     <section id="htf">
       <div class="sh"><h2>高紧旗形 High & Tight Flag</h2><span class="ss">Avg +69% | Fail 0% | 312标的(显示30)</span></div>
-      <div class="criteria"><span class="cl">定义标准</span> 涨幅 ≥90% | 回调 ≤20% | 旗形 3-8周 | 旗形振幅 <10%<br><span class="cl">操作建议</span> 等待突破旗形上沿+放量确认买入。Bulkowski唯一0%失败率(n=307)。</div>
+      <div class="ref"><span class="cl">定义标准</span> 涨幅 ≥90% | 回调 ≤20% | 旗形 3-8周 | 旗形振幅 <10%<br><span class="cl">操作建议</span> 等待突破旗形上沿+放量确认买入。Bulkowski唯一0%失败率(n=307)。<br><span class="cl">数据源</span> TradingView日线导出，覆盖2005年至今</div>
       <div class="cg">
       <div class="sc" id="c0">
         <div class="stage">形成中 — 等待突破</div>
@@ -2507,7 +2480,7 @@ a{color:var(--a);text-decoration:none}
     </section>
     <section id="cup_handle">
       <div class="sh"><h2>杯柄形 Cup with Handle</h2><span class="ss">Avg +54% | Fail 5% | 259标的(显示30)</span></div>
-      <div class="criteria"><span class="cl">定义标准</span> 杯深 15-33% | 杯宽 ≥7周 | 柄深 杯深1/3~1/2 | 柄宽 1-4周 | U形底<br><span class="cl">操作建议</span> 等待突破柄部上沿+放量确认买入。成功率95%。</div>
+      <div class="ref"><span class="cl">定义标准</span> 杯深 15-33% | 杯宽 ≥7周 | 柄深 杯深1/3~1/2 | 柄宽 1-4周 | U形底<br><span class="cl">操作建议</span> 等待突破柄部上沿+放量确认买入。成功率95%。<br><span class="cl">数据源</span> TradingView日线导出，覆盖2005年至今</div>
       <div class="cg">
       <div class="sc" id="c4">
         <div class="stage">形成中 — 等待突破</div>
@@ -6757,7 +6730,7 @@ a{color:var(--a);text-decoration:none}
     </section>
     <section id="asc_triangle">
       <div class="sh"><h2>上升三角 Ascending Triangle</h2><span class="ss">Avg +43% | Fail 17% | 43标的(显示30)</span></div>
-      <div class="criteria"><span class="cl">定义标准</span> 平顶阻力(≤2%) | 上升低点 ≥3个 | 突破放量 ≥1.5x<br><span class="cl">操作建议</span> 等待突破阻力位+放量确认买入。目标=三角高度。</div>
+      <div class="ref"><span class="cl">定义标准</span> 平顶阻力(≤2%) | 上升低点 ≥3个 | 突破放量 ≥1.5x<br><span class="cl">操作建议</span> 等待突破阻力位+放量确认买入。目标=三角高度。<br><span class="cl">数据源</span> TradingView日线导出，覆盖2005年至今</div>
       <div class="cg">
       <div class="sc" id="c14">
         <div class="stage">形成中 — 等待突破</div>
@@ -10953,7 +10926,7 @@ a{color:var(--a);text-decoration:none}
     </section>
     <section id="rect_bottom">
       <div class="sh"><h2>矩形底 Rectangle Bottom</h2><span class="ss">Avg +51% | Fail 15% | 12标的(显示12)</span></div>
-      <div class="criteria"><span class="cl">定义标准</span> 水平S/R ≥3触碰 | 持续 ≥3周 | 容差 ≤1.5%<br><span class="cl">操作建议</span> 等待突破阻力位+放量买入。</div>
+      <div class="ref"><span class="cl">定义标准</span> 水平S/R ≥3触碰 | 持续 ≥3周 | 容差 ≤1.5%<br><span class="cl">操作建议</span> 等待突破阻力位+放量买入。<br><span class="cl">数据源</span> TradingView日线导出，覆盖2005年至今</div>
       <div class="cg">
       <div class="sc" id="c24">
         <div class="stage">形成中 — 等待突破</div>
@@ -15187,7 +15160,7 @@ a{color:var(--a);text-decoration:none}
     </section>
     <section id="triple_bottom">
       <div class="sh"><h2>三重底 Triple Bottom</h2><span class="ss">Avg varies | Fail 13% | 34标的(显示30)</span></div>
-      <div class="criteria"><span class="cl">定义标准</span> 三底差 ≤5% | 间距 ≥15K | 突破中间高点<br><span class="cl">操作建议</span> 等待突破中间高点确认买入。</div>
+      <div class="ref"><span class="cl">定义标准</span> 三底差 ≤5% | 间距 ≥15K | 突破中间高点<br><span class="cl">操作建议</span> 等待突破中间高点确认买入。<br><span class="cl">数据源</span> TradingView日线导出，覆盖2005年至今</div>
       <div class="cg">
       <div class="sc" id="c34">
         <div class="stage">形成中 — 等待突破</div>
@@ -19467,7 +19440,7 @@ a{color:var(--a);text-decoration:none}
     </section>
     <section id="desc_triangle_up">
       <div class="sh"><h2>下降三角上破 Desc Tri (Up)</h2><span class="ss">Avg varies | Fail 13% | 198标的(显示30)</span></div>
-      <div class="criteria"><span class="cl">定义标准</span> 水平支撑(≤2%) | 下降高点 ≥3个 | 向上突破<br><span class="cl">操作建议</span> 等待向上突破确认。逆向形态需谨慎。</div>
+      <div class="ref"><span class="cl">定义标准</span> 水平支撑(≤2%) | 下降高点 ≥3个 | 向上突破<br><span class="cl">操作建议</span> 等待向上突破确认。逆向形态需谨慎。<br><span class="cl">数据源</span> TradingView日线导出，覆盖2005年至今</div>
       <div class="cg">
       <div class="sc" id="c44">
         <div class="stage">形成中 — 等待突破</div>
@@ -23633,7 +23606,7 @@ a{color:var(--a);text-decoration:none}
     </section>
     <section id="double_bottom">
       <div class="sh"><h2>双底 Double Bottom</h2><span class="ss">Avg +50% | Fail 12% | 207标的(显示30)</span></div>
-      <div class="criteria"><span class="cl">定义标准</span> 两底差 ≤3% | 二底量缩 | 突破颈线确认 | 3K不回落<br><span class="cl">操作建议</span> 等待突破颈线确认买入。Eve&Eve型最佳。</div>
+      <div class="ref"><span class="cl">定义标准</span> 两底差 ≤3% | 二底量缩 | 突破颈线确认 | 3K不回落<br><span class="cl">操作建议</span> 等待突破颈线确认买入。Eve&Eve型最佳。<br><span class="cl">数据源</span> TradingView日线导出，覆盖2005年至今</div>
       <div class="cg">
       <div class="sc" id="c54">
         <div class="stage">形成中 — 等待突破</div>
@@ -27867,7 +27840,7 @@ a{color:var(--a);text-decoration:none}
     </section>
     <section id="head_shoulders_bottom">
       <div class="sh"><h2>头肩底 H&S Bottom</h2><span class="ss">Avg +37% | Fail 15% | 166标的(显示30)</span></div>
-      <div class="criteria"><span class="cl">定义标准</span> 头最低 | 肩对称 ≤15% | 右肩量缩 | 颈线放量突破<br><span class="cl">操作建议</span> 等待突破颈线+放量买入。目标=颈线+头肩距。</div>
+      <div class="ref"><span class="cl">定义标准</span> 头最低 | 肩对称 ≤15% | 右肩量缩 | 颈线放量突破<br><span class="cl">操作建议</span> 等待突破颈线+放量买入。目标=颈线+头肩距。<br><span class="cl">数据源</span> TradingView日线导出，覆盖2005年至今</div>
       <div class="cg">
       <div class="sc" id="c64">
         <div class="stage">形成中 — 等待突破</div>
@@ -32113,7 +32086,7 @@ a{color:var(--a);text-decoration:none}
     </section>
     <section id="double_top">
       <div class="sh"><h2>双顶 Double Top</h2><span class="ss">Avg -16% | Fail 12% | 234标的(显示30)</span></div>
-      <div class="criteria"><span class="cl">定义标准</span> 两顶差 ≤3% | 二顶量缩 | 跌破颈线确认<br><span class="cl">操作建议</span> ⚠看跌。等待跌破颈线确认减仓/做空。</div>
+      <div class="ref"><span class="cl">定义标准</span> 两顶差 ≤3% | 二顶量缩 | 跌破颈线确认<br><span class="cl">操作建议</span> ⚠看跌。等待跌破颈线确认减仓/做空。<br><span class="cl">数据源</span> TradingView日线导出，覆盖2005年至今</div>
       <div class="cg">
       <div class="sc" id="c74">
         <div class="stage">形成中 — 等待突破</div>
@@ -36339,7 +36312,7 @@ a{color:var(--a);text-decoration:none}
     </section>
     <section id="head_shoulders_top">
       <div class="sh"><h2>头肩顶 H&S Top</h2><span class="ss">Avg -16% | Fail 19% | 244标的(显示30)</span></div>
-      <div class="criteria"><span class="cl">定义标准</span> 头最高 | 肩对称 ≤15% | 右肩量缩 | 颈线跌破<br><span class="cl">操作建议</span> ⚠看跌。等待跌破颈线确认减仓/做空。</div>
+      <div class="ref"><span class="cl">定义标准</span> 头最高 | 肩对称 ≤15% | 右肩量缩 | 颈线跌破<br><span class="cl">操作建议</span> ⚠看跌。等待跌破颈线确认减仓/做空。<br><span class="cl">数据源</span> TradingView日线导出，覆盖2005年至今</div>
       <div class="cg">
       <div class="sc" id="c84">
         <div class="stage">形成中 — 等待突破</div>
@@ -40585,7 +40558,7 @@ a{color:var(--a);text-decoration:none}
       </div>
       </div>
     </section>
-</main></div>
+</div>
 <script>
 function sw(b,i,p){var c=document.getElementById('c'+i);c.querySelectorAll('.tb').forEach(t=>t.classList.remove('a'));b.classList.add('a');c.querySelectorAll('.cp').forEach(e=>e.style.display='none');document.getElementById(p+i).style.display='block'}
 </script></body></html>
