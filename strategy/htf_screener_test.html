@@ -2236,4 +2236,240 @@ a{color:var(--a);text-decoration:none}
 </div>
 <script>
 function sw(b,i,p){var c=document.getElementById('c'+i);c.querySelectorAll('.tb').forEach(t=>t.classList.remove('a'));b.classList.add('a');c.querySelectorAll('.cp').forEach(e=>e.style.display='none');document.getElementById(p+i).style.display='block'}
+
+// ═══════════════════════════════════════════════════════
+// AUTO-ANNOTATE: 横盘标注 + 波动率收窄 + 威科夫分析
+// ═══════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.sc').forEach(function(card) {
+    try { annotateCard(card); } catch(e) { console.warn('annotate fail:', e); }
+  });
+});
+
+function annotateCard(card) {
+  // 1. 从 notes 提取数据
+  var grid = card.querySelector('.n-grid');
+  if (!grid) return;
+  var spans = grid.querySelectorAll('.n-val');
+  if (spans.length < 3) return;
+
+  var rallyText = spans[0].textContent;
+  var flagText = spans[1].textContent;
+  var nowText = spans[2].textContent;
+
+  // 解析旗形压力/支撑
+  var pRes = flagText.match(/压力\s*\$?([\d.]+)/);
+  var pSup = flagText.match(/支撑\s*\$?([\d.]+)/);
+  var pAmp = flagText.match(/振幅\s*([\d.]+)%/);
+  var pDur = flagText.match(/([\d.]+)周/);
+  if (!pRes || !pSup) return;
+  var resistance = parseFloat(pRes[1]);
+  var support = parseFloat(pSup[1]);
+  var amplitude = pAmp ? parseFloat(pAmp[1]) : 0;
+  var duration = pDur ? parseFloat(pDur[1]) : 0;
+
+  // 解析上涨起点/终点
+  var rMatch = rallyText.match(/\$([\d.]+)\s*→\s*\$([\d.]+)\s*\+([\d.]+)%/);
+  var rSlope = rallyText.match(/斜率\s*\+([\d.]+)%/);
+  var rallyStart = rMatch ? parseFloat(rMatch[1]) : 0;
+  var rallyEnd = rMatch ? parseFloat(rMatch[2]) : 0;
+  var rallyPct = rMatch ? parseFloat(rMatch[3]) : 0;
+
+  // 解析当前价
+  var nMatch = nowText.match(/\$([\d.]+)/);
+  var nowPrice = nMatch ? parseFloat(nMatch[1]) : 0;
+
+  // 2. 获取形态图SVG（第一个cp里的svg）
+  var svgEl = card.querySelector('.cp svg');
+  if (!svgEl) return;
+
+  // 从Y轴刻度反算价格↔Y坐标映射
+  var labels = svgEl.querySelectorAll('text[text-anchor="start"]');
+  if (labels.length < 2) return;
+  var yPrices = [];
+  labels.forEach(function(t) {
+    var y = parseFloat(t.getAttribute('y'));
+    var p = parseFloat(t.textContent.replace('$',''));
+    if (!isNaN(y) && !isNaN(p)) yPrices.push({y: y, p: p});
+  });
+  if (yPrices.length < 2) return;
+  yPrices.sort(function(a,b) { return a.y - b.y; });
+
+  // 线性插值：价格→Y
+  var y0 = yPrices[0].y, p0 = yPrices[0].p;
+  var y1 = yPrices[yPrices.length-1].y, p1 = yPrices[yPrices.length-1].p;
+  function priceToY(price) { return y0 + (price - p0) * (y1 - y0) / (p1 - p0); }
+
+  var yRes = priceToY(resistance);
+  var ySup = priceToY(support);
+  var ns = 'http://www.w3.org/2000/svg';
+
+  // 3. 从polyline找旗形区域X范围
+  var poly = svgEl.querySelector('polyline');
+  if (!poly) return;
+  var pts = poly.getAttribute('points').split(' ').map(function(s) {
+    var ab = s.split(','); return {x: parseFloat(ab[0]), y: parseFloat(ab[1])};
+  });
+
+  // 找旗形开始：从右往左找第一个到达压力线附近的点
+  var flagStartIdx = pts.length - 1;
+  var tolerance = Math.abs(yRes - ySup) * 0.3 + 3;
+  for (var i = pts.length - 1; i >= 0; i--) {
+    if (pts[i].y <= yRes + tolerance) {
+      flagStartIdx = i;
+    } else {
+      break;
+    }
+  }
+  // 往前找到价格首次到达压力价附近的点（旗形真正起点）
+  for (var i = flagStartIdx; i >= 0; i--) {
+    if (Math.abs(pts[i].y - yRes) < tolerance * 1.5) {
+      flagStartIdx = i;
+    } else {
+      break;
+    }
+  }
+
+  var xStart = pts[Math.max(0, flagStartIdx)].x;
+  var xEnd = pts[pts.length - 1].x;
+  var chartRight = xEnd + 15; // 标注文字位置
+
+  // 4. 画旗形横盘标注
+  if (amplitude > 0 && support !== resistance) {
+    // 半透明旗形区域
+    var rect = document.createElementNS(ns, 'rect');
+    rect.setAttribute('x', xStart);
+    rect.setAttribute('y', Math.min(yRes, ySup));
+    rect.setAttribute('width', xEnd - xStart);
+    rect.setAttribute('height', Math.abs(ySup - yRes));
+    rect.setAttribute('fill', 'rgba(91,155,213,.08)');
+    rect.setAttribute('stroke', 'rgba(91,155,213,.3)');
+    rect.setAttribute('stroke-width', '.5');
+    rect.setAttribute('stroke-dasharray', '4,3');
+    svgEl.appendChild(rect);
+
+    // 压力线
+    var lineR = document.createElementNS(ns, 'line');
+    lineR.setAttribute('x1', xStart); lineR.setAttribute('x2', xEnd);
+    lineR.setAttribute('y1', yRes); lineR.setAttribute('y2', yRes);
+    lineR.setAttribute('stroke', '#5b9bd5'); lineR.setAttribute('stroke-width', '1');
+    lineR.setAttribute('stroke-dasharray', '6,3'); lineR.setAttribute('opacity', '.8');
+    svgEl.appendChild(lineR);
+
+    // 支撑线
+    var lineS = document.createElementNS(ns, 'line');
+    lineS.setAttribute('x1', xStart); lineS.setAttribute('x2', xEnd);
+    lineS.setAttribute('y1', ySup); lineS.setAttribute('y2', ySup);
+    lineS.setAttribute('stroke', '#5b9bd5'); lineS.setAttribute('stroke-width', '1');
+    lineS.setAttribute('stroke-dasharray', '6,3'); lineS.setAttribute('opacity', '.8');
+    svgEl.appendChild(lineS);
+
+    // 振幅标注（右侧垂直双箭头）
+    var xLabel = xEnd + 5;
+    var yMid = (yRes + ySup) / 2;
+    var arrowLine = document.createElementNS(ns, 'line');
+    arrowLine.setAttribute('x1', xLabel); arrowLine.setAttribute('x2', xLabel);
+    arrowLine.setAttribute('y1', yRes); arrowLine.setAttribute('y2', ySup);
+    arrowLine.setAttribute('stroke', '#5b9bd5'); arrowLine.setAttribute('stroke-width', '1');
+    svgEl.appendChild(arrowLine);
+
+    var ampLabel = document.createElementNS(ns, 'text');
+    ampLabel.setAttribute('x', xLabel + 4); ampLabel.setAttribute('y', yMid + 3);
+    ampLabel.setAttribute('fill', '#5b9bd5'); ampLabel.setAttribute('font-size', '8');
+    ampLabel.setAttribute('font-family', 'Inter,sans-serif');
+    ampLabel.textContent = amplitude.toFixed(0) + '%';
+    svgEl.appendChild(ampLabel);
+
+    // 旗形时间标注（底部）
+    if (duration > 0) {
+      var durLabel = document.createElementNS(ns, 'text');
+      durLabel.setAttribute('x', (xStart + xEnd) / 2);
+      durLabel.setAttribute('y', Math.max(yRes, ySup) + 12);
+      durLabel.setAttribute('fill', '#5b9bd5'); durLabel.setAttribute('font-size', '7.5');
+      durLabel.setAttribute('text-anchor', 'middle');
+      durLabel.setAttribute('font-family', 'Inter,sans-serif');
+      durLabel.textContent = '← ' + duration.toFixed(1) + '周 →';
+      svgEl.appendChild(durLabel);
+    }
+
+    // "旗形" 标签
+    var flagLabel = document.createElementNS(ns, 'text');
+    flagLabel.setAttribute('x', (xStart + xEnd) / 2);
+    flagLabel.setAttribute('y', Math.min(yRes, ySup) - 5);
+    flagLabel.setAttribute('fill', '#5b9bd5'); flagLabel.setAttribute('font-size', '8');
+    flagLabel.setAttribute('text-anchor', 'middle'); flagLabel.setAttribute('font-weight', '600');
+    flagLabel.setAttribute('font-family', 'Inter,sans-serif');
+    flagLabel.textContent = '旗形横盘';
+    svgEl.appendChild(flagLabel);
+  }
+
+  // 5. 波动率收窄分析
+  // 把旗形区域分前半/后半，比较振幅变化
+  var flagPts = pts.slice(flagStartIdx);
+  var volText = '';
+  if (flagPts.length >= 6) {
+    var half = Math.floor(flagPts.length / 2);
+    var firstHalf = flagPts.slice(0, half);
+    var secondHalf = flagPts.slice(half);
+    function calcRange(arr) {
+      var mn = Infinity, mx = -Infinity;
+      arr.forEach(function(p) { if(p.y < mn) mn = p.y; if(p.y > mx) mx = p.y; });
+      return mx - mn;
+    }
+    var r1 = calcRange(firstHalf);
+    var r2 = calcRange(secondHalf);
+    // 转成价格空间的振幅百分比
+    var pricePerY = Math.abs(p0 - p1) / Math.abs(y0 - y1);
+    var vol1 = (r1 * pricePerY / resistance * 100).toFixed(1);
+    var vol2 = (r2 * pricePerY / resistance * 100).toFixed(1);
+    if (r2 < r1 * 0.85) {
+      volText = '波动率收窄: 前半 ' + vol1 + '% → 后半 ' + vol2 + '%，收敛 ' + ((1 - r2/r1)*100).toFixed(0) + '%，突破蓄力中。';
+    } else if (r2 > r1 * 1.15) {
+      volText = '波动率扩张: 前半 ' + vol1 + '% → 后半 ' + vol2 + '%，波动加大，注意方向选择。';
+    } else {
+      volText = '波动率稳定: 前半 ' + vol1 + '% → 后半 ' + vol2 + '%，旗形区间保持一致。';
+    }
+  }
+
+  // 6. 威科夫分析
+  var wyckoff = '';
+  if (rallyPct > 0 && amplitude >= 0) {
+    // HTF = 急涨后横盘 ≈ Wyckoff派发/再吸筹
+    if (amplitude <= 10 && duration <= 3) {
+      wyckoff = '【Wyckoff】急涨后极窄横盘，类似Phase D "LPS"(最后支撑点)。供给已在急涨中消耗，缩量横盘=机构控盘，突破阻力即进入Phase E(标价上升)。';
+    } else if (amplitude <= 15) {
+      wyckoff = '【Wyckoff】回调幅度受控(' + amplitude.toFixed(0) + '%)，类似Phase C→D: 横盘内测试支撑=Spring验证。若支撑线不破+缩量 → 吸筹完成信号。关注右侧SOS(力量信号)。';
+    } else if (amplitude <= 25) {
+      wyckoff = '【Wyckoff】旗形振幅' + amplitude.toFixed(0) + '%偏大，进入Phase B宽幅震荡区间。机构正在吸筹/洗盘，上沿=Creek(小溪)，需放量突破Creek确认Phase D。若缩量下测支撑 → 二次Spring机会。';
+    } else {
+      wyckoff = '【Wyckoff】回调超过25%，旗形可能失败。需重新评估是否为Wyckoff派发(SOW信号)而非吸筹。观察成交量：放量下跌=供给主导=退出。';
+    }
+  }
+
+  // 7. 追加到 n-analysis
+  var analysis = card.querySelector('.n-analysis');
+  if (analysis) {
+    var extra = '';
+    if (volText) extra += '<br><span style="color:#5b9bd5">📊 ' + volText + '</span>';
+    if (wyckoff) extra += '<br><span style="color:#ab47bc">🔮 ' + wyckoff + '</span>';
+    if (extra) analysis.innerHTML += extra;
+  }
+
+  // 8. 在 n-grid 插入威科夫阶段行
+  if (wyckoff && grid) {
+    var phase = '';
+    if (amplitude <= 10) phase = 'Phase D→E (突破在即)';
+    else if (amplitude <= 15) phase = 'Phase C→D (测试验证)';
+    else if (amplitude <= 25) phase = 'Phase B (区间震荡)';
+    else phase = '⚠ 可能派发';
+    var label = document.createElement('span');
+    label.className = 'n-label'; label.textContent = 'Wyckoff';
+    label.style.color = '#ab47bc';
+    var val = document.createElement('span');
+    val.className = 'n-val'; val.textContent = phase;
+    val.style.color = '#ab47bc';
+    grid.appendChild(label);
+    grid.appendChild(val);
+  }
+}
 </script></body></html>
