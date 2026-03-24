@@ -2403,6 +2403,149 @@ function annotateCard(card) {
     svgEl.appendChild(flagLabel);
   }
 
+  // 4b. 起涨前横盘（吸筹区）标注
+  if (rallyStart > 0 && pts.length > 20) {
+    // 找到起涨点在polyline中的位置（价格最接近rallyStart的点）
+    var yRallyStart = priceToY(rallyStart);
+    var rallyIdx = 0;
+    var bestDist = Infinity;
+    // 从左边找，rally起点通常在图表前半段
+    for (var i = 0; i < Math.min(pts.length, flagStartIdx); i++) {
+      var d = Math.abs(pts[i].y - yRallyStart);
+      // 找到最后一个靠近起涨价且在上涨之前的点
+      if (d < bestDist * 1.2 && pts[i].y >= yRallyStart - 10) {
+        bestDist = d;
+        rallyIdx = i;
+      }
+    }
+    // 找突破点：从rallyIdx往前，第一个开始持续上涨的位置
+    var breakoutIdx = rallyIdx;
+    for (var i = rallyIdx; i < Math.min(pts.length - 1, flagStartIdx); i++) {
+      if (pts[i].y < yRallyStart - 15) { breakoutIdx = i; break; }
+    }
+    if (breakoutIdx === rallyIdx) breakoutIdx = Math.min(rallyIdx + 5, pts.length - 1);
+    if (breakoutIdx >= pts.length) breakoutIdx = pts.length - 1;
+
+    // 横盘区域：从图表开始到突破点
+    var consolPts = pts.slice(0, breakoutIdx);
+    if (consolPts.length >= 5) {
+      // 找横盘的高低点
+      var cHigh = Infinity, cLow = -Infinity; // Y坐标（注意Y轴反转：小Y=高价）
+      consolPts.forEach(function(p) {
+        if (p.y < cHigh) cHigh = p.y;
+        if (p.y > cLow) cLow = p.y;
+      });
+      var cHighPrice = p0 + (cHigh - y0) * (p1 - p0) / (y1 - y0);
+      var cLowPrice = p0 + (cLow - y0) * (p1 - p0) / (y1 - y0);
+      var consolAmp = ((cHighPrice - cLowPrice) / cLowPrice * 100).toFixed(1);
+
+      var cxStart = consolPts[0].x;
+      var cxEnd = consolPts[consolPts.length - 1].x;
+
+      // 半透明吸筹区背景
+      var cRect = document.createElementNS(ns, 'rect');
+      cRect.setAttribute('x', cxStart);
+      cRect.setAttribute('y', cHigh);
+      cRect.setAttribute('width', cxEnd - cxStart);
+      cRect.setAttribute('height', cLow - cHigh);
+      cRect.setAttribute('fill', 'rgba(255,193,7,.06)');
+      cRect.setAttribute('stroke', 'rgba(255,193,7,.25)');
+      cRect.setAttribute('stroke-width', '.5');
+      cRect.setAttribute('stroke-dasharray', '4,3');
+      svgEl.appendChild(cRect);
+
+      // 高点水平线
+      var cLineH = document.createElementNS(ns, 'line');
+      cLineH.setAttribute('x1', cxStart); cLineH.setAttribute('x2', cxEnd);
+      cLineH.setAttribute('y1', cHigh); cLineH.setAttribute('y2', cHigh);
+      cLineH.setAttribute('stroke', '#ffc107'); cLineH.setAttribute('stroke-width', '.8');
+      cLineH.setAttribute('stroke-dasharray', '4,2'); cLineH.setAttribute('opacity', '.7');
+      svgEl.appendChild(cLineH);
+
+      // 低点水平线
+      var cLineL = document.createElementNS(ns, 'line');
+      cLineL.setAttribute('x1', cxStart); cLineL.setAttribute('x2', cxEnd);
+      cLineL.setAttribute('y1', cLow); cLineL.setAttribute('y2', cLow);
+      cLineL.setAttribute('stroke', '#ffc107'); cLineL.setAttribute('stroke-width', '.8');
+      cLineL.setAttribute('stroke-dasharray', '4,2'); cLineL.setAttribute('opacity', '.7');
+      svgEl.appendChild(cLineL);
+
+      // 高点价格标注
+      var cHighLabel = document.createElementNS(ns, 'text');
+      cHighLabel.setAttribute('x', cxStart - 2); cHighLabel.setAttribute('y', cHigh + 3);
+      cHighLabel.setAttribute('fill', '#ffc107'); cHighLabel.setAttribute('font-size', '7');
+      cHighLabel.setAttribute('text-anchor', 'end');
+      cHighLabel.setAttribute('font-family', 'Inter,sans-serif');
+      cHighLabel.textContent = '$' + cHighPrice.toFixed(2);
+      svgEl.appendChild(cHighLabel);
+
+      // 低点价格标注
+      var cLowLabel = document.createElementNS(ns, 'text');
+      cLowLabel.setAttribute('x', cxStart - 2); cLowLabel.setAttribute('y', cLow + 3);
+      cLowLabel.setAttribute('fill', '#ffc107'); cLowLabel.setAttribute('font-size', '7');
+      cLowLabel.setAttribute('text-anchor', 'end');
+      cLowLabel.setAttribute('font-family', 'Inter,sans-serif');
+      cLowLabel.textContent = '$' + cLowPrice.toFixed(2);
+      svgEl.appendChild(cLowLabel);
+
+      // 振幅标注（区域中间）
+      var cMidY = (cHigh + cLow) / 2;
+      var cAmpLabel = document.createElementNS(ns, 'text');
+      cAmpLabel.setAttribute('x', cxEnd + 4); cAmpLabel.setAttribute('y', cMidY + 3);
+      cAmpLabel.setAttribute('fill', '#ffc107'); cAmpLabel.setAttribute('font-size', '7.5');
+      cAmpLabel.setAttribute('font-family', 'Inter,sans-serif');
+      cAmpLabel.textContent = consolAmp + '%';
+      svgEl.appendChild(cAmpLabel);
+
+      // 垂直振幅线
+      var cAmpLine = document.createElementNS(ns, 'line');
+      cAmpLine.setAttribute('x1', cxEnd + 2); cAmpLine.setAttribute('x2', cxEnd + 2);
+      cAmpLine.setAttribute('y1', cHigh); cAmpLine.setAttribute('y2', cLow);
+      cAmpLine.setAttribute('stroke', '#ffc107'); cAmpLine.setAttribute('stroke-width', '.8');
+      svgEl.appendChild(cAmpLine);
+
+      // 时间范围标注（底部）
+      var totalDays = consolPts.length;
+      var weeksApprox = (totalDays * 5 / 5).toFixed(0); // 粗略按交易日
+      var cTimeLabel = document.createElementNS(ns, 'text');
+      cTimeLabel.setAttribute('x', (cxStart + cxEnd) / 2);
+      cTimeLabel.setAttribute('y', cLow + 14);
+      cTimeLabel.setAttribute('fill', '#ffc107'); cTimeLabel.setAttribute('font-size', '7');
+      cTimeLabel.setAttribute('text-anchor', 'middle');
+      cTimeLabel.setAttribute('font-family', 'Inter,sans-serif');
+      cTimeLabel.textContent = '← 吸筹 ' + totalDays + '日 →';
+      svgEl.appendChild(cTimeLabel);
+
+      // "吸筹区" 标题标签
+      var cTitle = document.createElementNS(ns, 'text');
+      cTitle.setAttribute('x', (cxStart + cxEnd) / 2);
+      cTitle.setAttribute('y', cHigh - 5);
+      cTitle.setAttribute('fill', '#ffc107'); cTitle.setAttribute('font-size', '8');
+      cTitle.setAttribute('text-anchor', 'middle'); cTitle.setAttribute('font-weight', '600');
+      cTitle.setAttribute('font-family', 'Inter,sans-serif');
+      cTitle.textContent = '起涨前横盘 (吸筹)';
+      svgEl.appendChild(cTitle);
+
+      // 突破箭头标注
+      if (breakoutIdx >= pts.length) breakoutIdx = pts.length - 1;
+      var bkX = pts[breakoutIdx].x;
+      var bkArrow = document.createElementNS(ns, 'text');
+      bkArrow.setAttribute('x', bkX); bkArrow.setAttribute('y', cHigh - 14);
+      bkArrow.setAttribute('fill', '#4caf50'); bkArrow.setAttribute('font-size', '9');
+      bkArrow.setAttribute('text-anchor', 'middle'); bkArrow.setAttribute('font-weight', '700');
+      bkArrow.setAttribute('font-family', 'Inter,sans-serif');
+      bkArrow.textContent = '↑突破';
+      svgEl.appendChild(bkArrow);
+
+      // 存储数据供笔记使用
+      card._consolData = {
+        high: cHighPrice.toFixed(2), low: cLowPrice.toFixed(2),
+        amp: consolAmp, days: totalDays,
+        breakoutX: bkX
+      };
+    }
+  }
+
   // 5. 波动率收窄分析
   // 把旗形区域分前半/后半，比较振幅变化
   var flagPts = pts.slice(flagStartIdx);
@@ -2450,12 +2593,29 @@ function annotateCard(card) {
   var analysis = card.querySelector('.n-analysis');
   if (analysis) {
     var extra = '';
+    // 起涨前横盘描述
+    if (card._consolData) {
+      var cd = card._consolData;
+      extra += '<br><span style="color:#ffc107">📦 起涨前横盘: $' + cd.low + ' ~ $' + cd.high + '，振幅 ' + cd.amp + '%，持续 ' + cd.days + ' 日。价格在此区间反复测试后向上突破，启动 +' + rallyPct.toFixed(0) + '% 急涨。横盘越久→突破后动能越强。</span>';
+    }
     if (volText) extra += '<br><span style="color:#5b9bd5">📊 ' + volText + '</span>';
     if (wyckoff) extra += '<br><span style="color:#ab47bc">🔮 ' + wyckoff + '</span>';
     if (extra) analysis.innerHTML += extra;
   }
 
-  // 8. 在 n-grid 插入威科夫阶段行
+  // 8. 在 n-grid 插入吸筹区行 + 威科夫阶段行
+  if (card._consolData && grid) {
+    var cd = card._consolData;
+    var cLabel = document.createElement('span');
+    cLabel.className = 'n-label'; cLabel.textContent = '吸筹';
+    cLabel.style.color = '#ffc107';
+    var cVal = document.createElement('span');
+    cVal.className = 'n-val';
+    cVal.textContent = '$' + cd.low + ' ~ $' + cd.high + '  振幅 ' + cd.amp + '%  ' + cd.days + '日 → 突破启动';
+    cVal.style.color = '#ffc107';
+    grid.appendChild(cLabel);
+    grid.appendChild(cVal);
+  }
   if (wyckoff && grid) {
     var phase = '';
     if (amplitude <= 10) phase = 'Phase D→E (突破在即)';
